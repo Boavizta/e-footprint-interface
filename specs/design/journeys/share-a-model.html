@@ -216,469 +216,1392 @@
   footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
   footer a { color: var(--accent); }
 
-  /* ---- share-a-model only: PROSPECTIVE banner, publish forms, public page, explore ---- */
-  .role.prospect { background: var(--danger-bg); color: var(--danger); }
-  .prospect-banner { background: var(--danger-bg); border: 1px solid #f7cfca; border-left: 4px solid var(--danger);
-        border-radius: 8px; padding: .7rem .9rem; font-size: .9rem; color: var(--muted); margin: 1rem 0 1.4rem; }
-  .prospect-banner b.h { color: var(--danger); text-transform: uppercase; letter-spacing: .04em; font-size: .78rem; }
-  .prospect-banner b { color: var(--ink); }
-  /* labeled publish button in the toolbar */
-  .pubbtn { display: inline-flex; align-items: center; gap: .25rem; border: none; border-radius: 999px;
-        background: var(--primary); color: #fff; font-weight: 600; font-size: .6rem; padding: .16rem .55rem; white-space: nowrap; }
-  /* tag chips (curated tags: pickable in the publish form, filters on Explore) */
-  .tagchip { display: inline-block; font-size: .56rem; border: 1px solid var(--g300); border-radius: 999px;
-        padding: .04rem .45rem; color: var(--muted); background: #fff; margin: 0 .15rem .15rem 0; white-space: nowrap; }
-  .tagchip.sel { background: var(--lp); border-color: var(--primary); color: var(--primary); font-weight: 600; }
-  /* the public share-link chip */
-  .linkchip { display: flex; align-items: center; gap: .35rem; background: var(--g50); border: 1px solid var(--g300);
-        border-radius: 7px; padding: .28rem .45rem; font-size: .6rem; color: var(--ink); font-family: ui-monospace, monospace; }
-  .linkchip .cp { margin-left: auto; color: var(--primary); font-family: "Inter", system-ui, sans-serif; font-weight: 600; flex: 0 0 auto; }
-  /* the public-visibility / license acknowledgment box in the publish form */
-  .pubnotice { background: var(--amber-bg); border: 1px solid #fde68a; border-radius: 7px; padding: .35rem .45rem;
-        font-size: .58rem; color: var(--amber); margin-bottom: .45rem; line-height: 1.45; }
-  .pubnotice label { display: flex; gap: .3rem; align-items: flex-start; color: var(--ink); margin-top: .25rem; font-size: .58rem; }
-  .pubnotice input { margin-top: .1rem; }
-  /* public modeling page header */
-  .pubhead { background: #fff; border-bottom: 1px solid var(--line); padding: .55rem .6rem; }
-  .pubhead .ttl { font-size: .8rem; font-weight: 700; color: var(--ink); }
-  .pubhead .byline { font-size: .6rem; color: var(--faint); margin: .1rem 0 .2rem; }
-  .pubhead .byline b { color: var(--muted); }
-  .pubhead .row { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; margin-top: .25rem; }
-  .pubhead .artlink { font-size: .58rem; color: var(--primary); }
-  .forkbtn { display: inline-flex; align-items: center; gap: .25rem; border: none; border-radius: 999px;
-        background: var(--primary); color: #fff; font-weight: 600; font-size: .6rem; padding: .2rem .6rem; white-space: nowrap; }
-  .reportlink { font-size: .54rem; color: var(--faint); margin-left: auto; }
-  .licbadge { font-size: .52rem; font-weight: 700; color: var(--g400); border: 1px solid var(--g300);
-        border-radius: 4px; padding: .02rem .3rem; letter-spacing: .03em; }
-  /* older-version banner on a permalink */
-  .oldver { background: var(--amber-bg); border-bottom: 1px solid #fde68a; padding: .3rem .6rem; font-size: .58rem; color: var(--amber); }
-  .oldver a { color: var(--amber); text-decoration: underline; }
-  /* explore page: search row + modeling cards */
-  .searchrow { display: flex; gap: .35rem; align-items: center; padding: .5rem .6rem .2rem; }
-  .searchrow .inp { flex: 1; border: 1px solid var(--g300); border-radius: 999px; padding: .26rem .6rem; font-size: .62rem; color: var(--faint); background: #fff; }
-  .tagrow { padding: .25rem .6rem .4rem; }
-  .mlist { padding: .2rem .6rem .6rem; display: grid; gap: .35rem; }
-  .mcard { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .4rem .55rem; }
-  .mcard .t { font-size: .66rem; font-weight: 600; color: var(--ink); }
-  .mcard .m { font-size: .56rem; color: var(--faint); }
-  /* "My published modelings" rows */
-  .myrow { display: flex; align-items: center; gap: .5rem; background: #fff; border: 1px solid var(--line);
-        border-radius: 8px; padding: .4rem .55rem; }
-  .myrow .t { font-size: .64rem; font-weight: 600; color: var(--ink); }
-  .myrow .m { font-size: .54rem; color: var(--faint); }
-  .myrow .acts { margin-left: auto; display: flex; gap: .4rem; font-size: .56rem; white-space: nowrap; }
-  .myrow .acts span { color: var(--primary); } .myrow .acts .dngr { color: var(--danger); }
-  .acctfoot { margin-top: .5rem; padding: .4rem .55rem; border-top: 1px dashed var(--g300); font-size: .56rem; color: var(--faint);
-        display: flex; align-items: center; gap: .5rem; }
-  .acctfoot .dngr { margin-left: auto; color: var(--danger); }
-  .quotaline { font-size: .54rem; color: var(--faint); padding: 0 .55rem; }
+
+  /* Sharing review: larger desktop context; existing app palette and components. */
+  html { scroll-behavior:smooth; }
+  body { max-width:82rem; padding:2rem 1.5rem 4rem; }
+  h1 { font-size:2.2rem; letter-spacing:-.035em; max-width:46rem; line-height:1.15; }
+  .eyebrow { font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--primary); font-weight:700; }
+  .intro { max-width:51rem; color:var(--muted); margin:.8rem 0 1.2rem; }
+  .review-note { background:var(--lp); border:1px solid #ccd3e6; border-radius:10px; padding:.8rem 1rem; font-size:.86rem; }
+  .journey-nav { display:flex; flex-wrap:wrap; gap:.45rem; margin:1.3rem 0 2rem; }
+  .journey-nav a { border:1px solid var(--g300); border-radius:999px; background:#fff; padding:.35rem .75rem; font-size:.8rem; }
+  .screen { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(16rem,1fr); gap:2rem; padding:2rem 0; scroll-margin-top:1rem; }
+  .mock-col { min-width:0; }
+  .win, .mock-help { width:100%; }
+  .win { box-shadow:0 10px 32px #18274112; }
+  .win .titlebar { padding:.5rem .75rem; }
+  .win .url { font-size:.68rem; overflow-wrap:anywhere; min-width:0; }
+  .mock-help { font-size:.78rem; border-left:3px solid var(--primary); padding:.75rem; }
+  .info-col { min-width:0; font-size:.9rem; }
+  .info-col h3 { line-height:1.3; }
+  .state { display:block; border-top:1px solid var(--line); padding-top:.55rem; font-size:.84rem; }
+  .state .k { display:block; padding:0; font-size:.68rem; margin-bottom:.15rem; }
+  .state .v { display:block; }
+  .state.proposal { background:var(--amber-bg); border:1px solid #f1d59e; padding:.6rem; border-radius:8px; }
+  .state.proposal .k { color:var(--amber); }
+  .app-nav { display:flex; align-items:center; gap:.8rem; padding:.7rem .9rem; background:#fff; border-bottom:1px solid var(--line); font-size:.7rem; }
+  .brand { font-size:1.05rem; font-weight:750; color:var(--primary); margin-right:auto; letter-spacing:-.04em; }
+  .app-nav a.current { color:var(--primary); font-weight:700; }
+  .app-nav a { color:var(--muted); }
+  .app-nav a.brand { color:var(--primary); }
+  .app-nav .account { border:1px solid var(--g300); border-radius:6px; padding:.18rem .45rem; }
+  .appbar { display:block; padding:.45rem .7rem 0; }
+  .tab { font-size:.67rem; }
+  .model-toolbar { display:flex; align-items:center; justify-content:space-between; gap:.5rem; background:#fff; padding:.65rem .8rem; border-bottom:1px solid var(--line); font-size:.78rem; }
+  .model-toolbar .toolbar { flex-shrink:0; }
+  .action, button.action { border:1px solid var(--g300); border-radius:7px; background:#fff; color:var(--primary); padding:.35rem .6rem; font:inherit; font-size:.72rem; display:inline-block; cursor:pointer; text-decoration:none; }
+  .action.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .action.danger { color:var(--danger); }
+  .action[disabled] { cursor:not-allowed; opacity:.45; }
+  .canvas { padding:.7rem; gap:.6rem; }
+  .col { padding:.65rem; }
+  .col h5 { font-size:.7rem; }
+  .ocard { font-size:.72rem; padding:.5rem; flex-wrap:wrap; gap:.35rem; }
+  .ocard .detail { display:block; flex:0 0 100%; color:var(--faint); font-size:.63rem; padding-left:1.45rem; }
+  .canvas.covered { grid-template-columns:repeat(3,1fr); width:100%; min-height:inherit; opacity:.6; }
+  .canvas.covered .col { min-height:100px; }
+  .stage.with-panel { min-height:610px; }
+  .stage.with-panel .panel { width:57%; padding:1rem; }
+  .stage.with-panel.publish { min-height:800px; }
+  .phead b { font-size:1rem; }
+  .field { margin-bottom:.75rem; }
+  .field label { font-size:.71rem; text-transform:none; letter-spacing:0; }
+  .field .inp { font-family:inherit; font-size:.77rem; padding:.45rem .5rem; line-height:1.4; }
+  .helptxt { font-size:.7rem; line-height:1.5; }
+  .notice { padding:.6rem .7rem; margin:.6rem 0; border:1px solid #ccd3e6; background:var(--lp); border-radius:7px; font-size:.72rem; color:var(--primary); }
+  .notice.warn { background:var(--amber-bg); color:var(--amber); border-color:#f1d59e; }
+  .notice.good { background:var(--ok-bg); color:var(--ok); border-color:#b6dec5; }
+  .tagchip { display:inline-block; font-size:.62rem; border:1px solid #c8d0e3; border-radius:999px; background:var(--lp); color:var(--primary); padding:.12rem .5rem; margin:.1rem .15rem .1rem 0; }
+  .link-preview { display:block; word-break:break-word; font-size:.7rem; color:var(--primary); padding:.4rem .5rem; background:var(--g50); border-radius:6px; margin:.4rem 0; }
+  .muted { color:var(--faint); }
+  .pubhead { background:#fff; padding:1rem; border-bottom:1px solid var(--line); }
+  .pubhead h2 { font-size:1.2rem; margin:.2rem 0 .3rem; line-height:1.35; letter-spacing:-.025em; }
+  .pubhead .byline { color:var(--muted); font-size:.73rem; }
+  .pill { display:inline-block; padding:.15rem .5rem; border:1px solid var(--g300); border-radius:6px; color:var(--muted); font-size:.63rem; font-weight:600; }
+  .pill.proposed { color:var(--amber); border-color:#f1d59e; background:var(--amber-bg); }
+  .row-actions { display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; margin-top:.65rem; }
+  .row-actions select { font-size:.71rem; }
+  .public-tools { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; padding:.5rem .85rem; background:#fff; border-bottom:1px solid var(--line); font-size:.68rem; color:var(--faint); }
+  .public-tools span { margin-right:auto; }
+  .result-area { padding:.8rem; background:#fff; border-top:1px solid var(--line); }
+  .result-area h3 { font-size:.9rem; margin:0; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin:.7rem 0; }
+  .kpi { border:1px solid var(--line); border-radius:8px; padding:.65rem; font-size:.65rem; color:var(--faint); }
+  .kpi strong { display:block; color:var(--primary); font-size:1.3rem; letter-spacing:-.035em; }
+  .diagram { width:100%; height:auto; display:block; margin:.4rem 0; }
+  .result-controls { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; font-size:.72rem; }
+  .result-controls label { color:var(--muted); }
+  .view-note { margin:.5rem 0 0; color:var(--faint); font-size:.66rem; }
+  .owner-banner { background:var(--lp); color:var(--primary); border-bottom:1px solid #ccd3e6; padding:.65rem .85rem; font-size:.73rem; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+  .source-bar { padding:.6rem .85rem; background:var(--g50); border-bottom:1px solid var(--line); font-size:.7rem; color:var(--muted); }
+  .publication-list { display:grid; gap:.7rem; padding:.8rem; }
+  .publication { background:#fff; border:1px solid var(--line); border-radius:9px; padding:.9rem; }
+  .publication h3 { margin:0 0 .3rem; font-size:.88rem; }
+  .publication .meta { color:var(--faint); font-size:.7rem; }
+  .searchbar { display:flex; gap:.5rem; padding:.8rem .8rem 0; }
+  .searchbar input { flex:1; min-width:0; border:1px solid var(--g300); border-radius:7px; padding:.55rem .7rem; font:inherit; font-size:.78rem; }
+  .footnote { padding:.8rem; font-size:.67rem; border-top:1px solid var(--line); color:var(--faint); background:#fff; }
+  .flow-note { font-size:.73rem; padding:.6rem .8rem; background:var(--ok-bg); color:var(--ok); border-top:1px solid #b6dec5; }
+  .state-dialog { background:#fff; border:1px solid var(--line); border-radius:10px; padding:1.2rem; margin:1.5rem; }
+  .state-dialog h3 { margin-top:0; font-size:1.05rem; }
+  .state-dialog p { font-size:.8rem; color:var(--muted); }
+  .citation { font-size:.74rem; overflow-wrap:anywhere; padding:.6rem; background:var(--g50); border:1px solid var(--line); border-radius:6px; }
+  [hidden] { display:none!important; }
+  button, input, select { accent-color:var(--primary); }
+  :focus-visible { outline:3px solid #a2b3d6; outline-offset:3px; }
+  @media (max-width:1050px) {
+    .screen { grid-template-columns:1fr; }
+    .info-col { max-width:52rem; }
+    .states { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width:600px) {
+    body { padding:1rem .7rem; }
+    h1 { font-size:1.7rem; }
+    .app-nav { flex-wrap:wrap; gap:.5rem; }
+    .brand { width:100%; }
+    .stage.with-panel .panel { position:relative; width:100%; }
+    .stage.with-panel, .stage.with-panel.publish { min-height:0; }
+    .canvas.covered { display:none; }
+    .model-toolbar { flex-wrap:wrap; }
+    .states { grid-template-columns:1fr; }
+    .canvas { padding:.4rem; gap:.3rem; }
+    .col { padding:.35rem; }
+    .ocard .detail { padding-left:0; }
+  }
+
+  /* Current app chrome, with proposed sharing controls marked for review. */
+  .chrome-assets { position:absolute; overflow:hidden; pointer-events:none; }
+  .chrome-review { padding:.5rem 0 2rem; border-bottom:1px dashed var(--line); scroll-margin-top:1rem; }
+  .chrome-review h2 { font-size:1.2rem; margin:0 0 .3rem; }
+  .chrome-label { display:flex; align-items:baseline; flex-wrap:wrap; gap:.7rem; margin:1.3rem 0 .45rem; font-size:.85rem; }
+  .chrome-label span { color:var(--faint); font-size:.75rem; }
+  .chrome-review .win { overflow:visible; }
+  .chrome-review .titlebar { border-radius:12px 12px 0 0; }
+  .chrome-review .model-toolbar { border-radius:0 0 12px 12px; }
+  .chrome-notes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.1rem; margin:.9rem 0 0; font-size:.8rem; color:var(--muted); }
+  .chrome-notes p { margin:0; }
+  .chrome-notes b { color:var(--ink); }
+  .app-nav { position:relative; z-index:30; background:var(--g50); padding:.35rem .9rem; gap:.45rem; }
+  .brand { display:flex; align-items:center; flex-shrink:0; width:auto; }
+  .brand-logo { display:block; width:120px; height:40px; }
+  .chrome-icon { display:block; width:1.1rem; height:1.1rem; flex-shrink:0; }
+  .app-nav .nav-button { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; padding:.28rem .6rem; border:1px solid var(--g300); border-radius:6px; color:var(--ink); background:var(--g50); font-weight:600; font-size:.7rem; line-height:1.4; white-space:nowrap; text-decoration:none; }
+  .app-nav .nav-button:hover { background:var(--g100); }
+  .app-nav .documentation { border-color:#1B9891; color:#1B9891; }
+  .app-nav .explore { color:var(--primary); border-color:transparent; background:transparent; }
+  .app-nav .chrome-icon { width:.9rem; height:.9rem; }
+  .proposed-control { position:relative; }
+  .proposed-control::after, .proposal-dot { display:inline-block; content:""; width:.38rem; height:.38rem; background:#c07a19; border-radius:50%; }
+  .proposed-control::after { position:absolute; top:-3px; right:-3px; box-shadow:0 0 0 2px white; }
+  .appbar { position:relative; z-index:25; }
+  .tabs { align-items:center; min-width:0; }
+  .chrome-menu { position:relative; }
+  .chrome-menu > summary { display:flex; align-items:center; gap:.3rem; cursor:pointer; list-style:none; white-space:nowrap; }
+  .chrome-menu > summary::-webkit-details-marker { display:none; }
+  .chrome-menu[open] { z-index:40; }
+  .chrome-dropdown { position:absolute; top:calc(100% + .35rem); right:0; min-width:12rem; padding:.4rem; background:#fff; border:1px solid var(--g300); border-radius:7px; box-shadow:0 8px 22px #11192820; font-size:.75rem; font-weight:400; z-index:50; }
+  .chrome-dropdown a { display:block; padding:.3rem .5rem; color:var(--ink); white-space:nowrap; border-radius:4px; }
+  .chrome-dropdown a:hover { background:var(--g100); text-decoration:none; }
+  .chrome-dropdown hr { border:0; border-top:1px solid var(--line); margin:.35rem 0; }
+  .menu-caption { display:block; padding:.25rem .5rem .4rem; color:var(--faint); font-size:.68rem; }
+  .add-model-menu .chrome-dropdown { left:0; right:auto; }
+  .model-toolbar { position:relative; z-index:20; }
+  .model-toolbar > b { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:500; }
+  .model-toolbar > b:hover { text-decoration:underline dotted; cursor:default; }
+  .model-toolbar .toolbar { gap:.65rem; font-size:.68rem; }
+  .edge-switch { display:flex; gap:.3rem; align-items:center; white-space:nowrap; cursor:pointer; }
+  .edge-switch input { appearance:none; width:1.45rem; height:.8rem; margin:0; border:1px solid var(--g350); border-radius:999px; background:var(--g200); position:relative; cursor:pointer; }
+  .edge-switch input::after { content:""; position:absolute; top:1px; left:1px; width:.55rem; height:.55rem; border-radius:50%; background:white; }
+  .edge-switch input:checked { background:var(--primary); border-color:var(--primary); }
+  .edge-switch input:checked::after { left:auto; right:1px; }
+  .edge-question { display:grid; place-items:center; width:.75rem; height:.75rem; border:1px solid var(--g350); border-radius:50%; color:var(--faint); font-size:.6rem; }
+  .tool-icon { color:var(--ink); display:flex; align-items:center; justify-content:center; padding:.2rem; border-radius:4px; }
+  .tool-icon:hover { background:var(--g100); }
+  .model-toolbar .publish-action { font-size:.68rem; border-color:var(--primary); padding:.3rem .55rem; white-space:nowrap; }
+  .show-results { display:inline-flex; align-items:center; justify-content:center; border-radius:999px; padding:.4rem .75rem; color:#fff; background:linear-gradient(92deg,#1B9891 .47%,#017E7E 50.5%,#2D4675 100.53%); font-weight:600; white-space:nowrap; }
+  .show-results:hover { color:#fff; text-decoration:none; filter:brightness(.95); }
+  @media (max-width:1200px) {
+    .screen { grid-template-columns:1fr; }
+    .info-col { max-width:52rem; }
+    .states { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width:700px) {
+    .chrome-notes { grid-template-columns:1fr; gap:.6rem; }
+    .model-toolbar { flex-wrap:wrap; }
+    .model-toolbar > b { flex-basis:100%; }
+    .model-toolbar .toolbar { flex-wrap:wrap; flex-shrink:1; gap:.5rem; }
+    .app-nav { flex-wrap:wrap; }
+    .tabs { flex-wrap:wrap; }
+    .brand { width:auto; }
+    .states { grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body>
+<!-- Embedded once from the current app assets, keeping this review file self-contained. -->
+<svg class="chrome-assets" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" aria-hidden="true"><defs>
+<symbol id="chrome-brand" viewBox="0 0 415.5 89.999999"><defs><filter x="0%" y="0%" width="100%" height="100%" id="8c006225f0"><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0" color-interpolation-filters="sRGB"/></filter><filter x="0%" y="0%" width="100%" height="100%" id="30185c9eb6"><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.2126 0.7152 0.0722 0 0" color-interpolation-filters="sRGB"/></filter><g/><clipPath id="77c5db2cac"><path d="M 3.171875 3.234375 L 86 3.234375 L 86 87 L 3.171875 87 Z M 3.171875 3.234375 " clip-rule="nonzero"/></clipPath><mask id="ae321bbc03"><g filter="url(#8c006225f0)"><g filter="url(#30185c9eb6)" transform="matrix(0.204803, 0, 0, 0.205635, 3.172335, 3.232979)"><image x="0" y="0" width="406" xlink:href="data:image/png;base64,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" height="408" preserveAspectRatio="xMidYMid meet"/></g></g></mask></defs><g fill="#26507d" fill-opacity="1"><g transform="translate(85.226943, 63.919517)"><g><path d="M 17.375 -31.328125 C 26.832031 -31.328125 31.5 -25.15625 31.375 -12.8125 L 11.375 -12.8125 C 12.132812 -8.625 14.953125 -6.53125 19.828125 -6.53125 C 21.304688 -6.53125 22.753906 -6.738281 24.171875 -7.15625 C 25.585938 -7.570312 27.09375 -8.117188 28.6875 -8.796875 L 28.6875 -1.140625 C 25.414062 0.210938 21.742188 0.890625 17.671875 0.890625 C 14.597656 0.890625 11.898438 0.265625 9.578125 -0.984375 C 7.265625 -2.242188 5.46875 -4.050781 4.1875 -6.40625 C 2.914062 -8.757812 2.28125 -11.535156 2.28125 -14.734375 C 2.28125 -20.003906 3.585938 -24.085938 6.203125 -26.984375 C 8.816406 -29.878906 12.539062 -31.328125 17.375 -31.328125 Z M 17.015625 -24.5 C 13.816406 -24.5 11.914062 -22.5 11.3125 -18.5 L 22.515625 -18.5 C 22.234375 -20.65625 21.664062 -22.191406 20.8125 -23.109375 C 19.957031 -24.035156 18.691406 -24.5 17.015625 -24.5 Z M 17.015625 -24.5 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(118.880082, 63.919517)"><g><path d="M 4.734375 -21.4375 L 23 -21.4375 L 23 -15.265625 L 4.734375 -15.265625 Z M 4.734375 -21.4375 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(146.664887, 63.919517)"><g><path d="M 6.234375 -23.484375 L 1.796875 -23.484375 L 1.796875 -30.296875 L 6.28125 -30.296875 L 6.28125 -31.015625 C 6.320312 -35.566406 7.367188 -38.734375 9.421875 -40.515625 C 11.484375 -42.296875 14.289062 -43.1875 17.84375 -43.1875 C 18.488281 -43.1875 19.1875 -43.125 19.9375 -43 C 20.695312 -42.882812 21.316406 -42.742188 21.796875 -42.578125 L 21.796875 -34.734375 C 21.359375 -35.171875 20.921875 -35.5 20.484375 -35.71875 C 20.046875 -35.9375 19.488281 -36.046875 18.8125 -36.046875 C 17.6875 -36.046875 16.804688 -35.742188 16.171875 -35.140625 C 15.535156 -34.546875 15.21875 -33.53125 15.21875 -32.09375 L 15.21875 -30.296875 L 21.796875 -30.296875 L 21.796875 -23.484375 L 15.15625 -23.484375 L 15.15625 0 L 6.234375 0 Z M 6.234375 -23.484375 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(169.180123, 63.919517)"><g><path d="M 17.609375 0.890625 C 12.492188 0.890625 8.660156 -0.460938 6.109375 -3.171875 C 3.554688 -5.890625 2.28125 -9.921875 2.28125 -15.265625 C 2.28125 -20.859375 3.546875 -24.929688 6.078125 -27.484375 C 8.609375 -30.046875 12.453125 -31.328125 17.609375 -31.328125 C 22.753906 -31.328125 26.625 -30.019531 29.21875 -27.40625 C 31.820312 -24.789062 33.125 -20.742188 33.125 -15.265625 C 33.125 -9.992188 31.785156 -5.984375 29.109375 -3.234375 C 26.429688 -0.484375 22.597656 0.890625 17.609375 0.890625 Z M 17.609375 -6.234375 C 19.804688 -6.234375 21.460938 -7 22.578125 -8.53125 C 23.691406 -10.070312 24.25 -12.316406 24.25 -15.265625 C 24.25 -18.503906 23.703125 -20.8125 22.609375 -22.1875 C 21.515625 -23.5625 19.847656 -24.25 17.609375 -24.25 C 15.296875 -24.25 13.628906 -23.5625 12.609375 -22.1875 C 11.585938 -20.8125 11.078125 -18.503906 11.078125 -15.265625 C 11.078125 -12.191406 11.601562 -9.914062 12.65625 -8.4375 C 13.71875 -6.96875 15.367188 -6.234375 17.609375 -6.234375 Z M 17.609375 -6.234375 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(204.509933, 63.919517)"><g><path d="M 17.609375 0.890625 C 12.492188 0.890625 8.660156 -0.460938 6.109375 -3.171875 C 3.554688 -5.890625 2.28125 -9.921875 2.28125 -15.265625 C 2.28125 -20.859375 3.546875 -24.929688 6.078125 -27.484375 C 8.609375 -30.046875 12.453125 -31.328125 17.609375 -31.328125 C 22.753906 -31.328125 26.625 -30.019531 29.21875 -27.40625 C 31.820312 -24.789062 33.125 -20.742188 33.125 -15.265625 C 33.125 -9.992188 31.785156 -5.984375 29.109375 -3.234375 C 26.429688 -0.484375 22.597656 0.890625 17.609375 0.890625 Z M 17.609375 -6.234375 C 19.804688 -6.234375 21.460938 -7 22.578125 -8.53125 C 23.691406 -10.070312 24.25 -12.316406 24.25 -15.265625 C 24.25 -18.503906 23.703125 -20.8125 22.609375 -22.1875 C 21.515625 -23.5625 19.847656 -24.25 17.609375 -24.25 C 15.296875 -24.25 13.628906 -23.5625 12.609375 -22.1875 C 11.585938 -20.8125 11.078125 -18.503906 11.078125 -15.265625 C 11.078125 -12.191406 11.601562 -9.914062 12.65625 -8.4375 C 13.71875 -6.96875 15.367188 -6.234375 17.609375 -6.234375 Z M 17.609375 -6.234375 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(239.839742, 63.919517)"><g><path d="M 16.34375 1.203125 C 12.875 1.203125 10.269531 0.382812 8.53125 -1.25 C 6.789062 -2.894531 5.921875 -5.253906 5.921875 -8.328125 L 5.921875 -23.484375 L 1.5 -23.484375 L 1.5 -30.296875 L 5.921875 -30.296875 L 5.921875 -38.625 L 15.265625 -38.625 L 15.265625 -30.296875 L 21.921875 -30.296875 L 21.921875 -23.484375 L 15.265625 -23.484375 L 15.265625 -9.46875 C 15.265625 -8.425781 15.484375 -7.65625 15.921875 -7.15625 C 16.367188 -6.65625 17.109375 -6.40625 18.140625 -6.40625 C 18.785156 -6.40625 19.445312 -6.515625 20.125 -6.734375 C 20.800781 -6.953125 21.398438 -7.265625 21.921875 -7.671875 L 21.921875 -0.0625 C 20.398438 0.78125 18.539062 1.203125 16.34375 1.203125 Z M 16.34375 1.203125 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(264.570612, 63.919517)"><g><path d="M 18.390625 -31.328125 C 23.253906 -31.328125 27.023438 -30.054688 29.703125 -27.515625 C 32.378906 -24.984375 33.71875 -20.765625 33.71875 -14.859375 C 33.71875 -10.097656 32.519531 -6.28125 30.125 -3.40625 C 27.726562 -0.539062 24.453125 0.890625 20.296875 0.890625 C 17.265625 0.890625 14.734375 0.351562 12.703125 -0.71875 L 12.703125 10.84375 L 3.953125 10.84375 L 3.953125 -23.890625 C 3.953125 -26.328125 5.296875 -28.164062 7.984375 -29.40625 C 10.679688 -30.644531 14.148438 -31.285156 18.390625 -31.328125 Z M 17.671875 -6.28125 C 20.109375 -6.28125 21.90625 -6.957031 23.0625 -8.3125 C 24.21875 -9.675781 24.796875 -11.957031 24.796875 -15.15625 C 24.796875 -18.03125 24.285156 -20.195312 23.265625 -21.65625 C 22.242188 -23.113281 20.5 -23.84375 18.03125 -23.84375 C 14.476562 -23.84375 12.703125 -23.160156 12.703125 -21.796875 L 12.703125 -7.546875 C 13.421875 -7.109375 14.21875 -6.785156 15.09375 -6.578125 C 15.96875 -6.378906 16.828125 -6.28125 17.671875 -6.28125 Z M 17.671875 -6.28125 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(300.559117, 63.919517)"><g><path d="M 3.953125 -27.125 C 4.546875 -27.644531 5.59375 -28.222656 7.09375 -28.859375 C 8.59375 -29.503906 10.269531 -30.054688 12.125 -30.515625 C 13.976562 -30.972656 15.765625 -31.203125 17.484375 -31.203125 C 20.796875 -31.203125 23.09375 -30.703125 24.375 -29.703125 L 24.375 -23.171875 C 22.78125 -23.535156 20.484375 -23.71875 17.484375 -23.71875 C 15.609375 -23.71875 14.070312 -23.617188 12.875 -23.421875 L 12.875 0 L 3.953125 0 Z M 3.953125 -27.125 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(326.188194, 63.919517)"><g><path d="M 3.953125 -41.328125 L 13.171875 -41.328125 L 13.171875 -34.4375 L 3.953125 -34.4375 Z M 4.125 -29.890625 L 13.0625 -29.890625 L 13.109375 0 L 4.125 0 Z M 4.125 -29.890625 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(343.314153, 63.919517)"><g><path d="M 3.953125 -27.734375 C 5.503906 -28.566406 7.878906 -29.34375 11.078125 -30.0625 C 14.273438 -30.78125 17.128906 -31.140625 19.640625 -31.140625 C 23.910156 -31.140625 27.125 -30.300781 29.28125 -28.625 C 31.4375 -26.945312 32.515625 -24.191406 32.515625 -20.359375 L 32.515625 0 L 23.59375 0 L 23.59375 -18.5625 C 23.59375 -22.039062 21.640625 -23.78125 17.734375 -23.78125 C 16.847656 -23.78125 15.945312 -23.675781 15.03125 -23.46875 C 14.113281 -23.269531 13.394531 -23.035156 12.875 -22.765625 L 12.875 0 L 3.953125 0 Z M 3.953125 -27.734375 "/></g></g></g><g fill="#26507d" fill-opacity="1"><g transform="translate(379.781727, 63.919517)"><g><path d="M 16.34375 1.203125 C 12.875 1.203125 10.269531 0.382812 8.53125 -1.25 C 6.789062 -2.894531 5.921875 -5.253906 5.921875 -8.328125 L 5.921875 -23.484375 L 1.5 -23.484375 L 1.5 -30.296875 L 5.921875 -30.296875 L 5.921875 -38.625 L 15.265625 -38.625 L 15.265625 -30.296875 L 21.921875 -30.296875 L 21.921875 -23.484375 L 15.265625 -23.484375 L 15.265625 -9.46875 C 15.265625 -8.425781 15.484375 -7.65625 15.921875 -7.15625 C 16.367188 -6.65625 17.109375 -6.40625 18.140625 -6.40625 C 18.785156 -6.40625 19.445312 -6.515625 20.125 -6.734375 C 20.800781 -6.953125 21.398438 -7.265625 21.921875 -7.671875 L 21.921875 -0.0625 C 20.398438 0.78125 18.539062 1.203125 16.34375 1.203125 Z M 16.34375 1.203125 "/></g></g></g><g clip-path="url(#77c5db2cac)"><g mask="url(#ae321bbc03)"><g transform="matrix(0.204803, 0, 0, 0.205635, 3.172335, 3.232979)"><image x="0" y="0" width="406" xlink:href="data:image/png;base64,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" height="408" preserveAspectRatio="xMidYMid meet"/></g></g></g></symbol>
+<symbol id="chrome-docs" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+            </symbol>
+<symbol id="chrome-feedback" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 14.25S1.5 10.35 1.5 5.45A3.7 3.7 0 0 1 8 3a3.7 3.7 0 0 1 6.5 2.45C14.5 10.35 8 14.25 8 14.25Zm0-1.78c1.7-1.12 5-3.92 5-7.02A2.2 2.2 0 0 0 8.9 4.3L8 5.65 7.1 4.3A2.2 2.2 0 0 0 3 5.45c0 3.1 3.3 5.9 5 7.02Z"/>
+            </symbol>
+<symbol id="chrome-upload" viewBox="0 0 16 16" fill="currentColor">
+  <path d="M8 6.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 .5-.5"/>
+  <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5z"/>
+</symbol>
+<symbol id="chrome-export" viewBox="0 0 16 16" fill="currentColor">
+  <path d="M11 2H9v3h2z"/>
+  <path d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"/>
+</symbol>
+<symbol id="chrome-reset" viewBox="0 0 24 24" fill="currentColor">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.0014 6.5642C13.4422 6.56475 14.8441 7.02474 15.9971 7.87529C17.15 8.72583 17.992 9.92114 18.3969 11.2822C18.8017 12.6432 18.7477 14.0967 18.2428 15.425C17.738 16.7533 16.8095 17.8848 15.5965 18.6502C14.3834 19.4155 12.9511 19.7734 11.5141 19.6703C10.077 19.5672 8.71261 19.0086 7.62516 18.0782C6.53771 17.1478 5.78578 15.8957 5.48199 14.5094C5.1782 13.1231 5.33891 11.6772 5.94003 10.3884C6.00546 10.2317 6.00678 10.0561 5.9437 9.89851C5.88063 9.74087 5.75806 9.61336 5.60164 9.54266C5.44522 9.47195 5.26707 9.46353 5.10449 9.51917C4.94191 9.5748 4.80749 9.69017 4.72937 9.84113C4.00805 11.3878 3.81528 13.1229 4.17994 14.7865C4.5446 16.4501 5.44706 17.9527 6.75213 19.0691C8.05721 20.1855 9.69464 20.8556 11.4192 20.9792C13.1437 21.1028 14.8625 20.6731 16.3181 19.7545C17.7737 18.8359 18.8877 17.4778 19.4933 15.8837C20.0989 14.2897 20.1634 12.5454 19.6773 10.9121C19.1912 9.27892 18.1805 7.84468 16.7967 6.82425C15.4129 5.80382 13.7305 5.25215 12.0014 5.25186V6.5642Z" fill="#374151"/>
+<path d="M12.0014 8.4881V3.32796C12.0013 3.26562 11.9833 3.20458 11.9493 3.15198C11.9153 3.09938 11.8668 3.0574 11.8094 3.03097C11.752 3.00453 11.6882 2.99472 11.6254 3.0027C11.5626 3.01067 11.5034 3.03609 11.4547 3.07599L8.30803 5.65606C8.27052 5.68685 8.24034 5.72538 8.21963 5.76892C8.19892 5.81247 8.18818 5.85996 8.18818 5.90803C8.18818 5.95611 8.19892 6.0036 8.21963 6.04714C8.24034 6.09068 8.27052 6.12921 8.30803 6.16L11.4547 8.74007C11.5034 8.77997 11.5626 8.8054 11.6254 8.81337C11.6882 8.82134 11.752 8.81154 11.8094 8.7851C11.8668 8.75866 11.9153 8.71668 11.9493 8.66409C11.9833 8.61149 12.0013 8.55044 12.0014 8.4881Z" fill="#374151"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.0014 6.5642C13.4422 6.56475 14.8441 7.02474 15.9971 7.87529C17.15 8.72583 17.992 9.92114 18.3969 11.2822C18.8017 12.6432 18.7477 14.0967 18.2428 15.425C17.738 16.7533 16.8095 17.8848 15.5965 18.6502C14.3834 19.4155 12.9511 19.7734 11.5141 19.6703C10.077 19.5672 8.71261 19.0086 7.62516 18.0782C6.53771 17.1478 5.78578 15.8957 5.48199 14.5094C5.1782 13.1231 5.33891 11.6772 5.94003 10.3884C6.00546 10.2317 6.00678 10.0561 5.9437 9.89851C5.88063 9.74087 5.75806 9.61336 5.60164 9.54266C5.44522 9.47195 5.26707 9.46353 5.10449 9.51917C4.94191 9.5748 4.80749 9.69017 4.72937 9.84113C4.00805 11.3878 3.81528 13.1229 4.17994 14.7865C4.5446 16.4501 5.44706 17.9527 6.75213 19.0691C8.05721 20.1855 9.69464 20.8556 11.4192 20.9792C13.1437 21.1028 14.8625 20.6731 16.3181 19.7545C17.7737 18.8359 18.8877 17.4778 19.4933 15.8837C20.0989 14.2897 20.1634 12.5454 19.6773 10.9121C19.1912 9.27892 18.1805 7.84468 16.7967 6.82425C15.4129 5.80382 13.7305 5.25215 12.0014 5.25186V6.5642Z" stroke="#374151"/>
+<path d="M12.0014 8.4881V3.32796C12.0013 3.26562 11.9833 3.20458 11.9493 3.15198C11.9153 3.09938 11.8668 3.0574 11.8094 3.03097C11.752 3.00453 11.6882 2.99472 11.6254 3.0027C11.5626 3.01067 11.5034 3.03609 11.4547 3.07599L8.30803 5.65606C8.27052 5.68685 8.24034 5.72538 8.21963 5.76892C8.19892 5.81247 8.18818 5.85996 8.18818 5.90803C8.18818 5.95611 8.19892 6.0036 8.21963 6.04714C8.24034 6.09068 8.27052 6.12921 8.30803 6.16L11.4547 8.74007C11.5034 8.77997 11.5626 8.8054 11.6254 8.81337C11.6882 8.82134 11.752 8.81154 11.8094 8.7851C11.8668 8.75866 11.9153 8.71668 11.9493 8.66409C11.9833 8.61149 12.0013 8.55044 12.0014 8.4881Z" stroke="#374151"/>
+</symbol>
+<symbol id="chrome-help" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
+        </symbol>
+</defs></svg>
+<p class="crumb">
+<a href="../index.html">← Design hub</a> · Public model sharing</p>
+<p class="eyebrow">Product review · 21 September 2026</p>
+<h1>From a working modeling<br>to a public reference.</h1>
+<p class="intro">Follow ACME Streaming as it publishes its footprint, a reader explores the assumptions,
+and the author returns with an update. Each screen shows where you are, what is public, and what your actions change.</p>
+<div class="review-note">
+<strong>Prospective design · not implemented.</strong> Screens use illustrative data.
+Buttons move through this local storyboard; they do not create accounts, send emails, or publish content.
+Amber “Proposal” notes identify decisions still to confirm. CC BY 4.0 remains subject to board approval.</div>
+<nav class="journey-nav" aria-label="Journey sections">
+<a href="#chrome-context">Navigation placement</a>
+<a href="#sign-in">1 · Sign in</a>
+<a href="#publish">2 · Publish</a>
+<a href="#read">3 · Read &amp; explore</a>
+<a href="#fork">4 · Fork</a>
+<a href="#update">5 · Update</a>
+<a href="#discover">6 · Discover</a>
+<a href="#manage">7 · Manage</a>
+<a href="#review-questions">Open decisions</a>
+</nav>
+<section class="chrome-review" id="chrome-context" aria-labelledby="chrome-heading">
+<h2 id="chrome-heading">Where sharing fits in the current interface</h2>
+<p class="note">Desktop navigation, grounded in the current templates. The same controls appear in the full journey below.</p>
+<div class="chrome-label"><b>Current interface</b><span>Global navigation → modeling tabs → active modeling toolbar</span></div>
+<div class="win current-chrome"><div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div><nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
 
-<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
-<h1>share-a-model <span class="role">Web + edge</span> <span class="role prospect">Prospective — not built</span></h1>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
 
-<div class="prospect-banner"><b class="h">⚠ Prospective journey — target-state design, not the deployed app.</b><br>
-  Normative design for the <b>public-model-sharing</b> feature (spec: <code>specs/features/public-model-sharing/spec.html</code>,
-  license draft: <code>content-license.md</code> alongside it). Today nothing survives the 12-hour session cache except a JSON
-  download (<a href="save-and-load.html">save-and-load</a> stays the faithful description of persistence). At ship time the
-  publish entry folds into the builder toolbar, the public/explore pages become faithful journeys, and the banner comes off.
-  Capability decisions locked in the spec (2026-07-07): public-by-construction, all listed, latest + immutable version
-  permalinks, thin email-only accounts, CC BY 4.0 pending board validation.</div>
-
-<p class="lede">Today a modeling is a <b>private, perishable session</b>: to show it to anyone you send a file. <b>share-a-model</b>
-  turns a modeling into a <b>citable public page</b>: publish it under a stable link, let anyone read it with full explainability
-  and <b>fork it into their own session without an account</b>, and let the world find it on an <b>Explore</b> page. Success is a
-  company publishing a living account of its ecodesign work, a journalist citing a version permalink that can never silently
-  change, and a reader one click away from challenging any hypothesis in their own copy.</p>
-<p class="note">Publishing requires a <b>thin account</b> (an email, nothing else) — viewing and forking never do. There are
-  <b>no private saves</b>: the session and the JSON file remain the only private workspaces. Code-level pointers in
-  <a href="#pointers">Implementation pointers</a>.</p>
-
-<!-- ============ PHASE A — PUBLISH ============ -->
-<div class="phase">
-  <span class="tag">A · Publish</span><span class="conn">from the builder — sign in with an email, describe it, make it public</span><span class="rule"></span>
+</nav><div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
 </div>
+</div><div class="model-toolbar">
+<b title="Streaming service">Streaming service</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
 
-<!-- screen 1 — the entry + thin sign-in -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
-      <div class="appbar">
-        <div class="tabs"><span class="tab active">Streaming service</span><span class="tab add">＋ Add ▾</span></div>
-        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="pubbtn">↗ Publish</span></div>
-      </div>
-      <div class="stage" style="min-height:300px">
-        <div class="canvas dim" style="min-height:300px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
-        <div class="panel" style="width:66%">
-          <div class="phead"><b>Publish — sign in</b><span class="x">×</span></div>
-          <p class="helptxt">Publishing needs an account so you stay in control of your public modelings. An account is just a
-            verified email — it is never displayed and never used for anything else.</p>
-          <div class="field"><label>Your email</label><span class="inp">vincent@example.org</span></div>
-          <button class="savebtn">Email me a sign-in link</button>
-          <p class="helptxt" style="margin-top:.4rem">✉ Check your inbox — the link signs you in and returns you right here.</p>
-        </div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The toolbar gains a <b>↗ Publish</b> action next to open / export.
-      Not signed in? The side panel asks for <b>an email, nothing else</b>, sends a sign-in link, and resumes the publish flow
-      after the click. Viewing and forking never see this screen — only publishing does.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">1</span><h3>Publishing is the only thing that needs an account</h3></div>
-    <p>The account exists solely so the publisher can later update or delete what they published — no volunteer in the loop.
-       It is deliberately thin: a verified email and the public author name they'll choose at publish time. The barrier stays
-       where it protects (writing to Boavizta's database) and away from where it would hurt adoption (reading, forking).</p>
-    <div class="states">
-      <div class="state"><span class="k">Thin account</span><span class="v">Email only — verified by a sign-in link. <b>No password stored</b> (leaning; the mechanism is a plan-stage call, the "email is the only personal data" promise is not).</span></div>
-      <div class="state"><span class="k">Verification gates</span><span class="v">You cannot publish until you've proven control of the email — the first anti-abuse wall.</span></div>
-      <div class="state"><span class="k">Consent up front</span><span class="v">Account creation shows the privacy notice: what's stored (the email), why, and how to erase it.</span></div>
-      <div class="state"><span class="k">Modeling not computable?</span><span class="v"><b>↗ Publish</b> is disabled with a tooltip reason until the modeling computes — disabled-not-errored, applied to publishing.</span></div>
-      <div class="state variant"><span class="k">Edge paradigm</span><span class="v">Identical flow — a modeling is a modeling; web and edge publish the same way.</span></div>
-    </div>
-  </div>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
 </div>
-
-<!-- screen 2 — the publish form -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
-      <div class="stage" style="min-height:340px">
-        <div class="canvas dim" style="min-height:340px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
-        <div class="panel" style="width:70%">
-          <div class="phead"><b>Publish this modeling</b><span class="x">×</span></div>
-          <div class="field"><label>Title</label><span class="inp">Streaming service — 2026 ecodesign baseline</span></div>
-          <div class="field"><label>Public author name</label><span class="inp">ACME Streaming — Sustainability team</span></div>
-          <div class="field"><label>Tags</label>
-            <div><span class="tagchip sel">video streaming</span><span class="tagchip sel">ecodesign case study</span><span
-              class="tagchip">AI service</span><span class="tagchip">edge fleet</span><span class="tagchip">+ more…</span></div>
-          </div>
-          <div class="field"><label>Article link (optional)</label><span class="inp" style="color:var(--faint)">https://blog.acme.example/ecodesign-journey</span></div>
-          <div class="pubnotice">This modeling will be <b>public</b>: listed on Explore, visible and forkable by anyone, under the
-            <b>CC BY 4.0</b> license. Your email is never displayed. There are no private saves.
-            <label><input type="checkbox" checked> I have the right to publish this content and I accept the license terms.</label>
-          </div>
-          <button class="savebtn">Publish</button>
-        </div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Signed in, the panel becomes the <b>publish form</b>: title,
-      the <b>public author name</b> (shown instead of the email, everywhere), <b>curated tag</b> chips, an optional <b>article
-      link</b> for the piece that cites this modeling, and the <b>public + license acknowledgment</b> — one unmissable amber box,
-      one checkbox.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">2</span><h3>Describe it, acknowledge what public means, publish</h3></div>
-    <p>Four fields and one honest warning. The amber box does the legal work in one breath: public by construction, listed,
-       forkable, CC BY 4.0 — so nobody publishes thinking they saved a private draft. The article link closes the loop with
-       the written piece that will cite this modeling.</p>
-    <div class="states">
-      <div class="state"><span class="k">Curated tags</span><span class="v">Pick from a maintained list — no free-text tags, so Explore filters stay meaningful. Extending the list is a maintainer action.</span></div>
-      <div class="state"><span class="k">Author name</span><span class="v">Free-text, deliberately public, required. The email never appears anywhere public.</span></div>
-      <div class="state"><span class="k">License at the point of grant</span><span class="v">CC BY 4.0 acknowledged <b>here</b>, not buried in terms — with the right-to-publish warranty (see <code>content-license.md</code>).</span></div>
-      <div class="state"><span class="k">Quota-bound</span><span class="v">Per-account limits on modeling count, size and publish rate. At the limit, Publish is disabled with the reason — the anti-overflow wall, invisible to honest users.</span></div>
-      <div class="state deferred"><span class="k">Author name placement</span><span class="v">Per-account default vs. per-modeling free-text — open spec question; mock shows per-modeling.</span></div>
-    </div>
-  </div>
+</div></div>
+<div class="chrome-label"><b>With public sharing</b><span><i class="proposal-dot" aria-hidden="true"></i> Proposed additions · amber markers are review annotations, not product UI</span></div>
+<div class="win proposed-chrome"><div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div><nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<details class="chrome-menu signed-account"><summary class="nav-button account proposed-control">ACME account <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><span class="menu-caption">team@acme.example</span><a href="#manage">My publications</a><a href="#account-states">Sign out</a></div></details>
+</nav><div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
 </div>
-
-<!-- screen 3 — published -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
-      <div class="stage" style="min-height:300px">
-        <div class="canvas dim" style="min-height:300px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
-        <div class="modal-mock"><div class="dialog">
-          <div class="warn">🎉</div>
-          <div class="msg">Published — version 1</div>
-          <div class="sub">Anyone with this link can view and fork your modeling.</div>
-          <div class="linkchip" style="margin-top:.5rem">e-footprint.boavizta.org/shared/streaming-2026-baseline<span class="cp">⧉ Copy</span></div>
-          <div class="sub" style="margin-top:.35rem">Publishing an update later keeps this link on the latest version and gives
-            each previous version a permanent link.</div>
-          <div class="acts"><button class="ok">View public page</button><button class="back">Keep editing</button></div>
-        </div></div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>Publish confirmed: the <b>stable public link</b>, ready to copy
-      into an article, and the versioning promise in one line. <em>View public page</em> opens what the world sees;
-      <em>Keep editing</em> returns to the session — the session copy remains the private working copy.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">3</span><h3>A link you can put in print</h3></div>
-    <p>The payoff artifact is the URL. The canonical link always shows the latest version; every published revision keeps an
-       immutable permalink — so a company hands out one evergreen link while a researcher cites an exact state. The dialog
-       says both in plain words at the moment the user needs them.</p>
-    <div class="states">
-      <div class="state"><span class="k">Canonical link</span><span class="v">One readable URL per modeling — follows the latest version forever.</span></div>
-      <div class="state"><span class="k">Version permalinks</span><span class="v">Each publish freezes an immutable snapshot with its own link — citations can't silently drift.</span></div>
-      <div class="state"><span class="k">Session unchanged</span><span class="v">Publishing copies the modeling out; the session keeps its 12-hour life and stays the private editing space.</span></div>
-    </div>
-  </div>
+</div><div class="model-toolbar">
+<b title="Streaming service">Streaming service</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
+<a class="action publish-action proposed-control" href="#publish">Publish</a>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
 </div>
-
-<!-- ============ PHASE B — THE PUBLIC PAGE ============ -->
-<div class="phase">
-  <span class="tag">B · The public page</span><span class="conn">what anyone — no account — sees at the link</span><span class="rule"></span>
+</div></div>
+<div class="chrome-notes" id="chrome-notes">
+<p><b>Site-wide:</b> keep the logo, Documentation, and Feedback; add Explore and Sign in / account. “My publications” sits inside the account menu.</p>
+<p><b>Active modeling:</b> keep Edge modeling, Help, open, export, reset, and Show results in order. Add Publish before Show results; it becomes Publish update for an owner’s linked working copy.</p>
+<p><b>Public page:</b> keep the same global navigation, with Fork and version controls beside the publication. Editing-only controls stay in the builder.</p>
 </div>
+<p class="note">Open the Help, account, or “Add a modeling to compare” menus to inspect their contents. Existing actions are visual references: this storyboard does not open files, reset modelings, or navigate to the live site. Desktop placement is illustrated here; mobile navigation is not redesigned in this review.</p>
+</section>
 
-<!-- screen 4 — public read-only view -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/shared/streaming-2026-baseline</span></div>
-      <div class="pubhead">
-        <div class="ttl">Streaming service — 2026 ecodesign baseline</div>
-        <div class="byline">by <b>ACME Streaming — Sustainability team</b> · updated 2026-07-07 · <span class="licbadge">CC BY 4.0</span></div>
-        <div><span class="tagchip sel">video streaming</span><span class="tagchip sel">ecodesign case study</span>
-          <span class="artlink">📄 Referenced by blog.acme.example/ecodesign-journey</span></div>
-        <div class="row">
-          <select class="dd" style="font-size:.58rem; padding:.14rem 1rem .14rem .35rem"><option>Version 3 (latest) — 2026-07-07</option><option>Version 2 — 2026-05-12</option><option>Version 1 — 2026-03-02</option></select>
-          <span class="forkbtn">⑂ Fork into my session</span>
-          <span class="reportlink">⚑ Report</span>
-        </div>
-      </div>
-      <div class="stage">
-        <div class="canvas" style="min-height:190px">
-          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◔</span> Viewers</div><div class="ocard"><span class="ic">◔</span> Admins</div></div>
-          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Streaming</div></div>
-          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server</div><div class="ocard"><span class="ic">▦</span> SSD storage</div></div>
-        </div>
-        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The public page is the <b>familiar modeling view, stripped of
-      editing</b>: no add buttons, no pencils, no toolbar — plus a header that answers <b>what / whose / which version / under
-      what license</b> at a glance. Results and every value's derivation open exactly as in the builder. <b>⑂ Fork</b> and
-      <b>⚑ Report</b> are the only actions.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">4</span><h3>Read-only, but nothing hidden</h3></div>
-    <p>The reader gets the full explainability contract — canvas, results charts, Sankey, sources, the derivation of any
-       number — because auditability <em>is</em> the product being shared. The header carries the trust signals a citation
-       needs: author, date, version, license. No account, no cookie wall, no watermark.</p>
-    <div class="states">
-      <div class="state"><span class="k">No account to read</span><span class="v">Public means public — the page renders for anyone, indexable by search engines.</span></div>
-      <div class="state"><span class="k">Full explainability</span><span class="v">Objects, hypotheses, results and each value's derivation — the same surfaces as <a href="view-results.html">view-results</a> / <a href="audit-a-result.html">audit-a-result</a>, editing affordances absent.</span></div>
-      <div class="state"><span class="k">Version visible</span><span class="v">The selector states which version you're reading and that history exists — switching goes to that version's permalink.</span></div>
-      <div class="state"><span class="k">Cheap to serve</span><span class="v">A share link may sit in a widely-read article: anonymous views are served from pre-rendered/cached state, never a per-request modeling rebuild.</span></div>
-      <div class="state"><span class="k">⚑ Report</span><span class="v">One-click report → reviewed by an administrator who can unpublish. Reactive moderation; no volunteer approves publications.</span></div>
-    </div>
-  </div>
+<section class="screen" id="sign-in">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/model_builder/</span>
 </div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<a class="nav-button account anon-account proposed-control" href="#sign-in">Sign in</a>
+</nav>
+<div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
+</div>
+</div>
+<div class="model-toolbar">
+<b title="Streaming service">Streaming service</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
+<a class="action publish-action proposed-control" href="#publish">Publish</a>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
+</div>
+</div>
+<div class="stage with-panel">
+<div class="canvas covered">
+<div class="col" data-orderable>
+<h5>Usage patterns</h5>
+<div class="cards">
+<div class="ocard">
+<span class="ic">◔</span>Viewers<span class="pencil">✎</span>
+<span class="detail">100,000 users</span>
+</div>
+<div class="ocard">
+<span class="ic">◔</span>Editors<span class="pencil">✎</span>
+<span class="detail">12 users</span>
+</div>
+</div>
+<div class="addbtn">＋ Add a usage pattern</div>
+</div>
+<div class="col">
+<h5>Usage journeys</h5>
+<div class="ocard">
+<span class="ic">↗</span>Watch a video<span class="pencil">✎</span>
+<span class="detail">Playback → delivery</span>
+</div>
+<div class="addbtn">＋ Add a usage journey</div>
+</div>
+<div class="col">
+<h5>Infrastructure</h5>
+<div class="ocard">
+<span class="ic">▤</span>Web server<span class="pencil">✎</span>
+<span class="detail">France · 24/7</span>
+</div>
+<div class="ocard">
+<span class="ic">▦</span>SSD storage<span class="pencil">✎</span>
+<span class="detail">Video catalogue</span>
+</div>
+<div class="addbtn">＋ Add a server</div>
+</div>
+</div>
+<div class="panel">
+<div class="phead">
+<b>Sign in to publish</b>
+<span class="x">×</span>
+</div>
+<p class="helptxt">Your modeling stays in this workspace while you sign in.</p>
+<div class="field">
+<label for="demo-email">Email</label>
+<input class="inp" id="demo-email" type="email" value="team@acme.example">
+</div>
+<div class="field">
+<label for="demo-password">Password</label>
+<input class="inp" id="demo-password" type="password" placeholder="Your password" autocomplete="off">
+</div>
+<a class="action primary" href="#publish">Sign in and continue</a>
+<p class="helptxt">Forgot your password? <a href="#account-states">Reset password</a>
+</p>
+<div class="notice">New here? Create an account with email and password, then verify your email before publishing.</div>
+<p class="helptxt">Your email is never displayed publicly. The public author name is chosen for each modeling.</p>
+<p class="helptxt">
+<a href="#account-states">Create an account</a> · Privacy notice · Terms</p>
+</div>
+</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>The site header, modeling tabs, toolbar, and populated canvas remain visible. The proposed account entry uses the existing side-panel pattern.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">1</span>
+<h3>Publish from your workspace</h3>
+</div>
+<p>The modeling already exists in the builder. Signing in keeps the user in that publishing task.</p>
+<div class="states">
+<div class="state">
+<span class="k">Reading stays open</span>
+<span class="v">Viewing and forking require no account.</span>
+</div>
+<div class="state">
+<span class="k">Email and password</span>
+<span class="v">Sign-in, email verification, and password recovery are separate steps.</span>
+</div>
+<div class="state">
+<span class="k">Account interruptions</span>
+<span class="v">The plan must cover an expired verification link, resend limits, and a failed email send while preserving the workspace.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Publication readiness</span>
+<span class="v">Require a computable modeling before publication and explain missing inputs. This gate still needs confirmation.</span>
+</div>
+</div>
+</div>
+</section>
 
-<details class="fold">
-  <summary><span class="s-tag alt">↩ Alt</span> Landing on an older version's permalink <span class="s-sub">— the amber strip keeps citations honest</span></summary>
-  <div class="fold-body">
-    <div class="screen">
-      <div class="mock-col">
-        <div class="win">
-          <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/shared/streaming-2026-baseline/v1</span></div>
-          <div class="oldver">You are viewing <b>version 1 · 2026-03-02</b> — this modeling has been updated since.
-            <a href="#">See the latest version</a></div>
-          <div class="pubhead">
-            <div class="ttl">Streaming service — 2026 ecodesign baseline</div>
-            <div class="byline">by <b>ACME Streaming — Sustainability team</b> · version 1 of 3 · <span class="licbadge">CC BY 4.0</span></div>
-            <div class="row"><span class="forkbtn">⑂ Fork this version</span><span class="reportlink">⚑ Report</span></div>
-          </div>
-          <div class="stage"><div class="canvas" style="min-height:130px"><div class="col"></div><div class="col"></div><div class="col"></div></div></div>
-        </div>
-        <div class="mock-help"><span class="lbl">On this screen</span>A permalink from a 2026 article lands on the exact state it
-          cited. The strip says so and offers the latest — the reader is never confused about <em>which</em> modeling they're
-          auditing. Forking here forks <b>this version</b>.</div>
-      </div>
-      <div class="info-col">
-        <div class="step"><span class="n alt">4b</span><h3>Permalinks age gracefully</h3></div>
-        <p>An older version is a first-class page, not an error: immutable content, a clear banner, a path to the present.
-           This is what makes the link safe to put in a peer-reviewed article.</p>
-      </div>
-    </div>
-  </div>
+<section class="screen" id="publish">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/model_builder/</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<details class="chrome-menu signed-account"><summary class="nav-button account proposed-control">ACME account <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><span class="menu-caption">team@acme.example</span><a href="#manage">My publications</a><a href="#account-states">Sign out</a></div></details>
+</nav>
+<div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
+</div>
+</div>
+<div class="model-toolbar">
+<b title="Streaming service">Streaming service</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
+<a class="action publish-action proposed-control" href="#publish">Publish</a>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
+</div>
+</div>
+<div class="stage with-panel publish">
+<div class="canvas covered">
+<div class="col" data-orderable>
+<h5>Usage patterns</h5>
+<div class="cards">
+<div class="ocard">
+<span class="ic">◔</span>Viewers<span class="pencil">✎</span>
+<span class="detail">100,000 users</span>
+</div>
+<div class="ocard">
+<span class="ic">◔</span>Editors<span class="pencil">✎</span>
+<span class="detail">12 users</span>
+</div>
+</div>
+<div class="addbtn">＋ Add a usage pattern</div>
+</div>
+<div class="col">
+<h5>Usage journeys</h5>
+<div class="ocard">
+<span class="ic">↗</span>Watch a video<span class="pencil">✎</span>
+<span class="detail">Playback → delivery</span>
+</div>
+<div class="addbtn">＋ Add a usage journey</div>
+</div>
+<div class="col">
+<h5>Infrastructure</h5>
+<div class="ocard">
+<span class="ic">▤</span>Web server<span class="pencil">✎</span>
+<span class="detail">France · 24/7</span>
+</div>
+<div class="ocard">
+<span class="ic">▦</span>SSD storage<span class="pencil">✎</span>
+<span class="detail">Video catalogue</span>
+</div>
+<div class="addbtn">＋ Add a server</div>
+</div>
+</div>
+<div class="panel">
+<div class="phead">
+<b>Publish this modeling</b>
+<span class="x">×</span>
+</div>
+<form id="demo-publish-form">
+<div class="field">
+<label for="publish-title">Title</label>
+<input class="inp" id="publish-title" value="Streaming service — 2026 baseline" required>
+</div>
+<div class="field">
+<label for="publish-slug">Sharing URL suffix</label>
+<input class="inp" id="publish-slug" value="streaming-service-2026-baseline" pattern="[a-z0-9]+(-[a-z0-9]+)*" required aria-describedby="slug-help">
+<span class="link-preview" id="slug-preview">https://e-footprint.boavizta.org/shared/streaming-service-2026-baseline</span>
+<p class="helptxt" id="slug-help">Suggested from the title. Editable until publication, then fixed.</p>
+<p class="helptxt" id="slug-status" aria-live="polite">Valid format · availability is illustrative in this demo.</p>
+</div>
+<div class="field">
+<label for="publish-author">Public author name</label>
+<input class="inp" id="publish-author" value="ACME Streaming · Sustainability team" required>
+</div>
+<div class="field">
+<label for="publish-tags">Tags</label>
+<input class="inp" id="publish-tags" value="video streaming, ecodesign">
+<p class="helptxt">Free text; separate tags with commas.</p>
+</div>
+<div class="field">
+<label for="publish-article">Article link (optional)</label>
+<input class="inp" id="publish-article" type="url" placeholder="https://…">
+</div>
+<div class="notice warn">
+<b>Public and reusable</b>
+<br>Listed on Explore and available for anyone to view and fork. CC BY 4.0 is the proposed license.
+<label style="display:flex;gap:.4rem;margin-top:.5rem;">
+<input type="checkbox" id="publish-consent" required> I have the right to publish this content and accept the publication terms.</label>
+</div>
+<button class="action primary" type="submit">Publish</button>
+</form>
+<div id="demo-published" hidden>
+<div class="notice good">
+<b>Published · version 1</b>
+<br>This is the storyboard's simulated confirmation.</div>
+<p class="helptxt">Your public link</p>
+<div class="citation" id="published-link">
+</div>
+<p class="helptxt">The URL stays the same when you publish an update. Every version also has its own permanent link.</p>
+<a class="action primary" href="#read">View public page</a> <button class="action" type="button" id="edit-demo">Back to form</button>
+</div>
+</div>
+</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>Try changing the title or suffix and publishing. Nothing is sent. For the unavailable state, enter <code>already-taken</code> as the suffix.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">2</span>
+<h3>Choose what people will see</h3>
+</div>
+<p>The title, author, tags, and URL form the public introduction to the modeling.</p>
+<div class="states">
+<div class="state">
+<span class="k">Stable link</span>
+<span class="v">Lowercase letters, numbers and hyphens. Real publication must recheck availability; title changes never rename an existing URL.</span>
+</div>
+<div class="state">
+<span class="k">Attribution per modeling</span>
+<span class="v">The same account can publish for different teams or clients. Tags are free text.</span>
+</div>
+<div class="state">
+<span class="k">Clear license choice</span>
+<span class="v">The publisher acknowledges the proposed reuse terms at publication; board approval is still pending.</span>
+</div>
+<div class="state">
+<span class="k">Errors preserve work</span>
+<span class="v">An unavailable URL or a failed publish must keep the form and the editing copy intact.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="screen" id="read">
+<div class="mock-col">
+<div class="win" id="public-window">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/shared/streaming-service-2026-baseline</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<a class="nav-button account anon-account proposed-control" href="#sign-in">Sign in</a><details class="chrome-menu signed-account" hidden><summary class="nav-button account proposed-control">ACME account <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><span class="menu-caption">team@acme.example</span><a href="#manage">My publications</a><a href="#account-states">Sign out</a></div></details>
+</nav>
+<div class="owner-banner" id="owner-view" hidden>
+<span>You own this publication.</span>
+<a class="action primary" href="#update">Edit and publish an update</a>
+</div>
+<div class="pubhead">
+<span class="pill">Public · read-only modeling</span>
+<h2>Streaming service — 2026 baseline</h2>
+<div class="byline">By ACME Streaming · Sustainability team · <span id="version-date">21 September 2026</span>
+</div>
+<div class="row-actions">
+<span class="tagchip">video streaming</span>
+<span class="tagchip">ecodesign</span>
+<span class="pill">CC BY 4.0 · proposed</span>
+</div>
+<p class="helptxt">
+<a href="#discover">Referenced in: Our 2026 ecodesign review ↗</a>
+</p>
+<div class="row-actions">
+<label for="public-version" class="helptxt">Version</label>
+<select class="dd" id="public-version">
+<option value="3">3 · latest</option>
+<option value="2">2 · 1 September 2026</option>
+</select>
+<a class="action primary" href="#fork">Fork into my session</a>
+<button class="action" id="show-links" type="button" aria-expanded="false">Share / cite</button>
+<a href="#report-note" class="helptxt">Report by email</a>
+</div>
+<div class="notice warn" id="old-version" hidden>You are viewing version 2. <button class="action" type="button" id="latest-version">View latest</button>
+</div>
+<div id="citation-links" hidden>
+<p class="helptxt">
+<span class="pill proposed">Proposal</span> Distinct links for a living reference and a fixed citation.</p>
+<div class="citation">
+<b>Latest:</b> <span id="latest-link">
+</span>
+<br>
+<b>This version:</b> <span id="version-link">
+</span>
+</div>
+</div>
+</div>
+<div class="public-tools">
+<span id="view-status" aria-live="polite">Your view · published defaults</span>
+<button class="action" id="reorder-cards" type="button">Reorder cards</button>
+<button class="action" id="reset-view" type="button">Reset to published view</button>
+</div>
+<div class="canvas">
+<div class="col" data-orderable>
+<h5>Usage patterns</h5>
+<div class="cards">
+<div class="ocard">
+<span class="ic">◔</span>Viewers<span class="detail">100,000 users</span>
+</div>
+<div class="ocard">
+<span class="ic">◔</span>Editors<span class="detail">12 users</span>
+</div>
+</div>
+</div>
+<div class="col">
+<h5>Usage journeys</h5>
+<div class="ocard">
+<span class="ic">↗</span>Watch a video<span class="detail">Playback → delivery</span>
+</div>
+</div>
+<div class="col">
+<h5>Infrastructure</h5>
+<div class="ocard">
+<span class="ic">▤</span>Web server<span class="detail">France · 24/7</span>
+</div>
+<div class="ocard">
+<span class="ic">▦</span>SSD storage<span class="detail">Video catalogue</span>
+</div>
+</div>
+</div>
+<div class="result-area">
+<div class="result-controls">
+<h3>Results</h3>
+<span class="pill">Illustrative values</span>
+</div>
+<div class="kpi-grid">
+<div class="kpi">Total footprint<strong data-result="total">12.4 t</strong>CO2-eq</div>
+<div class="kpi">Use<strong data-result="use">8.70 t</strong>CO2-eq</div>
+<div class="kpi">Manufacturing<strong data-result="manufacturing">3.70 t</strong>CO2-eq</div>
+</div>
+<div class="result-controls">
+<b>Impact repartition</b>
+<label>Lifecycle phase <select class="dd" id="phase-filter">
+<option value="all">All phases</option>
+<option value="use">Use</option>
+<option value="manufacturing">Manufacturing</option>
+</select>
+</label>
+</div>
+<svg class="diagram" viewBox="0 0 640 190" role="img" aria-label="Illustrative footprint flow from the whole modeling to use and manufacturing">
+<g fill="none" stroke-width="36" opacity=".3">
+<path data-flow="use" stroke="#2D4675" d="M120 85 C280 85 280 58 470 58"/>
+<path data-flow="manufacturing" stroke="#7B5DC7" stroke-width="18" d="M120 115 C280 115 280 142 470 142"/>
+</g>
+<rect x="108" y="60" width="12" height="67" rx="3" fill="#2D4675"/>
+<rect data-flow="use" x="470" y="39" width="12" height="38" rx="3" fill="#2D4675"/>
+<rect data-flow="manufacturing" x="470" y="131" width="12" height="22" rx="3" fill="#7B5DC7"/>
+<g font-family="system-ui,sans-serif" font-size="13" fill="#4B5563">
+<text x="12" y="45">Whole modeling</text>
+<text x="12" y="150">CO2-eq footprint</text>
+<text x="496" y="52">Use</text>
+<text x="496" y="71" data-result="use">8.70 t</text>
+<text x="496" y="139">Manufacturing</text>
+<text x="496" y="158" data-result="manufacturing">3.70 t</text>
+</g>
+</svg>
+<p class="view-note">Try the filter or card order. The prototype simulates a saved preference; the product will save it in your session.</p>
+</div>
+<div class="footnote">Published by its author · hosting does not imply review or endorsement by Boavizta.</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>Arrive from an article, Explore, or a version link. <label style="display:block;margin-top:.4rem;">
+<input id="preview-owner" type="checkbox"> Preview this page as its owner</label> “Reset to published view,” the saved-view indicator, and separate citation links are proposed refinements.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">3</span>
+<h3>A publication you can explore</h3>
+</div>
+<p>After several updates, a reader opens version 3 at the same shared URL. Presentation controls belong to the visitor; modeling inputs stay protected.</p>
+<div class="states">
+<div class="state">
+<span class="k">A real application context</span>
+<span class="v">Public navigation, attribution, versions, modeling cards, and results are visible together. No input-edit buttons appear.</span>
+</div>
+<div class="state">
+<span class="k">Personal preferences</span>
+<span class="v">Sankey settings and card order save per visitor session and shared modeling. They never overwrite published defaults, including for the owner.</span>
+</div>
+<div class="state">
+<span class="k">Fork or owner update</span>
+<span class="v">Fork creates an independent modeling; the owner action prepares a new version of this publication. Both open the normal builder.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Historical results</span>
+<span class="v">The sample version switch changes the example totals. Exact behavior after a calculation-engine upgrade is still to be decided.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Small viewing aids</span>
+<span class="v">A saved-view indicator, reset button, and two clearly labeled citation links make the read-only distinction visible.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="screen" id="fork">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/model_builder/</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<a class="nav-button account anon-account proposed-control" href="#sign-in">Sign in</a>
+</nav>
+<div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
+</div>
+</div>
+<div class="model-toolbar">
+<b title="Streaming service — 2026 baseline (fork)">Streaming service — 2026 baseline (fork)</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
+<a class="action publish-action proposed-control" href="#publish">Publish</a>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
+</div>
+</div>
+<div class="source-bar">Forked from <a href="#read">ACME Streaming · version 3</a> · source and version captured when copied</div>
+<div class="canvas">
+<div class="col" data-orderable>
+<h5>Usage patterns</h5>
+<div class="cards">
+<div class="ocard">
+<span class="ic">◔</span>Viewers<span class="pencil">✎</span>
+<span class="detail">100,000 users</span>
+</div>
+<div class="ocard">
+<span class="ic">◔</span>Editors<span class="pencil">✎</span>
+<span class="detail">12 users</span>
+</div>
+</div>
+<div class="addbtn">＋ Add a usage pattern</div>
+</div>
+<div class="col">
+<h5>Usage journeys</h5>
+<div class="ocard">
+<span class="ic">↗</span>Watch a video<span class="pencil">✎</span>
+<span class="detail">Playback → delivery</span>
+</div>
+<div class="addbtn">＋ Add a usage journey</div>
+</div>
+<div class="col">
+<h5>Infrastructure</h5>
+<div class="ocard">
+<span class="ic">▤</span>Web server<span class="pencil">✎</span>
+<span class="detail">France · 24/7</span>
+</div>
+<div class="ocard">
+<span class="ic">▦</span>SSD storage<span class="pencil">✎</span>
+<span class="detail">Video catalogue</span>
+</div>
+<div class="addbtn">＋ Add a server</div>
+</div>
+</div>
+<div class="result-area">
+<h3>Results</h3>
+<p class="helptxt">Change assumptions and inspect their effects using the normal builder.</p>
+<div class="notice">Working copy in your session. Export it or publish it to keep it beyond the workspace lifetime.</div>
+</div>
+<div class="flow-note">Editable copy opened · the source stays unchanged</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>The address is now <code>/model_builder/</code>. Editing controls return. The source appears as provenance, not as the destination for a future update.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">4</span>
+<h3>Make an independent working copy</h3>
+</div>
+<p>The reader leaves the publication and enters the familiar builder. The original publication is untouched.</p>
+<div class="states">
+<div class="state">
+<span class="k">Independent publication</span>
+<span class="v">Publishing this fork asks for its own URL and author metadata. Its public page links back to the source version.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Existing work</span>
+<span class="v">Opening the public page must not overwrite the builder. When forking, use a free slot or explicitly choose what to replace.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Durable provenance</span>
+<span class="v">Confirm how the source citation survives source deletion and JSON export/import.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="screen" id="update">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/model_builder/</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<details class="chrome-menu signed-account"><summary class="nav-button account proposed-control">ACME account <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><span class="menu-caption">team@acme.example</span><a href="#manage">My publications</a><a href="#account-states">Sign out</a></div></details>
+</nav>
+<div class="appbar">
+<div class="tabs">
+<span class="tab active">Reference modeling</span>
+<details class="chrome-menu add-model-menu"><summary class="tab add">＋ Add a modeling to compare <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">⧉ Duplicate current modeling</a><a href="#chrome-notes">⬆ Import from file…</a><a href="#chrome-notes">✚ Start blank / from template</a></div></details>
+<span class="tab compare disabled" aria-disabled="true" title="Add a second complete modeling to compare">⇄ Compare</span>
+</div>
+</div>
+<div class="model-toolbar">
+<b title="Streaming service — 2026 baseline">Streaming service — 2026 baseline</b>
+<div class="toolbar">
+<label class="edge-switch" title="Edge modeling (visual demonstration only)"><input type="checkbox" role="switch"><span>Edge modeling</span><span class="edge-question" title="Edge modeling adds support for deployed-device impact (IoT, sensors, industrial PCs).">?</span></label>
+<details class="chrome-menu help-menu"><summary><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-help"></use></svg>Help <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><a href="#chrome-notes">↺ Replay tour</a><a href="#chrome-notes">▦ Open templates</a><hr><a href="#chrome-notes">▣ Data &amp; privacy</a></div></details>
+<a class="tool-icon" href="#chrome-notes" title="Open a file" aria-label="Open a file"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-upload"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Export your modeling" aria-label="Export your modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-export"></use></svg></a>
+<a class="tool-icon" href="#chrome-notes" title="Reset to default modeling" aria-label="Reset to default modeling"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-reset"></use></svg></a>
+<a class="action publish-action proposed-control" href="#update">Publish update</a>
+<a class="show-results" href="#chrome-notes" title="Visual reference: opens the results panel in the app">Show results</a>
+</div>
+</div>
+<div class="source-bar">Editing your publication · based on version 3 · <a href="#read">View current public version</a>
+</div>
+<div class="stage with-panel">
+<div class="canvas covered">
+<div class="col" data-orderable>
+<h5>Usage patterns</h5>
+<div class="cards">
+<div class="ocard">
+<span class="ic">◔</span>Viewers<span class="pencil">✎</span>
+<span class="detail">100,000 users</span>
+</div>
+<div class="ocard">
+<span class="ic">◔</span>Editors<span class="pencil">✎</span>
+<span class="detail">12 users</span>
+</div>
+</div>
+<div class="addbtn">＋ Add a usage pattern</div>
+</div>
+<div class="col">
+<h5>Usage journeys</h5>
+<div class="ocard">
+<span class="ic">↗</span>Watch a video<span class="pencil">✎</span>
+<span class="detail">Playback → delivery</span>
+</div>
+<div class="addbtn">＋ Add a usage journey</div>
+</div>
+<div class="col">
+<h5>Infrastructure</h5>
+<div class="ocard">
+<span class="ic">▤</span>Web server<span class="pencil">✎</span>
+<span class="detail">France · 24/7</span>
+</div>
+<div class="ocard">
+<span class="ic">▦</span>SSD storage<span class="pencil">✎</span>
+<span class="detail">Video catalogue</span>
+</div>
+<div class="addbtn">＋ Add a server</div>
+</div>
+</div>
+<div class="panel">
+<div class="phead">
+<b>Publish update · version 4</b>
+</div>
+<div class="notice">This will add a version to your existing publication.</div>
+<div class="field">
+<label>Sharing URL · fixed</label>
+<div class="link-preview">https://e-footprint.boavizta.org/shared/streaming-service-2026-baseline</div>
+</div>
+<div class="field">
+<label>Version link after publication</label>
+<div class="link-preview">…/streaming-service-2026-baseline/versions/4</div>
+</div>
+<p class="helptxt">The latest link will show version 4. Versions 1–3 remain available at their own links.</p>
+<p class="helptxt">Your private working changes become public only when you publish.</p>
+<a class="action primary" href="#manage">Publish update</a> <a class="action" href="#fork">Keep editing</a>
+<div class="notice warn">
+<b>Proposal · version conflict</b>
+<br>If somebody has already published a newer version, keep this working copy and explain the conflict before continuing.</div>
+</div>
+</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>This route returns from either the owner’s shared-page action or My publications. URL fields are visibly fixed. The conflict example is a proposal, not a new collaboration feature.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">5</span>
+<h3>Prepare an update without changing the live page</h3>
+</div>
+<p>The owner’s working copy stays associated with the publication. Visitors continue to see version 3 until the owner publishes version 4.</p>
+<div class="states">
+<div class="state">
+<span class="k">Two different operations</span>
+<span class="v">“Publish update” adds to this publication; “Publish” on a fork creates a separate one.</span>
+</div>
+<div class="state">
+<span class="k">Explicit publication</span>
+<span class="v">Editing and personal layout changes on the shared page never silently update the public version.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Stale working copies</span>
+<span class="v">A shared account can have two editors without simultaneous collaborative editing. Check the base version before publishing.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Version metadata</span>
+<span class="v">Decide whether author/title edits apply only to the current listing while old version citations keep their original metadata.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="screen" id="discover">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/explore</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<a class="nav-button account anon-account proposed-control" href="#sign-in">Sign in</a>
+</nav>
+<div class="pubhead">
+<h2>Explore public modelings</h2>
+<p class="helptxt">Explore assumptions, inspect results, or start from someone else’s modeling.</p>
+</div>
+<div class="searchbar">
+<input id="explore-search" type="search" aria-label="Search modelings by title" placeholder="Search modelings by title…">
+</div>
+<div style="padding:.5rem .8rem">
+<span class="tagchip">video streaming</span>
+<span class="tagchip">ecodesign</span>
+<span class="tagchip">web services</span>
+<span class="tagchip">edge fleet</span>
+</div>
+<div class="publication-list" id="explore-list">
+<article class="publication">
+<h3>
+<a href="#read">Streaming service — 2026 baseline</a>
+</h3>
+<div class="meta">ACME Streaming · version 3 · updated 21 September 2026</div>
+<p class="helptxt">Referenced in: Our 2026 ecodesign review ↗</p>
+<span class="tagchip">video streaming</span>
+<span class="tagchip">ecodesign</span>
+</article>
+<article class="publication">
+<h3>Footprint of a national news website</h3>
+<div class="meta">Le Journal · version 1 · updated 18 September 2026</div>
+<span class="tagchip">web services</span>
+</article>
+<article class="publication">
+<h3>Smart-building edge fleet, 400 sites</h3>
+<div class="meta">FacilityCo · version 2 · updated 15 September 2026</div>
+<span class="tagchip">edge fleet</span>
+</article>
+<p class="helptxt" id="explore-empty" hidden>No matching modeling. Try a different title.</p>
+</div>
+<div class="footnote">Public author names are supplied by publishers. Publications are not endorsements by Boavizta.</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>The same global navigation connects the builder, Explore, and account management. The title search is interactive; these cards are example data.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">6</span>
+<h3>Find a modeling worth exploring</h3>
+</div>
+<p>Explore is reachable from the site header and shows every available publication, with title search and tags supplied by publishers.</p>
+<div class="states">
+<div class="state">
+<span class="k">Free-text vocabulary</span>
+<span class="v">Tags are not a maintained launch-time taxonomy. Consolidation can follow actual usage.</span>
+</div>
+<div class="state">
+<span class="k">Useful context</span>
+<span class="v">Each entry shows title, author, last update, tags, and the article link when supplied.</span>
+</div>
+<div class="state">
+<span class="k">Discovery details</span>
+<span class="v">Finalize ordering, pagination, and tag normalization in the plan. Empty results and unavailable content need explicit states.</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="screen" id="manage">
+<div class="mock-col">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/my-modelings</span>
+</div>
+<nav class="app-nav" aria-label="Application navigation">
+<a class="brand" href="#chrome-notes" aria-label="e-footprint home (storyboard)"><svg class="brand-logo" width="120" height="40" role="img" aria-label="e-footprint"><use href="#chrome-brand"></use></svg></a>
+<a class="nav-button explore proposed-control" href="#discover">Explore</a>
+<a class="nav-button documentation" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-docs"></use></svg>Documentation</a>
+<a class="nav-button feedback" href="#chrome-notes"><svg class="chrome-icon" aria-hidden="true"><use href="#chrome-feedback"></use></svg>Feedback</a>
+<details class="chrome-menu signed-account"><summary class="nav-button account proposed-control">ACME account <span aria-hidden="true">▾</span></summary><div class="chrome-dropdown"><span class="menu-caption">team@acme.example</span><a href="#manage">My publications</a><a href="#account-states">Sign out</a></div></details>
+</nav>
+<div class="pubhead">
+<h2>My publications</h2>
+<div class="byline">Signed in as team@acme.example · this email is visible only to you</div>
+</div>
+<div class="publication-list">
+<article class="publication">
+<h3>Streaming service — 2026 baseline</h3>
+<div class="meta">Version 3 · last published 21 September 2026</div>
+<div class="row-actions">
+<a class="action" href="#read">View public page</a>
+<a class="action primary" href="#update">Edit and publish an update</a>
+<a class="action" href="#metadata-note">Edit details</a>
+<a class="action danger" href="#unavailable">Delete…</a>
+</div>
+</article>
+<article class="publication">
+<h3>ACME office tools footprint</h3>
+<div class="meta">Version 1 · last published 18 September 2026</div>
+<div class="row-actions">
+<span class="pill">Public</span>
+</div>
+</article>
+<div class="notice">Publication count, version history, and storage allowance appear here. Quota values are not yet decided.</div>
+</div>
+<div class="footnote">Privacy notice · Terms · <a href="#account-states">Password recovery</a> · <a href="#unavailable">Delete my account…</a>
+</div>
+</div>
+<div class="mock-help">
+<span class="lbl">In context</span>Author names belong to individual modelings. Account email, public author identity, and edit ownership are distinct.</div>
+</div>
+<div class="info-col">
+<div class="step">
+<span class="n">7</span>
+<h3>Keep ownership visible</h3>
+</div>
+<p>An owner can return to a publication, prepare an update, edit its current details, or delete it.</p>
+<div class="states">
+<div class="state">
+<span class="k">Deletion</span>
+<span class="v">Deleting a modeling removes it and its version links. Deleting an account removes its publications. Already-published forks remain independent.</span>
+</div>
+<div class="state proposal">
+<span class="k">Proposal · Bounded history</span>
+<span class="v">Count versions and stored bytes in quota usage, not just publication count. Do not silently prune cited versions.</span>
+</div>
+<div class="state">
+<span class="k">Minimal moderation</span>
+<span class="v">Reports go to the chosen email inbox with the modeling URL. Authorized accounts can unpublish; admins delegate permissions. No report queue is planned.</span>
+</div>
+</div>
+</div>
+</section>
+<details class="fold" id="account-states">
+<summary>Account states to cover in the plan</summary>
+<div class="fold-body">
+<p>Email/password sign-up, email verification, sign-in, and password recovery need distinct screens.
+An expired verification link should offer a resend; a failed email send must preserve the workspace.
+Successful verification returns to publishing. The provider, retention policy, and account-email-change behavior still need confirmation.</p>
+</div>
+</details>
+<details class="fold" id="workspace-full">
+<summary>
+<span class="pill proposed">Proposal</span> Forking when both workspace slots are occupied</summary>
+<div class="fold-body">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/shared/streaming-service-2026-baseline</span>
+</div>
+<div class="state-dialog">
+<h3>Choose where to open this copy</h3>
+<p>Your workspace already contains two modelings. Download a copy before replacing one.</p>
+<p>
+<span class="pill">Reference modeling</span> My streaming baseline</p>
+<p>
+<span class="pill">Comparison modeling</span> Lower-bitrate scenario</p>
+<div class="notice warn">Replacement requires an explicit choice and confirmation. Nothing changes if you cancel.</div>
+<div class="row-actions">
+<a class="action" href="#read">Cancel</a>
+<span class="action">Export workspace</span>
+<button class="action" disabled>Choose a modeling to replace</button>
+</div>
+</div>
+</div>
+</div>
+</details>
+<details class="fold" id="unavailable">
+<summary>
+<span class="pill proposed">Proposal</span> A deleted or unpublished modeling</summary>
+<div class="fold-body">
+<div class="win">
+<div class="titlebar">
+<span class="dots">
+<i>
+</i>
+<i>
+</i>
+<i>
+</i>
+</span>
+<span class="url">e-footprint.boavizta.org/shared/retired-example/versions/2</span>
+</div>
+<div class="state-dialog">
+<h3>This modeling is unavailable</h3>
+<p>The shared page is no longer available. Other published modelings can still be explored.</p>
+<a class="action primary" href="#discover">Explore modelings</a>
+</div>
+</div>
+<p class="note">Proposed behavior: keep a retired address from being assigned to a different publication.
+Decide how moderation removal and restoration apply to version history, and which source attribution is retained by forks.</p>
+</div>
 </details>
 
-<!-- ============ PHASE C — FORK ============ -->
-<div class="phase">
-  <span class="tag">C · Fork</span><span class="conn">one click from reading to challenging the hypotheses</span><span class="rule"></span>
-</div>
-
-<!-- screen 5 — forked into session -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
-      <div class="appbar">
-        <div class="tabs"><span class="tab active">Streaming service — 2026 ecodesign baseline (fork)</span></div>
-        <div class="toolbar"><span class="tbtn">↥</span><span class="tbtn">⬇</span><span class="pubbtn">↗ Publish</span></div>
-      </div>
-      <div class="stage">
-        <div class="canvas" style="min-height:230px">
-          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◔</span> Viewers <span class="pencil">✎</span></div><div class="ocard"><span class="ic">◔</span> Admins <span class="pencil">✎</span></div></div>
-          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Streaming <span class="pencil">✎</span></div></div>
-          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server <span class="pencil">✎</span></div><div class="ocard"><span class="ic">▦</span> SSD storage <span class="pencil">✎</span></div></div>
-        </div>
-        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
-        <div class="toast-mock">Forked version 3 into your session — it's yours to edit</div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The visitor is now in the <b>ordinary builder</b> with a full
-      editable copy — pencils back, add buttons back, their own session. The tab carries the origin title + <em>(fork)</em>.
-      The original is untouched; this copy lives by session rules (12 h) unless they export it — or publish it themselves.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">5</span><h3>The fork is the conversation</h3></div>
-    <p>Disagree with a hypothesis in a published modeling? Fork it, change the number, watch the results move — the peer-review
-       gesture the whole feature exists for, and it costs a click. Collaboration happens by forking, never by co-editing:
-       every fork is an independent modeling with its own owner.</p>
-    <div class="states">
-      <div class="state"><span class="k">No account to fork</span><span class="v">Forking lands straight in an anonymous session — the account wall only returns if they choose to <b>publish</b> the fork.</span></div>
-      <div class="state"><span class="k">Original untouched</span><span class="v">A fork is a copy. Nothing a forker does reaches the source modeling — and deleting the source never reaches published forks.</span></div>
-      <div class="state"><span class="k">Session rules apply</span><span class="v">The fork is ephemeral like any session modeling: export it or publish it to keep it.</span></div>
-      <div class="state deferred"><span class="k">Fork provenance</span><span class="v">Whether a published fork shows "forked from X (v3)" — open spec question; capture-at-fork-time is cheap, reconstruction later impossible.</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ PHASE D — EXPLORE ============ -->
-<div class="phase">
-  <span class="tag">D · Explore</span><span class="conn">every published modeling, findable</span><span class="rule"></span>
-</div>
-
-<!-- screen 6 — the explore index -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/explore</span></div>
-      <div class="searchrow"><span class="inp">🔍 Search modelings by title…</span></div>
-      <div class="tagrow"><span class="tagchip sel">all</span><span class="tagchip">video streaming</span><span class="tagchip">AI service</span><span class="tagchip">edge fleet</span><span class="tagchip">ecodesign case study</span></div>
-      <div class="mlist">
-        <div class="mcard"><div class="t">Streaming service — 2026 ecodesign baseline</div>
-          <div class="m">ACME Streaming — Sustainability team · updated 2026-07-07 · 📄 article</div></div>
-        <div class="mcard"><div class="t">Footprint of a national news website</div>
-          <div class="m">J. Doe, Le Journal · updated 2026-06-18 · 📄 article</div></div>
-        <div class="mcard"><div class="t">LLM chatbot vs. classic search — impact comparison</div>
-          <div class="m">GreenIT Lab · updated 2026-06-02</div></div>
-        <div class="mcard"><div class="t">Smart-building edge fleet, 400 sites</div>
-          <div class="m">FacilityCo · updated 2026-05-27</div></div>
-      </div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span><b>Explore</b> lists every published modeling — title search,
-      curated-tag filters, cards with author · date · article marker. Reachable from the site navigation without an account.
-      Clicking a card opens the public page (Phase B).</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">6</span><h3>A commons, not a bucket of links</h3></div>
-    <p>Because everything published is listed, the index is complete by construction — a browsable record of who modelings what,
-       and the discovery surface that turns one company's transparency page into the next company's starting template.</p>
-    <div class="states">
-      <div class="state"><span class="k">Complete by construction</span><span class="v">No unlisted modelings exist, so Explore <b>is</b> the database — which also keeps quasi-private storage unattractive.</span></div>
-      <div class="state"><span class="k">Search scope</span><span class="v">Title + tags only in v1 — no full-text search inside modeling contents.</span></div>
-      <div class="state"><span class="k">Article marker</span><span class="v">Modelings that back a published piece wear the 📄 marker — the citation graph, surfaced.</span></div>
-      <div class="state deferred"><span class="k">Ordering</span><span class="v">Most-recently-updated first in v1; richer ranking (views, forks) only if scale ever demands it.</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ PHASE E — OWN YOUR PUBLICATIONS ============ -->
-<div class="phase">
-  <span class="tag">E · Own your publications</span><span class="conn">update, curate, erase — no volunteer in the loop</span><span class="rule"></span>
-</div>
-
-<!-- screen 7 — my published modelings -->
-<div class="screen">
-  <div class="mock-col">
-    <div class="win">
-      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/my-modelings</span></div>
-      <div class="pubhead"><div class="ttl">My published modelings</div>
-        <div class="byline">signed in as <b>vincent@example.org</b> · author name and email are yours to change</div></div>
-      <div class="mlist">
-        <div class="myrow"><div><div class="t">Streaming service — 2026 ecodesign baseline</div>
-          <div class="m">version 3 · updated 2026-07-07 · 2 tags · 📄 article</div></div>
-          <div class="acts"><span>Open in session</span><span>Edit details</span><span class="dngr">Delete</span></div></div>
-        <div class="myrow"><div><div class="t">ACME internal tooling footprint</div>
-          <div class="m">version 1 · published 2026-06-20 · 1 tag</div></div>
-          <div class="acts"><span>Open in session</span><span>Edit details</span><span class="dngr">Delete</span></div></div>
-      </div>
-      <div class="quotaline">2 of your published-modeling quota used</div>
-      <div class="acctfoot">Privacy notice · Terms of use <span class="dngr">Delete my account…</span></div>
-    </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The owner's home: each published modeling with <b>Open in
-      session</b> (load it into the builder, edit, then <b>↗ Publish</b> becomes <em>Publish update — version 4</em>),
-      <b>Edit details</b> (title, tags, article link — metadata only, no new version), and <b>Delete</b>. The footer holds the
-      quota line and self-service <b>account deletion</b>.</div>
-  </div>
-  <div class="info-col">
-    <div class="step"><span class="n">7</span><h3>The author keeps agency over public data</h3></div>
-    <p>Updating reuses the loop the user already knows: load into session, edit, republish — the canonical link moves to the
-       new version, permalinks preserve the old ones. Erasure is immediate and self-service: public doesn't mean surrendered.
-       Deleting the account deletes its modelings and their share links; forks already published by others live on
-       (CC BY 4.0 is irrevocable for existing copies — stated plainly at the confirm).</p>
-    <div class="states">
-      <div class="state"><span class="k">Update = republish</span><span class="v">Open in session → edit → <b>Publish update</b>. Same form, pre-filled; mints version n+1 and a new permalink.</span></div>
-      <div class="state"><span class="k">Metadata edits</span><span class="v">Title / tags / article link change in place without a new version — the content is versioned, the card is curated.</span></div>
-      <div class="state"><span class="k">Delete a modeling</span><span class="v">Immediate; the link and all its version permalinks go away. The confirm restates the fork caveat.</span></div>
-      <div class="state"><span class="k">Delete the account</span><span class="v">Immediate erasure of the email and every published modeling — the GDPR promise, self-service.</span></div>
-      <div class="state"><span class="k">Quota, visibly</span><span class="v">The quota line makes limits legible before they bite; at the limit, publishing is disabled with the reason.</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ DECISIONS ============ -->
-<h2 class="sec">Decisions taken</h2>
+<h2 class="sec" id="review-questions">Decisions still to confirm</h2>
+<p>The main flow is specified. These are the remaining product boundaries; recommendations are not approvals.</p>
 <table>
-  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
-  <tr><td><b>Public by construction — no private or unlisted saves.</b></td><td>A private-draft tier would turn Boavizta's database into a free private modeling store (the overflow-abuse vector) and muddy the data-ownership pitch. The session and the JSON file already are the private workspace.</td></tr>
-  <tr><td><b>Accounts gate publishing only; reading and forking are anonymous.</b></td><td>The wall sits where it protects (writes to the shared database) and not where it kills the reach that motivates the feature (readers of articles).</td></tr>
-  <tr><td><b>Thin accounts: a verified email, nothing else.</b></td><td>Boavizta has never handled personal data; "the only personal data is an email" is the whole board pitch. The public author name is user-chosen and deliberately public.</td></tr>
-  <tr><td><b>Canonical latest link + immutable version permalinks.</b></td><td>Mutable-only links let citations silently drift (fatal for research use); immutable-only links break the "living transparency page" (fatal for company use). Both personas are served by the pair.</td></tr>
-  <tr><td><b>Everything published is listed on Explore.</b></td><td>Complete-by-construction discovery, and unlisted links would reopen the quasi-private-storage channel.</td></tr>
-  <tr><td><b>CC BY 4.0 acknowledged in the publish form itself.</b></td><td>The license is the reuse contract forking depends on; burying it in a terms page invites "I didn't know". One amber box, one checkbox (rationale: <code>content-license.md</code>).</td></tr>
-  <tr><td><b>Deletion is self-service and cascades; published forks survive.</b></td><td>The author keeps agency over their data (no volunteer mediates erasure); forks are independent modelings under an irrevocable license — both halves stated at the moment of deletion, not discovered later.</td></tr>
-  <tr><td><b>Quotas + verified email + reactive report/unpublish — no editorial pipeline.</b></td><td>Volunteer pre-moderation wouldn't scale and adds no value; quotas bound the database, verification prices out burner loops, and the report path covers the residual (also fits the technical-intermediary hosting posture).</td></tr>
-  <tr><td><b>The public page reuses the builder's view surfaces read-only.</b></td><td>Explainability is what's being shared — a static export (PDF-like) would amputate it, and a bespoke public renderer would drift from the app. Strip editing, keep everything else.</td></tr>
+<tr>
+<th>Boundary</th>
+<th>Recommended starting point</th>
+</tr>
+<tr>
+<td>Existing workspace</td>
+<td>Use a free slot; otherwise ask before replacement. Viewing a shared URL never consumes or overwrites an editing slot.</td>
+</tr>
+<tr>
+<td>Historical results</td>
+<td>Distinguish published results and engine version from any later recomputation. Decide the extent of reproducible historical exploration.</td>
+</tr>
+<tr id="metadata-note">
+<td>Metadata and citations</td>
+<td>Snapshot version attribution; current listing details remain editable. Agree how later corrections and attribution-removal requests affect old citations.</td>
+</tr>
+<tr>
+<td>Deletion and provenance</td>
+<td>Reserve retired URLs; preserve appropriate source/version/license citation data in forks and exports. Decide takedown/restoration behavior.</td>
+</tr>
+<tr>
+<td>Storage and concurrent updates</td>
+<td>Count history in quotas; reject stale-base updates with an explanation and retain the working copy.</td>
+</tr>
+<tr>
+<td>Viewing preferences</td>
+<td>Carry valid preferences across versions; offer reset to published defaults and use the current view when forking.</td>
+</tr>
+<tr>
+<td>Publish readiness</td>
+<td>Require computable results and keep user input intact when publication fails.</td>
+</tr>
 </table>
+<p id="report-note" class="note">Before production: agree the report inbox, responsible administrator, transactional-email service,
+license and embedded-data compatibility, privacy and retention terms, and board approval. This prototype does not send a report.</p>
 
-<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
 <details class="ptr" id="pointers">
-  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— prospective: target shape + today's code anchors</span></summary>
-  <div class="pbody">
-    <p><b>Status: prospective.</b> Normative for <code>specs/features/public-model-sharing/</code> (spec.html locked 2026-07-07;
-      license draft in <code>content-license.md</code>). Production activation is gated on Boavizta board approval — the feature
-      must be demonstrable on <code>dev.e-footprint.boavizta.org</code> first.</p>
-    <dl>
-      <dt>Today's anchors</dt>
-      <dd>Toolbar (where ↗ Publish lands): the per-model toolbar mocked in <a href="build-a-model.html">build-a-model</a> /
-        <a href="save-and-load.html">save-and-load</a> (open ↥ / export ⬇ live there). Read-only surfaces: the public page reuses
-        the canvas, Results panel and derivation views described in <a href="view-results.html">view-results</a> and
-        <a href="audit-a-result.html">audit-a-result</a> with editing affordances stripped. Persistence: today only the
-        encrypted session cache (12 h TTL) and the <code>.e-f.json</code> round-trip — published modelings introduce the first
-        durable store (PostgreSQL is already provisioned on Clever Cloud; Django auth exists for admin only).</dd>
-      <dt>Target shape</dt>
-      <dd>Published modeling = immutable version snapshots (full system JSON) + mutable metadata row (title, tags, article link,
-        author name, owner). Canonical URL resolves to the latest snapshot; <code>/v&lt;n&gt;</code> permalinks resolve to frozen
-        ones. Fork = load a snapshot into a fresh session via the existing upload/deserialization path. Anonymous reads must be
-        cacheable — pre-render or cache the public page; never rebuild the modeling per request (the app's binding constraints are
-        store weight and round-trips). Old snapshots ride the same schema-upgrade path the JSON upload already uses.</dd>
-      <dt>Accounts & legal</dt>
-      <dd>Email-only identity, verification link gate before first publish; auth mechanism (magic-link vs password) is a
-        plan-stage decision — the "email is the only stored personal data" constraint is not. Outbound email is a new
-        operational dependency either way. Consent + privacy notice at sign-up; erasure cascades account → modelings →
-        snapshots. Quota values are plan-stage.</dd>
-      <dt>Supersession</dt>
-      <dd>At ship: the publish entry folds into the builder journeys' toolbar anatomy; Phases B/D/E become faithful journeys
-        (public page, explore, my-modelings); banner and hub pill come off.</dd>
-    </dl>
-  </div>
+<summary>Implementation pointers and review context</summary>
+<div class="pbody">
+<p>Prospective design for <a href="../../features/public-model-sharing/spec.html">public-model-sharing/spec.html</a>.
+The <a href="../../features/public-model-sharing/content-license.md">license proposal</a> remains a board decision.
+Mocked values are illustrative. This file is self-contained and makes no network requests.</p>
+<dl>
+<dt>Grounding in the existing interface</dt>
+<dd>
+<code>theme/templates/navbar.html</code> supplies the existing logo, Documentation, and Feedback buttons.
+The logo and toolbar SVGs are embedded directly from <code>theme/static/images/</code> and <code>theme/static/icons/tooltip/</code>; no remote assets are required.
+<code>model_builder/components/model_tab_strip.html</code> places the two modeling tabs above
+<code>upload_download_reboot_model_tooltips.html</code>'s per-modeling toolbar.
+<code>components/edge_modeling_toggle.html</code>, <code>components/help_menu.html</code>, and
+<code>components/show_results_toolbar_button.html</code> supply the toggle, menu contents, and results CTA.
+The one-model toolbar is shown; with two modelings the existing export menu offers “⬇ This modeling” and “⬇ Both modelings”.
+<code>model_builder_main.html</code> places the canvas, right-hand side panel, and results panel.
+Chrome checked against these templates on 21 September 2026. New Explore, account, and publication actions
+are explicitly marked proposals; “My publications” is a proposed account-menu entry, not an existing navbar link.</dd>
+<dt>Public state and personal state</dt>
+<dd>Public requests hydrate <code>ModelWeb</code> normally. The publication snapshot and its interface defaults
+are protected. Visitor presentation overrides are separate, session-scoped state keyed to the shared modeling.
+The prototype simulates changes in memory only; reload restores the example.</dd>
+<dt>Two builder destinations</dt>
+<dd>Forking loads an independent copy; editing an owned publication retains its publication/base-version
+association for an explicit update. Both use <code>/model_builder/</code>. A full workspace requires a product
+decision before implementation.</dd>
+<dt>Demonstration controls</dt>
+<dd>The publish form previews a slug and simulates a taken address using <code>already-taken</code>.
+The reader screen changes sample version totals and viewing preferences, previews owner actions, and shows
+citation links. Explore filters illustrative titles. No backend, authentication, durable storage, or clipboard
+access is implemented by this document.</dd>
+</dl>
+</div>
 </details>
-
-<footer>
-  Journey · share-a-model · <b>prospective</b> — a modeling becomes a citable, forkable public page · normative for
-  <code>specs/features/public-model-sharing/</code>. Shares the canonical <code>&lt;style&gt;</code> toolkit from
-  <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
-  Hub: <a href="../index.html">design/index.html</a>.
+<footer>e-footprint · Public model sharing · Prospective review, 21 September 2026 ·
+<a href="../../features/public-model-sharing/spec.html">Feature spec</a>
 </footer>
-
+<script>
+(function () {
+  'use strict';
+  const title = document.getElementById('publish-title');
+  const slug = document.getElementById('publish-slug');
+  const preview = document.getElementById('slug-preview');
+  const status = document.getElementById('slug-status');
+  const form = document.getElementById('demo-publish-form');
+  const published = document.getElementById('demo-published');
+  let customized = false;
+  let baseUrl = 'https://e-footprint.boavizta.org/shared/streaming-service-2026-baseline';
+  function suggest(value) {
+    return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  function showSlug() {
+    const taken = slug.value === 'already-taken';
+    slug.setCustomValidity(taken ? 'This URL is already taken in this demo. Choose another suffix.' : '');
+    preview.textContent = 'https://e-footprint.boavizta.org/shared/' + slug.value;
+    status.textContent = taken ? 'This URL is already taken. Your form has been kept.' :
+      (slug.validity.valid ? 'Valid format · availability is illustrative in this demo.' : 'Use lowercase letters, numbers and single hyphens between words.');
+  }
+  title.addEventListener('input', function () { if (!customized) slug.value = suggest(title.value); showSlug(); });
+  slug.addEventListener('input', function () { customized = true; showSlug(); });
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    baseUrl = preview.textContent;
+    document.getElementById('published-link').textContent = baseUrl;
+    document.querySelector('#read .pubhead h2').textContent = title.value;
+    document.querySelector('#manage .publication h3').textContent = title.value;
+    document.querySelector('#fork .model-toolbar b').textContent = title.value + ' (fork)';
+    document.querySelector('#update .model-toolbar b').textContent = title.value;
+    document.querySelectorAll('#update .link-preview')[0].textContent = baseUrl;
+    document.querySelectorAll('#update .link-preview')[1].textContent = baseUrl + '/versions/4';
+    form.hidden = true;
+    published.hidden = false;
+    updateVersion();
+  });
+  document.getElementById('edit-demo').addEventListener('click', function () { published.hidden = true; form.hidden = false; });
+  const version = document.getElementById('public-version');
+  function updateVersion() {
+    const old = version.value === '2';
+    document.getElementById('old-version').hidden = !old;
+    document.getElementById('version-date').textContent = old ? '1 September 2026' : '21 September 2026';
+    document.querySelector('#public-window .url').textContent = baseUrl.replace('https://', '') + (old ? '/versions/2' : '');
+    document.getElementById('latest-link').textContent = baseUrl;
+    document.getElementById('version-link').textContent = baseUrl + '/versions/' + version.value;
+    document.querySelector('#fork .source-bar a').textContent = 'ACME Streaming · version ' + version.value;
+    const values = old ? {total:'14.8 t',use:'10.2 t',manufacturing:'4.60 t'} : {total:'12.4 t',use:'8.70 t',manufacturing:'3.70 t'};
+    document.querySelectorAll('[data-result]').forEach(function (node) { node.textContent = values[node.dataset.result]; });
+  }
+  version.addEventListener('change', updateVersion);
+  document.getElementById('latest-version').addEventListener('click', function () { version.value = '3'; updateVersion(); });
+  document.getElementById('show-links').addEventListener('click', function () {
+    const links = document.getElementById('citation-links');
+    links.hidden = !links.hidden;
+    this.setAttribute('aria-expanded', String(!links.hidden));
+  });
+  document.getElementById('preview-owner').addEventListener('change', function () {
+    document.getElementById('owner-view').hidden = !this.checked;
+    document.querySelector('#read .anon-account').hidden = this.checked;
+    document.querySelector('#read .signed-account').hidden = !this.checked;
+  });
+  const phase = document.getElementById('phase-filter');
+  const viewStatus = document.getElementById('view-status');
+  const cards = document.querySelector('#read [data-orderable] .cards');
+  const originalCards = Array.from(cards.children);
+  function updatePhase() {
+    document.querySelectorAll('[data-flow]').forEach(function (node) {
+      node.style.opacity = phase.value === 'all' || node.dataset.flow === phase.value ? '1' : '.08';
+    });
+  }
+  function saved() { viewStatus.textContent = 'Your view · saved for this session (demo)'; }
+  phase.addEventListener('change', function () { updatePhase(); saved(); });
+  document.getElementById('reorder-cards').addEventListener('click', function () { cards.appendChild(cards.firstElementChild); saved(); });
+  document.getElementById('reset-view').addEventListener('click', function () {
+    phase.value = 'all'; updatePhase(); originalCards.forEach(function (card) { cards.appendChild(card); });
+    viewStatus.textContent = 'Your view · published defaults';
+  });
+  document.getElementById('explore-search').addEventListener('input', function () {
+    const query = this.value.trim().toLowerCase();
+    let count = 0;
+    document.querySelectorAll('#explore-list .publication').forEach(function (card) {
+      card.hidden = !card.querySelector('h3').textContent.toLowerCase().includes(query);
+      if (!card.hidden) count += 1;
+    });
+    document.getElementById('explore-empty').hidden = count !== 0;
+  });
+  updateVersion();
+})();
+</script>
 </body>
 </html>
