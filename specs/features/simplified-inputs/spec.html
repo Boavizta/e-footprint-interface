@@ -85,6 +85,15 @@
   [data-menu-items] button:hover { background: #f3f4f6; }
   [data-show-results] { background: linear-gradient(120deg, #1b9891, #2d4675); color: white;
     border: 0; border-radius: 2rem; padding: .45rem .9rem; font-size: .82rem; white-space: nowrap; }
+  [data-show-results]:disabled { background: #e5e7eb; color: #6b7280; cursor: not-allowed; }
+  [data-footprint-state] { font-size: .7rem; font-weight: 400; }
+  #bottom-results { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    width: 100%; border-radius: 0 0 7px 7px; padding: .65rem 1rem; text-align: left; }
+  #bottom-results > span:last-child { text-align: right; }
+  [data-field-status], [data-dependency-note] { display: block; font-size: .72rem; color: #526177; }
+  [data-field-status]:empty, [data-dependency-note]:empty { display: none; }
+  [data-field-status][data-error="true"] { color: #a32929; }
+  [data-demo-action]:disabled { color: #9ca3af; cursor: not-allowed; }
   [data-mobile-only], #mobile-model-picker, #mobile-toolbar-menu { display: none; }
   #mock-results-panel { position: absolute; z-index: 8; inset: auto 0 0; max-height: 75%; overflow: auto;
     border-top: 1px solid #bdc8d9; background: white; box-shadow: 0 -.3rem 1rem #11192818; padding: .8rem 1rem; }
@@ -290,8 +299,7 @@
       display: flex; width: 100%; align-items: center; gap: .5rem; padding: .45rem; }
     #mobile-toolbar-menu [data-toolbar-menu] [data-menu-items] { position: static; border: 0; box-shadow: none;
       min-width: 0; padding-left: 1.2rem; }
-    #mobile-toolbar-menu [data-show-results] { margin: .35rem 0; width: 100%;
-      background: linear-gradient(120deg, #1b9891, #2d4675); color: white; }
+    #quick-results { order: 5; font-size: .75rem; padding: .4rem .6rem; }
     #mock-system-name { max-width: 11rem; font-size: .85rem; }
     #edge-modeling-control { order: 4; }
     #mode-destination { order: 5; }
@@ -300,6 +308,14 @@
     #app-shell[data-comparing="true"] #workspace-tabs > [data-open-comparison] { display: none; }
   }
   @media (max-width: 36rem) {
+    #model-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; }
+    #mobile-model-picker { grid-column: 1; grid-row: 1; }
+    #model-name-control { grid-column: 2; grid-row: 1; width: 100%; }
+    #mock-system-name { max-width: 100%; }
+    #mobile-toolbar-menu { grid-column: 3; grid-row: 1; margin-left: 0; }
+    #mode-destination { grid-column: 1; grid-row: 2; justify-self: start; }
+    #quick-results { grid-column: 2 / 4; grid-row: 2; justify-self: end; max-width: 100%; white-space: normal; }
+    #edge-modeling-control { grid-column: 1 / 4; grid-row: 3; }
     [data-source-head] { display: none; }
     [data-source-row] { grid-template-columns: 1fr 1fr; }
     #model-canvas, #mode-flow, #modeling-workspace { grid-template-columns: 1fr; }
@@ -314,7 +330,7 @@
 <body>
 
 <h1>Simplified inputs</h1>
-<p class="status">Status: Spec — under review · 2026-09-21</p>
+<p class="status">Status: Spec — under review · 2026-09-23</p>
 
 <section>
   <h2>1. Problem and audience</h2>
@@ -401,6 +417,23 @@
     <li><strong>Only the intended choices:</strong> in Simplified inputs, only the inputs
     included in its definition are editable. Hidden inputs and structural actions cannot
     be changed accidentally through that mode.</li>
+    <li><strong>Bounded input scope:</strong> eligible fields are numerical inputs, whole editable
+    timeseries, and selects that do not edit object relationships. Country, Network, and Device
+    selectors are explicit exceptions: these familiar reference objects are not shown in the model
+    builder. Their normal single- or multiple-selection behavior is preserved. Other structural
+    relationships and weighted object collections cannot be exposed.</li>
+    <li><strong>Complete conditional choices:</strong> including a controlling select also includes
+    its dependent inputs, recursively, using the modeling's existing conditional-choice rules.
+    For example, including Provider also includes Model; Model may be included alone with Provider
+    fixed. Configuration and inline controls explain any automatically included fields and prevent
+    removing a required dependent while its controller remains included. No separate dependency
+    configuration is authored. If a required dependent cannot be exposed, its controller cannot be
+    exposed either, with an explanation. Clear, undo, and imported selections must respect the same invariant.</li>
+    <li><strong>Valid conditional changes:</strong> changing a controlling value retains each dependent
+    value when still valid; otherwise the first valid available option is selected and the automatic
+    change is reported discreetly. This fallback is not a recommendation. The controller and all
+    affected dependent values save together, never as an invalid intermediate combination. If there
+    is no valid option, the entire change is rejected with an explanation and saved values stay intact.</li>
     <li><strong>Familiar input context:</strong> Simplified inputs identifies every exposed field
     using its existing field label together with the owning object's existing type and name; modeling
     authors do not need to invent a separate category or labeling system.</li>
@@ -429,6 +462,11 @@
     <li><strong>Adapt and calculate:</strong> a user can change the exposed inputs using their
     normal input types, receives the same validation guarantees as full editing, and can view results
     recalculated from the adapted values.</li>
+    <li><strong>Autosave simple edits:</strong> numerical inputs and text metadata save on blur or
+    Enter, not on every keystroke; selects save on change. Source, confidence, and comment follow
+    the same rules. There is no Apply simple changes action. Discreet status distinguishes saving,
+    saved, and failed changes. A failed edit remains visible and retryable, without changing the
+    saved modeling or claiming success. Invalid fields open their object and display actionable feedback.</li>
     <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
     as an ordinary input within its owning-object container. In place of a standard value control it
     shows a read-only string preview and a small Edit timeseries action. That action opens a
@@ -439,7 +477,10 @@
     active at a time; switching strategy replaces the preview, and closing the editor closes both.</li>
     <li><strong>Timeseries strategies remain available:</strong> a user can switch among the
     compatible timeseries strategies available in normal editing. Saving the panel persists the
-    selected strategy and authored inputs, closes the panel, and refreshes the string preview.</li>
+    selected strategy and authored inputs together, closes the panel, and refreshes the string preview.
+    These composite edits remain a draft until Save timeseries; Cancel discards them. Failed validation
+    keeps the editor and draft open. Ordinary modeling panels and Configure retain their explicit
+    Save / Cancel boundaries.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
     legitimate calculated consequences, but does not rewrite unrelated hidden assumptions or the
     simplified-input definition.</li>
@@ -454,6 +495,24 @@
     there is no separate adapted-JSON download. Show results leads to the normal Results and Sources
     tabs without leaving the current modeling view. Compact layouts retain the usual model switcher
     and toolbar menu.</li>
+    <li><strong>Footprint at a glance:</strong> the top-right Show results control and the existing
+    bottom Results banner display the same total footprint for the active modeling. A tooltip explains
+    that it covers manufacturing and use over the entire modeling period, not an annualized rate;
+    units adapt to the magnitude. The bottom banner keeps Results on the left, its expansion chevron
+    in the middle, and the total on the right. The top quick-result affordance stays visible outside
+    the compact toolbar menu. Both are available in Modeling and Simplified inputs.</li>
+    <li><strong>Trustworthy live totals:</strong> both displays refresh together after a successful
+    simplified-input save, timeseries save, or modeling mutation, including side-panel saves, creation,
+    and deletion. Switching reference/comparison shows the active modeling's total. While saving they
+    indicate updating; after failure they identify the last saved result, not a result for unsaved
+    edits. A non-computable modeling shows no numeric total and retains the existing disabled-results
+    explanation. Opening the results panel is not required to refresh the total.</li>
+    <li><strong>Export follows completed saves:</strong> the ordinary export actions cannot run while
+    a relevant save is in flight, including a final field committed when focus leaves it. Exporting
+    both modelings waits for both. Every export entry point is protected, including menu links, with
+    no extra confirmation for this wait. A failed autosave remains visibly unresolved; export must
+    not silently imply it includes that edit. Explicit panel/configuration drafts still follow the
+    existing save/discard safeguards.</li>
     <li><strong>Familiar configuration:</strong> configuration and Simplified inputs share Navigation,
     two disclosure levels, field order, and responsive grid of up to three columns per object.
     With the filter off, configuration reveals every object with eligible inputs in Navigation and the main pane, including
@@ -514,7 +573,14 @@
       <li>One always-associated, possibly empty simplified-input definition for each workspace modeling.</li>
       <li>Inline membership and help-text authoring in creation/editing panels and Results → Sources,
       plus a dedicated overview editor. Sources already lists individual sourced inputs.</li>
-      <li>Selecting which existing modeling inputs are editable in Simplified inputs.</li>
+      <li>Selecting numerical inputs, whole editable timeseries, and non-relationship selects;
+      Country, Network, and Device selectors are the only object-relationship exceptions.</li>
+      <li>Conditional selection completeness and atomic dependent-value fallbacks, derived from
+      existing modeling rules rather than an additional author-maintained dependency configuration.</li>
+      <li>Autosaving simple values and provenance metadata, with visible failure/retry behavior and
+      export protection; explicit Save / Cancel for composite timeseries and configuration drafts.</li>
+      <li>A synchronized active-model total in the top-right Show results control and bottom Results
+      banner, refreshed on successful modeling changes and unavailable when computation is impossible.</li>
       <li>A title and general guidance for orientation: an explanation of what the user
       is adapting.</li>
       <li>Two main destinations over the same in-session modeling: Modeling and Simplified inputs,
@@ -598,6 +664,8 @@
       modeling switches to Modeling, where they are trusted to avoid unintended changes.</li>
       <li>Selecting or locking individual nested parts of a timeseries, such as one profile baseline
       or one weekly time range. The timeseries is exposed as a whole.</li>
+      <li>Editing structural object relationships or weighted object collections through Simplified
+      inputs, except the existing Country, Network, and Device selectors.</li>
       <li>Custom simplified-input categories, custom field labels, or a second naming hierarchy independent
       of the modeling's existing object types, object names, and field labels. Per-field help text
       supplements those labels but does not replace them.</li>
@@ -636,12 +704,20 @@
   stays in the form flow. In Simplified inputs, use Navigation and both disclosure levels; the three fields under
   “Watch a video” share columns only with one another. In Modeling, open a bookmark in the edit panel,
   then try its Delete object action to see how the existing confirmation is extended.</p>
+  <p>Simple values and Source and comment edits now autosave on leaving a field or pressing Enter;
+  selects save immediately. Both Results affordances update together. In External APIs → Assistant,
+  change Provider to see Model retain a valid choice or fall back to the first available one; a
+  provider with no models is rejected. Configure and the Sources bookmarks demonstrate required
+  dependent inclusion. Providers, models, and footprint amounts below are fictional UX fixtures:
+  successful value saves advance an illustrative total, not an environmental calculation. Save
+  latency is simulated; charts and file actions remain illustrative.</p>
   <div class="mockup">
     <div id="file-entry">
       <p><strong>Mockup controls (not application UI): open a JSON file</strong></p>
       <button type="button" id="open-regular-json">Open JSON · 0 selected inputs</button>
-      <button type="button" id="open-simplified-json">Open JSON · 7 selected inputs</button>
+      <button type="button" id="open-simplified-json">Open JSON · 9 selected inputs</button>
       <button type="button" id="reopen-current-json">Reopen current modeling as JSON</button>
+      <label><input type="checkbox" id="demo-noncomputable"> Show a non-computable modeling</label>
       <small id="open-result">JSON with selected inputs → opened in Simplified inputs by default.</small>
     </div>
 
@@ -681,6 +757,8 @@
         <label id="edge-modeling-control" hidden><input type="checkbox" role="switch" data-edge-toggle> Edge modeling</label>
         <button type="button" id="mode-destination" data-mode="modeling">Modeling →</button>
         <div id="desktop-toolbar-actions"></div>
+        <button type="button" id="quick-results" data-show-results>Show results ·
+          <span data-total-footprint>1.24 t CO2-eq</span> <small data-footprint-state></small></button>
         <details id="mobile-toolbar-menu" data-toolbar-menu>
           <summary aria-label="Toolbar menu">☰</summary>
           <div data-menu-items id="mobile-toolbar-actions"></div>
@@ -711,7 +789,6 @@
         </button>
         <button type="button" data-mobile-only data-demo-action="Documentation">▤ Documentation</button>
         <button type="button" data-mobile-only data-demo-action="Feedback">♡ Feedback</button>
-        <button type="button" data-show-results>Show results</button>
       </template>
 
     <article id="modeling-screen" hidden>
@@ -722,6 +799,7 @@
             <div id="model-canvas">
               <section><h3>Usage patterns</h3><p id="watch-video-model-card"><button type="button" data-modeling-surface="edit">Watch a video · Edit</button></p><p>Homepage visits · Edit</p></section>
               <section><h3>Usage journeys</h3><p>Stream a film · Edit</p><p>Browse catalogue · Edit</p></section>
+              <section><h3>External APIs</h3><p>Assistant</p></section>
               <section><h3>Infrastructure</h3><p>Video origin · Edit</p><p>Catalogue API · Edit</p><p id="archive-server-card" hidden>Archive server · Edit</p><p>CDN and network · Edit</p><p>User devices · Edit</p>
                 <button type="button" data-modeling-surface="create">+ Add web server</button></section>
             </div>
@@ -745,8 +823,10 @@
                 <label><strong>Hourly pattern occurrences</strong>
                   <output data-source-value="hourly-occurrences">Growth projection · 250,000/month</output></label>
               </section>
-              <label><strong>Devices</strong>
-                <select><option>Smart TV</option><option>Laptop</option></select></label>
+              <section data-inline-field data-inline-simplified="devices">
+                <label><strong>Devices</strong>
+                  <select multiple data-modeling-value="devices"><option selected>Smart TV</option><option>Laptop</option></select></label>
+              </section>
               <footer>
                 <button type="button" id="save-modeling-values">Save changes</button>
                 <button type="button" id="cancel-modeling-values">Cancel</button>
@@ -781,6 +861,14 @@
             <div data-source-row><strong>Recurrent compute need</strong><span>Video origin demand<small>Recurrent server need</small></span>
               <output data-source-value="recurrent-compute">Weekly pattern</output><span>Operations estimate<small>Confidence: medium</small></span></div>
           </section>
+          <section data-inline-field data-inline-simplified="api-provider">
+            <div data-source-row><strong>Provider</strong><span>Assistant<small>External API</small></span>
+              <output data-source-value="api-provider">Provider A</output><span>Service configuration</span></div>
+          </section>
+          <section data-inline-field data-inline-simplified="api-model">
+            <div data-source-row><strong>Model</strong><span>Assistant<small>External API</small></span>
+              <output data-source-value="api-model">Model A1</output><span>Service configuration</span></div>
+          </section>
         </section>
       </div>
       <div id="delete-confirmation-backdrop" hidden>
@@ -806,7 +894,7 @@
           <div id="simplified-heading">
             <div>
               <h3 id="simplified-title">Adapt this streaming scenario</h3>
-              <small data-simplified-only><span id="exposed-input-count">7</span>
+              <small data-simplified-only><span id="exposed-input-count">9</span>
                 <span id="exposed-input-noun">inputs</span></small>
             </div>
             <button type="button" id="configure-inputs" data-simplified-only>Configure</button>
@@ -844,6 +932,8 @@
                 <button type="button" data-object-target="archive-server-fields" hidden>Archive server</button>
                 <strong>Recurrent server needs</strong>
                 <button type="button" data-object-target="video-origin-demand-fields">Video origin demand</button>
+                <strong>External APIs</strong>
+                <button type="button" data-object-target="assistant-api-fields">Assistant</button>
               </nav>
               <label id="object-jump-control">Jump to object
                 <select id="object-jump">
@@ -853,6 +943,7 @@
                   <option value="catalogue-api-fields" hidden disabled>Catalogue API</option>
                   <option value="archive-server-fields" hidden disabled>Archive server</option>
                   <option value="video-origin-demand-fields">Video origin demand</option>
+                  <option value="assistant-api-fields">Assistant</option>
                 </select>
               </label>
             </aside>
@@ -912,6 +1003,18 @@
                           <label>Comment <textarea rows="2">Includes expected campaign traffic.</textarea></label>
                         </details>
                       </section>
+                      <section data-simplified-field data-included="false" hidden>
+                        <label><strong>Devices</strong>
+                          <small data-field-help data-help-output="devices" hidden></small>
+                          <select multiple><option selected>Smart TV</option><option>Laptop</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Audience research"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2"></textarea></label>
+                        </details>
+                      </section>
                     </div>
                   </details>
 
@@ -921,7 +1024,7 @@
                       <section data-simplified-field>
                         <label><strong>Sessions per month</strong>
                           <small data-field-help data-help-output="browse-sessions">the expected monthly catalogue browsing sessions</small>
-                          <input type="number" value="50000" step="1000"></label>
+                          <input type="number" value="50000" min="0" required step="1000"></label>
                         <details data-field-provenance>
                           <summary>Source and comment</summary>
                           <label>Source <input type="text" value="Product forecast"></label>
@@ -1051,13 +1154,44 @@
                   </details>
                 </div>
               </details>
+              <details data-object-type>
+                <summary>External APIs · 1 object</summary>
+                <div>
+                  <details data-simplified-object id="assistant-api-fields">
+                    <summary>Assistant <small>2 inputs</small></summary>
+                    <div data-object-fields>
+                      <section data-simplified-field>
+                        <label><strong>Provider</strong>
+                          <small data-field-help data-help-output="api-provider">the service hosting your assistant</small>
+                          <select><option>Provider A</option><option>Provider B</option><option>No available models</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Service configuration"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2"></textarea></label>
+                        </details>
+                      </section>
+                      <section data-simplified-field>
+                        <label><strong>Model</strong>
+                          <small data-field-help data-help-output="api-model">choose among the models available from this provider</small>
+                          <select><option>Model A1</option><option>Shared model</option></select></label>
+                        <details data-field-provenance>
+                          <summary>Source and comment</summary>
+                          <label>Source <input type="text" value="Service configuration"></label>
+                          <label>Source link <input type="url" value=""></label>
+                          <label>Confidence <select><option>low</option><option selected>medium</option><option>high</option></select></label>
+                          <label>Comment <textarea rows="2"></textarea></label>
+                        </details>
+                      </section>
+                    </div>
+                  </details>
+                </div>
+              </details>
             </div>
           </div>
 
-          <footer id="simplified-footer">
-            <div id="simplified-actions" data-simplified-only>
-              <button type="button">Apply simple changes</button>
-            </div>
+          <footer id="simplified-footer" data-editing-only hidden>
             <div id="configuration-actions" data-editing-only hidden>
               <button type="button" id="save-configuration" data-save-configuration>Save and return</button>
               <button type="button" data-cancel-configuration>Cancel</button>
@@ -1136,7 +1270,7 @@
             <div id="constant-strategy-editor" hidden>
               <fieldset>
                 <legend>Constant value</legend>
-                <label>Value <input type="number" id="constant-timeseries-value" value="4" step="0.1"> cpu_core</label>
+                <label>Value <input type="number" id="constant-timeseries-value" value="4" min="0" required step="0.1"> cpu_core</label>
               </fieldset>
               <div data-preview>
                 <p><strong>Weekly preview</strong> · 168 hours</p>
@@ -1151,18 +1285,25 @@
               <button type="button" id="cancel-timeseries-panel">Cancel</button>
               <button type="button" id="save-timeseries-panel">Save timeseries</button>
             </footer>
+            <small id="timeseries-save-status" role="status"></small>
           </div>
         </aside>
       </div>
     </article>
 
+    <button type="button" id="bottom-results" data-show-results>
+      <span>Results</span><span aria-hidden="true">⌃</span>
+      <span><span data-total-footprint>1.24 t CO2-eq</span> <small data-footprint-state></small></span>
+    </button>
     <section id="mock-results-panel" hidden aria-label="Results panel">
       <header><h3>Results</h3><button type="button" id="close-results" aria-label="Close results">×</button></header>
       <nav id="results-tabs" aria-label="Results tabs">
         <button type="button" data-result-tab="results" aria-pressed="true">Results</button>
         <button type="button" data-result-tab="sources" aria-pressed="false">Sources</button>
       </nav>
-      <div id="results-overview"><div id="results-summary"><strong>Total footprint:</strong> 18.4 t CO2-eq/year</div></div>
+      <div id="results-overview"><div id="results-summary"><strong>Total footprint:</strong>
+        <span data-total-footprint>1.24 t CO2-eq</span> <small data-footprint-state></small>
+        <small>Manufacturing + use · entire modeling period</small></div></div>
     </section>
     <section id="comparison-screen" hidden>
       <h3>Compare modelings</h3>
@@ -1192,6 +1333,18 @@
         var resultsOpen = false;
         var resultTab = 'results';
         var workspace = {};
+        var illustrativeTotal = 1.24;
+        var saving = false;
+        var invalidControls = new Set();
+        var savedMetadata = {};
+        // Fictional stand-in for existing object conditional-list metadata, not a new config schema.
+        var conditionalLists = {
+          'api-model': {depends_on: 'api-provider', options: {
+            'Provider A': ['Model A1', 'Shared model'],
+            'Provider B': ['Model B1', 'Shared model'],
+            'No available models': []
+          }}
+        };
         var activeTimeseries = 'recurrent';
         var savedTimeseriesStrategies = {hourly: 'growth', recurrent: 'weekly'};
         var fields = Array.from(mockup.querySelectorAll('[data-simplified-field]'));
@@ -1227,22 +1380,183 @@
           helpInput.setAttribute('aria-label', label + ' help text');
           helpLabel.append(helpInput);
           controls.append(includeLabel, helpLabel);
+          var dependencyNote = document.createElement('small');
+          dependencyNote.dataset.dependencyNote = '';
+          controls.append(dependencyNote);
+          var status = document.createElement('small');
+          status.dataset.fieldStatus = '';
+          status.setAttribute('role', 'status');
+          field.append(status);
           field.append(controls);
-          checkbox.addEventListener('change', refreshConfigurationState);
+          checkbox.addEventListener('change', function () {
+            includeDependents(function (name) { return mockup.querySelector('[data-include-field="' + name + '"]').checked; },
+              function (name) { mockup.querySelector('[data-include-field="' + name + '"]').checked = true; });
+            refreshConfigurationState();
+          });
         });
         var originalConfiguration = JSON.parse(JSON.stringify(savedConfiguration));
         // Mockup state only: simplified-input settings and modeling values are deliberately separate.
         var modelingValues = {};
         fields.forEach(function (field) {
-          var value = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
-          modelingValues[field.dataset.field] = value.tagName === 'OUTPUT' ? value.textContent : value.value;
-          if (value.tagName !== 'OUTPUT') value.addEventListener('change', function () {
-            if (!value.checkValidity()) { value.reportValidity(); return; }
-            modelingValues[field.dataset.field] = value.value;
-            syncValues();
-          });
+          var value = valueControl(field);
+          modelingValues[field.dataset.field] = readControl(value);
+          if (value.tagName !== 'OUTPUT') bindAutosave(value, field);
+          field.querySelectorAll('[data-field-provenance] input, [data-field-provenance] select, [data-field-provenance] textarea')
+            .forEach(function (control, index) {
+              control.dataset.metadataKey = field.dataset.field + ':' + index;
+              if (control.tagName === 'SELECT') control.append(new Option('Not assessed', ''));
+              savedMetadata[control.dataset.metadataKey] = readControl(control);
+              bindAutosave(control, field);
+            });
         });
         var originalValues = JSON.parse(JSON.stringify(modelingValues));
+        var originalMetadata = JSON.parse(JSON.stringify(savedMetadata));
+        var timeseriesControls = Array.from(mockup.querySelectorAll('#timeseries-panel input, #timeseries-panel select:not(#timeseries-strategy)'));
+        var savedTimeseriesForm = timeseriesControls.map(readControl);
+        var originalTimeseriesForm = savedTimeseriesForm.slice();
+
+        function valueControl(field) {
+          return field.querySelector(':scope > label input, :scope > label select, :scope > label output');
+        }
+        function readControl(control) {
+          if (control.tagName === 'OUTPUT') return control.textContent;
+          return control.multiple ? Array.from(control.selectedOptions, function (option) { return option.value; }) : control.value;
+        }
+        function writeControl(control, value) {
+          if (control.tagName === 'OUTPUT') control.textContent = value;
+          else if (control.multiple) Array.from(control.options).forEach(function (option) { option.selected = value.includes(option.value); });
+          else control.value = value;
+        }
+        function includeDependents(isSelected, include) {
+          var changed;
+          do {
+            changed = false;
+            Object.keys(conditionalLists).forEach(function (key) {
+              if (isSelected(conditionalLists[key].depends_on) && !isSelected(key)) { include(key); changed = true; }
+            });
+          } while (changed);
+        }
+        function requiredBy(key, isSelected) {
+          var dependency = conditionalLists[key];
+          return dependency && isSelected(dependency.depends_on) ? dependency.depends_on : null;
+        }
+        function refreshDependentOptions() {
+          Object.keys(conditionalLists).forEach(function (key) {
+            var rule = conditionalLists[key];
+            var control = valueControl(mockup.querySelector('[data-field="' + key + '"]'));
+            control.replaceChildren();
+            rule.options[modelingValues[rule.depends_on]].forEach(function (option) { control.append(new Option(option)); });
+            control.value = modelingValues[key];
+          });
+        }
+        function renderFootprint() {
+          var computable = !mockup.querySelector('#demo-noncomputable').checked;
+          var state = saving ? 'Updating…' : invalidControls.size ? 'Last saved' : '';
+          mockup.querySelectorAll('[data-total-footprint]').forEach(function (output) {
+            output.textContent = computable ? illustrativeTotal.toFixed(2) + ' t CO2-eq' : 'Unavailable';
+          });
+          mockup.querySelectorAll('[data-footprint-state]').forEach(function (output) { output.textContent = state; });
+          mockup.querySelectorAll('[data-show-results]').forEach(function (button) {
+            button.disabled = !computable;
+            button.title = computable ? 'Manufacturing + use over the entire modeling period · active modeling' :
+              'Results unavailable: complete the modeling to compute its footprint.';
+          });
+          mockup.querySelectorAll('[data-demo-action^="Export"]').forEach(function (button) {
+            button.disabled = saving || invalidControls.size > 0 ||
+              (button.dataset.demoAction === 'Export both modelings' && Object.keys(workspace).some(function (key) {
+                return key !== activeModel && workspace[key].invalid.length > 0;
+              }));
+            button.title = button.disabled ? 'Wait for saves to finish and resolve unsaved inputs before exporting.' : '';
+          });
+          mockup.querySelector('#reopen-current-json').disabled = saving || invalidControls.size > 0;
+        }
+        mockup.querySelector('#demo-noncomputable').addEventListener('change', renderFootprint);
+
+        function simulateSave(commit, afterSave, affectsFootprint) {
+          if (saving) return;
+          saving = true;
+          // Serialize this single-DOM demo's saves; no server or footprint engine runs here.
+          var controls = Array.from(mockup.querySelectorAll('#app-shell button:not([data-show-results]), #app-shell input, #app-shell select, #app-shell textarea, #file-entry button, #demo-noncomputable'));
+          var disabled = controls.map(function (control) { return control.disabled; });
+          controls.forEach(function (control) { control.disabled = true; });
+          renderFootprint();
+          window.setTimeout(function () {
+            commit();
+            if (affectsFootprint) illustrativeTotal += 0.03;
+            saving = false;
+            controls.forEach(function (control, index) { control.disabled = disabled[index]; });
+            if (afterSave) afterSave();
+            refreshConfigurationState();
+          }, 550);
+        }
+        function bindAutosave(control, field) {
+          function save() {
+            if (saving || currentMode !== 'simplified') return;
+            var key = field.dataset.field;
+            var metadataKey = control.dataset.metadataKey;
+            var status = field.querySelector('[data-field-status]');
+            if (!control.checkValidity()) {
+              invalidControls.add(control);
+              status.textContent = 'Not saved. ' + control.validationMessage;
+              status.dataset.error = 'true';
+              focusObject(field.closest('[data-simplified-object]').id);
+              control.reportValidity();
+              renderFootprint();
+              return;
+            }
+            invalidControls.delete(control);
+            status.dataset.error = 'false';
+            var candidate = readControl(control);
+            var previous = metadataKey ? savedMetadata[metadataKey] : modelingValues[key];
+            if (JSON.stringify(candidate) === JSON.stringify(previous)) {
+              status.textContent = '';
+              renderFootprint();
+              return;
+            }
+            var changes = {}; changes[key] = candidate;
+            var fallback = [];
+            if (!metadataKey) {
+              var invalidDependency = Object.keys(conditionalLists).some(function (dependent) {
+                var rule = conditionalLists[dependent];
+                if (rule.depends_on !== key) return false;
+                var options = rule.options[candidate] || [];
+                if (!options.length) return true;
+                if (!options.includes(modelingValues[dependent])) {
+                  changes[dependent] = options[0];
+                  fallback.push('Model changed to ' + options[0] + '.');
+                }
+                return false;
+              });
+              if (invalidDependency) {
+                writeControl(control, previous);
+                status.textContent = 'No models available for that provider. Neither value was changed.';
+                status.dataset.error = 'true';
+                renderFootprint();
+                return;
+              }
+            }
+            status.textContent = 'Saving…';
+            simulateSave(function () {
+              if (metadataKey) savedMetadata[metadataKey] = candidate;
+              else {
+                Object.assign(modelingValues, changes);
+                Object.keys(changes).forEach(function (changedKey) {
+                  var confidence = mockup.querySelector('[data-field="' + changedKey + '"] [data-field-provenance] select');
+                  confidence.value = '';
+                  savedMetadata[confidence.dataset.metadataKey] = '';
+                });
+                refreshDependentOptions();
+                syncValues();
+              }
+            }, function () { status.textContent = 'Saved.' + (fallback.length ? ' ' + fallback.join(' ') : ''); }, !metadataKey);
+          }
+          control.addEventListener(control.tagName === 'SELECT' ? 'change' : 'blur', save);
+          control.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && !event.shiftKey && control.tagName !== 'SELECT') {
+              event.preventDefault(); control.blur();
+            }
+          });
+        }
 
         function syncValues() {
           mockup.querySelectorAll('[data-source-value]').forEach(function (output) {
@@ -1252,7 +1566,7 @@
               (output.dataset.sourceValue === 'server-lifetime' ? ' years' : '');
           });
           mockup.querySelectorAll('[data-modeling-value]').forEach(function (input) {
-            input.value = modelingValues[input.dataset.modelingValue];
+            writeControl(input, modelingValues[input.dataset.modelingValue]);
           });
         }
 
@@ -1270,6 +1584,14 @@
             if (!host.hasAttribute('data-provisional')) {
               control.querySelector('[data-inline-include]').checked = entry.included;
               control.querySelector('[data-inline-help]').value = entry.help;
+              var controller = requiredBy(host.dataset.inlineSimplified, function (key) { return savedConfiguration.fields[key].included; });
+              control.querySelector('[data-inline-include]').disabled = !!controller;
+              control.querySelector('[data-inline-include]').parentElement.title = controller
+                ? 'Required while Provider is included. Remove Provider first.' : '';
+              if (controller) control.querySelector('[data-inline-status]').textContent =
+                'Required while Provider is included. Remove Provider first to exclude Model.';
+              else if (control.querySelector('[data-inline-status]').textContent.startsWith('Required while'))
+                control.querySelector('[data-inline-status]').textContent = 'Simplified-input settings save automatically, independently of value edits.';
             }
           });
         }
@@ -1294,13 +1616,23 @@
             'Simplified-input settings save automatically, independently of value edits.';
           include.addEventListener('change', function () {
             if (!provisional) {
-              undo.dataset.previousIncluded = String(savedConfiguration.fields[key].included);
+              var previousMembership = Object.fromEntries(Object.entries(savedConfiguration.fields)
+                .map(function (entry) { return [entry[0], entry[1].included]; }));
               savedConfiguration.fields[key].included = include.checked;
+              includeDependents(function (name) { return savedConfiguration.fields[name].included; },
+                function (name) { savedConfiguration.fields[name].included = true; });
+              undo.dataset.previousIncluded = JSON.stringify(Object.fromEntries(Object.entries(previousMembership)
+                .filter(function (entry) { return entry[1] !== savedConfiguration.fields[entry[0]].included; })));
               if (currentMode === 'configuration') {
-                mockup.querySelector('[data-include-field="' + key + '"]').checked = include.checked;
+                Object.keys(JSON.parse(undo.dataset.previousIncluded)).forEach(function (name) {
+                  mockup.querySelector('[data-include-field="' + name + '"]').checked = savedConfiguration.fields[name].included;
+                });
+                includeDependents(function (name) { return mockup.querySelector('[data-include-field="' + name + '"]').checked; },
+                  function (name) { mockup.querySelector('[data-include-field="' + name + '"]').checked = true; });
               }
               undo.hidden = false;
-              status.textContent = 'Saved. Modeling values are unchanged.';
+              status.textContent = 'Saved. Modeling values are unchanged.' +
+                (key === 'api-provider' && include.checked ? ' Model is included too.' : '');
             }
             refreshConfigurationState();
           });
@@ -1315,9 +1647,20 @@
             refreshConfigurationState();
           });
           undo.addEventListener('click', function () {
-            savedConfiguration.fields[key].included = undo.dataset.previousIncluded === 'true';
+            var previous = JSON.parse(undo.dataset.previousIncluded);
+            var beforeUndo = Object.fromEntries(Object.entries(savedConfiguration.fields)
+              .map(function (entry) { return [entry[0], entry[1].included]; }));
+            Object.keys(previous).forEach(function (name) { savedConfiguration.fields[name].included = previous[name]; });
+            includeDependents(function (name) { return savedConfiguration.fields[name].included; },
+              function (name) { savedConfiguration.fields[name].included = true; });
             if (currentMode === 'configuration') {
-              mockup.querySelector('[data-include-field="' + key + '"]').checked = savedConfiguration.fields[key].included;
+              fields.forEach(function (field) {
+                var name = field.dataset.field;
+                if (beforeUndo[name] !== savedConfiguration.fields[name].included)
+                  field.querySelector('[data-include-field]').checked = savedConfiguration.fields[name].included;
+              });
+              includeDependents(function (name) { return mockup.querySelector('[data-include-field="' + name + '"]').checked; },
+                function (name) { mockup.querySelector('[data-include-field="' + name + '"]').checked = true; });
             }
             undo.hidden = true;
             status.textContent = 'Membership restored. Modeling values are unchanged.';
@@ -1369,6 +1712,13 @@
             field.hidden = deleted || (!editing && !included);
             field.dataset.included = String(included);
             field.querySelector('[data-authoring-controls]').hidden = !editing;
+            var controller = requiredBy(field.dataset.field, function (key) {
+              return mockup.querySelector('[data-include-field="' + key + '"]').checked;
+            });
+            field.querySelector('[data-include-field]').disabled = !!controller;
+            field.querySelector('[data-dependency-note]').textContent = controller
+              ? 'Required while Provider is included. Remove Provider first to exclude Model.'
+              : field.dataset.field === 'api-provider' ? 'Including Provider also includes Model.' : '';
             var help = field.querySelector('[data-help-output]');
             help.textContent = savedConfiguration.fields[field.dataset.field].help.trim().toLowerCase();
             help.hidden = editing || !help.textContent;
@@ -1459,11 +1809,13 @@
             button.setAttribute('aria-pressed', String(comparing));
           });
           mockup.querySelector('#mock-results-panel').hidden = comparing || !resultsOpen;
+          mockup.querySelector('#bottom-results').hidden = comparing;
           mockup.querySelector('#results-overview').hidden = resultTab !== 'results';
           mockup.querySelector('#modeling-sources').hidden = resultTab !== 'sources';
           mockup.querySelectorAll('[data-result-tab]').forEach(function (button) {
             button.setAttribute('aria-pressed', String(button.dataset.resultTab === resultTab));
           });
+          renderFootprint();
         }
         mockup.querySelectorAll('[data-show-results]').forEach(function (button) {
           button.addEventListener('click', function () {
@@ -1538,12 +1890,16 @@
           button.addEventListener('click', function () { showModelingSurface(button.dataset.modelingSurface); });
         });
         mockup.querySelector('#save-modeling-values').addEventListener('click', function () {
-          mockup.querySelectorAll('[data-modeling-value]').forEach(function (input) {
-            modelingValues[input.dataset.modelingValue] = input.value;
-            mockup.querySelector('[data-field="' + input.dataset.modelingValue + '"] > label select').value = input.value;
-          });
-          syncValues();
-          mockup.querySelector('#value-status').textContent = 'Modeling values saved.';
+          var changes = {};
+          mockup.querySelectorAll('[data-modeling-value]').forEach(function (input) { changes[input.dataset.modelingValue] = readControl(input); });
+          mockup.querySelector('#value-status').textContent = 'Saving…';
+          simulateSave(function () {
+            Object.assign(modelingValues, changes);
+            Object.keys(changes).forEach(function (key) {
+              writeControl(valueControl(mockup.querySelector('[data-field="' + key + '"]')), changes[key]);
+            });
+            syncValues();
+          }, function () { mockup.querySelector('#value-status').textContent = 'Modeling values saved.'; }, true);
         });
         mockup.querySelector('#cancel-modeling-values').addEventListener('click', function () {
           syncValues();
@@ -1579,6 +1935,7 @@
           mockup.querySelector('#creation-status').textContent = 'Object created. Its simplified-input settings are now saved; its value belongs to the modeling.';
           mockup.querySelector('#create-server').disabled = true;
           mockup.querySelector('#cancel-create-server').textContent = 'Close';
+          illustrativeTotal += 0.03;
           refreshConfigurationState();
         });
         mockup.querySelector('#cancel-create-server').addEventListener('click', function () {
@@ -1670,12 +2027,16 @@
           var affected = exposedWatchFields();
           affected.forEach(function (field) { savedConfiguration.fields[field.dataset.field].included = false; });
           mockup.querySelector('#usage-simplified-fields').dataset.deleted = 'true';
+          invalidControls.forEach(function (control) {
+            if (control.closest('#usage-simplified-fields')) invalidControls.delete(control);
+          });
           mockup.querySelector('#watch-video-model-card').hidden = true;
           mockup.querySelector('#modeling-edit-panel').hidden = true;
           var result = mockup.querySelector('#modeling-delete-result');
           result.textContent = '“Watch a video” deleted.' + (affected.length
             ? ' Its ' + affected.length + ' exposed inputs were also removed from Simplified inputs.' : '');
           result.hidden = false;
+          illustrativeTotal -= 0.12;
           refreshConfigurationState();
           closeDeleteObjectConfirmation();
         });
@@ -1687,6 +2048,8 @@
         }
         function openTimeseriesPanel(field) {
           activeTimeseries = field;
+          timeseriesControls.forEach(function (control, index) { writeControl(control, savedTimeseriesForm[index]); });
+          mockup.querySelector('#timeseries-save-status').textContent = '';
           var selector = mockup.querySelector('#timeseries-strategy');
           if (field === 'hourly') {
             mockup.querySelector('#timeseries-panel-title').textContent = 'Edit hourly pattern occurrences';
@@ -1712,19 +2075,32 @@
         });
         mockup.querySelector('#save-timeseries-panel').addEventListener('click', function () {
           var strategy = mockup.querySelector('#timeseries-strategy').value;
-          savedTimeseriesStrategies[activeTimeseries] = strategy;
+          var invalid = timeseriesControls.find(function (control) {
+            return !control.closest('[id$="-strategy-editor"]').hidden && !control.checkValidity();
+          });
+          if (invalid) { invalid.reportValidity(); return; }
+          var preview;
           if (activeTimeseries === 'hourly') {
-            mockup.querySelector('#hourly-timeseries-preview').textContent =
-              'Growth projection — starts 2026-01-01 · 1 year · 250,000/month · +10%/year';
+            var numbers = mockup.querySelectorAll('#growth-strategy-editor input');
+            var units = mockup.querySelectorAll('#growth-strategy-editor select');
+            preview = 'Growth projection — starts ' + numbers[0].value + ' · ' + numbers[1].value +
+              ' ' + units[0].value + ' · ' + Number(numbers[2].value).toLocaleString('en-US') + ' ' +
+              units[1].value + ' · ' + numbers[3].value + '% ' + units[2].value;
           } else {
-            mockup.querySelector('#recurrent-timeseries-preview').textContent = strategy === 'weekly'
-              ? 'Weekly pattern — 2 profiles · 1 time range · cpu_core'
+            preview = strategy === 'weekly'
+              ? 'Weekly pattern — 2 profiles · 1 time range · ' + mockup.querySelector('#weekly-strategy-editor input[type="number"]').value + ' cpu_core weekday baseline'
               : 'Constant value — ' + mockup.querySelector('#constant-timeseries-value').value + ' cpu_core';
           }
-          modelingValues[activeTimeseries === 'hourly' ? 'hourly-occurrences' : 'recurrent-compute'] =
-            mockup.querySelector('#' + (activeTimeseries === 'hourly' ? 'hourly' : 'recurrent') + '-timeseries-preview').textContent;
-          syncValues();
-          closeTimeseriesPanel();
+          var key = activeTimeseries === 'hourly' ? 'hourly-occurrences' : 'recurrent-compute';
+          var formValues = timeseriesControls.map(readControl);
+          mockup.querySelector('#timeseries-save-status').textContent = 'Saving…';
+          simulateSave(function () {
+            savedTimeseriesStrategies[activeTimeseries] = strategy;
+            savedTimeseriesForm = formValues;
+            modelingValues[key] = preview;
+            writeControl(valueControl(mockup.querySelector('[data-field="' + key + '"]')), preview);
+            syncValues();
+          }, closeTimeseriesPanel, true);
         });
 
         function openFile(hasSelection) {
@@ -1733,6 +2109,12 @@
           mockup.querySelector('#only-selected-objects').checked = false;
           savedConfiguration = JSON.parse(JSON.stringify(originalConfiguration));
           modelingValues = JSON.parse(JSON.stringify(originalValues));
+          savedMetadata = JSON.parse(JSON.stringify(originalMetadata));
+          illustrativeTotal = 1.24;
+          invalidControls.clear();
+          mockup.querySelector('#demo-noncomputable').checked = false;
+          savedTimeseriesForm = originalTimeseriesForm.slice();
+          refreshDependentOptions();
           savedTimeseriesStrategies = {hourly: 'growth', recurrent: 'weekly'};
           if (!hasSelection) {
             savedConfiguration.name = 'Streaming service inputs';
@@ -1768,16 +2150,15 @@
             select.value = Array.from(select.options).find(function (option) { return option.defaultSelected; }).value;
           });
           mockup.querySelector('#value-status').textContent = '';
+          mockup.querySelectorAll('[data-field-status]').forEach(function (status) { status.textContent = ''; status.dataset.error = 'false'; });
           fields.forEach(function (field) {
-            var value = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
-            if (value.tagName === 'OUTPUT') value.textContent = modelingValues[field.dataset.field];
-            else value.value = modelingValues[field.dataset.field];
+            writeControl(valueControl(field), modelingValues[field.dataset.field]);
           });
           resetCreationDraft();
           syncValues();
           restoreDraft();
           mockup.querySelector('#open-result').textContent = hasSelection
-            ? 'JSON with 7 selected inputs → Simplified inputs. Its configuration contains no value snapshots.'
+            ? 'JSON with 9 selected inputs → Simplified inputs. Its configuration contains no value snapshots.'
             : 'JSON with zero selected inputs → Modeling. Add inputs through bookmarks or Choose inputs.';
           showModelingSurface('edit');
           show(hasSelection ? 'simplified' : 'modeling');
@@ -1803,10 +2184,9 @@
           mockup.querySelector('#only-selected-objects').checked = false;
           // Simulate an export/reopen boundary using saved metadata and actual modeling values only.
           fields.forEach(function (field) {
-            var control = field.querySelector(':scope > label input, :scope > label select, :scope > label output');
-            if (control.tagName === 'OUTPUT') control.textContent = modelingValues[field.dataset.field];
-            else control.value = modelingValues[field.dataset.field];
+            writeControl(valueControl(field), modelingValues[field.dataset.field]);
           });
+          mockup.querySelectorAll('[data-metadata-key]').forEach(function (control) { writeControl(control, savedMetadata[control.dataset.metadataKey]); });
           resetCreationDraft();
           mockup.querySelectorAll('[data-simplified-control]').forEach(function (control) {
             control.open = false;
@@ -1823,19 +2203,21 @@
 
         // Preserve separate per-model views and drafts in this single-DOM demonstration.
         var stateControls = Array.from(mockup.querySelectorAll('input, select, textarea, details, output'));
-        var stateMessages = Array.from(mockup.querySelectorAll('[data-inline-status], #value-status, #creation-status, #modeling-delete-result'));
+        var stateMessages = Array.from(mockup.querySelectorAll('[data-inline-status], [data-field-status], #value-status, #timeseries-save-status, #creation-status, #modeling-delete-result'));
         function snapshot() {
           return JSON.parse(JSON.stringify({
             configuration: savedConfiguration, values: modelingValues, mode: currentMode, surface: modelingSurface,
+            metadata: savedMetadata, total: illustrativeTotal, timeseriesForm: savedTimeseriesForm,
+            invalid: Array.from(invalidControls, function (control) { return stateControls.indexOf(control); }),
             resultsOpen: resultsOpen, resultTab: resultTab,
             strategies: savedTimeseriesStrategies, timeseries: activeTimeseries,
             panelOpen: !mockup.querySelector('#timeseries-panel').hidden,
             controls: stateControls.map(function (control) {
-              return {value: control.value, checked: control.checked, open: control.open,
+              return {value: control.multiple ? readControl(control) : control.value, checked: control.checked, open: control.open,
                 options: control.tagName === 'SELECT' ? control.innerHTML : null,
                 output: control.tagName === 'OUTPUT' ? control.textContent : null};
             }),
-            messages: stateMessages.map(function (element) { return element.textContent; }),
+            messages: stateMessages.map(function (element) { return {text: element.textContent, error: element.dataset.error}; }),
             undo: Array.from(mockup.querySelectorAll('[data-inline-undo]')).map(function (button) {
               return {hidden: button.hidden, previous: button.dataset.previousIncluded};
             }),
@@ -1848,6 +2230,10 @@
         function restoreModel(state) {
           savedConfiguration = JSON.parse(JSON.stringify(state.configuration));
           modelingValues = JSON.parse(JSON.stringify(state.values));
+          savedMetadata = JSON.parse(JSON.stringify(state.metadata));
+          illustrativeTotal = state.total;
+          savedTimeseriesForm = state.timeseriesForm.slice();
+          invalidControls = new Set(state.invalid.map(function (index) { return stateControls[index]; }));
           savedTimeseriesStrategies = JSON.parse(JSON.stringify(state.strategies));
           activeTimeseries = state.timeseries;
           resultsOpen = state.resultsOpen;
@@ -1867,7 +2253,7 @@
           stateControls.forEach(function (control, index) {
             var saved = state.controls[index];
             if (saved.options !== null) control.innerHTML = saved.options;
-            if (saved.value !== undefined) control.value = saved.value;
+            if (saved.value !== undefined) writeControl(control, saved.value);
             if (saved.checked !== undefined) control.checked = saved.checked;
             if (saved.open !== undefined) control.open = saved.open;
             if (saved.output !== null) control.textContent = saved.output;
@@ -1883,7 +2269,11 @@
             mockup.querySelector('#timeseries-panel-context').textContent = state.timeseries === 'hourly'
               ? 'Usage pattern · Watch a video' : 'Recurrent server need · Video origin demand';
           }
-          stateMessages.forEach(function (element, index) { element.textContent = state.messages[index]; });
+          stateMessages.forEach(function (element, index) {
+            element.textContent = state.messages[index].text;
+            if (state.messages[index].error === undefined) delete element.dataset.error;
+            else element.dataset.error = state.messages[index].error;
+          });
           mockup.querySelectorAll('[data-inline-undo]').forEach(function (button, index) {
             button.hidden = state.undo[index].hidden;
             button.dataset.previousIncluded = state.undo[index].previous;
@@ -1915,7 +2305,7 @@
         workspace.comparison = snapshot();
         restoreModel(workspace.reference);
         mockup.querySelector('#open-result').textContent =
-          'Reference JSON has 7 selected inputs; comparison JSON has none. Switch tabs to explore independent views.';
+          'Reference JSON has 9 selected inputs; comparison JSON has none. Switch tabs to explore independent views.';
       })();
     </script>
   </div>
@@ -1951,17 +2341,17 @@
 
 <section>
   <h2>6. Open questions</h2>
-  <ol>
-    <li><strong>Other selectable input shapes:</strong> beyond scalar inputs, choices, and complete
-    timeseries editors, must v1 also expose relationships and weighted collections?</li>
-  </ol>
+  <p>No blocking capability questions remain. Input eligibility, conditional choices, autosave,
+  export protection, and the two quick-total displays are settled above. The planning stage must
+  detail validation, request ordering, draft preservation, and recovery without widening this scope.</p>
 </section>
 
 <section>
   <h2>7. Resuming from cold context</h2>
   <ol>
     <li>Read this file end to end and resolve its open capability questions with the product owner.</li>
-    <li>Read the <a href="plan.html">draft plan</a> for the dedicated cross-repo examples rename.
+    <li>Read the <a href="plan.html">draft plan</a> for the captured implementation decisions and
+    dedicated cross-repo examples rename.
     Preserve it as its own task in the eventual implementation run. The main feature's JSON contract,
     interaction architecture, and ordered implementation steps still need the planning stage.</li>
     <li>Re-read <code>specs/architecture.md</code>, especially persistence, workspace files, normal
