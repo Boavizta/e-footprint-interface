@@ -194,7 +194,7 @@
   #simplified-screen[data-editing="true"] [data-field-provenance] { display: none; }
   [data-help-input] { width: 100%; font-size: .85rem; }
   [data-field-help] { display: block; color: #637083; font-size: .78rem; font-weight: 400;
-                      line-height: 1.35; margin: .08rem 0 .3rem; text-transform: lowercase; }
+                      line-height: 1.35; margin: .08rem 0 .3rem; white-space: pre-wrap; }
   [data-simplified-field] { margin: .4rem 0 .8rem; }
   [data-simplified-field] > label { margin-bottom: 0; }
   [data-field-provenance] { margin: .35rem 0 0; padding: .3rem .55rem; background: #fafbfc; }
@@ -454,8 +454,8 @@
     help, or values. The filter and expansion state are remembered per modeling when navigating;
     opening a JSON starts with the filter off.</li>
     <li><strong>Per-field guidance:</strong> in configuration or any inline simplified-input disclosure,
-    the author can optionally add custom help text. In Simplified inputs, non-empty help is displayed in lowercase
-    immediately below the field name; an empty help value leaves no placeholder or gap.</li>
+    the author can optionally add custom help text. In Simplified inputs, non-empty help is displayed as authored,
+    preserving capitalization, immediately below the field name; an empty help value leaves no placeholder or gap.</li>
     <li><strong>Editable source and comment:</strong> for every exposed input, a user can view and
     edit the source, confidence, and comment through the same compact disclosure below its value,
     including for timeseries inputs.</li>
@@ -518,7 +518,8 @@
     With the filter off, configuration reveals every object with eligible inputs in Navigation and the main pane, including
     objects with no fields currently exposed. Within each object, all eligible inputs appear with
     inclusion checkboxes and optional help-text controls. Objects and inputs added in Modeling are
-    available on the next entry into configuration, unchecked unless included during creation.
+    available on the next entry into configuration, unchecked unless included during creation or
+    required by an already included controlling field.
     Current values are shown for context; Simplified inputs shows only the saved selection. Saving applies
     membership and help changes together; Cancel leaves the saved configuration intact.</li>
     <li><strong>Depth remains available:</strong> switching to Modeling makes every assumption and
@@ -542,6 +543,15 @@
     remain part of the creation draft, visibly labeled Included when this object is created. They
     are committed only on successful creation; cancellation or failed validation creates no simplified-input
     references. A failed creation keeps the draft available to correct.</li>
+    <li><strong>Required inputs are visible before creation:</strong> if a new object's input is required
+    by an already included controlling field, it appears included and required in the creation panel.
+    For example, creating a video job linked to an API whose Model is included automatically includes
+    the job's Resolution. Its bookmark still opens the help-text editor, but removal is unavailable;
+    hover or keyboard focus explains “Required because [API name] → Model is included in Simplified inputs.”
+    Changing the chosen API recalculates the requirement. Removal becomes available once no included
+    controller requires the field; the lock is not permanent. The required selection and its help save
+    with successful creation, never before. No additional success notice is needed for inclusion already
+    shown in the panel; any further automatic inclusion discovered on save is named discreetly.</li>
     <li><strong>Warn before removing exposed fields:</strong> when an object being deleted contains
     fields exposed through Simplified inputs, its existing deletion confirmation and unchanged
     actions are extended with a warning that identifies the affected fields and explains that they
@@ -602,10 +612,11 @@
       <li>Inclusion controls and help-text editing alongside current-value previews in the same
       compact field layout. With its filter off, configuration shows all objects with eligible inputs and all their eligible
       fields, including objects and inputs absent from the selection or newly added in Modeling.
-      These remain unselected unless included during creation; Simplified inputs shows only saved exposed fields and hides
+      These remain unselected unless included during creation or required by an included controller;
+      Simplified inputs shows only saved exposed fields and hides
       objects with no exposed fields.</li>
-      <li>Optional custom help text for every exposed field, authored in the overview or inline and shown in
-      lowercase directly below that field's existing label in Simplified inputs.</li>
+      <li>Optional custom help text for every exposed field, authored in the overview or inline and shown
+      unchanged directly below that field's existing label in Simplified inputs.</li>
       <li>Timeseries exposed as one composite field inside its normal owning-object group, using the
       same label, help, and Source and comment disclosure as ordinary inputs. A read-only string
       preview and Edit timeseries action replace the ordinary value control; a dedicated side panel
@@ -697,7 +708,7 @@
   inputs. Clear simplified inputs asks for confirmation before clearing the draft selection and
   all custom per-field help, including help on deselected fields; Save and return applies it and
   Cancel restores the saved settings. Individually deselecting a field retains its help.
-  Help text appears in lowercase directly beneath the field's name after
+  Help text appears as authored, with its capitalization preserved, directly beneath the field's name after
   saving. Open “Source and comment” below an ordinary input to edit
   its metadata; a timeseries uses the same disclosure, with only its value editor moving into a side
   panel and its chart preview appearing to the panel's left on tablet/desktop. On phones the chart
@@ -1720,8 +1731,8 @@
               ? 'Required while Provider is included. Remove Provider first to exclude Model.'
               : field.dataset.field === 'api-provider' ? 'Including Provider also includes Model.' : '';
             var help = field.querySelector('[data-help-output]');
-            help.textContent = savedConfiguration.fields[field.dataset.field].help.trim().toLowerCase();
-            help.hidden = editing || !help.textContent;
+            help.textContent = savedConfiguration.fields[field.dataset.field].help;
+            help.hidden = editing || !help.textContent.trim();
             field.querySelectorAll(':scope > label input, :scope > label select, :scope > button')
               .forEach(function (control) { control.disabled = editing; });
             if (included && !deleted) total++;
