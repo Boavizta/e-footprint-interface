@@ -28,6 +28,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Simplify verbose edge-case sections before adding labels such as “agent-only” or “optional”.
   Remove repeated spec rules, preserve the genuinely new implementation points, and leave review
   decisions visible. A collapsed section is not a substitute for editing.
+- Prefer the feature's concrete vocabulary over unnecessary technical labels: “timeseries editor”,
+  not “composite editor”. Describe loading it beside the Edit timeseries interaction, not in Configure.
+- Describe UI transitions precisely: deselecting an object's last included input can hide that object;
+  say “keyboard focus” and name its destination, not “moving focus before hiding the last selected object”.
 
 ## Files, code and visual navigation
 
@@ -41,10 +45,22 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Show the structure of central return types, not just their names in signatures. The reviewer
   asked to see `FieldCatalog`: its field-address lookup and direct-dependent lookup explain the
   design more concretely than additional prose. Keep these sketches minimal and file-labelled.
+- Presenter examples should expose what the view needs explicitly. Replace the opaque
+  `"definition": definition` with `title` and `guidance`; keep membership/help only beside each
+  field rather than also passing the full configuration through a second path.
+- Name concrete identifiers instead of saying “model and field identity”: System ID, field owner
+  ID and attribute. Do not leave the reader guessing whether “model” means its name or workspace slot.
 - Name where proposed helpers are defined and show who passes or calls them. The phrase
   “server-wired boolean callback” hid the location and use of `can_edit_timeseries`; a short
   file-titled function plus the view/use-case/catalog call sequence made the proposal concrete.
   Prefer ordinary function/argument language to dependency-wiring jargon when that is all it means.
+- Separate browser draft feedback from server enforcement and persistence. Name the use case instead
+  of “the save use case”, and distinguish selecting an input for inclusion from editing its value.
+  In Configure, dependency feedback updates the browser draft; Save and return calls
+  `UpdateSimplifiedDefinitionUseCase`, not the consumption value-edit use case.
+- Explicitly label defense-in-depth checks when the server re-enforces a rule already reflected in
+  browser feedback. Explain the gap covered (bypassed or stale client state), while making clear that
+  server enforcement is authoritative, not optional duplication.
 - An arrow between two filenames is ambiguous. Do not use it as a decorative file-list separator.
   If an arrow expresses a call, import or data flow, make that meaning explicit.
 - Remove the generic approach diagram from this plan: it repeated familiar spec concepts and was
@@ -89,6 +105,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
   Explain new selection validation with configuration saves. Mention existing value validation only
   where our changes affect its invocation, such as one atomic batch of conditional value changes.
   Minor traversal details do not need their own review paragraph.
+- Separate implementation complexity from UX tradeoffs. The user chose one-at-a-time autosave:
+  temporarily block further edits/actions during saves rather than introducing a queue, manual batch
+  commit or automatic/manual toggle. Extend existing request protection before inventing new machinery.
+  Preserving failed edits is required in every approach, not a comparative cost unique to autosave.
 - Record confirmed bugs with evidence and ownership, not a UI workaround. The shared-controller
   overwrite defect is tracked in `known-issues.md` as SI-1, including its reproduction and planned
   library regression; it remains unfixed during planning.

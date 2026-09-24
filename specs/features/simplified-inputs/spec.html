@@ -467,6 +467,11 @@
     the same rules. There is no Apply simple changes action. Discreet status distinguishes saving,
     saved, and failed changes. A failed edit remains visible and retryable, without changing the
     saved modeling or claiming success. Invalid fields open their object and display actionable feedback.</li>
+    <li><strong>One save at a time:</strong> while a save is running, temporarily disable further edits,
+    structural actions, view/model switching and export across the workspace. Re-enable them when the
+    request finishes; failed edits remain visible for correction or retry. Users can still read and
+    scroll. Do not collect further edits for later submission. There is no form-wide commit button or
+    automatic/manual saving preference in this iteration.</li>
     <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
     as an ordinary input within its owning-object container. In place of a standard value control it
     shows a read-only string preview and a small Edit timeseries action. That action opens a
@@ -478,7 +483,7 @@
     <li><strong>Timeseries strategies remain available:</strong> a user can switch among the
     compatible timeseries strategies available in normal editing. Saving the panel persists the
     selected strategy and authored inputs together, closes the panel, and refreshes the string preview.
-    These composite edits remain a draft until Save timeseries; Cancel discards them. Failed validation
+    These timeseries edits remain a draft until Save timeseries; Cancel discards them. Failed validation
     keeps the editor and draft open. Ordinary modeling panels and Configure retain their explicit
     Save / Cancel boundaries.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
@@ -671,6 +676,8 @@
       <li>Multiple alternative simplified-input definitions for the same modeling. A workspace file
       may contain two modelings, each with its own definition.</li>
       <li>Configuration-owned initial values, defaults, snapshots, or a reset-to-defaults action.</li>
+      <li>Queued background autosaves, a form-wide batch commit for simple inputs, or a user-selectable
+      automatic/manual saving mode. Timeseries, normal modeling panels and Configure keep Save / Cancel.</li>
       <li>A separate read-only full-model exploration mode. A user who wants to inspect the complete
       modeling switches to Modeling, where they are trusted to avoid unintended changes.</li>
       <li>Selecting or locking individual nested parts of a timeseries, such as one profile baseline
@@ -716,7 +723,9 @@
   “Watch a video” share columns only with one another. In Modeling, open a bookmark in the edit panel,
   then try its Delete object action to see how the existing confirmation is extended.</p>
   <p>Simple values and Source and comment edits now autosave on leaving a field or pressing Enter;
-  selects save immediately. Both Results affordances update together. In External APIs → Assistant,
+  selects save immediately. During the simulated save, further edits, view/model switching and export
+  are temporarily disabled; there is no queue of pending edits. Both Results affordances update together.
+  In External APIs → Assistant,
   change Provider to see Model retain a valid choice or fall back to the first available one; a
   provider with no models is rejected. Configure and the Sources bookmarks demonstrate required
   dependent inclusion. Providers, models, and footprint amounts below are fictional UX fixtures:
@@ -1486,7 +1495,7 @@
         function simulateSave(commit, afterSave, affectsFootprint) {
           if (saving) return;
           saving = true;
-          // Serialize this single-DOM demo's saves; no server or footprint engine runs here.
+          // Block further edits during this demo save; no queue, server or footprint engine runs here.
           var controls = Array.from(mockup.querySelectorAll('#app-shell button:not([data-show-results]), #app-shell input, #app-shell select, #app-shell textarea, #file-entry button, #demo-noncomputable'));
           var disabled = controls.map(function (control) { return control.disabled; });
           controls.forEach(function (control) { control.disabled = true; });
@@ -1539,8 +1548,8 @@
                 return false;
               });
               if (invalidDependency) {
-                writeControl(control, previous);
-                status.textContent = 'No models available for that provider. Neither value was changed.';
+                invalidControls.add(control);
+                status.textContent = 'Not saved: no models available for that provider. Choose another provider; saved values are unchanged.';
                 status.dataset.error = 'true';
                 renderFootprint();
                 return;
@@ -2354,7 +2363,7 @@
   <h2>6. Open questions</h2>
   <p>No blocking capability questions remain. Input eligibility, conditional choices, autosave,
   export protection, and the two quick-total displays are settled above. The planning stage must
-  detail validation, request ordering, draft preservation, and recovery without widening this scope.</p>
+  detail validation, one-at-a-time save protection, draft preservation, and recovery without widening this scope.</p>
 </section>
 
 <section>
