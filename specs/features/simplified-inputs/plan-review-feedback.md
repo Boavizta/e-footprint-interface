@@ -29,13 +29,18 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Clarifying a passage should not continually expand it. State the purpose plainly, use one concrete
   example, and remove repeated wiring explanations and secondary caveats. For `FieldCatalog`, the
   approved shorter explanation is the two questions it answers (eligibility and required companion
-  fields), one API/Resolution example, and its shared use by configuration/save/import. “Reverse
+  fields), one API/Resolution example, and its shared use by configuration and saves. “Reverse
   dependent edges” and persistence/rendering caveats obscured that point in the main reading flow.
 - Simplify verbose edge-case sections before adding labels such as “agent-only” or “optional”.
   Remove repeated spec rules, preserve the genuinely new implementation points, and leave review
   decisions visible. A collapsed section is not a substitute for editing.
 - Prefer the feature's concrete vocabulary over unnecessary technical labels: “timeseries editor”,
   not “composite editor”. Describe loading it beside the Edit timeseries interaction, not in Configure.
+- Name the actual existing operation when reusing it: “refresh the open results panel,” not
+  “invalidate results,” which misleadingly suggests new cache-invalidation state or machinery.
+- Describe interaction ordering through the user's action and its outcome, not browser-event jargon:
+  “save the focused edit before downloading” is clearer than “capture an export action before blur”.
+  Leave event-level mechanics to implementation unless they represent a decision worth reviewing.
 - Describe UI transitions precisely: deselecting an object's last included input can hide that object;
   say “keyboard focus” and name its destination, not “moving focus before hiding the last selected object”.
 
@@ -77,13 +82,20 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Describe rendering per interaction: Configure Save returns the complete Simplified inputs view;
   inline bookmark/value saves use targeted updates to preserve other unsaved controls. Do not imply
   field-change tracking is needed for a full-view response merely because the saves share a result type.
+- Check which surfaces are actually visible before introducing refresh or draft-preservation work.
+  Modeling create/edit/delete operations maintain saved simplified-input selections, but do not need
+  to update a hidden Simplified inputs form. Render it afresh from server state on entry from Modeling.
+  Inline bookmark saves update visible bookmark controls without replacing the surrounding value draft;
+  that requirement does not justify general hidden-view synchronization or draft merging. Remove the
+  superseded render-once assumption from navigation, file notes and verification together.
 - Separate shared controls from their presentation wrapper. Configure includes `selection_controls.html`
   directly; creation/edit panels and Sources use the `bookmark.html` disclosure around it. Consumption
   includes neither. Shared markup does not imply shared save timing: Configure and creation defer their
   settings to their form save; existing-input bookmarks save immediately.
-- Explicitly label defense-in-depth checks when the server re-enforces a rule already reflected in
-  browser feedback. Explain the gap covered (bypassed or stale client state), while making clear that
-  server enforcement is authoritative, not optional duplication.
+- Do not use a “defense in depth” label to justify an unnecessary check. The later review explicitly
+  rejected protections added solely for hypothetical stale or manually constructed requests; this
+  supersedes the earlier suggestion to label such repeated checks. Explain the concrete job of a
+  necessary rule (for example, completing a saved selection), not speculative client bypasses.
 - An arrow between two filenames is ambiguous. Do not use it as a decorative file-list separator.
   If an arrow expresses a call, import or data flow, make that meaning explicit.
 - Remove the generic approach diagram from this plan: it repeated familiar spec concepts and was
@@ -101,6 +113,19 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
   machinery. Compare against the simplest extension of existing behavior first. Generic robustness
   language must not silently authorize a refactor. This is a planning check, not another verbose audit
   section for the reviewer; lack of evidence requires inspection or an explicit uncertainty.
+- Important for the eventual spec-plan update: do not add defensive programming for imagined stale
+  or hand-crafted requests by default. Identify a concrete failure in the supported workflow and its
+  consequence before proposing an extra check; otherwise omit it. Even a small check adds conceptual
+  noise and review cost. Simplified inputs is not an access-control boundary.
+  - Removed repeated inclusion/eligibility checks from value saves. Resolve the field normally and
+    reuse library validation; validate the definition when configuring it.
+  - Removed the proposed expected-System-ID request check. The current edit path uses the active
+    workspace repository; this feature uses that path too, with the agreed UI lock during saves.
+  - Removed the additional dispatch-time defense requirement. Keep one-at-a-time UI behavior and
+    Enter/blur deduplication, which serve actual interactions rather than hypothetical request bypasses.
+  This does not remove existing security protections, library invariants, existing import checks or
+  feature rules such as required companion-field inclusion. The reusable skill remains unchanged
+  until the user authorizes its final update.
 - Run that complexity audit before asking for human review. The user identified this as an important
   part of the eventual spec-plan update: trace the relevant existing paths, justify each added mechanism
   against the agreed behavior, and remove requirements accidentally introduced by prose. Do not make
@@ -108,8 +133,13 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Applied audit outcomes for this plan:
   - Reuse side-panel discard protection on model switches; remove timeseries draft parking and
     preview teardown/restoration. Same-model Compare return already retains the resident panel.
-  - Prevalidate incoming models before replacement, but defer transactional storage publication and
-    cache-write reporting as SI-2. Do not present an existing storage gap as a feature-required refactor.
+  - Run existing model import and combined-size checks before replacement. Park the separate
+    [storage-failure concern](../../backlog/workspace-storage-failure/problem.md) in the local backlog,
+    outside the feature's spec/plan reading flow. Do not present an existing storage gap as a
+    feature-required refactor or blocker.
+  - Keep that import-order correction separate from added validation. Normal exported simplified-input
+    definitions already satisfy the selection rules; do not add another catalog/definition-validation
+    pass during import without a demonstrated need. The existing import service stays unchanged.
   - Keep one multi-owner value update, while reusing request-local metadata mutation and persist-on-success.
     A separate deferred-metadata layer adds no needed persistence protection here.
   - Guard simplified autosaves and Configure on export; do not invent an existing warning or add new
@@ -121,6 +151,11 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
   error modal and clears the side panel; retain that flow here rather than silently adding recovery
   machinery. Pending simplified-input settings must not persist on failure. Any improved recovery UX
   needs explicit scope and implementation cost, not an incidental sentence.
+- Separate error presentation from edit retention. Reuse the existing error modal for simplified-input
+  saves, with only a Not saved indicator at the field; do not infer a new inline-error system from
+  “retain the entered value and error.” Preserve side-panel/Results editors for failed simplified
+  timeseries/bookmark saves, while ordinary Modeling errors stay unchanged. Trace response
+  semantics too: the existing modal response is HTTP 200, so it must not be mistaken for a successful save.
 - Inspect existing mechanisms before proposing new services, registries or discovery pipelines.
   The review question “Isn't there anything in the current code that does similar work?” exposed
   substantial overlap with existing form generation, timeseries support and input validation.

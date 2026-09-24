@@ -168,11 +168,12 @@
   #modeling-sources small { display: block; color: #526177; }
   #modeling-delete-result { border: 1px solid #b9d8b9; background: #f4faf4; border-radius: 6px;
                             padding: .5rem .65rem; margin: .7rem 0; }
-  #configure-exit-dialog { max-width: min(28rem, calc(100vw - 3rem)); padding: 1.4rem;
+  #configure-exit-dialog, #save-error-dialog { max-width: min(28rem, calc(100vw - 3rem)); padding: 1.4rem;
                            border: 1px solid #aeb9c7; border-radius: 8px; }
-  #configure-exit-dialog::backdrop { background: rgba(20, 30, 45, .48); }
+  #configure-exit-dialog::backdrop, #save-error-dialog::backdrop { background: rgba(20, 30, 45, .48); }
   #configure-exit-dialog h3 { margin-top: 0; }
   #configure-exit-dialog footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; }
+  #save-error-dialog { text-align: center; }
   #delete-confirmation-backdrop { position: absolute; z-index: 6; inset: 0; background: rgba(20, 30, 45, .48);
                                   display: grid; place-items: center; padding: 1rem; }
   #delete-object-confirmation { width: min(29rem, 100%); background: white; border-radius: 8px;
@@ -470,8 +471,9 @@
     <li><strong>Autosave simple edits:</strong> numerical inputs and text metadata save on blur or
     Enter, not on every keystroke; selects save on change. Source, confidence, and comment follow
     the same rules. There is no Apply simple changes action. Discreet status distinguishes saving,
-    saved, and failed changes. A failed edit remains visible and retryable, without changing the
-    saved modeling or claiming success. Invalid fields open their object and display actionable feedback.</li>
+    saved, and failed changes. A rejected save shows the existing error modal; the entered value
+    remains visible and marked Not saved for correction or retry, without changing the saved modeling.
+    Native browser validation remains available; invalid fields open their object.</li>
     <li><strong>One save at a time:</strong> while a save is running, temporarily disable further edits,
     structural actions, view/model switching and export across the workspace. Re-enable them when the
     request finishes; failed edits remain visible for correction or retry. Users can still read and
@@ -488,8 +490,8 @@
     <li><strong>Timeseries strategies remain available:</strong> a user can switch among the
     compatible timeseries strategies available in normal editing. Saving the panel persists the
     selected strategy and authored inputs together, closes the panel, and refreshes the string preview.
-    These timeseries edits remain a draft until Save timeseries; Cancel discards them. Failed validation
-    keeps the editor and draft open. Switching models reuses the ordinary side-panel unsaved-changes
+    These timeseries edits remain a draft until Save timeseries; Cancel discards them. A rejected save
+    shows the existing error modal without closing or clearing this editor. Switching models reuses the ordinary side-panel unsaved-changes
     warning: stay to save first, or discard and switch. Returning does not reopen that editor or restore
     its draft. Ordinary modeling panels and Configure retain their explicit Save / Cancel boundaries.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
@@ -551,7 +553,8 @@
     <li><strong>Immediate changes for existing inputs:</strong> inclusion changes save immediately;
     help text saves when leaving its field. Both are independent of the object's Save button and
     do not submit unsaved modeling values. A discreet status distinguishes saving, saved, and failed
-    changes; a failed save remains retryable and must not claim success. Cancelling value edits does
+    changes; a failed save shows the existing error modal without clearing the surrounding value draft,
+    remains retryable and must not claim success. Cancelling value edits does
     not undo saved simplified-input settings. Individually deselecting an input, inline or in the
     configuration overview, retains its help for re-inclusion, unlike Clear simplified inputs. An Undo
     action makes an accidental inline membership change recoverable.</li>
@@ -1362,6 +1365,12 @@
       </footer>
     </dialog>
 
+    <dialog id="save-error-dialog" aria-label="Save error" aria-describedby="save-error-message">
+      <p aria-hidden="true">⚠</p>
+      <p id="save-error-message"></p>
+      <form method="dialog"><button type="submit" autofocus>Go back</button></form>
+    </dialog>
+
     <script>
       (function () {
         var mockup = document.currentScript.parentElement;
@@ -1374,6 +1383,7 @@
         var configurationDirty = false;
         var pendingConfigureExit = null;
         var configureExitDialog = mockup.querySelector('#configure-exit-dialog');
+        var saveErrorDialog = mockup.querySelector('#save-error-dialog');
         var activeModel = 'reference';
         var modelingSurface = 'edit';
         var comparing = false;
@@ -1544,7 +1554,7 @@
             var status = field.querySelector('[data-field-status]');
             if (!control.checkValidity()) {
               invalidControls.add(control);
-              status.textContent = 'Not saved. ' + control.validationMessage;
+              status.textContent = 'Not saved.';
               status.dataset.error = 'true';
               focusObject(field.closest('[data-simplified-object]').id);
               control.reportValidity();
@@ -1576,9 +1586,12 @@
               });
               if (invalidDependency) {
                 invalidControls.add(control);
-                status.textContent = 'Not saved: no models available for that provider. Choose another provider; saved values are unchanged.';
+                status.textContent = 'Not saved.';
                 status.dataset.error = 'true';
                 renderFootprint();
+                mockup.querySelector('#save-error-message').textContent =
+                  'No models are available for that provider. Choose another provider; saved values are unchanged.';
+                saveErrorDialog.showModal();
                 return;
               }
             }
@@ -2417,10 +2430,9 @@
     <li><strong>JSON remains the only portable format:</strong> this feature extends the user-visible
     JSON round-trip rather than introducing an alternative serialization format, consistent with the
     e-footprint mission and constitution.</li>
-    <li><strong>Validate before replacing:</strong> import checks every incoming model, its simplified-input
-    definition and the combined size before replacing session state. Calculated outputs are verified or
-    recomputed under the established rules. Rejection at these checks leaves the current workspace intact;
-    storage-failure recovery is outside this feature.</li>
+    <li><strong>Check imports before replacing:</strong> complete existing model-loading and combined-size
+    checks before replacing session state. Calculated outputs are verified or recomputed under the
+    established rules. Rejection at these checks leaves the current workspace intact.</li>
     <li><strong>File contents are transparent:</strong> because the complete modeling is needed for
     calculation, audit, and resuming full editing, every assumption is present in the JSON. The UI
     must not imply that unexposed inputs are confidential or tamper-proof.</li>
