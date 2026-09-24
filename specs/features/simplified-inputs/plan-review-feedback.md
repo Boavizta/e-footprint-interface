@@ -1,6 +1,6 @@
 # Spec-plan review feedback
 
-Living notes from the Simplified inputs plan review, consolidated on 23 September 2026.
+Living notes from the Simplified inputs plan review, consolidated on 24 September 2026.
 Keep updating these notes as review continues. They are input to a later, explicitly authorized
 revision of the canonical spec-plan skill and its interface mirror, not changes to the skill itself.
 
@@ -12,6 +12,11 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
   resulting code, not just understand an architectural intention.
 - Start with meaningful new data structures, then tell a logical story through the code changes in
   a deliberate reading order. This does not mean inventing new structures to fill that section.
+- After the shared data, organize by functional surfaces and interactions, not by technical layers.
+  The reviewer wants to picture an interaction and follow the code implementing it: Configure;
+  author in Modeling/Sources; consume and edit; navigate and exchange models. Keep the Examples
+  rename separate. Introduce shared helpers with their first consumer, then link back instead of
+  repeating them. The reading order need not be the implementation dependency order.
 - Remove low-value implementation asides rather than explaining them at length. Specific rejected
   example: “It excludes self, not fields merely hidden by a particular form.” The meaningful
   boundary was already explained by keeping form-specific display rules in the adapter.
@@ -80,6 +85,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Distinguish existing validation from new checks before proposing more validation. Library value
   checks already handle unresolved conditional targets and allowed choices; simplified-selection
   validity is new. Blanket cycle rejection was not established and was removed from the proposal.
+- Omit reminders about unchanged library value validation from the catalog/form-building flow.
+  Explain new selection validation with configuration saves. Mention existing value validation only
+  where our changes affect its invocation, such as one atomic batch of conditional value changes.
+  Minor traversal details do not need their own review paragraph.
 - Record confirmed bugs with evidence and ownership, not a UI workaround. The shared-controller
   overwrite defect is tracked in `known-issues.md` as SI-1, including its reproduction and planned
   library regression; it remains unfixed during planning.
@@ -101,7 +110,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - The user subsequently authorized an editorial pass over the rest of this plan using the accumulated
   feedback, to reduce repetitive review rounds. Apply the lessons consistently, but do not silently
   resolve open product decisions or use this permission to implement code or update the skill.
-- No application implementation, task generation or commit is authorized by these review edits.
+- No application implementation or task generation is authorized by these review edits. On
+  23 September the user requested a checkpoint commit before reorganizing the reading order;
+  on 24 September they approved committing the interaction-led reorganization. The reusable skill
+  is unchanged.
 - When a skill revision is eventually authorized, use these notes and the reviewed plan together.
   Distinguish explicit preferences from still-experimental layout choices; do not mechanically
   promote every detail of this one feature into a universal planning rule.

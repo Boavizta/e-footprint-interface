@@ -34,7 +34,8 @@
   h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.15; font-weight: 740; letter-spacing: -.035em; margin: .8rem 0 1rem; }
   h2 { font-size: 1.65rem; letter-spacing: -.025em; line-height: 1.25; margin: 0 0 1rem; }
   h3 { font-size: 1.14rem; line-height: 1.4; margin: 1.6rem 0 .5rem; }
-  h4 { font-size: 1rem; margin: 1rem 0 .4rem; }
+  h4 { font-size: 1rem; margin: 1.5rem 0 .4rem; }
+  h5 { font-size: .9rem; margin: 1rem 0 .4rem; }
   p, ul, ol { margin-top: .6rem; margin-bottom: 1rem; }
   li { margin: .35rem 0; }
   main > section { margin-top: 2rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
@@ -42,7 +43,7 @@
   #approach > h2 { font-size: 1.1rem; margin-bottom: .25rem; }
   [data-reading-note] { color: var(--muted); font-size: .83rem; margin: .4rem 0 1rem; }
   [data-decision] > h3 > a { color: inherit; text-decoration: none; }
-  [data-decision]:target { border-left: 3px solid var(--green); padding-left: .9rem; }
+  [data-decision]:target, [data-decision]:has(:target) { border-left: 3px solid var(--green); padding-left: .9rem; }
   [data-files] { font-size: .8rem; line-height: 1.8; }
   [data-files] strong { font-weight: 500; color: var(--muted); }
   [data-code] { margin: 1rem 0; }
@@ -112,33 +113,24 @@
   #verification-table th:last-child { width: 28%; }
   footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .84rem; color: var(--muted); }
 
-  :is(body:has(#contract:target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #change-tree li[data-steps~="contract"] { background: #e2f1e8; }
-  :is(body:has(#contract:target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #change-tree details:has(li[data-steps~="contract"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#contract:target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #navigation a[href="#contract"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#dependencies:target, #change-tree :target[data-steps~="dependencies"])) #change-tree li[data-steps~="dependencies"] { background: #e2f1e8; }
-  :is(body:has(#dependencies:target, #change-tree :target[data-steps~="dependencies"])) #change-tree details:has(li[data-steps~="dependencies"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#dependencies:target, #change-tree :target[data-steps~="dependencies"])) #navigation a[href="#dependencies"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#atomic-edit:target, #change-tree :target[data-steps~="atomic-edit"])) #change-tree li[data-steps~="atomic-edit"] { background: #e2f1e8; }
-  :is(body:has(#atomic-edit:target, #change-tree :target[data-steps~="atomic-edit"])) #change-tree details:has(li[data-steps~="atomic-edit"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#atomic-edit:target, #change-tree :target[data-steps~="atomic-edit"])) #navigation a[href="#atomic-edit"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#persistence:target, #change-tree :target[data-steps~="persistence"])) #change-tree li[data-steps~="persistence"] { background: #e2f1e8; }
-  :is(body:has(#persistence:target, #change-tree :target[data-steps~="persistence"])) #change-tree details:has(li[data-steps~="persistence"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#persistence:target, #change-tree :target[data-steps~="persistence"])) #navigation a[href="#persistence"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#workspace:target, #change-tree :target[data-steps~="workspace"])) #change-tree li[data-steps~="workspace"] { background: #e2f1e8; }
-  :is(body:has(#workspace:target, #change-tree :target[data-steps~="workspace"])) #change-tree details:has(li[data-steps~="workspace"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#workspace:target, #change-tree :target[data-steps~="workspace"])) #navigation a[href="#workspace"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#totals:target, #change-tree :target[data-steps~="totals"])) #change-tree li[data-steps~="totals"] { background: #e2f1e8; }
-  :is(body:has(#totals:target, #change-tree :target[data-steps~="totals"])) #change-tree details:has(li[data-steps~="totals"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#totals:target, #change-tree :target[data-steps~="totals"])) #navigation a[href="#totals"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#saves:target, #change-tree :target[data-steps~="saves"])) #change-tree li[data-steps~="saves"] { background: #e2f1e8; }
-  :is(body:has(#saves:target, #change-tree :target[data-steps~="saves"])) #change-tree details:has(li[data-steps~="saves"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#saves:target, #change-tree :target[data-steps~="saves"])) #navigation a[href="#saves"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#lifecycle:target, #change-tree :target[data-steps~="lifecycle"])) #change-tree li[data-steps~="lifecycle"] { background: #e2f1e8; }
-  :is(body:has(#lifecycle:target, #change-tree :target[data-steps~="lifecycle"])) #change-tree details:has(li[data-steps~="lifecycle"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#lifecycle:target, #change-tree :target[data-steps~="lifecycle"])) #navigation a[href="#lifecycle"] { background: var(--soft); font-weight: 700; }
-  :is(body:has(#examples:target, #change-tree :target[data-steps~="examples"])) #change-tree li[data-steps~="examples"] { background: #e2f1e8; }
-  :is(body:has(#examples:target, #change-tree :target[data-steps~="examples"])) #change-tree details:has(li[data-steps~="examples"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
-  :is(body:has(#examples:target, #change-tree :target[data-steps~="examples"])) #navigation a[href="#examples"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#contract:target, #contract :target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #change-tree li[data-steps~="contract"] { background: #e2f1e8; }
+  :is(body:has(#contract:target, #contract :target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #change-tree details:has(li[data-steps~="contract"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#contract:target, #contract :target, #change-tree :target[data-steps~="contract"]), body:not(:has(:target))) #navigation a[href="#contract"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#configure:target, #configure :target, #change-tree :target[data-steps~="configure"])) #change-tree li[data-steps~="configure"] { background: #e2f1e8; }
+  :is(body:has(#configure:target, #configure :target, #change-tree :target[data-steps~="configure"])) #change-tree details:has(li[data-steps~="configure"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#configure:target, #configure :target, #change-tree :target[data-steps~="configure"])) #navigation a[href="#configure"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#lifecycle:target, #lifecycle :target, #change-tree :target[data-steps~="lifecycle"])) #change-tree li[data-steps~="lifecycle"] { background: #e2f1e8; }
+  :is(body:has(#lifecycle:target, #lifecycle :target, #change-tree :target[data-steps~="lifecycle"])) #change-tree details:has(li[data-steps~="lifecycle"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#lifecycle:target, #lifecycle :target, #change-tree :target[data-steps~="lifecycle"])) #navigation a[href="#lifecycle"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#consume:target, #consume :target, #change-tree :target[data-steps~="consume"])) #change-tree li[data-steps~="consume"] { background: #e2f1e8; }
+  :is(body:has(#consume:target, #consume :target, #change-tree :target[data-steps~="consume"])) #change-tree details:has(li[data-steps~="consume"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#consume:target, #consume :target, #change-tree :target[data-steps~="consume"])) #navigation a[href="#consume"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#navigation-flow:target, #navigation-flow :target, #change-tree :target[data-steps~="navigation-flow"])) #change-tree li[data-steps~="navigation-flow"] { background: #e2f1e8; }
+  :is(body:has(#navigation-flow:target, #navigation-flow :target, #change-tree :target[data-steps~="navigation-flow"])) #change-tree details:has(li[data-steps~="navigation-flow"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#navigation-flow:target, #navigation-flow :target, #change-tree :target[data-steps~="navigation-flow"])) #navigation a[href="#navigation-flow"] { background: var(--soft); font-weight: 700; }
+  :is(body:has(#examples:target, #examples :target, #change-tree :target[data-steps~="examples"])) #change-tree li[data-steps~="examples"] { background: #e2f1e8; }
+  :is(body:has(#examples:target, #examples :target, #change-tree :target[data-steps~="examples"])) #change-tree details:has(li[data-steps~="examples"]) > summary { color: var(--green); text-decoration: underline; text-decoration-color: #a5c9b5; text-underline-offset: .22em; }
+  :is(body:has(#examples:target, #examples :target, #change-tree :target[data-steps~="examples"])) #navigation a[href="#examples"] { background: var(--soft); font-weight: 700; }
 
   @media (max-width: 1150px) {
     #layout { grid-template-columns: 18rem minmax(0, 1fr); gap: 1.2rem; padding: 1.2rem; }
@@ -182,16 +174,14 @@
 <nav id="navigation" aria-label="Reading order">
   <p>Reading order</p>
   <ol>
-    <li><a href="#contract">1.1 · Data</a></li>
-    <li><a href="#dependencies">1.2 · Catalog</a></li>
-    <li><a href="#atomic-edit">1.3 · Mutations</a></li>
-    <li><a href="#persistence">1.4 · Persistence</a></li>
-    <li><a href="#workspace">1.5 · Rendering</a></li>
-    <li><a href="#saves">1.6 · Browser</a></li>
-    <li><a href="#lifecycle">1.7 · Lifecycle</a></li>
-    <li><a href="#examples">1.8 · Rename</a></li>
+    <li><a href="#contract">1.1 · Shared data</a></li>
+    <li><a href="#configure">1.2 · Configure</a></li>
+    <li><a href="#lifecycle">1.3 · Author in Modeling</a></li>
+    <li><a href="#consume">1.4 · Use inputs</a></li>
+    <li><a href="#navigation-flow">1.5 · Navigate &amp; files</a></li>
+    <li><a href="#examples">1.6 · Examples rename</a></li>
   </ol>
-  <p><a href="#cross-cutting">Verification</a> · <a href="#risks">Risks</a> · <a href="#review">Open decisions</a></p>
+  <p><a href="#cross-cutting">Verification</a> · <a href="#risks">Risks</a> · <a href="#review">Review points</a></p>
 </nav>
 <section id="modules">
   <h2>2. Changed files</h2>
@@ -204,69 +194,69 @@
         <details open>
           <summary>domain/</summary>
           <ul>
-            <li id="file-domain" data-steps="contract dependencies"><code>services/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#contract">1.1</a> <a data-read href="#dependencies">1.2</a></span><small>Definition, field addresses, eligibility and conditional closure using existing class metadata. <a href="#contract">Data / catalog</a></small></li>
-            <li id="file-conditional-inputs" data-steps="dependencies"><code>conditional_inputs.py</code> <span data-change="new">Extracted</span><span data-reading-links><a data-read href="#dependencies">1.2</a></span><small>Small dotted-path resolver shared by normal forms and simplified-input dependency indexing.</small></li>
-            <li id="file-factory" data-steps="atomic-edit"><a href="../../../model_builder/domain/object_factory.py"><code>object_factory.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#atomic-edit">1.3</a></span><small>Separate input/metadata preparation from commit; reuse conversions across owners. <a href="#atomic-edit">Mutation</a></small></li>
-            <li id="file-model-web" data-steps="atomic-edit persistence totals"><a href="../../../model_builder/domain/entities/web_core/model_web.py"><code>entities/web_core/model_web.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#atomic-edit">1.3</a> <a data-read href="#persistence">1.4</a> <a data-read href="#totals">1.5a</a></span><small>Reuse eager persistence; expose accepted modeling data, not interface configuration ownership.</small></li>
-            <li id="file-hooks" data-steps="totals lifecycle"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#totals">1.5a</a> <a data-read href="#lifecycle">1.7</a></span><small>Request total refresh on successful changes, not only constraint transitions. <a href="#totals">Results</a></small></li>
-            <li id="file-workspace-port" data-steps="persistence"><a href="../../../model_builder/domain/interfaces/workspace_repository.py"><code>interfaces/workspace_repository.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a></span><small>Prepared workspace replacement contract with failure-safe publication. <a href="#contract">Data</a></small></li>
-            <li id="file-import-service" data-steps="persistence"><a href="../../../model_builder/domain/services/system_import_service.py"><code>services/system_import_service.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a></span><small>Validate definition and dependency addresses before accepting a model.</small></li>
-            <li id="file-interface-rename" data-steps="examples"><code>reference_data/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Additional example registry/resources; retain IDs and contents. <a href="#examples">Rename</a></small></li>
-            <li id="file-catalog-rename" data-steps="examples"><code>services/template_catalog_service.py → example_catalog_service.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Cut over names, imports and catalog contracts together.</small></li>
+            <li id="file-domain" data-steps="contract configure lifecycle consume"><code>services/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#contract" title="Shared data">1.1</a> <a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Definition, field addresses, eligibility and conditional closure using existing class metadata. <a href="#contract">Data / catalog</a></small></li>
+            <li id="file-conditional-inputs" data-steps="configure"><code>conditional_inputs.py</code> <span data-change="new">Extracted</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a></span><small>Small dotted-path resolver shared by normal forms and simplified-input dependency indexing.</small></li>
+            <li id="file-factory" data-steps="consume"><a href="../../../model_builder/domain/object_factory.py"><code>object_factory.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Separate input/metadata preparation from commit; reuse conversions across owners. <a href="#atomic-edit">Mutation</a></small></li>
+            <li id="file-model-web" data-steps="consume"><a href="../../../model_builder/domain/entities/web_core/model_web.py"><code>entities/web_core/model_web.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Reuse eager persistence; expose accepted modeling data, not interface configuration ownership.</small></li>
+            <li id="file-hooks" data-steps="lifecycle consume"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Request total refresh on successful changes, not only constraint transitions. <a href="#totals">Results</a></small></li>
+            <li id="file-workspace-port" data-steps="navigation-flow"><a href="../../../model_builder/domain/interfaces/workspace_repository.py"><code>interfaces/workspace_repository.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Prepared workspace replacement contract with failure-safe publication. <a href="#contract">Data</a></small></li>
+            <li id="file-import-service" data-steps="navigation-flow"><a href="../../../model_builder/domain/services/system_import_service.py"><code>services/system_import_service.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Validate definition and dependency addresses before accepting a model.</small></li>
+            <li id="file-interface-rename" data-steps="examples"><code>reference_data/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Additional example registry/resources; retain IDs and contents. <a href="#examples">Rename</a></small></li>
+            <li id="file-catalog-rename" data-steps="examples"><code>services/template_catalog_service.py → example_catalog_service.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Cut over names, imports and catalog contracts together.</small></li>
           </ul>
         </details>
         <details>
           <summary>application/</summary>
           <ul>
-            <li id="file-usecase" data-steps="atomic-edit saves"><code>use_cases/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#atomic-edit">1.3</a> <a data-read href="#saves">1.6</a></span><small>Settings patches, overview delta, atomic selected-input edits and undo validation. <a href="#saves">Mutation / queue</a></small></li>
-            <li id="file-lifecycle" data-steps="lifecycle totals"><code>use_cases/{create_object,edit_object,delete_object}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle">1.7</a> <a data-read href="#totals">1.5a</a></span><small>Stage lifecycle configuration with the model; report affected addresses and results refresh. <a href="#lifecycle">Hooks</a></small></li>
+            <li id="file-usecase" data-steps="configure lifecycle consume"><code>use_cases/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Settings patches, overview delta, atomic selected-input edits and undo validation. <a href="#saves">Mutation / queue</a></small></li>
+            <li id="file-lifecycle" data-steps="lifecycle consume"><code>use_cases/{create_object,edit_object,delete_object}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Stage lifecycle configuration with the model; report affected addresses and results refresh. <a href="#lifecycle">Hooks</a></small></li>
           </ul>
         </details>
         <details>
           <summary>adapters/</summary>
           <ul>
-            <li id="file-views" data-steps="atomic-edit workspace"><code>views/views_simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#atomic-edit">1.3</a> <a data-read href="#workspace">1.5</a></span><small>Thin mode/config/field endpoints; slot-bound requests and targeted errors.</small></li>
-            <li id="file-presenter" data-steps="workspace"><code>presenters/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#workspace">1.5</a></span><small>Shared catalog → grouped navigation, fields, bookmarks and context. <a href="#workspace">Rendering</a></small></li>
-            <li id="file-forms" data-steps="dependencies workspace lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#dependencies">1.2</a> <a data-read href="#workspace">1.5</a> <a data-read href="#lifecycle">1.7</a></span><small>Reuse existing field metadata; add true owner addresses and creation-time required-selection context.</small></li>
-            <li id="file-timeseries-registry" data-steps="dependencies workspace"><a href="../../../model_builder/adapters/forms/timeseries_builder_registry.py"><code>forms/timeseries_builder_registry.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#dependencies">1.2</a> <a data-read href="#workspace">1.5</a></span><small>Extract a lightweight current-builder lookup shared by rendering and eligibility; keep the existing registry.</small></li>
-            <li id="file-views-existing" data-steps="persistence workspace lifecycle"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a> <a data-read href="#workspace">1.5</a> <a data-read href="#lifecycle">1.7</a></span><small>Shell entry/defaults, panel integration, copy settings, staged import, slot identity and restoration.</small></li>
-            <li id="file-sources" data-steps="lifecycle"><a href="../../../model_builder/adapters/views/source_table_row_editor_context.py"><code>views/source_table_row_editor_context.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle">1.7</a></span><small>Add bookmarks; preserve existing constructor-input checks and metadata rendering without eager model hydration.</small></li>
-            <li id="file-oob" data-steps="workspace totals"><a href="../../../model_builder/adapters/presenters/oob_regions.py"><code>presenters/oob_regions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#totals">1.5a</a></span><small>One total context for paired Results controls; targeted simplified/configuration updates. <a href="#totals">Results</a></small></li>
-            <li id="file-repositories" data-steps="persistence"><code>repositories/{session_system_repository,in_memory_system_repository}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a></span><small>Staged config publication, patch parity and save-failure tests.</small></li>
-            <li id="file-cache" data-steps="persistence"><code>repositories/cache_backend.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a></span><small>Surface write outcomes so rejected writes are not acknowledged as saved.</small></li>
-            <li id="file-workspace-repositories" data-steps="persistence"><code>repositories/{workspace_base,session_workspace_repository,workspace_index}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#persistence">1.4</a></span><small>Prepared import publication, isolated staging keys and System-address remapping.</small></li>
-            <li id="file-picker-rename" data-steps="examples"><code>presenters/template_picker_presenter.py → example_picker_presenter.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Example context/selectors and all callers. <a href="#examples">Rename</a></small></li>
-            <li id="file-onboarding" data-steps="examples"><a href="../../../model_builder/adapters/views/views_onboarding.py"><code>views/views_onboarding.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Example endpoints, links and onboarding vocabulary.</small></li>
+            <li id="file-views" data-steps="configure consume"><code>views/views_simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Thin mode/config/field endpoints; slot-bound requests and targeted errors.</small></li>
+            <li id="file-presenter" data-steps="configure consume"><code>presenters/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared catalog → grouped navigation, fields, bookmarks and context. <a href="#workspace">Rendering</a></small></li>
+            <li id="file-forms" data-steps="configure lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Reuse existing field metadata; add true owner addresses and creation-time required-selection context.</small></li>
+            <li id="file-timeseries-registry" data-steps="configure consume"><a href="../../../model_builder/adapters/forms/timeseries_builder_registry.py"><code>forms/timeseries_builder_registry.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract a lightweight current-builder lookup shared by rendering and eligibility; keep the existing registry.</small></li>
+            <li id="file-views-existing" data-steps="lifecycle navigation-flow"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shell entry/defaults, panel integration, copy settings, staged import, slot identity and restoration.</small></li>
+            <li id="file-sources" data-steps="lifecycle"><a href="../../../model_builder/adapters/views/source_table_row_editor_context.py"><code>views/source_table_row_editor_context.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Add bookmarks; preserve existing constructor-input checks and metadata rendering without eager model hydration.</small></li>
+            <li id="file-oob" data-steps="consume"><a href="../../../model_builder/adapters/presenters/oob_regions.py"><code>presenters/oob_regions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>One total context for paired Results controls; targeted simplified/configuration updates. <a href="#totals">Results</a></small></li>
+            <li id="file-repositories" data-steps="configure navigation-flow"><code>repositories/{session_system_repository,in_memory_system_repository}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Staged config publication, patch parity and save-failure tests.</small></li>
+            <li id="file-cache" data-steps="navigation-flow"><code>repositories/cache_backend.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Surface write outcomes so rejected writes are not acknowledged as saved.</small></li>
+            <li id="file-workspace-repositories" data-steps="navigation-flow"><code>repositories/{workspace_base,session_workspace_repository,workspace_index}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Prepared import publication, isolated staging keys and System-address remapping.</small></li>
+            <li id="file-picker-rename" data-steps="examples"><code>presenters/template_picker_presenter.py → example_picker_presenter.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Example context/selectors and all callers. <a href="#examples">Rename</a></small></li>
+            <li id="file-onboarding" data-steps="examples"><a href="../../../model_builder/adapters/views/views_onboarding.py"><code>views/views_onboarding.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Example endpoints, links and onboarding vocabulary.</small></li>
           </ul>
         </details>
         <details>
           <summary>templates/model_builder/ <small>— keep “templates” for rendering files</small></summary>
           <ul>
-            <li id="file-partials" data-steps="workspace"><code>simplified_inputs/</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#workspace">1.5</a></span><small>Shared workspace, navigation, object, field, bookmark and field-only timeseries partials. <a href="#workspace">Rendering / hooks</a></small></li>
-            <li id="file-shell" data-steps="workspace saves"><a href="../../../model_builder/templates/model_builder/model_builder_main.html"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#saves">1.6</a></span><small>Resident per-model simplified roots inside the actual application shell.</small></li>
-            <li id="file-toolbar" data-steps="workspace totals"><code>components/{edge_modeling_toggle,show_results_toolbar_button,results_bar_button}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#totals">1.5a</a></span><small>Destination-mode control, Edge visibility and matching totals.</small></li>
-            <li id="file-downloads" data-steps="saves"><a href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#saves">1.6</a></span><small>Every standard export link participates in save protection.</small></li>
-            <li id="file-field-partials" data-steps="workspace lifecycle"><code>side_panels/dynamic_form_fields/{dynamic_form_field,source_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#lifecycle">1.7</a></span><small>Shared bookmark and provenance completion mode; preserve ordinary form semantics.</small></li>
-            <li id="file-panels" data-steps="workspace lifecycle"><code>side_panels/{object_form_content,side_panel_structure}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#lifecycle">1.7</a></span><small>Creation settings, normal Save independence and focused timeseries variant.</small></li>
-            <li id="file-source-partials" data-steps="lifecycle"><code>result/{source_table_row,source_table_row_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle">1.7</a></span><small>Discreet bookmarks on individual inputs only.</small></li>
-            <li id="file-delete-modal" data-steps="lifecycle"><a href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html"><code>modals/delete_card_modal.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle">1.7</a></span><small>Append selected-field deletion warning; unchanged actions.</small></li>
-            <li id="file-onboarding-partial" data-steps="examples"><code>onboarding/template_picker.html → example_picker.html</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Catalog markup/IDs; update tour and Help-menu callers. <a href="#examples">Rename</a></small></li>
+            <li id="file-partials" data-steps="configure lifecycle consume"><code>simplified_inputs/</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared workspace, navigation, object, field, bookmark and field-only timeseries partials. <a href="#workspace">Rendering / hooks</a></small></li>
+            <li id="file-shell" data-steps="navigation-flow"><a href="../../../model_builder/templates/model_builder/model_builder_main.html"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Resident per-model simplified roots inside the actual application shell.</small></li>
+            <li id="file-toolbar" data-steps="consume navigation-flow"><code>components/{edge_modeling_toggle,show_results_toolbar_button,results_bar_button}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Destination-mode control, Edge visibility and matching totals.</small></li>
+            <li id="file-downloads" data-steps="navigation-flow"><a href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Every standard export link participates in save protection.</small></li>
+            <li id="file-field-partials" data-steps="lifecycle consume"><code>side_panels/dynamic_form_fields/{dynamic_form_field,source_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared bookmark and provenance completion mode; preserve ordinary form semantics.</small></li>
+            <li id="file-panels" data-steps="lifecycle consume"><code>side_panels/{object_form_content,side_panel_structure}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Creation settings, normal Save independence and focused timeseries variant.</small></li>
+            <li id="file-source-partials" data-steps="lifecycle"><code>result/{source_table_row,source_table_row_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Discreet bookmarks on individual inputs only.</small></li>
+            <li id="file-delete-modal" data-steps="lifecycle"><a href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html"><code>modals/delete_card_modal.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Append selected-field deletion warning; unchanged actions.</small></li>
+            <li id="file-onboarding-partial" data-steps="examples"><code>onboarding/template_picker.html → example_picker.html</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Catalog markup/IDs; update tour and Help-menu callers. <a href="#examples">Rename</a></small></li>
           </ul>
         </details>
         <ul>
-          <li id="file-routes" data-steps="workspace persistence examples"><code>urls.py · version_upgrade_handlers.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#persistence">1.4</a> <a data-read href="#examples">1.8</a></span><small>New simplified routes, examples routes, additive interface-config normalization.</small></li>
+          <li id="file-routes" data-steps="configure navigation-flow examples"><code>urls.py · version_upgrade_handlers.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a> <a data-read href="#examples" title="Examples rename">1.6</a></span><small>New simplified routes, examples routes, additive interface-config normalization.</small></li>
         </ul>
       </details>
       <details>
         <summary>theme/ <small>— shared shell and small client modules</small></summary>
         <ul>
-          <li id="file-client" data-steps="saves workspace lifecycle"><code>static/scripts/simplified_inputs.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#saves">1.6</a> <a data-read href="#workspace">1.5</a> <a data-read href="#lifecycle">1.7</a></span><small>Mode/draft/filter behavior, bookmarks, creation-time inclusion locks and field completion events.</small></li>
-          <li id="file-queue" data-steps="saves"><code>static/scripts/mutation_queue.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#saves">1.6</a></span><small>HTMX coordination, slot identity, failure state and export readiness; no modeling data store. <a href="#saves">Queue</a></small></li>
-          <li id="file-browser-existing" data-steps="saves"><code>static/scripts/{model_comparison,side_panel_utils,source_metadata}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#saves">1.6</a></span><small>Per-model restoration, parked editor lifecycle, provenance autosave integration.</small></li>
-          <li id="file-dynamic-forms" data-steps="workspace saves"><code>static/scripts/dynamic_forms.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#saves">1.6</a></span><small>Scoped initialization and server-selected dependent options; preserve normal form behavior.</small></li>
-          <li id="file-preview" data-steps="workspace saves"><code>static/scripts/{timeseries_preview,timeseries_utils}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a> <a data-read href="#saves">1.6</a></span><small>One active preview, safe teardown/rebind when parking a field editor.</small></li>
-          <li id="file-scss" data-steps="workspace"><code>static/scss/_simplified_inputs.scss</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#workspace">1.5</a></span><small>Compact fields, Navigation, container-responsive columns and discreet bookmark states.</small></li>
-          <li id="file-assets" data-steps="workspace"><code>static/scss/main.scss · templates/{base,navbar}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#workspace">1.5</a></span><small>Wire assets/shared compact shell as needed; keep standard file/results affordances.</small></li>
+          <li id="file-client" data-steps="configure lifecycle consume navigation-flow"><code>static/scripts/simplified_inputs.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Mode/draft/filter behavior, bookmarks, creation-time inclusion locks and field completion events.</small></li>
+          <li id="file-queue" data-steps="consume navigation-flow"><code>static/scripts/mutation_queue.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>HTMX coordination, slot identity, failure state and export readiness; no modeling data store. <a href="#saves">Queue</a></small></li>
+          <li id="file-browser-existing" data-steps="consume navigation-flow"><code>static/scripts/{model_comparison,side_panel_utils,source_metadata}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Per-model restoration, parked editor lifecycle, provenance autosave integration.</small></li>
+          <li id="file-dynamic-forms" data-steps="consume"><code>static/scripts/dynamic_forms.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Scoped initialization and server-selected dependent options; preserve normal form behavior.</small></li>
+          <li id="file-preview" data-steps="consume navigation-flow"><code>static/scripts/{timeseries_preview,timeseries_utils}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>One active preview, safe teardown/rebind when parking a field editor.</small></li>
+          <li id="file-scss" data-steps="configure lifecycle consume"><code>static/scss/_simplified_inputs.scss</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Compact fields, Navigation, container-responsive columns and discreet bookmark states.</small></li>
+          <li id="file-assets" data-steps="navigation-flow"><code>static/scss/main.scss · templates/{base,navbar}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Wire assets/shared compact shell as needed; keep standard file/results affordances.</small></li>
           <li><code>static/scripts/ <small>catalog / tour callers</small></code> <span data-change="modified">Modified</span><small>Semantic examples rename of handlers, selectors and deep-link producers.</small></li>
         </ul>
       </details>
@@ -297,8 +287,8 @@
       <details>
         <summary>efootprint/ · tests/</summary>
         <ul>
-          <li id="file-dependency-fix" data-steps="dependencies"><a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>efootprint/abstract_modeling_classes/modeling_object.py</code></a> <span data-change="modified">Planned fix</span><span data-reading-links><a data-read href="#dependencies">1.2</a></span><small>Preserve every dependent sharing a controller. <a href="known-issues.md">SI-1 reproduction</a>; regression in <code>tests/abstract_modeling_classes/test_modeling_object.py</code>.</small></li>
-          <li id="file-library-rename" data-steps="examples"><code>efootprint/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples">1.8</a></span><small>Introductory/how-to registries, packaged data, authoring helpers, public imports. <a href="#examples">Rename</a></small></li>
+          <li id="file-dependency-fix" data-steps="consume"><a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>efootprint/abstract_modeling_classes/modeling_object.py</code></a> <span data-change="modified">Planned fix</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Preserve every dependent sharing a controller. <a href="known-issues.md">SI-1 reproduction</a>; regression in <code>tests/abstract_modeling_classes/test_modeling_object.py</code>.</small></li>
+          <li id="file-library-rename" data-steps="examples"><code>efootprint/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Introductory/how-to registries, packaged data, authoring helpers, public imports. <a href="#examples">Rename</a></small></li>
           <li><code>tests/test_modeling_templates.py → test_modeling_examples.py</code> <span data-change="rename">Renamed</span><small>Registry completeness, package loading, computation and JSON round-trip.</small></li>
           <li><code>in-repo catalog callers and tests</code> <span data-change="modified">Modified</span><small>Coordinated API cutover; no deprecated aliases.</small></li>
         </ul>
@@ -325,12 +315,12 @@
 </header>
 
 <section id="approach">
-  <h2>1. Proposed code, in reading order</h2>
-  <p data-reading-note>Code sketches describe proposed shapes and seams, not implemented code.
-  Select a step to highlight its files in the left-hand tree. Code-block titles name their owning file,
-  relative to <code>model_builder/</code>; paths outside it start with <code>../</code>.</p>
+  <h2>1. Follow the interactions through the code</h2>
+  <p data-reading-note>Proposed changes, not implemented code. Select an interaction to highlight its
+  files in the left-hand tree. Code-block paths are relative to <code>model_builder/</code>;
+  paths outside it start with <code>../</code>.</p>
   <article id="contract" data-decision>
-    <h3><a href="#contract">1.1 · Define field identity and stored configuration</a> <span data-status="proposal">Proposed</span></h3>
+    <h3><a href="#contract">1.1 · Shared data: field identity and configuration</a> <span data-status="proposal">Proposed</span></h3>
 <p data-files><strong>Files</strong> <a href="#file-domain"><code>domain/services/simplified_inputs.py</code></a></p>
     <p>Extend the existing per-model <code>interface_config</code> with <code>simplified_inputs</code>.
     Identify a field by <strong>owner object ID + constructor attribute name</strong>, scoped to its modeling.
@@ -389,13 +379,15 @@ class SimplifiedInputsDefinition(TypedDict):
 
   </article>
 
-  <article id="dependencies" data-decision>
-    <h3><a href="#dependencies">1.2 · Resolve those addresses into an eligible-field catalog</a> <span data-status="proposal">Proposed</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-forms"><code>adapters/forms/form_field_generator.py</code></a> · <a href="#file-conditional-inputs"><code>domain/conditional_inputs.py</code></a> · <a href="#file-timeseries-registry"><code>adapters/forms/timeseries_builder_registry.py</code></a> · <a href="#file-domain"><code>domain/services/simplified_inputs.py</code></a></p>
+  <article id="configure" data-decision>
+    <h3><a href="#configure">1.2 · Configure simplified inputs</a> <span data-status="proposal">Proposed</span></h3>
+    <p data-reading-note>Follow an expert opening Configure, choosing Provider, editing help, and saving.</p>
+<p data-files><strong>Files</strong> <a href="#file-views"><code>adapters/views/views_simplified_inputs.py</code></a> · <a href="#file-forms"><code>adapters/forms/form_field_generator.py</code></a> · <a href="#file-domain"><code>domain/services/simplified_inputs.py</code></a> · <a href="#file-presenter"><code>adapters/presenters/simplified_inputs.py</code></a> · <a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a></p>
+    <h4 id="dependencies">1 · Open Configure: discover eligible inputs</h4>
     <p>Reuse constructor signatures and class metadata directly. Extract only dotted-path resolution and
     the timeseries builder-support lookup; add simplified-input eligibility and selection rules on top.</p>
 
-    <h4>Today · discovery and rendering are mixed together</h4>
+    <h5>Today · discovery and rendering are mixed together</h5>
     <ul>
       <li><a href="../../../model_builder/adapters/forms/form_field_generator.py"><code>adapters/forms/form_field_generator.py</code></a>:
       <code>generate_dynamic_form()</code> reads constructor signatures, unwraps optional annotations, reads
@@ -409,7 +401,7 @@ class SimplifiedInputsDefinition(TypedDict):
       to a registered builder before generating its editor context; an unfamiliar value stays read-only.</li>
     </ul>
 
-    <h4>Refactor · share two helpers, leave metadata access alone</h4>
+    <h5>Refactor · share two helpers, leave metadata access alone</h5>
     <p>Forms and the new service both use the existing <code>get_init_signature_params()</code>,
     <code>domain/type_annotation_utils.py</code> and class choice dictionaries. No new metadata wrapper is needed.</p>
     <p><strong>Conditional paths:</strong> extract the traversal currently embedded in
@@ -442,7 +434,7 @@ def can_edit_timeseries(annotation, value) -&gt; bool:
     <p>Sources' constructor-input checks and the stateless preview endpoint already use the existing
     helpers; neither needs a metadata-lookup refactor for this feature.</p>
 
-    <h4>Extend · add eligibility and a model-wide dependent index</h4>
+    <h5>Extend · add eligibility and a model-wide dependent index</h5>
     <p><code>domain/services/simplified_inputs.py</code> adds feature-specific work: identify constructor
     inputs by owner address, apply the allowed-input policy, and index conditional dependents
     across the model. A widget name alone is insufficient: Country and Server references can both render as
@@ -463,7 +455,6 @@ class FieldCatalog:
 
 def build_catalog(model_web, *, can_edit_timeseries) -&gt; FieldCatalog: ...
 def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
-def validate_definition(definition, catalog) -&gt; None: ...
 </code></pre></div>
     <p><code>can_edit_timeseries</code> is the ordinary Python function defined above in
     <code>adapters/forms/timeseries_builder_registry.py</code>. Pass the function itself, not its result:</p>
@@ -482,150 +473,13 @@ def validate_definition(definition, catalog) -&gt; None: ...
     </ul>
     <p>For example, including an API's Model also requires including Resolution for every video job
     linked to that API.</p>
-    <p>Configuration, saving and JSON import use this same catalog to enforce consistent selections.
-    Existing forms still provide the labels and editors.</p>
-    <h4>Validation · separate existing rules from new selection checks</h4>
-    <p>Reuse the library's <code>check_belonging_to_authorized_values()</code> for value validation.
-    The new validator checks saved field addresses, eligibility and required companion fields.
-    Selection traversal tracks visited addresses; it does not introduce blanket cycle rejection.</p>
-    <p><strong>Confirmed library bug:</strong> <code>attributes_with_depending_values()</code> overwrites
-    earlier dependents sharing a controller. <a href="known-issues.md">SI-1 records the reproduction and
-    focused library fix</a>; do not work around it in the interface.</p>
-    <aside id="new-dependents" data-note="agreed">
-      <p><span data-status="agreed">Agreed · required fields during creation</span></p>
-      <p>An API's Model is selected; a new linked video job's Resolution appears included and required
-      before saving. Its help remains editable; removal is locked only while required. Creation saves
-      the object and required selection together. <a href="#lifecycle">Preview and save boundaries →</a></p>
-      <p><a href="../../../../e-footprint/efootprint/builders/external_apis/ecologits/ecologits_video_external_api.py">Existing video dependency</a>.
-      No concrete ineligible-dependent case has been found; no silent-pruning policy is proposed.</p>
-    </aside>
-  </article>
+    <p>The next step joins this catalog to existing form contexts; the configuration save below uses
+    the same answers to check the submitted selection.</p>
 
-  <article id="atomic-edit" data-decision>
-    <h3><a href="#atomic-edit">1.3 · Add the selected-input mutation use case</a> <span data-status="proposal">Proposed</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-views"><code>adapters/views/views_simplified_inputs.py</code></a> · <a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a> · <a href="#file-factory"><code>domain/object_factory.py</code></a></p>
-    <p>Extract a prepare/commit seam from the existing object edit conversion so a simplified edit can submit
-    one library <code>ModelingUpdate</code> across all affected owners. Do not call the existing one-owner edit
-    use case repeatedly: that would persist invalid intermediate states.</p>
-    <figure id="mutation-call-path">
-      <div tabindex="0" aria-label="Input-save call path; links locate the files in the change tree">
-        <svg viewBox="0 0 920 164" role="img" aria-labelledby="save-title save-desc">
-          <title id="save-title">Input-save call path through concrete files</title>
-          <desc id="save-desc">The new view invokes the new use case, which prepares changes through
-          object_factory, applies a library ModelingUpdate, and persists once through ModelWeb.
-          Click any node to locate its file. The presenter handles the response in step 1.5.</desc>
-          <defs><marker id="arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10" fill="#648478"/></marker></defs>
-          <g font-family="system-ui, sans-serif" font-size="13" fill="#21312f">
-            <a href="#file-views"><rect x="8" y="20" width="164" height="119" rx="8" fill="#edf4fb" stroke="#c5d6e5"/>
-              <text x="20" y="43" fill="#285e91">1 · New view</text><text x="20" y="63" font-size="11">adapters/views/</text><text x="20" y="81">views_simplified_</text><text x="20" y="98">inputs.py</text><text x="20" y="123" font-size="11">Parse + bind model</text></a>
-            <path d="M172 67H191" stroke="#648478" marker-end="url(#arrow-b)"/>
-            <a href="#file-usecase"><rect x="196" y="20" width="164" height="119" rx="8" fill="#edf4fb" stroke="#c5d6e5"/>
-              <text x="208" y="43" fill="#285e91">2 · New use case</text><text x="208" y="63" font-size="11">application/use_cases/</text><text x="208" y="88">simplified_inputs.py</text><text x="208" y="123" font-size="11">Check selection + closure</text></a>
-            <path d="M360 67H379" stroke="#648478" marker-end="url(#arrow-b)"/>
-            <a href="#file-factory"><rect x="384" y="20" width="164" height="119" rx="8" fill="#eaf3ed" stroke="#b7d1c2"/>
-              <text x="396" y="43" fill="#176751">3 · Extract seam</text><text x="396" y="63" font-size="11">domain/</text><text x="396" y="88">object_factory.py</text><text x="396" y="123" font-size="11">Prepare; do not persist</text></a>
-            <path d="M548 67H567" stroke="#648478" marker-end="url(#arrow-b)"/>
-            <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py"><rect x="572" y="20" width="164" height="119" rx="8" fill="#f5f7f3" stroke="#c7d5ce"/>
-              <text x="584" y="43" fill="#5e706e">4 · Reuse library</text><text x="584" y="88">ModelingUpdate</text><text x="584" y="123" font-size="11">One multi-owner batch</text></a>
-            <path d="M736 67H755" stroke="#648478" marker-end="url(#arrow-b)"/>
-            <a href="#file-model-web"><rect x="760" y="20" width="152" height="119" rx="8" fill="#eaf3ed" stroke="#b7d1c2"/>
-              <text x="772" y="43" fill="#176751">5 · Existing boundary</text><text x="772" y="63" font-size="11">domain/entities/</text><text x="772" y="79" font-size="11">web_core/</text><text x="772" y="98">model_web.py</text><text x="772" y="123" font-size="11">persist_to_cache()</text></a>
-          </g>
-        </svg>
-      </div>
-      <figcaption>New names are proposed. File nodes link to the change tree; the unchanged library node opens
-      existing source. A rejected batch never reaches persistence. Response rendering follows in step 1.5.</figcaption>
-    </figure>
-<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>New · proposed command boundary</small></p><pre><code>@dataclass
-class EditSimplifiedInput:
-    address: FieldAddress
-    parsed_value: dict  # same normalized value/provenance shape as normal editing
-
-@dataclass
-class SimplifiedInputsOutput:
-    changed_fields: set[FieldAddress]
-    notices: list[str]
-
-class EditSimplifiedInputUseCase:
-    def execute(self, command: EditSimplifiedInput) -&gt; SimplifiedInputsOutput: ...
-
-class UpdateSimplifiedDefinitionUseCase:
-    def execute(self, patch: dict) -&gt; SimplifiedInputsOutput: ...
-</code></pre></div>
-    <p>The view binds the command to a repository using <code>slot + expected System ID</code>.
-    Configuration patches contain only changed membership/help/title/guidance properties, or a clear-fields
-    instruction. The presenter uses <code>changed_fields</code> to refresh the UI and displays any notices.</p>
-    <div data-comparison>
-      <div><h4>Today · one owner per edit</h4><div data-code><p data-code-file><a href="#file-factory"><code>domain/object_factory.py</code></a><small>Existing flow, abridged</small></p><pre><code>edit_object_from_parsed_data(...)
-  → convert inputs
-  → apply some metadata immediately
-  → ModelingUpdate(changes_list)</code></pre></div></div>
-      <div><h4>Proposed · separate preparation</h4><div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed orchestration, calling the factory helper</small></p><pre><code>prepare_input_changes(...)
-  → value pairs + deferred metadata
-reconcile dependent choices
-ModelingUpdate(all_value_pairs)
-apply accepted metadata
-persist once</code></pre></div></div>
-    </div>
-    <p><code>domain/object_factory.py</code> owns <code>prepare_input_changes()</code>.
-    Both the existing normal-edit function and the new use case call it; only the new use case gathers
-    changes across owners. First-valid fallback remains specific to simplified editing.</p>
-    <h4>Save order</h4>
-    <ol>
-      <li>Check the addressed field is selected and eligible; reuse normal value/unit/builder conversion.</li>
-      <li>Prepare dependent changes using the candidate controller values. Keep valid values; otherwise choose
-      the first allowed value. A missing conditional branch adds no restriction; an empty allowed list rejects
-      the change. The library remains the final validator.</li>
-      <li>Apply the whole value batch with <code>ModelingUpdate</code>, then its prepared provenance changes,
-      and persist once. Any failure discards the candidate model and preserves the browser draft.</li>
-    </ol>
-    <p><strong>Important refactor:</strong> some metadata edits currently mutate inputs immediately.
-    Defer them too, so failed dependent validation cannot leave a changed source/comment behind.
-    Keep existing source identity and confidence behavior, preserve omitted metadata, and do not edit shared
-    Source records through this patch.</p>
-  </article>
-
-  <article id="persistence" data-decision>
-    <h3><a href="#persistence">1.4 · Persist through the existing repository ports</a> <span data-status="proposal">Proposed</span></h3>
-    <p data-files><strong>Files</strong> <a href="#file-repositories"><code>adapters/repositories/session_system_repository.py</code></a> · <a href="#file-workspace-repositories"><code>adapters/repositories/workspace_base.py</code></a></p>
-    <p>Keep the two existing save paths. Configuration-only edits patch stored UI settings;
-    value edits persist the updated modeling and its staged settings together.</p>
-    <div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed call sites, reusing existing APIs</small></p><pre><code># Definition-only use case
-repository.interface_config = candidate_config
-repository.save_interface_config()
-
-# Selected-input value use case: after validation
-model_web.persist_to_cache()  # merges staged config via repository
-</code></pre></div>
-    <h4>Existing gaps to close</h4>
-    <ul>
-      <li><code>adapters/repositories/session_system_repository.py</code>: <code>save_data()</code> publishes
-      configuration before checking size. Publish it only after validation, budget checks and accepted writes.
-      Scope recovery settings by slot and System ID so one model cannot inherit another's configuration.</li>
-      <li><code>adapters/views/views_workspace.py</code>: duplication currently copies library data only.
-      Copy interface settings independently too; remap System-owned field addresses if the System ID changes.</li>
-      <li>The same file clears slots before restoring an import. Instead, prepare every incoming model in
-      isolation and validate definitions, distinct System IDs and the combined size before replacing live slots.</li>
-    </ul>
-    <details>
-      <summary>Publishing a prepared import</summary>
-      <p><code>adapters/repositories/workspace_base.py</code> stages documents under fresh cache keys.
-      Keep the previous keys/index reachable until required writes succeed, then publish the replacement.
-      Expose this operation through <code>domain/interfaces/workspace_repository.py</code> and implement the
-      same contract in the in-memory repository.</p>
-      <p><code>adapters/repositories/cache_backend.py</code> currently logs some write failures without
-      returning an outcome. Report those outcomes so the caller can reject the import and remove only its
-      staged keys. Preserve existing canonical/recovery formats and degraded-storage reporting; this does
-      not promise a transaction across both cache backends.</p>
-    </details>
-  </article>
-
-  <article id="workspace" data-decision>
-    <h3><a href="#workspace">1.5 · Build the presenter and reusable partials</a> <span data-status="proposal">Proposed</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-presenter"><code>adapters/presenters/simplified_inputs.py</code></a> · <a href="#file-partials"><code>templates/model_builder/simplified_inputs/</code></a> · <a href="#file-oob"><code>adapters/presenters/oob_regions.py</code></a></p>
-    <p>The new presenter groups existing field contexts by object type and owner.
-    <code>templates/model_builder/model_builder_main.html</code> keeps a simplified-input container beside
-    each model's canvas. Render it on first use; switching views hides it rather than destroying its drafts.</p>
+    <h4 id="workspace">2 · Build Navigation and the object grid</h4>
+    <p><code>adapters/presenters/simplified_inputs.py</code> groups the eligible fields' existing form
+    contexts by object type and owner, with saved membership and help attached. Configure renders all
+    eligible fields; the consumption view later uses the same structure with only selected fields.</p>
 <div data-code><p data-code-file><a href="#file-presenter"><code>adapters/presenters/simplified_inputs.py</code></a><small>New · proposed presenter output, not persisted</small></p><pre><code>{
     "model_identity": {"slot": slot, "system_id": system_id},
     "definition": definition,
@@ -650,37 +504,191 @@ model_web.persist_to_cache()  # merges staged config via repository
     ],
 }
 </code></pre></div>
-    <h4>Partial ownership</h4>
+    <h5>Partial ownership</h5>
     <ul>
       <li><code>templates/model_builder/simplified_inputs/workspace.html</code> includes
       <code>templates/model_builder/simplified_inputs/navigation.html</code> and object groups.</li>
       <li><code>templates/model_builder/simplified_inputs/object.html</code> renders
       <code>templates/model_builder/simplified_inputs/field.html</code>: the existing value/source editors plus
       <code>templates/model_builder/simplified_inputs/bookmark.html</code>. Configure reuses it with selection/help controls.</li>
-      <li><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
-      builder partials, parser and preview endpoint. Keep the existing left-hand chart placement.</li>
     </ul>
-    <p>Save responses replace only affected fields/objects and the shared Results controls.
-    Prefix DOM IDs with model and field identity. Load composite editors on demand, not for every field
-    during initial rendering.</p>
-    <details>
-      <summary>Filtering and restoring drafts</summary>
-      <ul>
-        <li>The Configure filter reads draft membership and filters both Navigation and content.
-        Keep every eligible field inside a matching object; move focus before hiding the last selected object.</li>
-        <li>Keep view, scroll, expansion and filter state by System ID. Apply JSON-opening defaults only on
-        import; duplication starts an independent browser context.</li>
-        <li>Model switching currently closes the shared panel. For simplified timeseries, detach its DOM,
-        stop the preview, and restore both on return. Only one editor/preview is active. Removing a model
-        disposes its stored DOM; ordinary panels retain their existing save/discard protection.</li>
-      </ul>
-      <p>The browser helpers implementing this are described in <a href="#saves">1.6</a>.</p>
-    </details>
+    <p>Prefix DOM IDs with model and field identity. Configure uses current-value previews; initialize
+    composite editors only when opened. The selected-object filter reads draft membership and filters
+    both Navigation and content. Keep all eligible fields inside each matching object, moving focus
+    before hiding the last selected object.</p>
+
+    <h4 id="configuration-save">3 · Change the selection and save it</h4>
+    <p>Choosing Provider uses the catalog's dependent links to include Model and further required inputs
+    in the draft, with an explanation on locked inclusion controls. The save use case uses
+    <code>complete_selection()</code> for the same dependency rule.
+    On Save, <code>validate_definition()</code> checks that the submitted addresses exist, are eligible,
+    and include every required companion.</p>
+<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>New · shared result and definition-only use case</small></p><pre><code>@dataclass
+class SimplifiedInputsOutput:
+    changed_fields: set[FieldAddress]
+    notices: list[str]
+
+class UpdateSimplifiedDefinitionUseCase:
+    def execute(self, patch: dict) -&gt; SimplifiedInputsOutput: ...
+</code></pre></div>
+<div data-code><p data-code-file><a href="#file-domain"><code>domain/services/simplified_inputs.py</code></a><small>New · selection validation, also used by imports</small></p><pre><code>def validate_definition(definition, catalog) -&gt; None: ...
+</code></pre></div>
+    <p>The view binds requests to <code>slot + expected System ID</code>. Configure keeps a delta of
+    membership/help/title/guidance properties in <code>../theme/static/scripts/simplified_inputs.js</code>,
+    not a full copied definition. Save submits that delta through the
+    <a href="#saves">shared mutation queue</a>; Cancel drops it.</p>
+    <p>Clear sends an explicit clear-all-fields instruction only after confirmation and Configure Save.
+    Individually excluded fields retain help. If an inline bookmark saves while a Configure draft exists,
+    update that property's draft/base value without wiping other edits; later Save or Cancel must not
+    undo the accepted inline change.</p>
+<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed definition save through existing repository API</small></p><pre><code># After applying the patch and validating the candidate definition:
+repository.interface_config = candidate_config
+repository.save_interface_config()
+</code></pre></div>
+    <p>Configuration-only saves patch stored UI settings without hydrating, computing or serializing the
+    model solely for persistence. The presenter uses <code>changed_fields</code> to refresh affected
+    counts/bookmarks and displays notices.</p>
+    <p><strong>Repository correction:</strong> <code>adapters/repositories/session_system_repository.py</code>
+    currently publishes configuration in <code>save_data()</code> before checking size. Stage it until
+    validation, budget checks and accepted writes succeed; keep parity in the in-memory repository.
+    Scope recovery settings by slot and System ID so one model cannot inherit another's configuration.</p>
   </article>
 
-  <article id="totals" data-decision>
-    <h3><a href="#totals">1.5a · Extend the paired Results renderer</a> <span data-status="proposal">Existing seam</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-oob"><code>adapters/presenters/oob_regions.py</code></a> · <a href="#file-hooks"><code>domain/entities/web_abstract_modeling_classes/modeling_object_web.py</code></a></p>
+  <article id="lifecycle" data-decision>
+    <h3><a href="#lifecycle">1.3 · Author simplified inputs while modeling</a> <span data-status="proposal">Proposed</span></h3>
+    <p data-reading-note>Follow a bookmark edit, then create a dependent input or delete its owner.</p>
+<p data-files><strong>Files</strong> <a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a> · <a href="#file-sources"><code>adapters/views/source_table_row_editor_context.py</code></a> · <a href="#file-lifecycle"><code>application/use_cases/{create,edit,delete}_object.py</code></a> · <a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a></p>
+    <h4>1 · Open a bookmark in an edit panel or Sources row</h4>
+    <p><code>adapters/forms/form_context_builder.py</code> attaches the true owner address to each
+    eligible field, including Storage fields displayed inside a Server panel.
+    <code>adapters/views/source_table_row_editor_context.py</code> adds the same bookmark context to
+    each input row while retaining its raw-JSON metadata path and current value editor.</p>
+    <p>The shared <code>templates/model_builder/simplified_inputs/bookmark.html</code> opens selection/help
+    controls. <code>../theme/static/scripts/simplified_inputs.js</code> sends settings-only patches to
+    <a href="#configuration-save"><code>UpdateSimplifiedDefinitionUseCase</code></a>: inclusion immediately,
+    help on completion. It never submits the panel's value draft. Undo applies an inverse membership
+    patch checked against current dependencies.</p>
+    <h4 id="new-dependents">2 · Create an object with required simplified inputs</h4>
+    <p><span data-status="agreed">Agreed</span> An API's Model is included; a new linked video job's
+    Resolution appears included and required before saving. The bookmark explains the controlling field
+    on hover/focus and still opens editable help. See the
+    <a href="../../../../e-footprint/efootprint/builders/external_apis/ecologits/ecologits_video_external_api.py">existing video dependency</a>.</p>
+    <ol>
+      <li><code>adapters/forms/form_context_builder.py</code> uses the catalog and conditional metadata
+      to attach required-selection context for each candidate parent/reference.
+      <code>../theme/static/scripts/simplified_inputs.js</code> applies it when that choice changes:
+      include the dependent and lock removal only while required. Nothing is persisted yet.</li>
+      <li><code>application/use_cases/create_object.py</code> carries pending selection/help with the
+      creation input. After creation/hooks, resolve final owner IDs, rebuild the catalog and run
+      <code>complete_selection()</code> against the resulting model. Persist model and settings together;
+      never trust the browser's required-state flag.</li>
+      <li>Failed creation retains the draft for correction; failure/cancellation leaves no references.
+      Report only automatic additions not already shown in the submitted draft.</li>
+    </ol>
+    <h4>3 · Delete an object containing selected inputs</h4>
+    <p><code>application/use_cases/delete_object.py</code> uses the actual cascade set to extend the
+    existing confirmation and prune selection/retained-help entries in the same save. Keep its actions
+    unchanged. After create/delete/relink, refresh affected dependencies, counts and bookmarks without
+    replacing unrelated drafts. Required inclusion is derived, not a permanent stored lock.</p>
+  </article>
+
+  <article id="consume" data-decision>
+    <h3><a href="#consume">1.4 · Use simplified inputs and see the result</a> <span data-status="proposal">Proposed</span></h3>
+    <p data-reading-note>Follow a Provider change through autosave, dependent values and the refreshed total;
+    then open a timeseries editor.</p>
+<p data-files><strong>Files</strong> <a href="#file-queue"><code>../theme/static/scripts/mutation_queue.js</code></a> · <a href="#file-views"><code>adapters/views/views_simplified_inputs.py</code></a> · <a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a> · <a href="#file-factory"><code>domain/object_factory.py</code></a> · <a href="#file-oob"><code>adapters/presenters/oob_regions.py</code></a></p>
+    <h4>1 · Render the selected fields</h4>
+    <p>Reuse the <a href="#workspace">grouped presenter and partials from Configure</a>, filtering to saved
+    included fields and enabling their value/source editors. Timeseries use a string preview and Edit
+    button in the same field layout. Source, confidence and comment stay at that shared field boundary.</p>
+    <h4 id="saves">2 · Complete an edit and send its save</h4>
+    <p><code>../theme/static/scripts/simplified_inputs.js</code> enqueues simple value/provenance edits on
+    completion; normal/timeseries panels enqueue on Save. Both models share session state, so
+    <code>../theme/static/scripts/mutation_queue.js</code> owns one workspace mutation queue.
+    Bookmark patches use it too; stateless previews stay outside it.</p>
+<div data-code><p data-code-file><a href="#file-queue"><code>../theme/static/scripts/mutation_queue.js</code></a><small>New · send starts the existing HTMX request</small></p><pre><code>enqueueMutation({ model: { slot, systemId }, target, patch, send });
+</code></pre></div>
+    <p>Coalesce unsent edits to the same property, never cancel a sent mutation. Include slot/System ID
+    and a response-generation token; reject replaced-model targets and prevent an older response from
+    overwriting a newer draft. Failure retains the draft and pauses dependent edits for retry/discard.
+    Apply shared toolbar updates only for the active model.</p>
+    <h4 id="atomic-edit">3 · Save Provider and affected values together</h4>
+    <p>Extract a prepare/commit seam from the existing object edit conversion so a simplified edit can submit
+    one library <code>ModelingUpdate</code> across all affected owners. Do not call the existing one-owner edit
+    use case repeatedly: that would persist invalid intermediate states.</p>
+    <figure id="mutation-call-path">
+      <div tabindex="0" aria-label="Input-save call path; links locate the files in the change tree">
+        <svg viewBox="0 0 920 164" role="img" aria-labelledby="save-title save-desc">
+          <title id="save-title">Input-save call path through concrete files</title>
+          <desc id="save-desc">The new view invokes the new use case, which prepares changes through
+          object_factory, applies a library ModelingUpdate, and persists once through ModelWeb.
+          Click any node to locate its file. The same response updates the field and totals below.</desc>
+          <defs><marker id="arrow-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10" fill="#648478"/></marker></defs>
+          <g font-family="system-ui, sans-serif" font-size="13" fill="#21312f">
+            <a href="#file-views"><rect x="8" y="20" width="164" height="119" rx="8" fill="#edf4fb" stroke="#c5d6e5"/>
+              <text x="20" y="43" fill="#285e91">1 · New view</text><text x="20" y="63" font-size="11">adapters/views/</text><text x="20" y="81">views_simplified_</text><text x="20" y="98">inputs.py</text><text x="20" y="123" font-size="11">Parse + bind model</text></a>
+            <path d="M172 67H191" stroke="#648478" marker-end="url(#arrow-b)"/>
+            <a href="#file-usecase"><rect x="196" y="20" width="164" height="119" rx="8" fill="#edf4fb" stroke="#c5d6e5"/>
+              <text x="208" y="43" fill="#285e91">2 · New use case</text><text x="208" y="63" font-size="11">application/use_cases/</text><text x="208" y="88">simplified_inputs.py</text><text x="208" y="123" font-size="11">Reconcile dependents</text></a>
+            <path d="M360 67H379" stroke="#648478" marker-end="url(#arrow-b)"/>
+            <a href="#file-factory"><rect x="384" y="20" width="164" height="119" rx="8" fill="#eaf3ed" stroke="#b7d1c2"/>
+              <text x="396" y="43" fill="#176751">3 · Extract seam</text><text x="396" y="63" font-size="11">domain/</text><text x="396" y="88">object_factory.py</text><text x="396" y="123" font-size="11">Prepare; do not persist</text></a>
+            <path d="M548 67H567" stroke="#648478" marker-end="url(#arrow-b)"/>
+            <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py"><rect x="572" y="20" width="164" height="119" rx="8" fill="#f5f7f3" stroke="#c7d5ce"/>
+              <text x="584" y="43" fill="#5e706e">4 · Reuse library</text><text x="584" y="88">ModelingUpdate</text><text x="584" y="123" font-size="11">One multi-owner batch</text></a>
+            <path d="M736 67H755" stroke="#648478" marker-end="url(#arrow-b)"/>
+            <a href="#file-model-web"><rect x="760" y="20" width="152" height="119" rx="8" fill="#eaf3ed" stroke="#b7d1c2"/>
+              <text x="772" y="43" fill="#176751">5 · Existing boundary</text><text x="772" y="63" font-size="11">domain/entities/</text><text x="772" y="79" font-size="11">web_core/</text><text x="772" y="98">model_web.py</text><text x="772" y="123" font-size="11">persist_to_cache()</text></a>
+          </g>
+        </svg>
+      </div>
+      <figcaption>New names are proposed. File nodes link to the change tree; the unchanged library node opens
+      existing source. A rejected batch never reaches persistence. The same response updates the field and totals below.</figcaption>
+    </figure>
+<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>New · proposed command boundary</small></p><pre><code>@dataclass
+class EditSimplifiedInput:
+    address: FieldAddress
+    parsed_value: dict  # same normalized value/provenance shape as normal editing
+
+class EditSimplifiedInputUseCase:
+    def execute(self, command: EditSimplifiedInput) -&gt; SimplifiedInputsOutput: ...
+</code></pre></div>
+    <p>The view uses the same slot/System-ID binding and shared
+    <a href="#configuration-save"><code>SimplifiedInputsOutput</code></a> as definition saves.</p>
+    <div data-comparison>
+      <div><h5>Today · one owner per edit</h5><div data-code><p data-code-file><a href="#file-factory"><code>domain/object_factory.py</code></a><small>Existing flow, abridged</small></p><pre><code>edit_object_from_parsed_data(...)
+  → convert inputs
+  → apply some metadata immediately
+  → ModelingUpdate(changes_list)</code></pre></div></div>
+      <div><h5>Proposed · separate preparation</h5><div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed orchestration, calling the factory helper</small></p><pre><code>prepare_input_changes(...)
+  → value pairs + deferred metadata
+reconcile dependent choices
+ModelingUpdate(all_value_pairs)
+apply accepted metadata
+persist once</code></pre></div></div>
+    </div>
+    <p><code>domain/object_factory.py</code> owns <code>prepare_input_changes()</code>.
+    Both the existing normal-edit function and the new use case call it; only the new use case gathers
+    changes across owners. First-valid fallback remains specific to simplified editing.</p>
+    <h5>Save order</h5>
+    <ol>
+      <li>Check the addressed field is selected and eligible; reuse normal value/unit/builder conversion.</li>
+      <li>Prepare dependent changes using the candidate controller values. Keep valid values; otherwise choose
+      the first allowed value. A missing conditional branch adds no restriction; an empty allowed list rejects
+      the change. The library remains the final validator.</li>
+      <li>Apply the whole value batch with <code>ModelingUpdate</code>, then its prepared provenance changes,
+      and persist once. Any failure discards the candidate model and preserves the browser draft.</li>
+    </ol>
+    <p><strong>Important refactor:</strong> some metadata edits currently mutate inputs immediately.
+    Defer them too, so failed dependent validation cannot leave a changed source/comment behind.
+    Keep existing source identity and confidence behavior, preserve omitted metadata, and do not edit shared
+    Source records through this patch.</p>
+    <p><strong>Tracked library fix:</strong> <code>attributes_with_depending_values()</code> drops earlier
+    dependents sharing a controller. Keep the <a href="known-issues.md">SI-1 fix and regression</a> in the
+    library; the new edit path must not compensate for it in interface code.</p>
+    <p>The presenter replaces only affected fields/objects, with accepted dependent choices and notices.
+    It does not replace unrelated dirty controls. Omitted provenance properties remain unchanged.</p>
+    <h4 id="totals">4 · Refresh both Results controls</h4>
     <p>Use the active System's <code>total_footprint.sum()</code> and library display formatting.
     <code>ModelWeb.persist_to_cache()</code> already pulls the total. Build one small results context,
     then render both controls through the existing <code>results_buttons</code> OOB region.</p>
@@ -700,78 +708,70 @@ model_web.persist_to_cache()  # merges staged config via repository
     <p>Both controls show the active model's accepted total. While saving, mark it updating; after failure,
     retain the last saved total. Configuration-only saves do not recalculate. Invalidate open detailed results
     through their existing refresh path so they cannot silently disagree with the new total.</p>
+    <h4 id="timeseries">5 · Open and save one timeseries</h4>
+    <p><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
+    builder partials, parser and stateless preview endpoint. Load it on demand for one addressed field,
+    keeping the chart to the panel's left. Strategy drafts remain in that editor; Save uses the same
+    selected-input use case, Cancel discards the editor draft. Switching models parks it as described
+    <a href="#model-context">below</a>.</p>
   </article>
 
-  <article id="saves" data-decision>
-    <h3><a href="#saves">1.6 · Coordinate requests and retain per-model browser state</a> <span data-status="proposal">Proposed</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-queue"><code>../theme/static/scripts/mutation_queue.js</code></a> · <a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a> · <a href="#file-browser-existing"><code>../theme/static/scripts/model_comparison.js</code></a></p>
-    <p>Both models share a session and active-slot pointer. Use <strong>one queue for workspace-changing
-    requests</strong>, with per-model dirty/saving/error state. Stateless previews stay outside this queue.</p>
-<div data-code><p data-code-file><a href="#file-queue"><code>../theme/static/scripts/mutation_queue.js</code></a><small>New · proposed queue API; send starts the existing HTMX request</small></p><pre><code>enqueueMutation({ model: { slot, systemId }, target, patch, send });
-whenSavesSettled(modelIds);
-canExport(modelIds);
-</code></pre></div>
+  <article id="navigation-flow" data-decision>
+    <h3><a href="#navigation-flow">1.5 · Navigate, duplicate and exchange models</a> <span data-status="proposal">Proposed</span></h3>
+    <p data-reading-note>Leave an edited model, return to it, then download or open a modeling file.</p>
+<p data-files><strong>Files</strong> <a href="#file-shell"><code>templates/model_builder/model_builder_main.html</code></a> · <a href="#file-browser-existing"><code>../theme/static/scripts/model_comparison.js</code></a> · <a href="#file-views-existing"><code>adapters/views/views_workspace.py</code></a> · <a href="#file-workspace-repositories"><code>adapters/repositories/workspace_base.py</code></a></p>
+    <h4 id="model-context">1 · Switch views or models and return</h4>
+    <p><code>templates/model_builder/model_builder_main.html</code> keeps a simplified-input container
+    beside each resident canvas. Render it on first use; switching hides rather than destroys it.
+    The toolbar offers the destination view, with Edge modeling only in Modeling. Configure is entered
+    from Simplified inputs.</p>
 <div data-code><p data-code-file><a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a><small>New · transient state keyed by System ID</small></p><pre><code>{
   view, expandedObjects, scrollTop, selectedOnly,
   configurationDelta, dirtyFields, parkedTimeseriesEditor
 }
 </code></pre></div>
-<div data-code><p data-code-file><a href="#file-browser-existing"><code>../theme/static/scripts/model_comparison.js</code></a><small>Modified · proposed calls to shared lifecycle helpers</small></p><pre><code>parkModelContext(systemId);
+<div data-code><p data-code-file><a href="#file-browser-existing"><code>../theme/static/scripts/model_comparison.js</code></a><small>Modified · calls to shared lifecycle helpers</small></p><pre><code>parkModelContext(systemId);
 restoreModelContext(systemId);
 disposeModelContext(systemId);
 </code></pre></div>
-    <p>Define the park/restore/dispose helpers in <code>../theme/static/scripts/simplified_inputs.js</code>;
-    connect them to model switching through the existing event/module convention.
-    <code>parkedTimeseriesEditor</code> holds detached DOM and preview lifecycle state, not a second model.</p>
-    <h4>Request handling</h4>
-    <ol>
-      <li>Simple editors enqueue on completion; normal/timeseries panels enqueue on Save. Bookmark requests
-      contain settings only. Coalesce unsent edits to the same property, but never cancel a sent mutation.</li>
-      <li>Queue saves, structural edits and model switches together. Each request carries slot/System ID and
-      a response-generation token. Reject replaced-model targets; never overwrite a newer draft with an older response.</li>
-      <li>A failed save keeps its draft and pauses dependent edits for retry/discard. Apply shared toolbar
-      updates only for the active model; preserve ordinary save/discard safeguards on destructive navigation.</li>
-      <li>Every export entry first completes the focused field and waits for the relevant models' saves.
-      Direct links and menus use the same guard. Failed saves require retry/discard; explicit panel/configuration
-      drafts retain their normal warning.</li>
-    </ol>
-    <h4>Configure draft versus inline saves</h4>
-    <p>Store Configure edits as changed properties, not a full copied definition. A later inline save updates
-    that property's draft/base value without wiping other edits; Save applies only the remaining changes.
-    Cancel does not undo successful inline saves. Metadata patches likewise preserve omitted properties.</p>
-    <p>Clear sends an explicit clear-all-fields instruction after confirmation and Configure Save.
-    Undo applies an inverse membership change and validates it against the current model.</p>
-  </article>
-
-  <article id="lifecycle" data-decision>
-    <h3><a href="#lifecycle">1.7 · Hook creation, deletion and Sources into the same services</a> <span data-status="proposal">Proposed</span></h3>
-<p data-files><strong>Files</strong> <a href="#file-lifecycle"><code>application/use_cases/{create,edit,delete}_object.py</code></a> · <a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a> · <a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a> · <a href="#file-sources"><code>adapters/views/source_table_row_editor_context.py</code></a></p>
-    <p>All entry points use the same selection service. The changes belong at these existing boundaries:</p>
-    <ul>
-      <li><strong>Creation preview:</strong> <code>adapters/forms/form_context_builder.py</code> uses the
-      catalog and existing conditional metadata to attach required-selection context for each candidate
-      parent/reference. <code>../theme/static/scripts/simplified_inputs.js</code> applies that context when
-      the chosen reference changes: include the dependent, disable removal, and explain the controller
-      on bookmark hover/focus. The disclosure and help editor stay usable. When no controller requires
-      the field, unlock removal. These are draft settings, not repository writes.</li>
-      <li><code>application/use_cases/create_object.py</code>: carry pending selection/help with the creation
-      input. After creation/hooks, resolve final owner IDs, rebuild the catalog, and run
-      <code>complete_selection()</code> against the resulting model before persisting model and settings
-      together. Never trust the browser's required-state flag. Failed creation leaves no references;
-      retain the draft for correction. Report only additions not already shown in the submitted draft.</li>
-      <li><code>application/use_cases/delete_object.py</code>: use the actual cascade set to append the warning
-      and remove selected/retained-help entries in the same save. Existing confirmation actions stay unchanged.</li>
-      <li><code>adapters/views/source_table_row_editor_context.py</code>: add address and bookmark context to
-      each existing input row. Keep its raw-JSON metadata path and current value editor.</li>
-      <li><code>adapters/forms/form_context_builder.py</code>: attach the true owner to nested fields—Storage
-      fields shown inside a Server panel still belong to Storage. Bookmark saves must not submit the panel's value draft.</li>
-    </ul>
-    <p>After create/delete/relink, refresh affected dependencies, counts and bookmarks without replacing
-    unrelated drafts. Required inclusion is derived, not a stored permanent lock.</p>
+    <p>Define those helpers in <code>../theme/static/scripts/simplified_inputs.js</code> and connect
+    them through the existing event/module convention. Model switching currently closes the shared
+    panel: for simplified timeseries, detach its DOM, stop the preview, then restore both on return.
+    Removing a model disposes its parked DOM; ordinary panels retain existing save/discard protection.
+    Compare hides the resident context without losing drafts.</p>
+    <p>Model switches and structural edits join the <a href="#saves">same queue as saves</a>.
+    Restore view, scroll, expansion and filter state by System ID; apply simplified-versus-modeling
+    opening defaults only when importing JSON, not on every tab switch.</p>
+    <h4 id="exports">2 · Download through the normal toolbar</h4>
+<div data-code><p data-code-file><a href="#file-queue"><code>../theme/static/scripts/mutation_queue.js</code></a><small>New · export readiness for the requested model(s)</small></p><pre><code>whenSavesSettled(modelIds);
+canExport(modelIds);
+</code></pre></div>
+    <p>Every export entry completes the focused field and waits for the relevant models' saves.
+    Direct links and menus share the guard. Failed saves require retry/discard; explicit panel and
+    Configure drafts retain their normal warning. Keep existing single-model/workspace file formats.</p>
+    <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
+    <p><code>adapters/views/views_workspace.py</code> currently duplicates library data only. Copy
+    interface settings independently too, remap System-owned field addresses when that ID changes,
+    and start an independent browser context.</p>
+    <p>Import currently clears slots before restoring their replacements. Prepare every incoming model
+    in isolation instead. Reuse <a href="#configuration-save"><code>validate_definition()</code></a>
+    with the catalog; the import adapter supplies the same <code>can_edit_timeseries</code> function.
+    Check distinct System IDs and combined size before replacing any live slot.</p>
+    <details>
+      <summary>Publishing a prepared import</summary>
+      <p><code>adapters/repositories/workspace_base.py</code> stages documents under fresh cache keys.
+      Keep the previous keys/index reachable until required writes succeed, then publish the replacement.
+      Expose this operation through <code>domain/interfaces/workspace_repository.py</code> and implement the
+      same contract in the in-memory repository.</p>
+      <p><code>adapters/repositories/cache_backend.py</code> currently logs some write failures without
+      returning an outcome. Report those outcomes so the caller can reject the import and remove only its
+      staged keys. Preserve existing canonical/recovery formats and degraded-storage reporting; this does
+      not promise a transaction across both cache backends.</p>
+    </details>
   </article>
 
   <article id="examples" data-decision>
-    <h3><a href="#examples">1.8 · Review the Examples rename as a separate change</a> <span data-status="proposal">Required task</span></h3>
+    <h3><a href="#examples">1.6 · Rename the existing catalog to Examples</a> <span data-status="proposal">Required task</span></h3>
 <p data-files><strong>Files</strong> <a href="#file-library-rename"><code>../../e-footprint/efootprint/modeling_templates/ → ../../e-footprint/efootprint/modeling_examples/</code></a> · <a href="#file-interface-rename"><code>domain/reference_data/modeling_templates/ → domain/reference_data/modeling_examples/</code></a></p>
     <p>Keep one identifiable cross-repo task in this feature's eventual interface-owned <code>tasks.md</code>,
     with its own verification and review. Rename the ready-made modeling concept in depth, before adding new
@@ -791,9 +791,10 @@ disposeModelContext(systemId);
 </section>
 
 <section id="cross-cutting">
-  <h2>3. Cross-cutting concerns and acceptance</h2>
+  <h2>3. Implementation sequence and verification</h2>
   <h3 id="sequence">Implementation sequence</h3>
-  <p>These are planning phases, not generated tasks. Keep the Examples rename and the
+  <p>The walkthrough above follows user interactions; these implementation phases follow dependencies.
+  They are not generated tasks. Keep the Examples rename and the
   <a href="known-issues.md">SI-1 library fix</a> independently reviewable in the later task breakdown.</p>
   <ol id="phases">
     <li><strong>Examples terminology</strong>Coordinated cross-repo rename, resources, callers and independent verification.<small>Independent workstream · finish before new catalog integration.</small></li>
@@ -850,7 +851,7 @@ disposeModelContext(systemId);
   <ul>
     <li><a href="#atomic-edit">Partial saves:</a> dependent values and provenance must be accepted together.</li>
     <li><a href="#persistence">Import failure:</a> old workspace data must remain reachable until the replacement succeeds.</li>
-    <li><a href="#saves">Wrong-model or stale responses:</a> queued requests and restored drafts must retain their owning model.</li>
+    <li><a href="#model-context">Wrong-model or stale responses:</a> queued requests and restored drafts must retain their owning model.</li>
   </ul>
   <p>These are the highest-risk integration boundaries; the verification map targets them directly.</p>
 </section>
@@ -883,13 +884,13 @@ disposeModelContext(systemId);
   <h2>7. Review points before tasks</h2>
   <ol>
     <li><strong>Approach:</strong> review batched saves, prepared imports, the shared request queue and draft restoration.</li>
-    <li><strong>Format:</strong> is the code now concrete and concise enough to review with the linked file tree?</li>
+    <li><strong>Format:</strong> can you follow each interaction through its files and proposed changes without jumping between technical layers?</li>
   </ol>
   <p>Next, after approval: <code>spec-tasks</code>, including the separate rename and
   <a href="known-issues.md">SI-1 fix</a>. The planning skill remains unchanged; feedback is retained in
   <a href="plan-review-feedback.md">plan-review-feedback.md</a>.</p>
 </section>
-<footer>Review-format experiment · Code-first walkthrough, linked change tree and proposed signatures ·
+<footer>Review-format experiment · Interaction-led code walkthrough, linked change tree and proposed signatures ·
 No application implementation or test results are claimed by this document.</footer>
 </main>
 </div>
