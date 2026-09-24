@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home-page starting-point drawer — Implementation plan</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; table-layout: fixed; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  th:nth-child(1), td:nth-child(1) { width: 27%; overflow-wrap: anywhere; }
+  th:nth-child(2), td:nth-child(2) { width: 13%; }
+  th:nth-child(3), td:nth-child(3) { width: 60%; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Home-page starting-point drawer — Implementation plan</h1>
+<p class="status">Status: <strong>Draft</strong> — captured during <code>spec-specify</code> from the kickoff
+conversation; to be refined in the <code>spec-plan</code> stage · 2026-09-24 · Spec:
+<a href="spec.html">spec.html</a></p>
+
+<section>
+  <h2>1. Approach</h2>
+
+  <p>The catalog machinery already exists and is sound:
+  <code>domain/services/template_catalog_service.py</code> builds the ordered groups,
+  <code>adapters/presenters/template_picker_presenter.py::build_picker_groups()</code> turns them into a
+  view model with chips and mkdocs guide URLs, and
+  <code>views_onboarding.py::load_template</code> loads a chosen id into the session. None of that
+  changes. What changes is <em>who renders that view model and where</em>.</p>
+
+  <p>Three moves:</p>
+  <ol>
+    <li><strong>Extract the card markup</strong> from <code>onboarding/template_picker.html</code> into a
+    reusable partial, so the home-page band, the home-page drawer and the existing in-builder overlay all
+    render the same cards from the same <code>build_picker_groups()</code> output. The three differ only in
+    chrome (a section heading, a drawer shell, an overlay shell) and in whether chips/guides are shown.</li>
+    <li><strong>Give <code>views.home</code> the catalog context</strong> and add one new GET endpoint that
+    returns the drawer fragment, HTMX-swapped into a container on the home page. Fetching the drawer at
+    click time (rather than rendering it hidden at page load) keeps the "continue where you left off" state
+    and the replace-confirmation truthful even if the session changed in another tab.</li>
+    <li><strong>Stop auto-showing the overlay.</strong> <code>model_builder_main</code> passes
+    <code>show_template_picker=False</code> unconditionally; <code>is_empty_model</code> keeps its other two
+    jobs (the <code>model_is_empty</code> context flag and the blank-flavoured tour). The overlay lives on
+    for <code>open_template_picker</code> (Help ▸ Open templates) and <code>reset_model</code>.</li>
+  </ol>
+
+  <svg viewBox="0 0 700 300" width="100%" role="img" aria-label="Data flow: one catalog service feeds one presenter, which feeds three render surfaces">
+    <style>
+      .b { fill:#fff; stroke:#555; stroke-width:1.2; }
+      .n { fill:#f4f7f5; stroke:#1f7a4d; stroke-width:1.2; }
+      .t { font: 11px system-ui, sans-serif; fill:#1a1a1a; }
+      .s { font: 9.5px system-ui, sans-serif; fill:#666; }
+      .a { stroke:#777; stroke-width:1.1; fill:none; marker-end:url(#ah); }
+    </style>
+    <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#777"/></marker></defs>
+
+    <rect class="b" x="10" y="125" width="150" height="46" rx="5"/>
+    <text class="t" x="20" y="145">template_catalog_service</text>
+    <text class="s" x="20" y="160">domain · unchanged</text>
+
+    <rect class="b" x="190" y="125" width="155" height="46" rx="5"/>
+    <text class="t" x="200" y="145">build_picker_groups()</text>
+    <text class="s" x="200" y="160">presenter · unchanged</text>
+
+    <rect class="n" x="385" y="15" width="150" height="46" rx="5"/>
+    <text class="t" x="395" y="35">home page band</text>
+    <text class="s" x="395" y="50">new · intro templates</text>
+
+    <rect class="n" x="385" y="125" width="150" height="46" rx="5"/>
+    <text class="t" x="395" y="145">starting-point drawer</text>
+    <text class="s" x="395" y="160">new · full catalog</text>
+
+    <rect class="b" x="385" y="235" width="150" height="46" rx="5"/>
+    <text class="t" x="395" y="255">template_picker.html</text>
+    <text class="s" x="395" y="270">kept · on-demand only</text>
+
+    <rect class="n" x="570" y="125" width="120" height="46" rx="5"/>
+    <text class="t" x="580" y="145">shared card</text>
+    <text class="t" x="580" y="159">partial</text>
+
+    <path class="a" d="M162,148 L188,148"/>
+    <path class="a" d="M347,140 C365,140 365,45 383,42"/>
+    <path class="a" d="M347,148 L383,148"/>
+    <path class="a" d="M347,156 C365,156 365,252 383,255"/>
+    <path class="a" d="M568,140 C550,140 550,50 537,45"/>
+    <path class="a" d="M568,148 L539,148"/>
+    <path class="a" d="M568,156 C550,156 550,250 537,254"/>
+  </svg>
+</section>
+
+<section>
+  <h2>2. Affected modules</h2>
+  <table>
+    <thead><tr><th>Module / file</th><th>Change type</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>e_footprint_interface/views.py::home</code></td>
+        <td>modified</td>
+        <td>Today a one-liner rendering <code>home.html</code> with no context. Gains
+        <code>template_picker_groups=build_picker_groups()</code> (or just the introductory group for the
+        band) plus the resume state. Reading the session here is new for this view — read-only via
+        <code>SessionWorkspaceRepository(request.session)</code>; it must <strong>not</strong> seed the
+        scratch baseline the way <code>model_builder_main</code> does, or every home-page visit would
+        create a session model.</td>
+      </tr>
+      <tr>
+        <td><code>theme/templates/home.html</code></td>
+        <td>modified</td>
+        <td>Hero CTA stops being <code>hx-get</code> → <code>model-builder</code>; becomes
+        <code>hx-get</code> → the new drawer endpoint targeting a drawer container, with no
+        <code>hx-push-url</code> (the URL must not move until a choice is made). New "Start from a template"
+        section, plus an empty <code>&lt;div id="starting-point-drawer"&gt;</code> and backdrop.
+        Everything below the hero is untouched.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/onboarding/_starting_point_cards.html</code></td>
+        <td>new</td>
+        <td>The card grid extracted verbatim from <code>template_picker.html</code>, parameterised by
+        <code>groups</code>, whether to show chips/guides, and the HTMX target/push-url (the builder-hosted
+        overlay needs no push; home-page cards must push <code>/model_builder/</code>).</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/onboarding/starting_point_drawer.html</code></td>
+        <td>new</td>
+        <td>Drawer shell: dialog semantics (<code>role="dialog"</code>, <code>aria-modal</code>,
+        labelled heading), the optional "Continue where you left off" block, then the shared card partial.
+        Bootstrap utility classes only, no new SCSS unless the slide-in needs it.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/templates/model_builder/onboarding/template_picker.html</code></td>
+        <td>modified</td>
+        <td>Keeps its overlay shell and close button; its card grid is replaced by an include of the shared
+        partial. Its comment block is rewritten — it is no longer a "first-run" picker, it is the on-demand
+        template chooser (Help ▸ Open templates, post-reset).</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/views/views_onboarding.py</code></td>
+        <td>modified</td>
+        <td>New <code>starting_point_drawer(request)</code> — a GET returning only the drawer fragment. It
+        reads the session read-only to decide whether to offer resume, and renders
+        <code>build_picker_groups()</code>. <code>open_template_picker</code>, <code>load_template</code>
+        and <code>load_template_deeplink</code> are unchanged.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/views/views.py::model_builder_main</code></td>
+        <td>modified</td>
+        <td>One line: <code>show_template_picker=is_empty_model(...)</code> →
+        <code>show_template_picker=False</code>. Everything else about the view stands, including the
+        scratch-baseline seeding and the recovery fallback.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/urls.py</code> / <code>e_footprint_interface/urls.py</code></td>
+        <td>modified</td>
+        <td>Route for the drawer fragment. Open question in §7 on which namespace it belongs to — it is a
+        home-page fragment but its content is builder-owned.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/starting_point_drawer.js</code></td>
+        <td>new</td>
+        <td>The only JS: open/close, backdrop click, <kbd>Esc</kbd>, focus trap, restore focus to the CTA on
+        close. IIFE, nothing on <code>window</code>, per <code>conventions.md</code> → JavaScript. Opening
+        itself is HTMX; this module handles dismissal and focus.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/onboarding_first_run.js</code></td>
+        <td>modified</td>
+        <td>Its <code>#template-picker</code> deferral guard was written for the auto-overlay. With the
+        overlay gone from the entry path, a home-page template load lands a picker-free canvas and the tour
+        fires immediately — which is the intent. Keep the guard for the Help-menu re-open path, but re-read
+        the comment block and the <code>htmx:afterSettle</code> target matching, since entry now arrives from
+        a <code>load-template</code> POST rather than a plain builder GET.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/scripts/model_builder_main.js</code></td>
+        <td>modified</td>
+        <td>The body-delegated <code>htmx:confirm</code> listener behind
+        <code>data-confirm-when-model-not-empty</code> reads emptiness live from the DOM
+        (<code>.model-builder-card</code>). On the home page there are no cards, so it would read "empty"
+        and skip the confirmation. See §4 risk 1 — the home-page surfaces need a server-decided confirmation
+        instead.</td>
+      </tr>
+      <tr>
+        <td><code>theme/static/css/</code> (or <code>custom.scss</code>)</td>
+        <td>modified</td>
+        <td>Only if the slide-in transition and backdrop can't be expressed with Bootstrap utilities. Keep it
+        to a handful of rules; the existing picker got by with utilities alone.</td>
+      </tr>
+      <tr>
+        <td><code>specs/architecture.md</code> → "First-run template picker"</td>
+        <td>modified</td>
+        <td>That section (≈ line 483–487) documents the auto-overlay as the entry point. It becomes the
+        home-page drawer plus an on-demand chooser; the section heading itself should lose "first-run".</td>
+      </tr>
+      <tr>
+        <td><code>specs/design/journeys/onboarding.html</code></td>
+        <td>modified</td>
+        <td>Screens A·1 and A·2 and the implementation-pointers footer all describe the old flow.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>3. Cross-cutting concerns</h2>
+
+  <ul>
+    <li><strong>Unit tests.</strong>
+      <code>tests/unit_tests/adapters/presenters/test_template_picker_presenter.py</code> still covers
+      <code>build_picker_groups()</code> unchanged. Add Jest coverage for
+      <code>starting_point_drawer.js</code> (open/close, Esc, focus restore) alongside the existing
+      <code>onboarding_first_run.js</code> Jest suite.</li>
+    <li><strong>Integration tests.</strong> New: <code>GET /</code> carries the catalog context and the band
+    renders every introductory template by name; the drawer endpoint returns the resume block only when the
+    session model is non-empty; <code>GET /model_builder/</code> on an empty session renders
+    <strong>no</strong> <code>#template-picker</code>; <code>open-template-picker</code> still does.
+    <code>test_template_deeplink_view.py</code> and <code>test_template_catalog_service.py</code> should
+    keep passing untouched — a good signal the catalog layer really is unchanged.</li>
+    <li><strong>E2E.</strong> <code>tests/e2e/test_onboarding.py</code> is the main rewrite: it currently
+    asserts the picker appears over the canvas. New coverage — templates readable on the home page without
+    clicking; CTA opens the drawer without changing the URL; Esc/backdrop dismisses to an untouched home
+    page; a template click lands a filled canvas; a returning session sees Continue first. Check
+    <code>tests/e2e/pages/model_builder_page.py</code> and <code>tests/e2e/conftest.py</code> for picker
+    helpers other suites lean on (<code>test_forms.py</code> touches them) before changing their
+    signatures. Constitution §2.1 puts this flow squarely in "critical flows" territory.</li>
+    <li><strong>Migrations.</strong> None. No Django models, no serialized-model schema change.</li>
+    <li><strong>Docs.</strong> <code>specs/architecture.md</code> and the onboarding journey (above), plus a
+    <code>CHANGELOG.md</code> entry under <code>## [Unreleased]</code> per constitution §2.6 —
+    consolidated by the supervisor if this runs as a <code>feature-implement</code> loop.</li>
+    <li><strong>Docs site.</strong> If mkdocs pages tell readers "click Start modeling, then pick a
+    template", they now describe a drawer. Worth a grep of the docs repo before closing the feature.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Risks</h2>
+
+  <ol>
+    <li><strong>The replace-confirmation silently stops working from the home page.</strong> The existing
+    guard reads emptiness from canvas cards in the DOM, which the home page doesn't have — so a returning
+    visitor could lose their model with no prompt. This is the sharpest correctness risk in the feature.
+    Mitigation: the home view and the drawer endpoint both know emptiness server-side at render time, and
+    the drawer is fetched at click time, so a plain <code>hx-confirm</code> rendered onto home-page cards
+    when the session is non-empty is honest here — the staleness argument that forced the delegated listener
+    inside the builder (a long-lived toolbar outliving partial swaps) does not apply to a freshly fetched
+    fragment. Cover it with an explicit e2e assertion.</li>
+    <li><strong>The home view starts touching the session.</strong> If it accidentally seeds the scratch
+    baseline (as <code>model_builder_main</code> deliberately does), every home-page visit mints a session
+    model, <code>is_empty_model</code> stays true but a session is written for every anonymous visitor, and
+    the resume logic gets muddier. Mitigation: read-only access, explicit test that
+    <code>GET /</code> creates no session model.</li>
+    <li><strong>"Continue where you left off" promising work that has expired.</strong> Slot payloads live
+    in a short-TTL cache while the workspace index lives in the long session —
+    <code>model_builder_main</code> calls <code>workspace.drop_expired_slots()</code> for exactly this
+    reason. The home view must reconcile the same way, or it will offer to resume a model that 500s on
+    load.</li>
+    <li><strong>The guided tour stops auto-running, or runs at the wrong moment.</strong> Its once-ever
+    trigger is entangled with the picker's presence (<code>onboarding_first_run.js</code> defers while
+    <code>#template-picker</code> exists). Removing the auto-overlay changes that timing. Mitigation:
+    explicit e2e assertion that the tour appears once on a template-loaded canvas reached from the home
+    page.</li>
+    <li><strong>Two entry points diverging anyway.</strong> The mitigation is the shared card partial; the
+    risk is that "the home page needs a slightly different card" erodes it. Mitigation: parameterise the
+    partial, never fork it, and assert in an integration test that the names rendered on the home page match
+    <code>build_picker_groups()</code>.</li>
+    <li><strong>Home-page bloat — the thing the user explicitly wants to avoid.</strong> All four cards plus
+    a drawer is more page than exists today, and trimming the count is no longer an available escape hatch
+    (that decision is made). The remaining levers are layout and density: a single row of compact cards at
+    desktop width, short descriptions, and chips only if they earn their weight. Build it, look at it at
+    full width and at the narrowest supported desktop width, and if it reads as a catalogue rather than an
+    invitation, fix it in the card design — not by hiding templates.</li>
+    <li><strong>Losing the "just get me in" path.</strong> Today the CTA lands you somewhere; now it asks a
+    question. Mitigation is copy, not code — "Start from scratch" must read as an obvious first-class
+    option, not a consolation prize.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>5. Alternatives considered</h2>
+
+  <ul>
+    <li><strong>Render the drawer hidden in the home page and toggle it purely client-side.</strong>
+    Rejected: the resume state and the replace-confirmation would be baked in at page-load time and could go
+    stale, and it pushes state into JS against constitution §1.4. Fetching the fragment on click is both
+    more HTMX-idiomatic and more correct.</li>
+    <li><strong>Keep the auto-overlay as a safety net alongside the drawer.</strong> Rejected by the spec —
+    a user who chose on the home page would be asked again on the canvas.</li>
+    <li><strong>Delete the overlay entirely and route Help ▸ Open templates back to the home page.</strong>
+    Rejected: switching template mid-session is a legitimate in-app action and bouncing to the home page to
+    do it is worse than keeping a working chooser.</li>
+    <li><strong>A separate <code>/start</code> page instead of a drawer.</strong> Rejected: an extra
+    navigation is exactly the abruptness the feature is removing.</li>
+    <li><strong>A second hand-written template list on the home page.</strong> Rejected outright — the
+    duplication hazard is the whole reason for the shared partial.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Constitutional notes</h2>
+  <ul>
+    <li><strong>§1.4 HTMX-first, minimize JS.</strong> Respected: the drawer's <em>content</em> is a server
+    fragment; JS covers dismissal and focus only. The new JS module must follow
+    <code>conventions.md</code> → JavaScript (IIFE, no <code>window</code> globals, Jest-testable export
+    tail like <code>onboarding_first_run.js</code>).</li>
+    <li><strong>§1.1 dependency direction.</strong> Nothing new in <code>domain/</code> or
+    <code>application/</code>. The catalog service stays Django-free; the presenter stays the only place
+    that knows about <code>CLASS_UI_CONFIG</code> and <code>MKDOCS_BASE_URL</code>.</li>
+    <li><strong>§2 quality gates.</strong> Critical first-run flow → e2e required; full pytest + Jest green;
+    <code>CHANGELOG.md</code> entry; <code>pyproject.toml</code> back on the PyPI <code>efootprint</code>
+    before anything reaches main.</li>
+    <li><strong>§4 desktop-first.</strong> The drawer must not break narrow viewports, but is designed for
+    desktop. No amendment needed anywhere.</li>
+    <li><strong>§3.1 never paper over a bug.</strong> Specifically relevant to risk 1: if the confirmation
+    gap is found mid-implementation, fix it rather than dropping the assertion.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Open questions</h2>
+  <ul>
+    <li>Does the drawer fragment route live under the <code>model_builder</code> namespace (its content is
+    builder-owned, and <code>load-template</code> already lives there) or at the project root next to
+    <code>home</code> (it is a home-page fragment)? The deep-link precedent shows root-level routes for
+    onboarding entry points are acceptable.</li>
+    <li>Does <code>views.home</code> call <code>build_picker_groups()</code> directly, or should the resume
+    state and the groups be assembled by one small presenter shared by the home view and the drawer
+    endpoint? The latter if the resume logic turns out to be more than three lines.</li>
+    <li>Does the home-page band render the how-to templates too, or only the introductory group? The count
+    question is settled — <strong>all four introductory templates render inline</strong>, so the band never
+    takes a subset of that group. What remains open is whether the library's how-to scenarios join them;
+    if not, the band filters <code>build_picker_groups()</code> down to the introductory entries by
+    <code>category</code> rather than taking the whole output.</li>
+    <li>Does the CTA's <code>hx-get</code> need a <code>hx-trigger</code>/<code>hx-swap</code> pairing that
+    lets the drawer be re-opened without re-fetching, or is a fetch per open acceptable? A fetch per open is
+    simpler and keeps the state fresh; confirm it isn't perceptibly slow.</li>
+    <li>Should the band's cards show concept chips (as the picker's do) or stay minimal? Chips are
+    pedagogically useful but are the main driver of home-page visual weight.</li>
+  </ul>
+</section>
+
+</body>
+</html>

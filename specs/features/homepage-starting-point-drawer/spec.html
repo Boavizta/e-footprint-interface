@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home-page starting-point drawer — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Home-page starting-point drawer</h1>
+<p class="status">Status: Spec — under review · 2026-09-24</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+
+  <p><strong>What is wrong today.</strong> e-footprint ships four starter templates — a classical
+  e-commerce journey, an AI chatbot, an industrial IoT fleet, a machine-learning workflow — plus the
+  library's how-to scenarios. They are the fastest route from "I have never modeled anything" to "I am
+  looking at a realistic model I can poke at". The home page never mentions that any of them exist.
+  A visitor sees one call to action, <em>Start modeling →</em>, and has no way to know whether it leads
+  to a blank page or a worked example.</p>
+
+  <p>The templates <em>are</em> offered, but only after the visitor has already committed: clicking the
+  call to action swaps the whole page to the builder, and only then does a welcome overlay appear asking
+  them to pick a starting point. Two things go wrong at that moment:</p>
+
+  <ul>
+    <li><strong>The choice arrives after the decision.</strong> The visitor asked to start modeling and
+    was answered with a question. The information that would have made the call to action attractive —
+    "there is a ready-made e-commerce model waiting" — is revealed only to people who were already
+    willing to click into the unknown.</li>
+    <li><strong>The context switch is abrupt.</strong> The overlay lands on a page the visitor has never
+    seen, over a canvas they cannot yet read. Dismissing it leaves them on an empty canvas with no route
+    back to the explanation they were reading a second ago.</li>
+  </ul>
+
+  <p><strong>Who experiences it.</strong> The primary audience of the whole product: a non-technical
+  product person arriving cold, usually from a link or a talk, with no modeling background and a few
+  minutes of curiosity. This is their very first interaction, so the severity is high — a newcomer who
+  bounces here never sees anything else the tool does. Frequency is every single first visit.</p>
+
+  <p><strong>Why now.</strong> The template catalog has just reached the point where it carries real
+  pedagogical weight — showcased-concept chips, how-to guides attached to cards, a growing library-side
+  set of scenarios. That investment is currently gated behind a click that gives no reason to be made.
+  Making the catalog visible is the cheapest available improvement to first-run conversion, and it needs
+  no new modeling capability.</p>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+
+  <p>Each criterion is phrased as something an observer can check in a browser or an automated test.</p>
+
+  <ol>
+    <li>A first-time visitor who loads the home page and <strong>scrolls, without clicking anything</strong>,
+    can read the name and a one-line description of every starter template.</li>
+    <li>Clicking a named template on the home page loads that model and lands the visitor on the canvas
+    with it already filled in — no intermediate picker, no second confirmation for an empty session.</li>
+    <li>Clicking <em>Start modeling</em> opens a starting-point chooser <strong>in place on the home
+    page</strong>: the page beneath stays visible and the address bar does not change until a choice is
+    made.</li>
+    <li>The chooser offers, in one view: every starter template, start from scratch, and load an existing
+    <code>.e-f.json</code> file.</li>
+    <li>Dismissing the chooser (close control, backdrop click, or <kbd>Esc</kbd>) returns the visitor to
+    the home page exactly as it was, with nothing loaded and no model replaced.</li>
+    <li>A returning visitor whose session still holds work sees <em>Continue where you left off</em> as
+    the first and visually primary option in the chooser, naming their model.</li>
+    <li>Choosing a template or scratch while a non-empty model is in session asks for confirmation before
+    replacing it; cancelling leaves the existing model untouched.</li>
+    <li>After this feature ships, a visitor who reaches the canvas through the home page is
+    <strong>never</strong> shown the welcome overlay on top of it — the starting-point question is asked
+    exactly once, on the home page.</li>
+    <li>The starting points available on the home page are always the same set, with the same names,
+    descriptions and concept chips, as those available from the in-app template chooser. Adding a template
+    to the catalog makes it appear in both places with no further work.</li>
+    <li>Every starting point in the chooser is reachable and operable by keyboard alone, and the chooser
+    traps focus while open.</li>
+    <li>The home page's existing narrative sections — what e-footprint is, who it is for, how it works,
+    about us — remain present and in their current order.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here.</blockquote>
+
+  <details open><summary>In scope</summary>
+    <ul>
+      <li><strong>A named-template section on the home page.</strong> A visible band presenting
+      <strong>all four</strong> starter templates by name and description — none held back behind the
+      drawer — positioned so a visitor meets it while reading the page rather than having to hunt for it.
+      Each entry is itself a way in: selecting it loads that model.</li>
+      <li><strong>An in-page starting-point drawer behind the main call to action.</strong> <em>Start
+      modeling</em> no longer navigates; it opens a chooser over the home page containing the full set of
+      starting points — templates, start from scratch, load a JSON file — with the home page still visible
+      behind it.</li>
+      <li><strong>A continue affordance for returning visitors.</strong> When the session already holds a
+      model, the drawer leads with an option to resume it, named after the model, ahead of everything that
+      would replace it.</li>
+      <li><strong>Retiring the automatic welcome overlay.</strong> The canvas no longer greets an empty
+      model with the picker. The same chooser stays reachable on demand from inside the app (help menu,
+      and after a model reset) so a user can switch starting point mid-session.</li>
+      <li><strong>A single catalog behind both surfaces</strong>, so home page and in-app chooser cannot
+      drift apart in content or ordering.</li>
+      <li><strong>Dismissal and replace-protection semantics</strong> as described in §2.</li>
+      <li><strong>Keyboard and screen-reader operability</strong> of the drawer and the template band.</li>
+      <li><strong>Updating the onboarding journey documentation</strong> to describe the new first ninety
+      seconds.</li>
+    </ul>
+  </details>
+
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li><strong>Changing the template catalog itself</strong> — no new templates, no renamed or
+      re-described ones, no re-grouping. This feature changes where the catalog is shown, not what is in
+      it.</li>
+      <li><strong>Previews of a template's contents</strong> before loading it — a thumbnail of the canvas,
+      an impact figure, a sample result. Worth considering later; not needed to make the names visible.</li>
+      <li><strong>Search, filtering or tag-based browsing</strong> of templates. The catalog is small enough
+      to read at a glance; adding navigation to it would be the overwhelm the feature is trying to avoid.</li>
+      <li><strong>Changing the guided tour</strong> that runs once the canvas loads.</li>
+      <li><strong>Changing the JSON import experience</strong> itself. The drawer routes to the existing
+      import flow; that flow is unchanged.</li>
+      <li><strong>Anything about the rest of the home page's copy or layout</strong> beyond inserting the
+      template band.</li>
+      <li><strong>Mobile-first treatment.</strong> Desktop-first per the constitution; the drawer must remain
+      usable on a narrow viewport but is not designed for it.</li>
+      <li><strong>Persisting which template a user chose</strong>, or personalising the home page on repeat
+      visits beyond the continue affordance.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+
+  <p>Two surfaces change, both on the home page. The mockup below is interactive — click
+  <em>Start modeling</em> to open the drawer, click the backdrop or <kbd>Esc</kbd> to dismiss it, and use
+  the toggle to see what a returning visitor with work in progress gets.</p>
+
+  <div class="mockup">
+    <div id="mk" style="font-family: system-ui, sans-serif;">
+      <label style="display:block; font-size:.8rem; color:#555; margin-bottom:.8rem;">
+        <input type="checkbox" id="mk-returning"> Simulate a returning visitor (session holds “Retail platform”)
+      </label>
+
+      <div id="mk-frame" style="position:relative; border:1px solid #d5d5d5; border-radius:8px; overflow:hidden; background:#fff;">
+
+        <div style="background:#f3f4f6; border-bottom:1px solid #e5e5e5; padding:.35rem .7rem; font-size:.75rem; color:#666;">
+          <span id="mk-url">e-footprint.boavizta.org/</span>
+        </div>
+
+        <div id="mk-page" style="padding:1.2rem; max-height:26rem; overflow-y:auto;">
+          <div style="font-weight:700; font-size:1.05rem; line-height:1.35; margin-bottom:.3rem;">
+            Do you know the environmental footprint of your digital service?
+          </div>
+          <div style="color:#666; font-size:.85rem; margin-bottom:.9rem;">
+            Model it, simulate changes before you make them, and prioritize the actions that actually reduce it.
+          </div>
+          <div style="display:flex; gap:.5rem; margin-bottom:1.6rem;">
+            <button id="mk-cta" style="background:#1f7a4d; color:#fff; border:0; border-radius:999px; padding:.45rem 1rem; font-size:.85rem; cursor:pointer;">
+              Start modeling →
+            </button>
+            <button style="background:#fff; color:#1f7a4d; border:1px solid #1f7a4d; border-radius:999px; padding:.45rem 1rem; font-size:.85rem;">
+              Documentation
+            </button>
+          </div>
+
+          <div style="border-top:1px solid #eee; padding-top:1rem;">
+            <div style="font-weight:700; font-size:.95rem;">Start from a template</div>
+            <div style="color:#666; font-size:.8rem; margin-bottom:.7rem;">
+              A realistic model, already built. Load one and change anything.
+            </div>
+            <div id="mk-strip" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem;"></div>
+            <div style="margin-top:.6rem; font-size:.8rem;">
+              <a href="#" id="mk-more" style="color:#1f7a4d;">Other ways to start →</a>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid #eee; margin-top:1.4rem; padding-top:1rem; color:#999; font-size:.8rem;">
+            What is e-footprint? · Who is this for? · How does it work? · About us
+            <div style="font-size:.72rem; margin-top:.3rem;">(unchanged sections, still below)</div>
+          </div>
+        </div>
+
+        <div id="mk-backdrop" style="display:none; position:absolute; inset:0; background:rgba(20,20,20,.35);"></div>
+
+        <div id="mk-drawer" role="dialog" aria-modal="true" aria-labelledby="mk-drawer-title"
+             style="position:absolute; left:0; right:0; bottom:0; transform:translateY(102%);
+                    transition:transform .25s ease; background:#fff; border-top:1px solid #ddd;
+                    border-radius:10px 10px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.14);
+                    padding:1rem 1.1rem 1.2rem; max-height:88%; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.8rem;">
+            <div>
+              <div id="mk-drawer-title" style="font-weight:700; font-size:.98rem;">How would you like to start?</div>
+              <div style="color:#666; font-size:.8rem;">You can change everything once it loads.</div>
+            </div>
+            <button id="mk-close" aria-label="Close" style="border:0; background:none; font-size:1.1rem; cursor:pointer; color:#666;">×</button>
+          </div>
+
+          <div id="mk-continue" style="display:none; margin-bottom:.9rem;">
+            <button style="width:100%; text-align:left; border:1px solid #1f7a4d; background:#f1f9f4; border-radius:8px; padding:.6rem .75rem; cursor:pointer;">
+              <div style="font-weight:600; font-size:.85rem;">↩ Continue where you left off</div>
+              <div style="color:#555; font-size:.78rem;">Retail platform — your model is still in this session.</div>
+            </button>
+          </div>
+
+          <div style="font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; color:#888; font-weight:600; margin-bottom:.4rem;">
+            Templates
+          </div>
+          <div id="mk-drawer-templates" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem; margin-bottom:.9rem;"></div>
+
+          <div style="font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; color:#888; font-weight:600; margin-bottom:.4rem;">
+            Or
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem;">
+            <button style="text-align:left; border:2px dashed #ccc; background:#fff; border-radius:8px; padding:.55rem .7rem; cursor:pointer;">
+              <div style="font-weight:600; font-size:.83rem;">＋ Start from scratch</div>
+              <div style="color:#666; font-size:.76rem;">An empty model. We'll show you where to begin.</div>
+            </button>
+            <button style="text-align:left; border:2px dashed #ccc; background:#fff; border-radius:8px; padding:.55rem .7rem; cursor:pointer;">
+              <div style="font-weight:600; font-size:.83rem;">↥ Load a json file</div>
+              <div style="color:#666; font-size:.76rem;">Open an existing model exported as .e-f.json.</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <p style="font-size:.78rem; color:#666; margin-top:.6rem;">
+        Illustrative only — spacing, wording and iconography are settled during implementation. What this
+        mockup fixes is the <em>structure</em>: templates readable without a click, the full choice reachable
+        in place, the page never leaving until a choice is made.
+      </p>
+    </div>
+
+    <script>
+    (function () {
+      var TEMPLATES = [
+        { icon: "🛒", name: "Classical e-commerce", desc: "A shopping journey served by a web app calling a database.", chips: ["Web service", "Cloud server", "Database"] },
+        { icon: "🤖", name: "AI chatbot", desc: "A chatbot routing simple and complex prompts to small and large LLM APIs.", chips: ["Web service", "LLM inference"] },
+        { icon: "📟", name: "Industrial IoT", desc: "Factory sensors send readings to a server; analysts review a dashboard.", chips: ["Connected sensors", "Analysis dashboard"] },
+        { icon: "🧠", name: "Machine learning workflow", desc: "Training on a GPU server plus recurrent inference jobs.", chips: ["GPU server"] }
+      ];
+
+      function card(t, withChips) {
+        var chips = withChips ? t.chips.map(function (c) {
+          return '<span style="display:inline-block; border:1px solid #ddd; background:#fafafa; border-radius:999px;' +
+                 ' font-size:.68rem; padding:.05rem .4rem; margin:.25rem .25rem 0 0; color:#555;">' + c + '</span>';
+        }).join("") : "";
+        return '<button style="text-align:left; border:1px solid #ddd; background:#fff; border-radius:8px;' +
+               ' padding:.55rem .7rem; cursor:pointer;">' +
+               '<div style="font-weight:600; font-size:.83rem;">' + t.icon + ' ' + t.name + '</div>' +
+               '<div style="color:#666; font-size:.76rem;">' + t.desc + '</div>' + chips + '</button>';
+      }
+
+      var strip = document.getElementById("mk-strip");
+      var drawerTemplates = document.getElementById("mk-drawer-templates");
+      strip.innerHTML = TEMPLATES.map(function (t) { return card(t, false); }).join("");
+      drawerTemplates.innerHTML = TEMPLATES.map(function (t) { return card(t, true); }).join("");
+
+      var drawer = document.getElementById("mk-drawer");
+      var backdrop = document.getElementById("mk-backdrop");
+      var cont = document.getElementById("mk-continue");
+      var returning = document.getElementById("mk-returning");
+
+      function open() {
+        cont.style.display = returning.checked ? "block" : "none";
+        backdrop.style.display = "block";
+        drawer.style.transform = "translateY(0)";
+      }
+      function close() {
+        drawer.style.transform = "translateY(102%)";
+        backdrop.style.display = "none";
+      }
+
+      document.getElementById("mk-cta").addEventListener("click", open);
+      document.getElementById("mk-more").addEventListener("click", function (e) { e.preventDefault(); open(); });
+      document.getElementById("mk-close").addEventListener("click", close);
+      backdrop.addEventListener("click", close);
+      document.getElementById("mk").addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { close(); }
+      });
+    })();
+    </script>
+  </div>
+
+  <h3>Behaviour table</h3>
+  <table>
+    <thead><tr><th>Visitor does</th><th>Session state</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td>Loads the home page</td><td>any</td><td>Reads the hero, and further down a band naming every starter template. Nothing is loaded.</td></tr>
+      <tr><td>Clicks a template in the home-page band</td><td>empty</td><td>That model loads; the visitor lands on the filled canvas. No chooser is shown.</td></tr>
+      <tr><td>Clicks a template in the home-page band</td><td>holds a model</td><td>Confirmation that this replaces the current model; on cancel, nothing changes.</td></tr>
+      <tr><td>Clicks <em>Start modeling</em></td><td>empty</td><td>The drawer opens over the home page with templates, scratch and load-a-file. The address bar has not moved.</td></tr>
+      <tr><td>Clicks <em>Start modeling</em></td><td>holds a model</td><td>Same drawer, led by <em>Continue where you left off</em> naming the model; the replacing options sit below.</td></tr>
+      <tr><td>Dismisses the drawer</td><td>any</td><td>Back to the home page, untouched. Nothing loaded, nothing replaced.</td></tr>
+      <tr><td>Chooses <em>Load a json file</em></td><td>any</td><td>Enters the existing import flow, unchanged.</td></tr>
+      <tr><td>Reaches the canvas by any route</td><td>empty</td><td>No welcome overlay. The canvas's own disabled-instead-of-error cues and the guided tour do the teaching.</td></tr>
+      <tr><td>Opens the template chooser from inside the app</td><td>any</td><td>The same catalog, same content, presented in the app's own chooser.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Constitution §1.4 — HTMX-first, minimize JS.</strong> The drawer is a partial update over
+    the home page, not a client-side route. Any JavaScript is vanilla and confined to opening, closing and
+    focus management.</li>
+    <li><strong>Constitution §4 — no SPA framework.</strong> "In-page drawer" means an overlay served and
+    dismissed within the existing page, not client-side routing.</li>
+    <li><strong>Constitution §4 — desktop-first.</strong> The drawer must not break on a narrow viewport,
+    but mobile is best-effort.</li>
+    <li><strong>Mission — "no one left behind, depth available on demand."</strong> The band must read as an
+    invitation, not a wall of options. All four starter templates are shown inline (decided), so the
+    burden of keeping the page calm falls on layout and copy density rather than on hiding options —
+    compact cards, short descriptions, one row if the width allows.</li>
+    <li><strong>Session model, not user accounts.</strong> "Continue where you left off" can only mean the
+    current session's model. A visitor returning after their session expired sees the ordinary drawer; the
+    continue option must never promise work that is gone.</li>
+    <li><strong>One catalog, two surfaces.</strong> Templates, descriptions, concept chips and how-to links
+    come from the catalog the app already owns. Neither surface may carry its own hand-written list.</li>
+    <li><strong>The existing deep link into a named scenario stays working</strong> — documentation links
+    that load a scenario directly are unaffected by this change.</li>
+    <li><strong>Quality gates (constitution §2)</strong> apply: this is a critical first-run flow, so it
+    warrants end-to-end coverage alongside unit and integration tests.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li><strong>How many templates go in the home-page band?</strong> <em>Decided (2026-09-24): all four
+    introductory templates, inline.</em> Discoverability wins over page calm here — a template the visitor
+    cannot see is a template that does not exist to them. Keeping the page calm is now a layout and
+    copy-density problem (see §5), not a reason to hide options.</li>
+    <li><strong>Where does the band sit?</strong> Directly under the hero (maximum visibility, but pushes the
+    explanatory sections down) or after "How does it work?" (read in context, but below the fold). Leaning
+    toward directly under the hero, since a visitor who already knows they want to try should not have to
+    scroll past the pitch.</li>
+    <li><strong>Do the library's how-to scenarios appear on the home page at all</strong>, or only in the
+    drawer and the in-app chooser? They are more pedagogical than exemplary and there will be more of them
+    over time, which argues for drawer-only.</li>
+    <li><strong>Does the main call to action keep its current label?</strong> "Start modeling →" now opens a
+    question rather than starting anything. A label naming the choice may set expectations better, at the
+    cost of sounding less decisive.</li>
+    <li><strong>Should the drawer be dismissible into a "just start" path</strong> — i.e. does closing it
+    ever mean "go to a blank canvas"? Current answer is no: closing returns to the home page and scratch is
+    an explicit option. Confirm this is not frustrating in practice.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> for ordered steps and test gates.</li>
+    <li>Read the onboarding journey under <code>specs/design/journeys/</code> for the first-run experience as
+    it stands today, then <code>specs/architecture.md</code> and <code>specs/conventions.md</code> for
+    code-style and architectural constraints.</li>
+  </ol>
+</section>
+
+</body>
+</html>
