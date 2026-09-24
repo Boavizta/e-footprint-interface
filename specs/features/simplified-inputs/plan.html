@@ -196,10 +196,9 @@
           <ul>
             <li id="file-domain" data-steps="contract configure lifecycle consume"><code>services/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#contract" title="Shared data">1.1</a> <a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Definition, field addresses, eligibility and conditional closure using existing class metadata. <a href="#contract">Data / catalog</a></small></li>
             <li id="file-conditional-inputs" data-steps="configure"><code>conditional_inputs.py</code> <span data-change="new">Extracted</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a></span><small>Small dotted-path resolver shared by normal forms and simplified-input dependency indexing.</small></li>
-            <li id="file-factory" data-steps="consume"><a href="../../../model_builder/domain/object_factory.py"><code>object_factory.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Separate input/metadata preparation from commit; reuse conversions across owners. <a href="#atomic-edit">Mutation</a></small></li>
+            <li id="file-factory" data-steps="consume"><a href="../../../model_builder/domain/object_factory.py"><code>object_factory.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract input conversion and collection for multi-owner updates; reuse metadata helpers. <a href="#atomic-edit">Mutation</a></small></li>
             <li id="file-model-web" data-steps="consume"><a href="../../../model_builder/domain/entities/web_core/model_web.py"><code>entities/web_core/model_web.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Reuse eager persistence; expose accepted modeling data, not interface configuration ownership.</small></li>
             <li id="file-hooks" data-steps="lifecycle consume"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Request total refresh on successful changes, not only constraint transitions. <a href="#totals">Results</a></small></li>
-            <li id="file-workspace-port" data-steps="navigation-flow"><a href="../../../model_builder/domain/interfaces/workspace_repository.py"><code>interfaces/workspace_repository.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Prepared workspace replacement contract with failure-safe publication. <a href="#contract">Data</a></small></li>
             <li id="file-import-service" data-steps="navigation-flow"><a href="../../../model_builder/domain/services/system_import_service.py"><code>services/system_import_service.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Validate definition and dependency addresses before accepting a model.</small></li>
             <li id="file-interface-rename" data-steps="examples"><code>reference_data/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Additional example registry/resources; retain IDs and contents. <a href="#examples">Rename</a></small></li>
             <li id="file-catalog-rename" data-steps="examples"><code>services/template_catalog_service.py → example_catalog_service.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Cut over names, imports and catalog contracts together.</small></li>
@@ -208,7 +207,7 @@
         <details>
           <summary>application/</summary>
           <ul>
-            <li id="file-usecase" data-steps="configure lifecycle consume"><code>use_cases/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Settings patches, overview delta, atomic selected-input edits and undo validation. <a href="#saves">Settings / values</a></small></li>
+            <li id="file-usecase" data-steps="configure lifecycle consume"><code>use_cases/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Configure replacement, bookmark patches, atomic selected-input edits and undo validation. <a href="#saves">Settings / values</a></small></li>
             <li id="file-lifecycle" data-steps="lifecycle consume"><code>use_cases/{create_object,edit_object,delete_object}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Stage lifecycle configuration with the model; report affected addresses and results refresh. <a href="#lifecycle">Hooks</a></small></li>
           </ul>
         </details>
@@ -219,12 +218,11 @@
             <li id="file-presenter" data-steps="configure consume"><code>presenters/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared catalog → grouped navigation, fields, bookmarks and context. <a href="#workspace">Rendering</a></small></li>
             <li id="file-forms" data-steps="configure lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Reuse existing field metadata; add true owner addresses and creation-time required-selection context.</small></li>
             <li id="file-timeseries-registry" data-steps="configure consume"><a href="../../../model_builder/adapters/forms/timeseries_builder_registry.py"><code>forms/timeseries_builder_registry.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract a lightweight current-builder lookup shared by rendering and eligibility; keep the existing registry.</small></li>
-            <li id="file-views-existing" data-steps="lifecycle navigation-flow"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shell entry/defaults, panel integration, copy settings, staged import, slot identity and restoration.</small></li>
+            <li id="file-views-existing" data-steps="lifecycle navigation-flow"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shell entry/defaults, panel integration, copy settings, import prevalidation and slot identity.</small></li>
             <li id="file-sources" data-steps="lifecycle"><a href="../../../model_builder/adapters/views/source_table_row_editor_context.py"><code>views/source_table_row_editor_context.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Add bookmarks; preserve existing constructor-input checks and metadata rendering without eager model hydration.</small></li>
-            <li id="file-oob" data-steps="consume"><a href="../../../model_builder/adapters/presenters/oob_regions.py"><code>presenters/oob_regions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>One total context for paired Results controls; targeted simplified/configuration updates. <a href="#totals">Results</a></small></li>
-            <li id="file-repositories" data-steps="configure navigation-flow"><code>repositories/{session_system_repository,in_memory_system_repository}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Staged config publication, patch parity and save-failure tests.</small></li>
-            <li id="file-cache" data-steps="navigation-flow"><code>repositories/cache_backend.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Surface write outcomes so rejected writes are not acknowledged as saved.</small></li>
-            <li id="file-workspace-repositories" data-steps="navigation-flow"><code>repositories/{workspace_base,session_workspace_repository,workspace_index}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Prepared import publication, isolated staging keys and System-address remapping.</small></li>
+            <li id="file-oob" data-steps="consume"><a href="../../../model_builder/adapters/presenters/oob_regions.py"><code>presenters/oob_regions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>One total context for paired Results controls; targeted input/bookmark updates. <a href="#totals">Results</a></small></li>
+            <li id="file-repositories" data-steps="configure navigation-flow"><code>repositories/{session_system_repository,in_memory_system_repository}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Validate size before saving configuration; per-model config and in-memory parity.</small></li>
+            <li id="file-workspace-repositories" data-steps="navigation-flow"><code>repositories/workspace_base.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Remap System-owned field addresses when assigning a fresh System ID.</small></li>
             <li id="file-picker-rename" data-steps="examples"><code>presenters/template_picker_presenter.py → example_picker_presenter.py</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Example context/selectors and all callers. <a href="#examples">Rename</a></small></li>
             <li id="file-onboarding" data-steps="examples"><a href="../../../model_builder/adapters/views/views_onboarding.py"><code>views/views_onboarding.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Example endpoints, links and onboarding vocabulary.</small></li>
           </ul>
@@ -232,10 +230,10 @@
         <details>
           <summary>templates/model_builder/ <small>— keep “templates” for rendering files</small></summary>
           <ul>
-            <li id="file-partials" data-steps="configure lifecycle consume"><code>simplified_inputs/</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared workspace, navigation, object, field, bookmark and field-only timeseries partials. <a href="#workspace">Rendering / hooks</a></small></li>
+            <li id="file-partials" data-steps="configure lifecycle consume"><code>simplified_inputs/</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Workspace, navigation, object, field and timeseries partials; shared <code>selection_controls.html</code> and its <code>bookmark.html</code> disclosure wrapper. <a href="#workspace">Rendering / hooks</a></small></li>
             <li id="file-shell" data-steps="navigation-flow"><a href="../../../model_builder/templates/model_builder/model_builder_main.html"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Resident per-model simplified roots inside the actual application shell.</small></li>
             <li id="file-toolbar" data-steps="consume navigation-flow"><code>components/{edge_modeling_toggle,show_results_toolbar_button,results_bar_button}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Destination-mode control, Edge visibility and matching totals.</small></li>
-            <li id="file-downloads" data-steps="navigation-flow"><a href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Every standard export link participates in save protection.</small></li>
+            <li id="file-downloads" data-steps="navigation-flow"><a href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Guard standard exports during simplified autosaves and unsaved Configure changes.</small></li>
             <li id="file-field-partials" data-steps="lifecycle consume"><code>side_panels/dynamic_form_fields/{dynamic_form_field,source_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Shared bookmark and provenance completion mode; preserve ordinary form semantics.</small></li>
             <li id="file-panels" data-steps="lifecycle consume"><code>side_panels/{object_form_content,side_panel_structure}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Creation settings, normal Save independence and focused timeseries variant.</small></li>
             <li id="file-source-partials" data-steps="lifecycle"><code>result/{source_table_row,source_table_row_editor}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Discreet bookmarks on individual inputs only.</small></li>
@@ -252,9 +250,8 @@
         <ul>
           <li id="file-client" data-steps="configure lifecycle consume navigation-flow"><code>static/scripts/simplified_inputs.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Mode/draft/filter behavior, bookmarks, creation-time inclusion locks and field completion events.</small></li>
           <li id="file-request-guard" data-steps="consume navigation-flow"><code>static/scripts/model_builder_main.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Extend existing HTMX disabled-state handling with a shared in-flight guard; no queued edits. <a href="#saves">Save guard</a></small></li>
-          <li id="file-browser-existing" data-steps="consume navigation-flow"><code>static/scripts/{model_comparison,side_panel_utils,source_metadata}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Per-model restoration, parked editor lifecycle, provenance autosave integration.</small></li>
+          <li id="file-browser-existing" data-steps="consume navigation-flow"><code>static/scripts/{model_comparison,side_panel_utils,source_metadata}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Per-model base view, existing panel navigation protection and provenance autosave integration.</small></li>
           <li id="file-dynamic-forms" data-steps="consume"><code>static/scripts/dynamic_forms.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Scoped initialization and server-selected dependent options; preserve normal form behavior.</small></li>
-          <li id="file-preview" data-steps="consume navigation-flow"><code>static/scripts/{timeseries_preview,timeseries_utils}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>One active preview, safe teardown/rebind when parking a field editor.</small></li>
           <li id="file-scss" data-steps="configure lifecycle consume"><code>static/scss/_simplified_inputs.scss</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Compact fields, Navigation, container-responsive columns and discreet bookmark states.</small></li>
           <li id="file-assets" data-steps="navigation-flow"><code>static/scss/main.scss · templates/{base,navbar}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Wire assets/shared compact shell as needed; keep standard file/results affordances.</small></li>
           <li><code>static/scripts/ <small>catalog / tour callers</small></code> <span data-change="modified">Modified</span><small>Semantic examples rename of handlers, selectors and deep-link producers.</small></li>
@@ -265,7 +262,7 @@
         <ul>
           <li><code>tests/unit_tests/{domain,application,adapters}/</code> <span data-change="new">New + modified</span><small>Catalog/closure/contract, request mapping, repository budget safety, presentation and existing panel fixtures.</small></li>
           <li><code>tests/integration/test_simplified_inputs.py</code> <span data-change="new">New</span><small>Real library multi-owner updates, provenance, lifecycle and in-memory round-trips.</small></li>
-          <li><code>tests/integration/{test_workspace_file,test_workspace_integration}.py</code> <span data-change="modified">Modified</span><small>Independent definitions, duplication, System IDs and safe multi-model import.</small></li>
+          <li><code>tests/integration/{test_workspace_file,test_workspace_integration}.py</code> <span data-change="modified">Modified</span><small>Independent definitions, duplication, System IDs and multi-model import prevalidation.</small></li>
           <li><code>tests/e2e/test_simplified_inputs.py · tests/e2e/pages/</code> <span data-change="new">New + modified</span><small>Critical end-to-end workflows through page objects; not duplicate permutations.</small></li>
           <li><code>js_tests/{simplified_inputs,model_builder_main}.test.js</code> <span data-change="new">New + modified</span><small>One-at-a-time protection, failure recovery, Enter/blur/export and draft/filter behavior.</small></li>
           <li><code>js_tests/build_fixtures.py</code> <span data-change="modified">Modified</span><small>Render real Django partials for JS tests.</small></li>
@@ -416,7 +413,7 @@ class SimplifiedInputsDefinition(TypedDict):
 </code></pre></div>
     <p>Normal forms retain labels, widgets, provenance, exclusions, ordering and one-hop
     <code>dynamic_lists</code>. On creation, resolve the remaining path from each candidate reference;
-    on edit, start from the existing object. No change to form output or browser behavior.</p>
+    on edit, start from the existing object. This extraction leaves existing choice behavior unchanged.</p>
     <p><strong>Timeseries support:</strong> in <code>adapters/forms/timeseries_builder_registry.py</code>,
     extract <code>find_editable_builder(annotation, value)</code> from <code>build_timeseries_form_config()</code>.
     Rendering and eligibility use that same lookup, but only rendering initializes strategy drafts.
@@ -511,8 +508,12 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
       <li><code>templates/model_builder/simplified_inputs/workspace.html</code> includes
       <code>templates/model_builder/simplified_inputs/navigation.html</code> and object groups.</li>
       <li><code>templates/model_builder/simplified_inputs/object.html</code> renders
-      <code>templates/model_builder/simplified_inputs/field.html</code>: the existing value/source editors plus
-      <code>templates/model_builder/simplified_inputs/bookmark.html</code>. Configure reuses it with selection/help controls.</li>
+      <code>templates/model_builder/simplified_inputs/field.html</code>: current-value previews in Configure;
+      existing value/source editors and authored help in consumption.</li>
+      <li><code>templates/model_builder/simplified_inputs/selection_controls.html</code> owns the inclusion
+      checkbox, help-text input and dependency explanation. Configure's field includes it directly.</li>
+      <li><code>templates/model_builder/simplified_inputs/bookmark.html</code> wraps those controls in
+      the expandable badge for creation/edit panels and Sources. Consumption includes neither partial.</li>
     </ul>
     <p>Prefix DOM IDs with the System ID, then the field's owner ID and attribute. Configure uses
     current-value previews. The selected-object filter reads draft membership and filters
@@ -528,38 +529,46 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     nothing is persisted yet.</p>
     <p><strong>Server · on Save and return:</strong> the view binds the request to
     <code>slot + expected System ID</code> and calls <code>UpdateSimplifiedDefinitionUseCase</code>.
-    It applies the configuration patch, uses <code>complete_selection()</code> to include required
+    Configure submits the complete definition from its form controls. The use case replaces the
+    saved simplified-input definition, uses <code>complete_selection()</code> to include required
     companions, then calls <code>validate_definition()</code> to check addresses, eligibility and
     selection completeness before persisting. This saves configuration, not modeling values.
     <strong>Defense in depth:</strong> the server repeats the browser's checks against current model
     state, protecting against bypassed or stale browser feedback. Server checks are authoritative.</p>
 <div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>New · shared result and definition-only use case</small></p><pre><code>@dataclass
 class SimplifiedInputsOutput:
-    changed_fields: set[FieldAddress]
     notices: list[str]
+    changed_fields: set[FieldAddress] | None = None  # Inline bookmark/value saves only.
 
 class UpdateSimplifiedDefinitionUseCase:
-    def execute(self, patch: dict) -&gt; SimplifiedInputsOutput: ...
+    def execute(self, settings: dict, *, replace: bool = False) -&gt; SimplifiedInputsOutput: ...
+    # Configure: complete definition, replace=True.
+    # Inline bookmark: field-property patch against the latest saved definition.
 </code></pre></div>
 <div data-code><p data-code-file><a href="#file-domain"><code>domain/services/simplified_inputs.py</code></a><small>New · selection validation, also used by imports</small></p><pre><code>def validate_definition(definition, catalog) -&gt; None: ...
 </code></pre></div>
-    <p>The browser keeps only changed membership/help/title/guidance properties, not a full copied
-    definition. Save and return submits that delta under the <a href="#saves">one-at-a-time save guard</a>;
-    Cancel discards the unsaved changes.</p>
-    <p>Clear sends an explicit clear-all-fields instruction only after confirmation and Configure Save.
-    Individually excluded fields retain help. If an inline bookmark saves while a Configure draft exists,
-    update that property's draft/base value without wiping other edits; later Save or Cancel must not
-    undo the accepted inline change.</p>
-<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed definition save through existing repository API</small></p><pre><code># After applying the patch and validating the candidate definition:
+    <p>Keep values in the form controls and track one form-level dirty flag, not changed properties or
+    a copied JavaScript definition. Submit the complete configuration under the
+    <a href="#saves">one-at-a-time save guard</a>. Cancel discards unsaved changes.</p>
+    <p>Before leaving a dirty Configure form, offer <strong>Save / Discard / Stay</strong>.
+    Save continues the requested action only after success; failure keeps the form open.
+    This also gates model switching, Compare, Results/Sources, file opening and export.
+    Thus inline bookmarks cannot save alongside a Configure draft; no reconciliation is needed.</p>
+    <p>Each Configure entry loads saved settings, starts at the top, opens the first object and turns
+    the selected-object filter off. Do not park its draft or restore its layout after leaving.
+    Clear, after confirmation, empties the form's field settings; Save replaces the saved fields with
+    that empty selection. Ordinary deselection retains help.</p>
+<div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed definition save through existing repository API</small></p><pre><code># After validating the replacement or patched candidate definition:
 repository.interface_config = candidate_config
 repository.save_interface_config()
 </code></pre></div>
     <p>Configuration-only saves patch stored UI settings without hydrating, computing or serializing the
-    model solely for persistence. The presenter uses <code>changed_fields</code> to refresh affected
-    counts/bookmarks and displays notices.</p>
+    model solely for persistence. After Configure Save, the server renders the complete Simplified
+    inputs view, including Navigation, counts and any notices, and replaces the Configure view.
+    This path does not track <code>changed_fields</code>.</p>
     <p><strong>Repository correction:</strong> <code>adapters/repositories/session_system_repository.py</code>
-    currently publishes configuration in <code>save_data()</code> before checking size. Stage it until
-    validation, budget checks and accepted writes succeed; keep parity in the in-memory repository.
+    currently publishes configuration in <code>save_data()</code> before checking size. Move that
+    publication after the size check, alongside the normal save; keep parity in the in-memory repository.
     Scope recovery settings by slot and System ID so one model cannot inherit another's configuration.</p>
   </article>
 
@@ -572,27 +581,70 @@ repository.save_interface_config()
     eligible field, including Storage fields displayed inside a Server panel.
     <code>adapters/views/source_table_row_editor_context.py</code> adds the same bookmark context to
     each input row while retaining its raw-JSON metadata path and current value editor.</p>
-    <p>The shared <code>templates/model_builder/simplified_inputs/bookmark.html</code> opens selection/help
-    controls. <code>../theme/static/scripts/simplified_inputs.js</code> sends settings-only patches to
+    <p><code>templates/model_builder/simplified_inputs/bookmark.html</code> discloses the shared
+    <code>templates/model_builder/simplified_inputs/selection_controls.html</code> controls.
+    For existing inputs, <code>../theme/static/scripts/simplified_inputs.js</code> sends settings-only patches to
     <a href="#configuration-save"><code>UpdateSimplifiedDefinitionUseCase</code></a>: inclusion immediately,
     help on completion. It never submits the panel's value draft. Undo applies an inverse membership
-    patch checked against current dependencies.</p>
+    patch checked against current dependencies. These inline saves return <code>changed_fields</code>
+    for targeted bookmark/count updates, preserving the open panel's unsaved value controls.</p>
     <h4 id="new-dependents">2 · Create an object with required simplified inputs</h4>
     <p><span data-status="agreed">Agreed</span> An API's Model is included; a new linked video job's
     Resolution appears included and required before saving. The bookmark explains the controlling field
     on hover/focus and still opens editable help. See the
     <a href="../../../../e-footprint/efootprint/builders/external_apis/ecologits/ecologits_video_external_api.py">existing video dependency</a>.</p>
+    <p><strong>Server · extend the existing form context:</strong>
+    <code>adapters/forms/form_field_generator.py</code> already builds a <code>dynamic_lists</code> entry
+    mapping each candidate API to its allowed resolutions. After the form strategy runs,
+    <code>adapters/forms/form_context_builder.py</code> imports helpers from
+    <code>domain/services/simplified_inputs.py</code> to resolve each candidate's controlling field and
+    check its saved inclusion. The adapter adds display labels and the optional
+    <code>simplified_required_by</code> mapping; existing option data stays unchanged.</p>
+<div data-code><p data-code-file><a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a><small>Proposed enrichment of one dynamic_form_data["dynamic_lists"] entry · illustrative API IDs</small></p><pre><code>{
+    # Existing: resolution choices depend on the selected API.
+    "input_id": "EcoLogitsVideoGenExternalAPIJob_resolution",
+    "filter_by": "service_or_external_api",
+    "list_value": {
+        "api-a": ["720p (1280 x 720)", "1080p (1920 x 1080)"],
+        "api-b": ["480p (854 x 480)", "720p (1280 x 720)"],
+    },
+
+    # New: why inclusion in simplified inputs is required.
+    "simplified_required_by": {
+        "api-a": {
+            "object_id": "api-a",
+            "attribute": "model_name",
+            "label": "Video API A · Model used",
+        },
+        "api-b": None,
+    },
+}
+</code></pre></div>
+    <p>API A's Model is included; API B's is not. The domain derives this from
+    <code>external_api.model_name</code> and saved selection, not a video-specific rule.
+    The new job has no object ID yet: <code>input_id</code> identifies its Resolution control until creation.</p>
+    <p>On edit, when the API relationship is fixed, there is no dynamic-list entry. Attach the resolved
+    requirement directly to the field context consumed by <code>selection_controls.html</code>:</p>
+<div data-code><p data-code-file><a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a><small>Proposed field-context addition for a fixed relationship · None when inclusion is not required</small></p><pre><code>field["simplified_required_by"] = {
+    "object_id": "api-a",
+    "attribute": "model_name",
+    "label": "Video API A · Model used",
+}
+</code></pre></div>
     <ol>
-      <li><code>adapters/forms/form_context_builder.py</code> uses the catalog and conditional metadata
-      to attach required-selection context for each candidate parent/reference.
-      <code>../theme/static/scripts/simplified_inputs.js</code> applies it when that choice changes:
-      include the dependent and lock removal only while required. Nothing is persisted yet.</li>
+      <li><strong>Browser:</strong> <code>../theme/static/scripts/simplified_inputs.js</code> reads the
+      mapping on initialization and parent changes. For API A, include Resolution and lock removal
+      with an explanation naming its Model. For API B, remove the lock and let the user choose inclusion.
+      Help remains editable; nothing is persisted yet.</li>
       <li><code>application/use_cases/create_object.py</code> carries pending selection/help with the
-      creation input. After creation/hooks, resolve final owner IDs, rebuild the catalog and run
-      <code>complete_selection()</code> against the resulting model. Persist model and settings together;
-      never trust the browser's required-state flag.</li>
-      <li>Failed creation retains the draft for correction; failure/cancellation leaves no references.
+      creation input. Creation bookmarks collect these settings until Create; they do not autosave.
+      After creation/hooks, resolve final owner IDs, rebuild the catalog and run
+      <code>complete_selection()</code> against the resulting model. Persist model and settings together.
+      <strong>Defense in depth:</strong> recompute required inclusion from current model state rather
+      than trusting the browser's precomputed requirement.
       Report only automatic additions not already shown in the submitted draft.</li>
+      <li>Failed creation uses the existing error modal, which closes and clears the creation panel,
+      and does not persist pending simplified-input settings. Cancellation also leaves no references.</li>
     </ol>
     <h4>3 · Delete an object containing selected inputs</h4>
     <p><code>application/use_cases/delete_object.py</code> uses the actual cascade set to extend the
@@ -626,13 +678,13 @@ repository.save_interface_config()
       <li>Keep the guard through response updates and restore controls on success or failure, preserving
       their constraint-disabled states. Avoid duplicate saves from Enter followed by blur. Stateless
       timeseries previews stay outside this guard; reading and scrolling remain available.</li>
-      <li>On failure, retain the entered value and error for correction/retry; do not report success or
-      overwrite it with the last saved value. Restore controls without automatically retrying.</li>
+      <li>Restore controls on failure without automatically retrying. For simplified-input saves, retain
+      the entered value and error for correction/retry; leave ordinary Modeling-panel error handling unchanged.</li>
     </ol>
     <p><strong>Server:</strong> retain the slot/System-ID check before mutation. It rejects stale targets
     even if browser navigation protection was bypassed; no response-generation queue protocol is needed.</p>
     <h4 id="atomic-edit">3 · Save Provider and affected values together</h4>
-    <p>Extract a prepare/commit seam from the existing object edit conversion so a simplified edit can submit
+    <p>Extract input conversion and change collection from the existing object edit function so a simplified edit can submit
     one library <code>ModelingUpdate</code> across all affected owners. Do not call the existing one-owner edit
     use case repeatedly: that would persist invalid intermediate states.</p>
     <figure id="mutation-call-path">
@@ -672,18 +724,18 @@ class EditSimplifiedInput:
 class EditSimplifiedInputUseCase:
     def execute(self, command: EditSimplifiedInput) -&gt; SimplifiedInputsOutput: ...
 </code></pre></div>
-    <p>The view uses the same slot/System-ID binding and shared
-    <a href="#configuration-save"><code>SimplifiedInputsOutput</code></a> as definition saves.</p>
+    <p>The view uses the same slot/System-ID binding. Like inline bookmark saves, it populates
+    <a href="#configuration-save"><code>SimplifiedInputsOutput.changed_fields</code></a>
+    for targeted rendering.</p>
     <div data-comparison>
       <div><h5>Today · one owner per edit</h5><div data-code><p data-code-file><a href="#file-factory"><code>domain/object_factory.py</code></a><small>Existing flow, abridged</small></p><pre><code>edit_object_from_parsed_data(...)
   → convert inputs
   → apply some metadata immediately
   → ModelingUpdate(changes_list)</code></pre></div></div>
-      <div><h5>Proposed · separate preparation</h5><div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed orchestration, calling the factory helper</small></p><pre><code>prepare_input_changes(...)
-  → value pairs + deferred metadata
-reconcile dependent choices
+      <div><h5>Proposed · collect across owners</h5><div data-code><p data-code-file><a href="#file-usecase"><code>application/use_cases/simplified_inputs.py</code></a><small>Proposed orchestration, calling the factory helper</small></p><pre><code>prepare_input_changes(...)
+  → converted value pairs; existing metadata helpers
+reconcile and collect dependent changes
 ModelingUpdate(all_value_pairs)
-apply accepted metadata
 persist once</code></pre></div></div>
     </div>
     <p><code>domain/object_factory.py</code> owns <code>prepare_input_changes()</code>.
@@ -695,13 +747,13 @@ persist once</code></pre></div></div>
       <li>Prepare dependent changes using the candidate controller values. Keep valid values; otherwise choose
       the first allowed value. A missing conditional branch adds no restriction; an empty allowed list rejects
       the change. The library remains the final validator.</li>
-      <li>Apply the whole value batch with <code>ModelingUpdate</code>, then its prepared provenance changes,
-      and persist once. Any failure discards the candidate model and preserves the browser draft.</li>
+      <li>Apply the whole value batch with <code>ModelingUpdate</code> and persist once on success.
+      Validation failure discards the request-local model and preserves the simplified-input edit in the browser.</li>
     </ol>
-    <p><strong>Important refactor:</strong> some metadata edits currently mutate inputs immediately.
-    Defer them too, so failed dependent validation cannot leave a changed source/comment behind.
-    Keep existing source identity and confidence behavior, preserve omitted metadata, and do not edit shared
-    Source records through this patch.</p>
+    <p><strong>Reuse the existing persistence boundary:</strong> <code>ModelWeb</code> reconstructs the
+    model per request, and normal edits persist only after success. Metadata can still change on that
+    request-local model through existing helpers; no deferred-metadata or rollback layer is needed.
+    Preserve source identity, confidence and omitted metadata; do not edit shared Source records through this patch.</p>
     <p><strong>Tracked library fix:</strong> <code>attributes_with_depending_values()</code> drops earlier
     dependents sharing a controller. Keep the <a href="known-issues.md">SI-1 fix and regression</a> in the
     library; the new edit path must not compensate for it in interface code.</p>
@@ -732,8 +784,8 @@ persist once</code></pre></div></div>
     builder partials, parser and stateless preview endpoint. Render the string preview with the field;
     load its side-panel editor when the user clicks Edit timeseries, keeping the chart to the panel's
     left. Strategy drafts remain in that editor; Save uses the same
-    selected-input use case, Cancel discards the editor draft. Switching models parks it as described
-    <a href="#model-context">below</a>.</p>
+    selected-input use case, Cancel discards the editor draft. Model switching uses the existing
+    side-panel unsaved-changes warning and closes the editor; no draft is parked for return.</p>
   </article>
 
   <article id="navigation-flow" data-decision>
@@ -744,60 +796,51 @@ persist once</code></pre></div></div>
     <p><code>templates/model_builder/model_builder_main.html</code> keeps a simplified-input container
     beside each resident canvas. Render it on first use; switching hides rather than destroys it.
     The toolbar offers the destination view, with Edge modeling only in Modeling. Configure is entered
-    from Simplified inputs.</p>
-<div data-code><p data-code-file><a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a><small>New · transient state keyed by System ID</small></p><pre><code>{
-  view, expandedObjects, scrollTop, selectedOnly,
-  configurationDelta, dirtyFields, parkedTimeseriesEditor
-}
+    from Simplified inputs and is a temporary editing session, not a remembered view.
+    Its <a href="#configuration-save">Save / Discard / Stay guard</a> runs before leaving;
+    there is no Configure draft to park.</p>
+<div data-code><p data-code-file><a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a><small>New · last base view keyed by System ID</small></p><pre><code>const viewBySystemId = new Map(); // Values: "modeling" or "simplified".
 </code></pre></div>
-<div data-code><p data-code-file><a href="#file-browser-existing"><code>../theme/static/scripts/model_comparison.js</code></a><small>Modified · calls to shared lifecycle helpers</small></p><pre><code>parkModelContext(systemId);
-restoreModelContext(systemId);
-disposeModelContext(systemId);
-</code></pre></div>
-    <p>Define those helpers in <code>../theme/static/scripts/simplified_inputs.js</code> and connect
-    them through the existing event/module convention. Model switching currently closes the shared
-    panel: for simplified timeseries, detach its DOM, stop the preview, then restore both on return.
-    Removing a model disposes its parked DOM; ordinary panels retain existing save/discard protection.
-    Compare hides the resident context without losing drafts.</p>
+    <p>Reuse <code>../theme/static/scripts/side_panel_utils.js</code>'s unsaved-changes warning before
+    switching models, including for the simplified timeseries panel. Staying lets the user save first;
+    continuing discards the draft and the existing model-switch handler closes the panel.
+    Compare already hides the resident builder without destroying its panel, so a same-model return
+    needs no restoration code. Configure must first be saved or discarded.</p>
     <p>Model switches and structural edits use the <a href="#saves">same in-flight guard as saves</a>;
     they are unavailable while a mutation is running, not queued for later.
-    Restore view, scroll, expansion and filter state by System ID; apply simplified-versus-modeling
-    opening defaults only when importing JSON, not on every tab switch.</p>
+    Remember only the last base view by System ID; do not add scroll, expansion or filter restoration.
+    Apply simplified-versus-modeling opening defaults only when importing JSON, not on every tab switch.</p>
     <h4 id="exports">2 · Download through the normal toolbar</h4>
     <p><code>../theme/static/scripts/simplified_inputs.js</code> captures an export action before blur
     can start a save. Complete the focused field first; if that starts an autosave, wait for that one
     request and continue the export only on success. This is a continuation of that export action,
     not a queue of mutations. Export controls are otherwise disabled during a mutation.</p>
-    <p>Direct links and menus share this guard. Failed edits in the requested model(s) require
-    correction/retry or discard; explicit panel and Configure drafts retain their normal warning.
+    <p>Direct links and menus share this guard. Failed simplified autosaves in the requested model(s)
+    require correction/retry or discard. Configure uses its Save / Discard / Stay exit guard.
+    Ordinary Modeling panels currently have no unsaved-export warning; keep that behavior.
+    Exports contain saved values, not unfinished panel edits, including timeseries drafts.
     Keep existing single-model/workspace file formats.</p>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
     <p><code>adapters/views/views_workspace.py</code> currently duplicates library data only. Copy
     interface settings independently too, remap System-owned field addresses when that ID changes,
     and start an independent browser context.</p>
-    <p>Import currently clears slots before restoring their replacements. Prepare every incoming model
-    in isolation instead. Reuse <a href="#configuration-save"><code>validate_definition()</code></a>
-    with the catalog; the import adapter supplies the same <code>can_edit_timeseries</code> function.
-    Check distinct System IDs and combined size before replacing any live slot.</p>
-    <details>
-      <summary>Publishing a prepared import</summary>
-      <p><code>adapters/repositories/workspace_base.py</code> stages documents under fresh cache keys.
-      Keep the previous keys/index reachable until required writes succeed, then publish the replacement.
-      Expose this operation through <code>domain/interfaces/workspace_repository.py</code> and implement the
-      same contract in the in-memory repository.</p>
-      <p><code>adapters/repositories/cache_backend.py</code> currently logs some write failures without
-      returning an outcome. Report those outcomes so the caller can reject the import and remove only its
-      staged keys. Preserve existing canonical/recovery formats and degraded-storage reporting; this does
-      not promise a transaction across both cache backends.</p>
-    </details>
+    <p><strong>Existing gap:</strong> <code>adapters/views/views_workspace.py</code> clears slots before
+    validating all replacements. Run every incoming model through the existing
+    <code>SystemImportService.import_system()</code> first. Extend its validation with
+    <a href="#configuration-save"><code>validate_definition()</code></a>; the import adapter supplies
+    <code>can_edit_timeseries</code>. Resolve System IDs and check the combined size before clearing any
+    live slot, then save the validated documents through the existing repository paths.</p>
+    <p>This protects against invalid files, not backend-write failures. Cache-write reporting and
+    atomic workspace replacement are a separate deferred issue, <a href="known-issues.md#si-2--workspace-replacement-is-not-atomic-on-storage-failure">SI-2</a>;
+    no new repository contract or staging keys are part of this feature.</p>
   </article>
 
   <article id="examples" data-decision>
     <h3><a href="#examples">1.6 · Rename the existing catalog to Examples</a> <span data-status="proposal">Required task</span></h3>
 <p data-files><strong>Files</strong> <a href="#file-library-rename"><code>../../e-footprint/efootprint/modeling_templates/ → ../../e-footprint/efootprint/modeling_examples/</code></a> · <a href="#file-interface-rename"><code>domain/reference_data/modeling_templates/ → domain/reference_data/modeling_examples/</code></a></p>
     <p>Keep one identifiable cross-repo task in this feature's eventual interface-owned <code>tasks.md</code>,
-    with its own verification and review. Rename the ready-made modeling concept in depth, before adding new
-    catalog callers. Do not rename Django/Jinja/HTML rendering templates.</p>
+    with its own verification and review. Rename the ready-made modeling concept in depth.
+    This is independent of the eligible-field catalog. Do not rename Django/Jinja/HTML rendering templates.</p>
     <ul>
       <li><strong>Library:</strong> rename the package, registries and public API together:
       <code>HowToTemplate → HowToExample</code>, <code>template_id → example_id</code>,
@@ -819,11 +862,11 @@ disposeModelContext(systemId);
   They are not generated tasks. Keep the Examples rename and the
   <a href="known-issues.md">SI-1 library fix</a> independently reviewable in the later task breakdown.</p>
   <ol id="phases">
-    <li><strong>Examples terminology</strong>Coordinated cross-repo rename, resources, callers and independent verification.<small>Independent workstream · finish before new catalog integration.</small></li>
+    <li><strong>Examples terminology</strong>Coordinated cross-repo rename, resources, callers and independent verification.<small>Independent workstream; can run alongside B–E.</small></li>
     <li><strong>Definition and eligible-field catalog</strong>Address SI-1; reuse metadata and editor helpers; add addresses, configuration and selection validation.<small>Foundation for C and D.</small></li>
-    <li><strong>Persistence and lifecycle</strong>Config patching, copy/remap, safe imports, provisional creation and deletion cleanup.<small>Depends on B · tested without the new browser surface.</small></li>
-    <li><strong>Atomic input-edit path</strong>Prepared multi-owner changes, metadata staging, library rollback and authoritative errors.<small>Depends on B and repository guarantees from C.</small></li>
-    <li><strong>Views and coordinated interaction</strong>Shared consumption/config UI, bookmarks, focused timeseries, one-at-a-time save/export guard and draft restoration.<small>Depends on C + D; extend the existing request guard before acceptance.</small></li>
+    <li><strong>Persistence and lifecycle</strong>Config patching, copy/remap, import prevalidation, provisional creation and deletion cleanup.<small>Depends on B · tested without the new browser surface.</small></li>
+    <li><strong>Atomic input-edit path</strong>Collect converted changes across owners, apply one ModelingUpdate and persist once after success.<small>Depends on B; reuse existing metadata and persistence behavior.</small></li>
+    <li><strong>Views and coordinated interaction</strong>Shared consumption/config UI, bookmarks, Configure exit guard, focused timeseries and one-at-a-time save/export protection.<small>Depends on C + D; extend the existing request guard before acceptance.</small></li>
     <li><strong>Live results and release verification</strong>Paired total updates across all mutation paths, critical E2E flows, documentation and final terminology audit.<small>Depends on A–E · total presenter can be developed alongside E.</small></li>
   </ol>
 
@@ -837,11 +880,11 @@ disposeModelContext(systemId);
       <tbody>
         <tr><td>Catalog and forms</td><td>Eligible versus excluded input kinds, including empty optional numbers and unsupported timeseries; normal creation/edit forms unchanged.</td><td>Catalog and existing form tests</td></tr>
         <tr><td>Required selections</td><td>Provider/Model and linked video-job Resolution; chained inclusion, dependent-only selection, stale addresses and invalid deselection. SI-1 preserves both siblings.</td><td>Interface unit/integration; focused library regression for SI-1</td></tr>
-        <tr><td>Value/provenance updates</td><td>Keep a valid dependent or choose the first allowed value; reject an invalid batch without partial metadata. Include the Server empty-count case.</td><td>Framework-free integration using ModelingUpdate</td></tr>
-        <tr><td>Configuration and imports</td><td>Membership/help round-trip; independent copies and System-ID remapping; malformed second model, budget rejection or failed writes preserve the previous workspace.</td><td>Repository/workspace integration; one import E2E</td></tr>
+        <tr><td>Value/provenance updates</td><td>Keep a valid dependent or choose the first allowed value; an invalid batch persists neither values nor metadata. Include the Server empty-count case.</td><td>Framework-free integration using ModelingUpdate</td></tr>
+        <tr><td>Configuration and imports</td><td>Membership/help round-trip; independent copies and System-ID remapping; malformed second model or combined-budget rejection leaves the previous workspace unchanged.</td><td>Repository/workspace integration; one import E2E</td></tr>
         <tr><td>Inline authoring and lifecycle</td><td>Bookmarks do not save value drafts; correct nested owner; creation previews required inclusion, updates the lock when the API changes, and keeps help editable. Successful creation enforces inclusion; failure/cancel leaves no references. Clear/Undo/delete respect retained help and dependencies.</td><td>Use-case integration; one combined authoring E2E</td></tr>
-        <tr><td>Requests and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; restore controls and retain failed edits. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
-        <tr><td>Workspace and timeseries</td><td>Selected-object filtering and keyboard navigation; preserve configuration/editor drafts across models and Compare; one active preview with strategy Save/Cancel.</td><td>Presenter/Jest tests; focused browser flow at wide and compact widths</td></tr>
+        <tr><td>Requests and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; restore controls and retain failed simplified-input edits. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
+        <tr><td>Workspace and timeseries</td><td>Selected-object filtering and keyboard navigation; Configure Save returns the complete Simplified inputs view with updated counts; exit Save/Discard/Stay, failed-save recovery and fresh entry defaults; per-model base view; timeseries Save/Cancel and existing discard warning on model switch.</td><td>Presenter/Jest tests; focused browser flow at wide and compact widths</td></tr>
         <tr><td>Results and large models</td><td>Both totals update when computability stays true; failure retains the last saved total. Check a representative large model for unnecessary full rendering/recalculation.</td><td>OOB/integration tests; targeted render measurement</td></tr>
         <tr><td>Examples rename</td><td>Same IDs/data/results; installed resources, picker, deep links, guide associations and authoring commands still work.</td><td>Both repositories' existing suites and package/docs checks</td></tr>
       </tbody>
@@ -864,7 +907,7 @@ disposeModelContext(systemId);
   Keep server-side field validation, CSRF/session protection, escaped user text and source-link sanitization.
   Simplified inputs is a view, not an authorization boundary.</p>
   <p>At implementation, document the shared helpers, configuration ownership, atomic dependent updates, in-flight guard,
-  import publication and draft restoration in the owning architecture pages. Update live Examples docs and
+  import prevalidation, Configure exit protection and reuse of the existing panel lifecycle in the owning architecture pages. Update live Examples docs and
   relevant <code>AGENTS.md</code>/<code>CLAUDE.md</code> pointers.</p>
 </section>
 
@@ -872,8 +915,8 @@ disposeModelContext(systemId);
   <h2>4. Risks · where review matters</h2>
   <ul>
     <li><a href="#atomic-edit">Partial saves:</a> dependent values and provenance must be accepted together.</li>
-    <li><a href="#persistence">Import failure:</a> old workspace data must remain reachable until the replacement succeeds.</li>
-    <li><a href="#saves">Overlapping mutations:</a> protect input-triggered saves and links as well as buttons; keep restored drafts bound to their System ID.</li>
+    <li><a href="#persistence">Invalid imports:</a> validate all incoming models and their combined size before clearing the workspace.</li>
+    <li><a href="#saves">Overlapping mutations:</a> protect input-triggered saves and links as well as buttons; bind each mutation to its slot and System ID.</li>
   </ul>
   <p>These are the highest-risk integration boundaries; the verification map targets them directly.</p>
 </section>
@@ -887,8 +930,10 @@ disposeModelContext(systemId);
     use the library's multi-owner update instead.</li>
     <li><strong>Queued autosave, manual batch save or a mode toggle:</strong> extra pending-edit and
     recovery machinery is not justified for this iteration. Use one-at-a-time autosave; accept the
-    brief editing pause during saves. Failed-edit preservation is necessary with every approach.</li>
-    <li><strong>Full-page refreshes:</strong> discard drafts and focus; use targeted updates and retained view containers.</li>
+    brief editing pause during saves. Preserving failed simplified-input edits is necessary with every approach.</li>
+    <li><strong>Full-page refreshes during inline edits:</strong> discard drafts and focus; use targeted updates and retained view containers.</li>
+    <li><strong>Preserved Configure drafts and bookmark reconciliation:</strong> unnecessary with the
+    Save / Discard / Stay exit guard. Submit the whole configuration and reopen saved settings.</li>
   </ul>
 </section>
 
@@ -906,7 +951,7 @@ disposeModelContext(systemId);
 <section id="review">
   <h2>7. Review points before tasks</h2>
   <ol>
-    <li><strong>Approach:</strong> review atomic dependent updates, prepared imports, the in-flight guard and draft restoration.</li>
+    <li><strong>Approach:</strong> review atomic dependent updates, import prevalidation, the in-flight guard and Configure exit protection.</li>
     <li><strong>Format:</strong> can you follow each interaction through its files and proposed changes without jumping between technical layers?</li>
   </ol>
   <p>Next, after approval: <code>spec-tasks</code>, including the separate rename and

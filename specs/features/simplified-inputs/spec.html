@@ -168,6 +168,11 @@
   #modeling-sources small { display: block; color: #526177; }
   #modeling-delete-result { border: 1px solid #b9d8b9; background: #f4faf4; border-radius: 6px;
                             padding: .5rem .65rem; margin: .7rem 0; }
+  #configure-exit-dialog { max-width: min(28rem, calc(100vw - 3rem)); padding: 1.4rem;
+                           border: 1px solid #aeb9c7; border-radius: 8px; }
+  #configure-exit-dialog::backdrop { background: rgba(20, 30, 45, .48); }
+  #configure-exit-dialog h3 { margin-top: 0; }
+  #configure-exit-dialog footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; }
   #delete-confirmation-backdrop { position: absolute; z-index: 6; inset: 0; background: rgba(20, 30, 45, .48);
                                   display: grid; place-items: center; padding: 1rem; }
   #delete-object-confirmation { width: min(29rem, 100%); background: white; border-radius: 8px;
@@ -405,10 +410,10 @@
     independently to each modeling in a workspace file, initially showing the active modeling.
     Adding or removing selected inputs never automatically navigates away from the current view.</li>
     <li><strong>Independent workspace context:</strong> reference and comparison modelings each retain
-    their own selection, help text, values, and last view. Switching between them restores that view
-    (including configuration), scroll position, and expanded sections instead of reapplying
-    JSON-opening defaults. Preserved drafts resume intact; navigation that would discard edits follows
-    the existing save/discard safeguards. Duplicating a modeling copies
+    their own selection, help text, values, and last base view (Modeling or Simplified inputs).
+    Switching between them restores that base view instead of reapplying JSON-opening defaults.
+    Configure is a temporary editing session: save or discard its changes before leaving, with no
+    draft or layout restoration on return. Duplicating a modeling copies
     its selection and guidance, after which both copies evolve independently.</li>
     <li><strong>One source of values:</strong> Simplified inputs reads and edits the modeling's actual
     values. The simplified-input configuration has no initial-value snapshot, default values, or reset-to-defaults
@@ -451,8 +456,8 @@
     are hidden too. All eligible fields within a matching object remain available. Deselecting its
     last input removes that object from the filtered view, without deleting its help or other data.
     An empty result offers Show all objects to turn the filter off. Filtering never changes membership,
-    help, or values. The filter and expansion state are remembered per modeling when navigating;
-    opening a JSON starts with the filter off.</li>
+    help, or values. Every entry into Configure starts at the top with the filter off and the first
+    object open; scroll position, expansion and filter choices are not remembered after leaving.</li>
     <li><strong>Per-field guidance:</strong> in configuration or any inline simplified-input disclosure,
     the author can optionally add custom help text. In Simplified inputs, non-empty help is displayed as authored,
     preserving capitalization, immediately below the field name; an empty help value leaves no placeholder or gap.</li>
@@ -484,8 +489,9 @@
     compatible timeseries strategies available in normal editing. Saving the panel persists the
     selected strategy and authored inputs together, closes the panel, and refreshes the string preview.
     These timeseries edits remain a draft until Save timeseries; Cancel discards them. Failed validation
-    keeps the editor and draft open. Ordinary modeling panels and Configure retain their explicit
-    Save / Cancel boundaries.</li>
+    keeps the editor and draft open. Switching models reuses the ordinary side-panel unsaved-changes
+    warning: stay to save first, or discard and switch. Returning does not reopen that editor or restore
+    its draft. Ordinary modeling panels and Configure retain their explicit Save / Cancel boundaries.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
     legitimate calculated consequences, but does not rewrite unrelated hidden assumptions or the
     simplified-input definition.</li>
@@ -516,8 +522,9 @@
     a relevant save is in flight, including a final field committed when focus leaves it. Exporting
     both modelings waits for both. Every export entry point is protected, including menu links, with
     no extra confirmation for this wait. A failed autosave remains visibly unresolved; export must
-    not silently imply it includes that edit. Explicit panel/configuration drafts still follow the
-    existing save/discard safeguards.</li>
+    not silently imply it includes that edit. Configure uses its Save / Discard / Stay exit guard.
+    Ordinary modeling panels retain their current export behavior, without a new unsaved-changes
+    warning: exports contain saved values, not unfinished panel edits, including timeseries drafts.</li>
     <li><strong>Familiar configuration:</strong> configuration and Simplified inputs share Navigation,
     two disclosure levels, field order, and responsive grid of up to three columns per object.
     With the filter off, configuration reveals every object with eligible inputs in Navigation and the main pane, including
@@ -526,7 +533,11 @@
     available on the next entry into configuration, unchecked unless included during creation or
     required by an already included controlling field.
     Current values are shown for context; Simplified inputs shows only the saved selection. Saving applies
-    membership and help changes together; Cancel leaves the saved configuration intact.</li>
+    membership and help changes together; Cancel leaves the saved configuration intact.
+    Leaving with unsaved changes offers
+    Save / Discard / Stay, including model switching, Compare, Results/Sources, file opening and export.
+    Save continues only after success; a failed save keeps the form and edits available.
+    Opening Sources therefore cannot make inline configuration changes alongside a Configure draft.</li>
     <li><strong>Depth remains available:</strong> switching to Modeling makes every assumption and
     structural action available. Mode labels and navigation communicate the current view without
     permanent instructional or permission banners. Autosave explanations remain inside expanded
@@ -547,7 +558,7 @@
     <li><strong>Creation is provisional:</strong> for an object not yet created, membership and help
     remain part of the creation draft, visibly labeled Included when this object is created. They
     are committed only on successful creation; cancellation or failed validation creates no simplified-input
-    references. A failed creation keeps the draft available to correct.</li>
+    references. Server-side creation failures use the existing error modal and discard the creation form.</li>
     <li><strong>Required inputs are visible before creation:</strong> if a new object's input is required
     by an already included controlling field, it appears included and required in the creation panel.
     For example, creating a video job linked to an API whose Model is included automatically includes
@@ -593,7 +604,7 @@
       <li>Conditional selection completeness and atomic dependent-value fallbacks, derived from
       existing modeling rules rather than an additional author-maintained dependency configuration.</li>
       <li>Autosaving simple values and provenance metadata, with visible failure/retry behavior and
-      export protection; explicit Save / Cancel for composite timeseries and configuration drafts.</li>
+      export protection; explicit Save / Cancel for timeseries and configuration drafts.</li>
       <li>A synchronized active-model total in the top-right Show results control and bottom Results
       banner, refreshed on successful modeling changes and unavailable when computation is impossible.</li>
       <li>A title and general guidance for orientation: an explanation of what the user
@@ -640,7 +651,8 @@
       <li>Reusing the existing navbar, workspace tabs, modeling toolbar, normal Export menu, and
       Results/Sources navigation in the simplified experience; no special simplified-input download.</li>
       <li>Choosing the initial view only on JSON load: empty selection → Modeling; non-empty selection
-      → Simplified inputs. Workspace switching restores each modeling's last view and working context.</li>
+      → Simplified inputs. Workspace switching restores each modeling's last base view;
+      Configure must first be saved or discarded and starts fresh on re-entry.</li>
       <li>Independent reference/comparison definitions, duplication, and per-model or workspace JSON
       round-trips. Neither definition contains initial or current input values.</li>
       <li>Equal access to Modeling, Simplified inputs, and configuration for every holder of a
@@ -653,7 +665,7 @@
       user edit them in Simplified inputs without separately exposing those metadata fields in
       configuration. Other context such as units remains available wherever the normal editor
       supports it.</li>
-      <li>Non-destructive validation and recovery when an uploaded modeling with simplified inputs cannot be used.</li>
+      <li>Validate all uploaded models and their combined size before replacing the current workspace.</li>
       <li>A dedicated ride-along refactor renames the existing ready-made modelings from templates to
       examples throughout both the interface and library, including developer-facing terminology and
       documentation. This must be its own task in the implementation run, not just a UI-label change;
@@ -711,7 +723,9 @@
   pane. “Video origin” remains, with its selected and unselected fields available. Deselecting the
   last input of an object removes it from the filtered view; turn the filter off to find it again.
   Include a field and save to make it available in Simplified inputs. Save and return previews your
-  changes; Cancel restores the saved selection and guidance. An empty selection offers Choose
+  changes; Cancel restores the saved selection and guidance. Try switching models or opening Results
+  with configuration changes to see Save / Discard / Stay. Re-entering Configure resets the filter,
+  expansion and scroll position. An empty selection offers Choose
   inputs. Clear simplified inputs asks for confirmation before clearing the draft selection and
   all custom per-field help, including help on deselected fields; Save and return applies it and
   Cancel restores the saved settings. Individually deselecting a field retains its help.
@@ -1338,6 +1352,16 @@
     </section>
     </div>
 
+    <dialog id="configure-exit-dialog" aria-labelledby="configure-exit-title" aria-describedby="configure-exit-description">
+      <h3 id="configure-exit-title">Save configuration changes?</h3>
+      <p id="configure-exit-description">Save your selection and help text before continuing, or discard these changes.</p>
+      <footer>
+        <button type="button" data-configure-exit="stay" autofocus>Stay</button>
+        <button type="button" data-configure-exit="discard">Discard</button>
+        <button type="button" data-configure-exit="save">Save</button>
+      </footer>
+    </dialog>
+
     <script>
       (function () {
         var mockup = document.currentScript.parentElement;
@@ -1347,6 +1371,9 @@
           mockup.querySelector('#' + id).append(mockup.querySelector('#toolbar-actions-template').content.cloneNode(true));
         });
         var currentMode = 'simplified';
+        var configurationDirty = false;
+        var pendingConfigureExit = null;
+        var configureExitDialog = mockup.querySelector('#configure-exit-dialog');
         var activeModel = 'reference';
         var modelingSurface = 'edit';
         var comparing = false;
@@ -1643,13 +1670,6 @@
                 function (name) { savedConfiguration.fields[name].included = true; });
               undo.dataset.previousIncluded = JSON.stringify(Object.fromEntries(Object.entries(previousMembership)
                 .filter(function (entry) { return entry[1] !== savedConfiguration.fields[entry[0]].included; })));
-              if (currentMode === 'configuration') {
-                Object.keys(JSON.parse(undo.dataset.previousIncluded)).forEach(function (name) {
-                  mockup.querySelector('[data-include-field="' + name + '"]').checked = savedConfiguration.fields[name].included;
-                });
-                includeDependents(function (name) { return mockup.querySelector('[data-include-field="' + name + '"]').checked; },
-                  function (name) { mockup.querySelector('[data-include-field="' + name + '"]').checked = true; });
-              }
               undo.hidden = false;
               status.textContent = 'Saved. Modeling values are unchanged.' +
                 (key === 'api-provider' && include.checked ? ' Model is included too.' : '');
@@ -1659,29 +1679,15 @@
           help.addEventListener('change', function () {
             if (!provisional) {
               savedConfiguration.fields[key].help = help.value;
-              if (currentMode === 'configuration') {
-                mockup.querySelector('[data-help-input="' + key + '"]').value = help.value;
-              }
               status.textContent = 'Help saved. Modeling values are unchanged.';
             }
             refreshConfigurationState();
           });
           undo.addEventListener('click', function () {
             var previous = JSON.parse(undo.dataset.previousIncluded);
-            var beforeUndo = Object.fromEntries(Object.entries(savedConfiguration.fields)
-              .map(function (entry) { return [entry[0], entry[1].included]; }));
             Object.keys(previous).forEach(function (name) { savedConfiguration.fields[name].included = previous[name]; });
             includeDependents(function (name) { return savedConfiguration.fields[name].included; },
               function (name) { savedConfiguration.fields[name].included = true; });
-            if (currentMode === 'configuration') {
-              fields.forEach(function (field) {
-                var name = field.dataset.field;
-                if (beforeUndo[name] !== savedConfiguration.fields[name].included)
-                  field.querySelector('[data-include-field]').checked = savedConfiguration.fields[name].included;
-              });
-              includeDependents(function (name) { return mockup.querySelector('[data-include-field="' + name + '"]').checked; },
-                function (name) { mockup.querySelector('[data-include-field="' + name + '"]').checked = true; });
-            }
             undo.hidden = true;
             status.textContent = 'Membership restored. Modeling values are unchanged.';
             refreshConfigurationState();
@@ -1689,6 +1695,7 @@
         });
 
         function restoreDraft() {
+          configurationDirty = false;
           mockup.querySelector('#simplified-name-input').value = savedConfiguration.name;
           mockup.querySelector('#simplified-guidance-input').value = savedConfiguration.guidance;
           fields.forEach(function (field) {
@@ -1968,25 +1975,59 @@
         mockup.querySelectorAll('[data-mode]').forEach(function (button) {
           button.addEventListener('click', function () { show(button.dataset.mode); });
         });
+        function resetSimplifiedLayout() {
+          var firstObject = objects.find(function (object) { return !object.hidden && object.dataset.deleted !== 'true'; });
+          objects.forEach(function (object) { object.open = object === firstObject; });
+          mockup.querySelectorAll('[data-object-type]').forEach(function (type) {
+            type.open = firstObject && type.contains(firstObject);
+          });
+          mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
+            if (firstObject && button.dataset.objectTarget === firstObject.id) button.setAttribute('aria-current', 'true');
+            else button.removeAttribute('aria-current');
+          });
+          mockup.querySelector('#object-jump').value = firstObject ? firstObject.id : '';
+          mockup.querySelector('#simplified-fields').scrollTo({top: 0, behavior: 'instant'});
+        }
         function configureInputs() {
           restoreDraft();
+          resultsOpen = false;
+          mockup.querySelector('#only-selected-objects').checked = false;
           show('configuration');
+          resetSimplifiedLayout();
         }
         mockup.querySelector('#configure-inputs').addEventListener('click', configureInputs);
         mockup.querySelector('#choose-inputs').addEventListener('click', configureInputs);
-        mockup.querySelectorAll('[data-save-configuration]').forEach(function (button) {
-          button.addEventListener('click', function () {
-            savedConfiguration.name = mockup.querySelector('#simplified-name-input').value.trim() || 'Simplified inputs';
-            savedConfiguration.guidance = mockup.querySelector('#simplified-guidance-input').value.trim();
-            fields.forEach(function (field) {
-              savedConfiguration.fields[field.dataset.field] = {
-                included: field.querySelector('[data-include-field]').checked &&
-                  field.closest('[data-simplified-object]').dataset.deleted !== 'true',
-                help: field.querySelector('[data-help-input]').value
-              };
-            });
-            show('simplified');
+        ['input', 'change'].forEach(function (eventName) {
+          mockup.addEventListener(eventName, function (event) {
+            if (currentMode === 'configuration' && event.target.matches(
+              '[data-include-field], [data-help-input], #simplified-name-input, #simplified-guidance-input')) {
+              configurationDirty = true;
+            }
+          }, true);
+        });
+        function saveConfiguration(afterSave) {
+          var definition = {
+            name: mockup.querySelector('#simplified-name-input').value.trim() || 'Simplified inputs',
+            guidance: mockup.querySelector('#simplified-guidance-input').value.trim(),
+            fields: {}
+          };
+          fields.forEach(function (field) {
+            definition.fields[field.dataset.field] = {
+              included: field.querySelector('[data-include-field]').checked &&
+                field.closest('[data-simplified-object]').dataset.deleted !== 'true',
+              help: field.querySelector('[data-help-input]').value
+            };
           });
+          simulateSave(function () {
+            savedConfiguration = definition;
+            configurationDirty = false;
+          }, function () {
+            show('simplified');
+            if (afterSave) afterSave();
+          }, false);
+        }
+        mockup.querySelectorAll('[data-save-configuration]').forEach(function (button) {
+          button.addEventListener('click', function () { saveConfiguration(); });
         });
         mockup.querySelectorAll('[data-cancel-configuration]').forEach(function (button) {
           button.addEventListener('click', function () {
@@ -1994,6 +2035,45 @@
             show('simplified');
           });
         });
+
+        // Resolve Configure before another surface can edit the same saved settings.
+        mockup.addEventListener('click', function (event) {
+          if (currentMode !== 'configuration') return;
+          var destination = event.target.closest('[data-workspace-model], [data-open-comparison], ' +
+            '[data-mode], [data-show-results], [data-open-file], #open-regular-json, #open-simplified-json, ' +
+            '#reopen-current-json, [data-demo-action^="Export"], [data-demo-action^="Remove"], ' +
+            '[data-demo-action="Reset to default modeling"], [data-demo-action="Open examples"]');
+          if (!destination || destination.disabled || destination.dataset.workspaceModel === activeModel) return;
+          if (saving) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+          }
+          if (!configurationDirty) {
+            show('simplified');
+            return;
+          }
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          pendingConfigureExit = destination;
+          configureExitDialog.showModal();
+        }, true);
+        mockup.querySelectorAll('[data-configure-exit]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            var destination = pendingConfigureExit;
+            pendingConfigureExit = null;
+            configureExitDialog.close();
+            if (button.dataset.configureExit === 'stay') return;
+            if (button.dataset.configureExit === 'save') {
+              saveConfiguration(function () { destination.click(); });
+            } else {
+              restoreDraft();
+              show('simplified');
+              destination.click();
+            }
+          });
+        });
+        configureExitDialog.addEventListener('cancel', function () { pendingConfigureExit = null; });
 
         function focusObject(objectId) {
           var object = mockup.querySelector('#' + objectId);
@@ -2194,6 +2274,7 @@
             field.querySelector('[data-include-field]').checked = false;
             field.querySelector('[data-help-input]').value = '';
           });
+          configurationDirty = true;
           mockup.querySelector('#open-result').textContent =
             'Selection and all per-field help cleared in this draft. Save and return to apply. Modeling data is unchanged.';
           refreshConfigurationState();
@@ -2221,19 +2302,21 @@
           show(count ? 'simplified' : 'modeling');
         });
 
-        // Preserve separate per-model views and drafts in this single-DOM demonstration.
-        var stateControls = Array.from(mockup.querySelectorAll('input, select, textarea, details, output'));
-        var stateMessages = Array.from(mockup.querySelectorAll('[data-inline-status], [data-field-status], #value-status, #timeseries-save-status, #creation-status, #modeling-delete-result'));
+        // Keep per-model demo data and base views; do not park timeseries editor drafts.
+        var stateControls = Array.from(mockup.querySelectorAll('input, select, textarea, output')).filter(function (control) {
+          return !control.closest('#timeseries-panel') && !control.matches('[data-include-field], [data-help-input], #simplified-name-input, ' +
+            '#simplified-guidance-input, #only-selected-objects, #object-jump');
+        });
+        var stateMessages = Array.from(mockup.querySelectorAll('[data-inline-status], [data-field-status], #value-status, #creation-status, #modeling-delete-result'));
         function snapshot() {
           return JSON.parse(JSON.stringify({
             configuration: savedConfiguration, values: modelingValues, mode: currentMode, surface: modelingSurface,
             metadata: savedMetadata, total: illustrativeTotal, timeseriesForm: savedTimeseriesForm,
             invalid: Array.from(invalidControls, function (control) { return stateControls.indexOf(control); }),
             resultsOpen: resultsOpen, resultTab: resultTab,
-            strategies: savedTimeseriesStrategies, timeseries: activeTimeseries,
-            panelOpen: !mockup.querySelector('#timeseries-panel').hidden,
+            strategies: savedTimeseriesStrategies,
             controls: stateControls.map(function (control) {
-              return {value: control.multiple ? readControl(control) : control.value, checked: control.checked, open: control.open,
+              return {value: control.multiple ? readControl(control) : control.value, checked: control.checked,
                 options: control.tagName === 'SELECT' ? control.innerHTML : null,
                 output: control.tagName === 'OUTPUT' ? control.textContent : null};
             }),
@@ -2242,9 +2325,7 @@
               return {hidden: button.hidden, previous: button.dataset.previousIncluded};
             }),
             deleted: objects.map(function (object) { return object.dataset.deleted === 'true'; }),
-            archiveName: mockup.querySelector('#archive-server-label').textContent,
-            scroll: mockup.querySelector('#simplified-fields').scrollTop,
-            outline: mockup.querySelector('#object-jump').value
+            archiveName: mockup.querySelector('#archive-server-label').textContent
           }));
         }
         function restoreModel(state) {
@@ -2255,7 +2336,6 @@
           savedTimeseriesForm = state.timeseriesForm.slice();
           invalidControls = new Set(state.invalid.map(function (index) { return stateControls[index]; }));
           savedTimeseriesStrategies = JSON.parse(JSON.stringify(state.strategies));
-          activeTimeseries = state.timeseries;
           resultsOpen = state.resultsOpen;
           resultTab = state.resultTab;
           objects.forEach(function (object, index) { object.dataset.deleted = String(state.deleted[index]); });
@@ -2269,26 +2349,19 @@
           mockup.querySelector('#archive-server-card').hidden = !mockup.querySelector('#create-server').disabled;
           mockup.querySelector('[data-object-target="archive-server-fields"]').textContent = state.archiveName;
           mockup.querySelector('#object-jump option[value="archive-server-fields"]').textContent = state.archiveName;
-          // Restore configuration checkboxes before rendering their draft selection.
+          // Configure is never parked; its next entry reloads saved settings and default layout.
           stateControls.forEach(function (control, index) {
             var saved = state.controls[index];
             if (saved.options !== null) control.innerHTML = saved.options;
             if (saved.value !== undefined) writeControl(control, saved.value);
             if (saved.checked !== undefined) control.checked = saved.checked;
-            if (saved.open !== undefined) control.open = saved.open;
             if (saved.output !== null) control.textContent = saved.output;
           });
+          restoreDraft();
+          mockup.querySelector('#only-selected-objects').checked = false;
           showModelingSurface(state.surface);
           show(state.mode);
-          if (state.panelOpen) {
-            mockup.querySelector('#timeseries-panel').hidden = false;
-            mockup.querySelector('#simplified-workspace').setAttribute('data-panel-open', 'true');
-            activateTimeseriesEditor(mockup.querySelector('#timeseries-strategy').value);
-            mockup.querySelector('#timeseries-panel-title').textContent = state.timeseries === 'hourly'
-              ? 'Edit hourly pattern occurrences' : 'Edit recurrent compute need';
-            mockup.querySelector('#timeseries-panel-context').textContent = state.timeseries === 'hourly'
-              ? 'Usage pattern · Watch a video' : 'Recurrent server need · Video origin demand';
-          }
+          resetSimplifiedLayout();
           stateMessages.forEach(function (element, index) {
             element.textContent = state.messages[index].text;
             if (state.messages[index].error === undefined) delete element.dataset.error;
@@ -2298,11 +2371,6 @@
             button.hidden = state.undo[index].hidden;
             button.dataset.previousIncluded = state.undo[index].previous;
           });
-          mockup.querySelectorAll('[data-object-target]').forEach(function (button) {
-            if (button.dataset.objectTarget === state.outline) button.setAttribute('aria-current', 'true');
-            else button.removeAttribute('aria-current');
-          });
-          mockup.querySelector('#simplified-fields').scrollTop = state.scroll;
         }
         mockup.querySelectorAll('[data-workspace-model]').forEach(function (button) {
           button.addEventListener('click', function () {
@@ -2312,6 +2380,12 @@
               refreshChrome();
               return;
             }
+            var timeseriesDirty = !mockup.querySelector('#timeseries-panel').hidden &&
+              (mockup.querySelector('#timeseries-strategy').value !== savedTimeseriesStrategies[activeTimeseries] ||
+                JSON.stringify(timeseriesControls.map(readControl)) !== JSON.stringify(savedTimeseriesForm));
+            if (timeseriesDirty && !window.confirm('Discard unsaved timeseries changes and switch models?\n\n' +
+              'Cancel to stay here and save first.')) return;
+            closeTimeseriesPanel();
             workspace[activeModel] = snapshot();
             activeModel = button.dataset.workspaceModel;
             restoreModel(workspace[activeModel]);
@@ -2343,9 +2417,10 @@
     <li><strong>JSON remains the only portable format:</strong> this feature extends the user-visible
     JSON round-trip rather than introducing an alternative serialization format, consistent with the
     e-footprint mission and constitution.</li>
-    <li><strong>Existing file safety still applies:</strong> import must validate before replacing
-    session state, calculated outputs must be verified or recomputed under the established rules, and
-    a failed open must leave the current modeling intact.</li>
+    <li><strong>Validate before replacing:</strong> import checks every incoming model, its simplified-input
+    definition and the combined size before replacing session state. Calculated outputs are verified or
+    recomputed under the established rules. Rejection at these checks leaves the current workspace intact;
+    storage-failure recovery is outside this feature.</li>
     <li><strong>File contents are transparent:</strong> because the complete modeling is needed for
     calculation, audit, and resuming full editing, every assumption is present in the JSON. The UI
     must not imply that unexposed inputs are confidential or tamper-proof.</li>
@@ -2363,7 +2438,8 @@
   <h2>6. Open questions</h2>
   <p>No blocking capability questions remain. Input eligibility, conditional choices, autosave,
   export protection, and the two quick-total displays are settled above. The planning stage must
-  detail validation, one-at-a-time save protection, draft preservation, and recovery without widening this scope.</p>
+  detail selection validation, one-at-a-time save protection and retention of failed simplified-input
+  edits without changing ordinary modeling-panel error handling.</p>
 </section>
 
 <section>

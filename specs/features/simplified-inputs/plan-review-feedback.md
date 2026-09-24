@@ -6,6 +6,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 
 ## Reading experience
 
+- The reviewer reads every sentence like code, assuming it carries meaningful implementation
+  implications. Redundant prose is therefore misleading, not merely verbose: it suggests requirements
+  that do not exist. Each sentence must convey a concrete change, constraint, necessary rationale or
+  decision. Leave ordinary behavior implicit and clearly distinguish examples from special-case rules.
 - The reviewer has the approved spec fresh in mind. Avoid a verbose introduction or repeating the
   feature's UX and requirements; link back to the spec when necessary.
 - Make the plan feel like a high-level code review: the reviewer should be able to picture the
@@ -20,6 +24,8 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Remove low-value implementation asides rather than explaining them at length. Specific rejected
   example: “It excludes self, not fields merely hidden by a particular form.” The meaningful
   boundary was already explained by keeping form-specific display rules in the adapter.
+- Omit statements of ordinary behavior: “Saving partway through curation is allowed” merely
+  restates what Save does, without adding a requirement or implementation decision.
 - Clarifying a passage should not continually expand it. State the purpose plainly, use one concrete
   example, and remove repeated wiring explanations and secondary caveats. For `FieldCatalog`, the
   approved shorter explanation is the two questions it answers (eligibility and required companion
@@ -45,6 +51,10 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Show the structure of central return types, not just their names in signatures. The reviewer
   asked to see `FieldCatalog`: its field-address lookup and direct-dependent lookup explain the
   design more concretely than additional prose. Keep these sketches minimal and file-labelled.
+- Surface new data structures and extensions to existing structures beside the interaction that uses
+  them. Show the actual proposed shape, mark existing versus new fields, name the producer and consumer,
+  and explain the behavior driven by the data. For creation-time required inclusion, extending an existing
+  `dynamic_lists` entry with `simplified_required_by` made “attach required-selection context” concrete.
 - Presenter examples should expose what the view needs explicitly. Replace the opaque
   `"definition": definition` with `title` and `guidance`; keep membership/help only beside each
   field rather than also passing the full configuration through a second path.
@@ -58,6 +68,19 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
   of “the save use case”, and distinguish selecting an input for inclusion from editing its value.
   In Configure, dependency feedback updates the browser draft; Save and return calls
   `UpdateSimplifiedDefinitionUseCase`, not the consumption value-edit use case.
+- Keep form values in the DOM, not a second JavaScript configuration object. The later decision to
+  gate leaving Configure supersedes per-property dirty tracking and partial Configure submissions:
+  one form-level dirty flag and a complete form submission are enough.
+- Prefer a simple Save / Discard / Stay exit guard over preserving low-value Configure drafts and
+  reconciling them with inline bookmark saves. Reopen saved settings with default layout/filter state;
+  do not add scroll/expansion/filter restoration. Keep the useful per-model base-view choice separate.
+- Describe rendering per interaction: Configure Save returns the complete Simplified inputs view;
+  inline bookmark/value saves use targeted updates to preserve other unsaved controls. Do not imply
+  field-change tracking is needed for a full-view response merely because the saves share a result type.
+- Separate shared controls from their presentation wrapper. Configure includes `selection_controls.html`
+  directly; creation/edit panels and Sources use the `bookmark.html` disclosure around it. Consumption
+  includes neither. Shared markup does not imply shared save timing: Configure and creation defer their
+  settings to their form save; existing-input bookmarks save immediately.
 - Explicitly label defense-in-depth checks when the server re-enforces a rule already reflected in
   browser feedback. Explain the gap covered (bypassed or stale client state), while making clear that
   server enforcement is authoritative, not optional duplication.
@@ -71,6 +94,33 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 
 ## Existing code, refactors and new behavior
 
+- Ground proposed behavior in the affected code path, including relevant success, failure and
+  cancellation handling—not architecture prose alone. Distinguish existing behavior, feature-required
+  changes and optional improvements while planning; surface only the meaningful delta in the plan.
+- Require a concrete agreed requirement for added state, queues, reconciliation, recovery or validation
+  machinery. Compare against the simplest extension of existing behavior first. Generic robustness
+  language must not silently authorize a refactor. This is a planning check, not another verbose audit
+  section for the reviewer; lack of evidence requires inspection or an explicit uncertainty.
+- Run that complexity audit before asking for human review. The user identified this as an important
+  part of the eventual spec-plan update: trace the relevant existing paths, justify each added mechanism
+  against the agreed behavior, and remove requirements accidentally introduced by prose. Do not make
+  the reviewer discover these costs sentence by sentence.
+- Applied audit outcomes for this plan:
+  - Reuse side-panel discard protection on model switches; remove timeseries draft parking and
+    preview teardown/restoration. Same-model Compare return already retains the resident panel.
+  - Prevalidate incoming models before replacement, but defer transactional storage publication and
+    cache-write reporting as SI-2. Do not present an existing storage gap as a feature-required refactor.
+  - Keep one multi-owner value update, while reusing request-local metadata mutation and persist-on-success.
+    A separate deferred-metadata layer adds no needed persistence protection here.
+  - Guard simplified autosaves and Configure on export; do not invent an existing warning or add new
+    unsaved-export behavior to ordinary Modeling panels.
+  - Keep the required Examples rename independent; it is not a prerequisite for the eligible-field catalog.
+  These are code-backed decisions for this feature, not universal prohibitions on draft retention or
+  transactions. Synchronize the file tree, snippets, sequence, tests and spec when cutting a mechanism.
+- Verify existing error behavior before promising draft preservation. Creation currently shows an
+  error modal and clears the side panel; retain that flow here rather than silently adding recovery
+  machinery. Pending simplified-input settings must not persist on failure. Any improved recovery UX
+  needs explicit scope and implementation cost, not an incidental sentence.
 - Inspect existing mechanisms before proposing new services, registries or discovery pipelines.
   The review question “Isn't there anything in the current code that does similar work?” exposed
   substantial overlap with existing form generation, timeseries support and input validation.
@@ -108,7 +158,8 @@ revision of the canonical spec-plan skill and its interface mirror, not changes 
 - Separate implementation complexity from UX tradeoffs. The user chose one-at-a-time autosave:
   temporarily block further edits/actions during saves rather than introducing a queue, manual batch
   commit or automatic/manual toggle. Extend existing request protection before inventing new machinery.
-  Preserving failed edits is required in every approach, not a comparative cost unique to autosave.
+  Preserving failed simplified-input edits is required in every approach, not a comparative cost unique
+  to autosave or permission to change ordinary creation/edit error handling.
 - Record confirmed bugs with evidence and ownership, not a UI workaround. The shared-controller
   overwrite defect is tracked in `known-issues.md` as SI-1, including its reproduction and planned
   library regression; it remains unfixed during planning.
