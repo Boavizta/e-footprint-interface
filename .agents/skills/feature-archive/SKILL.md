@@ -14,15 +14,22 @@ You are archiving a **shipped** feature — the final stage of the spec-driven w
 1. **Confirm the feature and that it has shipped.** Read `specs/features/<feature-name>/tasks.md`; every task must be marked done. If any task is unshipped, stop and surface it — do not archive a half-done feature.
 2. **Confirm the user wants to archive now.** Archiving deletes the spec folder, so it is normally done once the work has merged / you are satisfied it is final. If that is unclear, ask before deleting.
 
+Read `.agents/repository.md` for documentation destinations. Resolve outstanding judgements,
+evidence and validation gates before deletion. Promote or explicitly park actionable unfinished
+work with enough context to survive deletion. Do not retire migration/serialization tests merely
+because their feature is archived. Commit briefs/handoffs with the working set; they leave with it.
+
 ## Process
 
-1. **Promote durable insight into the live reference docs — and verify they reflect reality.** Walk the feature's available intent records (spec / plan, or bug diagnostics), tasks, and shipped diff, and ask: is there any decision, convention, constraint, or pattern that a future contributor or agent would need to make a sound call? If so, it belongs in the live reference specs (`architecture.md` / `conventions.md` / `testing.md`, and — where the feature changed how a user moves through a flow — the user-journey docs under `specs/design/`), **not** in an archive. Most of this should already have happened during implementation — this is the final check. Add the missing one-line mentions in the right sections. If nothing durable is left to promote, say so explicitly.
+1. **Promote durable insight into the live reference docs — and verify they reflect reality.** Walk the feature's available intent records (spec / plan, or bug diagnostics), tasks, and shipped diff, and ask: is there any decision, convention, constraint, or pattern that a future contributor or agent would need to make a sound call? If so, it belongs in the live reference specs (`architecture/` / `conventions.md` / `testing.md`), **not** in an archive. Most of this should already have happened during implementation — this is the final check. Add the missing one-line mentions in the owning sections. If nothing durable is left to promote (common for docs-only features, where the published docs are themselves the reference), say so explicitly.
 
-2. **Delete `specs/features/<feature-name>/`.** Use `git rm -r` for tracked files, **and** remove any untracked `spec.html` / `plan.html` left behind (a tracked-files-only delete leaves those on disk — check with `git status` and `rm` them). Git history preserves everything.
+2. **Sync `specs/roadmap.md`.** If the feature (or a step of it) has an entry under "Active streams" or another horizon section, update or remove that entry now — mark it shipped, drop it if fully done, or narrow it to whatever genuinely remains (e.g. a follow-up step that was scoped but not done). A stale roadmap that still lists shipped work as active is exactly the drift this step exists to prevent. If the feature was never mentioned in the roadmap, say so explicitly and move on.
 
-3. **Confirm `CHANGELOG.md` has an entry** for this feature under `## [Unreleased]`. `feature-implement` writes this once all tasks are done, so it's normally already there — add it now only if the feature was implemented without that skill (e.g. `task-implement` run standalone) and the entry is missing.
+3. **Delete `specs/features/<feature-name>/`.** Use `git rm -r` for tracked files, **and** remove any untracked `spec.html` / `plan.html` left behind (a tracked-files-only delete leaves those on disk — check with `git status` and `rm` them). Git history preserves everything.
 
-4. **Commit** with a `[REMOVE]` prefix, body `<feature-name>: archive shipped feature spec`. Bundle the promotion edits, the deletion, and any CHANGELOG change into this commit (or a small number of related commits if the promotion edits are substantial).
+4. **Confirm `CHANGELOG.md` has an entry** for this feature under `## [Unreleased]`. `feature-implement` writes this once all tasks are done, so it's normally already there — add it now only if the feature was implemented without that skill (e.g. `task-implement` run standalone) and the entry is missing.
+
+5. **Commit** with a `[REMOVE]` prefix, body `<feature-name>: archive shipped feature spec`. Bundle the promotion edits, the roadmap sync, the deletion, and any CHANGELOG change into this commit (or a small number of related commits if the promotion edits are substantial).
 
 For cross-repo features, archive in the **driving repo** (same rule as the feature folder).
 

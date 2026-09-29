@@ -1,11 +1,15 @@
 ---
 name: spec-specify
-description: Use when the user wants to start a new feature in this repo. Walks the agent through writing specs/features/<feature-name>/spec.html — the first stage of the four-stage spec-driven workflow (specify → plan → tasks → implement). Read-only on code. May also draft plan.html in the same pass when the kickoff is design-rich.
+description: Start a new feature specification as spec.html, covering capability, scope and success criteria. Read-only on application code; existing kickoff design decisions may be captured in a draft plan for later review in a fresh planning session.
 ---
 
 # spec-specify
 
 You are about to start a new feature spec. Do NOT write any code or modify any source files. The primary output is `specs/features/<feature-name>/spec.html`. When the kickoff is design-rich (see Process step 3), you also draft `plan.html` in the same pass so design detail is not lost.
+
+Read `.agents/repository.md` and use the collection/binding commands in `specs/agent-tooling.md`
+at stage start and close-out, attributing this session to the driving repo, feature and `specify`
+stage. Report missing telemetry without blocking specification work.
 
 ## What goes where
 
@@ -118,7 +122,7 @@ The spec is a **single self-contained `.html` file** — openable offline, share
   <h2>5. Constraints</h2>
   <ul>
     <li>Performance, compatibility, dependencies, regulatory, etc.</li>
-    <li>References to <code>constitution.md</code> or <code>architecture.md</code> if applicable.</li>
+    <li>References to <code>constitution.md</code> or the owning page under <code>architecture/</code> if applicable.</li>
   </ul>
 </section>
 
@@ -132,7 +136,7 @@ The spec is a **single self-contained `.html` file** — openable offline, share
   <ol>
     <li>Read this file end to end.</li>
     <li>Read <code>plan.html</code> (when written) for ordered steps and test gates.</li>
-    <li>Re-read the relevant spec files (<code>specs/architecture.md</code>,
+    <li>Re-read the relevant spec files (start at <code>specs/architecture/index.html</code> and follow it to the owning page,
     <code>specs/conventions.md</code>) for code-style and architectural constraints.</li>
   </ol>
 </section>
@@ -150,3 +154,6 @@ Tell the user clearly:
 - If a plan was drafted: a one-sentence note that it captured design content from the kickoff conversation and will be refined in the `spec-plan` stage.
 - Any open questions surfaced during drafting.
 - The next step: human review, then `spec-plan`.
+
+After spec approval, hand off to `spec-plan` in a fresh session using the committed documents.
+Any draft plan captures decisions for later refinement; it does not bypass plan approval.
