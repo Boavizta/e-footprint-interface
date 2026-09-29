@@ -18,7 +18,7 @@ Method:
 4. **Copy exact strings** — button labels, panel headers, modal copy, tooltip/toast text — from the templates and from `adapters/ui_config/` (e.g. `constraint_messages.py`). Don't paraphrase. Many user-facing strings are built in the presenter or use-case — grep for them.
 5. When unsure about a behavior, grep the template/view rather than infer from the spec.
 
-Start from `specs/architecture.md` — it maps the layers (views, presenters, render layer) and the named patterns (OOB regions, creation constraints, dict relationships, the edge toggle), so it usually points straight at the file you need.
+Start from [the architecture index](../architecture/index.html) — it maps the layers (views, presenters, render layer) and the named patterns (OOB regions, creation constraints, dict relationships, the edge toggle), so it usually points straight at the file you need.
 
 ---
 
@@ -78,7 +78,7 @@ Simplified but faithful: real structure, real copy, app palette; never pixel-per
 | **Zoom a mechanism, don't park implementation** | A `details.fold.zoomfold` that **breaks out wide when open** for a cross-cutting mechanism (e.g. how OOB regions patch the canvas). Collapsed by default. |
 | **Lean & functional in the body** | The main flow is for people: narrative, states, and decisions stay at the **functionality + pattern** level. Keep prose tight and let the mocks carry the load — a journey is meant to be *seen*, not read like a spec. |
 | **Code-level detail is collapsed, for agents** | File names, routes, function names, mechanism tables — useful to agents, noise to people. Strip them from the body and collect them in one **low-emphasis collapsed `details.ptr`** ("Implementation pointers — for agents") at the foot, organised by area. Link to it once from the top note. Don't sprinkle `(file.py)` citations through the states. |
-| **Stay at altitude** | Beyond the pointers fold, exclude the implementation parking-lot — migration numbers, repository internals, exhaustive prop lists. That's `plan.html` / `architecture.md` territory. |
+| **Stay at altitude** | Beyond the pointers fold, exclude the implementation parking-lot — migration numbers, repository internals, exhaustive prop lists. That's `plan.html` / [architecture detail pages](../architecture/index.html) territory. |
 
 ### Class vocabulary (full set in `build-a-model.html`)
 

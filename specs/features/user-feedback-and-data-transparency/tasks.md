@@ -77,7 +77,7 @@ Files:
 - `model_builder/management/commands/purge_expired_session_data.py` (new)
 - `docker/conf/supervisord-prod.conf`
 - `AGENTS.md`
-- `specs/architecture.md`
+- [Persistence and interface state](../../architecture/persistence.html) and [Runtime and error recovery](../../architecture/runtime-and-recovery.html)
 - `tests/unit_tests/test_settings.py` (new or extend the existing settings test module)
 - `tests/unit_tests/adapters/repositories/test_recovery_retention.py` (new)
 - `tests/unit_tests/adapters/repositories/test_workspace_repository.py`
@@ -218,7 +218,7 @@ Files:
 - `INSTALL.md`
 - `docker/README.md`
 - `model_builder/templates/model_builder/side_panels/data_privacy.html`
-- `specs/architecture.md`
+- [Persistence and interface state](../../architecture/persistence.html) and [Runtime and error recovery](../../architecture/runtime-and-recovery.html)
 - `specs/design/journeys/save-and-load.html`
 - `CHANGELOG.md`
 - `tests/unit_tests/test_settings.py`

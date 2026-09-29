@@ -527,7 +527,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— the file documents, content-routing, recovery &amp; session persistence</span></summary>
   <div class="pbody">
-    <p>Where this lives in code. Start with <code>specs/architecture.md</code> ("Persistence and <code>interface_config</code>", the workspace / multi-slot session). The toolbar is <code>upload_download_reboot_model_tooltips.html</code> (Open file · Export / Export ▾ · Reset).</p>
+    <p>Where this lives in code. Start with <a href="../../architecture/persistence.html">Persistence and interface state</a> · <a href="../../architecture/workspace.html">Workspace and resident canvases</a> ("Persistence and <code>interface_config</code>", the workspace / multi-slot session). The toolbar is <code>upload_download_reboot_model_tooltips.html</code> (Open file · Export / Export ▾ · Reset).</p>
     <dl>
       <dt>Export (Phase A)</dt>
       <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.to_json(save_calculated_attributes=False)</code> + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>

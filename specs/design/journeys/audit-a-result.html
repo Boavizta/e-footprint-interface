@@ -501,7 +501,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— the provenance fields, the Sources table &amp; the derivation / calculus-graph views</span></summary>
   <div class="pbody">
-    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (the render layer; metadata-only edits). The surfaces are reached from <a href="view-results.html">view-results</a> (Sources) and <a href="build-a-model.html">build-a-model</a> (the edit panel's Calculated attributes).</p>
+    <p>Where this lives in code. Start with <a href="../../architecture/rendering.html">Rendering and mutation feedback</a> (the render layer; metadata-only edits). The surfaces are reached from <a href="view-results.html">view-results</a> (Sources) and <a href="build-a-model.html">build-a-model</a> (the edit panel's Calculated attributes).</p>
     <dl>
       <dt>Provenance (Phase A)</dt>
       <dd>Source / confidence are fields on a quantity (rendered in the dynamic form fields). Consolidated view: route <code>source-table/</code> → <code>source_table</code> → <code>result/source_table.html</code> + <code>source_table_row.html</code>; inline editor <code>source-table-row-editor/&lt;id&gt;/&lt;attr&gt;/</code> → <code>source_table_row_editor.html</code>, posting via <code>edit-object</code> but <b>metadata-only</b> (no table reload — <code>source_metadata.js</code>). Export <code>download-sources/</code> → <code>download_sources</code> (openpyxl, sheet "Sources"; button label literally "Export to xslx"). Labels via <code>adapters/label_resolver.py</code>.</dd>

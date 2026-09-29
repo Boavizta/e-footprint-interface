@@ -4,23 +4,24 @@ This file orients agents and contributors. It is intentionally short. Substance 
 
 ## Read this first
 
-**Always begin any codebase exploration by reading `specs/architecture.md`.** It maps the Clean Architecture layers, web wrappers, render layer, and the named patterns (OOB regions, dict relationships, the edge-paradigm toggle, etc.), so it usually points straight at the file you need — start there before grepping.
+**Always begin any codebase exploration by reading [`specs/architecture/index.html`](specs/architecture/index.html).** Use its task router, then read only the owning detail pages before exploring code. The index maps the Clean Architecture layers and routes to web wrappers, forms/relationships, persistence, workspace, rendering, onboarding, and runtime recovery.
 
-1. **`specs/architecture.md`** — the structural map; your entry point for finding where anything lives.
+1. **[`specs/architecture/index.html`](specs/architecture/index.html)** — the structural map and task router; follow only the relevant detail pages.
 2. **`specs/constitution.md`** — the project's immutable rules. Every change respects them.
 3. **`specs/mission.md`** — what e-footprint-interface is and isn't.
-4. The companion library: `../e-footprint/` (or upstream PyPI). The interface assumes familiarity with the library's modeling concepts; when in doubt, read `../e-footprint/specs/architecture.md`.
+4. The companion library: `../e-footprint/` (or upstream PyPI). The interface assumes familiarity with the library's modeling concepts; when in doubt, read [`../e-footprint/specs/architecture/index.html`](../e-footprint/specs/architecture/index.html).
 
 ## Where things live
 
 | If you need... | Read |
 |---|---|
-| Architecture (Clean Architecture map, web wrappers, dict relationships, timeseries, persistence, render layer) | `specs/architecture.md` |
+| Architecture (Clean Architecture map, web wrappers, dict relationships, timeseries, persistence, render layer) | [`specs/architecture/index.html`](specs/architecture/index.html) |
 | Code style, performance preferences, agent behaviour rules | `specs/conventions.md` |
 | Testing patterns (unit / integration / E2E layers, fixtures) | `specs/testing.md` |
 | Tech stack and version bounds | `specs/tech_stack.md` |
 | What's planned and in flight | `specs/roadmap.md` |
 | The spec-driven workflow (specify → plan → tasks → implement) | `specs/workflow.md` |
+| Shared workflow, agent roles, and usage tooling | [`specs/agent-tooling.md`](specs/agent-tooling.md) |
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
@@ -61,7 +62,7 @@ Conversational bug batches use `bug-fixes`: diagnostics plus `tasks.md`, followe
 
 ## Documentation upkeep
 
-When you implement a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), update the relevant spec file (`specs/architecture.md`, `specs/conventions.md`, or `specs/testing.md`) — a one-line mention in the right section is enough. The goal is to keep specs accurate so future agents don't rediscover patterns from code.
+When you implement a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), update the owning architecture detail page (routed from [`specs/architecture/index.html`](specs/architecture/index.html)), `specs/conventions.md`, or `specs/testing.md` — a one-line mention in the right section is enough. The goal is to keep specs accurate so future agents don't rediscover patterns from code.
 
 ## Production maintenance workers
 

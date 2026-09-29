@@ -783,7 +783,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— files, routes &amp; the in-place-update mechanism behind the patterns above</span></summary>
   <div class="pbody">
-    <p>Where the functionality above lives in code. Start with <code>specs/architecture.md</code> — it maps the layers and names these patterns (creation constraints, OOB regions, dict relationships, the edge toggle). Mission &amp; audience: <code>specs/mission.md</code>.</p>
+    <p>Where the functionality above lives in code. Start with <a href="../../architecture/index.html">Architecture index</a> · <a href="../../architecture/forms-and-relationships.html">Forms and relationships</a> · <a href="../../architecture/rendering.html">Rendering and mutation feedback</a> — it maps the layers and names these patterns (creation constraints, OOB regions, dict relationships, the edge toggle). Mission &amp; audience: <code>specs/mission.md</code>.</p>
     <dl>
       <dt>Canvas &amp; the gate (Phase A)</dt>
       <dd><code>model_canvas_content.html</code> (the three columns), <code>add_object_button.html</code> (white dotted button + the disabled-with-tooltip span — disabled buttons fire no hover events), <code>results_bar_button.html</code>. The gate is <code>model_web.creation_constraints</code> (keyed by class, plus <code>__results__</code>); copy in <code>constraint_messages.py</code>. Help drawer: <code>open-help-drawer/&lt;Class&gt;</code>.</dd>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layers and web wrappers — e-footprint-interface architecture</title>
+<link rel="stylesheet" href="architecture.css">
+</head>
+<body>
+<header><nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Architecture</a> / Layers and web wrappers</nav>
+<h1>Layers and web wrappers</h1>
+<p class="lede">Dependency direction, ModelWeb, use cases, descriptions, and class registration.</p></header>
+<main id="main">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ul><li><a href="#clean-architecture-layout">Clean Architecture layout</a></li><li><a href="#request-lifecycle">Request lifecycle</a></li><li><a href="#core-classes">Core classes</a></li><li><a href="#modelweb-the-central-orchestrator">ModelWeb — the central orchestrator</a></li><li><a href="#use-cases">Use cases</a></li><li><a href="#domain-services">Domain services</a></li><li><a href="#web-wrappers">Web wrappers</a></li><li><a href="#adapters">Adapters</a></li><li><a href="#descriptionprovider-port">DescriptionProvider port</a></li><li><a href="#extension-mechanism">Extension mechanism</a></li><li><a href="#adding-a-new-modeling-object-class">Adding a new modeling object class</a></li></ul></nav>
+<h2 id="clean-architecture-layout">Clean Architecture layout</h2>
+<p>The codebase follows Clean Architecture principles, with strict dependency direction enforced by constitution §1.1. Inner layers never import outer layers.</p>
+<pre><code>model_builder/
+├── domain/                    # Business logic, no Django dependencies
+│   ├── entities/              # Web wrappers around efootprint objects
+│   │   ├── web_core/          # ModelWeb, ServerWeb, JobWeb, EdgeDeviceGroupWeb, etc.
+│   │   ├── web_builders/      # Builder-specific entities (ExternalAPIWeb, etc.)
+│   │   ├── web_abstract_modeling_classes/  # Base classes (ModelingObjectWeb)
+│   │   └── efootprint_extensions/          # extension point for downstream consumers (currently empty)
+│   ├── services/              # EmissionsCalculationService, ObjectLinkingService, EditService, SystemValidationService
+│   ├── interfaces/            # Repository interfaces (ISystemRepository)
+│   ├── object_factory.py      # Object creation/editing logic
+│   ├── all_efootprint_classes.py
+│   └── efootprint_to_web_mapping.py
+├── application/
+│   └── use_cases/             # CreateObjectUseCase, EditObjectUseCase, DeleteObjectUseCase
+├── adapters/
+│   ├── views/                 # HTTP views (thin adapters)
+│   │   ├── views.py
+│   │   ├── views_addition.py
+│   │   ├── views_edition.py
+│   │   ├── views_dict_mutation.py
+│   │   └── sankey_views.py
+│   ├── presenters/            # HtmxPresenter
+│   ├── repositories/          # SessionSystemRepository, InMemorySystemRepository
+│   ├── forms/                 # form_data_parser.py, form_field_generator.py
+│   └── ui_config/             # UI configuration providers
+├── templates/                 # Django templates
+├── version_upgrade_handlers.py  # interface_config schema migrations
+└── domain/reference_data/     # JSON configs (default data) + modeling_templates/ (see onboarding.html)
+</code></pre>
+<h2 id="request-lifecycle">Request lifecycle</h2>
+<ol>
+<li>User action → View (adapter).</li>
+<li>View maps request → Use Case input.</li>
+<li>Use Case orchestrates domain logic via <code>ModelWeb</code> and domain services.</li>
+<li>Presenter formats output → HTTP response with HTMX triggers.</li>
+<li>View returns response (full page or partial DOM swap).</li>
+</ol>
+<p>The production request envelope is documented in <a href="runtime-and-recovery.html">Runtime and recovery</a>.</p>
+<h2 id="core-classes">Core classes</h2>
+<h3 id="modelweb-the-central-orchestrator">ModelWeb — the central orchestrator</h3>
+<p><a class="source" href="../../model_builder/domain/entities/web_core/model_web.py"><code>model_builder/domain/entities/web_core/model_web.py</code></a>. <code>ModelWeb</code> is the central web wrapper around the e-footprint domain model:</p>
+<ul>
+<li>Deserializes repository-provided <code>system_data</code> via <code>efootprint.api_utils.json_to_system</code>.</li>
+<li>Wraps the resulting <code>System</code> into web objects (<code>wrap_efootprint_object</code>).</li>
+<li>Exposes typed accessors: <code>servers</code>, <code>services</code>, <code>jobs</code>, <code>usage_patterns</code>, <code>usage_journeys</code>, <code>edge_device_groups</code>, <code>ungrouped_edge_devices</code>, etc.</li>
+<li>Serializes current cached state via passive <code>to_json()</code> and prepares complete explicit downloads via <code>export_json()</code>.</li>
+<li>Persists to cache via <code>persist_to_cache()</code> (serializes system + merges <code>interface_config</code> via the repository).</li>
+<li>Maintains a flat index of objects (<code>flat_efootprint_objs_dict</code>) for quick lookups.</li>
+<li><code>get_efootprint_objects_from_efootprint_type</code> builds form selection options from the catalog defaults (<code>DEFAULT_OBJECTS_CLASS_MAPPING</code>, e.g. countries) plus the system's existing objects. An existing system object <strong>shadows</strong> the catalog default with the same name, so selecting e.g. "France" reuses the country already in the system instead of materializing a duplicate on submit (templates ship their own copy keyed differently from the catalog).</li>
+</ul>
+<p><code>ModelWeb</code> does <strong>not</strong> see or touch <code>interface_config</code>. The repository owns that (constitution §1.3, library is the truth).</p>
+<h3 id="use-cases">Use cases</h3>
+<p><a class="source" href="../../model_builder/application/use_cases"><code>model_builder/application/use_cases/</code></a>:</p>
+<ul>
+<li><strong><code>CreateObjectUseCase</code></strong> — object creation with hooks (<code>pre_create</code>, <code>post_create</code>).</li>
+<li><strong><code>EditObjectUseCase</code></strong> — object editing with <code>pre_edit</code> hook.</li>
+<li><strong><code>DeleteObjectUseCase</code></strong> — object deletion with <code>can_delete</code>, <code>pre_delete</code> hooks.</li>
+</ul>
+<h3 id="domain-services">Domain services</h3>
+<p><a class="source" href="../../model_builder/domain/services"><code>model_builder/domain/services/</code></a>:</p>
+<ul>
+<li><strong><code>ObjectLinkingService</code></strong> — parent-child linking logic.</li>
+<li><strong><code>EditService</code></strong> — handles object editing with cascade cleanup.</li>
+<li><strong><code>SystemValidationService</code></strong> — validates system completeness (drives the "Get results" button state).</li>
+<li><strong><code>EmissionsCalculationService</code></strong> — aggregates library footprint series into daily chart values; it does not define footprint formulas.</li>
+<li><strong><code>ComparisonService</code></strong> — thin adapter shaping the library <code>SystemComparison</code> (<code>system_a.compare_to(system_b)</code>) into the comparison dashboard's view model (KPI values, three Chart.js payloads, diff table). Rendering only — no modeling logic, no Django imports.</li>
+</ul>
+<h3 id="web-wrappers">Web wrappers</h3>
+<p>Package of web wrappers around e-footprint domain classes. Each provides template-friendly properties and form-generation logic.</p>
+<p>Notable:</p>
+<ul>
+<li><strong><code>EdgeDeviceGroupWeb</code></strong> — uses generated <code>dict_count</code> fields, membership filters and cycle guards, plus edge-list OOB refreshes after mutation.</li>
+<li><strong><code>EdgeGroupMemberMixin</code></strong> — shared behavior for objects that can be members of edge device groups (pre-delete hooks to remove dict references before deletion).</li>
+</ul>
+<h3 id="adapters">Adapters</h3>
+<ul>
+<li><strong><a class="source" href="../../model_builder/adapters/repositories/session_system_repository.py"><code>adapters/repositories/session_system_repository.py</code></a></strong> — loads/saves slot-keyed system payloads through Redis and Postgres, using the Django session identifier. Holds <code>interface_config</code> in RAM and merges it on <code>save_data()</code>.</li>
+<li>
+<p><strong><a class="source" href="../../model_builder/adapters/forms/form_data_parser.py"><code>adapters/forms/form_data_parser.py</code></a></strong> — decodes and normalizes HTTP transport data before passing parsed dicts to use cases. It does not enforce semantic invariants: those belong to the owning domain or library object. Browser validation provides immediate UX feedback but never replaces authoritative domain validation.</p>
+</li>
+<li>
+<p><strong><a class="source" href="../../model_builder/adapters/presenters/htmx_presenter.py"><code>adapters/presenters/htmx_presenter.py</code></a></strong> — formats use case outputs as HTMX responses.</p>
+</li>
+<li><strong><a class="source" href="../../model_builder/adapters/ui_config"><code>adapters/ui_config/</code></a></strong> — provides UI configuration (class labels, field metadata).</li>
+</ul>
+<h3 id="descriptionprovider-port">DescriptionProvider port</h3>
+<p>Library-side SSOT metadata (<code>param_descriptions</code>, class docstrings, <code>disambiguation</code>, <code>pitfalls</code>) reaches templates through the <code>DescriptionProvider</code> port in <a class="source" href="../../model_builder/domain/interfaces/description_provider.py"><code>domain/interfaces/description_provider.py</code></a>. The only implementation, <code>EfootprintDescriptionProvider</code> (<a class="source" href="../../model_builder/adapters/ui_config/efootprint_description_provider.py"><code>adapters/ui_config/efootprint_description_provider.py</code></a>), merges library text with interface-side overlays from <a class="source" href="../../model_builder/adapters/ui_config/class_ui_config.json"><code>class_ui_config.json</code></a> (<code>interactions</code>) and <a class="source" href="../../model_builder/adapters/ui_config/field_ui_config.json"><code>field_ui_config.json</code></a> (per-field tooltips), then runs <code>{kind:target}</code> placeholders through <code>efootprint.utils.placeholder_resolver</code> with the interface's HTML handlers (<a class="source" href="../../model_builder/adapters/ui_config/interface_placeholder_handlers.py"><code>interface_placeholder_handlers.py</code></a>). The module-level <code>EFOOTPRINT_DESCRIPTION_PROVIDER</code> singleton is the entry point; templates only ever see <code>SafeString</code> output with placeholders already resolved. See the library’s <a href="../../../e-footprint/specs/architecture/layers-and-modeling.html">layers and modeling page</a> for the broader single-source-of-truth rationale.</p>
+<h3 id="extension-mechanism">Extension mechanism</h3>
+<p>The library exposes <code>ExplainableObject.register_subclass(matcher)</code> so that JSON files can round-trip back into typed Python objects.</p>
+<p><strong>For e-footprint-interface development, register new subclasses inside the e-footprint package itself</strong> (typically <a class="source" href="../../../e-footprint/efootprint/builders/timeseries"><code>efootprint/builders/timeseries/</code></a>). Otherwise the library would no longer be able to load JSON files generated by the interface. This is why the form-driven extensions originally written here — <code>ExplainableHourlyQuantitiesFromFormInputs</code> and <code>ExplainableRecurrentQuantitiesFromConstant</code> — now live under <a class="source" href="../../../e-footprint/efootprint/builders/timeseries"><code>e-footprint/efootprint/builders/timeseries/</code></a>.</p>
+<p><a class="source" href="../../model_builder/domain/entities/efootprint_extensions"><code>model_builder/domain/entities/efootprint_extensions/</code></a> is preserved as an extension point for downstream consumers (e.g. a company building a custom interface on top of e-footprint with proprietary subclasses that should not bleed into the public library). It is currently empty in our codebase; this case has not appeared in practice yet. When in doubt, put new subclasses in e-footprint.</p>
+<h2 id="adding-a-new-modeling-object-class">Adding a new modeling object class</h2>
+<p>You should NOT need to create extension classes — use base efootprint classes directly.</p>
+<p>If you need to add a base efootprint class to the web interface:</p>
+<ol>
+<li>Ensure it's in <code>efootprint.all_classes_in_order.ALL_EFOOTPRINT_CLASSES</code>.</li>
+<li>Add interface labels and selection metadata to <a class="source" href="../../model_builder/adapters/ui_config/class_ui_config.json"><code>model_builder/adapters/ui_config/class_ui_config.json</code></a>; add field-specific UI metadata to <a class="source" href="../../model_builder/adapters/ui_config/field_ui_config.json"><code>field_ui_config.json</code></a> when needed.</li>
+<li>Optionally create a web wrapper in <a class="source" href="../../model_builder/domain/entities/web_core"><code>domain/entities/web_core/</code></a> and add to <code>EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING</code>.</li>
+<li>Check the generated form against the library constructor annotations, defaults, and the selected wrapper. <a class="source" href="../../model_builder/adapters/forms/form_field_generator.py"><code>form_field_generator.py</code></a> builds fields from those declarations; there is no separate form-entry generation script.</li>
+</ol>
+<aside class="rule"><strong>Related pages</strong><div class="related"><a href="forms-and-relationships.html">Form parsing and relationships</a><a href="rendering.html">Mutation feedback</a><a href="persistence.html">Repository persistence</a></div></aside>
+</main>
+<footer><a href="index.html">Architecture index</a> · <a href="../constitution.md">Constitution</a> · <a href="../../../e-footprint/specs/architecture/index.html">Library architecture</a></footer>
+</body>
+</html>

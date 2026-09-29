@@ -528,7 +528,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the result-charts bundle, the Sankey pipeline &amp; the derivation views</span></summary>
   <div class="pbody">
-    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (render layer, OOB regions, <code>interface_config</code> / Sankey persistence). The gate &amp; live reason mirror <a href="build-a-model.html">build-a-model</a>'s Results bar.</p>
+    <p>Where this lives in code. Start with <a href="../../architecture/rendering.html">Rendering and mutation feedback</a> · <a href="../../architecture/persistence.html">Persistence and interface state</a> (render layer, OOB regions, <code>interface_config</code> / Sankey persistence). The gate &amp; live reason mirror <a href="build-a-model.html">build-a-model</a>'s Results bar.</p>
     <dl>
       <dt>The gate (Phase A)</dt>
       <dd><code>components/results_bar_button.html</code> (<code>#btn-open-panel-result</code>) + <code>components/show_results_toolbar_button.html</code> (<code>#show-results-toolbar-btn</code>, label "Show results"), both gating on <code>creation_constraints["__results__"]</code>. Live reason from <code>ModelWeb._build_creation_constraints</code> → <code>SystemValidationService.validate_for_computation</code>. Lock/unlock toast: <code>results_buttons</code> OOB region (<code>modeling_object_web.py</code>, <code>oob_regions.py</code>) + <code>CONSTRAINT_MESSAGES["__results__"]</code> ("Your modeling is complete — results are now available" / "Results are no longer available").</dd>

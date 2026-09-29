@@ -154,7 +154,7 @@ criteria, scope, constraints. Same pattern as the pull-based-computation thin sp
       the companion attributed-footprints feature (serialized daily attributed footprints for non-impact-source
       objects). Quality gate §2.4 (PyPI pin) applies before merge.</li>
     <li><b>Performance.</b> Binding constraints are session-store weight and JSON round-trips, not CPU
-      (<code>specs/architecture.md</code>): viewing results must not recompute the model; chart payloads are rolled
+      (<a href="../../architecture/rendering.html">Rendering and mutation feedback</a>): viewing results must not recompute the model; chart payloads are rolled
       up server-side to the requested granularity so they stay small on large models.</li>
     <li><b>Prospective-journey discipline.</b> Until this feature ships, <code>view-results</code> remains the
       faithful journey; <code>analyse-results</code> carries a prospective banner and supersedes view-results
@@ -182,7 +182,7 @@ criteria, scope, constraints. Same pattern as the pull-based-computation thin sp
       <code>specs/design/journeys/analyse-results.html</code> (prospective — screens, states, decisions).</li>
     <li>Read <a href="plan.html"><code>plan.html</code></a> for the implementation approach, affected modules and the
       library dependency.</li>
-    <li>Re-read <code>specs/architecture.md</code> and <code>specs/conventions.md</code> for layering and style
+    <li>Re-read <a href="../../architecture/rendering.html">Rendering and mutation feedback</a> and <code>specs/conventions.md</code> for layering and style
       constraints; <code>view-results</code> and the Sankey card code are the patterns being generalized.</li>
   </ol>
 </section>

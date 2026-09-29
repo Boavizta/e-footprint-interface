@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistence and interface state — e-footprint-interface architecture</title>
+<link rel="stylesheet" href="architecture.css">
+</head>
+<body>
+<header><nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Architecture</a> / Persistence and interface state</nav>
+<h1>Persistence and interface state</h1>
+<p class="lede">Canonical Redis snapshots, inputs-only Postgres recovery, interface_config, and import/export boundaries.</p></header>
+<main id="main">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ul><li><a href="#persistence-and-interface_config">Persistence and interface_config</a></li><li><a href="#backend-payloads-and-computation-boundaries">Backend payloads and computation boundaries</a></li><li><a href="#canvas-card-order">Canvas card order</a></li><li><a href="#bounded-recovery-retention">Bounded recovery retention</a></li><li><a href="#import-and-re-id-snapshots">Import and re-id snapshots</a></li><li><a href="#security-and-data">Security and data</a></li></ul></nav>
+<h2 id="persistence-and-interface_config">Persistence and <code>interface_config</code></h2>
+<p>The repository layer manages two concerns:</p>
+<ol>
+<li><strong>System data</strong> — the efootprint model (serialized via <code>ModelWeb.to_json()</code>).</li>
+<li><strong>Interface config</strong> — UI-only state (e.g., Sankey diagram settings) stored as a top-level <code>interface_config</code> key in the cached JSON.</li>
+</ol>
+<p><strong>Key principle:</strong> <code>ModelWeb</code> stays pure efootprint domain — it never sees or touches <code>interface_config</code>. The repository owns it.</p>
+<ul>
+<li><code>SessionSystemRepository</code> holds <code>_interface_config</code> in RAM, populated lazily on first read.</li>
+<li><code>save_data()</code> merges <code>_interface_config</code> and <code>efootprint_interface_version</code> into the JSON before writing.</li>
+<li><code>persist_to_cache()</code> on <code>ModelWeb</code> builds canonical and inputs-only payloads, then passes both to <code>repository.save_data()</code>.</li>
+<li><a class="source" href="../../model_builder/version_upgrade_handlers.py"><code>version_upgrade_handlers.py</code></a> provides migration infrastructure for <code>interface_config</code> schema changes across versions.</li>
+</ul>
+<h2 id="backend-payloads-and-computation-boundaries">Backend payloads and computation boundaries</h2>
+<p><strong>Pull-based contract, efootprint ≥ 23.</strong> The library's canonical payload contains inputs, the serialize-flagged computed slots (footprint totals, per-source footprints, impact-repartition matrix, edge breakdown summaries) and a values-free <code>calculation_graph</code> topology section. <code>ModelWeb.to_json(save_computed_state=True)</code> emits that graph (built with the library's <code>calculation_graph_section</code> over <code>flat_efootprint_objs_dict</code>) so that on reload <code>json_to_system</code> — which recomputes nothing — attaches the stored values as trusted caches when the <code>efootprint_version</code> matches exactly (any mismatch demotes them and recomputes lazily on read).</p>
+<p>Redis stores this canonical representation for fast request hydration; Postgres stores a second inputs-only recovery representation from <code>to_json(save_computed_state=False)</code>, keeping synchronous durable-cache writes small while accepting lazy recomputation after a Redis miss. The shared workspace payload budget and slot-size index continue to measure the canonical Redis representation.</p>
+<p>Source hoisting into the top-level <code>Sources</code> block scans both <code>__dict__</code> inputs and peeked computed slots (computed values live in reactive slots, not <code>__dict__</code>).</p>
+<p><code>ModelWeb.to_json()</code> itself remains passive (<code>descriptor.peek</code>, not pull), but <code>persist_to_cache()</code> first pulls <code>System.total_footprint</code>; this materializes every impact source's aggregate footprint pair so the payload-size guard measures the footprint-bearing steady state immediately after each mutation, while leaving projections such as the Sankey matrix lazy. The Sankey render persists that matrix when first materialised.</p>
+<p>Explicit user download is the complete-snapshot boundary: <code>ModelWeb.export_json()</code> first calls the library-owned <code>materialize_serialized_state()</code> helper, then serializes, so the downloaded snapshot contains every <code>serialize=True</code> value and the resulting topology regardless of which projections the user visited.</p>
+<p>The <code>interface_config</code> is included in JSON exports (download) and restored on imports (upload), enabling Sankey settings to survive export/import cycles.
+Interface-only autosaves use <code>ISystemRepository.save_interface_config()</code>: the session repository patches the existing
+Redis canonical payload and Postgres inputs-only recovery payload independently, so a UI metadata change does not hydrate,
+compute, or reserialize <code>ModelWeb</code> and does not collapse the two backend representations into one.</p>
+<h2 id="canvas-card-order">Canvas card order</h2>
+<p><code>interface_config["card_order"]</code> stores the top-level modeling-canvas order for <code>up-list</code>, <code>uj-list</code>,
+<code>external-api-list</code>, <code>server-list</code>, <code>edge-device-groups-list</code>, and <code>edge-devices-list</code>. SortableJS reads each card's
+existing <code>id</code> (<code>web_id</code>) and, after every completed drag, POSTs all six current arrays together to
+<code>save-card-order</code>; the request is fire-and-forget and a failed save leaves the reordered DOM in place. On every full
+render, the adapter performs a stable rank merge for each resident model using that slot's repository-owned config:
+stale IDs are ignored and current objects absent from the saved order are appended in their natural relative order.
+The explicitly ordered lists are template context, so this interface-only state never enters <code>ModelWeb</code>.</p>
+<h2 id="bounded-recovery-retention">Bounded recovery retention</h2>
+<p>System-model Redis entries stay hot for one hour; the generic cache policy is separate.
+The inputs-only Postgres recovery copy uses a session-scoped allowlisted preference (1, 3, 6, or 12 hours, or 1–14
+whole days), defaults to 12 hours, and can never exceed the 14-day session-cookie lifetime. A preference change touches
+only the expiry of each saved slot's Postgres row—never Redis or either payload—and reports each touch independently so
+a concurrently expired slot does not roll back successful updates or the stored preference. A supervised maintenance
+command physically removes expired <code>django_cache</code> and <code>django_session</code> rows immediately at container startup and hourly
+thereafter; concurrent workers are safe because deletion is idempotent, and logs contain aggregate counts/duration only.</p>
+<h2 id="import-and-re-id-snapshots">Import and re-id snapshots</h2>
+<p>Import recomputation payloads must be assembled from <code>efootprint.api_utils.system_to_json.system_to_json()</code> fragments (the connected <code>System</code> plus any orphaned objects) rather than hand-serializing objects in the interface. Import and workspace re-id are explicit complete-snapshot boundaries: they call <code>materialize_serialized_state()</code> before passive serialization; hydration itself never calls construction-time <code>after_init()</code> hooks. This keeps object serialization and top-level <code>Sources</code> hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.</p>
+<h2 id="security-and-data">Security and data</h2>
+<ul>
+<li>Model access is session-scoped; payloads are stored server-side in Redis and Postgres under the retention policy above. This is not browser-only storage. No PII is expected; do not log sensitive information.</li>
+<li>Validate transport shape/types at adapter boundaries. Semantic modeling invariants belong to the domain/library; browser checks provide immediate feedback only. Deployment-specific data/privacy copy lives in <a class="source" href="../../model_builder/templates/model_builder/side_panels/data_privacy.html"><code>model_builder/templates/model_builder/side_panels/data_privacy.html</code></a>.</li>
+</ul>
+<aside class="rule"><strong>Related pages</strong><div class="related"><a href="workspace.html">Workspace slots and files</a><a href="runtime-and-recovery.html">Raw recovery and errors</a><a href="rendering.html">Sankey and source rendering</a></div></aside>
+</main>
+<footer><a href="index.html">Architecture index</a> · <a href="../constitution.md">Constitution</a> · <a href="../../../e-footprint/specs/architecture/index.html">Library architecture</a></footer>
+</body>
+</html>

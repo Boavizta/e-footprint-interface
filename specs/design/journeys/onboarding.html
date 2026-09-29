@@ -531,7 +531,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the picker catalog, the driver.js tour &amp; the help drawer</span></summary>
   <div class="pbody">
-    <p>Where this lives in code. Start with <code>specs/architecture.md</code> ("First-run template picker", "Guided tour") and <code>specs/mission.md</code> (audience). The landing canvas is the <a href="build-a-model.html">build-a-model</a> loop.</p>
+    <p>Where this lives in code. Start with <a href="../../architecture/onboarding.html">Templates and onboarding</a> ("First-run template picker", "Guided tour") and <code>specs/mission.md</code> (audience). The landing canvas is the <a href="build-a-model.html">build-a-model</a> loop.</p>
     <dl>
       <dt>Home → entry (Phase A)</dt>
       <dd><code>e_footprint_interface/views.py::home</code> → <code>home.html</code> (CTA <code>#btn-start-modeling-my-service</code>, <code>hx-get model-builder</code> + <code>hx-push-url</code>); <code>theme/templates/{base,navbar,footer}.html</code>. Deep link <code>template/&lt;id&gt;/</code> → <code>load_template_deeplink</code> (GET load + redirect).</dd>

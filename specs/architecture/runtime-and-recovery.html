@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runtime and error recovery — e-footprint-interface architecture</title>
+<link rel="stylesheet" href="architecture.css">
+</head>
+<body>
+<header><nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Architecture</a> / Runtime and error recovery</nav>
+<h1>Runtime and error recovery</h1>
+<p class="lede">Memory guard boundaries, post-request collection, recoverable errors, and raw-data escape hatches.</p></header>
+<main id="main">
+<nav class="toc" aria-label="On this page"><strong>On this page</strong><ul><li><a href="#production-request-lifecycle">Production request lifecycle</a></li><li><a href="#computation-memory-guard">Computation memory guard</a></li><li><a href="#memory-investigations">Memory investigations</a></li><li><a href="#dead-state-recovery">Dead-state recovery</a></li><li><a href="#per-request-error-modal">Per-request error modal</a></li><li><a href="#code-entry-points">Code entry points</a></li></ul></nav>
+<h2 id="production-request-lifecycle">Production request lifecycle</h2>
+<p>In production, Gunicorn runs each request with automatic cyclic GC disabled, writes and closes the
+response, then performs a logged full collection in <code>post_request</code> before accepting more work. This
+keeps collection pauses out of the response-producing stages. After collection, a cgroup working set
+above 60% of the container limit recycles the worker; reclaimable inactive file cache is excluded.
+<code>WORKER_RECYCLE_LIMIT_RATIO</code> changes the ratio and <code>WORKER_RECYCLE_LIMIT_MB</code> provides an absolute override.</p>
+<h2 id="computation-memory-guard">Computation memory guard</h2>
+<p><code>ComputationMemoryMiddleware</code> wraps every <code>/model_builder/</code> request before view execution when
+<code>COMPUTATION_MEMORY_GUARD_MODE</code> is <code>observe</code> or <code>enforce</code> (the default is <code>off</code>). It uses the library's scoped reactive
+observer to count every cache-miss completion, samples process RSS and cgroup memory adaptively, and emits correlated
+JSON records at start, bounded high-water progress, completion, or abort. Records use route patterns and numerical
+topology only, and include the process-resolved computation limit as <code>limit_mb</code> for exact correlation; model names,
+serialized data, calculated values, and other user-authored labels are forbidden.</p>
+<p>Unexpected
+monitor failures disable telemetry for that request and fail open in both modes.</p>
+<p>In <code>enforce</code>, the first sampled
+completion at or above the computation working-set limit raises a typed recoverable exception and latches the monitor,
+so transactional rollback computations cannot trip it again.</p>
+<p>Decorated views use the standard exception modal; the
+middleware supplies the same modal only for undecorated routes.</p>
+<p>Sankey catches the typed exception inside its generic
+decorator after <code>ModelWeb</code> hydration and replaces only the graph area with peek-only attribution-cache coverage and
+container-capacity guidance. If hydration itself is interrupted before a complete system exists, the outer generic
+decorator returns the standard out-of-band modal instead; the interface never fabricates attribution coverage.
+Gunicorn's normal post-request collection and recycling still happen after either recoverable response. Gunicorn also
+reuses the cgroup reader and compares cumulative <code>oom</code>/<code>oom_kill</code> counters across worker boot and exit, including exits
+where a killed worker cannot log for itself. Computation and recycling limits are resolved once per process from
+separate ratio/absolute settings; the recycling policy remains 60% while the computation limit is independently
+configurable through <code>COMPUTATION_MEMORY_LIMIT_RATIO</code> (85% by default) or <code>COMPUTATION_MEMORY_LIMIT_MB</code>.</p>
+<h2 id="memory-investigations">Memory investigations</h2>
+<p>Repeatable production-container memory experiments, compact reference results, and the evidence-ranked optimization
+backlog live under <a class="source" href="../../performance/memory"><code>performance/memory/</code></a>; large profiler captures remain untracked artifacts.</p>
+<h2 id="dead-state-recovery">Dead-state recovery</h2>
+<p>A session model that fails to deserialize would 500 <code>model_builder_main</code> at the <code>ModelWeb</code> load, stranding the user (the reset button lives on that very page). The view wraps the load in a <code>try/except</code> and falls back to <code>exception_handling.render_recovery_page</code> (<a class="source" href="../../model_builder/templates/model_builder/recovery.html"><code>templates/model_builder/recovery.html</code></a>, a self-contained page intentionally decoupled from <code>model_web</code>) offering: download the raw session JSON (<code>download_raw_json</code>, served verbatim without rebuilding the model), reset, and a prefilled GitHub bug report. <code>RAISE_EXCEPTIONS=1</code> still bubbles the raw traceback (same convention as <code>upload_json</code>). The same page is reachable read-only at <code>GET /model_builder/recover/</code> (the always-available escape hatch that replaced the removed <code>GET /reboot</code>) and is rendered by the project-wide <code>handler500</code> (<a class="source" href="../../e_footprint_interface/views.py"><code>e_footprint_interface/views.py::server_error</code></a>) for any unhandled 500 in production.</p>
+<h2 id="per-request-error-modal">Per-request error modal</h2>
+<p>For <em>recoverable</em> view errors (a single endpoint failing without corrupting the model), the <code>@render_exception_modal_if_error</code> decorator (<a class="source" href="../../model_builder/adapters/views/exception_handling.py"><code>exception_handling.py</code></a>) catches the exception and returns <a class="source" href="../../model_builder/templates/model_builder/modals/exception_modal.html"><code>exception_modal.html</code></a>, which is <strong>entirely out-of-band</strong> into <code>#modal-container</code>. Because the modal carries no main-target content, the response also sets <code>HX-Reswap: none</code> so the empty body is never swapped into the triggering element's target — this is what lets the <em>same</em> decorator serve both small side-panel views and views whose <code>hx-target</code> is the whole builder (<code>add-model</code>/<code>remove-model</code>, which would otherwise have the empty body wipe <code>#main-content-block</code>). OOB swaps are still processed under <code>none</code>, so the modal appears over an untouched canvas. <code>RAISE_EXCEPTIONS=1</code> bubbles the raw traceback instead.</p>
+<h2 id="code-entry-points">Code entry points</h2>
+<ul>
+<li><a class="source" href="../../gunicorn.conf.py"><code>gunicorn.conf.py</code></a> — collection, recycling, and worker memory events.</li>
+<li><a class="source" href="../../e_footprint_interface/computation_memory_middleware.py"><code>e_footprint_interface/computation_memory_middleware.py</code></a> and <a class="source" href="../../e_footprint_interface/runtime_memory.py"><code>e_footprint_interface/runtime_memory.py</code></a> — observer, limits, and cgroup measurements.</li>
+<li><a class="source" href="../../model_builder/adapters/views/exception_handling.py"><code>model_builder/adapters/views/exception_handling.py</code></a> — recovery page and OOB error modal.</li>
+</ul>
+<aside class="rule"><strong>Related pages</strong><div class="related"><a href="persistence.html">Retention and security</a><a href="rendering.html">HTMX updates</a><a href="onboarding.html">Template/reset entry points</a></div></aside>
+</main>
+<footer><a href="index.html">Architecture index</a> · <a href="../constitution.md">Constitution</a> · <a href="../../../e-footprint/specs/architecture/index.html">Library architecture</a></footer>
+</body>
+</html>

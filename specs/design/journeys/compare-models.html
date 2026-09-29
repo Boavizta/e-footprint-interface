@@ -661,7 +661,7 @@
 <details class="ptr" id="pointers">
   <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, the resident-sibling reveal &amp; the comparison service behind the patterns above</span></summary>
   <div class="pbody">
-    <p>Where this lives in code. Start with <code>specs/architecture.md</code> (the workspace / multi-slot session, two resident canvases + system-id DOM prefixing) and the feature specs <code>specs/features/model-comparison/</code> + <code>specs/features/compare-overlay-layer/</code>.</p>
+    <p>Where this lives in code. Start with <a href="../../architecture/workspace.html">Workspace and resident canvases</a> · <a href="../../architecture/comparison.html">Comparison dashboard</a> (the workspace / multi-slot session, two resident canvases + system-id DOM prefixing) and the feature specs <code>specs/features/model-comparison/</code> + <code>specs/features/compare-overlay-layer/</code>.</p>
     <dl>
       <dt>Tab strip, ＋Add &amp; gating (Phases A–B)</dt>
       <dd><code>components/model_tab_strip.html</code> (fixed role labels, <code>＋ Add a model to compare</code> menu, the ✕ remove with <code>data-confirm-remove-model</code>, the <code>⇄ Compare</code> button + disabled tooltips), <code>components/active_model_role.html</code> (mobile role pill). Add routes <code>add-model/</code> (<code>source</code> = duplicate / blank / import), <code>open-add-model-import-panel/</code> → <code>side_panels/add_model_import.html</code>. Gate: <code>compare_enabled()</code> in <code>adapters/views/views.py</code> (runs <code>SystemValidationService.validate_for_computation</code> on both slots).</dd>
