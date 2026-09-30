@@ -1,6 +1,6 @@
 # Task 8 — Author selection beside Modeling inputs
 
-Repository and implementation range: `e-footprint-interface`, `5cfe21b02f228beb3272afafa4826112b48f3049..3f0b344b05749088c8397d1469bd582e804dd1f9`. No library changes; library product baseline remains `d85de9753db5abe3551ccaa87fce9f714124877d` (the shared checkout's later experiment commit is not a product dependency change).
+Repository and final implementation range: `e-footprint-interface`, `5cfe21b02f228beb3272afafa4826112b48f3049..753c63d94baa46599c06e2e530247803a8ded214`. No library changes; library product baseline remains `d85de9753db5abe3551ccaa87fce9f714124877d` (the shared checkout's later experiment commit is not a product dependency change).
 
 ## Review pointers
 
@@ -9,6 +9,7 @@ Repository and implementation range: `e-footprint-interface`, `5cfe21b02f228beb3
 - Creation keeps settings in nameless provisional controls, serialized once at submission. Existing `dynamic_lists` metadata supplies candidate-controller requirements; previews release forced-only inclusion as candidates change and retain authored help. Successful hooks resolve the new object and nested Storage IDs before the single final persistence call. Cancellation and failed creation leave no persisted provisional definitions.
 - Create/edit/delete require the catalog factory at every application entry point, including framework-free callers. `persist_structural_change()` reuses the configuration use case without a separate config save, completes selection, prunes removed owners and retained help, and restores request-local configuration on failed persistence. Delete confirmation runs the same removal operation on a separate inputs-only model to identify the actual cascade, excluding surviving shared children.
 - Owning patterns are recorded in `specs/architecture/forms-and-relationships.html` and `persistence.html`. The supervisor can add an AGENTS pointer to the new bookmark/Sources lazy-rendering pattern when consolidating documentation.
+- Task 9 seam: when a response updates surviving controls in place, apply their saved constraints after `workspace-mutation:finished`. The shared guard restores pre-request disabled states at settlement; bookmarks then reuse their current requirement labels to apply authoritative locks.
 
 ## Open concerns
 
