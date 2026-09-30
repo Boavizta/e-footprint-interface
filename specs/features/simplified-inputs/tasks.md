@@ -67,7 +67,7 @@ Repository: e-footprint-interface. Files touched: `theme/static/scripts/model_bu
 
 ## Task 7 — Build Configure and the shared workspace
 
-Goal: Render eligible fields in the grouped Configure view and saved fields in a Simplified inputs view, with navigation and explicit configuration save/exit. Status: approved. Brief: [task-7](briefs/task-7.md).
+Goal: Render eligible fields in the grouped Configure view and saved fields in a Simplified inputs view, with navigation and explicit configuration save/exit. Status: complete. Brief: [task-7](briefs/task-7.md).
 
 Repository: e-footprint-interface. Files touched: new simplified-input views, presenter, partials, JS and SCSS; URLs, model shell, toolbar and presenter/Jest/E2E tests. Tests: grouping, filter/focus, conditional draft locks, Clear, Save/Discard/Stay, per-model base view and fresh render on Modeling entry. Acceptance: Configure saves a complete definition and returns a complete selected-field view; leaving dirty Configure cannot discard changes silently; old form values stay in DOM only. Depends on: Tasks 3, 4 and 6. Implementation: standard — combine Task 3/4 catalog and save APIs with `side_panel_utils.js`'s deferred-action pattern and resident-canvas switching.
 

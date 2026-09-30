@@ -322,6 +322,7 @@
   <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
   <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
   <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
+  <p><a href="#impl-decision-05">[IMPL-DECISION-05] Bound complete-configuration transport — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -555,7 +556,8 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     <p><strong>Server · on Save and return:</strong> the view uses the existing
     <code>SessionWorkspaceRepository(request.session).active_repository()</code> path and calls
     <code>UpdateSimplifiedDefinitionUseCase</code>.
-    Configure submits the complete definition from its form controls. The use case replaces the
+    Configure serializes the complete definition from its form controls at request time into one
+    JSON-valued <code>definition</code> POST parameter. The use case replaces the
     saved simplified-input definition, uses <code>complete_selection()</code> to include required
     companions, then calls <code>validate_definition()</code> to check addresses, eligibility and
     selection completeness before persisting. This saves configuration, not modeling values.</p>
@@ -574,6 +576,15 @@ class UpdateSimplifiedDefinitionUseCase:
     <p>Keep values in the form controls and track one form-level dirty flag, not changed properties or
     a copied JavaScript definition. Submit the complete configuration under the
     <a href="#saves">one-at-a-time save guard</a>. Cancel discards unsaved changes.</p>
+    <aside id="impl-decision-05" data-note="review">
+      <p><strong>[IMPL-DECISION-05] — APPLIED</strong></p>
+      <p>Run B, Task 7 review: a supported modeling with 61 ordinary servers and their storage has
+      more eligible fields than Django's 1,000-parameter form limit, even with nothing selected.
+      Submit one serialized definition instead of a parameter per control. Controls remain the
+      only draft state, complete replacement remains unchanged, and global request limits stay
+      intact. See <a href="../../../theme/static/scripts/simplified_inputs.js"><code>definitionFromForm()</code></a>
+      and the <a href="handoffs/task-7.md">Task 7 handoff</a>.</p>
+    </aside>
     <p>Before leaving a dirty Configure form, offer <strong>Save / Discard / Stay</strong>.
     Save continues the requested action only after success; failure keeps the form open.
     This also gates model switching, Compare, Results/Sources, file opening and export.
