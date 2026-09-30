@@ -434,7 +434,8 @@
     fixed. Configuration and inline controls explain any automatically included fields and prevent
     removing a required dependent while its controller remains included. No separate dependency
     configuration is authored. If a required dependent cannot be exposed, its controller cannot be
-    exposed either, with an explanation. Clear, undo, and imported selections must respect the same invariant.</li>
+    exposed either, with an explanation. Clear, undo, and selections reopened from normal exports
+    respect the same invariant.</li>
     <li><strong>Valid conditional changes:</strong> changing a controlling value retains each dependent
     value when still valid; otherwise the first valid available option is selected and the automatic
     change is reported discreetly. This fallback is not a recommendation. The controller and all
@@ -583,8 +584,11 @@
     modeling, current adapted values, simplified-input choices, per-field help text, and user
     edits to source and comment in the modeling itself. Each modeling with a non-empty selection
     opens in Simplified inputs when loaded from JSON; an empty selection opens in Modeling.</li>
-    <li><strong>Safe failure:</strong> an invalid simplified-input configuration or unreadable JSON is rejected
-    with an actionable explanation and does not replace the modeling already open in the session.</li>
+    <li><strong>Safe failure:</strong> an invalid simplified-input configuration save is rejected with
+    an actionable explanation and leaves the saved definition and modeling unchanged. An unreadable
+    JSON file, or model data rejected by the existing import and size checks, does not replace the
+    modeling already open in the session. File opening does not revalidate a saved simplified-input
+    definition.</li>
     <li><strong>Consistent examples terminology:</strong> ready-made modelings are called Examples
     in the catalog, Open examples in navigation, and example modelings in documentation. Onboarding
     offers Start from an example or Start from scratch. Introductory examples and examples accompanying

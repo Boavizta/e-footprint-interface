@@ -311,6 +311,10 @@
   <h1>Simplified inputs — implementation plan</h1>
   <p><a href="spec.html">Spec &amp; mockup</a> · <a href="#modules">Changed files</a></p>
 </header>
+<aside id="plan-updates" data-note="review">
+  <p><strong>Plan decision history</strong></p>
+  <p><a href="#plan-update-01">[PLAN-UPDATE-01] Revalidate imported definitions — REJECTED</a></p>
+</aside>
 
 <section id="approach">
   <h2>1. Follow the interactions through the code</h2>
@@ -367,7 +371,8 @@ class SimplifiedInputsDefinition(TypedDict):
 }</code></pre></div>
       <ul>
         <li>Normalize absent configuration through <code>version_upgrade_handlers.py</code> to empty
-        title/guidance/fields. Reject malformed definitions with the owner and field identified.</li>
+        title/guidance/fields. On configuration and inline saves, reject malformed definitions with
+        the owner and field identified.</li>
         <li>An excluded entry survives only to retain help. Clear empties <code>fields</code>, including
         retained help, without removing title/guidance.</li>
         <li>Values and provenance stay in the modeling. Labels and ordering come from existing form contexts;
@@ -845,6 +850,16 @@ persist once</code></pre></div></div>
     resolve System IDs and check the combined size before clearing any live slot. Then save the prepared
     documents through the existing repository paths. Do not add simplified-input definition validation
     on import.</p>
+    <aside id="plan-update-01" data-note="review">
+      <p><strong>[PLAN-UPDATE-01] — REJECTED</strong></p>
+      <p><strong>Decision:</strong> Keep the approved import path without a second simplified-input
+      definition check. Configure and inline saves validate definitions before writing them; normal
+      JSON exports carry those saved definitions.</p>
+      <p><strong>Why:</strong> Revalidation on file opening would address manually altered metadata,
+      outside the supported workflow, without evidence of a failure in ordinary exports. The
+      <a href="spec.html">Safe failure criterion</a> now distinguishes configuration-save rejection
+      from existing JSON import failure.</p>
+    </aside>
   </article>
 
   <article id="examples" data-decision>
