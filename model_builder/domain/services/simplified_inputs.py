@@ -3,10 +3,8 @@
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from numbers import Number
-from types import UnionType
-from typing import TypedDict, Union, get_args, get_origin
+from typing import TypedDict, get_args, get_origin
 
-from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -70,10 +68,6 @@ def _eligibility(owner, attribute, annotation, can_edit_timeseries):
         return False, "Reference objects are selected through their owning input."
 
     annotation = resolve_optional_annotation(annotation)
-    # An empty optional quantity is still a number input, not a different editor kind.
-    non_empty_types = [arg for arg in get_args(annotation) if arg not in (EmptyExplainableObject, type(None))]
-    if len(non_empty_types) == 1 and get_origin(annotation) in (Union, UnionType):
-        annotation = non_empty_types[0]
     origin = get_origin(annotation)
     if _is_type(origin, ExplainableObjectDict):
         return False, "Weighted object collections are structural inputs."
