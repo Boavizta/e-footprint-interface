@@ -1,5 +1,6 @@
 import json
 
+from django.views.decorators.http import require_POST
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import SessionWorkspaceRepository
@@ -27,6 +28,7 @@ def ask_delete_object(request, object_id):
     return http_response
 
 
+@require_POST
 @render_exception_modal_if_error
 @time_it
 def delete_object(request, object_id):

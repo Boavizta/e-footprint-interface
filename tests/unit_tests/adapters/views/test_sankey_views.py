@@ -192,6 +192,9 @@ class TestSankeyCards:
         assert 'name="aggregation_threshold_percent" min="0" max="10" step="0.5" value="2.5"' in content
         assert 'name="node_label_max_length" value="31"' in content
         assert 'name="excluded_types" value="Device"' in content
+        assert 'hx-get="/model_builder/sankey-diagram/?card_id=deadbeef"' in content
+        assert 'hx-sync="#settings-deadbeef:replace"' in content
+        assert 'hx-trigger="load, change' not in content
 
     def test_restores_saved_zero_aggregation_threshold(self, client, minimal_system_data):
         system_data = {

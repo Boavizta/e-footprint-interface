@@ -139,13 +139,13 @@
                         <p class="d-block d-lg-none mb-0">Export</p>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="download-menu-toggle">
-                        <li><a class="dropdown-item" data-workspace-control href="download-json/" target="_blank">⬇ This modeling</a></li>
-                        <li><a class="dropdown-item" data-workspace-control href="download-workspace/" target="_blank">⬇ Both modelings</a></li>
+                        <li><a id="download-model" class="dropdown-item" data-workspace-control href="download-json/" target="_blank">⬇ This modeling</a></li>
+                        <li><a id="download-workspace" class="dropdown-item" data-workspace-control href="download-workspace/" target="_blank">⬇ Both modelings</a></li>
                     </ul>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a data-workspace-control href="download-json/"
+                    <a id="download-model" data-workspace-control href="download-json/"
                            target="_blank"
                            class="nav-link d-flex flex-row gap-2 mx-2"
                            data-bs-title="Export your modeling"

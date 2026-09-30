@@ -3,7 +3,9 @@
 {% block modal-footer %}
     <button type="button" class="btn btn-danger rounded-2 px-4 py-3 mb-3"
             data-bs-dismiss="modal"
-            hx-get="/model_builder/delete-object/{{ obj.efootprint_id }}/"
+            hx-post="/model_builder/delete-object/{{ obj.efootprint_id }}/"
+            hx-target="#modal-container"
+            hx-swap="none"
             script="on htmx:afterRequest
                     {% if remove_card_with_hyperscript %}remove #{{ obj.web_id }}{% endif %}"
             hx-on::after-request="dropModal('{{ modal_id }}');closeAndEmptySidePanel();"

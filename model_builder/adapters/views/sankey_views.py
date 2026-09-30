@@ -4,6 +4,7 @@ import uuid
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_http_methods
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT, SANKEY_COLUMNS, SANKEY_BREAKDOWN_ONLY_CLASSES
 from efootprint.constants.units import u
@@ -314,22 +315,33 @@ def _build_sankey_payload(sankey: ImpactRepartitionSankey) -> dict:
     }, recommended_height
 
 
+@require_http_methods(["GET", "POST"])
 @render_exception_modal_if_error
 @time_it
 def sankey_diagram(request):
-    card_id = request.POST.get("card_id", "")
+    card_id = (request.POST if request.method == "POST" else request.GET).get("card_id", "")
     # Hydration happens before the graph-specific recovery boundary because attribution
     # coverage is only meaningful once a complete System exists. An earlier capacity
     # interruption therefore falls through to the outer generic recoverable-error modal.
     repository = SessionWorkspaceRepository(request.session).active_repository()
+    if request.method == "POST":
+        settings = {
+            **request.POST.dict(),
+            "active_columns": request.POST.getlist("active_columns"),
+            "excluded_types": request.POST.getlist("excluded_types"),
+            "display_column_headers": "display_column_headers" in request.POST,
+        }
+    else:
+        settings = next(diagram for diagram in repository.interface_config["sankey_diagrams"]
+                        if diagram["id"] == card_id)
     model_web = ModelWeb(repository)
     system = list(model_web.response_objs["System"].values())[0]
 
-    lifecycle_phase_str = request.POST.get("lifecycle_phase_filter", "")
+    lifecycle_phase_str = settings.get("lifecycle_phase_filter", "")
     lifecycle_phase_filter = _LIFECYCLE_PHASE_MAP.get(lifecycle_phase_str)
 
-    aggregation_threshold_percent = float(request.POST.get("aggregation_threshold_percent", "1.0"))
-    active_columns = set(request.POST.getlist("active_columns"))
+    aggregation_threshold_percent = float(settings.get("aggregation_threshold_percent", "1.0"))
+    active_columns = set(settings.get("active_columns", []))
     skip_phase_footprint_split = "phase" not in active_columns
     skip_object_category_footprint_split = "category" not in active_columns
     skip_object_footprint_split = "7" not in active_columns and "8" not in active_columns
@@ -339,9 +351,9 @@ def sankey_diagram(request):
         if chip_id not in active_columns and chip_id not in ("phase", "category")
     ]
     skipped_classes = _expand_skipped_columns(inactive_column_indices)
-    excluded_object_types = request.POST.getlist("excluded_types")
-    display_column_headers = "display_column_headers" in request.POST
-    node_label_max_length = int(request.POST.get("node_label_max_length", "15"))
+    excluded_object_types = settings.get("excluded_types", [])
+    display_column_headers = settings.get("display_column_headers", False)
+    node_label_max_length = int(settings.get("node_label_max_length", "15"))
 
     try:
         sankey = ImpactRepartitionSankey(
@@ -375,23 +387,24 @@ def sankey_diagram(request):
         }
         subtitle = subtitle_map[lifecycle_phase_filter]
 
-        card_settings = {
-            "id": card_id,
-            "lifecycle_phase_filter": lifecycle_phase_str,
-            "aggregation_threshold_percent": aggregation_threshold_percent,
-            "active_columns": sorted(active_columns),
-            "excluded_types": excluded_object_types,
-            "display_column_headers": display_column_headers,
-            "node_label_max_length": node_label_max_length,
-        }
-        config = repository.interface_config
-        diagrams = config.setdefault("sankey_diagrams", [])
-        existing_index = next((i for i, diagram in enumerate(diagrams) if diagram["id"] == card_id), None)
-        if existing_index is None:
-            diagrams.append(card_settings)
-        else:
-            diagrams[existing_index] = card_settings
-        model_web.persist_to_cache()
+        if request.method == "POST":
+            card_settings = {
+                "id": card_id,
+                "lifecycle_phase_filter": lifecycle_phase_str,
+                "aggregation_threshold_percent": aggregation_threshold_percent,
+                "active_columns": sorted(active_columns),
+                "excluded_types": excluded_object_types,
+                "display_column_headers": display_column_headers,
+                "node_label_max_length": node_label_max_length,
+            }
+            config = repository.interface_config
+            diagrams = config.setdefault("sankey_diagrams", [])
+            existing_index = next((i for i, diagram in enumerate(diagrams) if diagram["id"] == card_id), None)
+            if existing_index is None:
+                diagrams.append(card_settings)
+            else:
+                diagrams[existing_index] = card_settings
+            model_web.persist_to_cache()
 
         response = render(
             request,
@@ -407,7 +420,7 @@ def sankey_diagram(request):
                 "subtitle": subtitle,
             },
         )
-        return append_workspace_storage_status(response, request.session)
+        return append_workspace_storage_status(response, request.session) if request.method == "POST" else response
     except ComputationMemoryLimitExceeded as error:
         cached_slots, total_slots = impact_repartition_rows_cache_coverage(system)
         coverage_percent = round(100 * cached_slots / total_slots) if total_slots else 0

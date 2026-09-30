@@ -399,10 +399,12 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
                             ? constraintDisabled.get(element) ?? element.disabled : element.disabled)
                         : null,
                     ariaDisabled: element.getAttribute("aria-disabled"),
+                    href: element.matches("a[data-workspace-control]") ? element.getAttribute("href") : null,
                 });
             }
             if ("disabled" in element) element.disabled = true;
             else element.setAttribute("aria-disabled", "true");
+            if (element.matches("a[data-workspace-control]")) element.removeAttribute("href");
         });
     }
 
@@ -422,6 +424,7 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
             if (state.disabled !== null) element.disabled = state.disabled;
             if (state.ariaDisabled === null) element.removeAttribute("aria-disabled");
             else element.setAttribute("aria-disabled", state.ariaDisabled);
+            if (state.href !== null) element.setAttribute("href", state.href);
         });
         active = null;
         delete document.body.dataset.workspaceMutation;

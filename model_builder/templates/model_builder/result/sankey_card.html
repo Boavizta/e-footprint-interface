@@ -23,7 +23,7 @@
           hx-target="#sankey-diagram-area-{{ card_id }}"
           hx-swap="outerHTML"
           hx-sync="this:replace"
-          hx-trigger="load, change, input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
+          hx-trigger="{% if not initial_settings %}load, {% endif %}change, input delay:300ms from:find input[type=range], input delay:300ms from:find input[type=number]">
         <input type="hidden" name="card_id" value="{{ card_id }}">
 
         <div class="settings-row">
@@ -143,7 +143,9 @@
         </div>
     </form>
 
-    <div id="sankey-diagram-area-{{ card_id }}" class="sankey-diagram-area">
+    <div id="sankey-diagram-area-{{ card_id }}" class="sankey-diagram-area"
+         {% if initial_settings %}hx-get="/model_builder/sankey-diagram/?card_id={{ card_id }}"
+         hx-trigger="load" hx-swap="outerHTML" hx-sync="#settings-{{ card_id }}:replace"{% endif %}>
         <div class="sankey-card-title-area" style="padding: 8px 16px;">
             <span class="card-title">Impact repartition</span>
             <span class="card-subtitle">Generating diagram...</span>

@@ -14,6 +14,7 @@ from urllib.parse import parse_qs
 import pytest
 from playwright.sync_api import expect
 
+from tests.e2e.pages.side_panel_page import SidePanelPage
 from tests.e2e.utils import click_and_wait_for_htmx
 
 
@@ -34,7 +35,9 @@ class TestModelComparisonWorkspace:
         expect(count).to_be_disabled()
         expect(page.locator("#model-tab-0")).to_be_disabled()
         expect(page.locator("#compare-tab")).to_be_disabled()
-        expect(page.locator("a[href='download-json/']")).to_have_attribute("aria-disabled", "true")
+        expect(page.locator("#download-model")).to_have_attribute("aria-disabled", "true")
+        assert page.locator("#download-model").get_attribute("href") is None
+        assert page.locator("#download-workspace").get_attribute("href") is None
         model_builder.attempt_locked_workspace_actions()
         assert len(pending) == 1
         assert model_builder.active_slot() == "1"
@@ -58,6 +61,50 @@ class TestModelComparisonWorkspace:
         page.unroute("**/update-dict-count/**")
         model_builder.switch_to_model(0)
         assert model_builder.active_slot() == "0"
+
+    @pytest.mark.parametrize("unused_journey", [False, True])
+    def test_delayed_object_deletion_locks_count_edits_and_export(
+            self, minimal_complete_model_builder, unused_journey):
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+        if unused_journey:
+            # An unused journey needs no constraint OOB swaps: the modal's stable target
+            # must deliver afterSettle even after the confirmation button is removed.
+            model_builder.click_add_usage_journey()
+            model_builder.side_panel.fill_field("UsageJourney_name", "Unused journey")
+            model_builder.side_panel.submit_and_wait_for_close()
+            model_builder.get_object_card("UsageJourney", "Unused journey").click_edit_button()
+        else:
+            click_and_wait_for_htmx(page, model_builder.canvas.locator("#up-list button[hx-get]").first)
+        SidePanelPage(page).click_delete_button()
+        pending = []
+        page.route("**/delete-object/**", lambda route: pending.append(route))
+
+        with page.expect_request(lambda request: "/delete-object/" in request.url):
+            page.get_by_role("button", name="Yes, delete").click()
+        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
+        assert pending[0].request.method == "POST"
+        expect(model_builder.canvas.locator("input.count-inline-edit").first).to_be_disabled()
+        export = page.locator("#download-model")
+        assert export.get_attribute("href") is None
+        pages_before = len(page.context.pages)
+        export.click(button="middle")
+        export.press("Enter")
+        export.dispatch_event("contextmenu")
+        assert export.get_attribute("href") is None
+        assert len(page.context.pages) == pages_before
+
+        with page.expect_response(lambda response: "/delete-object/" in response.url):
+            pending.pop().continue_()
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        expect(export).to_have_attribute("href", "download-json/")
+        if unused_journey:
+            model_builder.object_should_not_exist("UsageJourney", "Unused journey")
+            expect(model_builder.canvas.locator("input.count-inline-edit").first).to_be_enabled()
+            click_and_wait_for_htmx(page, model_builder.canvas.locator("#up-list button[hx-get]").first)
+            model_builder.side_panel.should_be_visible()
+        else:
+            expect(model_builder.canvas.locator("#up-list .model-builder-card")).to_have_count(0)
 
     def test_duplicate_edit_refresh_and_remove(self, minimal_complete_model_builder):
         model_builder = minimal_complete_model_builder

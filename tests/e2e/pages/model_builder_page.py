@@ -46,7 +46,7 @@ class ModelBuilderPage:
 
     def attempt_locked_workspace_actions(self):
         """Probe capture guards as well as native disabled buttons, without waiting for enablement."""
-        for selector in ("#model-tab-0", "#compare-tab", "a[href='download-json/']", "a[href='download-workspace/']"):
+        for selector in ("#model-tab-0", "#compare-tab", "#download-model", "#download-workspace"):
             self.page.locator(selector).dispatch_event("click")
 
     def goto(self):

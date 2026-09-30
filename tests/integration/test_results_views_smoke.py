@@ -254,6 +254,35 @@ def test_result_chart_persists_newly_computed_footprints_only_once(client, monke
 
 
 @pytest.mark.django_db
+def test_saved_sankey_read_computes_without_publishing_a_model_snapshot(client, monkeypatch):
+    system_data = system_to_json(_build_basic_web(), save_computed_state=False)
+    system_data["interface_config"] = {"sankey_diagrams": [{
+        "id": "saved-card",
+        "lifecycle_phase_filter": "Manufacturing",
+        "aggregation_threshold_percent": 2.5,
+        "active_columns": ["phase", "category", "3"],
+        "excluded_types": [],
+        "display_column_headers": False,
+        "node_label_max_length": 31,
+    }]}
+    repository = SessionSystemRepository(client.session)
+    repository.save_data(system_data)
+    saved_before = repository.get_system_data()
+    monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
+
+    def unexpected_publication(_self):
+        pytest.fail("Rendering a saved diagram must not publish a model snapshot")
+
+    monkeypatch.setattr(ModelWeb, "persist_to_cache", unexpected_publication)
+    response = client.get("/model_builder/sankey-diagram/", {"card_id": "saved-card"})
+
+    assert response.status_code == 200
+    assert 'id="sankey-diagram-area-saved-card"' in response.content.decode()
+    assert "manufacturing impact repartition" in response.content.decode()
+    assert repository.get_system_data() == saved_before
+
+
+@pytest.mark.django_db
 def test_cold_sankey_memory_trip_uses_real_observer_and_peek_coverage_without_persisting(client, monkeypatch):
     system_data = system_to_json(_build_basic_web(), save_computed_state=False)
     repository = SessionSystemRepository(client.session)

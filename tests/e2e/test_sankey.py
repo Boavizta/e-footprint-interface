@@ -5,6 +5,7 @@ so all chip types are non-empty and meaningful assertions can be made.
 """
 
 import pytest
+from playwright.sync_api import expect
 from django.template.loader import render_to_string
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
@@ -142,6 +143,30 @@ class TestSankeySection:
 
         # card1 diagram must still be rendered after the second card was appended
         assert card1.diagram_is_rendered()
+
+    def test_reopening_saved_cards_renders_both_without_mutations(self, sankey_system: ModelBuilderPage):
+        sankey_system.open_result_panel()
+        sankey_page = SankeyPage(sankey_system)
+        card1 = sankey_page.first_card()
+        card1.wait_for_diagram_update()
+        card2 = sankey_page.add_card()
+        card2.set_lifecycle_filter("Manufacturing")
+        expected_titles = [card1.title_text(), card2.title_text()]
+        sankey_system.close_result_panel()
+
+        page = sankey_system.page
+        pending = []
+        page.route("**/sankey-diagram/*", lambda route: pending.append(route))
+        sankey_system.open_result_panel()
+        expect(page.locator(".sankey-diagram-area.htmx-request")).to_have_count(2)
+        assert len(pending) == 2
+        assert all(route.request.method == "GET" for route in pending)
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        for route in pending:
+            route.continue_()
+        for card, title in zip(sankey_page.cards(), expected_titles):
+            card.wait_for_diagram_update()
+            assert card.title_text() == title
 
     def test_add_and_remove_cards(self, sankey_system: ModelBuilderPage):
         """Cards can be added and removed; removal is client-side only."""

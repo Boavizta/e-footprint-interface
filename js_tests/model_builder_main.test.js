@@ -207,6 +207,24 @@ test("swapped controls keep server constraints and are locked until the initiati
     expect(document.querySelector("button").disabled).toBe(true);
 });
 
+test.each([true, false])("exports have no native link destination until completion (successful=%s)", successful => {
+    document.body.innerHTML = `
+        <a id="model" data-workspace-control href="download-json/" target="_blank">Model</a>
+        <a id="workspace" data-workspace-control href="download-workspace/">Workspace</a>
+        <a id="empty" data-workspace-control href="">Empty</a>
+        <a id="absent" data-workspace-control>Absent</a>
+        <a id="documentation" href="/docs/">Read</a>
+    `;
+    loadModule();
+    const destinations = () => Object.fromEntries(Array.from(document.querySelectorAll("a"),
+        link => [link.id, link.getAttribute("href")]));
+    const before = destinations();
+    const xhr = startMutation();
+    expect(destinations()).toEqual({model: null, workspace: null, empty: null, absent: null, documentation: "/docs/"});
+    completeMutation(xhr, {successful, swap: successful});
+    expect(destinations()).toEqual(before);
+});
+
 test.each(["HTTP error", "abort", "HTTP-200 error modal"])("%s unlocks and reports an unsuccessful mutation", failure => {
     document.body.innerHTML = '<div id="sidePanel"><input value="unsaved"></div>';
     loadModule();
