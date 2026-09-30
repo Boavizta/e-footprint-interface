@@ -219,7 +219,7 @@
             <li id="file-forms" data-steps="configure lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Reuse existing field metadata; add true owner addresses and creation-time required-selection context.</small></li>
             <li id="file-timeseries-registry" data-steps="configure consume"><a href="../../../model_builder/adapters/forms/timeseries_builder_registry.py"><code>forms/timeseries_builder_registry.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract a lightweight current-builder lookup shared by rendering and eligibility; keep the existing registry.</small></li>
             <li id="file-views-existing" data-steps="lifecycle navigation-flow"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shell entry/defaults, panel integration, copy settings, import-order correction and slot identity.</small></li>
-            <li id="file-sources" data-steps="lifecycle"><a href="../../../model_builder/adapters/views/source_table_row_editor_context.py"><code>views/source_table_row_editor_context.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Add bookmarks; preserve existing constructor-input checks and metadata rendering without eager model hydration.</small></li>
+            <li id="file-sources" data-steps="lifecycle"><a href="../../../model_builder/adapters/views/views.py"><code>views/views.py</code></a> · <a href="../../../model_builder/adapters/views/views_simplified_inputs.py"><code>views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Catalog-backed bookmark summaries in Sources; lazy controls leave the provenance-row editor's raw-JSON path intact.</small></li>
             <li id="file-oob" data-steps="consume"><a href="../../../model_builder/adapters/presenters/oob_regions.py"><code>presenters/oob_regions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>One total context for paired Results controls; targeted input/bookmark updates. <a href="#totals">Results</a></small></li>
             <li id="file-repositories" data-steps="configure navigation-flow"><code>repositories/{session_system_repository,in_memory_system_repository}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Validate size before saving configuration; per-model config and in-memory parity.</small></li>
             <li id="file-workspace-repositories" data-steps="navigation-flow"><code>repositories/workspace_base.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Remap System-owned field addresses when assigning a fresh System ID.</small></li>
@@ -323,6 +323,7 @@
   <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
   <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Bound complete-configuration transport — APPLIED</a></p>
+  <p><a href="#impl-decision-06">[IMPL-DECISION-06] Keep Sources bookmark controls lazy — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -610,12 +611,21 @@ repository.save_interface_config()
   <article id="lifecycle" data-decision>
     <h3><a href="#lifecycle">1.3 · Author simplified inputs while modeling</a> <span data-status="proposal">Proposed</span></h3>
     <p data-reading-note>Follow a bookmark edit, then create a dependent input or delete its owner.</p>
-<p data-files><strong>Files</strong> <a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a> · <a href="#file-sources"><code>adapters/views/source_table_row_editor_context.py</code></a> · <a href="#file-lifecycle"><code>application/use_cases/{create,edit,delete}_object.py</code></a> · <a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a></p>
+<p data-files><strong>Files</strong> <a href="#file-forms"><code>adapters/forms/form_context_builder.py</code></a> · <a href="#file-sources"><code>adapters/views/{views,views_simplified_inputs}.py</code></a> · <a href="#file-lifecycle"><code>application/use_cases/{create,edit,delete}_object.py</code></a> · <a href="#file-client"><code>../theme/static/scripts/simplified_inputs.js</code></a></p>
     <h4>1 · Open a bookmark in an edit panel or Sources row</h4>
     <p><code>adapters/forms/form_context_builder.py</code> attaches the true owner address to each
     eligible field, including Storage fields displayed inside a Server panel.
-    <code>adapters/views/source_table_row_editor_context.py</code> adds the same bookmark context to
-    each input row while retaining its raw-JSON metadata path and current value editor.</p>
+    Sources' existing <code>source_table()</code> model load supplies catalog-backed bookmark summaries
+    for eligible input rows. Opening a disclosure loads the shared settings controls on demand;
+    <code>source_table_row_editor_context.py</code> retains its raw-JSON metadata path and current value editor.</p>
+    <aside id="impl-decision-06" data-note="review">
+      <p><strong>[IMPL-DECISION-06] — APPLIED</strong></p>
+      <p>Run B, Task 8: derive Sources bookmark eligibility during the existing hydrated table render,
+      then load settings controls only when opened. This reuses the authoritative catalog without
+      adding model hydration to provenance-row editing or eagerly rendering every row's controls.
+      See <a href="../../../model_builder/adapters/views/views.py"><code>source_table()</code></a> and
+      <a href="../../../model_builder/adapters/views/views_simplified_inputs.py"><code>simplified_input_bookmark()</code></a>.</p>
+    </aside>
     <p><code>templates/model_builder/simplified_inputs/bookmark.html</code> discloses the shared
     <code>templates/model_builder/simplified_inputs/selection_controls.html</code> controls.
     For existing inputs, <code>../theme/static/scripts/simplified_inputs.js</code> sends settings-only patches to

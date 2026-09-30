@@ -17,7 +17,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 |---|---|
 | Architecture (Clean Architecture map, web wrappers, dict relationships, timeseries, persistence, render layer) | [`specs/architecture/index.html`](specs/architecture/index.html) |
 | Onboarding examples, picker and guided tour | [`specs/architecture/onboarding.html`](specs/architecture/onboarding.html) |
-| Simplified-input fields, authoring and per-model configuration | [Forms](specs/architecture/forms-and-relationships.html#simplified-input-catalog) · [Workspace and Configure exits](specs/architecture/workspace.html#simplified-workspace) · [Persistence](specs/architecture/persistence.html) |
+| Simplified-input fields, authoring and per-model configuration | [Catalog](specs/architecture/forms-and-relationships.html#simplified-input-catalog) · [Inline bookmarks and Sources](specs/architecture/forms-and-relationships.html#inline-bookmarks) · [Workspace and Configure exits](specs/architecture/workspace.html#simplified-workspace) · [Persistence](specs/architecture/persistence.html) |
 | Code style, performance preferences, agent behaviour rules | `specs/conventions.md` |
 | Testing patterns (unit / integration / E2E layers, fixtures) | `specs/testing.md` |
 | Tech stack and version bounds | `specs/tech_stack.md` |

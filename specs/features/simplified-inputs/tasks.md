@@ -2,14 +2,14 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Run B is in progress; Run C remains approved and pending. The deployment/merge prerequisite below remains outstanding.
+Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Run B tasks are complete and its global review is in progress; Run C remains approved and pending. The deployment/merge prerequisite below remains outstanding.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 
 ## Runs
 
 - **Run A — foundations:** Tasks 1–5 complete.
-- **Run B — authoring:** Tasks 6–8 in progress.
+- **Run B — authoring:** Tasks 6–8 complete; global review in progress.
 - **Run C — consumption:** Tasks 9–10.
 
 ## Overview
@@ -73,7 +73,7 @@ Repository: e-footprint-interface. Files touched: new simplified-input views, pr
 
 ## Task 8 — Author selection beside Modeling inputs
 
-Goal: Provide immediate bookmarks for existing fields, provisional bookmarks for new objects and deletion cleanup. Status: approved. Brief: [task-8](briefs/task-8.md).
+Goal: Provide immediate bookmarks for existing fields, provisional bookmarks for new objects and deletion cleanup. Status: complete. Brief: [task-8](briefs/task-8.md).
 
 Repository: e-footprint-interface. Files touched: form/source-row contexts, shared bookmark partial, create/edit/delete use cases and views, deletion modal, simplified-input JS, tests. Tests: true nested owner, independent inline patch, Undo, creation required-field preview/lock, successful create, failed/cancelled create, cascade pruning and warning. Acceptance: bookmark saves never submit unsaved value drafts; creation settings persist only after success; deletion removes selected and retained-help entries for removed owners. Depends on: Tasks 3, 4, 6 and 7. Implementation: standard — Task 3/4 provide addresses and patches, and `CreateObjectUseCase` has one final save after request-local hooks; map draft fields to created IDs and use deletion's actual cascade.
 
