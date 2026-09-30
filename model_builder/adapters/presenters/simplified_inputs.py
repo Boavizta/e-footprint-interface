@@ -69,16 +69,3 @@ def build_workspace_context(model_web, *, configure=False, catalog=None):
     return {"system_id": system_id, "slot": getattr(model_web.repository, "slot", 0),
             "configure": configure, "title": definition["title"], "guidance": definition["guidance"],
             "groups": list(groups.values()), "unavailable_inputs": unavailable_inputs}
-
-
-def definition_from_form(data):
-    """Read the complete settings form; missing checkboxes are excluded, help remains authored."""
-    fields = {}
-    for key in data:
-        if key.startswith("help:"):
-            _, owner_id, attribute = key.split(":", 2)
-            included = f"include:{owner_id}:{attribute}" in data
-            help_text = data[key]
-            if included or help_text:
-                fields.setdefault(owner_id, {})[attribute] = {"included": included, "help": help_text}
-    return {"title": data.get("title", ""), "guidance": data.get("guidance", ""), "fields": fields}

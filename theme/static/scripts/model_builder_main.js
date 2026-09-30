@@ -394,7 +394,7 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
         document.querySelectorAll(`${actionSelector}, ${editorSelector}`).forEach(element => {
             // Editor forms contain stateless reading controls; lock their inputs and save actions,
             // rather than declaring the whole form (and its reading controls) aria-disabled.
-            if (element.matches("form[data-workspace-editor]")) return;
+            if (element.matches("form[data-workspace-editor], [data-workspace-read]")) return;
             if (!active.controls.has(element)) {
                 active.controls.set(element, {
                     disabled: "disabled" in element

@@ -50,11 +50,14 @@ open Simplified inputs, an empty selection opens Modeling. Ordinary slot switche
 <p>Configure renders all eligible fields using the same type/object hierarchy, a single main scrolling pane,
 container-responsive field columns and compact object selector. Draft settings live only in form controls with one
 form-level dirty flag. Filtering hides objects and matching navigation entries without dropping controls or help;
-recursive dependency locks use catalog links, with hidden checkbox mirrors preserving locked inclusions in submission.
+recursive dependency locks use catalog links. Save serializes the complete definition directly from the controls into
+one JSON form parameter, including checked locked inputs, so model size does not exhaust Django's parameter limit.
 Every exit (including Results/Sources, Compare, switching, import and download) uses Save/Discard/Stay. Discard fetches
 saved state before continuing; Save continues only after the matching successful mutation settlement. Cancelled or
 failed saves leave the draft visible. The ordinary side-panel discard-confirmation helper runs before focused-view
-reads, whose continuation is tied to their actually issued XHR. Configure is never parked and each entry starts fresh.</p>
+reads, whose continuation is tied to their actually issued XHR. Duplicate reads are suppressed; leaving or starting a
+mutation aborts pending reads before they can replace a draft or park Configure in another model's resident target.
+Configure is never parked and each entry starts fresh.</p>
 <h3 id="tab-roles-and-ordering">Tab roles and ordering</h3>
 <p>Tabs are fixed role labels; the model name lives in the toolbar. Each model tab shows a fixed label by <em>list position</em> — first slot "Reference model", second "Comparison model" (matching how <code>compare()</code> pairs <code>workspace_slots[0]→A</code>, <code>[1]→B</code>) — not the model's own name, so a long name can never stretch a tab (the tab width is pinned in <a class="source" href="../../theme/static/scss/custom.scss"><code>custom.scss</code></a>).</p>
 <p><strong>The slot list is role-ordered, not numeric-ordered:</strong> <code>WorkspaceIndex</code> (and the in-memory mirror) <em>append</em> new slots and never <code>sorted()</code> the list, so removing the Reference (slot 0) leaves the survivor role-first in slot 1, and a model added afterwards reuses the freed slot number 0 yet appends as the Comparison — sorting would re-promote it to Reference (the model-comparison re-add bug). The active model's editable name lives in the toolbar (<code>#btn-change-system-name</code> / <code>#system-name</code>, left of the edge toggle); renaming swaps <code>#system-name</code> in place and switching OOB-rebinds it (above).</p>

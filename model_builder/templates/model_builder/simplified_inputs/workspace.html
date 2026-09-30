@@ -6,7 +6,7 @@
         {% endif %}
     </header>
     {% if configure %}
-    <form data-configure-form data-workspace-editor hx-post="{% url 'save-simplified-inputs' %}" hx-target="#simplified-slot-{{ slot }}" hx-swap="innerHTML">
+    <form data-configure-form data-workspace-editor hx-post="{% url 'save-simplified-inputs' %}" hx-target="#simplified-slot-{{ slot }}" hx-swap="innerHTML" hx-params="csrfmiddlewaretoken">
         {% csrf_token %}
         <div class="simplified-description">
             <label for="si-{{ system_id }}-title">Title</label>
@@ -16,7 +16,7 @@
         </div>
         {% for notice in unavailable_inputs %}<p class="small text-muted">{{ notice }}</p>{% endfor %}
         <div class="simplified-actions">
-            <label><input type="checkbox" data-selected-object-filter> Only objects with selected inputs</label>
+            <label><input type="checkbox" data-selected-object-filter data-workspace-read> Only objects with selected inputs</label>
             <button type="button" class="btn btn-outline-secondary" data-action="simplified-clear">Clear simplified inputs</button>
             <button type="submit" class="btn btn-primary" data-workspace-control>Save and return</button>
             <button type="button" class="btn btn-outline-secondary" data-action="simplified-cancel" data-workspace-control>Cancel</button>
@@ -43,7 +43,7 @@
             {% endfor %}
             <div data-filter-empty hidden>
                 <p>No objects have selected inputs.</p>
-                <button type="button" class="btn btn-outline-secondary" data-action="simplified-show-all">Show all objects</button>
+                <button type="button" class="btn btn-outline-secondary" data-action="simplified-show-all" data-workspace-read>Show all objects</button>
             </div>
         </main>
     </div>

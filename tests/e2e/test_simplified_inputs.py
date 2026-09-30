@@ -7,9 +7,13 @@ from playwright.sync_api import expect
 from tests.e2e.utils import click_and_wait_for_htmx
 
 
-def open_configure(page):
+def open_simplified(page):
     click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
     expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "simplified")
+
+
+def open_configure(page):
+    open_simplified(page)
     click_and_wait_for_htmx(page, page.locator('[data-action="simplified-configure"]:visible').first)
     expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "configure")
     return page.locator('[data-simplified-workspace]:visible')
@@ -21,6 +25,53 @@ def field(workspace, attribute):
 
 @pytest.mark.e2e
 class TestSimplifiedInputs:
+    def test_repeated_configure_entry_does_not_queue_a_draft_replacement(self, minimal_complete_model_builder):
+        page = minimal_complete_model_builder.page
+        open_simplified(page)
+        pending = []
+        page.route("**/simplified-inputs/?configure=1", lambda route: pending.append(route))
+        with page.expect_request("**/simplified-inputs/?configure=1"):
+            page.get_by_role("button", name="Configure", exact=True).dblclick()
+        assert len(pending) == 1
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
+        workspace = page.locator('[data-simplified-workspace]:visible')
+        expect(workspace).to_have_attribute("data-mode", "configure")
+        workspace.locator('[name="title"]').fill("Preserve this draft")
+        expect(workspace.locator("form")).to_have_attribute("data-dirty", "true")
+        assert pending == []
+        page.unroute("**/simplified-inputs/?configure=1")
+        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+        expect(workspace.get_by_text("Preserve this draft", exact=True)).to_be_visible()
+
+    @pytest.mark.parametrize("return_before_response", [False, True])
+    def test_abandoned_configure_read_cannot_follow_a_model_switch(
+            self, minimal_complete_model_builder, return_before_response):
+        builder = minimal_complete_model_builder
+        page = builder.page
+        builder.add_model_by_duplication()
+        open_simplified(page)
+        system_id = page.locator('[data-simplified-target="1"]').get_attribute("data-system-id")
+        pending = []
+        page.route("**/simplified-inputs/?configure=1", lambda route: pending.append(route))
+        with page.expect_request("**/simplified-inputs/?configure=1"):
+            page.get_by_role("button", name="Configure", exact=True).click()
+        assert len(pending) == 1
+        route = pending.pop()
+        response = route.fetch()
+        builder.switch_to_model(0)
+        if return_before_response:
+            builder.switch_to_model(1)
+        route.fulfill(response=response)
+        expect(page.locator("[data-configure-form]")).to_have_count(0)
+        if not return_before_response:
+            builder.switch_to_model(1)
+        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "simplified")
+        page.unroute("**/simplified-inputs/?configure=1")
+        click_and_wait_for_htmx(page, page.get_by_role("button", name="Configure", exact=True))
+        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-slot", "1")
+        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-system-id", system_id)
+
     def test_save_clear_cancel_and_fresh_configuration(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
         workspace = open_configure(page)
@@ -114,11 +165,11 @@ class TestSimplifiedInputs:
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
         builder.switch_to_model(0)
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
-        click_and_wait_for_htmx(page, page.locator("#model-tab-1"))
+        builder.switch_to_model(1)
         expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
         click_and_wait_for_htmx(page, page.locator("#compare-tab"))
         expect(page.locator("#comparison-view")).to_be_visible()
-        page.locator("#model-tab-1").click()
+        builder.dismiss_compare_to_active_model(1)
         expect(page.locator("[data-simplified-workspace]:visible")).to_have_attribute("data-mode", "simplified")
 
     def test_json_selected_opening_and_fresh_render_after_modeling_edit(self, minimal_complete_model_builder, tmp_path):
@@ -163,9 +214,18 @@ class TestSimplifiedInputs:
         expect(page.locator("[data-simplified-workspace]:visible")).to_have_attribute("data-mode", "simplified")
         expect(page.locator("#sidePanel")).not_to_be_visible()
 
-    def test_configuration_save_locks_exits_but_allows_reading_sections(self, minimal_complete_model_builder):
+    @pytest.mark.parametrize("compact", [False, True])
+    def test_configuration_save_locks_exits_but_allows_reading_sections(self, minimal_complete_model_builder, compact):
         page = minimal_complete_model_builder.page
+        if compact:
+            page.set_viewport_size({"width": 700, "height": 1000})
+            page.locator("#toolbar-nav .navbar-toggler").click()
         workspace = open_configure(page)
+        if compact:
+            selector = workspace.locator("[data-object-selector]")
+            selector.select_option(index=1)
+            expect(workspace.locator("form")).not_to_have_attribute("data-dirty", "true")
+            workspace.get_by_role("button", name="Expand all").click()
         field(workspace, "lifespan").locator("[data-include-input]").check()
         pending = []
         page.route("**/save-simplified-inputs/", lambda route: pending.append(route))
@@ -176,7 +236,11 @@ class TestSimplifiedInputs:
         expect(workspace.locator("[data-field-help]").first).to_be_disabled()
         workspace.get_by_role("button", name="Collapse all").click()
         expect(workspace.locator("[data-simplified-group]").first).not_to_have_attribute("open", "")
-        workspace.locator("[data-navigation-object]").first.click()
+        if compact:
+            expect(selector).to_be_enabled()
+            selector.select_option(index=0)
+        else:
+            workspace.locator("[data-navigation-object]").first.click()
         expect(workspace.locator("[data-simplified-object]").first).to_have_attribute("open", "")
         assert len(pending) == 1
         pending.pop().continue_()

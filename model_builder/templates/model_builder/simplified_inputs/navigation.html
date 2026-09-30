@@ -1,7 +1,7 @@
 <nav class="simplified-navigation" aria-label="Navigation">
     <h2 class="h6">Navigation</h2>
     <label class="simplified-compact-navigation" for="si-{{ system_id }}-object-selector">Object
-        <select id="si-{{ system_id }}-object-selector" class="form-select" data-object-selector>
+        <select id="si-{{ system_id }}-object-selector" class="form-select" data-object-selector data-workspace-read>
             {% for group in groups %}<optgroup label="{{ group.object_type }}" data-selector-group="{{ group.dom_id }}">
                 {% for object in group.objects %}<option value="{{ object.dom_id }}">{{ object.name }}</option>{% endfor %}
             </optgroup>{% endfor %}

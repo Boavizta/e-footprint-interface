@@ -1,8 +1,7 @@
-from django.http import QueryDict
 from django.template.loader import render_to_string
 
 from model_builder.adapters.forms.form_field_generator import generate_dynamic_form
-from model_builder.adapters.presenters.simplified_inputs import build_workspace_context, definition_from_form
+from model_builder.adapters.presenters.simplified_inputs import build_workspace_context
 
 
 def test_configure_groups_current_inputs_by_true_owner_and_keeps_existing_labels(minimal_model_web):
@@ -44,10 +43,3 @@ def test_normal_forms_still_exclude_instance_count(minimal_model_web):
     normal, advanced, _ = generate_dynamic_form(server.class_as_simple_str, server.modeling_obj.__dict__,
                                                 minimal_model_web, obj_to_edit=server)
     assert "fixed_nb_of_instances" not in {field["attr_name"] for field in normal + advanced}
-
-
-def test_form_transport_retains_excluded_help_and_clear_has_empty_fields():
-    data = QueryDict("title=Title&guidance=Guidance&include:o:power=on&help:o:power=Help&help:o:lifespan=Retained")
-    assert definition_from_form(data) == {"title": "Title", "guidance": "Guidance", "fields": {
-        "o": {"power": {"included": True, "help": "Help"}, "lifespan": {"included": False, "help": "Retained"}}}}
-    assert definition_from_form(QueryDict("title=Title&help:o:power=&help:o:lifespan="))["fields"] == {}

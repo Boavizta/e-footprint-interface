@@ -3,7 +3,11 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
+from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.core.hardware.server import Server
+from efootprint.core.hardware.storage import Storage
 
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
@@ -20,9 +24,9 @@ class TestSimplifiedViews:
         model = self.save_model(client, minimal_system_data)
         server_id = model.servers[0].efootprint_id
         before = deepcopy(SessionSystemRepository(client.session).get_system_data())
-        response = client.post("/model_builder/save-simplified-inputs/", {
-            "title": "Author Title", "guidance": "Author Guidance", f"include:{server_id}:server_type": "on",
-            f"help:{server_id}:server_type": "Choose Type", f"help:{server_id}:fixed_nb_of_instances": ""})
+        response = client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({
+            "title": "Author Title", "guidance": "Author Guidance", "fields": {server_id: {
+                "server_type": {"included": True, "help": "Choose Type"}}}})})
         assert response.status_code == 200
         content = response.content.decode()
         assert 'data-mode="simplified"' in content
@@ -41,13 +45,43 @@ class TestSimplifiedViews:
         model = self.save_model(client, minimal_system_data)
         before = deepcopy(SessionSystemRepository(client.session).interface_config)
         with patch.object(SessionSystemRepository, "save_interface_config", side_effect=ValueError("Save rejected")):
-            response = client.post("/model_builder/save-simplified-inputs/", {
-                f"include:{model.servers[0].efootprint_id}:lifespan": "on",
-                f"help:{model.servers[0].efootprint_id}:lifespan": "Keep Draft"})
+            response = client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({
+                "fields": {model.servers[0].efootprint_id: {
+                    "lifespan": {"included": True, "help": "Keep Draft"}}}})})
         assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in json.loads(response["HX-Trigger-After-Settle"])
         assert "closeAndEmptySidePanel" not in response.content.decode()
         assert "hidePanelResult" not in response.content.decode()
+        assert SessionSystemRepository(client.session).interface_config == before
+
+    def test_large_complete_configuration_saves_without_raising_django_parameter_limit(
+            self, client, minimal_system_data, settings):
+        assert settings.DATA_UPLOAD_MAX_NUMBER_FIELDS == 1000
+        for index in range(60):
+            server = Server.from_defaults(f"Server {index}", storage=Storage.from_defaults(f"Storage {index}"))
+            fragment = system_to_json(server, save_computed_state=False)
+            for key, value in fragment.items():
+                if isinstance(value, dict):
+                    minimal_system_data.setdefault(key, {}).update(value)
+        model = self.save_model(client, minimal_system_data)
+        fields = {}
+        for address, descriptor in input_catalog(model).fields.items():
+            if descriptor.eligible:
+                fields.setdefault(address.object_id, {})[address.attribute] = {"included": True, "help": "Guidance"}
+        assert sum(map(len, fields.values())) > settings.DATA_UPLOAD_MAX_NUMBER_FIELDS
+        definition = {"title": "Large model", "guidance": "Complete selection", "fields": fields}
+        response = client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps(definition)})
+        assert 'data-mode="simplified"' in response.content.decode()
+        assert SessionSystemRepository(client.session).interface_config["simplified_inputs"] == definition
+
+    @pytest.mark.parametrize("definition", ['{"fields":', '[]'])
+    def test_invalid_configuration_transport_keeps_saved_definition(
+            self, client, minimal_system_data, monkeypatch, definition):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        self.save_model(client, minimal_system_data)
+        before = deepcopy(SessionSystemRepository(client.session).interface_config)
+        response = client.post("/model_builder/save-simplified-inputs/", {"definition": definition})
+        assert response["HX-Reswap"] == "none"
         assert SessionSystemRepository(client.session).interface_config == before
 
     def test_json_opening_defaults_are_applied_once_independently_per_slot(self, client, minimal_system_data):

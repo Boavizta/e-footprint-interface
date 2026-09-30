@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { refreshSelection, refreshFilter, initialize, deferExit } = require("../theme/static/scripts/simplified_inputs.js");
+const { refreshSelection, refreshFilter, initialize, deferExit, definitionFromForm } = require("../theme/static/scripts/simplified_inputs.js");
 
 function mount() {
     document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_configure.html"), "utf8");
@@ -38,9 +38,13 @@ test("recursive companions lock across owners and unlock without removing saved 
     expect(count.checked).toBe(true);
     expect(model.disabled).toBe(true);
     expect(count.disabled).toBe(true);
-    const data = new FormData(document.querySelector("form"));
-    expect(data.has("include:api:model")).toBe(true);
-    expect(data.has("include:job:count")).toBe(true);
+    expect(definitionFromForm(document.querySelector("form"))).toEqual({
+        title: "Title", guidance: "Guidance", fields: {
+            api: { provider: { included: true, help: "Retained Help" }, model: { included: true, help: "Retained Help" } },
+            job: { count: { included: true, help: "Retained Help" } },
+            other: { lifespan: { included: false, help: "Retained Help" } },
+        },
+    });
     include("provider", false);
     expect(model.disabled).toBe(false);
     expect(model.checked).toBe(true);
@@ -73,6 +77,42 @@ test("Clear confirmation removes field settings but preserves title and guidance
     expect([...document.querySelectorAll("[data-field-help]")].every(input => input.value === "")).toBe(true);
     expect(document.querySelector('[name="title"]').value).toBe("Title");
     expect(document.querySelector('[name="guidance"]').value).toBe("Guidance");
+    expect(definitionFromForm(document.querySelector("form"))).toEqual({ title: "Title", guidance: "Guidance", fields: {} });
+});
+
+test("compact object navigation does not author a configuration change", () => {
+    const workspace = mount();
+    const selector = workspace.querySelector("[data-object-selector]");
+    selector.value = "si-test-object-job";
+    selector.dispatchEvent(new Event("input", { bubbles: true }));
+    selector.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(workspace.querySelector("form").dataset.dirty).toBeUndefined();
+    expect(document.activeElement).toBe(workspace.querySelector("#si-test-object-job summary"));
+});
+
+test("configuration transport is one snapshot taken when HTMX sends the form", () => {
+    const workspace = mount();
+    const form = workspace.querySelector("form");
+    include("provider");
+    form.elements.title.value = "Latest title";
+    const parameters = { csrfmiddlewaretoken: "token" };
+    form.dispatchEvent(new CustomEvent("htmx:configRequest", { bubbles: true, detail: { elt: form, parameters } }));
+    expect(Object.keys(parameters)).toEqual(["csrfmiddlewaretoken", "definition"]);
+    expect(JSON.parse(parameters.definition)).toEqual(definitionFromForm(form));
+    expect(form.getAttribute("hx-params")).toBe("csrfmiddlewaretoken");
+});
+
+test("duplicate pending reads are suppressed and failed reads can be retried", () => {
+    mount();
+    deferExit(() => {});
+    deferExit(() => {});
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+    const target = document.querySelector("[data-simplified-target]");
+    const xhr = { abort: jest.fn() };
+    target.dispatchEvent(new CustomEvent("htmx:beforeRequest", { detail: { elt: target, xhr } }));
+    target.dispatchEvent(new CustomEvent("htmx:afterRequest", { detail: { xhr, successful: false } }));
+    deferExit(() => {});
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(2);
 });
 
 test("Stay keeps the draft and Save resumes an exit only after successful mutation settlement", () => {

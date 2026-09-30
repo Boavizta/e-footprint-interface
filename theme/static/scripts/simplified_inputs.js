@@ -4,7 +4,7 @@
     let pendingExit = null;
     let savingForm = null;
     let replaying = false;
-    let pendingReadCleanup = null;
+    let pendingRead = null;
 
     function targetForActiveModel() {
         const slot = document.getElementById("model-tab-strip")?.dataset.activeSlot || "0";
@@ -32,36 +32,69 @@
         if (mode === "simplified" && typeof window.removeAllLines === "function") window.removeAllLines();
         if (mode === "modeling" && previousMode === "simplified" && typeof window.initModelBuilderMain === "function") window.initModelBuilderMain();
     }
+    function cancelPendingRead() {
+        if (!pendingRead) return;
+        const read = pendingRead;
+        read.cleanup();
+        read.xhr?.abort();
+    }
     function loadView(configure, then) {
         const target = targetForActiveModel();
-        if (!target) return;
+        if (!target || pendingRead) return;
         window.runAfterSidePanelDiscardConfirmation(() => {
-            // Keep navigation behind actual settlement, and match the source request's XHR.
-            if (pendingReadCleanup) pendingReadCleanup();
-            let requestXhr = null;
+            const read = { target, xhr: null, cleanup };
+            pendingRead = read;
             const started = event => {
-                if (event.detail.elt === target) requestXhr = event.detail.xhr;
+                if (event.detail.elt === target) read.xhr = event.detail.xhr;
             };
-            const cleanup = () => {
+            function cleanup() {
                 target.removeEventListener("htmx:beforeRequest", started);
+                target.removeEventListener("htmx:beforeSwap", beforeSwap);
+                target.removeEventListener("htmx:afterRequest", completed);
+                target.removeEventListener("htmx:onLoadError", cleanup);
                 target.removeEventListener("htmx:afterSettle", settled);
+                if (pendingRead === read) pendingRead = null;
+            }
+            const beforeSwap = event => {
+                if (event.detail.xhr !== read.xhr) return;
+                if (target !== targetForActiveModel()) {
+                    event.preventDefault();
+                    cleanup();
+                }
+            };
+            const completed = event => {
+                if (event.detail.xhr === read.xhr && event.detail.successful !== true) cleanup();
             };
             const settled = event => {
-                if (event.target !== target || !requestXhr || event.detail.xhr !== requestXhr) return;
+                if (event.target !== target || event.detail.xhr !== read.xhr) return;
                 cleanup();
-                pendingReadCleanup = null;
                 if (target !== targetForActiveModel()) return;
                 window.closeAndEmptySidePanel();
                 setBaseView("simplified");
                 if (then) then();
             };
             target.addEventListener("htmx:beforeRequest", started);
+            target.addEventListener("htmx:beforeSwap", beforeSwap);
+            target.addEventListener("htmx:afterRequest", completed);
+            target.addEventListener("htmx:onLoadError", cleanup);
             target.addEventListener("htmx:afterSettle", settled);
-            pendingReadCleanup = cleanup;
             window.htmx.ajax("GET", `/model_builder/simplified-inputs/${configure ? "?configure=1" : ""}`, {
                 source: target, target, swap: "innerHTML"
             });
         });
+    }
+
+    function definitionFromForm(form) {
+        const fields = {};
+        form.querySelectorAll("[data-field-address]").forEach(field => {
+            const included = field.querySelector("[data-include-input]").checked;
+            const help = field.querySelector("[data-field-help]").value;
+            if (included || help) {
+                fields[field.dataset.ownerId] ??= {};
+                fields[field.dataset.ownerId][field.dataset.attribute] = { included, help };
+            }
+        });
+        return { title: form.elements.title.value, guidance: form.elements.guidance.value, fields };
     }
 
     function navigate(workspace, objectId) {
@@ -90,7 +123,6 @@
         controls.forEach(control => {
             const locked = required.has(control.dataset.fieldId);
             control.querySelector("[data-include-input]").disabled = locked;
-            control.querySelector("[data-locked-include]").disabled = !locked;
             control.querySelector("[data-required-explanation]").hidden = !locked;
         });
         refreshFilter(workspace);
@@ -126,6 +158,7 @@
         }
     }
     function initialize() {
+        if (pendingRead && pendingRead.target !== targetForActiveModel()) cancelPendingRead();
         document.querySelectorAll("[data-simplified-target]").forEach(target => {
             if (target.dataset.openingDefault) {
                 viewBySystemId.set(target.dataset.systemId, target.dataset.openingDefault);
@@ -157,10 +190,16 @@
     }
     // Capture before HTMX or other delegated navigation can alter the visible workspace.
     document.addEventListener("click", event => {
-        if (replaying || !configureForm() || document.body.dataset.workspaceMutation === "updating") return;
+        if (replaying || document.body.dataset.workspaceMutation === "updating") return;
         const element = event.target.closest("a, button, [hx-get], [hx-post], [data-action]");
         if (!element || element.closest("[data-simplified-workspace], #simplified-exit-dialog, #modal-container")) return;
         if (!element.matches("a[href], [hx-get], [hx-post], [data-workspace-control], [data-action]")) return;
+        // A pending entry must not land after the user has chosen another destination.
+        // Repeated Modeling → Simplified clicks instead share the first pending read.
+        if (element.dataset.action !== "simplified-mode" || document.body.dataset.baseView === "simplified") {
+            cancelPendingRead();
+        }
+        if (!configureForm()) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         deferExit(() => replayClick(element));
@@ -176,7 +215,14 @@
     });
     document.addEventListener("input", event => {
         const form = event.target.closest("[data-configure-form]");
-        if (form && !event.target.matches("[data-selected-object-filter]")) form.dataset.dirty = "true";
+        if (form && event.target.matches('[name="title"], [name="guidance"], [data-field-help], [data-include-input]')) {
+            form.dataset.dirty = "true";
+        }
+    });
+    document.body.addEventListener("htmx:configRequest", event => {
+        if (event.detail.elt.matches("[data-configure-form]")) {
+            event.detail.parameters.definition = JSON.stringify(definitionFromForm(event.detail.elt));
+        }
     });
     document.addEventListener("change", event => {
         const workspace = event.target.closest("[data-simplified-workspace]");
@@ -228,6 +274,7 @@
         }
     });
     document.body.addEventListener("workspace-mutation:started", event => {
+        cancelPendingRead();
         if (event.detail.elt.matches("[data-configure-form]")) savingForm = event.detail.elt;
     });
     document.body.addEventListener("workspace-mutation:finished", event => {
@@ -247,6 +294,6 @@
     document.body.addEventListener("htmx:afterSettle", initialize);
     document.addEventListener("DOMContentLoaded", initialize);
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit };
+        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit, definitionFromForm };
     }
 })();
