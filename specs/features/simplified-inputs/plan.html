@@ -319,6 +319,7 @@
 <aside id="impl-decisions" data-note="review">
   <p><strong>Implementation decisions</strong></p>
   <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — APPLIED</a></p>
+  <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -857,9 +858,18 @@ persist once</code></pre></div></div>
     Exports contain saved values, not unfinished panel edits, including timeseries drafts.
     Keep existing single-model/workspace file formats.</p>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
-    <p><code>adapters/views/views_workspace.py</code> currently duplicates library data only. Copy
-    interface settings independently too, remap System-owned field addresses when that ID changes,
+    <p><code>adapters/views/views_workspace.py</code> duplicates the complete flat modeling document
+    and its independent interface settings. Remap System-owned field addresses when that ID changes,
     and start an independent browser context.</p>
+    <aside id="impl-decision-02" data-note="review">
+      <p><strong>[IMPL-DECISION-02] — APPLIED</strong></p>
+      <p>Run A, Task 4 review: copying only the System-connected graph drops ordinarily created but
+      unused objects while retaining their selected-field addresses. Duplicate and System-ID remint
+      now preserve the complete flat object set through the existing System-and-orphans serializer
+      in <a href="../../../model_builder/domain/services/system_import_service.py">SystemImportService</a>.
+      This preserves both model contents and valid definitions without adding import-time definition
+      validation. See <a href="handoffs/task-4.md">Task 4 handoff</a>.</p>
+    </aside>
     <p><strong>Import-order correction:</strong> <code>adapters/views/views_workspace.py</code> currently
     clears slots before loading their replacements. Run every incoming model through the unchanged
     <a href="../../../model_builder/domain/services/system_import_service.py"><code>SystemImportService.import_system()</code></a>,

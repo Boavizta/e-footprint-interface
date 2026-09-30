@@ -47,13 +47,13 @@ Repository: e-footprint-interface. Files touched: new `domain/services/simplifie
 
 ## Task 4 — Save configuration and exchange independent models
 
-Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: implementing. Brief: [task-4](briefs/task-4.md).
+Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: complete. Brief: [task-4](briefs/task-4.md).
 
 Repository: e-footprint-interface. Files touched: new `application/use_cases/simplified_inputs.py`; session/in-memory/workspace repositories; `views.py`, `views_workspace.py`, version normalization and repository/workspace tests. Tests: replacement versus patch, retained help/Clear, budget failure, per-slot recovery, independent duplicate, System-ID remapping, two-model import failure and round-trip. Acceptance: a failed configuration save publishes nothing; every file carries its model's definition; incoming models and combined size are checked before live workspace replacement. Depends on: Task 3. Implementation: standard — extend `save_interface_config()`, slot/ID helpers and `SystemImportService`; preflight both models before the current restore writes.
 
 ## Task 5 — Apply one atomic selected-input edit
 
-Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: approved. Brief: [task-5](briefs/task-5.md).
+Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: implementing. Brief: [task-5](briefs/task-5.md).
 
 Repository: e-footprint-interface. Files touched: `domain/object_factory.py`, `application/use_cases/simplified_inputs.py`, `domain/entities/web_core/model_web.py`, integration tests. Tests: valid-dependent retention, first-allowed fallback, empty-choice rejection, no partial value/metadata persistence, nested owner and empty-count cases. Acceptance: one accepted batch persists once; failure preserves saved values and metadata; normal edit behavior remains intact. Depends on: Tasks 2 and 3. Implementation: hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply sibling validation and field links, and the existing factory/`ModelingUpdate` supply conversion and rollback. The implementer must derive chained, cross-owner candidate values and coordinate direct metadata changes before that batch; this is demanding because conditional validation reads the applied graph while the current converter invokes `ModelingUpdate` per owner.
 
