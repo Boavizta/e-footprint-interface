@@ -536,7 +536,11 @@ document.body.addEventListener("htmx:confirm", function (evt) {
     if (!elt) return; // not a guarded action — let HTMX proceed normally
     if (!document.querySelector(".model-builder-card")) return; // empty model — nothing to discard
     evt.preventDefault();
-    if (window.confirm(elt.getAttribute("data-confirm-when-model-not-empty"))) {
+    let message = elt.getAttribute("data-confirm-when-model-not-empty");
+    if (evt.detail.discardsSimplifiedEdits) {
+        message += " Its unsaved Simplified input edits will also be discarded.";
+    }
+    if (window.confirm(message)) {
         evt.detail.issueRequest(true);
     }
 });

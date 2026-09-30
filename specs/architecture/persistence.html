@@ -59,6 +59,10 @@ also checks failed forms in parked resident models; single-model export checks o
 use Save/Discard/Stay. A failed Simplified edit also blocks entry into Modeling or Configure until recovered or
 explicitly discarded, because fresh Simplified entry replaces fields from saved state. Unfinished timeseries and
 ordinary Modeling panels export their last saved values.</p>
+<p>Requests replacing <code>#main-content-block</code> also require recovery of failed edits in every retained model.
+This covers adding/removing comparison models, file uploads (including rejected imports), reset and the Examples picker.
+Explicit model removal or reset may discard that model's failed edits through the existing destructive confirmation,
+which names the unsaved edits; a failed edit in the surviving sibling still blocks the replacement.</p>
 <p>The <code>interface_config</code> is included in JSON exports (download) and restored on imports (upload), enabling Sankey settings to survive export/import cycles.
 Interface-only autosaves use <code>ISystemRepository.save_interface_config()</code>: the session repository patches the existing
 Redis canonical payload and Postgres inputs-only recovery payload independently, so a UI metadata change does not hydrate,

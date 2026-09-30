@@ -54,6 +54,7 @@ fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both 
         {% if workspace_slots|length > 1 %}
         <button type="button" class="btn btn-sm model-tab__close border-0 px-2 text-muted"
                 id="remove-model-tab-{{ slot_entry.slot }}"
+                data-remove-model-slot="{{ slot_entry.slot }}"
                 aria-label="Remove {{ slot_entry.name }}"
                 hx-post="{% url 'remove-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"}'

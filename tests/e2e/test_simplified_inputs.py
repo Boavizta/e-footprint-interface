@@ -806,8 +806,8 @@ def test_workspace_export_commits_focused_field_and_honors_other_model_failed_sa
     downloads = []
     page.on("download", lambda download: downloads.append(download))
     page.locator("#download-workspace").click()
-    expect(page.locator("[data-export-status]")).to_be_visible()
-    expect(page.locator("[data-export-status]")).to_contain_text("Another modeling has an unsaved input")
+    expect(page.locator("[data-simplified-recovery-status]")).to_be_visible()
+    expect(page.locator("[data-simplified-recovery-status]")).to_contain_text("Another modeling has an unsaved input")
     assert downloads == []
     builder.switch_to_model(0)
     expect(field(workspace, "lifespan").locator('input[type="number"]')).to_have_value("9")
@@ -863,3 +863,100 @@ def test_export_waits_for_activation_and_runs_once(minimal_complete_model_builde
             builder.release_export_control()
     expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
     assert len(saves) == 1 and len(downloads) == 1
+
+
+def fail_lifespan_edit(builder):
+    page = builder.page
+    workspace = open_configure(page)
+    field(workspace, "lifespan").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    page.route("**/edit-simplified-input/**", lambda route: route.abort("failed"))
+    value = field(workspace, "lifespan").locator('input[type="number"]')
+    value.fill("9")
+    with page.expect_event("requestfailed"):
+        value.press("Enter")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    page.unroute("**/edit-simplified-input/**")
+    return workspace
+
+
+@pytest.mark.e2e
+def test_failed_edit_blocks_additions_and_examples_until_discard(minimal_complete_model_builder, tmp_path):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    filename = str(tmp_path / "existing.e-f.json")
+    builder.download_active_model(filename)
+    workspace = fail_lifespan_edit(builder)
+    requests = []
+    page.on("request", lambda request: requests.append(request.url))
+
+    for label in ("Duplicate current modeling", "Start blank / from example"):
+        page.locator("#add-model-toggle").click()
+        page.locator(".dropdown-item", has_text=label).click()
+        expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_contain_text("before continuing")
+        expect(page.locator("[data-model-tab]")).to_have_count(1)
+    page.locator("#help-menu-toggle").click()
+    page.locator(".dropdown-item[hx-get]").click()
+    expect(builder.example_picker).not_to_be_visible()
+    assert not any("/add-model/" in url or "/open-example-picker/" in url for url in requests)
+
+    page.locator("#add-model-toggle").click()
+    click_and_wait_for_htmx(page, page.locator('.dropdown-item[data-action="open-add-model-import"]'))
+    page.locator("input[type='file']").set_input_files(filename)
+    page.locator("#btn-submit-form").click()
+    expect(page.locator("[data-model-tab]")).to_have_count(1)
+    assert not any("/add-model/" in url for url in requests)
+    builder.close_side_panel()
+    expect(field(workspace, "lifespan").locator('input[type="number"]')).to_have_value("9")
+    click_and_wait_for_htmx(page, field(workspace, "lifespan").get_by_role("button", name="Discard edit"))
+    builder.add_model_by_duplication()
+    expect(page.locator("[data-model-tab]")).to_have_count(2)
+
+
+@pytest.mark.e2e
+def test_parked_failure_survives_replacement_of_other_model_until_explicit_removal(
+        minimal_complete_model_builder, tmp_path):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    builder.add_model_by_duplication()
+    filename = str(tmp_path / "replacement.e-f.json")
+    builder.download_active_model(filename)
+    builder.switch_to_model(0)
+    fail_lifespan_edit(builder)
+    builder.switch_to_model(1)
+    requests, dialogs = [], []
+    page.on("request", lambda request: requests.append(request.url))
+    page.on("dialog", lambda dialog: (dialogs.append(dialog.message), dialog.accept()))
+
+    for selector in ("#remove-model-tab-1", "#btn-reboot-modeling"):
+        page.locator(selector).click()
+        expect(page.locator("[data-simplified-recovery-status]")).to_contain_text("Another modeling has an unsaved input")
+        expect(page.locator("[data-model-tab]")).to_have_count(2)
+    builder.open_import_panel()
+    page.locator("input[type='file']").set_input_files(filename)
+    page.locator("#btn-submit-form").click()
+    expect(page.locator("[data-simplified-recovery-status]")).to_contain_text("before continuing")
+    assert not any("/remove-model/" in url or "/reset-model/" in url or "/upload-json/" in url for url in requests)
+    assert dialogs == []
+    builder.close_side_panel()
+    parked = page.locator('[data-simplified-target="0"]')
+    expect(parked.locator('input[type="number"]')).to_have_value("9")
+    click_and_wait_for_htmx(page, page.locator("#remove-model-tab-0"))
+    expect(page.locator("[data-model-tab]")).to_have_count(1)
+    assert len(dialogs) == 1
+    assert "unsaved Simplified input edits will also be discarded" in dialogs[0]
+    expect(page.locator('[data-save-failed="true"]')).to_have_count(0)
+
+
+@pytest.mark.e2e
+def test_reset_explicitly_confirms_failed_simplified_edit_discard(minimal_complete_model_builder):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    workspace = fail_lifespan_edit(builder)
+    dialogs = []
+    page.once("dialog", lambda dialog: (dialogs.append(dialog.message), dialog.dismiss()))
+    page.locator("#btn-reboot-modeling").click()
+    expect(field(workspace, "lifespan").locator('input[type="number"]')).to_have_value("9")
+    assert "unsaved Simplified input edits will also be discarded" in dialogs[0]
+    builder.reset_to_default()
+    expect(page.locator('[data-save-failed="true"]')).to_have_count(0)

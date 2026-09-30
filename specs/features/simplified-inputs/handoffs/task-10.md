@@ -9,6 +9,7 @@ Repositories and implementation ranges:
 
 - [Focused panel adapter](../../../../model_builder/adapters/views/views_simplified_inputs.py) reuses the ordinary builder field/parser and selected-input mutation. The panel edits value only; provenance autosaves in the field's existing disclosure. Opening or saving the panel requires recovery of failed provenance on that field, including failures arising while the panel is open. HTTP-200 modal errors retain the panel draft.
 - [Export and failure recovery](../../../../theme/static/scripts/simplified_inputs.js): primary mouse press retains focus; activation starts the save and continuation at window capture before Bootstrap can toggle the menu. Continue only after successful mutation settlement. Active export checks its resident forms; workspace export checks both slots. Explicit discard reloads the affected field with zero settlement delay before initializing its accepted baseline.
+- Full workspace replacements must preserve failed edits in retained models. The `htmx:confirm` guard checks the actual `#main-content-block` target before add/remove/import/reset/Examples requests; only a model explicitly removed or replaced by a destructive confirmation may discard its failed edits. The confirmation carries that warning. This includes failed drafts parked in the other slot; see [IMPL-DECISION-08](../plan.html#impl-decision-08).
 
 ## Design decisions
 

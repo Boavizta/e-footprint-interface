@@ -265,6 +265,9 @@
         if (!elt) return;
         evt.preventDefault();
         let message = elt.getAttribute("data-confirm-remove-model");
+        if (evt.detail.discardsSimplifiedEdits) {
+            message += " Its unsaved Simplified input edits will also be discarded.";
+        }
         if (typeof window.isSidePanelFormModified === "function" && window.isSidePanelFormModified()) {
             message += " You also have unsaved changes in the open panel that will be lost.";
         }

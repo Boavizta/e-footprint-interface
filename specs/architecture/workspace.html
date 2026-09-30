@@ -50,6 +50,10 @@ open Simplified inputs, an empty selection opens Modeling. Ordinary slot switche
 <p>A failed simple autosave keeps its resident field retryable. Entry into Modeling or Configure requires correction,
 retry or explicit Discard edit first, so fresh rendering cannot silently replace a failed draft. Model tabs may still
 park it; export of both models checks these resident failures.</p>
+<p>Full workspace replacements check all resident failures before the request: adding models, opening Examples and
+uploading files require recovery first. Removing or resetting a model may discard its own failed edits after explicit
+confirmation, but requires recovery in any surviving sibling. The guard runs before other HTMX confirmations so these
+actions cannot rebuild a retained model's field from saved state and silently release its export block.</p>
 <p>Configure renders all eligible fields using the same type/object hierarchy, a single main scrolling pane,
 container-responsive field columns and compact object selector. Draft settings live only in form controls with one
 form-level dirty flag. Filtering hides objects and matching navigation entries without dropping controls or help;

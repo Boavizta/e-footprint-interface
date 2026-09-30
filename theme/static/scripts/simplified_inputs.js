@@ -30,26 +30,29 @@
         form.scrollIntoView({block: "nearest"});
     }
 
-    function continueExport(element) {
-        document.querySelector("[data-export-status]")?.remove();
-        const failed = failedExportForm(element);
-        if (failed) {
-            failed.querySelector("[data-simplified-save-status]").textContent = "Not saved. Retry or discard this edit before exporting.";
-            const active = failed.closest("[data-simplified-target]") === targetForActiveModel();
-            if (active && document.body.dataset.baseView === "simplified") {
-                showFailedEdit(failed, "Not saved. Retry or discard this edit before exporting.");
-            } else {
-                const notice = document.createElement("p");
-                notice.dataset.exportStatus = "";
-                notice.setAttribute("role", "status");
-                notice.className = "small text-danger px-4";
-                notice.textContent = active
-                    ? "An input was not saved. Open Simplified inputs and retry or discard the edit before exporting."
-                    : "Another modeling has an unsaved input. Open it and retry or discard the edit before exporting both modelings.";
-                document.querySelector("#toolbar-nav")?.after(notice);
-            }
-            return;
+    function requireEditRecovery(form, action) {
+        document.querySelector("[data-simplified-recovery-status]")?.remove();
+        const message = `Not saved. Retry or discard this edit before ${action}.`;
+        form.querySelector("[data-simplified-save-status]").textContent = message;
+        const active = form.closest("[data-simplified-target]") === targetForActiveModel();
+        if (active && document.body.dataset.baseView === "simplified") {
+            showFailedEdit(form, message);
+        } else {
+            const notice = document.createElement("p");
+            notice.dataset.simplifiedRecoveryStatus = "";
+            notice.setAttribute("role", "status");
+            notice.className = "small text-danger px-4";
+            notice.textContent = active
+                ? `An input was not saved. Open Simplified inputs and retry or discard the edit before ${action}.`
+                : `Another modeling has an unsaved input. Open it and retry or discard the edit before ${action}.`;
+            document.querySelector("#toolbar-nav")?.after(notice);
         }
+    }
+
+    function continueExport(element) {
+        document.querySelector("[data-simplified-recovery-status]")?.remove();
+        const failed = failedExportForm(element);
+        if (failed) return requireEditRecovery(failed, "exporting");
         if (element.matches("a")) {
             // Save settlement can outlive the click's popup permission. Download in the current
             // browsing context; the attachment response leaves the workspace in place.
@@ -135,6 +138,25 @@
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
     });
+    // Add/remove/import/reset and the Examples picker rebuild every resident view.
+    // Preserve failed drafts in surviving models; explicit model removal/replacement
+    // folds the discarded draft into its existing destructive confirmation.
+    window.addEventListener("htmx:confirm", event => {
+        if (event.detail.target?.id !== "main-content-block") return;
+        const element = event.detail.elt;
+        const removedSlot = element.dataset.removeModelSlot;
+        const discardedTarget = removedSlot !== undefined
+            ? document.querySelector(`[data-simplified-target="${removedSlot}"]`)
+            : element.hasAttribute("data-confirm-when-model-not-empty") ? targetForActiveModel() : null;
+        event.detail.discardsSimplifiedEdits = !!discardedTarget?.querySelector('[data-save-failed="true"]');
+        const failed = [...document.querySelectorAll("[data-simplified-target]")]
+            .filter(target => target !== discardedTarget)
+            .map(target => target.querySelector('[data-save-failed="true"]')).find(Boolean);
+        if (!failed) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        requireEditRecovery(failed, "continuing");
+    }, true);
     document.body.addEventListener("htmx:confirm", event => {
         const element = event.detail.elt;
         let editor;
