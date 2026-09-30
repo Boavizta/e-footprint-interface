@@ -11,6 +11,7 @@ Use adapters/forms/form_data_parser.py to parse HTTP form data before calling th
 from copy import copy, deepcopy
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -155,33 +156,24 @@ def create_efootprint_obj_from_parsed_data(
     return new_efootprint_obj_class.from_defaults(**obj_creation_kwargs)
 
 
-def edit_object_from_parsed_data(
-    parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb", update_system_data=False
-):
-    """Edit an efootprint object from parsed attribute data.
+def prepare_input_changes(
+    parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb", *, available_sources=None, pending_sources=None
+) -> list:
+    """Convert inputs into ModelingUpdate pairs without applying or persisting their values.
 
-    Args:
-        parsed_data: Dict with clean attribute names (no prefixes), nested fields as dicts,
-                    and optional "_units" key for unit mappings
-        obj_to_edit: The web wrapper of the object to edit
-        update_system_data: Whether to update system data after editing
-
-    Returns:
-        Tuple of (edited_object, had_non_name_changes: bool, name_changed: bool)
+    Metadata-only and same-value patches mutate the request-local graph directly. Callers must
+    persist only after the complete edit succeeds. Share source lookups across multi-owner edits.
     """
     model_web = obj_to_edit.model_web
-    available_sources = model_web.available_sources
-    pending_sources: Dict[str, Source] = {}
+    if available_sources is None:
+        available_sources = model_web.available_sources
+    if pending_sources is None:
+        pending_sources = {}
     init_sig_params = get_init_signature_params(obj_to_edit.efootprint_class)
 
     changes_list = []
-    old_name = obj_to_edit.name
-
     for attr_name, value in parsed_data.items():
-        if attr_name not in init_sig_params or attr_name == "self":
-            continue
-        if attr_name == "name":
-            obj_to_edit.set_efootprint_value(attr_name, value)
+        if attr_name not in init_sig_params or attr_name in ("self", "name"):
             continue
 
         annotation = init_sig_params[attr_name].annotation
@@ -244,14 +236,18 @@ def edit_object_from_parsed_data(
             if value.get("_metadata_only"):
                 _apply_metadata(current_value, value, available_sources, pending_sources)
                 continue
-            new_value = ExplainableObject.from_json_dict(value)
-            new_value.set_label(current_value.label)
-            authored_state_changed = type(new_value) is not type(current_value) or (
-                hasattr(new_value, "form_inputs")
-                and hasattr(current_value, "form_inputs")
-                and new_value.form_inputs != current_value.form_inputs
+            new_value = ExplainableObject.from_json_dict({**value, "label": current_value.label})
+            authored_state_changed = (
+                (hasattr(new_value, "form_inputs") or hasattr(current_value, "form_inputs"))
+                and (type(new_value) is not type(current_value)
+                     or new_value.form_inputs != current_value.form_inputs)
             )
-            value_changed = authored_state_changed or new_value != current_value
+            presence_changed = isinstance(new_value, EmptyExplainableObject) != isinstance(
+                current_value, EmptyExplainableObject)
+            value_changed = presence_changed or authored_state_changed or new_value != current_value
+            new_value.source = current_value.source
+            new_value.confidence = current_value.confidence
+            new_value.comment = current_value.comment
             _apply_metadata(new_value, value, available_sources, pending_sources)
             if value_changed:
                 changes_list.append([current_value, new_value])
@@ -268,10 +264,21 @@ def edit_object_from_parsed_data(
                     current_value.confidence = new_value.confidence
                     current_value.comment = new_value.comment
 
+    return changes_list
+
+
+def edit_object_from_parsed_data(
+    parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb", update_system_data=False
+):
+    """Edit parsed inputs, returning (object, had_non_name_changes, name_changed)."""
+    old_name = obj_to_edit.name
+    if "name" in parsed_data:
+        obj_to_edit.set_efootprint_value("name", parsed_data["name"])
+    changes_list = prepare_input_changes(parsed_data, obj_to_edit)
     if changes_list:
         ModelingUpdate(changes_list)
 
     if update_system_data:
-        model_web.persist_to_cache()
+        obj_to_edit.model_web.persist_to_cache()
 
     return obj_to_edit, bool(changes_list), obj_to_edit.name != old_name

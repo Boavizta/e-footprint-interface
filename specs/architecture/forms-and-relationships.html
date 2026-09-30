@@ -28,15 +28,27 @@ an ineligible required companion is itself ineligible; a dependent may be select
 <p><code>domain/conditional_inputs.resolve_input_path()</code> returns a dotted path's final owner and attribute.
 Normal forms use the same traversal while retaining their existing exclusions, labels, ordering, provenance and
 one-hop <code>dynamic_lists</code>.</p>
+<p><code>EditSimplifiedInputUseCase(model_web, catalog)</code> accepts one selected <code>FieldAddress</code> and
+normalized value/provenance data. It reconciles conditional dependents against candidate controller values across all
+owners, retaining valid values or choosing the first metadata option with a notice. Missing branches are unrestricted;
+empty lists reject. One <code>ModelingUpdate</code> applies the collected changes before one
+<code>persist_to_cache()</code>. Its <code>changed_fields</code> also includes retained dependents whose options changed,
+but same-value/provenance-only saves affect only the submitted address. A rejected request discards its local model.</p>
 <h2 id="object-factory">Object factory</h2>
 <p><a class="source" href="../../model_builder/domain/object_factory.py"><code>model_builder/domain/object_factory.py</code></a>:</p>
 <ul>
 <li><code>create_efootprint_obj_from_parsed_data()</code> — creates efootprint objects from pre-parsed form data. Supports both list-based (<code>List[ChildType]</code>) and dict-based (<code>ExplainableObjectDict</code>) constructor parameters.</li>
-<li><code>edit_object_from_parsed_data()</code> — handles object updates via <code>ModelingUpdate</code>.</li>
+<li><code>prepare_input_changes()</code> — converts normal and simplified edits to library value pairs without applying
+them or persisting. Optional annotations admitting <code>EmptyExplainableObject</code> resolve to their editable type;
+empty and explicit zero remain distinct authored inputs.</li>
+<li><code>edit_object_from_parsed_data()</code> — handles object updates via the shared preparer and <code>ModelingUpdate</code>.</li>
 <li><code>_apply_metadata(obj, parsed_value, available_sources, pending_sources)</code> — sets <code>source</code>, <code>confidence</code>, and <code>comment</code> on any <code>ExplainableObject</code> from the parsed form dict. Called per-attribute in both create and edit paths.</li>
 </ul>
 <p>Source resolution order: (1) <code>available_sources</code> matched by id (model's existing sources), (2) <code>pending_sources</code> matched by id (sources just minted earlier in the same submission), (3) mint a new <code>Source(name, link, id=submitted_id)</code> and stash it in <code>pending_sources</code>.</p>
 <p><code>pending_sources</code> is a per-submission dict shared across all calls within one create/edit invocation — this lets two fields submitting the same client-generated id resolve to the same <code>Source</code> instance (same-form cross-field source sharing). Metadata is patched only when its key is present: an omitted source, confidence, or comment preserves the existing value. Submitted confidence accepts <code>low</code>, <code>medium</code>, or <code>high</code>; other submitted values clear it to <code>None</code>. The client clears <code>__confidence</code> on value change, and the server honors that explicit clear. <code>available_sources</code> is pre-computed once per request and passed in to avoid O(n×m) recomputation inside the per-attribute loop.</p>
+<p>Replacement values inherit the current input's label and omitted provenance before <code>_apply_metadata()</code>
+patches submitted keys. Same-value edits patch the existing object directly because <code>ModelingUpdate</code> skips
+equal values. These metadata changes stay on the request-local graph until the entire edit succeeds and is persisted.</p>
 <h2 id="relationship-types">Relationship types</h2>
 <h3 id="list-based-children-standard-pattern">List-based children (standard pattern)</h3>
 <p>Most parent-child relationships use <code>List[ChildType]</code> constructor parameters. Managed via:</p>

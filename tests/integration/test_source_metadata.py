@@ -62,8 +62,8 @@ def test_edit_with_unknown_source_id_mints_new_source(model_web_with_server):
     assert updated.source.id in [s.id for s in model_web.available_sources]
 
 
-def test_edit_value_change_with_no_confidence_submitted_resets_confidence(model_web_with_server):
-    """Changing the value without resubmitting confidence clears it (client clears __confidence on change)."""
+def test_edit_value_change_with_explicit_clear_resets_confidence(model_web_with_server):
+    """The client's explicit empty confidence clears it alongside a changed value."""
     model_web = model_web_with_server
     server_web = model_web.get_web_objects_from_efootprint_type("Server")[0]
 
@@ -84,6 +84,7 @@ def test_edit_value_change_with_no_confidence_submitted_resets_confidence(model_
     raw_form_data_changed = {
         "Server_compute": new_value,
         "Server_compute__unit": current_units,
+        "Server_compute__confidence": "",
         "Server_compute__comment": "initial note",
     }
     parsed_changed = parse_form_data(raw_form_data_changed, "Server")

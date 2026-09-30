@@ -306,21 +306,22 @@ class TestApplyMetadata:
         assert server_web.modeling_obj.compute.comment == "from audit"
         assert server_web.modeling_obj.compute.source is existing_source
 
-    def test_edit_clears_confidence_when_value_changes_and_no_confidence_submitted(self, minimal_model_web):
+    def test_edit_preserves_omitted_metadata_when_value_changes(self, minimal_model_web):
         server_web = minimal_model_web.get_web_objects_from_efootprint_type("Server")[0]
         server_web.modeling_obj.compute.confidence = "high"
         server_web.modeling_obj.compute.comment = "my note"
+        original_source = server_web.modeling_obj.compute.source
         parsed = {
             "compute": {
                 "value": "999",
                 "unit": f"{server_web.modeling_obj.compute.value.units:~P}",
                 "label": "no label",
-                "comment": "my note",
             },
         }
         edit_object_from_parsed_data(parsed, server_web)
-        assert server_web.modeling_obj.compute.confidence is None
+        assert server_web.modeling_obj.compute.confidence == "high"
         assert server_web.modeling_obj.compute.comment == "my note"
+        assert server_web.modeling_obj.compute.source is original_source
 
     def test_edit_honors_confidence_when_value_changes_and_confidence_submitted(self, minimal_model_web):
         server_web = minimal_model_web.get_web_objects_from_efootprint_type("Server")[0]
