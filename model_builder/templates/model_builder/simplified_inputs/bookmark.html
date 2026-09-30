@@ -1,9 +1,10 @@
-<details class="simplified-bookmark" id="{{ field.dom_id }}" data-bookmark data-workspace-editor
+<details class="simplified-bookmark" id="{{ field.dom_id }}" name="simplified-bookmarks-{% if field.lazy %}sources{% else %}panel{% endif %}" data-bookmark data-workspace-editor
          data-owner-id="{{ field.address.object_id }}" data-attribute="{{ field.address.attribute|default:field.attribute }}"
          {% if field.provisional_owner %}data-provisional-owner="{{ field.provisional_owner }}" data-input-id="{{ field.input_id }}"{% else %}
          hx-post="{% url 'patch-simplified-inputs' %}" hx-trigger="bookmark-save" hx-target="#modal-container" hx-swap="none" hx-params="none"{% endif %}
          data-saved-included="{{ field.setting.included|yesno:'true,false' }}" data-required-label="{{ field.required_by.label }}">
-    <summary aria-label="Simplified inputs settings" title="Simplified inputs settings" data-workspace-control>
+    <summary aria-label="{{ field.setting.included|yesno:'Included in Simplified inputs,Not included in Simplified inputs' }}. Open settings."
+             title="{{ field.setting.included|yesno:'Included in Simplified inputs,Not included in Simplified inputs' }}.{% if field.required_by %} Required by {{ field.required_by.label }}.{% endif %} Open settings." data-workspace-control>
         <i class="bi {% if field.setting.included %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}" data-bookmark-icon aria-hidden="true"></i>
     </summary>
     <div class="simplified-bookmark-content" data-bookmark-content>

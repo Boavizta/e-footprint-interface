@@ -77,6 +77,8 @@ body[data-base-view="simplified"] {
 
 .form-label-row {
   position: relative;
-  .simplified-bookmark { position: static; }
-  .simplified-bookmark[open] > .simplified-bookmark-content { width: 100%; left: 0; }
+  > .col-auto:first-child { max-width: calc(100% - 2rem); }
+  .simplified-bookmark { position: static; display: block; }
+  .simplified-bookmark > summary { position: absolute; top: 0; right: 0; }
+  .simplified-bookmark[open] > .simplified-bookmark-content { position: static; width: 100%; margin-bottom: .5rem; }
 }

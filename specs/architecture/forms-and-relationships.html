@@ -41,14 +41,16 @@ remain edits even when their calculated values are equal. A rejected request dis
 include set overrides panel exclusions without changing normal-form output; optional empty quantities render a blank
 numeric default and expose <code>allows_empty</code>. The simplified presenter groups these existing field dictionaries
 by actual type and owner, with System-ID/owner/attribute identities. The shared <code>selection_controls.html</code>
-partial owns inclusion, retained help and required-companion explanations; it also provides the later inline-disclosure seam.</p>
+partial owns inclusion, retained help and required-companion explanations in both Configure and inline disclosures.</p>
 <h3 id="inline-bookmarks">Inline simplified-input bookmarks</h3>
 <p><code>simplified_input_context.py</code> joins the authoritative catalog and saved definition with normal form
 fields; nested Storage fields carry Storage’s owner ID. <code>bookmark.html</code> discloses the shared
 <code>selection_controls.html</code> without changing membership on opening. Existing bookmarks send settings-only
 patches, update visible bookmark state, and keep surrounding value and independent help drafts in place. Undo sends an
 inverse membership patch checked against current dependencies. Edit forms close only for their own completed request,
-so a bookmark’s bubbling HTMX response cannot clear the panel.</p>
+so a bookmark’s bubbling HTMX response cannot clear the panel. Native <code>details[name]</code> groups keep one
+disclosure open per surface (panel or Sources); membership and required-controller labels follow accepted settings.
+Panel disclosures expand in the label row’s normal flow so they cannot cover the next field’s controls.</p>
 <p>Creation bookmarks remain nameless DOM draft controls. Cross-owner <code>dynamic_lists</code> entries carry a
 <code>simplified_required_by</code> map derived from candidate controller addresses and saved selection; same-owner
 chains reuse their existing selector edges. Changing a candidate releases forced membership while retaining authored

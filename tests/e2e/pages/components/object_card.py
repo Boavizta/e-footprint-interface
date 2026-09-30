@@ -66,6 +66,7 @@ class ObjectCard:
         # Wait for HTMX settleDelay so event listeners are registered on OOB-swapped inputs.
         self.locator.page.wait_for_timeout(20)
         field = self.locator.locator("input[name='count']").first
+        expect(field).to_be_enabled()
         hx_url = field.get_attribute("hx-post")
         if hx_url:
             with self.locator.page.expect_response(lambda r: hx_url in r.url):

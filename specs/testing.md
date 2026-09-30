@@ -85,9 +85,10 @@ Patterns:
 
 ### Use case execution
 
-- Create: `CreateObjectUseCase(repository).execute(CreateObjectInput(...))`
-- Edit: `EditObjectUseCase(ModelWeb(repository)).execute(EditObjectInput(...))`
-- Delete: `DeleteObjectUseCase(ModelWeb(repository)).execute(DeleteObjectInput(...))`
+- Pass `input_catalog` from `model_builder.adapters.presenters.simplified_inputs` explicitly so structural changes maintain saved selections.
+- Create: `CreateObjectUseCase(repository, input_catalog).execute(CreateObjectInput(...))`
+- Edit: `EditObjectUseCase(ModelWeb(repository), input_catalog).execute(EditObjectInput(...))`
+- Delete: `DeleteObjectUseCase(ModelWeb(repository), input_catalog).execute(DeleteObjectInput(...))`
 
 ### Assertions
 

@@ -10,6 +10,7 @@ Repository and final implementation range: `e-footprint-interface`, `5cfe21b02f2
 - Create/edit/delete require the catalog factory at every application entry point, including framework-free callers. `persist_structural_change()` reuses the configuration use case without a separate config save, completes selection, prunes removed owners and retained help, and restores request-local configuration on failed persistence. Delete confirmation runs the same removal operation on a separate inputs-only model to identify the actual cascade, excluding surviving shared children.
 - Owning patterns are recorded in `specs/architecture/forms-and-relationships.html` and `persistence.html`. The supervisor can add an AGENTS pointer to the new bookmark/Sources lazy-rendering pattern when consolidating documentation.
 - Task 9 seam: when a response updates surviving controls in place, apply their saved constraints after `workspace-mutation:finished`. The shared guard restores pre-request disabled states at settlement; bookmarks then reuse their current requirement labels to apply authoritative locks.
+- Keep panel bookmark controls in the label row's normal flow; absolute overlays cover adjacent field actions. Native `details[name]` groups scope exclusive disclosure separately to the panel and Sources, preserving Sources' lazy settings fetch.
 
 ## Open concerns
 

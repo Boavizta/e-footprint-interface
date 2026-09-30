@@ -63,6 +63,7 @@ test.each([
 function finishBookmarkRequest(bookmark, fields, inverse = {}, successful = true) {
     const xhr = {getResponseHeader: () => null, responseText: JSON.stringify({fields, inverse: {fields: inverse}})};
     dispatch("htmx:beforeRequest", {xhr, elt: bookmark, requestConfig: {verb: "post"}});
+    expect(bookmark.querySelector("[data-bookmark-status]").textContent).toBe("Saving…");
     dispatch("htmx:beforeSwap", {xhr, shouldSwap: true});
     dispatch("htmx:afterRequest", {xhr, elt: bookmark, successful});
     dispatch("htmx:afterSettle", {xhr, elt: document.body});
@@ -82,6 +83,9 @@ test("saved companion locks remain authoritative after the workspace guard resto
         finishBookmarkRequest(provider, [field("provider", included),
             field("model_name", true, included ? {label: "API Provider"} : null)]);
         expect({checked: model.checked, disabled: model.disabled}).toEqual({checked: true, disabled: included});
+        expect(provider.querySelector("summary").title).toBe(`${included ? "Included" : "Not included"} in Simplified inputs. Open settings.`);
+        expect(model.closest("[data-bookmark]").querySelector("summary").title).toBe(
+            `Included in Simplified inputs.${included ? " Required by API Provider." : ""} Open settings.`);
     }
 });
 

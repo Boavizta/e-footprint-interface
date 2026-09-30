@@ -91,12 +91,12 @@ function requestWorkspaceStorageStatus() {
     });
 }
 
-function saveCardOrder(sortables) {
+function saveCardOrder(sortables, elt) {
     const cardOrder = Object.fromEntries(
         sortables.map(({listId, sortable}) => [listId, sortable.toArray()])
     );
     const xhr = {};
-    const begin = new CustomEvent("workspace-mutation:begin", {cancelable: true, detail: {xhr}});
+    const begin = new CustomEvent("workspace-mutation:begin", {cancelable: true, detail: {xhr, elt}});
     if (!document.body.dispatchEvent(begin)) return Promise.resolve();
     let successful = false;
     return fetch("/model_builder/save-card-order/", {
@@ -124,12 +124,12 @@ function initSortableObjectCards() {
                 el.classList.remove('grabbing');
             });
         },
-        onEnd: () =>{
+        onEnd: event =>{
             document.querySelectorAll('.grabbing').forEach(el => {
                 el.classList.remove('grabbing');
             });
             updateLines();
-            saveCardOrder(sortables);
+            saveCardOrder(sortables, event.from);
         }
     };
 

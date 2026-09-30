@@ -52,7 +52,7 @@ test("every completed sortable drag persists the current order of every initiali
     });
 
     for (const instance of instances) {
-        instance.options.onEnd();
+        instance.options.onEnd({from: instance.el});
         await new Promise(resolve => setTimeout(resolve, 0));
     }
 
@@ -71,12 +71,15 @@ test("every completed sortable drag persists the current order of every initiali
 test("one drag end saves once, refreshes only storage metadata, clears grab state, and updates leader lines", async () => {
     const {initSortableObjectCards} = loadModule();
     initSortableObjectCards();
+    const started = jest.fn();
+    document.body.addEventListener("workspace-mutation:started", started, {once: true});
     const grabbed = document.querySelector("#server-list > div");
     grabbed.classList.add("grabbing");
 
-    global.Sortable.mock.instances[0].options.onEnd();
+    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
     await new Promise(resolve => setTimeout(resolve, 0));
 
+    expect(started.mock.calls[0][0].detail.elt).toBe(global.Sortable.mock.instances[0].el);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.htmx.ajax).toHaveBeenCalledWith(
         "GET",
@@ -95,7 +98,7 @@ test("reinitialization destroys old sortables and a later drag sends one request
     initSortableObjectCards();
     const currentInstances = global.Sortable.mock.instances.slice(CARD_ORDER_LIST_IDS.length);
     global.fetch.mockClear();
-    currentInstances[0].options.onEnd();
+    currentInstances[0].options.onEnd({from: currentInstances[0].el});
 
     oldInstances.forEach(instance => expect(instance.destroy).toHaveBeenCalledTimes(1));
     currentInstances.forEach(instance => expect(instance.destroy).not.toHaveBeenCalled());
@@ -110,7 +113,7 @@ test("a rejected background save keeps the DOM order and is handled", async () =
     const reorderedIds = Array.from(serverList.children, child => child.id).reverse();
     serverList.prepend(serverList.lastElementChild);
 
-    global.Sortable.mock.instances[0].options.onEnd();
+    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
     await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(Array.from(serverList.children, child => child.id)).toEqual(reorderedIds);
@@ -122,7 +125,7 @@ test("a rejected card-order response does not refresh storage metadata", async (
     const {initSortableObjectCards} = loadModule();
     initSortableObjectCards();
 
-    global.Sortable.mock.instances[0].options.onEnd();
+    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
     await new Promise(resolve => setTimeout(resolve, 0));
 
     expect(global.htmx.ajax).not.toHaveBeenCalled();
@@ -277,7 +280,7 @@ test("an already-busy workspace rejects fetch mutations without queueing a later
     const {initSortableObjectCards} = loadModule();
     initSortableObjectCards();
     const xhr = startMutation();
-    global.Sortable.mock.instances[0].options.onEnd();
+    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
     expect(global.fetch).not.toHaveBeenCalled();
     completeMutation(xhr);
     await new Promise(resolve => setTimeout(resolve, 0));

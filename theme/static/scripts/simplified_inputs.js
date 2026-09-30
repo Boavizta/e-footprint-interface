@@ -164,6 +164,10 @@
         bookmark.dataset.savedIncluded = String(setting.included);
         bookmark.dataset.requiredLabel = requiredBy?.label || "";
         bookmark.querySelector("[data-bookmark-icon]").className = `bi bi-bookmark${setting.included ? "-fill" : ""}`;
+        const summary = bookmark.querySelector("summary");
+        const state = `${setting.included ? "Included" : "Not included"} in Simplified inputs.`;
+        summary.setAttribute("aria-label", `${state} Open settings.`);
+        summary.title = `${state}${requiredBy ? ` Required by ${requiredBy.label}.` : ""} Open settings.`;
         if (checkbox) { checkbox.checked = setting.included; checkbox.disabled = !!requiredBy; }
         if (help) { help.value = setting.help; help.defaultValue = setting.help; }
         if (explanation) {
@@ -436,6 +440,9 @@
     document.body.addEventListener("workspace-mutation:started", event => {
         cancelPendingRead();
         if (event.detail.elt.matches("[data-configure-form]")) savingForm = event.detail.elt;
+        if (event.detail.elt.matches("[data-bookmark]")) {
+            event.detail.elt.querySelector("[data-bookmark-status]").textContent = "Saving…";
+        }
     });
     document.body.addEventListener("workspace-mutation:finished", event => {
         if (!savingForm || event.detail.elt !== savingForm) return;

@@ -24052,12 +24052,22 @@ body[data-base-view=simplified] #edge-modeling-toggle-wrapper, body[data-base-vi
 .form-label-row {
   position: relative;
 }
+.form-label-row > .col-auto:first-child {
+  max-width: calc(100% - 2rem);
+}
 .form-label-row .simplified-bookmark {
   position: static;
+  display: block;
+}
+.form-label-row .simplified-bookmark > summary {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 .form-label-row .simplified-bookmark[open] > .simplified-bookmark-content {
+  position: static;
   width: 100%;
-  left: 0;
+  margin-bottom: 0.5rem;
 }
 
 /*# sourceMappingURL=bs_main.css.map */

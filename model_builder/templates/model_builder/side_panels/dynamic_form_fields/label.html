@@ -5,8 +5,8 @@
             {{ field.label|capfirst }}
         </label>
     </div>
-    {% if field.bookmark %}<div class="col-auto">{% include "model_builder/simplified_inputs/bookmark.html" with field=field.bookmark %}</div>{% endif %}
     {% if field.tooltip %}
         {% include "model_builder/side_panels/components/tooltip.html" with tooltip_html=True %}
     {% endif %}
+    {% if field.bookmark %}<div class="col-12 p-0">{% include "model_builder/simplified_inputs/bookmark.html" with field=field.bookmark %}</div>{% endif %}
 </div>
