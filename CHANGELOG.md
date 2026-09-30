@@ -11,11 +11,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.
 - A grouped Configure view lets authors choose simplified inputs and guidance, with required selections, filtering, navigation, and Save/Discard/Stay protection for drafts. Each modeling remembers its base view.
 - Inline bookmarks in Modeling panels and Sources let authors select inputs without saving surrounding value drafts; new-object selections are saved on creation, and deletion warns about and removes affected selections.
+- Simplified inputs now edits selected values, sources, confidence and comments directly, including focused timeseries builders with live previews. Accepted edits refresh both Results totals and open detailed results.
 
 ### Changed
 
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
 - Workspace mutations run one at a time, protecting edits, navigation and exports until the save settles while keeping reading and stateless previews available.
+- Modeling and workspace downloads finish a focused simplified edit and wait for its accepted save; failed edits remain retryable or explicitly discardable and block affected downloads.
 - Feature implementation now proceeds through reviews autonomously, records consequential choices in the plan with `IMPL-DECISION` tags, and omits judgement journals, routine-fix inventories and successful-test reports.
 - Task decomposition runs autonomously in one session, writes briefs in dependency order, and presents any plan amendments together in `plan.html` using searchable `PLAN-UPDATE` tags. No plan amendments is a valid outcome.
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.

@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Runs A–B complete, including independent task and global reviews. This is one interface-owned, cross-repository working set; Run C Task 9 is implemented and Task 10 remains approved and pending. The deployment/merge prerequisite below remains outstanding.
+Status: Runs A–B complete, including independent task and global reviews. Run C Tasks 9–10 are implemented and independently reviewed; cumulative Run C review remains pending. This is one interface-owned, cross-repository working set. The deployment/merge prerequisite below remains outstanding.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 
@@ -85,7 +85,7 @@ Repository: e-footprint-interface. Files touched: simplified-input endpoints/pre
 
 ## Task 10 — Complete timeseries, export and release checks
 
-Goal: Finish focused timeseries editing and make every normal export follow completed simplified-input saves; verify the full feature. Status: approved. Brief: [task-10](briefs/task-10.md).
+Goal: Finish focused timeseries editing and make every normal export follow completed simplified-input saves; verify the full feature. Status: complete. Brief: [task-10](briefs/task-10.md). [IMPL-DECISION-08](plan.html#impl-decision-08) records failed-edit recovery before changing views.
 
 Repository: e-footprint-interface, with both repositories' release gates. Files touched: timeseries side-panel partial and view wiring, simplified-input/export JS, existing download controls, critical E2E tests, changelogs and owning architecture/design/docs pages. Tests: strategy switch/preview/Save/Cancel, failed panel preservation, model-switch discard, focused edit then export, two-model export, full interface Python/Jest/E2E gates, full library pytest and strict docs/package checks. Acceptance: no export claims an unsaved simplified edit; all agreed user journeys pass; the PyPI dependency is restored in both `pyproject.toml` and `poetry.lock` before any merge to main. Depends on: Tasks 1–9. Implementation: standard — use the existing timeseries registry/panel and Task 6/9 save state in current export controls, then run integrated gates.
 

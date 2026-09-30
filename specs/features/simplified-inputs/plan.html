@@ -325,6 +325,7 @@
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Bound complete-configuration transport — APPLIED</a></p>
   <p><a href="#impl-decision-06">[IMPL-DECISION-06] Keep Sources bookmark controls lazy — APPLIED</a></p>
   <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep simplified editing reachable with Results open — APPLIED</a></p>
+  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Require explicit recovery of a failed edit before leaving its view — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -914,6 +915,18 @@ persist once</code></pre></div></div>
     Ordinary Modeling panels currently have no unsaved-export warning; keep that behavior.
     Exports contain saved values, not unfinished panel edits, including timeseries drafts.
     Keep existing single-model/workspace file formats.</p>
+    <p>A failed simple-input edit remains in its resident Simplified view. Until Retry succeeds or the user
+    chooses Discard edit, that model's Modeling and Configure actions keep the failed field in place; model
+    tab switching may park the view. Workspace download checks both requested slots and points to a failed
+    edit in the other model from the shared toolbar.</p>
+    <aside id="impl-decision-08" data-note="review">
+      <p><strong>[IMPL-DECISION-08] — APPLIED</strong></p>
+      <p>Run C, Task 10: a normal Modeling → Simplified entry fetches fresh saved state. Leaving a failed edit
+      for Modeling and returning would silently erase the retryable draft while releasing the export block.
+      Keep that edit resident until explicit recovery, retaining normal fresh-entry behavior afterward.
+      See <a href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a>
+      and the <a href="handoffs/task-10.md">Task 10 handoff</a>.</p>
+    </aside>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
     <p><code>adapters/views/views_workspace.py</code> duplicates the complete flat modeling document
     and its independent interface settings. Remap System-owned field addresses when that ID changes,
