@@ -5,15 +5,19 @@ import pytest
 
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
-from efootprint.abstract_modeling_classes.source_objects import SourceObject
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
     EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob,
 )
 from efootprint.core.hardware.server_base import ServerTypes
 from efootprint.core.hardware.hardware_base import InsufficientCapacityError
+from efootprint.core.hardware.server import Server
+from efootprint.core.hardware.storage import Storage
+from efootprint.constants.units import u
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.forms.timeseries_builder_registry import can_edit_timeseries
+from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
 from model_builder.application.use_cases.simplified_inputs import (
     EditSimplifiedInput, EditSimplifiedInputUseCase, UpdateSimplifiedDefinitionUseCase,
 )
@@ -222,6 +226,52 @@ def test_empty_server_count_to_zero_reaches_capacity_validation(minimal_model_we
     update.assert_called_once()
     assert isinstance(server.fixed_nb_of_instances, EmptyExplainableObject)
     assert model.repository.get_system_data() == before
+
+
+def test_zero_count_is_replaced_by_empty_when_switching_to_autoscaling(minimal_model_web):
+    model = minimal_model_web
+    server = Server.from_defaults(
+        "Idle fixed server", storage=Storage.from_defaults("Idle storage"),
+        server_type=ServerTypes.on_premise(), fixed_nb_of_instances=SourceValue(0 * u.concurrent))
+    model.add_new_efootprint_object_to_system(server)
+    model.persist_to_cache()
+    address = FieldAddress(server.id, "server_type")
+    use_case = _select(model, address)
+    with patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update:
+        result = use_case.execute(EditSimplifiedInput(address, {"value": ServerTypes.autoscaling().value}))
+    update.assert_called_once()
+    assert len(update.call_args.args[0]) == 2
+    assert result.changed_fields == {address, FieldAddress(server.id, "fixed_nb_of_instances")}
+    assert len(result.notices) == 1 and "no value" in result.notices[0]
+    restored = ModelWeb(model.repository).flat_efootprint_objs_dict[server.id]
+    assert isinstance(restored.fixed_nb_of_instances, EmptyExplainableObject)
+
+
+@pytest.mark.parametrize("simplified", [False, True], ids=["normal-edit", "selected-edit"])
+def test_equal_timeseries_authored_inputs_and_provenance_round_trip(minimal_model_web, simplified):
+    model = minimal_model_web
+    pattern = model.get_efootprint_objects_from_efootprint_type("UsagePattern")[0]
+    original = pattern.hourly_occurrences
+    form_inputs = {**original.form_inputs, "net_growth_rate_timespan": "month"}
+    post_data = {f"UsagePattern_hourly_occurrences__{name}": value for name, value in form_inputs.items()}
+    post_data.update({
+        "UsagePattern_hourly_occurrences__confidence": "high",
+        "UsagePattern_hourly_occurrences__comment": "Reviewed monthly growth",
+        "UsagePattern_hourly_occurrences__source_id": "monthly-projection",
+        "UsagePattern_hourly_occurrences__source_name": "Monthly projection",
+    })
+    parsed = parse_form_data(post_data, "UsagePattern")
+    if simplified:
+        address = FieldAddress(pattern.id, "hourly_occurrences")
+        _select(model, address).execute(EditSimplifiedInput(address, parsed["hourly_occurrences"]))
+    else:
+        EditObjectUseCase(model).execute(EditObjectInput(pattern.id, parsed))
+    restored = ModelWeb(model.repository).flat_efootprint_objs_dict[pattern.id].hourly_occurrences
+    assert restored == original
+    assert restored.form_inputs == form_inputs
+    assert (restored.label, restored.confidence, restored.comment, restored.source.to_json()) == (
+        original.label, "high", "Reviewed monthly growth",
+        {"id": "monthly-projection", "name": "Monthly projection", "link": None})
 
 
 @pytest.mark.parametrize("metadata_only", [False, True])

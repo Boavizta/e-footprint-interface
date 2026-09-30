@@ -33,7 +33,9 @@ normalized value/provenance data. It reconciles conditional dependents against c
 owners, retaining valid values or choosing the first metadata option with a notice. Missing branches are unrestricted;
 empty lists reject. One <code>ModelingUpdate</code> applies the collected changes before one
 <code>persist_to_cache()</code>. Its <code>changed_fields</code> also includes retained dependents whose options changed,
-but same-value/provenance-only saves affect only the submitted address. A rejected request discards its local model.</p>
+but same-value/provenance-only saves affect only the submitted address. Conditional matching and input preparation use
+the library's <code>input_values_match()</code>: absence differs from zero, and authored timeseries builder/input changes
+remain edits even when their calculated values are equal. A rejected request discards its local model.</p>
 <h2 id="object-factory">Object factory</h2>
 <p><a class="source" href="../../model_builder/domain/object_factory.py"><code>model_builder/domain/object_factory.py</code></a>:</p>
 <ul>

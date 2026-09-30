@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
+from efootprint.abstract_modeling_classes.input_values import input_values_match
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -63,7 +64,7 @@ class EditSimplifiedInputUseCase:
                 if not allowed:
                     raise ValueError(f"No allowed value for {owner.name}.{dependent.attribute}.")
                 current = candidates.get(dependent, getattr(owner, dependent.attribute))
-                if current in allowed:
+                if any(input_values_match(current, option) for option in allowed):
                     continue
                 if dependent == address:
                     raise ValueError("The submitted value conflicts with its conditional inputs.")

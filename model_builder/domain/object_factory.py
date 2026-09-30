@@ -11,9 +11,9 @@ Use adapters/forms/form_data_parser.py to parse HTTP form data before calling th
 from copy import copy, deepcopy
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
-from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.input_values import input_values_match
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import Sources
@@ -237,14 +237,7 @@ def prepare_input_changes(
                 _apply_metadata(current_value, value, available_sources, pending_sources)
                 continue
             new_value = ExplainableObject.from_json_dict({**value, "label": current_value.label})
-            authored_state_changed = (
-                (hasattr(new_value, "form_inputs") or hasattr(current_value, "form_inputs"))
-                and (type(new_value) is not type(current_value)
-                     or new_value.form_inputs != current_value.form_inputs)
-            )
-            presence_changed = isinstance(new_value, EmptyExplainableObject) != isinstance(
-                current_value, EmptyExplainableObject)
-            value_changed = presence_changed or authored_state_changed or new_value != current_value
+            value_changed = not input_values_match(current_value, new_value)
             new_value.source = current_value.source
             new_value.confidence = current_value.confidence
             new_value.comment = current_value.comment
