@@ -59,7 +59,7 @@ class SystemImportService:
         materialize_serialized_state(flat_efootprint_objs_dict.values())
 
         start = perf_counter()
-        final_system_data = self._serialize_system_and_orphans(system, flat_efootprint_objs_dict)
+        final_system_data = self.serialize_system_and_orphans(system, flat_efootprint_objs_dict)
         self._preserve_interface_metadata(upgraded_system_data, final_system_data)
         self._validate_payload_size(final_system_data)
         elapsed_ms = (perf_counter() - start) * 1000
@@ -67,7 +67,8 @@ class SystemImportService:
 
         return final_system_data
 
-    def _serialize_system_and_orphans(self, system: Any, flat_efootprint_objs_dict: Dict[str, Any]) -> Dict[str, Any]:
+    @staticmethod
+    def serialize_system_and_orphans(system: Any, flat_efootprint_objs_dict: Dict[str, Any]) -> Dict[str, Any]:
         """Serialize the connected system, then preserve objects outside that graph.
 
         `system_to_json` owns both object serialization and top-level `Sources` construction. Keeping
@@ -78,15 +79,15 @@ class SystemImportService:
         """
         final_system_data = system_to_json(system, save_computed_state=True)
         final_system_data.pop(CALCULATION_GRAPH_KEY, None)
-        serialized_object_ids = self._object_ids_in_system_data(final_system_data)
+        serialized_object_ids = SystemImportService._object_ids_in_system_data(final_system_data)
 
         for efootprint_object in flat_efootprint_objs_dict.values():
             if efootprint_object.id in serialized_object_ids:
                 continue
             orphan_data = system_to_json(efootprint_object, save_computed_state=True)
             orphan_data.pop(CALCULATION_GRAPH_KEY, None)
-            self._merge_system_json_fragment(final_system_data, orphan_data)
-            serialized_object_ids.update(self._object_ids_in_system_data(orphan_data))
+            SystemImportService._merge_system_json_fragment(final_system_data, orphan_data)
+            serialized_object_ids.update(SystemImportService._object_ids_in_system_data(orphan_data))
 
         final_system_data[CALCULATION_GRAPH_KEY] = calculation_graph_section(
             list(flat_efootprint_objs_dict.values()))

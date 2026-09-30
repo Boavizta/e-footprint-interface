@@ -23,10 +23,17 @@ from model_builder.version_upgrade_handlers import normalize_interface_config
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.adapters.repositories.workspace_base import with_fresh_system_id
+from model_builder.adapters.repositories.cache_backend import CacheBackend
+from model_builder.adapters.forms.timeseries_builder_registry import can_edit_timeseries
+from model_builder.application.use_cases.simplified_inputs import UpdateSimplifiedDefinitionUseCase
 from e_footprint_interface.json_payload_utils import compute_json_size
+from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.services import SystemImportService
+from model_builder.domain.services.simplified_inputs import build_catalog, validate_definition
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from efootprint.api_utils.system_to_json import system_to_json
+from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
+from tests.fixtures.use_case_helpers import create_object
 
 
 @pytest.fixture(autouse=True)
@@ -340,6 +347,104 @@ def test_duplicate_independent_definitions_remap_system_addresses_and_export(cli
     for slot in [0, 1]:
         assert (restored.repository_for(slot).interface_config["simplified_inputs"]
                 == envelope["models"][slot]["interface_config"]["simplified_inputs"])
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("action", ["duplicate", "add_import", "replace_import"])
+def test_copy_preserves_disconnected_objects_and_their_selected_inputs(client, minimal_system, action):
+    _seed_active_slot(client, minimal_system)
+    session = client.session
+    repository = SessionSystemRepository(session)
+    server_id = create_object(repository, create_post_data_from_class_default_values(
+        "Unused server", "Server",
+        Storage_form_data=create_post_data_from_class_default_values("Unused storage", "Storage")))
+    model = ModelWeb(repository)
+    UpdateSimplifiedDefinitionUseCase(repository, build_catalog(
+        model, can_edit_timeseries=can_edit_timeseries)).execute({"fields": {
+            server_id: {"lifespan": {"included": True, "help": "Expected lifetime"}}}}, replace=True)
+    session.save()
+    document = _download(client, "/model_builder/download-json/")
+
+    if action == "duplicate":
+        response = client.post("/model_builder/add-model/", {"source": "duplicate"})
+    else:
+        file = SimpleUploadedFile("model.e-f.json", json.dumps(document).encode(), content_type="application/json")
+        if action == "add_import":
+            response = client.post("/model_builder/add-model/", {"source": "import", "import-json-input": file})
+        else:
+            client.post("/model_builder/add-model/", {"source": "blank"})
+            response = client.post("/model_builder/upload-json/", {"import-json-input": file})
+    assert response.status_code == (302 if action == "replace_import" else 200)
+
+    copied_document = _download(client, "/model_builder/download-json/")
+    assert system_id_of(copied_document) != system_id_of(document)
+    assert _object_ids(copied_document) == _object_ids(document)
+    assert copied_document["Server"][server_id] == document["Server"][server_id]
+    assert copied_document["interface_config"] == document["interface_config"]
+    copied_repository = SessionWorkspaceRepository(client.session).active_repository()
+    copied_catalog = build_catalog(ModelWeb(copied_repository), can_edit_timeseries=can_edit_timeseries)
+    assert validate_definition(copied_catalog, copied_repository.interface_config["simplified_inputs"]) == (
+        document["interface_config"]["simplified_inputs"])
+
+
+@pytest.mark.django_db
+def test_rejected_single_import_cannot_publish_config_while_recovering_saved_model(client, minimal_system, monkeypatch):
+    from django.core.cache import caches
+
+    saved_config = {"simplified_inputs": {"title": "Saved", "guidance": "Saved guidance", "fields": {}}}
+    _seed_active_slot(client, minimal_system, saved_config)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})
+    session = client.session
+    workspace = SessionWorkspaceRepository(session)
+    repository = workspace.active_repository()
+    # Produce the normal compact Postgres recovery copy before expiring Redis.
+    ModelWeb(repository).persist_to_cache()
+    session.save()
+    cache_key = repository._cache_key(create_if_missing=False)
+    saved_recovery = deepcopy(caches[CacheBackend.POSTGRES_CACHE_ALIAS].get(cache_key))
+    saved_fallback = deepcopy(session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY])
+    incoming = _download(client, "/model_builder/download-json/")
+    incoming["System"][system_id_of(incoming)]["name"] = "Incoming model"
+    incoming["interface_config"]["simplified_inputs"] = {
+        "title": "Incoming", "guidance": "New guidance " * 1000, "fields": {}}
+    incoming_size = compute_json_size(SystemImportService(30).import_system(incoming)).size_bytes
+    sizes = repository._index.slot_sizes()
+    # Both existing models fit, and the incoming model fits alone, but replacing this slot exceeds the sum.
+    budget_bytes = sum(sizes.values()) + (incoming_size - sizes[repository.slot]) // 2
+    assert incoming_size < budget_bytes
+    monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", budget_bytes / (1024 * 1024))
+    caches[CacheBackend.REDIS_CACHE_ALIAS].delete(cache_key)
+    writes, rejected = [], []
+    real_set, real_save = CacheBackend.set, SessionSystemRepository.save_data
+
+    def record_set(backend, key, value, **kwargs):
+        if key == cache_key:
+            writes.append(deepcopy(value))
+        return real_set(backend, key, value, **kwargs)
+
+    def record_save(repo, data, recovery_data=None):
+        try:
+            return real_save(repo, data, recovery_data)
+        except PayloadSizeLimitExceeded:
+            rejected.append((deepcopy(data["interface_config"]), len(writes)))
+            raise
+
+    monkeypatch.setattr(CacheBackend, "set", record_set)
+    monkeypatch.setattr(SessionSystemRepository, "save_data", record_save)
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    response = _upload(client, "/model_builder/upload-json/", incoming, "incoming.e-f.json")
+    assert response.status_code == 200
+    assert "too large" in response.content.decode().lower()
+    assert rejected == [(incoming["interface_config"], 0)]
+    assert len(writes) == 2  # Only the ordinary old-model recovery publication occurred.
+    for payload in writes:
+        assert payload["interface_config"] == saved_config
+        assert system_id_of(payload) == system_id_of(saved_recovery)
+        assert (payload["System"][system_id_of(payload)]["name"]
+                == saved_recovery["System"][system_id_of(saved_recovery)]["name"])
+    assert writes[1] == saved_recovery
+    assert caches[CacheBackend.POSTGRES_CACHE_ALIAS].get(cache_key) == saved_recovery
+    assert client.session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == saved_fallback
 
 
 @pytest.mark.django_db

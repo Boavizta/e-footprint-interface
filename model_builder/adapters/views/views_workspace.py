@@ -21,8 +21,6 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
-from efootprint.api_utils.system_to_json import system_to_json
-from efootprint.comparison.duplication import duplicate_system
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.repositories import (
@@ -30,7 +28,7 @@ from model_builder.adapters.repositories import (
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 from model_builder.adapters.views.views import render_model_builder, build_workspace_slots
 from model_builder.adapters.repositories.workspace_base import (
-    MAX_SLOTS, copy_interface_config_for_system, system_id_of, with_fresh_system_id)
+    MAX_SLOTS, system_id_of, with_fresh_system_id)
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from e_footprint_interface import __version__ as interface_version
@@ -131,11 +129,11 @@ def _restore_workspace(workspace, data: dict) -> None:
 
 
 def _system_data_for_add(request, workspace):
-    """Build the without-calc single-model document for the model the user asked to add.
+    """Build the single-model document for the model the user asked to add.
 
-    Three sources, all returning a recomputed (with-calc) document for ``add_slot`` to save:
-      - ``duplicate``: deep-copy the active model via the library ``duplicate_system`` (fresh system
-        id, object ids preserved) and propose the editable name ``"Copy of {name}"``;
+    Three sources, all passed through the import service before ``add_slot`` saves them:
+      - ``duplicate``: copy the complete active model (fresh System id, other object ids preserved)
+        and propose the editable name ``"Copy of {name}"``;
       - ``blank``: the empty scratch baseline;
       - ``import``: an uploaded single-model file.
     """
@@ -152,14 +150,13 @@ def _system_data_for_add(request, workspace):
     if source == "blank":
         return get_example_system_data(SCRATCH_ID)
 
-    active_model = ModelWeb(workspace.active_repository())
-    duplicated = duplicate_system(active_model.system.modeling_obj)
-    system_data = system_to_json(duplicated, save_computed_state=False)
-    system_block = system_data["System"][duplicated.id]
-    system_block["name"] = f"Copy of {active_model.system.name}"
-    system_data["interface_config"] = copy_interface_config_for_system(
-        workspace.active_repository().interface_config, active_model.system.efootprint_id, duplicated.id)
+    repository = workspace.active_repository()
+    active_model = ModelWeb(repository)
+    system_data = active_model.to_json()
+    system_data["interface_config"] = repository.interface_config
     system_data["efootprint_interface_version"] = interface_version
+    system_data = with_fresh_system_id(system_data)
+    system_data["System"][system_id_of(system_data)]["name"] = f"Copy of {active_model.system.name}"
     return system_data
 
 

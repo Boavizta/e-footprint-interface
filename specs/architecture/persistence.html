@@ -70,6 +70,8 @@ command physically removes expired <code>django_cache</code> and <code>django_se
 thereafter; concurrent workers are safe because deletion is idempotent, and logs contain aggregate counts/duration only.</p>
 <h2 id="import-and-re-id-snapshots">Import and re-id snapshots</h2>
 <p>Import recomputation payloads must be assembled from <code>efootprint.api_utils.system_to_json.system_to_json()</code> fragments (the connected <code>System</code> plus any orphaned objects) rather than hand-serializing objects in the interface. Import and workspace re-id are explicit complete-snapshot boundaries: they call <code>materialize_serialized_state()</code> before passive serialization; hydration itself never calls construction-time <code>after_init()</code> hooks. This keeps object serialization and top-level <code>Sources</code> hoisting owned by e-footprint and prevents dangling source references after calculated attributes are recomputed.</p>
+<p>A rejected single-model upload renders saved state through a fresh repository. Its attempted configuration remains
+request-local, so Postgres recovery during error rendering cannot persist that configuration onto the old model.</p>
 <h2 id="security-and-data">Security and data</h2>
 <ul>
 <li>Model access is session-scoped; payloads are stored server-side in Redis and Postgres under the retention policy above. This is not browser-only storage. No PII is expected; do not log sensitive information.</li>
