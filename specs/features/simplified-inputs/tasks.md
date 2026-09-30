@@ -4,6 +4,12 @@ Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed librar
 
 Status: under review. This is one interface-owned, cross-repository working set; implementation starts after review in a fresh session.
 
+## Runs
+
+- **Run A — foundations:** Tasks 1 and 2 may proceed independently; Task 3 follows Task 2 for final validation, Task 4 follows 3, and Task 5 follows 2–3.
+- **Run B — authoring:** Task 6 precedes all new browser saves. Task 7 follows 3–4 and 6; Task 8 follows 7.
+- **Run C — consumption:** Task 9 follows the atomic edit path, guard and shared UI; Task 10 completes timeseries/export and the integrated review.
+
 ## Overview
 
 | Task | Delivered behavior | Plan section | Repository | Implementation |
@@ -81,10 +87,7 @@ Goal: Finish focused timeseries editing and make every normal export follow comp
 
 Repository: e-footprint-interface, with both repositories' release gates. Files touched: timeseries side-panel partial and view wiring, simplified-input/export JS, existing download controls, critical E2E tests, changelogs and owning architecture/design/docs pages. Tests: strategy switch/preview/Save/Cancel, failed panel preservation, model-switch discard, focused edit then export, two-model export, full interface Python/Jest/E2E gates, full library pytest and strict docs/package checks. Acceptance: no export claims an unsaved simplified edit; all agreed user journeys pass; the PyPI dependency is restored in both `pyproject.toml` and `poetry.lock` before any merge to main. Depends on: Tasks 1–9. Implementation: standard — use the existing timeseries registry/panel and Task 6/9 save state in current export controls, then run integrated gates.
 
-## Runs and gates
+## Gates
 
-- **Run A — foundations:** Tasks 1 and 2 may proceed independently; Task 3 follows Task 2 for final validation, Task 4 follows 3, and Task 5 follows 2–3.
-- **Run B — authoring:** Task 6 precedes all new browser saves. Task 7 follows 3–4 and 6; Task 8 follows 7.
-- **Run C — consumption:** Task 9 follows the atomic edit path, guard and shared UI; Task 10 completes timeseries/export and the integrated review.
 - **Deployment/merge prerequisite:** current uncommitted `pyproject.toml` and `poetry.lock` edits in the interface checkout are pre-existing; preserve them during planning. The constitution requires a PyPI `efootprint` dependency in both files before any commit reaches `main`.
 - **Final environment:** use the intended local library checkout for cross-repo tests. Interface E2E requires a running local server; no production service. Full interface pytest and Jest, library pytest, strict MkDocs and installed-resource checks are final quality gates. Add consolidated Unreleased changelog entries and promote new patterns to the owning architecture pages; suggest the matching `AGENTS.md`/`CLAUDE.md` pointers.
