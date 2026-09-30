@@ -2,11 +2,11 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Run A implementation and per-task reviews complete; global review in progress. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending.
+Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending. The deployment/merge prerequisite below remains outstanding.
 
 ## Runs
 
-- **Run A — foundations:** Tasks 1–5.
+- **Run A — foundations:** Tasks 1–5 complete.
 - **Run B — authoring:** Tasks 6–8.
 - **Run C — consumption:** Tasks 9–10.
 

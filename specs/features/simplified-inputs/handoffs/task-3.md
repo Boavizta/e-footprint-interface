@@ -7,7 +7,7 @@ Library dependency: e-footprint `99962fad05692c1ab14f1d2a89735eb920347b69`, unch
 
 - `domain/services/simplified_inputs.py` provides `FieldAddress`, JSON-shaped definition types, `normalize_definition`, `build_catalog(model_web, *, can_edit_timeseries)`, `complete_selection(catalog, selected)` and `validate_definition(catalog, definition)`. Dependency links use actual owners across the flat model inventory; ineligible companions propagate to their controllers. Tests exercise real nested Storage and chained API/linked-job addresses.
 - Both repository `interface_config` getters apply `normalize_interface_config` for current-version, missing-key reads as well as older configurations. This is request-local normalization; persisted payloads are not written on read. Task 4 should preserve Session/InMemory parity and their existing config-only save boundaries.
-- Task 7 rendering seam: normal `generate_dynamic_form` skips `fixed_nb_of_instances`, and `resolve_optional_annotation` retains `ExplainableQuantity | EmptyExplainableObject`. Rendering these eligible optional numbers needs a deliberate skip override and numeric-union/empty-value handling before `issubclass` and conditional-select handling. Catalog eligibility does not change ordinary form output. Task 5 owns any corresponding shared conversion support.
+- Task 7 rendering seam: normal `generate_dynamic_form` skips `fixed_nb_of_instances`. Rendering these eligible optional numbers needs a deliberate skip override and empty-value rendering/transport. Task 5 now supplies shared optional-union normalization and empty-value conversion; see its [handoff](task-5.md). Catalog eligibility does not change ordinary form output.
 
 ## Design decisions
 
@@ -16,4 +16,3 @@ Library dependency: e-footprint `99962fad05692c1ab14f1d2a89735eb920347b69`, unch
 ## Open concerns
 
 - Full non-browser Python validation retains the expected `tests/test_no_dev_dependency.py::TestNoDevDependency::test_no_active_develop_true_in_pyproject` failure because the authorized pre-existing local editable `efootprint` dependency is preserved. Restore published dependency declarations before merge, as recorded in [task gates](../tasks.md#gates).
-- Full browser validation belongs to the Run A global review; this task adds no browser surface.

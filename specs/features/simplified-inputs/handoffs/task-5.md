@@ -31,4 +31,3 @@ Repositories and implementation ranges:
   `tests/test_no_dev_dependency.py::TestNoDevDependency::test_no_active_develop_true_in_pyproject` failure because the
   authorized pre-existing editable dependency declarations remain untouched. Restore published declarations before
   merge, as recorded in [task gates](../tasks.md#gates).
-- Full browser validation belongs to the Run A global review; this task adds no browser surface.

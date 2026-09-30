@@ -24,4 +24,3 @@ Library dependency: e-footprint `99962fad05692c1ab14f1d2a89735eb920347b69`, unch
   `tests/test_no_dev_dependency.py::TestNoDevDependency::test_no_active_develop_true_in_pyproject` failure
   because authorized pre-existing local editable dependency declarations remain untouched. Restore published
   declarations before merge, as recorded in [task gates](../tasks.md#gates).
-- Full browser validation belongs to the Run A global review; this task introduces no browser surface.
