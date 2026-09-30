@@ -6,6 +6,101 @@
     let replaying = false;
     let pendingRead = null;
     const savedEdits = new WeakMap();
+    const failedEdits = new WeakMap();
+    let pendingExport = null;
+
+    function markEditFailed(form) {
+        form.dataset.saveFailed = "true";
+        failedEdits.set(form, editSnapshot(form));
+        form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
+        form.querySelector('[data-action="simplified-retry"]').hidden = false;
+        form.querySelector('[data-action="simplified-discard"]')?.removeAttribute("hidden");
+    }
+
+    function failedExportForm(element) {
+        const targets = element.dataset.workspaceExport === "all"
+            ? document.querySelectorAll("[data-simplified-target]") : [targetForActiveModel()];
+        return [...targets].map(target => target?.querySelector('[data-save-failed="true"]')).find(Boolean);
+    }
+
+    function showFailedEdit(form, message) {
+        form.querySelector("[data-simplified-save-status]").textContent = message;
+        form.closest("[data-simplified-object]").open = true;
+        form.closest("[data-simplified-group]").open = true;
+        form.scrollIntoView({block: "nearest"});
+    }
+
+    function continueExport(element) {
+        document.querySelector("[data-export-status]")?.remove();
+        const failed = failedExportForm(element);
+        if (failed) {
+            failed.querySelector("[data-simplified-save-status]").textContent = "Not saved. Retry or discard this edit before exporting.";
+            const active = failed.closest("[data-simplified-target]") === targetForActiveModel();
+            if (active && document.body.dataset.baseView === "simplified") {
+                showFailedEdit(failed, "Not saved. Retry or discard this edit before exporting.");
+            } else {
+                const notice = document.createElement("p");
+                notice.dataset.exportStatus = "";
+                notice.setAttribute("role", "status");
+                notice.className = "small text-danger px-4";
+                notice.textContent = active
+                    ? "An input was not saved. Open Simplified inputs and retry or discard the edit before exporting."
+                    : "Another modeling has an unsaved input. Open it and retry or discard the edit before exporting both modelings.";
+                document.querySelector("#toolbar-nav")?.after(notice);
+            }
+            return;
+        }
+        if (element.matches("a")) {
+            // Save settlement can outlive the click's popup permission. Download in the current
+            // browsing context; the attachment response leaves the workspace in place.
+            const link = document.createElement("a");
+            link.href = element.href;
+            link.click();
+        } else queueMicrotask(() => replayClick(element));
+    }
+
+    // Blur locks the export control before its click can fire. Capture the intended
+    // export from the press and continue only after the focused field settles.
+    function completeFocusedEditForExport(element) {
+        const focused = document.activeElement;
+        const form = focused?.closest("[data-simplified-editor]");
+        if (!form) return false;
+        pendingExport = element;
+        // Source controls write their named hidden inputs on completion of the group.
+        focused.blur();
+        saveEdit(form);
+        if (form.dataset.saving === "true") return true;
+        pendingExport = null;
+        return false;
+    }
+    document.addEventListener("mousedown", event => {
+        const element = event.target.closest("[data-workspace-export]");
+        if (element && completeFocusedEditForExport(element)) event.preventDefault();
+    }, true);
+
+    document.addEventListener("click", event => {
+        const element = event.target.closest("[data-workspace-export]");
+        if (!element || replaying) return;
+        if (!configureForm() && document.body.dataset.workspaceMutation !== "updating"
+            && completeFocusedEditForExport(element)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+        if (!configureForm() && document.body.dataset.workspaceMutation !== "updating"
+            && !failedExportForm(element)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (configureForm()) {
+            deferExit(() => continueExport(element));
+            return;
+        }
+        if (document.body.dataset.workspaceMutation === "updating") {
+            pendingExport = element;
+            return;
+        }
+        continueExport(element);
+    }, true);
 
     function editSnapshot(form) {
         return JSON.stringify([...new FormData(form)].filter(([key]) => key !== "csrfmiddlewaretoken"));
@@ -13,9 +108,9 @@
     function saveEdit(form, retry = false) {
         if (!form || form.dataset.saving === "true" || document.body.dataset.workspaceMutation === "updating") return;
         if (!retry && savedEdits.get(form) === editSnapshot(form)) return;
+        if (!retry && failedEdits.get(form) === editSnapshot(form)) return;
         if (!form.reportValidity()) {
-            form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
-            form.querySelector('[data-action="simplified-retry"]').hidden = false;
+            markEditFailed(form);
             return;
         }
         form.dataset.saving = "true";
@@ -45,6 +140,9 @@
         if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
     });
     document.body.addEventListener("htmx:configRequest", event => {
+        if (event.detail.elt.matches("[data-simplified-timeseries]") && window.recomputationVals?.().recomputation) {
+            event.detail.parameters.recomputation = "true";
+        }
         if (!event.detail.elt.matches("[data-simplified-editor]")) return;
         const saved = new Map(JSON.parse(savedEdits.get(event.detail.elt) || "[]"));
         const parameters = event.detail.parameters;
@@ -73,8 +171,26 @@
         if (!form.matches("[data-simplified-editor]")) return;
         delete form.dataset.saving;
         if (event.detail.successful) return;
-        form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
-        form.querySelector('[data-action="simplified-retry"]').hidden = false;
+        markEditFailed(form);
+    });
+    document.body.addEventListener("workspace-mutation:finished", event => {
+        const form = event.detail.elt;
+        if (form.matches("[data-simplified-timeseries]")) {
+            if (event.detail.successful) window.closeAndEmptySidePanel();
+            else form.querySelector("[data-timeseries-save-status]").textContent = "Not saved. Correct the input and retry Save.";
+        }
+        const element = pendingExport;
+        pendingExport = null;
+        if (element && event.detail.successful) continueExport(element);
+    });
+    document.addEventListener("input", event => {
+        if (event.target.closest("[data-simplified-timeseries]")) window.tagFormAsModified();
+    });
+    document.addEventListener("change", event => {
+        if (event.target.closest("[data-simplified-timeseries]")) window.tagFormAsModified();
+    });
+    document.addEventListener("click", event => {
+        if (event.target.closest('[data-action="simplified-timeseries-cancel"]')) window.closeAndEmptySidePanel();
     });
     document.body.addEventListener("simplifiedInputSaved", event => {
         const notices = event.detail.notices || [];
@@ -447,6 +563,15 @@
     document.addEventListener("click", event => {
         if (replaying || document.body.dataset.workspaceMutation === "updating") return;
         const element = event.target.closest("a, button, [hx-get], [hx-post], [data-action]");
+        // Both destinations replace fields on fresh entry. Recover explicitly first,
+        // so a failed draft cannot silently become a saved export after navigation.
+        const failed = targetForActiveModel()?.querySelector('[data-save-failed="true"]');
+        if (failed && ["simplified-mode", "simplified-configure"].includes(element?.dataset.action)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            showFailedEdit(failed, "Not saved. Retry or discard this edit before changing views.");
+            return;
+        }
         if (!element || element.closest("[data-simplified-workspace], #simplified-exit-dialog, #modal-container")) return;
         if (!element.matches("a[href], [hx-get], [hx-post], [data-workspace-control], [data-action]")) return;
         // A pending entry must not land after the user has chosen another destination.

@@ -620,14 +620,16 @@ def render_simplified_bookmark(field):
 
 
 def render_simplified_editor(_):
-    field = {"address": {"object_id": "server", "attribute": "lifespan"},
+    field = {"dom_id": "si-test-server-lifespan", "address": {"object_id": "server", "attribute": "lifespan"},
              "editor": {"web_id": "si-test-server-lifespan-value", "input_type": "explainable_quantity",
                         "label": "Lifespan", "default": 5, "step": 1, "unit": "year",
                         "metadata": metadata_field(source=HYPOTHESIS, comment="Preserve comment")["metadata"]}}
     context = {"quick_total": "20 kg", "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}}
-    return render_to_string("model_builder/simplified_inputs/editor.html", {"field": field}) + "".join(
-        render_to_string(f"model_builder/components/{name}.html", context)
-        for name in ("results_bar_button", "show_results_toolbar_button"))
+    return (
+        render_to_string("model_builder/simplified_inputs/editor.html", {"field": field})
+        + render_to_string("model_builder/components/results_bar_button.html", context)
+        + render_to_string("model_builder/upload_download_reboot_model_tooltips.html", context)
+    )
 
 
 def render_simplified_creation(object_type):

@@ -495,6 +495,11 @@
 </div>
 
 <!-- file format section -->
+<p class="note">In Simplified inputs, Export first saves the last focused field and waits for acceptance. If an edit
+fails, retry or discard it before downloading that modeling or moving to Modeling/Configure. Exporting both modelings also checks the other modeling's
+failed edits. Configure offers Save / Discard / Stay. An unfinished timeseries panel exports the last saved value;
+its draft remains available until Save or Cancel.</p>
+
 <h2 class="sec">What's in the file</h2>
 <p style="font-size:.95rem;color:var(--muted);max-width:54rem;margin:0 0 .3rem">One extension, <code>.e-f.json</code>, for both shapes —
   the app routes by <b>content, not extension</b>, so a single-model session can still open a workspace file. Modelings export
@@ -530,7 +535,7 @@
     <p>Where this lives in code. Start with <a href="../../architecture/persistence.html">Persistence and interface state</a> · <a href="../../architecture/workspace.html">Workspace and resident canvases</a> ("Persistence and <code>interface_config</code>", the workspace / multi-slot session). The toolbar is <code>upload_download_reboot_model_tooltips.html</code> (Open file · Export / Export ▾ · Reset).</p>
     <dl>
       <dt>Export (Phase A)</dt>
-      <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.to_json(save_calculated_attributes=False)</code> + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>
+      <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.export_json()</code> + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>
       <dt>Open / upload (Phase B)</dt>
       <dd><code>open-import-json-panel/</code> → <code>open_import_json_panel</code> → <code>side_panels/import_model.html</code> (<code>header_name="Open a file"</code>, <code>save_button_label="Open"</code>, label <em>Choose a file (.e-f.json)</em>, native <code>&lt;input type="file"&gt;</code>, no drag-drop). <code>upload-json/</code> → <code>upload_json</code>: content-routes on <code>"models" in data</code> → <code>views_workspace._restore_workspace</code>, else single-model (<code>upgrade_system_data</code> → <code>SystemImportService.import_system</code> → <code>distinctify_against_siblings</code> → <code>persist_to_cache</code>) → <code>redirect("model-builder")</code>. Failure → re-render with <code>error-import-modal</code> (<code>modals/import_error_modal.html</code>); messages in <code>upload_json</code>.</dd>
       <dt>Recovery &amp; reset (Phase C)</dt>

@@ -68,6 +68,15 @@ its successful-save close handler.</p>
 fixed surface immediately left of the side panel, matching the hourly-preview workspace layout; on phones it returns to
 the form flow. A side-panel form exposes at most one weekly preview: selecting or editing a weekly field activates its
 surface and hides sibling previews, so forms with several recurrent quantities never stack charts over the canvas.</p>
+<h3 id="focused-simplified-editor">Focused Simplified-input editor</h3>
+<p>Selected timeseries fields render their string preview and ordinary source/confidence/comment disclosure;
+metadata autosaves through the same selected-input endpoint. Edit timeseries loads only the selected field into
+<code>simplified_inputs/timeseries_panel.html</code>, using ordinary singleton panel field IDs and the existing
+builder parser. The panel edits value only, so omitted provenance retains the latest accepted metadata.
+Save closes the editor only after a successful <code>workspace-mutation:finished</code> event; an HTTP-200 error
+modal retains the draft for retry. Cancel discards it, and model switching uses the shared side-panel warning.
+Focused hourly and weekly previews share the placement shell to the panel's left on tablet/desktop and in form flow
+on phones; hourly previews use their own canvas rather than the ordinary Modeling preview singleton.</p>
 <h2 id="adding-a-new-timeseries-generation-method">Adding a new timeseries generation method</h2>
 <p>To add a new way to generate timeseries (e.g., from uploaded CSV):</p>
 <ol>

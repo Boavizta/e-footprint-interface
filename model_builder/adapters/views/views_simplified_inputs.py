@@ -4,6 +4,7 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from model_builder.adapters.forms.form_data_parser import parse_form_data
+from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.simplified_input_context import bookmark_context
 from model_builder.domain.services.simplified_inputs import FieldAddress, normalize_definition
 from django.views.decorators.http import require_POST
@@ -23,6 +24,40 @@ def simplified_inputs(request):
     return render(request, "model_builder/simplified_inputs/workspace.html", context)
 
 
+def simplified_input_field(request, object_id, attribute):
+    model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
+    context = build_workspace_context(model_web, addresses={FieldAddress(object_id, attribute)})
+    fields = [field for group in context["groups"] for obj in group["objects"] for field in obj["fields"]]
+    if not fields:
+        raise Http404("This input is not selected.")
+    return render(request, "model_builder/simplified_inputs/field.html", {"field": fields[0]})
+
+
+def simplified_timeseries_panel(request, object_id, attribute):
+    try:
+        model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
+        catalog = input_catalog(model_web)
+        address = FieldAddress(object_id, attribute)
+        definition = normalize_definition(model_web.repository.interface_config.get("simplified_inputs"))
+        if not definition["fields"].get(object_id, {}).get(attribute, {}).get("included"):
+            raise ValueError("This input is not selected.")
+        if not catalog.fields[address].eligible:
+            raise ValueError("This input has no supported editor.")
+        owner = model_web.get_web_object_from_efootprint_id(object_id)
+        field = FormContextBuilder(model_web).build_input_fields(owner, {attribute})[0]
+        field.pop("bookmark", None)
+        field.pop("metadata", None)
+        if field["input_type"] not in ("recurrent_timeseries_builder", "hourly_quantities_from_growth"):
+            raise ValueError("This input is not an editable timeseries.")
+        return render(request, "model_builder/simplified_inputs/timeseries_panel.html", {
+            "field": field, "address": address, "header_name": f"{owner.name}: {field['label']}",
+            "dynamic_form_data": {},
+            "simplified_timeseries": True, "focused_canvas_id": field["web_id"] + "__focused_chart",
+        })
+    except Exception as error:
+        return render_exception_modal(request, error, preserve_panels=True)
+
+
 @require_POST
 def edit_simplified_input(request, object_id, attribute):
     try:
@@ -30,6 +65,8 @@ def edit_simplified_input(request, object_id, attribute):
         catalog = input_catalog(model_web)
         owner = model_web.get_web_object_from_efootprint_id(object_id)
         prefix = f"si-{model_web.system.efootprint_id}-{object_id}-{attribute}-value"
+        if request.POST.get("timeseries") == "true":
+            prefix = f"{owner.class_as_simple_str}_{attribute}"
         form_data = {}
         for key in request.POST:
             if key == prefix or key.startswith(prefix + "__"):

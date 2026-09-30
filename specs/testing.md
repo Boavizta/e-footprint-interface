@@ -170,6 +170,7 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. This handles waiting for the HTTP response — don't write raw Playwright clicks for HTMX flows.
 Side-panel form submissions use `SidePanelPage.submit_and_wait_for_close()`, which waits for newly swapped content to be
 processed before clicking, validates the form response, and waits for HTMX request/settling classes to clear before returning.
+Opening Results also starts descendant Sankey configuration requests; wait for that complete HTMX cascade before the next edit.
 
 ### Edge-paradigm tests
 

@@ -1,0 +1,16 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+{% block panel_body %}
+<form id="sidePanelForm" data-simplified-timeseries data-workspace-editor autocomplete="off"
+      hx-post="{% url 'edit-simplified-input' address.object_id address.attribute %}" hx-swap="none">
+    {% csrf_token %}
+    <input type="hidden" name="timeseries" value="true">
+    {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
+    <p data-timeseries-save-status role="status"></p>
+</form>
+{% endblock %}
+{% block save_button %}
+<div class="d-flex gap-2 mb-3">
+    <button id="btn-submit-form" class="btn btn-primary flex-grow-1" type="submit" form="sidePanelForm">Save</button>
+    <button type="button" class="btn btn-outline-secondary" data-action="simplified-timeseries-cancel">Cancel</button>
+</div>
+{% endblock %}

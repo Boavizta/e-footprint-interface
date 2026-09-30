@@ -134,19 +134,19 @@
                 {% if workspace_slots|length > 1 %}
                 <li class="nav-item dropdown">
                     <button class="nav-link d-flex flex-row gap-2 mx-2 dropdown-toggle" type="button"
-                            data-workspace-control id="download-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                            data-workspace-control data-workspace-export="active" id="download-menu-toggle" data-bs-toggle="dropdown" aria-expanded="false"
                             _="on click call collapseNavbarIfShown()">
                         <img src="{% static "icons/tooltip/export.svg" %}" width="24px" height="24px" alt="export_icon">
                         <p class="d-block d-lg-none mb-0">Export</p>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="download-menu-toggle">
-                        <li><a id="download-model" class="dropdown-item" data-workspace-control href="download-json/" target="_blank">⬇ This modeling</a></li>
-                        <li><a id="download-workspace" class="dropdown-item" data-workspace-control href="download-workspace/" target="_blank">⬇ Both modelings</a></li>
+                        <li><a data-workspace-export="active" id="download-model" class="dropdown-item" data-workspace-control href="download-json/" target="_blank">⬇ This modeling</a></li>
+                        <li><a data-workspace-export="all" id="download-workspace" class="dropdown-item" data-workspace-control href="download-workspace/" target="_blank">⬇ Both modelings</a></li>
                     </ul>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a id="download-model" data-workspace-control href="download-json/"
+                    <a data-workspace-export="active" id="download-model" data-workspace-control href="download-json/"
                            target="_blank"
                            class="nav-link d-flex flex-row gap-2 mx-2"
                            data-bs-title="Export your modeling"

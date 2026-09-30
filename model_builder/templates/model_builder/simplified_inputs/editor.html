@@ -1,11 +1,16 @@
 {% load l10n %}
-{% if field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' %}
+{% if field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' or field.editor.input_type == 'recurrent_timeseries_builder' or field.editor.input_type == 'hourly_quantities_from_growth' %}
 <form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
       hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
       hx-trigger="simplified-save" hx-swap="none">
     {% csrf_token %}
     {% with editor=field.editor %}
-    {% if editor.input_type == 'explainable_quantity' %}
+    {% if editor.input_type == 'recurrent_timeseries_builder' or editor.input_type == 'hourly_quantities_from_growth' %}
+    <p class="simplified-preview" data-current-value>{{ field.preview }}</p>
+    <button type="button" class="btn btn-sm btn-outline-primary" data-workspace-control
+            hx-get="{% url 'simplified-timeseries-panel' field.address.object_id field.address.attribute %}"
+            hx-target="#sidePanel" hx-swap="innerHTML">Edit timeseries</button>
+    {% elif editor.input_type == 'explainable_quantity' %}
     <div class="input-group">
         <input type="number" class="form-control" name="{{ editor.web_id }}" id="{{ editor.web_id }}"
                aria-label="{{ editor.label }}" value="{{ editor.default|unlocalize }}" step="{{ editor.step|unlocalize }}"
@@ -32,5 +37,8 @@
     {% endwith %}
     <span class="small" data-simplified-save-status role="status">Saved</span>
     <button type="button" class="btn btn-sm btn-outline-primary" data-action="simplified-retry" data-workspace-control hidden>Retry save</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-discard" data-workspace-control hidden
+            hx-get="{% url 'simplified-input-field' field.address.object_id field.address.attribute %}"
+            hx-target="#{{ field.dom_id }}" hx-swap="outerHTML settle:0">Discard edit</button>
 </form>
 {% else %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>{% endif %}

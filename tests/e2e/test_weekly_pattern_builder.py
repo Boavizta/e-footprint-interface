@@ -168,3 +168,45 @@ def test_weekly_pattern_save_reopen_and_download_upload_round_trip(recurrent_pro
     expect(page.locator(f"#{ram_field_id}__confidence")).to_have_value("high")
     expect(page.locator(f"#{ram_field_id}__source_name")).to_have_value("RAM benchmark")
     expect(page.locator(f"#{ram_field_id}__comment")).to_have_value("Measured RAM demand")
+
+
+@pytest.mark.e2e
+def test_focused_weekly_editor_keeps_strategy_drafts_and_discards_on_model_switch(recurrent_process_model):
+    from tests.e2e.test_simplified_inputs import open_configure, open_simplified, field
+    from tests.e2e.utils import click_and_wait_for_htmx
+
+    builder = recurrent_process_model
+    page = builder.page
+    workspace = open_configure(page)
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    selected = field(workspace, "recurrent_compute_needed")
+    selected.locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    panel = page.locator("[data-simplified-timeseries]")
+    selector = panel.locator("[data-builder-selector]")
+    selector.select_option("weekly_pattern")
+    baseline = panel.locator("[data-profile-baseline]").first
+    baseline.fill("3")
+    preview = panel.locator("[data-timeseries-preview]")
+    expect(preview.locator("[data-timeseries-preview-status]")).to_be_hidden()
+    page.wait_for_function("() => document.querySelector('[data-simplified-timeseries] canvas')._timeseriesPreviewChart")
+    selector.select_option("constant")
+    selector.select_option("weekly_pattern")
+    expect(baseline).to_have_value("3")
+    builder.side_panel.submit_and_wait_for_close()
+    builder.add_model_by_duplication()
+    open_simplified(page)
+    click_and_wait_for_htmx(page, page.locator('[data-simplified-workspace]:visible').get_by_role("button", name="Edit timeseries"))
+    panel.locator("[data-profile-baseline]").first.fill("5")
+    page.locator('[data-model-tab="0"]').click()
+    expect(page.locator("#unsavedModal")).to_be_visible()
+    page.locator("#cancel-unsaved-modal").click()
+    expect(panel).to_be_visible()
+    page.locator('[data-model-tab="0"]').click()
+    with page.expect_response("**/switch-model/"):
+        page.locator("#continue-unsaved-modal").click()
+    expect(page.locator("#sidePanel")).not_to_be_visible()
+    builder.switch_to_model(1)
+    expect(page.locator("[data-simplified-timeseries]")).to_have_count(0)

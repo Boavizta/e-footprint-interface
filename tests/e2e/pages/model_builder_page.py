@@ -450,3 +450,11 @@ class ModelBuilderPage:
             self.page.locator('a[href="download-json/"]').click()
         download_info.value.save_as(file_path)
         return self
+
+    def download_workspace(self, file_path: str):
+        """Download both models through the shared export menu."""
+        self.page.locator("#download-menu-toggle").click()
+        with self.page.expect_download() as download_info:
+            self.page.locator("#download-workspace").click()
+        download_info.value.save_as(file_path)
+        return self

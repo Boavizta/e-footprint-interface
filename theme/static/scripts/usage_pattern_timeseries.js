@@ -79,7 +79,7 @@
     }
 
     function schedulePreview(root, delay) {
-        if (!validForPreview(root) || window.innerWidth < 1200) {
+        if (!validForPreview(root) || (window.innerWidth < 1200 && !root.closest("[data-simplified-timeseries]"))) {
             root.dispatchEvent(new CustomEvent("timeseries-preview:cancel", {bubbles: true}));
             setVisible(root, false);
             return;

@@ -47,6 +47,9 @@ too. Settings are validated when authored; file opening preserves them without a
 inputs always reads fresh state; <code>simplified_inputs.js</code> remembers only the last base view by System ID.
 A successful JSON load supplies one-use session opening markers, consumed by the next builder render: selected inputs
 open Simplified inputs, an empty selection opens Modeling. Ordinary slot switches never reapply this rule.</p>
+<p>A failed simple autosave keeps its resident field retryable. Entry into Modeling or Configure requires correction,
+retry or explicit Discard edit first, so fresh rendering cannot silently replace a failed draft. Model tabs may still
+park it; export of both models checks these resident failures.</p>
 <p>Configure renders all eligible fields using the same type/object hierarchy, a single main scrolling pane,
 container-responsive field columns and compact object selector. Draft settings live only in form controls with one
 form-level dirty flag. Filtering hides objects and matching navigation entries without dropping controls or help;

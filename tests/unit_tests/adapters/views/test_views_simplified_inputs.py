@@ -227,3 +227,44 @@ class TestSimplifiedViews:
         count = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.fixed_nb_of_instances
         assert isinstance(count, EmptyExplainableObject)
         assert count.comment == "Automatic fleet size"
+
+    def test_focused_timeseries_reuses_value_parser_and_outside_metadata_save(self, client, minimal_system_data):
+        model = self.save_model(client, minimal_system_data)
+        owner = model.system.modeling_obj.usage_patterns[0]
+        owner_id = owner.id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"hourly_occurrences": {"included": True, "help": "Projection guidance"}}}})})
+        response = client.get(f"/model_builder/simplified-timeseries-panel/{owner_id}/hourly_occurrences/")
+        html = response.content.decode()
+        assert html.count("data-hourly-timeseries-preview") == 1
+        assert "data-simplified-timeseries" in html
+        assert "data-bookmark" not in html
+        assert "__source_id" not in html
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}-hourly_occurrences-value"
+        response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/hourly_occurrences/", {
+            prefix + "__comment": "Reviewed projection"})
+        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        html = response.content.decode()
+        assert "Edit timeseries" in html and "Source, confidence and comment" in html
+        inputs = dict(owner.hourly_occurrences.form_inputs)
+        inputs["initial_volume"] = 45
+        data = {"UsagePattern_hourly_occurrences__" + key: value for key, value in inputs.items()}
+        data["timeseries"] = "true"
+        response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/hourly_occurrences/", data)
+        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        current = ModelWeb(SessionSystemRepository(client.session)).system.modeling_obj.usage_patterns[0]
+        assert current.hourly_occurrences.form_inputs["initial_volume"] == "45"
+        assert current.hourly_occurrences.comment == "Reviewed projection"
+        saved = client.get(f"/model_builder/simplified-input-field/{owner_id}/hourly_occurrences/").content.decode()
+        assert "data-simplified-editor" in saved and "Reviewed projection" in saved
+
+    def test_timeseries_panel_rejects_unselected_and_non_timeseries_inputs(self, client, minimal_system_data, monkeypatch):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        server_id = model.servers[0].efootprint_id
+        response = client.get(f"/model_builder/simplified-timeseries-panel/{server_id}/lifespan/")
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            server_id: {"lifespan": {"included": True, "help": ""}}}})})
+        response = client.get(f"/model_builder/simplified-timeseries-panel/{server_id}/lifespan/")
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]

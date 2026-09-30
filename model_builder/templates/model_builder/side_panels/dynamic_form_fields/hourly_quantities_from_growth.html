@@ -2,8 +2,18 @@
 <div class="mb-3" id="{{ field.web_id }}" data-timeseries-preview data-hourly-timeseries-preview
      data-field-web-id="{{ field.web_id }}" data-field-name="{{ field.attr_name }}"
      data-preview-url="{% url 'timeseries-preview' %}" data-preview-id="{{ field.web_id }}__preview"
-     data-latest-request-sequence="0" data-timeseries-preview-canvas-id="timeSeriesChart"
-     data-timeseries-preview-container-id="chartTimeseries" data-timeseries-preview-granularity-id="display_granularity">
+     data-latest-request-sequence="0"
+     {% if simplified_timeseries %}data-timeseries-preview-canvas-id="{{ field.web_id }}__focused_chart"
+     data-timeseries-preview-container-id="{{ field.web_id }}__focused_preview"
+     {% else %}data-timeseries-preview-canvas-id="timeSeriesChart"
+     data-timeseries-preview-container-id="chartTimeseries" data-timeseries-preview-granularity-id="display_granularity"{% endif %}>
+    {% if simplified_timeseries %}
+    <div class="recurrent-timeseries-preview-shell" id="{{ field.web_id }}__focused_preview">
+        <aside class="recurrent-timeseries-preview timeseries-preview-panel text-start shadow-custom" aria-live="polite">
+            {% include "model_builder/side_panels/timeseries_preview_panel.html" with preview_title="Usage volume projection" preview_subtitle=field.label preview_canvas_id=focused_canvas_id preview_status="Preparing preview…" %}
+        </aside>
+    </div>
+    {% endif %}
     <div class="accordion accordion-panel" id="{{ field.web_id }}__usage_projection">
         <div class="accordion-item">
             <h2 class="accordion-header">

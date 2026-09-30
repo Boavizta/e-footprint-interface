@@ -254,7 +254,12 @@ test("creation requirements follow candidates, release forced membership and ret
 
 function mountEditor() {
     mount();
-    document.querySelector('[data-simplified-workspace]').innerHTML = fs.readFileSync(path.join(__dirname, 'fixtures/simplified_editor.html'), 'utf8');
+    const workspace = document.querySelector('[data-simplified-workspace]');
+    const group = workspace.querySelector('[data-simplified-group]').cloneNode(false);
+    const object = workspace.querySelector('[data-simplified-object]').cloneNode(false);
+    object.innerHTML = fs.readFileSync(path.join(__dirname, 'fixtures/simplified_editor.html'), 'utf8');
+    group.appendChild(object);
+    workspace.replaceChildren(group);
     window.htmx.trigger = jest.fn();
     require('../theme/static/scripts/simplified_inputs.js').initializeEdits();
     return document.querySelector('[data-simplified-editor]');
@@ -335,4 +340,46 @@ test("accepted replacement baselines wait for the workspace guard to restore for
     input.value = "9";
     input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
     expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+});
+
+
+test("export press completes the focused field before downloading and failure blocks continuation", () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    const link = document.getElementById("download-model");
+    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    input.focus();
+    input.value = "8";
+    link.dispatchEvent(new MouseEvent("mousedown", {bubbles: true, cancelable: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
+    expect(click).not.toHaveBeenCalled();
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, successful: false},
+    }));
+    expect(click).not.toHaveBeenCalled();
+    link.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+    expect(form.querySelector("[data-simplified-save-status]").textContent).toContain("Retry or discard");
+    expect(form.querySelector('[data-action="simplified-discard"]').hidden).toBe(false);
+    expect(click).not.toHaveBeenCalled();
+    form.querySelector('[data-action="simplified-retry"]').click();
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, successful: true},
+    }));
+    expect(click).not.toHaveBeenCalled();
+    click.mockRestore();
+});
+
+test("direct click activation completes the focused-field save before resuming export", () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    input.focus();
+    input.value = "9";
+    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    document.getElementById("download-model").dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+    expect(click).not.toHaveBeenCalled();
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, successful: true},
+    }));
+    expect(click).toHaveBeenCalledTimes(1);
+    click.mockRestore();
 });

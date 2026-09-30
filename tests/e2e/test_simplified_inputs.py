@@ -56,6 +56,7 @@ class TestSimplifiedInputs:
         expect(model_select.locator("option")).to_have_text([str(model) for model in models])
         expect(resolution_select.locator("option")).to_have_text([str(value) for value in resolutions])
         expect(resolution_select).to_have_value(job.resolution.value)
+        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
         with page.expect_response("**/edit-simplified-input/**"):
             resolution_select.select_option(resolutions[0].value)
         expect(resolution_select).to_have_value(resolutions[0].value)
@@ -583,6 +584,7 @@ class TestInlineBookmarks:
         page.unroute("**/edit-simplified-input/**")
         click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
         expect(page.locator("#result-block")).not_to_be_empty()
+        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
         saved_total = totals.nth(0).text_content()
 
         def reject_value(route):
@@ -610,7 +612,9 @@ class TestInlineBookmarks:
         assert totals.nth(0).text_content() != saved_total
         lifespan.get_by_text("Source, confidence and comment", exact=True).click()
         lifespan.locator(".confidence-badge").click()
-        click_and_wait_for_htmx(page, lifespan.locator('.confidence-menu [data-level="high"]'))
+        with page.expect_response("**/edit-simplified-input/**"):
+            lifespan.locator('.confidence-menu [data-level="high"]').click()
+        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
         expect(lifespan.locator(".confidence-badge")).to_have_attribute("data-level", "high")
         lifespan.get_by_text("Source, confidence and comment", exact=True).click()
         lifespan.locator('[data-action="open-source-editor"]').click()
@@ -645,3 +649,181 @@ class TestInlineBookmarks:
         minimal_complete_model_builder.side_panel.submit_and_wait_for_close()
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
         assert totals.nth(0).text_content() != prior
+
+
+@pytest.mark.e2e
+def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_complete_model_builder, tmp_path):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    workspace = open_configure(page)
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    field(workspace, "hourly_occurrences").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return", exact=True))
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    selected = field(workspace, "hourly_occurrences")
+    before = selected.locator("[data-current-value]").text_content()
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    panel = page.locator("[data-simplified-timeseries]")
+    expect(panel.locator('[data-hourly-preview-input][name$="__initial_volume"]')).to_be_visible()
+    volume = panel.locator('[name$="__initial_volume"]')
+    accepted_volume = volume.input_value()
+    volume.fill("25")
+    builder.download_active_model(str(tmp_path / "saved-timeseries.e-f.json"))
+    data = json.loads((tmp_path / "saved-timeseries.e-f.json").read_text())
+    owner_id = selected.get_attribute("data-owner-id")
+    exported_volume = data["UsagePattern"][owner_id]["hourly_occurrences"]["form_inputs"]["initial_volume"]
+    assert float(exported_volume) == float(accepted_volume)
+    expect(panel).to_be_visible()
+    expect(volume).to_have_value("25")
+    page.locator('[data-action="simplified-timeseries-cancel"]').click()
+    expect(page.locator("#sidePanel")).not_to_be_visible()
+    expect(selected.locator("[data-current-value]")).to_have_text(before)
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    page.set_viewport_size({"width": 500, "height": 900})
+    volume.fill("30")
+    preview = panel.locator("[data-hourly-timeseries-preview]")
+    expect(preview.locator("canvas")).to_be_visible()
+    page.wait_for_function("() => document.querySelector('[data-simplified-timeseries] canvas')._timeseriesPreviewChart")
+    page.set_viewport_size({"width": 1440, "height": 1000})
+    volume.fill("40")
+    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=200, body="", headers={
+        "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
+    page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
+        if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
+    }, true)""")
+    click_and_wait_for_htmx(page, page.locator("#btn-submit-form"))
+    expect(panel).to_be_visible()
+    expect(volume).to_have_value("40")
+    expect(panel.locator("[data-timeseries-save-status]")).to_contain_text("Not saved")
+    page.unroute("**/edit-simplified-input/**")
+    builder.side_panel.submit_and_wait_for_close()
+    expect(selected.locator("[data-current-value]")).not_to_have_text(before)
+    selected.get_by_text("Source, confidence and comment", exact=True).click()
+    selected.locator('[data-action="open-source-editor"]').click()
+    comment = selected.locator(".source-editor-comment")
+    comment.fill("Forecast assumption")
+    with page.expect_response("**/edit-simplified-input/**"):
+        comment.press("Tab")
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
+    expect(selected.locator('input[name$="__comment"]')).to_have_value("Forecast assumption")
+    expect(page.locator("[data-simplified-timeseries]")).to_have_count(0)
+
+
+@pytest.mark.e2e
+def test_focused_edit_export_waits_for_save_and_failed_edit_blocks_until_discard(
+        minimal_complete_model_builder, tmp_path):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    workspace = open_configure(page)
+    field(workspace, "lifespan").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    value = field(workspace, "lifespan").locator('input[type="number"]')
+    value.fill("8")
+    filename = str(tmp_path / "final-field.e-f.json")
+    builder.download_active_model(filename)
+    data = json.loads((tmp_path / "final-field.e-f.json").read_text())
+    owner_id = field(workspace, "lifespan").get_attribute("data-owner-id")
+    assert data["Storage"][owner_id]["lifespan"]["value"] == 8
+    selected = field(workspace, "lifespan")
+    selected.get_by_text("Source, confidence and comment", exact=True).click()
+    selected.locator('[data-action="open-source-editor"]').click()
+    selected.locator(".source-editor-comment").fill("Export the final metadata too")
+    builder.download_active_model(filename)
+    data = json.loads((tmp_path / "final-field.e-f.json").read_text())
+    assert data["Storage"][owner_id]["lifespan"]["comment"] == "Export the final metadata too"
+    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=200, body="", headers={
+        "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
+    page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
+        if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
+    }, true)""")
+    value.fill("9")
+    with page.expect_response("**/edit-simplified-input/**"):
+        value.press("Enter")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    downloads = []
+    page.on("download", lambda download: downloads.append(download))
+    page.locator("#download-model").click()
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_contain_text("Retry or discard")
+    assert downloads == []
+    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
+    expect(value).to_have_value("9")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_contain_text("before changing views")
+    workspace.get_by_role("button", name="Configure", exact=True).click()
+    expect(workspace).to_have_attribute("data-mode", "simplified")
+    page.unroute("**/edit-simplified-input/**")
+    click_and_wait_for_htmx(page, field(workspace, "lifespan").get_by_role("button", name="Discard edit"))
+    expect(value).to_have_value("8")
+    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+    expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+    open_simplified(page)
+    expect(value).to_have_value("8")
+    value.fill("10")
+    with page.expect_response("**/edit-simplified-input/**"):
+        value.press("Tab")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
+    expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+    with page.expect_download() as download:
+        page.locator("#download-model").press("Enter")
+    download.value.save_as(filename)
+    builder.import_json_file(filename)
+    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
+    expect(field(page.locator('[data-simplified-workspace]:visible'), "lifespan").locator('input[type="number"]')).to_have_value("10")
+
+
+@pytest.mark.e2e
+def test_workspace_export_commits_focused_field_and_honors_other_model_failed_save(
+        minimal_complete_model_builder, tmp_path):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    builder.add_model_by_duplication()
+    builder.switch_to_model(0)
+    workspace = open_configure(page)
+    field(workspace, "lifespan").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    reference_id = field(workspace, "lifespan").get_attribute("data-owner-id")
+    value = field(workspace, "lifespan").locator('input[type="number"]')
+    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=200, body="", headers={
+        "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
+    page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
+        if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
+    }, true)""")
+    value.fill("9")
+    with page.expect_response("**/edit-simplified-input/**"):
+        value.press("Enter")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    page.unroute("**/edit-simplified-input/**")
+    builder.switch_to_model(1)
+    workspace = open_configure(page)
+    field(workspace, "lifespan").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    field(workspace, "lifespan").locator('input[type="number"]').fill("7")
+    builder.download_active_model(str(tmp_path / "active.e-f.json"))
+    expect(page.locator('[data-simplified-target="1"] [data-simplified-save-status]')).to_have_text("Saved")
+    page.locator('[data-action="simplified-mode"]').click()
+    expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+    page.locator("#download-menu-toggle").click()
+    downloads = []
+    page.on("download", lambda download: downloads.append(download))
+    page.locator("#download-workspace").click()
+    expect(page.locator("[data-export-status]")).to_be_visible()
+    expect(page.locator("[data-export-status]")).to_contain_text("Another modeling has an unsaved input")
+    assert downloads == []
+    builder.switch_to_model(0)
+    expect(field(workspace, "lifespan").locator('input[type="number"]')).to_have_value("9")
+    page.locator('[data-action="simplified-mode"]').click()
+    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
+    click_and_wait_for_htmx(page, field(workspace, "lifespan").get_by_role("button", name="Discard edit"))
+    page.locator('[data-action="simplified-mode"]').click()
+    expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+    open_simplified(page)
+    builder.switch_to_model(1)
+    open_simplified(page)
+    field(workspace, "lifespan").locator('input[type="number"]').fill("8")
+    builder.download_workspace(str(tmp_path / "both.e-f.json"))
+    data = json.loads((tmp_path / "both.e-f.json").read_text())
+    assert data["models"][0]["Storage"][reference_id]["lifespan"]["value"] != 9
+    assert data["models"][1]["Storage"][reference_id]["lifespan"]["value"] == 8
+    builder.import_json_file(str(tmp_path / "both.e-f.json"))
+    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
+    expect(field(page.locator('[data-simplified-workspace]:visible'), "lifespan").locator('input[type="number"]')).to_have_value("8")

@@ -203,7 +203,7 @@
     function setPreviewVisibility(region, visible) {
         const container = previewContainer(region);
         if (!container) return;
-        const shouldShow = visible && window.innerWidth >= 1200;
+        const shouldShow = visible && (window.innerWidth >= 1200 || !!region.closest("[data-simplified-timeseries]"));
         container.classList.toggle("d-none", !shouldShow);
         container.classList.toggle("d-block", shouldShow);
         if (!shouldShow) destroyPreview(region);
