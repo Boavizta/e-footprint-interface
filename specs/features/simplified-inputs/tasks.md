@@ -4,6 +4,8 @@ Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed librar
 
 Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending. The deployment/merge prerequisite below remains outstanding.
 
+Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
+
 ## Runs
 
 - **Run A — foundations:** Tasks 1–5 complete.
@@ -89,5 +91,6 @@ Repository: e-footprint-interface, with both repositories' release gates. Files 
 
 ## Gates
 
+- **Local development:** keep `efootprint = {path = "../e-footprint", develop = true}  # local dev: swap back, do NOT commit` active throughout Runs B–C. Preserve the local `pyproject.toml` and `poetry.lock` edits and exclude them from commits. The dependency guard's expected local failure does not block implementation or human review; restore the published dependency during release/merge preparation.
 - **Deployment/merge prerequisite:** pre-existing editable `pyproject.toml` and `poetry.lock` edits are preserved for local co-development; the dependency guard therefore remains failing locally. Before any commit reaches `main`, publish/use an `efootprint` release containing the Examples API and authored-input matching changes, then restore a matching PyPI dependency in both files and pass the dependency guard.
 - **Final environment:** use the intended local library checkout for cross-repo tests. Interface E2E requires a running local server; no production service. Full interface pytest and Jest, library pytest, strict MkDocs and installed-resource checks are final quality gates. Add consolidated Unreleased changelog entries and promote new patterns to the owning architecture pages; suggest the matching `AGENTS.md`/`CLAUDE.md` pointers.
