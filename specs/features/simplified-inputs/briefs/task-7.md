@@ -1,7 +1,7 @@
 # Task 7 — Build Configure and the shared workspace
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [grouped workspace](../plan.html#workspace), [configuration save](../plan.html#configuration-save), [model context](../plan.html#model-context). Task: [overview](../tasks.md#task-7). Status: under review.
+Plan: [grouped workspace](../plan.html#workspace), [configuration save](../plan.html#configuration-save), [model context](../plan.html#model-context). Task: [overview](../tasks.md#task-7). Status: approved.
 Implementation: standard — combine Task 3/4 catalog and save APIs with `side_panel_utils.js`'s deferred-action pattern and resident-canvas switching.
 
 ## Start here

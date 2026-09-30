@@ -1,7 +1,7 @@
 # Task 10 — Complete timeseries, export and release checks
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [timeseries](../plan.html#timeseries), [exports](../plan.html#exports), [verification](../plan.html#verification). Task: [overview](../tasks.md#task-10). Status: under review.
+Plan: [timeseries](../plan.html#timeseries), [exports](../plan.html#exports), [verification](../plan.html#verification). Task: [overview](../tasks.md#task-10). Status: approved.
 Implementation: standard — use the existing timeseries registry/panel and Task 6/9 save state in current export controls, then run integrated gates.
 
 ## Start here

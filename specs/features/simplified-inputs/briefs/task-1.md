@@ -1,7 +1,7 @@
 # Task 1 — Rename ready-made modelings to Examples
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [Examples](../plan.html#examples). Task: [overview](../tasks.md#task-1). Status: under review.
+Plan: [Examples](../plan.html#examples). Task: [overview](../tasks.md#task-1). Status: approved.
 Implementation: easy — the rename map and Django rendering-template boundary are explicit.
 
 ## Start here

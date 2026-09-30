@@ -1,7 +1,7 @@
 # Task 6 — Guard workspace mutations
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [one-at-a-time saves](../plan.html#saves). Task: [overview](../tasks.md#task-6). Status: under review.
+Plan: [one-at-a-time saves](../plan.html#saves). Task: [overview](../tasks.md#task-6). Status: approved.
 Implementation: standard — extend current HTMX request hooks and per-XHR disabled-state snapshot to mutation controls and response settlement.
 
 ## Start here

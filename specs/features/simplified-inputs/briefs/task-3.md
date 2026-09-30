@@ -1,7 +1,7 @@
 # Task 3 — Establish the definition and eligible-field catalog
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [shared data](../plan.html#contract), [eligible inputs](../plan.html#dependencies). Task: [overview](../tasks.md#task-3). Status: under review.
+Plan: [shared data](../plan.html#contract), [eligible inputs](../plan.html#dependencies). Task: [overview](../tasks.md#task-3). Status: approved.
 Implementation: standard — integrate existing constructor/conditional metadata, form fields and timeseries builder lookup into one catalog.
 
 ## Start here

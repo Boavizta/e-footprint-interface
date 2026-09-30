@@ -1,7 +1,7 @@
 # Task 8 — Author selection beside Modeling inputs
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [author in Modeling](../plan.html#lifecycle), [new dependents](../plan.html#new-dependents). Task: [overview](../tasks.md#task-8). Status: under review.
+Plan: [author in Modeling](../plan.html#lifecycle), [new dependents](../plan.html#new-dependents). Task: [overview](../tasks.md#task-8). Status: approved.
 Implementation: standard — Task 3/4 provide addresses and patches, and `CreateObjectUseCase` has one final save after request-local hooks; map draft fields to created IDs and use deletion's actual cascade.
 
 ## Start here

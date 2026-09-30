@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: under review. This is one interface-owned, cross-repository working set; implementation starts after review in a fresh session.
+Status: approved. This is one interface-owned, cross-repository working set; implementation begins in a fresh session.
 
 ## Runs
 
@@ -29,61 +29,61 @@ The [agent tooling](../../agent-tooling.md) routes easy, standard and hard to th
 
 ## Task 1 — Rename ready-made modelings to Examples
 
-Goal: Complete the coordinated terminology and API cutover while preserving scenario IDs, data, results and guide associations. Status: under review. Brief: [task-1](briefs/task-1.md).
+Goal: Complete the coordinated terminology and API cutover while preserving scenario IDs, data, results and guide associations. Status: approved. Brief: [task-1](briefs/task-1.md).
 
 Repository: e-footprint and e-footprint-interface. Files touched: library `efootprint/modeling_templates/`, `tests/test_modeling_templates.py`, package resources, live docs; interface catalog, picker, routes, tour/help, authoring scripts, callers and tests. Tests: both catalog suites, package-resource and deep-link checks, full suites and library strict docs build. Acceptance: renamed imports/commands/picker/deep links work from installed artifacts; historical content and Django rendering-template names remain intact. Depends on: none. Implementation: easy — the rename map and Django rendering-template boundary are explicit.
 
 ## Task 2 — Fix shared-controller dependent validation
 
-Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: under review. Brief: [task-2](briefs/task-2.md).
+Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: approved. Brief: [task-2](briefs/task-2.md).
 
 Repository: e-footprint. Files touched: `efootprint/abstract_modeling_classes/modeling_object.py`, `tests/abstract_modeling_classes/test_modeling_object.py`. Tests: focused sibling-dependent regression and library suite. Acceptance: two conditional fields with one controller are both returned and both checked by the existing validator. Depends on: none. Implementation: easy — the wrong dictionary-key check in `attributes_with_depending_values()` is identified; the regression is focused.
 
 ## Task 3 — Establish the definition and eligible-field catalog
 
-Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: under review. Brief: [task-3](briefs/task-3.md).
+Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: approved. Brief: [task-3](briefs/task-3.md).
 
 Repository: e-footprint-interface. Files touched: new `domain/services/simplified_inputs.py` and `domain/conditional_inputs.py`; form generator, timeseries registry, version normalization and focused tests. Tests: eligibility, nested owner addresses, dependent-only/chained selection, normal form and timeseries regressions. Acceptance: address keys are owner ID plus constructor attribute; unsupported structural fields stay excluded; `complete_selection` and validation agree; older files normalize to empty without copying values. Depends on: Task 2 for final shared-controller verification. Implementation: standard — integrate existing constructor/conditional metadata, form fields and timeseries builder lookup into one catalog.
 
 ## Task 4 — Save configuration and exchange independent models
 
-Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: under review. Brief: [task-4](briefs/task-4.md).
+Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: approved. Brief: [task-4](briefs/task-4.md).
 
 Repository: e-footprint-interface. Files touched: new `application/use_cases/simplified_inputs.py`; session/in-memory/workspace repositories; `views.py`, `views_workspace.py`, version normalization and repository/workspace tests. Tests: replacement versus patch, retained help/Clear, budget failure, per-slot recovery, independent duplicate, System-ID remapping, two-model import failure and round-trip. Acceptance: a failed configuration save publishes nothing; every file carries its model's definition; incoming models and combined size are checked before live workspace replacement. Depends on: Task 3. Implementation: standard — extend `save_interface_config()`, slot/ID helpers and `SystemImportService`; preflight both models before the current restore writes.
 
 ## Task 5 — Apply one atomic selected-input edit
 
-Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: under review. Brief: [task-5](briefs/task-5.md).
+Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: approved. Brief: [task-5](briefs/task-5.md).
 
 Repository: e-footprint-interface. Files touched: `domain/object_factory.py`, `application/use_cases/simplified_inputs.py`, `domain/entities/web_core/model_web.py`, integration tests. Tests: valid-dependent retention, first-allowed fallback, empty-choice rejection, no partial value/metadata persistence, nested owner and empty-count cases. Acceptance: one accepted batch persists once; failure preserves saved values and metadata; normal edit behavior remains intact. Depends on: Tasks 2 and 3. Implementation: hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply sibling validation and field links, and the existing factory/`ModelingUpdate` supply conversion and rollback. The implementer must derive chained, cross-owner candidate values and coordinate direct metadata changes before that batch; this is demanding because conditional validation reads the applied graph while the current converter invokes `ModelingUpdate` per owner.
 
 ## Task 6 — Guard workspace mutations
 
-Goal: Allow only one mutation at a time across existing Modeling and new simplified-input controls. Status: under review. Brief: [task-6](briefs/task-6.md).
+Goal: Allow only one mutation at a time across existing Modeling and new simplified-input controls. Status: approved. Brief: [task-6](briefs/task-6.md).
 
 Repository: e-footprint-interface. Files touched: `theme/static/scripts/model_builder_main.js`, related shell controls and Jest/E2E guard tests. Tests: delayed mutation blocks editing, switching and export; disabled-state restoration and failure unlock. Acceptance: no second mutation or queued edit starts while one is active; read/scroll and stateless preview remain available. Depends on: none; land before Tasks 7–10. Implementation: standard — extend current HTMX request hooks and per-XHR disabled-state snapshot to mutation controls and response settlement.
 
 ## Task 7 — Build Configure and the shared workspace
 
-Goal: Render eligible fields in the grouped Configure view and saved fields in a Simplified inputs view, with navigation and explicit configuration save/exit. Status: under review. Brief: [task-7](briefs/task-7.md).
+Goal: Render eligible fields in the grouped Configure view and saved fields in a Simplified inputs view, with navigation and explicit configuration save/exit. Status: approved. Brief: [task-7](briefs/task-7.md).
 
 Repository: e-footprint-interface. Files touched: new simplified-input views, presenter, partials, JS and SCSS; URLs, model shell, toolbar and presenter/Jest/E2E tests. Tests: grouping, filter/focus, conditional draft locks, Clear, Save/Discard/Stay, per-model base view and fresh render on Modeling entry. Acceptance: Configure saves a complete definition and returns a complete selected-field view; leaving dirty Configure cannot discard changes silently; old form values stay in DOM only. Depends on: Tasks 3, 4 and 6. Implementation: standard — combine Task 3/4 catalog and save APIs with `side_panel_utils.js`'s deferred-action pattern and resident-canvas switching.
 
 ## Task 8 — Author selection beside Modeling inputs
 
-Goal: Provide immediate bookmarks for existing fields, provisional bookmarks for new objects and deletion cleanup. Status: under review. Brief: [task-8](briefs/task-8.md).
+Goal: Provide immediate bookmarks for existing fields, provisional bookmarks for new objects and deletion cleanup. Status: approved. Brief: [task-8](briefs/task-8.md).
 
 Repository: e-footprint-interface. Files touched: form/source-row contexts, shared bookmark partial, create/edit/delete use cases and views, deletion modal, simplified-input JS, tests. Tests: true nested owner, independent inline patch, Undo, creation required-field preview/lock, successful create, failed/cancelled create, cascade pruning and warning. Acceptance: bookmark saves never submit unsaved value drafts; creation settings persist only after success; deletion removes selected and retained-help entries for removed owners. Depends on: Tasks 3, 4, 6 and 7. Implementation: standard — Task 3/4 provide addresses and patches, and `CreateObjectUseCase` has one final save after request-local hooks; map draft fields to created IDs and use deletion's actual cascade.
 
 ## Task 9 — Edit simple selected inputs and refresh totals
 
-Goal: Autosave scalar/select/provenance edits from Simplified inputs and show the accepted footprint in both Results controls. Status: under review. Brief: [task-9](briefs/task-9.md).
+Goal: Autosave scalar/select/provenance edits from Simplified inputs and show the accepted footprint in both Results controls. Status: approved. Brief: [task-9](briefs/task-9.md).
 
 Repository: e-footprint-interface. Files touched: simplified-input endpoints/presenter/field partials, error modal path, source metadata JS, OOB results renderer, modeling-object hooks and tests. Tests: Enter/blur deduplication, targeted updates, error-modal failure despite HTTP 200, preserved draft, both totals after successful mutations and last-saved total on failure. Acceptance: hidden fields are not offered by the view; accepted edits refresh only affected controls/results; failed edits remain visible and retryable. Depends on: Tasks 5–8. Implementation: standard — connect Task 5/6/7 outputs through existing error-modal signals, targeted swaps and Results OOB rendering.
 
 ## Task 10 — Complete timeseries, export and release checks
 
-Goal: Finish focused timeseries editing and make every normal export follow completed simplified-input saves; verify the full feature. Status: under review. Brief: [task-10](briefs/task-10.md).
+Goal: Finish focused timeseries editing and make every normal export follow completed simplified-input saves; verify the full feature. Status: approved. Brief: [task-10](briefs/task-10.md).
 
 Repository: e-footprint-interface, with both repositories' release gates. Files touched: timeseries side-panel partial and view wiring, simplified-input/export JS, existing download controls, critical E2E tests, changelogs and owning architecture/design/docs pages. Tests: strategy switch/preview/Save/Cancel, failed panel preservation, model-switch discard, focused edit then export, two-model export, full interface Python/Jest/E2E gates, full library pytest and strict docs/package checks. Acceptance: no export claims an unsaved simplified edit; all agreed user journeys pass; the PyPI dependency is restored in both `pyproject.toml` and `poetry.lock` before any merge to main. Depends on: Tasks 1–9. Implementation: standard — use the existing timeseries registry/panel and Task 6/9 save state in current export controls, then run integrated gates.
 

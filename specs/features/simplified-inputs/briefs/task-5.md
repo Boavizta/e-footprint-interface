@@ -1,7 +1,7 @@
 # Task 5 — Apply one atomic selected-input edit
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [atomic edit](../plan.html#atomic-edit). Task: [overview](../tasks.md#task-5). Status: under review.
+Plan: [atomic edit](../plan.html#atomic-edit). Task: [overview](../tasks.md#task-5). Status: approved.
 Implementation: hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply sibling validation and field links, and the existing factory/`ModelingUpdate` supply conversion and rollback. The implementer must derive chained, cross-owner candidate values and coordinate direct metadata changes before that batch; this is demanding because conditional validation reads the applied graph while the current converter invokes `ModelingUpdate` per owner.
 
 ## Start here

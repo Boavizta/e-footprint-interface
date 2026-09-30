@@ -1,7 +1,7 @@
 # Task 9 — Edit simple selected inputs and refresh totals
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [consumption](../plan.html#consume), [saves](../plan.html#saves), [totals](../plan.html#totals). Task: [overview](../tasks.md#task-9). Status: under review.
+Plan: [consumption](../plan.html#consume), [saves](../plan.html#saves), [totals](../plan.html#totals). Task: [overview](../tasks.md#task-9). Status: approved.
 Implementation: standard — connect Task 5/6/7 outputs through existing error-modal signals, targeted swaps and Results OOB rendering.
 
 ## Start here

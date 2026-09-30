@@ -1,7 +1,7 @@
 # Task 2 — Fix shared-controller dependent validation
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [atomic edit](../plan.html#atomic-edit), [SI-1](../known-issues.md). Task: [overview](../tasks.md#task-2). Status: under review.
+Plan: [atomic edit](../plan.html#atomic-edit), [SI-1](../known-issues.md). Task: [overview](../tasks.md#task-2). Status: approved.
 Implementation: easy — the wrong dictionary-key check in `attributes_with_depending_values()` is identified; the regression is focused.
 
 ## Start here

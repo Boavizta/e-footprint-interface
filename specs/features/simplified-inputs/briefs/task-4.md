@@ -1,7 +1,7 @@
 # Task 4 — Save configuration and exchange independent models
 
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
-Plan: [configuration save](../plan.html#configuration-save), [workspace files](../plan.html#persistence). Task: [overview](../tasks.md#task-4). Status: under review.
+Plan: [configuration save](../plan.html#configuration-save), [workspace files](../plan.html#persistence). Task: [overview](../tasks.md#task-4). Status: approved.
 Implementation: standard — extend `save_interface_config()`, slot/ID helpers and `SystemImportService`; preflight both models before the current restore writes.
 
 ## Start here
