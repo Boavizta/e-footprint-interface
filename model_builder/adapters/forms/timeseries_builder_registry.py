@@ -90,10 +90,21 @@ def editable_builders_for(annotation: type) -> tuple[TimeseriesBuilderDefinition
     return EDITABLE_TIMESERIES_BUILDERS.get(annotation, ())
 
 
+def find_editable_builder(annotation: type, value) -> TimeseriesBuilderDefinition | None:
+    """Match a stored value without initializing strategy drafts or evaluating its timeseries."""
+    return next((builder for builder in editable_builders_for(annotation)
+                 if isinstance(value, builder.builder_class)), None)
+
+
+def can_edit_timeseries(annotation: type, value) -> bool:
+    """Whether the ordinary timeseries editor supports the current value."""
+    return find_editable_builder(annotation, value) is not None
+
+
 def build_timeseries_form_config(annotation: type, value) -> dict | None:
     """Build template data for a registered value, or ``None`` when it is read-only."""
     builders = editable_builders_for(annotation)
-    selected = next((builder for builder in builders if isinstance(value, builder.builder_class)), None)
+    selected = find_editable_builder(annotation, value)
     if selected is None:
         return None
 

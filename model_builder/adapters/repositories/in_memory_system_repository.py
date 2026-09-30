@@ -66,7 +66,10 @@ class InMemorySystemRepository(ISystemRepository):
     def interface_config(self) -> dict:
         if self._interface_config is None and self._data and "interface_config" in self._data:
             self._interface_config = deepcopy(self._data["interface_config"])
-        return {} if self._interface_config is None else self._interface_config
+        from model_builder.version_upgrade_handlers import normalize_interface_config
+
+        self._interface_config = normalize_interface_config(self._interface_config or {})
+        return self._interface_config
 
     @interface_config.setter
     def interface_config(self, value: dict) -> None:

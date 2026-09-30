@@ -16,6 +16,18 @@
 <p><strong><a class="source" href="../../model_builder/adapters/forms/form_field_generator.py"><code>adapters/forms/form_field_generator.py</code></a></strong> — form field generation utilities. Includes <code>generate_select_multiple_field()</code> as a standalone reusable helper. A class's <code>conditional_list_values</code> produces a required native select plus a one-hop <code>dynamic_lists</code> entry (<code>filter_by</code> = the parent field's web_id, <code>list_value</code> keyed by the parent's values); <a class="source" href="../../theme/static/scripts/dynamic_forms.js"><code>dynamic_forms.js</code></a> populates the options, restores a valid saved/default value, and clears stale selections when the parent changes.</p>
 <p>When <code>depends_on</code> is a <strong>cross-object dotted path</strong> (e.g. <code>external_api.model_name</code>), the generator collapses the hop at generation time: it keys <code>list_value</code> by each available referenced object's id (resolving the remaining path on the object) and points <code>filter_by</code> at the DOM element that carries that object's selection. That element defaults to <code>{class}_{first_segment}</code>, but a web class can redirect it via <code>conditional_list_filter_overrides</code> when the reference isn't rendered as its own field (e.g. <code>JobWeb</code> maps <code>external_api</code> → the creation-only <code>service_or_external_api</code> parent-selection helper).</p>
 <p>On edit, if the dependency's first segment is skipped from the form, the relationship is fixed: the generator resolves the dotted value from the edited object and renders its valid options directly instead of emitting a dynamic list for a nonexistent controller. This reuses the single-hop cascade with no extra JS.</p>
+<h3 id="simplified-input-catalog">Simplified-input catalog</h3>
+<p><code>domain/services/simplified_inputs.py</code> derives eligibility from constructor annotations and existing
+<code>list_values</code>/<code>conditional_list_values</code>. Request-local <code>FieldAddress</code> identifies the actual
+owner ID and constructor attribute, including nested Storage inputs. Reference-object selectors (Country, Network,
+Device) are eligible, but their hidden reference objects' own inputs and structural/weighted relationships are excluded.
+Numerical inputs remain eligible when empty; normal-form skip lists describe panel layout and do not determine catalog
+eligibility. <code>complete_selection()</code> follows model-wide dependent links recursively, and
+<code>validate_definition()</code> rejects unknown/ineligible settings or missing required companions. A controller with
+an ineligible required companion is itself ineligible; a dependent may be selected alone.</p>
+<p><code>domain/conditional_inputs.resolve_input_path()</code> returns a dotted path's final owner and attribute.
+Normal forms use the same traversal while retaining their existing exclusions, labels, ordering, provenance and
+one-hop <code>dynamic_lists</code>.</p>
 <h2 id="object-factory">Object factory</h2>
 <p><a class="source" href="../../model_builder/domain/object_factory.py"><code>model_builder/domain/object_factory.py</code></a>:</p>
 <ul>

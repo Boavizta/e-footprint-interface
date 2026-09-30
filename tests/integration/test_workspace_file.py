@@ -18,6 +18,7 @@ import json
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from model_builder.version_upgrade_handlers import normalize_interface_config
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.domain.services import SystemImportService
@@ -109,7 +110,7 @@ def test_workspace_round_trip_restores_both_slots_and_active_pointer(client, min
     names = [ModelWeb(restored.repository_for(s)).system.name for s in restored.list_slots()]
     assert names == ["Test System", "Copy of Test System"]
     # interface_config is restored per slot (it was dropped before the #1 fix).
-    assert restored.repository_for(0).interface_config == slot_0_config
+    assert restored.repository_for(0).interface_config == normalize_interface_config(slot_0_config)
 
 
 @pytest.mark.django_db
@@ -205,7 +206,7 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
     shared_config = {"sankey_diagrams": [{"id": "shared"}]}
     _seed_active_slot(client, minimal_system, interface_config=shared_config)
     single_doc = _download(client, "/model_builder/download-json/")
-    assert single_doc["interface_config"] == shared_config  # the export carries it
+    assert single_doc["interface_config"] == normalize_interface_config(shared_config)  # the export carries it
     # Build a workspace whose two models are the SAME single-model document (same system id).
     envelope = {"efootprint_workspace_version": "x", "active_slot": 0,
                 "models": [single_doc, json.loads(json.dumps(single_doc))]}
@@ -223,8 +224,8 @@ def test_workspace_import_with_shared_system_id_re_mints_a_distinct_one(client, 
     assert _object_ids(restored.repository_for(0).get_system_data()) == \
            _object_ids(restored.repository_for(1).get_system_data())
     # interface_config survives the re-mint on the collision slot (with_fresh_system_id preserves it).
-    assert restored.repository_for(0).interface_config == shared_config
-    assert restored.repository_for(1).interface_config == shared_config
+    assert restored.repository_for(0).interface_config == normalize_interface_config(shared_config)
+    assert restored.repository_for(1).interface_config == normalize_interface_config(shared_config)
 
 
 @pytest.mark.django_db

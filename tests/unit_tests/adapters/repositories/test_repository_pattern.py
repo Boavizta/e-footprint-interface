@@ -5,6 +5,8 @@ without requiring Django session infrastructure.
 """
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from e_footprint_interface import __version__ as interface_version
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.adapters.repositories.cache_backend import CacheBackend
@@ -51,9 +53,9 @@ class TestInMemoryRepository:
         assert repository.has_system_data()
         assert repository.get_system_data() == data
 
-    def test_interface_config_defaults_to_empty_dict(self):
+    def test_interface_config_defaults_to_empty_simplified_definition(self):
         repository = InMemorySystemRepository()
-        assert repository.interface_config == {}
+        assert repository.interface_config == {"simplified_inputs": {"title": "", "guidance": "", "fields": {}}}
 
     def test_save_merges_interface_config(self):
         repository = InMemorySystemRepository()
@@ -165,6 +167,25 @@ class FakeSession(dict):
 
 
 class TestSessionSystemRepositoryInterfaceConfigFallback:
+    @pytest.mark.parametrize("source", ["redis", "session"])
+    def test_current_version_missing_definition_reads_empty_without_saving(self, source):
+        config = {"card_order": {"server-list": ["Server_a"]}}
+        session = FakeSession()
+        cached_data = {"interface_config": config, "efootprint_interface_version": interface_version}
+        if source == "session":
+            session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = config
+            session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = interface_version
+        repository = SessionSystemRepository(session)
+        result = (cached_data, "redis") if source == "redis" else (None, None)
+        with patch.object(repository._cache_backend, "get_with_source", return_value=result), \
+                patch.object(repository._cache_backend, "set") as cache_set:
+            assert repository.interface_config == {
+                **config, "simplified_inputs": {"title": "", "guidance": "", "fields": {}},
+            }
+            cache_set.assert_not_called()
+        assert "simplified_inputs" not in config
+        assert "simplified_inputs" not in cached_data["interface_config"]
+
     def test_interface_config_falls_back_to_session_when_cache_empty(self):
         session = FakeSession()
         session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"sankey_diagrams": [{"id": "deadbeef"}]}
@@ -172,7 +193,10 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         repository = SessionSystemRepository(session)
 
         with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source", return_value=(None, None)):
-            assert repository.interface_config == {"sankey_diagrams": [{"id": "deadbeef"}]}
+            assert repository.interface_config == {
+                "sankey_diagrams": [{"id": "deadbeef"}],
+                "simplified_inputs": {"title": "", "guidance": "", "fields": {}},
+            }
 
     def test_save_data_persists_interface_config_to_session(self):
         session = FakeSession()

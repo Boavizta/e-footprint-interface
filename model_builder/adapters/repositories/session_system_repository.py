@@ -170,7 +170,10 @@ class SessionSystemRepository(ISystemRepository):
             self.get_system_data_with_source()
         if self._interface_config is None:
             self._interface_config = self.load_interface_config_from_session()
-        return {} if self._interface_config is None else self._interface_config
+        from model_builder.version_upgrade_handlers import normalize_interface_config
+
+        self._interface_config = normalize_interface_config(self._interface_config or {})
+        return self._interface_config
 
     @interface_config.setter
     def interface_config(self, value: dict) -> None:

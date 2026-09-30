@@ -19,6 +19,7 @@ from model_builder.adapters.ui_config.field_ui_config_provider import FieldUICon
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
+from model_builder.domain.conditional_inputs import resolve_input_path
 from model_builder.adapters.forms.timeseries_builder_registry import build_timeseries_form_config
 
 if TYPE_CHECKING:
@@ -385,9 +386,8 @@ def generate_dynamic_form(
                         and first_segment in corresponding_web_class.attributes_to_skip_in_forms
                     )
                     if dependency_is_fixed_on_edit:
-                        resolved = obj_to_edit.modeling_obj
-                        for segment in dependency_path:
-                            resolved = getattr(resolved, segment)
+                        owner, attribute = resolve_input_path(obj_to_edit.modeling_obj, depends_on)
+                        resolved = getattr(owner, attribute)
                         structure_field["options"] = [
                             {"label": value, "value": value}
                             for value in values_by_conditional_value.get(str(resolved), [])
@@ -406,9 +406,8 @@ def generate_dynamic_form(
                         ).__name__
                         list_value = {}
                         for referenced_obj in model_web.get_efootprint_objects_from_efootprint_type(referenced_type):
-                            resolved = referenced_obj
-                            for segment in remaining_path:
-                                resolved = getattr(resolved, segment)
+                            owner, attribute = resolve_input_path(referenced_obj, ".".join(remaining_path))
+                            resolved = getattr(owner, attribute)
                             # Persisted objects always resolve to a known key (submit-time
                             # check_belonging_to_authorized_values rejects off-catalog values), so the [] fallback
                             # only fires on a str()-keying bug — and then for every object at once. The

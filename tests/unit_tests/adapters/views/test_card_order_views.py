@@ -233,6 +233,7 @@ def test_save_card_order_persists_complete_mapping_and_preserves_siblings_and_ot
     assert active_data["interface_config"] == {
         "sankey_diagrams": [{"id": "deadbeef"}],
         "card_order": COMPLETE_CARD_ORDER,
+        "simplified_inputs": {"title": "", "guidance": "", "fields": {}},
     }
     parked_data = SessionSystemRepository(client.session, slot=1).get_system_data()
     assert parked_data["interface_config"] == {"sankey_diagrams": [{"id": "parked"}]}
