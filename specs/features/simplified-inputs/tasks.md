@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Run A in progress. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending.
+Status: Run A implementation and per-task reviews complete; global review in progress. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending.
 
 ## Runs
 
@@ -18,7 +18,7 @@ Status: Run A in progress. This is one interface-owned, cross-repository working
 | [2](#task-2) | One controller validates every dependent | [1.4](plan.html#atomic-edit) | Library | easy — identified wrong-key check and focused regression |
 | [3](#task-3) | Field identity, eligibility, required-selection closure and empty definition | [1.1](plan.html#contract), [1.2](plan.html#dependencies) | Interface | standard — integrate constructor metadata, form fields and builder lookup |
 | [4](#task-4) | Per-model configuration saves, copies and safe file exchange | [1.2](plan.html#configuration-save), [1.5](plan.html#persistence) | Interface | standard — extend existing config save, slot/ID helpers and import preflight |
-| [5](#task-5) | Atomic selected-input value and provenance changes across owners | [1.4](plan.html#atomic-edit) | Interface | hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply validation and field links, and existing code supplies conversion/rollback; deriving chained cross-owner candidates and coordinating metadata remains demanding because validation reads the applied graph |
+| [5](#task-5) | Atomic selected-input value and provenance changes across owners | [1.4](plan.html#atomic-edit) | Both | hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply validation and field links, and existing code supplies conversion/rollback; deriving chained cross-owner candidates and coordinating metadata remains demanding because validation reads the applied graph |
 | [6](#task-6) | One workspace mutation in flight, preserving disabled states | [1.4](plan.html#saves) | Interface | standard — extend existing HTMX lifecycle and disabled-state snapshot to mutation triggers |
 | [7](#task-7) | Configure, navigation, base-view switching and draft exit | [1.2](plan.html#workspace), [1.5](plan.html#model-context) | Interface | standard — join Task 3/4 data and save APIs with the existing deferred-navigation pattern |
 | [8](#task-8) | Inline bookmarks and creation/deletion selection lifecycle | [1.3](plan.html#lifecycle) | Interface | standard — Task 3/4 APIs and creation's final save cover the lifecycle; map draft fields to final IDs |
@@ -53,9 +53,9 @@ Repository: e-footprint-interface. Files touched: new `application/use_cases/sim
 
 ## Task 5 — Apply one atomic selected-input edit
 
-Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: implementing. Brief: [task-5](briefs/task-5.md).
+Goal: Save a controlling field, all affected dependent values and provenance with one library `ModelingUpdate`. Status: complete. Brief: [task-5](briefs/task-5.md).
 
-Repository: e-footprint-interface. Files touched: `domain/object_factory.py`, `application/use_cases/simplified_inputs.py`, `domain/entities/web_core/model_web.py`, integration tests. Tests: valid-dependent retention, first-allowed fallback, empty-choice rejection, no partial value/metadata persistence, nested owner and empty-count cases. Acceptance: one accepted batch persists once; failure preserves saved values and metadata; normal edit behavior remains intact. Depends on: Tasks 2 and 3. Implementation: hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply sibling validation and field links, and the existing factory/`ModelingUpdate` supply conversion and rollback. The implementer must derive chained, cross-owner candidate values and coordinate direct metadata changes before that batch; this is demanding because conditional validation reads the applied graph while the current converter invokes `ModelingUpdate` per owner.
+Repository: both. Files touched: interface `domain/object_factory.py`, `application/use_cases/simplified_inputs.py`, integration tests; library authored-input matching, conditional validation and transaction regressions. [IMPL-DECISION-03](plan.html#impl-decision-03) covers confirmed authored-state changes hidden by numerical equality. Tests: valid-dependent retention, first-allowed fallback, empty-choice rejection, no partial value/metadata persistence, nested owner and empty-count cases. Acceptance: one accepted batch persists once; failure preserves saved values and metadata; normal edit behavior remains intact. Depends on: Tasks 2 and 3. Implementation: hard — the plan fixes one batch and request-local persistence, Tasks 2–3 supply sibling validation and field links, and the existing factory/`ModelingUpdate` supply conversion and rollback. The implementer must derive chained, cross-owner candidate values and coordinate direct metadata changes before that batch; this is demanding because conditional validation reads the applied graph while the current converter invokes `ModelingUpdate` per owner.
 
 ## Task 6 — Guard workspace mutations
 
@@ -89,5 +89,5 @@ Repository: e-footprint-interface, with both repositories' release gates. Files 
 
 ## Gates
 
-- **Deployment/merge prerequisite:** current uncommitted `pyproject.toml` and `poetry.lock` edits in the interface checkout are pre-existing; preserve them during planning. The constitution requires a PyPI `efootprint` dependency in both files before any commit reaches `main`.
+- **Deployment/merge prerequisite:** pre-existing editable `pyproject.toml` and `poetry.lock` edits are preserved for local co-development; the dependency guard therefore remains failing locally. Before any commit reaches `main`, publish/use an `efootprint` release containing the Examples API and authored-input matching changes, then restore a matching PyPI dependency in both files and pass the dependency guard.
 - **Final environment:** use the intended local library checkout for cross-repo tests. Interface E2E requires a running local server; no production service. Full interface pytest and Jest, library pytest, strict MkDocs and installed-resource checks are final quality gates. Add consolidated Unreleased changelog entries and promote new patterns to the owning architecture pages; suggest the matching `AGENTS.md`/`CLAUDE.md` pointers.

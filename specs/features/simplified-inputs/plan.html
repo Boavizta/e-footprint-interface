@@ -320,6 +320,7 @@
   <p><strong>Implementation decisions</strong></p>
   <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — APPLIED</a></p>
   <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
+  <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -790,6 +791,17 @@ persist once</code></pre></div></div>
     <p><strong>Tracked library fix:</strong> <code>attributes_with_depending_values()</code> drops earlier
     dependents sharing a controller. Keep the <a href="known-issues.md">SI-1 fix and regression</a> in the
     library; the new edit path must not compensate for it in interface code.</p>
+    <aside id="impl-decision-03" data-note="review">
+      <p><strong>[IMPL-DECISION-03] — APPLIED</strong></p>
+      <p>Run A, Task 5 and its review: authored input state can differ even when numerical values
+      compare equal. Empty versus zero Server counts must transact and satisfy conditional choices;
+      timeseries builder settings must persist even when they produce the same series. Library-owned
+      input matching distinguishes these states in validation and transaction no-op detection, and
+      the interface reuses that rule. Arithmetic equality remains unchanged. This prevents successful
+      saves from silently discarding authored settings or accompanying provenance. See
+      <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py">ModelingUpdate</a>
+      and <a href="handoffs/task-5.md">Task 5 handoff</a>.</p>
+    </aside>
     <p>The presenter replaces only affected fields/objects, with accepted dependent choices and notices.
     It does not replace unrelated dirty controls. Omitted provenance properties remain unchanged.</p>
     <h4 id="totals">4 · Refresh both Results controls</h4>

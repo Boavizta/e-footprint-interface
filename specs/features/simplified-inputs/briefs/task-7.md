@@ -44,4 +44,4 @@ No bookmark autosave, simple value autosave or timeseries editor. The selected s
 `Server.fixed_nb_of_instances` (also present on Storage) is an eligible optional number even though ordinary
 panels skip it. When rendering catalog-selected fields, allow their explicit inclusion and handle
 `ExplainableQuantity | EmptyExplainableObject` as a numeric input, including conditional empty choices.
-The existing normal-form defaults must stay unchanged. See [Task 3 handoff](../handoffs/task-3.md).
+Task 5 already extends the shared annotation resolver to unwrap the optional-empty union; rendering and empty-value transport remain here. The existing normal-form defaults must stay unchanged. See [Task 3 handoff](../handoffs/task-3.md) and [Task 5 handoff](../handoffs/task-5.md).
