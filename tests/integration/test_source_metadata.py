@@ -1,4 +1,5 @@
 """Integration tests for source metadata through parser → factory chain."""
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import pytest
 
 from efootprint.abstract_modeling_classes.source_objects import Sources
@@ -207,7 +208,7 @@ def test_country_metadata_only_confidence_edit_from_source_table_does_not_requir
     }
     parsed = parse_form_data(raw_form_data, "Country")
 
-    output = EditObjectUseCase(model_web).execute(
+    output = EditObjectUseCase(model_web, input_catalog).execute(
         EditObjectInput(object_id=country_web.efootprint_id, form_data=parsed))
 
     request = rf.post("/model_builder/edit-object/")

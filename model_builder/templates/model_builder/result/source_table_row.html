@@ -3,7 +3,10 @@
 {% url 'edit-object' explainable_quantity.modeling_obj_container.efootprint_id as edit_object_url %}
 <tr id="source-row-display-{{ explainable_quantity.web_id }}">
     <th scope="row" class="source-col-name">
+        <div class="d-flex align-items-center gap-1">
+        {% if explainable_quantity.bookmark %}{% include 'model_builder/simplified_inputs/bookmark.html' with field=explainable_quantity.bookmark %}{% endif %}
         {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.label|capfirst %}
+        </div>
     </th>
     <td class="source-col-attr">
         {% include 'model_builder/components/truncating_text.html' with visible_text=explainable_quantity.modeling_obj_container.name %}

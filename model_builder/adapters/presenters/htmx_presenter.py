@@ -85,6 +85,14 @@ class HtmxPresenter:
         """
         canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
 
+        from django.utils.html import escape
+        from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
+
+        for address in sorted(output.simplified_added, key=lambda value: (value.object_id, value.attribute)):
+            owner = self.model_web.flat_efootprint_objs_dict[address.object_id]
+            label = FieldUIConfigProvider.get_config(address.attribute, owner.efootprint_class.__name__)["label"]
+            constraint_messages.append(f"{escape(owner.name)} · {escape(label)} was included in Simplified inputs.")
+
         if output.parent_was_linked:
             toast_and_highlight_data = {
                 "id": output.web_id,
@@ -357,6 +365,11 @@ class HtmxPresenter:
             "modal_id": "model-builder-modal",
             "remove_card_with_hyperscript": True,
         }
+
+        context["selected_fields_removed"] = [
+            f"{self.model_web.flat_efootprint_objs_dict[address.object_id].name} · "
+            f"{LabelResolver.get_field_label(address.attribute)}"
+            for address in check_result.selected_fields_removed]
 
         if check_result.has_accordion_children:
             class_label = LabelResolver.get_class_label(web_obj.class_as_simple_str).lower()

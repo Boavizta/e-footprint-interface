@@ -1,8 +1,8 @@
 <div class="simplified-selection" data-selection-controls data-field-id="{{ field.dom_id }}" data-required-inputs="{{ field.dependents|join:' ' }}">
     <label for="{{ field.dom_id }}-include">
-        <input id="{{ field.dom_id }}-include" type="checkbox" data-include-input {% if field.setting.included %}checked{% endif %}> Include
+        <input id="{{ field.dom_id }}-include" type="checkbox" data-include-input {% if field.setting.included %}checked{% endif %} {% if field.required_by %}disabled{% endif %}> Include
     </label>
-    <p class="small text-muted" data-required-explanation hidden>Required by an included input.</p>
+    <p class="small text-muted" data-required-explanation {% if not field.required_by %}hidden{% endif %}>Required by {% if field.required_by %}{{ field.required_by.label }}{% else %}an included input{% endif %}.</p>
     <label for="{{ field.dom_id }}-help">Help text</label>
     <textarea id="{{ field.dom_id }}-help" class="form-control" data-field-help>{{ field.setting.help }}</textarea>
 </div>

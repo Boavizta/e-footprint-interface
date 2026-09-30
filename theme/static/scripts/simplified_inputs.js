@@ -157,7 +157,150 @@
             else workspace.querySelector("[data-selected-object-filter]").focus();
         }
     }
+    function updateBookmark(bookmark, setting, requiredBy) {
+        const checkbox = bookmark.querySelector("[data-include-input]");
+        const help = bookmark.querySelector("[data-field-help]");
+        const explanation = bookmark.querySelector("[data-required-explanation]");
+        bookmark.dataset.savedIncluded = String(setting.included);
+        bookmark.dataset.requiredLabel = requiredBy?.label || "";
+        bookmark.querySelector("[data-bookmark-icon]").className = `bi bi-bookmark${setting.included ? "-fill" : ""}`;
+        if (checkbox) { checkbox.checked = setting.included; checkbox.disabled = !!requiredBy; }
+        if (help) { help.value = setting.help; help.defaultValue = setting.help; }
+        if (explanation) {
+            explanation.hidden = !requiredBy;
+            explanation.textContent = requiredBy ? `Required by ${requiredBy.label}.` : "";
+        }
+    }
+    function refreshCreationBookmarks() {
+        const script = document.getElementById("dynamic-form-data");
+        if (!script) return;
+        const data = JSON.parse(script.textContent);
+        const bookmarks = [...document.querySelectorAll("[data-bookmark][data-provisional-owner]")];
+        const active = bookmark => !bookmark.closest('[id^="item-"]')?.classList.contains("d-none");
+        bookmarks.forEach(bookmark => {
+            const checkbox = bookmark.querySelector("[data-include-input]");
+            if (bookmark.dataset.authoredIncluded === undefined) bookmark.dataset.authoredIncluded = String(checkbox.checked);
+            checkbox.checked = bookmark.dataset.authoredIncluded === "true";
+            checkbox.disabled = false;
+            bookmark.dataset.requiredLabel = "";
+        });
+        // Same-owner chains use the same dynamic-list edges as the value selectors.
+        for (let pass = 0; pass <= bookmarks.length; pass++) {
+            let changed = false;
+            (data.dynamic_lists || []).forEach(list => {
+                const bookmark = bookmarks.find(item => item.dataset.inputId === list.input_id && active(item));
+                if (!bookmark) return;
+                const filter = document.getElementById(list.filter_by);
+                const controller = bookmarks.find(item => item.dataset.inputId === list.filter_by && active(item));
+                const requirement = list.simplified_required_by?.[filter?.value]
+                    || (controller?.querySelector("[data-include-input]").checked
+                        ? {label: document.querySelector(`label[for="${list.filter_by}"]`)?.textContent.trim()} : null);
+                if (!requirement) return;
+                const checkbox = bookmark.querySelector("[data-include-input]");
+                if (!checkbox.checked) changed = true;
+                checkbox.checked = true;
+                checkbox.disabled = true;
+                bookmark.dataset.requiredLabel = requirement.label;
+            });
+            if (!changed) break;
+        }
+        bookmarks.forEach(bookmark => {
+            const checkbox = bookmark.querySelector("[data-include-input]");
+            updateBookmark(bookmark, {included: checkbox.checked, help: bookmark.querySelector("[data-field-help]").value},
+                bookmark.dataset.requiredLabel ? {label: bookmark.dataset.requiredLabel} : null);
+        });
+    }
+    function pendingCreationSettings(form) {
+        return [...form.querySelectorAll("[data-provisional-owner]")]
+            .filter(bookmark => !bookmark.closest('[id^="item-"]')?.classList.contains("d-none"))
+            .map(bookmark => ({owner: bookmark.dataset.provisionalOwner, attribute: bookmark.dataset.attribute,
+                included: bookmark.querySelector("[data-include-input]").checked,
+                help: bookmark.querySelector("[data-field-help]").value}))
+            .filter(setting => setting.included || setting.help);
+    }
+    function saveBookmark(bookmark, patch, undo = false) {
+        bookmark.dataset.pendingPatch = JSON.stringify(patch);
+        bookmark.dataset.pendingUndo = String(undo);
+        window.htmx.trigger(bookmark, "bookmark-save");
+    }
+    document.addEventListener("toggle", event => {
+        const bookmark = event.target.closest("[data-bookmark]");
+        if (bookmark?.open) {
+            const lazy = bookmark.querySelector('[hx-trigger="bookmark-open once"]');
+            if (lazy) window.htmx.trigger(lazy, "bookmark-open");
+            else bookmark.querySelector("[data-bookmark-content]").scrollIntoView({block: "nearest"});
+        }
+    }, true);
+    document.addEventListener("change", event => {
+        const bookmark = event.target.closest("[data-bookmark]");
+        if (bookmark && event.target.matches("[data-include-input], [data-field-help]")) {
+            if (bookmark.hasAttribute("data-provisional-owner")) {
+                if (event.target.matches("[data-include-input]")) bookmark.dataset.authoredIncluded = String(event.target.checked);
+            } else {
+                const property = event.target.matches("[data-include-input]") ? "included" : "help";
+                const value = property === "included" ? event.target.checked : event.target.value;
+                saveBookmark(bookmark, {fields: {[bookmark.dataset.ownerId]: {[bookmark.dataset.attribute]: {[property]: value}}}});
+            }
+        }
+        if (document.querySelector("[data-provisional-owner]")) refreshCreationBookmarks();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Enter" && event.target.closest("[data-bookmark]") && event.target.matches("[data-field-help]")) {
+            event.preventDefault();
+            event.target.blur();
+        }
+    });
+    document.addEventListener("click", event => {
+        const button = event.target.closest('[data-action="bookmark-undo"]');
+        if (button) {
+            const bookmark = button.closest("[data-bookmark]");
+            saveBookmark(bookmark, JSON.parse(bookmark.dataset.inversePatch), true);
+        }
+    });
+    document.body.addEventListener("htmx:configRequest", event => {
+        const element = event.detail.elt;
+        if (element.matches("[data-bookmark]")) event.detail.parameters.patch = element.dataset.pendingPatch;
+        if (element.querySelector("[data-provisional-owner]")) {
+            event.detail.parameters.simplified_settings = JSON.stringify(pendingCreationSettings(element));
+        }
+    });
+    document.body.addEventListener("htmx:afterRequest", event => {
+        const bookmark = event.detail.elt;
+        if (!bookmark?.matches("[data-bookmark]")) return;
+        const failed = event.detail.successful !== true
+            || (event.detail.xhr.getResponseHeader("HX-Trigger-After-Settle") || "").includes("openModalDialog");
+        bookmark.querySelector("[data-bookmark-status]").textContent = failed ? "Not saved" : "Saved";
+        if (failed) return;
+        const result = JSON.parse(event.detail.xhr.responseText);
+        result.fields.forEach(field => {
+            document.querySelectorAll("[data-bookmark]").forEach(visible => {
+                if (visible.dataset.ownerId !== field.object_id || visible.dataset.attribute !== field.attribute) return;
+                // Help belongs to its own draft until its own request completes.
+                const help = visible.querySelector("[data-field-help]");
+                const draft = help?.value;
+                const dirtyHelp = help && draft !== help.defaultValue;
+                updateBookmark(visible, field.setting, field.required_by);
+                if (dirtyHelp && visible !== bookmark) help.value = draft;
+            });
+        });
+        if (Object.keys(result.inverse.fields).length && bookmark.dataset.pendingUndo !== "true") {
+            bookmark.dataset.inversePatch = JSON.stringify(result.inverse);
+            bookmark.querySelector('[data-action="bookmark-undo"]').hidden = false;
+        } else if (bookmark.dataset.pendingUndo === "true") {
+            bookmark.querySelector('[data-action="bookmark-undo"]').hidden = true;
+        }
+    });
+    document.body.addEventListener("htmx:afterSettle", event => {
+        const bookmark = event.target.closest("[data-bookmark]");
+        if (bookmark?.open) bookmark.querySelector("[data-bookmark-content]").scrollIntoView({block: "nearest"});
+    });
+    document.addEventListener("initDynamicForm", refreshCreationBookmarks);
+
     function initialize() {
+        document.querySelectorAll("[data-bookmark]:not([data-provisional-owner])").forEach(bookmark => {
+            const checkbox = bookmark.querySelector("[data-include-input]");
+            if (checkbox) checkbox.disabled = !!bookmark.dataset.requiredLabel;
+        });
         if (pendingRead && pendingRead.target !== targetForActiveModel()) cancelPendingRead();
         document.querySelectorAll("[data-simplified-target]").forEach(target => {
             if (target.dataset.openingDefault) {
@@ -214,6 +357,7 @@
         deferExit(() => event.detail.issueRequest(true));
     });
     document.addEventListener("input", event => {
+        if (event.target.closest("[data-provisional-owner]")) window.tagFormAsModified();
         const form = event.target.closest("[data-configure-form]");
         if (form && event.target.matches('[name="title"], [name="guidance"], [data-field-help], [data-include-input]')) {
             form.dataset.dirty = "true";
@@ -294,6 +438,6 @@
     document.body.addEventListener("htmx:afterSettle", initialize);
     document.addEventListener("DOMContentLoaded", initialize);
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit, definitionFromForm };
+        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit, definitionFromForm, refreshCreationBookmarks, pendingCreationSettings, updateBookmark };
     }
 })();

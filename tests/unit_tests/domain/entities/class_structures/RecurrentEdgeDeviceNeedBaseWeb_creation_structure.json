@@ -60,7 +60,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Recurrent edge process 1"
+                "default": "Recurrent edge process 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "RecurrentEdgeProcess_recurrent_compute_needed",
@@ -122,7 +123,19 @@
                         }
                     }
                 ],
-                "can_be_negative": false
+                "can_be_negative": false,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-RecurrentEdgeProcess_recurrent_compute_needed",
+                    "input_id": "RecurrentEdgeProcess_recurrent_compute_needed",
+                    "provisional_owner": "object",
+                    "attribute": "recurrent_compute_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "RecurrentEdgeProcess_recurrent_ram_needed",
@@ -184,7 +197,19 @@
                         }
                     }
                 ],
-                "can_be_negative": false
+                "can_be_negative": false,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-RecurrentEdgeProcess_recurrent_ram_needed",
+                    "input_id": "RecurrentEdgeProcess_recurrent_ram_needed",
+                    "provisional_owner": "object",
+                    "attribute": "recurrent_ram_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "RecurrentEdgeProcess_recurrent_storage_needed",
@@ -246,7 +271,19 @@
                         }
                     }
                 ],
-                "can_be_negative": true
+                "can_be_negative": true,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-RecurrentEdgeProcess_recurrent_storage_needed",
+                    "input_id": "RecurrentEdgeProcess_recurrent_storage_needed",
+                    "provisional_owner": "object",
+                    "attribute": "recurrent_storage_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": []
@@ -261,7 +298,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Recurrent edge workload 1"
+                "default": "Recurrent edge workload 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "RecurrentEdgeWorkload_recurrent_workload",
@@ -323,7 +361,19 @@
                         }
                     }
                 ],
-                "can_be_negative": false
+                "can_be_negative": false,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-RecurrentEdgeWorkload_recurrent_workload",
+                    "input_id": "RecurrentEdgeWorkload_recurrent_workload",
+                    "provisional_owner": "object",
+                    "attribute": "recurrent_workload",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": []
@@ -338,7 +388,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Recurrent edge device need 1"
+                "default": "Recurrent edge device need 1",
+                "simplified_eligible": false
             }
         ],
         "advanced_fields": []

@@ -1,10 +1,11 @@
-<div class="row gy-0 p-0 m-0 w-100
+<div class="form-label-row row gy-0 p-0 m-0 w-100
         {% if field.input_type == "select_multiple" and not field.options %} d-none {% endif %}">
     <div class="col-auto">
         <label for="{{ field.web_id }}" class="form-label">
             {{ field.label|capfirst }}
         </label>
     </div>
+    {% if field.bookmark %}<div class="col-auto">{% include "model_builder/simplified_inputs/bookmark.html" with field=field.bookmark %}</div>{% endif %}
     {% if field.tooltip %}
         {% include "model_builder/side_panels/components/tooltip.html" with tooltip_html=True %}
     {% endif %}

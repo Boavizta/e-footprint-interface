@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -265,7 +266,7 @@ def test_equal_timeseries_authored_inputs_and_provenance_round_trip(minimal_mode
         address = FieldAddress(pattern.id, "hourly_occurrences")
         _select(model, address).execute(EditSimplifiedInput(address, parsed["hourly_occurrences"]))
     else:
-        EditObjectUseCase(model).execute(EditObjectInput(pattern.id, parsed))
+        EditObjectUseCase(model, input_catalog).execute(EditObjectInput(pattern.id, parsed))
     restored = ModelWeb(model.repository).flat_efootprint_objs_dict[pattern.id].hourly_occurrences
     assert restored == original
     assert restored.form_inputs == form_inputs
@@ -336,3 +337,125 @@ def test_rejects_unavailable_or_unselected_inputs(minimal_model_web, target):
             EditSimplifiedInputUseCase(model, catalog).execute(EditSimplifiedInput(address, {}))
     persist.assert_not_called()
     assert model.repository.get_system_data() == before
+
+
+def test_creation_resolves_nested_settings_and_saves_model_once(minimal_repository):
+    from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
+    pending = [{"owner": "object", "attribute": "lifespan", "included": True, "help": "Server lifetime"},
+               {"owner": "storage", "attribute": "storage_capacity", "included": False, "help": "Retained capacity"}]
+    with (patch.object(minimal_repository, "save_data", wraps=minimal_repository.save_data) as save,
+          patch.object(minimal_repository, "save_interface_config", wraps=minimal_repository.save_interface_config) as config):
+        result = CreateObjectUseCase(minimal_repository, input_catalog).execute(CreateObjectInput(
+            "Server", {"name": "New server", "type_object_available": "Server", "_parsed_Storage": {"name": "Nested storage"}},
+            simplified_settings=pending))
+    save.assert_called_once()
+    config.assert_not_called()
+    restored = ModelWeb(minimal_repository)
+    server = restored.get_web_object_from_efootprint_id(result.created_object_id)
+    fields = minimal_repository.interface_config["simplified_inputs"]["fields"]
+    assert fields[server.efootprint_id]["lifespan"] == {"included": True, "help": "Server lifetime"}
+    assert fields[server.storage.efootprint_id]["storage_capacity"] == {"included": False, "help": "Retained capacity"}
+
+
+@pytest.mark.parametrize("failure", ["hook", "settings", "budget"])
+def test_failed_creation_publishes_neither_object_nor_pending_settings(minimal_repository, failure):
+    from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
+    from model_builder.domain.entities.web_core.hardware.storage_web import StorageWeb
+    pending = [{"owner": "object", "attribute": "storage_capacity", "included": True, "help": "Pending"}]
+    original = deepcopy(minimal_repository.get_system_data())
+    config = deepcopy(minimal_repository.interface_config)
+    if failure == "settings":
+        pending[0]["attribute"] = "missing"
+    if failure == "budget":
+        minimal_repository._max_payload_size_mb = 0.000001
+    with patch.object(StorageWeb, "post_create", create=True,
+                      side_effect=ValueError("Rejected hook") if failure == "hook" else None):
+        with pytest.raises((ValueError, PayloadSizeLimitExceeded)):
+            CreateObjectUseCase(minimal_repository, input_catalog).execute(CreateObjectInput(
+                "Storage", {"name": "Rejected", "type_object_available": "Storage"}, simplified_settings=pending))
+    assert minimal_repository.get_system_data() == original
+    assert minimal_repository.interface_config == config
+
+
+def test_new_dependents_are_completed_after_creation_hooks(video_model):
+    from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
+    model, api_id, _ = video_model
+    _select(model, FieldAddress(api_id, "model_name"))
+    result = CreateObjectUseCase(model.repository, input_catalog).execute(CreateObjectInput(
+        "Job", {"name": "New video", "type_object_available": "EcoLogitsVideoGenExternalAPIJob",
+                "service_or_external_api": api_id, "server_or_external_api": api_id},
+        simplified_settings=[{"owner": "object", "attribute": "resolution", "included": False, "help": "New help"}]))
+    setting = model.repository.interface_config["simplified_inputs"]["fields"][result.created_object_id]["resolution"]
+    assert setting == {"included": True, "help": "New help"}
+
+
+def test_deletion_warning_and_cleanup_follow_actual_cascade_and_keep_shared_children(minimal_model_web):
+    from efootprint.core.usage.usage_journey import UsageJourney
+    from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+    from model_builder.application.use_cases.delete_object import DeleteObjectInput, DeleteObjectUseCase
+
+    model = minimal_model_web
+    shared = UsageJourneyStep.from_defaults("Shared", jobs={})
+    removed = UsageJourneyStep.from_defaults("Removed", jobs={})
+    removed_help = UsageJourneyStep.from_defaults("Removed help", jobs={})
+    first = UsageJourney("First", uj_steps={shared: SourceValue(1 * u.dimensionless), removed: SourceValue(1 * u.dimensionless),
+                                            removed_help: SourceValue(1 * u.dimensionless)})
+    second = UsageJourney("Second", uj_steps={shared: SourceValue(1 * u.dimensionless)})
+    for owner in [first, second]:
+        model.add_new_efootprint_object_to_system(owner)
+    model.persist_to_cache()
+    # Steps have eligible scalar timing fields; keep deselected help on another field as well.
+    catalog = input_catalog(model)
+    removed_address = next(address for address, descriptor in catalog.fields.items()
+                           if address.object_id == removed.id and descriptor.eligible)
+    shared_address = FieldAddress(shared.id, removed_address.attribute)
+    _select(model, removed_address, shared_address)
+    UpdateSimplifiedDefinitionUseCase(model.repository, catalog).execute({"fields": {
+        removed_help.id: {"user_time_spent": {"included": False, "help": "Removed owner help"}}}})
+    original = deepcopy(model.repository.get_system_data())
+    use_case = DeleteObjectUseCase(model, input_catalog)
+    check = use_case.check_can_delete(first.id)
+    assert check.selected_fields_removed == [removed_address]
+    assert model.repository.get_system_data() == original
+    use_case.execute(DeleteObjectInput(first.id))
+    fields = model.repository.interface_config["simplified_inputs"]["fields"]
+    assert first.id not in fields and removed.id not in fields and removed_help.id not in fields
+    assert fields[shared.id][shared_address.attribute]["included"]
+
+
+def test_server_deletion_warns_about_nested_storage_and_prunes_its_retained_help(minimal_model_web):
+    from model_builder.application.use_cases.delete_object import DeleteObjectInput, DeleteObjectUseCase
+    model = minimal_model_web
+    server = model.add_new_efootprint_object_to_system(Server.from_defaults(
+        "Independent server", storage=Storage.from_defaults("Independent storage")))
+    model.persist_to_cache()
+    catalog = input_catalog(model)
+    address = FieldAddress(server.storage.efootprint_id, "storage_capacity")
+    _select(model, address)
+    UpdateSimplifiedDefinitionUseCase(model.repository, catalog).execute({"fields": {
+        server.storage.efootprint_id: {"data_storage_duration": {"included": False, "help": "Stored only as help"}}}})
+    use_case = DeleteObjectUseCase(model, input_catalog)
+    with patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save:
+        warning = use_case.check_can_delete(server.efootprint_id)
+        assert warning.selected_fields_removed == [address]
+        save.assert_not_called()
+        use_case.execute(DeleteObjectInput(server.efootprint_id))
+        save.assert_called_once()
+    fields = model.repository.interface_config["simplified_inputs"]["fields"]
+    assert server.efootprint_id not in fields and server.storage.efootprint_id not in fields
+
+
+def test_structural_relink_completes_current_controller_dependencies(video_model):
+    model, api_a_id, job_ids = video_model
+    api_b = model.add_new_efootprint_object_to_system(EcoLogitsVideoGenExternalAPI.from_defaults("Unselected API"))
+    model.persist_to_cache()
+    _select(model, FieldAddress(api_a_id, "model_name"))
+    job_id = job_ids[0]
+    EditObjectUseCase(model, input_catalog).execute(EditObjectInput(job_id, {"external_api": api_b.efootprint_id}))
+    # Membership survives a released requirement; deselection retains help and is now allowed.
+    catalog = input_catalog(model)
+    use_case = UpdateSimplifiedDefinitionUseCase(model.repository, catalog)
+    use_case.execute({"fields": {job_id: {"resolution": {"included": False, "help": "Kept after reorienting"}}}})
+    EditObjectUseCase(model, input_catalog).execute(EditObjectInput(job_id, {"external_api": api_a_id}))
+    setting = model.repository.interface_config["simplified_inputs"]["fields"][job_id]["resolution"]
+    assert setting == {"included": True, "help": "Kept after reorienting"}

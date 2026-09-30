@@ -26,7 +26,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Edge function 1"
+                "default": "Edge function 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeFunction_recurrent_edge_device_needs",
@@ -48,7 +49,8 @@
                 ],
                 "selected_json": "[]",
                 "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]",
-                "hide_field": false
+                "hide_field": false,
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeFunction_recurrent_server_needs",
@@ -70,7 +72,8 @@
                 ],
                 "selected_json": "[]",
                 "unselected_json": "[{\"value\": \"efootprint_id1\", \"label\": \"option1\"}, {\"value\": \"efootprint_id2\", \"label\": \"option2\"}]",
-                "hide_field": false
+                "hide_field": false,
+                "simplified_eligible": false
             }
         ],
         "advanced_fields": []

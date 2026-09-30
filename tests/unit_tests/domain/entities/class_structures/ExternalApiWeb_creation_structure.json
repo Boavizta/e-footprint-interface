@@ -15,7 +15,7 @@
                     {
                         "label": "EcoLogits modeling of generative-AI video API calls (Sora, Veo, Kling, ...).",
                         "value": "EcoLogitsVideoGenExternalAPI",
-                        "attribution": "Research performed by Sasha Luccioni, Boris Gamazaychikov and Nidhal Jegham, within the GenAI Footprint Alliance, piloted by Publicis and with AXA, Engie, Groupe La Poste/La Banque Postale (founding members) and also supported by FDJ United, Accor, L’Oréal, Orange, Renault Group (partner members)."
+                        "attribution": "Research performed by Sasha Luccioni, Boris Gamazaychikov and Nidhal Jegham, within the GenAI Footprint Alliance, piloted by Publicis and with AXA, Engie, Groupe La Poste/La Banque Postale (founding members) and also supported by FDJ United, Accor, L\u2019Or\u00e9al, Orange, Renault Group (partner members)."
                     }
                 ],
                 "has_selection_attribution": true
@@ -32,7 +32,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Gen AI external API 1"
+                "default": "Gen AI external API 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EcoLogitsGenAIExternalAPI_provider",
@@ -77,7 +78,19 @@
                         "label": "openai",
                         "value": "openai"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsGenAIExternalAPI_provider",
+                    "input_id": "EcoLogitsGenAIExternalAPI_provider",
+                    "provisional_owner": "object",
+                    "attribute": "provider",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EcoLogitsGenAIExternalAPI_model_name",
@@ -97,7 +110,19 @@
                 "default": "claude-opus-4-5",
                 "input_type": "select_str_input",
                 "selected": "claude-opus-4-5",
-                "options": []
+                "options": [],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsGenAIExternalAPI_model_name",
+                    "input_id": "EcoLogitsGenAIExternalAPI_model_name",
+                    "provisional_owner": "object",
+                    "attribute": "model_name",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": []
@@ -112,7 +137,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Gen AI video external API 1"
+                "default": "Gen AI video external API 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPI_provider",
@@ -165,7 +191,19 @@
                         "label": "tencent",
                         "value": "tencent"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsVideoGenExternalAPI_provider",
+                    "input_id": "EcoLogitsVideoGenExternalAPI_provider",
+                    "provisional_owner": "object",
+                    "attribute": "provider",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPI_model_name",
@@ -185,7 +223,19 @@
                 "default": "sora-2-pro",
                 "input_type": "select_str_input",
                 "selected": "sora-2-pro",
-                "options": []
+                "options": [],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsVideoGenExternalAPI_model_name",
+                    "input_id": "EcoLogitsVideoGenExternalAPI_model_name",
+                    "provisional_owner": "object",
+                    "attribute": "model_name",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": []

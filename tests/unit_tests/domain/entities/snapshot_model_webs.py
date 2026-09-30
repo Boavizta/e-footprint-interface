@@ -16,6 +16,7 @@ class _MockModelingObjectWeb:
 def build_basic_model_web():
     """Basic model_web stub with deterministic option lists."""
     model_web = MagicMock()
+    model_web.repository.interface_config = {}
     option1 = _MockModelingObjectWeb(id="efootprint_id1", name="option1")
     option2 = _MockModelingObjectWeb(id="efootprint_id2", name="option2")
     model_web.get_efootprint_objects_from_efootprint_type.side_effect = lambda _: [option1, option2]

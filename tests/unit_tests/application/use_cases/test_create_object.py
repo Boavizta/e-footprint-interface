@@ -3,6 +3,7 @@
 These tests focus on the generic orchestration behavior of the use case,
 not object-specific creation rules (those belong in entity tests).
 """
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -18,7 +19,7 @@ class TestCreateObjectUseCase:
 
     def test_execute_returns_create_object_output(self, minimal_repository):
         """execute returns a CreateObjectOutput with created object info."""
-        use_case = CreateObjectUseCase(minimal_repository)
+        use_case = CreateObjectUseCase(minimal_repository, input_catalog)
         form_data = {"name": "New Storage", "type_object_available": "Storage"}
 
         output = use_case.execute(CreateObjectInput(
@@ -40,7 +41,7 @@ class TestCreateObjectUseCase:
         """
         from model_builder.domain.entities.web_core.hardware.storage_web import StorageWeb
 
-        use_case = CreateObjectUseCase(minimal_repository)
+        use_case = CreateObjectUseCase(minimal_repository, input_catalog)
         form_data = {"name": "Test Storage", "type_object_available": "Storage"}
 
         # Add a pre_add_to_system hook to StorageWeb that raises an error
@@ -58,7 +59,7 @@ class TestCreateObjectUseCase:
 
     def test_cleanup_when_post_add_step_fails(self, minimal_repository, minimal_model_web):
         """When a step after add_new_efootprint_object_to_system fails, should cleanup the added object."""
-        use_case = CreateObjectUseCase(minimal_repository)
+        use_case = CreateObjectUseCase(minimal_repository, input_catalog)
 
         # Count objects before
         initial_count = len(minimal_model_web.flat_efootprint_objs_dict)

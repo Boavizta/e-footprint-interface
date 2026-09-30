@@ -44,7 +44,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Recurrent edge component need 1"
+                "default": "Recurrent edge component need 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "RecurrentEdgeComponentNeed_recurrent_need",
@@ -106,7 +107,19 @@
                         }
                     }
                 ],
-                "can_be_negative": false
+                "can_be_negative": false,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-RecurrentEdgeComponentNeed_recurrent_need",
+                    "input_id": "RecurrentEdgeComponentNeed_recurrent_need",
+                    "provisional_owner": "object",
+                    "attribute": "recurrent_need",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": []

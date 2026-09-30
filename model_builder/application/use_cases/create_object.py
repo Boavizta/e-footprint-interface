@@ -23,6 +23,7 @@ class CreateObjectInput:
     object_type: str
     form_data: Dict[str, Any]  # Pre-parsed form data (clean attribute names)
     parent_id: Optional[str] = None
+    simplified_settings: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -41,6 +42,7 @@ class CreateObjectOutput:
     model_web: ModelWeb = None
     oob_regions: List[OobRegion] = field(default_factory=list)
     replaces_primary_render: bool = False
+    simplified_added: set = field(default_factory=set)
 
 
 class CreateObjectUseCase:
@@ -51,13 +53,14 @@ class CreateObjectUseCase:
     data without any HTTP/presentation concerns.
     """
 
-    def __init__(self, repository: ISystemRepository):
+    def __init__(self, repository: ISystemRepository, catalog_factory):
         """Initialize with a system repository.
 
         Args:
             repository: Repository for loading and saving system data.
         """
         self.repository = repository
+        self.catalog_factory = catalog_factory
 
     def execute(self, input_data: CreateObjectInput) -> CreateObjectOutput:
         """Execute the object creation use case.
@@ -162,7 +165,10 @@ class CreateObjectUseCase:
                 if post_create_result and post_create_result.get("return_server_instead"):
                     override_object = post_create_result.get("server_web")
 
-            model_web.persist_to_cache()
+            from model_builder.application.use_cases.simplified_inputs import persist_structural_change
+
+            simplified_added = persist_structural_change(
+                model_web, self.catalog_factory, input_data.simplified_settings, added_obj)
 
             # 9b. Side-effect descriptors (OOB DOM regions to refresh after the create)
             side_effects = added_obj.create_side_effects()
@@ -181,6 +187,7 @@ class CreateObjectUseCase:
                 model_web=model_web,
                 oob_regions=side_effects.oob_regions,
                 replaces_primary_render=side_effects.replaces_primary_render,
+                simplified_added=simplified_added,
             )
         except Exception as e:
             if added_obj is not None:

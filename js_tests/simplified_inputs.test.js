@@ -159,3 +159,95 @@ test("internal saved-view reads bypass exit interception, using the resident set
         expect.objectContaining({ source: target, target }));
     expect(action).toHaveBeenCalled();
 });
+
+function bookmark(owner, attribute, provisional = false) {
+    const element = document.createElement("details");
+    element.dataset.bookmark = "";
+    element.dataset.ownerId = owner;
+    element.dataset.attribute = attribute;
+    element.dataset.savedIncluded = "false";
+    element.dataset.requiredLabel = "";
+    if (provisional) {
+        element.dataset.provisionalOwner = owner;
+        element.dataset.inputId = `Job_${attribute}`;
+    }
+    element.innerHTML = `<summary><i data-bookmark-icon></i></summary>
+        <div data-selection-controls><input type="checkbox" data-include-input>
+        <p data-required-explanation hidden></p><textarea data-field-help></textarea></div>
+        <small data-bookmark-status></small><button data-action="bookmark-undo" hidden>Undo</button>`;
+    return element;
+}
+function bookmarkResponse(element, result, failed = false) {
+    document.body.dispatchEvent(new CustomEvent("htmx:afterRequest", {bubbles: true, detail: {
+        elt: element, successful: true, xhr: {responseText: JSON.stringify(result),
+            getResponseHeader: () => failed ? "openModalDialog" : null}
+    }}));
+}
+
+test("inline settings payload excludes the surrounding value draft and failed saves preserve controls", () => {
+    mount().remove();
+    window.htmx.trigger = jest.fn();
+    const form = document.createElement("form");
+    form.innerHTML = '<input name="Storage_storage_capacity" value="9999">';
+    const element = bookmark("storage", "storage_capacity");
+    form.appendChild(element);
+    document.body.appendChild(form);
+    element.querySelector("[data-include-input]").checked = true;
+    element.querySelector("[data-include-input]").dispatchEvent(new Event("change", {bubbles: true}));
+    const parameters = {};
+    document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: element, parameters}}));
+    expect(JSON.parse(parameters.patch)).toEqual({fields: {storage: {storage_capacity: {included: true}}}});
+    expect(Object.keys(parameters)).toEqual(["patch"]);
+    bookmarkResponse(element, {}, true);
+    expect(form.querySelector("[name]").value).toBe("9999");
+    expect(element.querySelector("[data-include-input]").checked).toBe(true);
+    expect(element.querySelector("[data-bookmark-status]").textContent).toBe("Not saved");
+});
+
+test("bookmark success updates visible membership only, preserves independent help draft and offers inverse Undo", () => {
+    mount().remove();
+    window.htmx.trigger = jest.fn();
+    const first = bookmark("storage", "storage_capacity");
+    const second = bookmark("storage", "storage_capacity");
+    second.querySelector("textarea").value = "Unsaved help";
+    document.body.append(first, second);
+    const inverse = {fields: {storage: {storage_capacity: {included: false}}}};
+    bookmarkResponse(first, {fields: [{object_id: "storage", attribute: "storage_capacity",
+        setting: {included: true, help: ""}, required_by: null}], inverse});
+    expect(first.querySelector("[data-include-input]").checked).toBe(true);
+    expect(second.querySelector("[data-include-input]").checked).toBe(true);
+    expect(second.querySelector("textarea").value).toBe("Unsaved help");
+    expect(first.querySelector("button").hidden).toBe(false);
+    first.querySelector("button").click();
+    expect(JSON.parse(first.dataset.pendingPatch)).toEqual(inverse);
+    expect(window.htmx.trigger).toHaveBeenCalledWith(first, "bookmark-save");
+});
+
+test("creation requirements follow candidates, release forced membership and retain help", () => {
+    mount();
+    const {refreshCreationBookmarks, pendingCreationSettings} = require("../theme/static/scripts/simplified_inputs.js");
+    const form = document.createElement("form");
+    form.innerHTML = '<select id="service_or_external_api"><option value="a">A</option><option value="b">B</option></select>';
+    const resolution = bookmark("object", "resolution", true);
+    form.appendChild(resolution);
+    document.body.appendChild(form);
+    const script = document.createElement("script");
+    script.id = "dynamic-form-data";
+    script.type = "application/json";
+    script.textContent = JSON.stringify({dynamic_lists: [{input_id: "Job_resolution", filter_by: "service_or_external_api",
+        simplified_required_by: {a: {label: "Video API A · Model"}, b: null}}]});
+    document.body.appendChild(script);
+    resolution.querySelector("textarea").value = "Retained help";
+    refreshCreationBookmarks();
+    expect(resolution.querySelector("[data-include-input]").checked).toBe(true);
+    expect(resolution.querySelector("[data-include-input]").disabled).toBe(true);
+    expect(resolution.querySelector("textarea").disabled).toBe(false);
+    form.querySelector("select").value = "b";
+    refreshCreationBookmarks();
+    expect(resolution.querySelector("[data-include-input]").checked).toBe(false);
+    expect(resolution.querySelector("[data-include-input]").disabled).toBe(false);
+    expect(pendingCreationSettings(form)).toEqual([{owner: "object", attribute: "resolution", included: false, help: "Retained help"}]);
+    const parameters = {};
+    document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: form, parameters}}));
+    expect(JSON.parse(parameters.simplified_settings)).toEqual(pendingCreationSettings(form));
+});

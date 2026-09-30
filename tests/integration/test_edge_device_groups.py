@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
@@ -66,7 +67,7 @@ def test_edge_group_child_sections_and_edit_rendering_are_deliberate(default_sys
         [child_id], [device_id]]
 
     parsed = parse_form_data({"name": "Building renamed", "csrfmiddlewaretoken": "token"}, "EdgeDeviceGroup")
-    output = EditObjectUseCase(model_web).execute(EditObjectInput(object_id=parent_id, form_data=parsed))
+    output = EditObjectUseCase(model_web, input_catalog).execute(EditObjectInput(object_id=parent_id, form_data=parsed))
     request = rf.post("/model_builder/edit-object/")
     request.session = {}
     response = HtmxPresenter(request, model_web).present_edited_object(output)

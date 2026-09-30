@@ -65,13 +65,14 @@ class EditObjectUseCase:
     It returns pure data without any HTTP/presentation concerns.
     """
 
-    def __init__(self, model_web: ModelWeb):
+    def __init__(self, model_web: ModelWeb, catalog_factory):
         """Initialize with a web model.
 
         Args:
             model web with a loaded system data.
         """
         self.model_web = model_web
+        self.catalog_factory = catalog_factory
 
     def execute(self, input_data: EditObjectInput) -> EditObjectOutput:
         """Execute the object editing use case.
@@ -99,7 +100,9 @@ class EditObjectUseCase:
         # Build output with pure data (presenter will generate HTML)
         edited_obj = edit_result.edited_object
 
-        self.model_web.persist_to_cache()
+        from model_builder.application.use_cases.simplified_inputs import persist_structural_change
+
+        persist_structural_change(self.model_web, self.catalog_factory)
         edit_side_effects = edited_obj.edit_side_effects()
         oob_regions = edit_side_effects.oob_regions
         oob_regions.extend(input_data.extra_oob_regions)

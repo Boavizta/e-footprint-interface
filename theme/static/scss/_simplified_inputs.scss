@@ -57,3 +57,26 @@
 body[data-base-view="simplified"] {
   #edge-modeling-toggle-wrapper, #model-scroll-to-left, #model-scroll-to-right { display: none !important; }
 }
+
+.simplified-bookmark {
+  position: relative;
+  display: inline-block;
+  font-weight: normal;
+  > summary { cursor: pointer; list-style: none; padding: 0 .3rem; color: #53645d; }
+  > summary::-webkit-details-marker { display: none; }
+  .simplified-bookmark-content { display: none; }
+  &[open] > .simplified-bookmark-content {
+    display: block; position: absolute; z-index: 30; top: 100%; left: 0;
+    width: 20rem; padding: .8rem; border: 1px solid #dae4df; border-radius: .4rem;
+    background: white; box-shadow: 0 .2rem .6rem #0002;
+  }
+  .simplified-selection { display: grid; gap: .3rem; }
+  textarea { min-height: 4rem; }
+  [hidden] { display: none !important; }
+}
+
+.form-label-row {
+  position: relative;
+  .simplified-bookmark { position: static; }
+  .simplified-bookmark[open] > .simplified-bookmark-content { width: 100%; left: 0; }
+}

@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody class="text-start">
-                {% for explainable_quantity in model_web.web_explainable_quantities_sources %}
+                {% for explainable_quantity in source_rows %}
                     {% include "model_builder/result/source_table_row.html" %}
                 {% endfor %}
             </tbody>

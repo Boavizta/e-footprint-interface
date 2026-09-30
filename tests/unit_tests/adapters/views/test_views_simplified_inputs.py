@@ -99,3 +99,47 @@ class TestSimplifiedViews:
         assert "simplified_inputs_opening_ids" not in client.session
         again = client.get("/model_builder/", HTTP_HX_REQUEST="true").content.decode()
         assert "data-opening-default" not in again
+
+    def test_bookmark_patch_and_inverse_preserve_values_and_retained_help(self, client, minimal_system_data):
+        model = self.save_model(client, minimal_system_data)
+        owner = model.servers[0].storage.efootprint_id
+        original = deepcopy(SessionSystemRepository(client.session).get_system_data())
+        response = client.post("/model_builder/patch-simplified-inputs/", {
+            "patch": json.dumps({"fields": {owner: {"storage_capacity": {"included": True, "help": "Capacity help"}}}}),
+            "Storage_storage_capacity": "999999"})
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["fields"][0]["object_id"] == owner
+        assert payload["inverse"] == {"fields": {owner: {"storage_capacity": {"included": False}}}}
+        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps(payload["inverse"])})
+        assert response.json()["fields"][0]["setting"] == {"included": False, "help": "Capacity help"}
+        current = SessionSystemRepository(client.session).get_system_data()
+        assert current["Storage"][owner] == original["Storage"][owner]
+
+    def test_bookmark_failure_preserves_workspace_and_selection(self, client, minimal_system_data, monkeypatch):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        server_id = model.servers[0].efootprint_id
+        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
+            server_id: {"server_type": {"included": True}}}})})
+        fields = response.json()["fields"]
+        required = next(field for field in fields if field["attribute"] == "fixed_nb_of_instances")
+        assert required["setting"]["included"]
+        assert required["required_by"]["attribute"] == "server_type"
+        original = deepcopy(SessionSystemRepository(client.session).get_system_data())
+        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
+            server_id: {"fixed_nb_of_instances": {"included": False}}}})})
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        html = response.content.decode()
+        assert "closeAndEmptySidePanel()" not in html and "hidePanelResult()" not in html
+        assert SessionSystemRepository(client.session).get_system_data() == original
+
+    def test_bookmark_controls_are_lazy_for_sources(self, client, minimal_system_data):
+        model = self.save_model(client, minimal_system_data)
+        html = client.get("/model_builder/source-table/").content.decode()
+        assert "data-bookmark" in html and "bookmark-open once" in html
+        assert "data-selection-controls" not in html
+        owner = model.servers[0].storage.efootprint_id
+        response = client.get(f"/model_builder/simplified-input-bookmark/{owner}/storage_capacity/")
+        assert "data-selection-controls" in response.content.decode()
+        assert "bookmark-" + owner in response.content.decode()

@@ -21,7 +21,9 @@ from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 from model_builder.domain.conditional_inputs import resolve_input_path
-from model_builder.adapters.forms.timeseries_builder_registry import build_timeseries_form_config
+from model_builder.domain.services.simplified_inputs import FieldAddress, input_eligibility, normalize_definition
+from model_builder.adapters.forms.simplified_input_context import included_requirement
+from model_builder.adapters.forms.timeseries_builder_registry import build_timeseries_form_config, can_edit_timeseries
 
 if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -225,6 +227,7 @@ def generate_dynamic_form(
     structure_fields = []
     structure_fields_advanced = []
     dynamic_lists = []
+    simplified_definition = normalize_definition(model_web.repository.interface_config.get("simplified_inputs"))
     efootprint_class = MODELING_OBJECT_CLASSES_DICT[efootprint_class_str]
 
     list_values = efootprint_class.list_values
@@ -412,9 +415,12 @@ def generate_dynamic_form(
                             init_sig_params[first_segment].annotation
                         ).__name__
                         list_value = {}
+                        simplified_required_by = {}
                         for referenced_obj in model_web.get_efootprint_objects_from_efootprint_type(referenced_type):
                             owner, attribute = resolve_input_path(referenced_obj, ".".join(remaining_path))
                             resolved = getattr(owner, attribute)
+                            simplified_required_by[referenced_obj.id] = included_requirement(
+                                model_web, FieldAddress(owner.id, attribute), definition=simplified_definition)
                             # Persisted objects always resolve to a known key (submit-time
                             # check_belonging_to_authorized_values rejects off-catalog values), so the [] fallback
                             # only fires on a str()-keying bug — and then for every object at once. The
@@ -429,10 +435,15 @@ def generate_dynamic_form(
                                 "input_id": f"{efootprint_class_str}_{attr_name}",
                                 "filter_by": filter_by,
                                 "list_value": list_value,
+                                **({"simplified_required_by": simplified_required_by} if "." in depends_on else {}),
                             }
                         )
                 else:
                     structure_field.update({"input_type": "str"})
+
+        structure_field["simplified_eligible"] = input_eligibility(
+            efootprint_class, attr_name, init_sig_params[attr_name].annotation,
+            default_values.get(attr_name), can_edit_timeseries)[0]
 
         if field_config.get("is_advanced_parameter", False):
             structure_fields_advanced.append(structure_field)

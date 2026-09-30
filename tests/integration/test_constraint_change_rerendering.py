@@ -4,6 +4,7 @@ These tests exercise the end-to-end effect of `create_side_effects` /
 `delete_side_effects` on `ModelWeb.creation_constraints` and verify that the
 expected OOB regions are emitted when a constraint flips.
 """
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
 
 from model_builder.adapters.forms.form_data_parser import parse_form_data
@@ -33,7 +34,7 @@ def _create_server(repository: InMemorySystemRepository):
     server_post_data["Storage_form_data"] = json.dumps(
         create_post_data_from_class_default_values("Stg", "Storage"))
     parsed = parse_form_data(server_post_data, "Server")
-    return CreateObjectUseCase(repository).execute(
+    return CreateObjectUseCase(repository, input_catalog).execute(
         CreateObjectInput(object_type="Server", form_data=parsed, parent_id=None))
 
 
@@ -76,7 +77,7 @@ def test_deleting_last_server_flips_job_constraint_off():
     server_output = _create_server(repository)
     server_id = server_output.created_object_id
 
-    use_case = DeleteObjectUseCase(ModelWeb(repository))
+    use_case = DeleteObjectUseCase(ModelWeb(repository), input_catalog)
     delete_output = use_case.execute(DeleteObjectInput(object_id=server_id))
 
     after = ModelWeb(repository)

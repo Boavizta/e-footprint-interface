@@ -37,6 +37,13 @@ patches supplied inline field properties against the latest settings. It complet
 addresses and eligibility, retains authored help on ordinary deselection, and saves through
 <code>save_interface_config()</code>. An empty replacement field map clears retained help while preserving supplied
 title/guidance. The caller supplies the catalog; configuration persistence itself never hydrates the model.</p>
+<p>Create, edit, and delete use cases require the adapter-supplied catalog factory. Their shared
+<code>persist_structural_change()</code> reconciles settings against actual surviving owners, completes required
+selection through the existing configuration use case with <code>persist=False</code>, and saves model and configuration
+once. Pending creation addresses resolve only after hooks; failed persistence restores request-local configuration.
+Deletion confirmation runs the same removal operation on a separate inputs-only model without saving, so its warning
+names selected fields in the actual cascade and excludes surviving shared children. Successful deletion also prunes
+retained help on removed owners; structural edits preserve membership when a requirement is released.</p>
 <h2 id="backend-payloads-and-computation-boundaries">Backend payloads and computation boundaries</h2>
 <p><strong>Pull-based contract, efootprint ≥ 23.</strong> The library's canonical payload contains inputs, the serialize-flagged computed slots (footprint totals, per-source footprints, impact-repartition matrix, edge breakdown summaries) and a values-free <code>calculation_graph</code> topology section. <code>ModelWeb.to_json(save_computed_state=True)</code> emits that graph (built with the library's <code>calculation_graph_section</code> over <code>flat_efootprint_objs_dict</code>) so that on reload <code>json_to_system</code> — which recomputes nothing — attaches the stored values as trusted caches when the <code>efootprint_version</code> matches exactly (any mismatch demotes them and recomputes lazily on read).</p>
 <p>Redis stores this canonical representation for fast request hydration; Postgres stores a second inputs-only recovery representation from <code>to_json(save_computed_state=False)</code>, keeping synchronous durable-cache writes small while accepting lazy recomputation after a Redis miss. The shared workspace payload budget and slot-size index continue to measure the canonical Redis representation.</p>

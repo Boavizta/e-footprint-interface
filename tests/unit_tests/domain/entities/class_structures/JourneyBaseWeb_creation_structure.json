@@ -26,7 +26,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Usage journey 1"
+                "default": "Usage journey 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "UsageJourney_uj_steps",
@@ -39,7 +40,8 @@
                 "options": [],
                 "options_json": "[]",
                 "selected_json": "{}",
-                "hide_field": true
+                "hide_field": true,
+                "simplified_eligible": false
             }
         ],
         "advanced_fields": []

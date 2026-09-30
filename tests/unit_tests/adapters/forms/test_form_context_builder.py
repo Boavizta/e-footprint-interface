@@ -146,3 +146,33 @@ class TestParentLinkCountField:
             EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["UsageJourneyStep"], "UsageJourneyStep")
 
         assert "parent_link_count_field" not in context
+
+
+def test_nested_storage_bookmarks_have_storage_identity(minimal_model_web):
+    server = minimal_model_web.servers[0]
+    context = FormContextBuilder(minimal_model_web).build_edition_context(server)
+    field = next(field for field in context["storage_form_fields"] if field["attr_name"] == "storage_capacity")
+    assert field["bookmark"]["address"].object_id == server.storage.efootprint_id
+    assert field["bookmark"]["address"].object_id != server.efootprint_id
+    assert next(field for field in context["form_fields"] if field["attr_name"] == "name")["bookmark"] is None
+
+
+def test_creation_requirement_metadata_tracks_selected_controller_candidates(minimal_model_web):
+    from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import EcoLogitsVideoGenExternalAPI
+    from model_builder.adapters.presenters.simplified_inputs import input_catalog
+    from model_builder.application.use_cases.simplified_inputs import UpdateSimplifiedDefinitionUseCase
+
+    model = minimal_model_web
+    api_a = model.add_new_efootprint_object_to_system(EcoLogitsVideoGenExternalAPI.from_defaults("Video API A"))
+    api_b = model.add_new_efootprint_object_to_system(EcoLogitsVideoGenExternalAPI.from_defaults("Video API B"))
+    model.persist_to_cache()
+    UpdateSimplifiedDefinitionUseCase(model.repository, input_catalog(model)).execute({"fields": {
+        api_a.efootprint_id: {"model_name": {"included": True}}}})
+    context = FormContextBuilder(model).build_creation_context(EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["Job"], "Job")
+    dynamic = next(item for item in context["dynamic_form_data"]["dynamic_lists"]
+                   if item["input_id"] == "EcoLogitsVideoGenExternalAPIJob_resolution")
+    assert dynamic["simplified_required_by"][api_a.efootprint_id]["attribute"] == "model_name"
+    assert "Video API A" in dynamic["simplified_required_by"][api_a.efootprint_id]["label"]
+    assert dynamic["simplified_required_by"][api_b.efootprint_id] is None
+    fields = _fields_by_attr(context["form_sections"], "EcoLogitsVideoGenExternalAPIJob")
+    assert fields["resolution"]["bookmark"]["provisional_owner"] == "object"

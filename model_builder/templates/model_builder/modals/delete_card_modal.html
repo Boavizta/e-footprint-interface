@@ -22,3 +22,10 @@
         hidePanelResult();
     </script>
 {% endblock %}
+
+{% block additional_warning %}
+    {% if selected_fields_removed %}
+        <p>These inputs will also be removed from Simplified inputs:</p>
+        <ul class="text-start">{% for label in selected_fields_removed %}<li>{{ label }}</li>{% endfor %}</ul>
+    {% endif %}
+{% endblock %}

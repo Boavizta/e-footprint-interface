@@ -89,7 +89,7 @@ class UpdateSimplifiedDefinitionUseCase:
         self.repository = repository
         self.catalog = catalog
 
-    def execute(self, settings: dict, *, replace: bool = False) -> SimplifiedInputsOutput:
+    def execute(self, settings: dict, *, replace: bool = False, persist: bool = True) -> SimplifiedInputsOutput:
         if not isinstance(settings, dict) or settings.keys() - {"title", "guidance", "fields"}:
             raise ValueError("Simplified inputs may contain only title, guidance, and fields.")
         current_config = deepcopy(self.repository.interface_config)
@@ -144,8 +144,42 @@ class UpdateSimplifiedDefinitionUseCase:
                        != candidate["fields"].get(owner, {}).get(attribute))}
         self.repository.interface_config = {**current_config, "simplified_inputs": candidate}
         try:
-            self.repository.save_interface_config()
+            if persist:
+                self.repository.save_interface_config()
         except Exception:
             self.repository.interface_config = current_config
             raise
         return SimplifiedInputsOutput(notices=[], changed_fields=None if replace else changed)
+
+
+def reconcile_simplified_definition(model_web, catalog_factory, pending=None, created_object=None):
+    """Keep settings on surviving owners and complete selection before the model's final save."""
+    definition = normalize_definition(model_web.repository.interface_config.get("simplified_inputs"))
+    catalog = catalog_factory(model_web)
+    definition["fields"] = {owner: settings for owner, settings in definition["fields"].items()
+                            if owner in model_web.flat_efootprint_objs_dict}
+    for setting in pending or []:
+        if not isinstance(setting, dict) or setting.keys() != {"owner", "attribute", "included", "help"}:
+            raise ValueError("Invalid pending simplified input.")
+        owner = created_object
+        if setting["owner"] == "storage":
+            owner = created_object.storage
+        elif setting["owner"] != "object":
+            raise ValueError("Unknown pending input owner.")
+        definition["fields"].setdefault(owner.efootprint_id, {})[setting["attribute"]] = {
+            "included": setting["included"], "help": setting["help"]}
+    submitted = {FieldAddress(owner, attribute) for owner, fields in definition["fields"].items()
+                 for attribute, setting in fields.items() if setting["included"]}
+    UpdateSimplifiedDefinitionUseCase(model_web.repository, catalog).execute(definition, replace=True, persist=False)
+    return complete_selection(catalog, submitted) - submitted
+
+
+def persist_structural_change(model_web, catalog_factory, pending=None, created_object=None):
+    previous = deepcopy(model_web.repository.interface_config)
+    try:
+        added = reconcile_simplified_definition(model_web, catalog_factory, pending, created_object)
+        model_web.persist_to_cache()
+        return added
+    except Exception:
+        model_web.repository.interface_config = previous
+        raise

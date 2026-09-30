@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
 
 from django.http import HttpResponse
@@ -62,7 +63,7 @@ def edit_object(request, object_id, trigger_result_display=False):
     input_data = EditObjectInput(object_id=object_id, form_data=parsed_form_data)
 
     # 4. Execute use case
-    use_case = EditObjectUseCase(model_web)
+    use_case = EditObjectUseCase(model_web, input_catalog)
     output = use_case.execute(input_data)
 
     # 5. Present result (with optional recomputation)

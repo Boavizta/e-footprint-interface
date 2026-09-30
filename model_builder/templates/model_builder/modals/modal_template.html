@@ -14,6 +14,7 @@
                 <img src="{% static 'icons/warning.svg' %}" class="mb-4" width="50px" height="50px" alt="error icon" />
                 <p id="exception-msg" class="modal-message">{{ message|linebreaksbr }}</p>
                 <p class="fs-xl">{{ sub_message }}</p>
+                {% block additional_warning %}{% endblock %}
             </div>
             <div class="modal-footer justify-content-center">
                 {% block modal-footer %}

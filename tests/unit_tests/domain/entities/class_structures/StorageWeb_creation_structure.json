@@ -26,7 +26,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Storage 1"
+                "default": "Storage 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "Storage_storage_capacity",
@@ -47,7 +48,19 @@
                 "unit": "TB_stored",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_storage_capacity",
+                    "input_id": "Storage_storage_capacity",
+                    "provisional_owner": "object",
+                    "attribute": "storage_capacity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Storage_data_replication_factor",
@@ -68,7 +81,19 @@
                 "unit": "dimensionless",
                 "default": "3",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_data_replication_factor",
+                    "input_id": "Storage_data_replication_factor",
+                    "provisional_owner": "object",
+                    "attribute": "data_replication_factor",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Storage_data_storage_duration",
@@ -89,7 +114,19 @@
                 "unit": "yr",
                 "default": "5",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_data_storage_duration",
+                    "input_id": "Storage_data_storage_duration",
+                    "provisional_owner": "object",
+                    "attribute": "data_storage_duration",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Storage_lifespan",
@@ -110,7 +147,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_lifespan",
+                    "input_id": "Storage_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -133,7 +182,19 @@
                 "unit": "kg/TB_stored",
                 "default": "160",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_carbon_footprint_manufacturing_per_storage_capacity",
+                    "input_id": "Storage_carbon_footprint_manufacturing_per_storage_capacity",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_storage_capacity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Storage_base_storage_need",
@@ -154,7 +215,19 @@
                 "unit": "TB_stored",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_base_storage_need",
+                    "input_id": "Storage_base_storage_need",
+                    "provisional_owner": "object",
+                    "attribute": "base_storage_need",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     }

@@ -3,6 +3,7 @@
 These tests focus on the generic orchestration behavior of the use case,
 not object-specific deletion rules (those belong in entity tests).
 """
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from unittest.mock import patch, MagicMock
 
 from model_builder.application.use_cases.delete_object import (
@@ -16,7 +17,7 @@ class TestDeleteObjectUseCase:
 
     def test_check_can_delete_returns_delete_check_result(self, minimal_model_web):
         """check_can_delete returns a DeleteCheckResult."""
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
 
         result = use_case.check_can_delete(minimal_model_web.servers[0].efootprint_id)
 
@@ -24,7 +25,7 @@ class TestDeleteObjectUseCase:
 
     def test_check_can_delete_blocked_object_returns_container_names(self, minimal_model_web):
         """When blocked, result includes blocking container names as strings."""
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
         uj = minimal_model_web.usage_journeys[0]
 
         result = use_case.check_can_delete(uj.efootprint_id)
@@ -35,7 +36,7 @@ class TestDeleteObjectUseCase:
 
     def test_check_can_delete_uses_class_can_delete_hook(self, minimal_model_web):
         """Uses web class can_delete hook when available."""
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
         server = minimal_model_web.servers[0]
 
         result = use_case.check_can_delete(server.efootprint_id)
@@ -48,7 +49,7 @@ class TestDeleteObjectUseCase:
 
     def test_execute_returns_deleted_object_info(self, minimal_model_web):
         """execute returns info about the deleted object."""
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
         up = minimal_model_web.usage_patterns[0]
 
         output = use_case.execute(DeleteObjectInput(object_id=up.efootprint_id))
@@ -58,7 +59,7 @@ class TestDeleteObjectUseCase:
 
     def test_execute_persists_deletion_to_repository(self, minimal_repository, minimal_model_web):
         """execute persists the deletion to the repository."""
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
         up_id = minimal_model_web.usage_patterns[0].efootprint_id
 
         use_case.execute(DeleteObjectInput(object_id=up_id))
@@ -70,7 +71,7 @@ class TestDeleteObjectUseCase:
         """execute calls pre_delete hook on web class when defined."""
         from model_builder.domain.entities.web_core.usage.usage_pattern_web import UsagePatternWeb
 
-        use_case = DeleteObjectUseCase(minimal_model_web)
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
         up = minimal_model_web.usage_patterns[0]
         original_pre_delete = UsagePatternWeb.pre_delete
 

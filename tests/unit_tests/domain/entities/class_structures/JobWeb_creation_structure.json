@@ -38,12 +38,16 @@
                 "label": "Available job types",
                 "options": [
                     {
-                        "label": "GPU job",
-                        "value": "GPUJob"
+                        "label": "Gen AI Job",
+                        "value": "EcoLogitsGenAIExternalAPIJob"
                     },
                     {
                         "label": "Job",
                         "value": "Job"
+                    },
+                    {
+                        "label": "GPU job",
+                        "value": "GPUJob"
                     },
                     {
                         "label": "Video streaming job",
@@ -52,32 +56,29 @@
                     {
                         "label": "Gen AI video Job",
                         "value": "EcoLogitsVideoGenExternalAPIJob"
-                    },
-                    {
-                        "label": "Gen AI Job",
-                        "value": "EcoLogitsGenAIExternalAPIJob"
                     }
                 ]
             }
         ]
     },
     {
-        "category": "GPUJob",
-        "header": "GPU job creation",
+        "category": "EcoLogitsGenAIExternalAPIJob",
+        "header": "Gen AI Job creation",
         "fields": [
             {
-                "web_id": "GPUJob_name",
+                "web_id": "EcoLogitsGenAIExternalAPIJob_name",
                 "attr_name": "name",
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "GPU job 1"
+                "default": "Gen AI Job 1",
+                "simplified_eligible": false
             },
             {
-                "web_id": "GPUJob_data_transferred",
-                "attr_name": "data_transferred",
-                "label": "data transferred",
-                "tooltip": "Total bytes uploaded plus downloaded over the network for one invocation of the job.",
+                "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
+                "attr_name": "output_token_count",
+                "label": "output token count",
+                "tooltip": "Average number of tokens generated per call. Drives generation latency, energy use, and embodied GWP through the EcoLogits impact model.",
                 "metadata": {
                     "confidence": null,
                     "comment": null,
@@ -89,98 +90,25 @@
                     "available_sources": []
                 },
                 "input_type": "explainable_quantity",
-                "unit": "kB",
-                "default": "150",
+                "unit": "dimensionless",
+                "default": "1000",
                 "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "GPUJob_data_stored",
-                "attr_name": "data_stored",
-                "label": "data stored",
-                "tooltip": "Net change in stored data per invocation. Positive values only. Data deletion is handled by <span class=\"ssot-param-ref\">data storage duration</span>",
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsGenAIExternalAPIJob_output_token_count",
+                    "input_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
+                    "provisional_owner": "object",
+                    "attribute": "output_token_count",
+                    "setting": {
+                        "included": false,
+                        "help": ""
                     },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "kB_stored",
-                "default": "100",
-                "can_be_negative": false,
-                "step": "1"
-            },
-            {
-                "web_id": "GPUJob_request_duration",
-                "attr_name": "request_duration",
-                "label": "request duration",
-                "tooltip": "How long the job takes to process from start to finish on the server.",
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "s",
-                "default": "1",
-                "can_be_negative": false,
-                "step": "0.1"
+                    "required_by": null
+                }
             }
         ],
-        "advanced_fields": [
-            {
-                "web_id": "GPUJob_compute_needed",
-                "attr_name": "compute_needed",
-                "label": "compute needed",
-                "tooltip": "GPU consumed by one invocation of the job, expressed in GPUs held for the request duration.",
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "gpu",
-                "default": "1",
-                "can_be_negative": false,
-                "step": "0.1"
-            },
-            {
-                "web_id": "GPUJob_ram_needed",
-                "attr_name": "ram_needed",
-                "label": "RAM needed",
-                "tooltip": "GPU memory held by one invocation of the job for its full duration.",
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "MB_ram",
-                "default": "50",
-                "can_be_negative": false,
-                "step": "1"
-            }
-        ]
+        "advanced_fields": []
     },
     {
         "category": "Job",
@@ -192,7 +120,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Job 1"
+                "default": "Job 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "Job_data_transferred",
@@ -213,7 +142,19 @@
                 "unit": "kB",
                 "default": "150",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Job_data_transferred",
+                    "input_id": "Job_data_transferred",
+                    "provisional_owner": "object",
+                    "attribute": "data_transferred",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Job_data_stored",
@@ -234,7 +175,19 @@
                 "unit": "kB_stored",
                 "default": "100",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Job_data_stored",
+                    "input_id": "Job_data_stored",
+                    "provisional_owner": "object",
+                    "attribute": "data_stored",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Job_request_duration",
@@ -255,7 +208,19 @@
                 "unit": "s",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Job_request_duration",
+                    "input_id": "Job_request_duration",
+                    "provisional_owner": "object",
+                    "attribute": "request_duration",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -278,7 +243,19 @@
                 "unit": "cpu_core",
                 "default": "0.1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Job_compute_needed",
+                    "input_id": "Job_compute_needed",
+                    "provisional_owner": "object",
+                    "attribute": "compute_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Job_ram_needed",
@@ -299,7 +276,201 @@
                 "unit": "MB_ram",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Job_ram_needed",
+                    "input_id": "Job_ram_needed",
+                    "provisional_owner": "object",
+                    "attribute": "ram_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            }
+        ]
+    },
+    {
+        "category": "GPUJob",
+        "header": "GPU job creation",
+        "fields": [
+            {
+                "web_id": "GPUJob_name",
+                "attr_name": "name",
+                "label": "name",
+                "tooltip": null,
+                "input_type": "str",
+                "default": "GPU job 1",
+                "simplified_eligible": false
+            },
+            {
+                "web_id": "GPUJob_data_transferred",
+                "attr_name": "data_transferred",
+                "label": "data transferred",
+                "tooltip": "Total bytes uploaded plus downloaded over the network for one invocation of the job.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB",
+                "default": "150",
+                "can_be_negative": false,
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUJob_data_transferred",
+                    "input_id": "GPUJob_data_transferred",
+                    "provisional_owner": "object",
+                    "attribute": "data_transferred",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            },
+            {
+                "web_id": "GPUJob_data_stored",
+                "attr_name": "data_stored",
+                "label": "data stored",
+                "tooltip": "Net change in stored data per invocation. Positive values only. Data deletion is handled by <span class=\"ssot-param-ref\">data storage duration</span>",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "kB_stored",
+                "default": "100",
+                "can_be_negative": false,
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUJob_data_stored",
+                    "input_id": "GPUJob_data_stored",
+                    "provisional_owner": "object",
+                    "attribute": "data_stored",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            },
+            {
+                "web_id": "GPUJob_request_duration",
+                "attr_name": "request_duration",
+                "label": "request duration",
+                "tooltip": "How long the job takes to process from start to finish on the server.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "s",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUJob_request_duration",
+                    "input_id": "GPUJob_request_duration",
+                    "provisional_owner": "object",
+                    "attribute": "request_duration",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            }
+        ],
+        "advanced_fields": [
+            {
+                "web_id": "GPUJob_compute_needed",
+                "attr_name": "compute_needed",
+                "label": "compute needed",
+                "tooltip": "GPU consumed by one invocation of the job, expressed in GPUs held for the request duration.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "gpu",
+                "default": "1",
+                "can_be_negative": false,
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUJob_compute_needed",
+                    "input_id": "GPUJob_compute_needed",
+                    "provisional_owner": "object",
+                    "attribute": "compute_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            },
+            {
+                "web_id": "GPUJob_ram_needed",
+                "attr_name": "ram_needed",
+                "label": "RAM needed",
+                "tooltip": "GPU memory held by one invocation of the job for its full duration.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": {
+                        "id": "hypothesis",
+                        "name": "e-footprint hypothesis",
+                        "link": null
+                    },
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "MB_ram",
+                "default": "50",
+                "can_be_negative": false,
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUJob_ram_needed",
+                    "input_id": "GPUJob_ram_needed",
+                    "provisional_owner": "object",
+                    "attribute": "ram_needed",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -313,7 +484,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Video streaming job 1"
+                "default": "Video streaming job 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "VideoStreamingJob_resolution",
@@ -362,7 +534,19 @@
                         "label": "8K (7680 x 4320)",
                         "value": "8K (7680 x 4320)"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-VideoStreamingJob_resolution",
+                    "input_id": "VideoStreamingJob_resolution",
+                    "provisional_owner": "object",
+                    "attribute": "resolution",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "VideoStreamingJob_video_duration",
@@ -383,7 +567,19 @@
                 "unit": "h",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-VideoStreamingJob_video_duration",
+                    "input_id": "VideoStreamingJob_video_duration",
+                    "provisional_owner": "object",
+                    "attribute": "video_duration",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "VideoStreamingJob_data_stored",
@@ -404,7 +600,19 @@
                 "unit": "MB_stored",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-VideoStreamingJob_data_stored",
+                    "input_id": "VideoStreamingJob_data_stored",
+                    "provisional_owner": "object",
+                    "attribute": "data_stored",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -427,7 +635,19 @@
                 "unit": "1/s",
                 "default": "30",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-VideoStreamingJob_refresh_rate",
+                    "input_id": "VideoStreamingJob_refresh_rate",
+                    "provisional_owner": "object",
+                    "attribute": "refresh_rate",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -441,7 +661,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Gen AI video Job 1"
+                "default": "Gen AI video Job 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPIJob_resolution",
@@ -461,7 +682,19 @@
                 "default": "720p (1280 x 720)",
                 "input_type": "select_str_input",
                 "selected": "720p (1280 x 720)",
-                "options": []
+                "options": [],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsVideoGenExternalAPIJob_resolution",
+                    "input_id": "EcoLogitsVideoGenExternalAPIJob_resolution",
+                    "provisional_owner": "object",
+                    "attribute": "resolution",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPIJob_duration",
@@ -482,7 +715,19 @@
                 "unit": "s",
                 "default": "8",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EcoLogitsVideoGenExternalAPIJob_duration",
+                    "input_id": "EcoLogitsVideoGenExternalAPIJob_duration",
+                    "provisional_owner": "object",
+                    "attribute": "duration",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EcoLogitsVideoGenExternalAPIJob_with_audio",
@@ -500,43 +745,8 @@
                     "available_sources": []
                 },
                 "default": true,
-                "input_type": "bool"
-            }
-        ],
-        "advanced_fields": []
-    },
-    {
-        "category": "EcoLogitsGenAIExternalAPIJob",
-        "header": "Gen AI Job creation",
-        "fields": [
-            {
-                "web_id": "EcoLogitsGenAIExternalAPIJob_name",
-                "attr_name": "name",
-                "label": "name",
-                "tooltip": null,
-                "input_type": "str",
-                "default": "Gen AI Job 1"
-            },
-            {
-                "web_id": "EcoLogitsGenAIExternalAPIJob_output_token_count",
-                "attr_name": "output_token_count",
-                "label": "output token count",
-                "tooltip": "Average number of tokens generated per call. Drives generation latency, energy use, and embodied GWP through the EcoLogits impact model.",
-                "metadata": {
-                    "confidence": null,
-                    "comment": null,
-                    "source": {
-                        "id": "hypothesis",
-                        "name": "e-footprint hypothesis",
-                        "link": null
-                    },
-                    "available_sources": []
-                },
-                "input_type": "explainable_quantity",
-                "unit": "dimensionless",
-                "default": "1000",
-                "can_be_negative": false,
-                "step": "1"
+                "input_type": "bool",
+                "simplified_eligible": false
             }
         ],
         "advanced_fields": []

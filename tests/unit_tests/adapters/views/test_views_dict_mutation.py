@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from copy import deepcopy
 
 import numpy as np
@@ -28,7 +29,7 @@ def _create_object_in_session(client, post_data: dict, parent_id: str | None = N
     repository = SessionSystemRepository(client.session)
     object_type = post_data["type_object_available"]
     parsed_form_data = parse_form_data(post_data, object_type)
-    output = CreateObjectUseCase(repository).execute(
+    output = CreateObjectUseCase(repository, input_catalog).execute(
         CreateObjectInput(object_type=object_type, form_data=parsed_form_data, parent_id=parent_id)
     )
     return output.created_object_id

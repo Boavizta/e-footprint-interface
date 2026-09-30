@@ -541,7 +541,20 @@ def download_sources(request):
 @time_it
 def source_table(request):
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
-    return render(request, "model_builder/result/source_table.html", {"model_web": model_web})
+    from model_builder.adapters.presenters.simplified_inputs import input_catalog
+    from model_builder.adapters.forms.simplified_input_context import bookmark_context
+    from model_builder.domain.services.simplified_inputs import FieldAddress, normalize_definition
+
+    catalog = input_catalog(model_web)
+    definition = normalize_definition(model_web.repository.interface_config.get("simplified_inputs"))
+    rows = model_web.web_explainable_quantities_sources
+    for row in rows:
+        row.bookmark = bookmark_context(model_web, FieldAddress(
+            row.modeling_obj_container.efootprint_id, row.attr_name_in_mod_obj_container),
+            catalog=catalog, definition=definition, suffix="sources")
+        if row.bookmark:
+            row.bookmark["lazy"] = True
+    return render(request, "model_builder/result/source_table.html", {"source_rows": rows})
 
 
 @time_it

@@ -134,6 +134,7 @@ def _build_job_snapshot_model_web():
         model_name: str = "sora-2-pro"
 
     basic_model_web = MagicMock()
+    basic_model_web.repository.interface_config = {}
     # Divergent models so the snapshot itself proves per-object differentiation: sora-2-pro offers
     # 720p/1080p, seedance-1.0 offers 480p/720p — a regression that ignored model_name would break it.
     option1 = _MockModelingObjectWeb(id="efootprint_id1", name="option1", model_name="sora-2-pro")

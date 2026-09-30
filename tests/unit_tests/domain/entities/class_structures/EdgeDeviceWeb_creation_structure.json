@@ -34,7 +34,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Edge computer 1"
+                "default": "Edge computer 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeComputer_lifespan",
@@ -55,7 +56,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_lifespan",
+                    "input_id": "EdgeComputer_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_ram",
@@ -76,7 +89,19 @@
                 "unit": "GB_ram",
                 "default": "8",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_ram",
+                    "input_id": "EdgeComputer_ram",
+                    "provisional_owner": "object",
+                    "attribute": "ram",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_compute",
@@ -97,7 +122,19 @@
                 "unit": "cpu_core",
                 "default": "4",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_compute",
+                    "input_id": "EdgeComputer_compute",
+                    "provisional_owner": "object",
+                    "attribute": "compute",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -120,7 +157,19 @@
                 "unit": "kg",
                 "default": "60",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_carbon_footprint_manufacturing",
+                    "input_id": "EdgeComputer_carbon_footprint_manufacturing",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_power",
@@ -141,7 +190,19 @@
                 "unit": "W",
                 "default": "30",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_power",
+                    "input_id": "EdgeComputer_power",
+                    "provisional_owner": "object",
+                    "attribute": "power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_idle_power",
@@ -162,7 +223,19 @@
                 "unit": "W",
                 "default": "5",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_idle_power",
+                    "input_id": "EdgeComputer_idle_power",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_base_ram_consumption",
@@ -183,7 +256,19 @@
                 "unit": "GB_ram",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_base_ram_consumption",
+                    "input_id": "EdgeComputer_base_ram_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_ram_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeComputer_base_compute_consumption",
@@ -204,7 +289,19 @@
                 "unit": "cpu_core",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeComputer_base_compute_consumption",
+                    "input_id": "EdgeComputer_base_compute_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_compute_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -218,7 +315,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Edge appliance 1"
+                "default": "Edge appliance 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeAppliance_lifespan",
@@ -239,7 +337,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeAppliance_lifespan",
+                    "input_id": "EdgeAppliance_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -262,7 +372,19 @@
                 "unit": "kg",
                 "default": "100",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeAppliance_carbon_footprint_manufacturing",
+                    "input_id": "EdgeAppliance_carbon_footprint_manufacturing",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeAppliance_power",
@@ -283,7 +405,19 @@
                 "unit": "W",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeAppliance_power",
+                    "input_id": "EdgeAppliance_power",
+                    "provisional_owner": "object",
+                    "attribute": "power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeAppliance_idle_power",
@@ -304,7 +438,19 @@
                 "unit": "W",
                 "default": "5",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeAppliance_idle_power",
+                    "input_id": "EdgeAppliance_idle_power",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -318,7 +464,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Edge device 1"
+                "default": "Edge device 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeDevice_lifespan",
@@ -339,7 +486,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeDevice_lifespan",
+                    "input_id": "EdgeDevice_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -362,7 +521,19 @@
                 "unit": "kg",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeDevice_structure_carbon_footprint_manufacturing",
+                    "input_id": "EdgeDevice_structure_carbon_footprint_manufacturing",
+                    "provisional_owner": "object",
+                    "attribute": "structure_carbon_footprint_manufacturing",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     }

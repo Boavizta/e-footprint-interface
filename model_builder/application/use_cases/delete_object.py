@@ -28,6 +28,7 @@ class DeleteCheckResult:
     accordion_children_class_type: str = ""  # Raw class type for presenter to resolve label
     is_mirrored: bool = False
     mirrored_count: int = 0
+    selected_fields_removed: list = field(default_factory=list)
 
 
 @dataclass
@@ -48,13 +49,14 @@ class DeleteObjectUseCase:
     including handling list container removals.
     """
 
-    def __init__(self, model_web: ModelWeb):
+    def __init__(self, model_web: ModelWeb, catalog_factory):
         """Initialize with a loaded web model.
 
         Args:
             model_web: web model loaded with system data.
         """
         self.model_web = model_web
+        self.catalog_factory = catalog_factory
 
     @staticmethod
     def _container_removal_targets(web_obj, web_class):
@@ -124,8 +126,20 @@ class DeleteObjectUseCase:
         mirrored_cards = web_obj.mirrored_cards
         is_mirrored = len(mirrored_cards) > 1
 
+        from model_builder.domain.services.simplified_inputs import FieldAddress, normalize_definition
+
+        definition = normalize_definition(self.model_web.repository.interface_config.get("simplified_inputs"))
+        selected = [FieldAddress(owner, attribute) for owner, attributes in definition["fields"].items()
+                    for attribute, setting in attributes.items() if setting["included"]]
+        removed_fields = []
+        if selected:
+            preview = ModelWeb(self.model_web.repository, system_data=self.model_web.to_json(save_computed_state=False))
+            DeleteObjectUseCase(preview, self.catalog_factory)._delete(DeleteObjectInput(object_id))
+            removed_fields = [address for address in selected if address.object_id not in preview.flat_efootprint_objs_dict]
+
         return DeleteCheckResult(
             can_delete=True,
+            selected_fields_removed=removed_fields,
             is_list_or_dict_deletion=bool(list_or_dict_containers),
             has_accordion_children=has_children,
             accordion_children_count=len(accordion_children),
@@ -135,6 +149,13 @@ class DeleteObjectUseCase:
         )
 
     def execute(self, input_data: DeleteObjectInput) -> DeleteObjectOutput:
+        from model_builder.application.use_cases.simplified_inputs import persist_structural_change
+
+        output = self._delete(input_data)
+        persist_structural_change(self.model_web, self.catalog_factory)
+        return output
+
+    def _delete(self, input_data: DeleteObjectInput) -> DeleteObjectOutput:
         """Execute the object deletion use case.
 
         Args:
@@ -187,7 +208,6 @@ class DeleteObjectUseCase:
                 edit_result = edit_service.edit_with_cascade_cleanup(container, edit_data)
                 edited_containers.append(edit_result.edited_object)
 
-            self.model_web.persist_to_cache()
             # Call delete_side_effects after deletion so constraint diff reflects post-deletion state
             oob_regions = web_obj.delete_side_effects()
             return DeleteObjectOutput(
@@ -205,7 +225,6 @@ class DeleteObjectUseCase:
 
             web_obj.self_delete()
 
-            self.model_web.persist_to_cache()
             # Call delete_side_effects after deletion so constraint diff reflects post-deletion state
             oob_regions = web_obj.delete_side_effects()
             return DeleteObjectOutput(

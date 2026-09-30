@@ -3,6 +3,7 @@
 Follows the Step 1 constraint-change OOB pattern: no browser, real
 InMemorySystemRepository + ModelWeb + use cases.
 """
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
@@ -23,7 +24,7 @@ def _fresh_repository() -> InMemorySystemRepository:
 def _create(repository, object_type: str, name: str, parent_id=None, **overrides):
     post_data = create_post_data_from_class_default_values(name, object_type, **overrides)
     parsed = parse_form_data(post_data, object_type)
-    return CreateObjectUseCase(repository).execute(
+    return CreateObjectUseCase(repository, input_catalog).execute(
         CreateObjectInput(object_type=object_type, form_data=parsed, parent_id=parent_id))
 
 
@@ -45,7 +46,7 @@ def test_deleting_last_edge_object_emits_toggle_region():
 
     assert ModelWeb(repository).has_edge_objects is True
 
-    delete_output = DeleteObjectUseCase(ModelWeb(repository)).execute(
+    delete_output = DeleteObjectUseCase(ModelWeb(repository), input_catalog).execute(
         DeleteObjectInput(object_id=edge_device_id))
 
     assert ModelWeb(repository).has_edge_objects is False
@@ -59,7 +60,7 @@ def test_edit_without_edge_flip_does_not_emit_toggle_region():
 
     edit_post_data = create_post_data_from_class_default_values("Renamed Sensor", "EdgeDevice", components="")
     parsed = parse_form_data(edit_post_data, "EdgeDevice")
-    edit_output = EditObjectUseCase(ModelWeb(repository)).execute(
+    edit_output = EditObjectUseCase(ModelWeb(repository), input_catalog).execute(
         EditObjectInput(object_id=edge_device_id, form_data=parsed))
 
     assert TOGGLE_REGION not in {r.key for r in edit_output.oob_regions}
@@ -90,7 +91,7 @@ def test_edge_device_group_edit_without_flip_does_not_emit_toggle_region():
 
     edit_post_data = create_post_data_from_class_default_values("Renamed Group", "EdgeDeviceGroup")
     parsed = parse_form_data(edit_post_data, "EdgeDeviceGroup")
-    edit_output = EditObjectUseCase(ModelWeb(repository)).execute(
+    edit_output = EditObjectUseCase(ModelWeb(repository), input_catalog).execute(
         EditObjectInput(object_id=group_id, form_data=parsed))
 
     assert TOGGLE_REGION not in {r.key for r in edit_output.oob_regions}
@@ -102,7 +103,7 @@ def test_edge_device_group_delete_emits_toggle_region():
     create_output = _create(repository, "EdgeDeviceGroup", "Group")
     group_id = create_output.created_object_id
 
-    delete_output = DeleteObjectUseCase(ModelWeb(repository)).execute(
+    delete_output = DeleteObjectUseCase(ModelWeb(repository), input_catalog).execute(
         DeleteObjectInput(object_id=group_id))
 
     assert ModelWeb(repository).has_edge_objects is False

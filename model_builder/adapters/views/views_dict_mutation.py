@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 from efootprint.utils.tools import time_it
 
@@ -45,7 +46,7 @@ def _build_edit_form_data(parent_obj, mutated_attr: str, mutated_key, new_count)
 
 def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, form_data: dict, panel_object_id: str,
                           refresh_cards: bool = True):
-    use_case = EditObjectUseCase(model_web)
+    use_case = EditObjectUseCase(model_web, input_catalog)
     # Preserve the side-panel sync side-effect: if a child object's edit panel is currently
     # open, its membership section needs to refresh too.
     extra_oob_regions = [OobRegion.make("dict_membership_section", object_id=panel_object_id)]

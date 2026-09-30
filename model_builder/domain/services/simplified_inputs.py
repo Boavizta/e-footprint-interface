@@ -63,8 +63,8 @@ def _is_type(annotation, parent):
     return isinstance(annotation, type) and issubclass(annotation, parent)
 
 
-def _eligibility(owner, attribute, annotation, can_edit_timeseries):
-    if isinstance(owner, (Country, Network, Device)):
+def input_eligibility(owner_class, attribute, annotation, value, can_edit_timeseries):
+    if issubclass(owner_class, (Country, Network, Device)):
         return False, "Reference objects are selected through their owning input."
 
     annotation = resolve_optional_annotation(annotation)
@@ -81,7 +81,7 @@ def _eligibility(owner, attribute, annotation, can_edit_timeseries):
             return True, None
         return False, "Object relationships are structural inputs."
     if _is_type(annotation, (ExplainableHourlyQuantities, ExplainableRecurrentQuantities)):
-        if can_edit_timeseries(annotation, getattr(owner, attribute)):
+        if can_edit_timeseries(annotation, value):
             return True, None
         return False, "This timeseries has no supported editor."
     if _is_type(annotation, ExplainableQuantity):
@@ -89,10 +89,10 @@ def _eligibility(owner, attribute, annotation, can_edit_timeseries):
     if _is_type(annotation, Number) and not _is_type(annotation, bool):
         return True, None
     if _is_type(annotation, ExplainableObject):
-        value = getattr(owner, attribute).value
+        value = value.value
         if isinstance(value, bool):
             return False, "Boolean inputs are outside the supported input kinds."
-        if attribute in owner.list_values or attribute in owner.conditional_list_values:
+        if attribute in owner_class.list_values or attribute in owner_class.conditional_list_values:
             return True, None
         if isinstance(value, Number):
             return True, None
@@ -108,7 +108,8 @@ def build_catalog(model_web, *, can_edit_timeseries) -> FieldCatalog:
             if attribute == "self":
                 continue
             address = FieldAddress(owner.id, attribute)
-            eligible, reason = _eligibility(owner, attribute, parameter.annotation, can_edit_timeseries)
+            eligible, reason = input_eligibility(
+                owner.efootprint_class, attribute, parameter.annotation, getattr(owner, attribute), can_edit_timeseries)
             controller = None
             if attribute in owner.conditional_list_values:
                 controller_owner, controller_attribute = resolve_input_path(

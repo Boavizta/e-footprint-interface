@@ -9,6 +9,7 @@ Dropped/changed:
 """
 
 from __future__ import annotations
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 
 from copy import deepcopy
 import json
@@ -127,7 +128,7 @@ def test_memory_interruption_rolls_transactional_edit_back_without_persisting(
 
     with observe_computations(interrupt_first_guard):
         with pytest.raises(ComputationMemoryLimitExceeded) as raised:
-            EditObjectUseCase(model_web).execute(
+            EditObjectUseCase(model_web, input_catalog).execute(
                 EditObjectInput(
                     object_id=server.efootprint_id,
                     form_data=parse_form_data({"ram": "256", "ram__unit": str(u.GB_ram)}, "Server"),

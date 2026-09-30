@@ -1,10 +1,10 @@
 {
     "switch_item": "type_object_available",
     "switch_values": [
-        "GPUJob",
-        "Job",
-        "VideoStreamingJob",
         "EcoLogitsVideoGenExternalAPIJob",
+        "Job",
+        "GPUJob",
+        "VideoStreamingJob",
         "EcoLogitsGenAIExternalAPIJob"
     ],
     "dynamic_lists": [
@@ -20,6 +20,10 @@
                     "480p (854 x 480)",
                     "720p (1280 x 720)"
                 ]
+            },
+            "simplified_required_by": {
+                "efootprint_id1": null,
+                "efootprint_id2": null
             }
         }
     ],

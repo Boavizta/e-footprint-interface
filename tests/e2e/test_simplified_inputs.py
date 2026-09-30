@@ -288,3 +288,161 @@ class TestSimplifiedInputs:
         rendered = workspace.locator(".simplified-fields").first.evaluate(
             "el => getComputedStyle(el).gridTemplateColumns.split(' ').length")
         assert rendered == columns
+
+@pytest.mark.e2e
+class TestInlineBookmarks:
+    def test_inline_sources_creation_requirements_and_delete(self, minimal_system, model_builder_page, tmp_path):
+        from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import EcoLogitsVideoGenExternalAPI
+        from tests.e2e.conftest import load_system_dict_into_browser
+        from tests.e2e.utils import add_only_update
+
+        api_a = EcoLogitsVideoGenExternalAPI.from_defaults("Video API A")
+        api_b = EcoLogitsVideoGenExternalAPI.from_defaults("Video API B")
+        data = system_to_json(minimal_system, save_computed_state=False)
+        for api in [api_a, api_b]:
+            add_only_update(data, system_to_json(api, save_computed_state=False))
+        builder = load_system_dict_into_browser(model_builder_page, data)
+        page = builder.page
+        builder.get_object_card("Server", "Test Server").click_edit_button()
+        draft = page.locator("#Storage_storage_capacity")
+        expect(draft).to_be_visible()
+        draft.fill("1234")
+        storage_bookmark = page.locator('#field-group-Storage_storage_capacity [data-bookmark]')
+        storage_bookmark.locator("summary").click()
+        expect(storage_bookmark.locator("textarea")).to_be_in_viewport(ratio=1)
+        page.screenshot(path="/tmp/task8-panel-bookmark.png")
+        with page.expect_response("**/patch-simplified-inputs/"):
+            storage_bookmark.locator("[data-include-input]").check()
+        expect(storage_bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
+        expect(draft).to_have_value("1234")
+        expect(page.locator("#sidePanel")).to_be_visible()
+        click_and_wait_for_htmx(page, storage_bookmark.locator('[data-action="bookmark-undo"]'))
+        expect(storage_bookmark.locator("[data-include-input]")).not_to_be_checked()
+        expect(draft).to_have_value("1234")
+        # Close the value draft through the existing discard flow.
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        page.locator("#btn-close-side-panel").click()
+        expect(page.locator("#unsavedModal")).to_be_visible()
+        page.locator("#continue-unsaved-modal").click()
+        expect(page.locator("#sidePanel")).not_to_be_visible()
+
+        builder.open_result_panel()
+        click_and_wait_for_htmx(page, page.locator(".header-btn-result-sources-desktop"))
+        row = page.locator("#source-block [data-bookmark][data-attribute='storage_capacity']").first
+        source_row = row.locator("xpath=ancestor::tr")
+        editor_button = source_row.locator(".source-table-edit-btn")
+        editor_target = editor_button.get_attribute("data-bs-target")
+        click_and_wait_for_htmx(page, editor_button)
+        source_draft = page.locator(editor_target).locator(".source-editor-comment")
+        source_draft.fill("Unsubmitted provenance draft")
+        expect(row.locator("[data-selection-controls]")).to_have_count(0)
+        with page.expect_response("**/simplified-input-bookmark/**"):
+            row.locator("summary").click()
+        expect(row.locator("[data-selection-controls]")).to_be_visible()
+        expect(row.locator("textarea")).to_be_in_viewport(ratio=1)
+        page.screenshot(path="/tmp/task8-sources-bookmark.png")
+        page.set_viewport_size({"width": 1000, "height": 800})
+        page.screenshot(path="/tmp/task8-sources-compact-bookmark.png")
+        page.set_viewport_size({"width": 1280, "height": 720})
+        with page.expect_response("**/patch-simplified-inputs/"):
+            row.locator("[data-include-input]").check()
+        expect(row.locator("[data-bookmark-status]")).to_have_text("Saved")
+        expect(source_draft).to_have_value("Unsubmitted provenance draft")
+        expect(source_draft).to_be_visible()
+        page.locator(editor_target).locator('[data-action="cancel-source-table-row-editor"]').click()
+        builder.close_result_panel()
+
+        builder.get_object_card("EcoLogitsVideoGenExternalAPI", "Video API A").click_edit_button()
+        controller = page.locator('#field-group-EcoLogitsVideoGenExternalAPI_model_name [data-bookmark]')
+        controller.locator("summary").click()
+        with page.expect_response("**/patch-simplified-inputs/"):
+            controller.locator("[data-include-input]").check()
+        expect(controller.locator("[data-bookmark-status]")).to_have_text("Saved")
+        page.locator("#btn-close-side-panel").click()
+        expect(page.locator("#sidePanel")).not_to_be_visible()
+        step = builder.get_object_card("UsageJourney", "Test Journey").get_nested_object_card(
+            "UsageJourneyStep", "Test Step")
+        step.open_accordion()
+        step.accordion_should_be_open()
+        add_job = page.locator('[hx-get*="/model_builder/open-create-object-panel/JobBase/"]:visible').first
+        click_and_wait_for_htmx(page, add_job)
+        page.locator("#server_or_external_api").select_option(api_a.id)
+        resolution = page.locator('#field-group-EcoLogitsVideoGenExternalAPIJob_resolution [data-bookmark]')
+        resolution.locator("summary").click()
+        expect(resolution.locator("[data-include-input]")).to_be_checked()
+        expect(resolution.locator("[data-include-input]")).to_be_disabled()
+        expect(resolution.locator("[data-required-explanation]")).to_contain_text("Video API A")
+        resolution.locator("textarea").fill("Resolution help retained")
+        page.locator("#server_or_external_api").select_option(api_b.id)
+        expect(resolution.locator("[data-include-input]")).to_be_enabled()
+        expect(resolution.locator("[data-include-input]")).not_to_be_checked()
+        expect(resolution.locator("textarea")).to_have_value("Resolution help retained")
+        page.locator("#server_or_external_api").select_option(api_a.id)
+        resolution.locator("summary").click()
+        page.locator("#EcoLogitsVideoGenExternalAPIJob_resolution").select_option("720p (1280 x 720)")
+        page.locator("#EcoLogitsVideoGenExternalAPIJob_name").fill("New selected video")
+        builder.side_panel.submit_and_wait_for_close()
+        card = builder.get_object_card("EcoLogitsVideoGenExternalAPIJob", "New selected video")
+        card.click_edit_button()
+        saved = page.locator('#field-group-EcoLogitsVideoGenExternalAPIJob_resolution [data-bookmark]')
+        saved.locator("summary").click()
+        expect(saved.locator("[data-include-input]")).to_be_checked()
+        expect(saved.locator("textarea")).to_have_value("Resolution help retained")
+        builder.side_panel.click_delete_button()
+        expect(page.locator("#model-builder-modal")).to_contain_text("New selected video")
+        expect(page.locator("#model-builder-modal")).to_contain_text("resolution")
+        click_and_wait_for_htmx(page, page.get_by_role("button", name="Yes, delete", exact=True))
+        expect(card.locator).to_have_count(0)
+        with page.expect_download() as download:
+            page.locator('a[href="download-json/"]').click()
+        path = tmp_path / "bookmarks.json"
+        download.value.save_as(str(path))
+        exported = json.loads(path.read_text())
+        fields = exported["interface_config"]["simplified_inputs"]["fields"]
+        assert api_a.id in fields
+        assert not any(setting.get("help") == "Resolution help retained" for attributes in fields.values()
+                       for setting in attributes.values())
+
+    def test_cancelled_creation_discards_provisional_bookmarks(self, minimal_complete_model_builder, tmp_path):
+        builder = minimal_complete_model_builder
+        page = builder.page
+        builder.click_add_server()
+        bookmark = page.locator('#field-group-Storage_storage_capacity [data-bookmark]')
+        bookmark.locator("summary").click()
+        bookmark.locator("[data-include-input]").check()
+        bookmark.locator("textarea").fill("Cancelled provisional help")
+        page.locator("#btn-close-side-panel").click()
+        expect(page.locator("#unsavedModal")).to_be_visible()
+        page.locator("#continue-unsaved-modal").click()
+        expect(page.locator("#sidePanel")).not_to_be_visible()
+        with page.expect_download() as download:
+            page.locator('a[href="download-json/"]').click()
+        path = tmp_path / "cancelled-bookmarks.json"
+        download.value.save_as(str(path))
+        exported = json.loads(path.read_text())
+        assert not exported.get("interface_config", {}).get("simplified_inputs", {}).get("fields", {})
+
+    def test_failed_bookmark_preserves_the_panel_and_unsaved_value(self, minimal_complete_model_builder):
+        from urllib.parse import urlencode
+        builder = minimal_complete_model_builder
+        page = builder.page
+        builder.get_object_card("Server", "Test Server").click_edit_button()
+        draft = page.locator("#Storage_storage_capacity")
+        draft.fill("9876")
+        bookmark = page.locator('#field-group-Storage_storage_capacity [data-bookmark]')
+        bookmark.locator("summary").click()
+        page.route("**/patch-simplified-inputs/", lambda route: route.continue_(post_data=urlencode({
+            "patch": json.dumps({"fields": {"missing-owner": {"storage_capacity": {"included": True}}}})})))
+        with page.expect_response("**/patch-simplified-inputs/"):
+            bookmark.locator("[data-include-input]").check()
+        expect(page.locator("#model-builder-modal")).to_be_visible()
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
+        expect(draft).to_have_value("9876")
+        expect(page.locator("#sidePanel")).to_be_visible()
+        page.locator("#model-builder-modal .btn-close").click()
+        page.unroute("**/patch-simplified-inputs/")
+        with page.expect_response("**/patch-simplified-inputs/"):
+            bookmark.locator("[data-include-input]").uncheck()
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
+        expect(draft).to_have_value("9876")

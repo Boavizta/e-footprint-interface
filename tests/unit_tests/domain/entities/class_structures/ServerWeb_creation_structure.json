@@ -34,7 +34,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "AI server 1"
+                "default": "AI server 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "GPUServer_server_type",
@@ -67,7 +68,19 @@
                         "label": "serverless",
                         "value": "serverless"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_server_type",
+                    "input_id": "GPUServer_server_type",
+                    "provisional_owner": "object",
+                    "attribute": "server_type",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_average_carbon_intensity",
@@ -88,7 +101,19 @@
                 "unit": "g/kWh",
                 "default": "400",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_average_carbon_intensity",
+                    "input_id": "GPUServer_average_carbon_intensity",
+                    "provisional_owner": "object",
+                    "attribute": "average_carbon_intensity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_compute",
@@ -109,7 +134,19 @@
                 "unit": "gpu",
                 "default": "4",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_compute",
+                    "input_id": "GPUServer_compute",
+                    "provisional_owner": "object",
+                    "attribute": "compute",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_lifespan",
@@ -130,7 +167,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_lifespan",
+                    "input_id": "GPUServer_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -153,7 +202,19 @@
                 "unit": "W/gpu",
                 "default": "400",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_gpu_power",
+                    "input_id": "GPUServer_gpu_power",
+                    "provisional_owner": "object",
+                    "attribute": "gpu_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_gpu_idle_power",
@@ -174,7 +235,19 @@
                 "unit": "W/gpu",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_gpu_idle_power",
+                    "input_id": "GPUServer_gpu_idle_power",
+                    "provisional_owner": "object",
+                    "attribute": "gpu_idle_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_ram_per_gpu",
@@ -195,7 +268,19 @@
                 "unit": "GB_ram/gpu",
                 "default": "80",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_ram_per_gpu",
+                    "input_id": "GPUServer_ram_per_gpu",
+                    "provisional_owner": "object",
+                    "attribute": "ram_per_gpu",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_carbon_footprint_manufacturing_per_gpu",
@@ -216,7 +301,19 @@
                 "unit": "kg/gpu",
                 "default": "150",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_carbon_footprint_manufacturing_per_gpu",
+                    "input_id": "GPUServer_carbon_footprint_manufacturing_per_gpu",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_gpu",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_carbon_footprint_manufacturing_without_gpu",
@@ -237,7 +334,19 @@
                 "unit": "kg",
                 "default": "2500",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_carbon_footprint_manufacturing_without_gpu",
+                    "input_id": "GPUServer_carbon_footprint_manufacturing_without_gpu",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_without_gpu",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_power_usage_effectiveness",
@@ -258,7 +367,19 @@
                 "unit": "dimensionless",
                 "default": "1.2",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_power_usage_effectiveness",
+                    "input_id": "GPUServer_power_usage_effectiveness",
+                    "provisional_owner": "object",
+                    "attribute": "power_usage_effectiveness",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_utilization_rate",
@@ -279,7 +400,19 @@
                 "unit": "dimensionless",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_utilization_rate",
+                    "input_id": "GPUServer_utilization_rate",
+                    "provisional_owner": "object",
+                    "attribute": "utilization_rate",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_base_compute_consumption",
@@ -300,7 +433,19 @@
                 "unit": "gpu",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_base_compute_consumption",
+                    "input_id": "GPUServer_base_compute_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_compute_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "GPUServer_base_ram_consumption",
@@ -321,7 +466,19 @@
                 "unit": "GB_ram",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_base_ram_consumption",
+                    "input_id": "GPUServer_base_ram_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_ram_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -335,7 +492,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Cloud server 1"
+                "default": "Cloud server 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "BoaviztaCloudServer_provider",
@@ -376,7 +534,19 @@
                         "label": "scaleway",
                         "value": "scaleway"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_provider",
+                    "input_id": "BoaviztaCloudServer_provider",
+                    "provisional_owner": "object",
+                    "attribute": "provider",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_instance_type",
@@ -396,7 +566,19 @@
                 "default": "ent1-s",
                 "input_type": "select_str_input",
                 "selected": "ent1-s",
-                "options": []
+                "options": [],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_instance_type",
+                    "input_id": "BoaviztaCloudServer_instance_type",
+                    "provisional_owner": "object",
+                    "attribute": "instance_type",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_server_type",
@@ -429,7 +611,19 @@
                         "label": "serverless",
                         "value": "serverless"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_server_type",
+                    "input_id": "BoaviztaCloudServer_server_type",
+                    "provisional_owner": "object",
+                    "attribute": "server_type",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_lifespan",
@@ -450,7 +644,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_lifespan",
+                    "input_id": "BoaviztaCloudServer_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_average_carbon_intensity",
@@ -471,7 +677,19 @@
                 "unit": "g/kWh",
                 "default": "400",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_average_carbon_intensity",
+                    "input_id": "BoaviztaCloudServer_average_carbon_intensity",
+                    "provisional_owner": "object",
+                    "attribute": "average_carbon_intensity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -494,7 +712,19 @@
                 "unit": "W",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_idle_power",
+                    "input_id": "BoaviztaCloudServer_idle_power",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_power_usage_effectiveness",
@@ -515,7 +745,19 @@
                 "unit": "dimensionless",
                 "default": "1.2",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_power_usage_effectiveness",
+                    "input_id": "BoaviztaCloudServer_power_usage_effectiveness",
+                    "provisional_owner": "object",
+                    "attribute": "power_usage_effectiveness",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_utilization_rate",
@@ -536,7 +778,19 @@
                 "unit": "dimensionless",
                 "default": "0.9",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_utilization_rate",
+                    "input_id": "BoaviztaCloudServer_utilization_rate",
+                    "provisional_owner": "object",
+                    "attribute": "utilization_rate",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_base_ram_consumption",
@@ -557,7 +811,19 @@
                 "unit": "GB_ram",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_base_ram_consumption",
+                    "input_id": "BoaviztaCloudServer_base_ram_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_ram_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "BoaviztaCloudServer_base_compute_consumption",
@@ -578,7 +844,19 @@
                 "unit": "cpu_core",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_base_compute_consumption",
+                    "input_id": "BoaviztaCloudServer_base_compute_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_compute_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -592,7 +870,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Custom server 1"
+                "default": "Custom server 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "Server_server_type",
@@ -625,7 +904,19 @@
                         "label": "serverless",
                         "value": "serverless"
                     }
-                ]
+                ],
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_server_type",
+                    "input_id": "Server_server_type",
+                    "provisional_owner": "object",
+                    "attribute": "server_type",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_lifespan",
@@ -646,7 +937,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_lifespan",
+                    "input_id": "Server_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_ram",
@@ -667,7 +970,19 @@
                 "unit": "GB_ram",
                 "default": "128",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_ram",
+                    "input_id": "Server_ram",
+                    "provisional_owner": "object",
+                    "attribute": "ram",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_compute",
@@ -688,7 +1003,19 @@
                 "unit": "cpu_core",
                 "default": "24",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_compute",
+                    "input_id": "Server_compute",
+                    "provisional_owner": "object",
+                    "attribute": "compute",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_average_carbon_intensity",
@@ -709,7 +1036,19 @@
                 "unit": "g/kWh",
                 "default": "400",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_average_carbon_intensity",
+                    "input_id": "Server_average_carbon_intensity",
+                    "provisional_owner": "object",
+                    "attribute": "average_carbon_intensity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -732,7 +1071,19 @@
                 "unit": "kg",
                 "default": "600",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_carbon_footprint_manufacturing",
+                    "input_id": "Server_carbon_footprint_manufacturing",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_power",
@@ -753,7 +1104,19 @@
                 "unit": "W",
                 "default": "300",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_power",
+                    "input_id": "Server_power",
+                    "provisional_owner": "object",
+                    "attribute": "power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_idle_power",
@@ -774,7 +1137,19 @@
                 "unit": "W",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_idle_power",
+                    "input_id": "Server_idle_power",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_power_usage_effectiveness",
@@ -795,7 +1170,19 @@
                 "unit": "dimensionless",
                 "default": "1.2",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_power_usage_effectiveness",
+                    "input_id": "Server_power_usage_effectiveness",
+                    "provisional_owner": "object",
+                    "attribute": "power_usage_effectiveness",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_utilization_rate",
@@ -816,7 +1203,19 @@
                 "unit": "dimensionless",
                 "default": "0.9",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_utilization_rate",
+                    "input_id": "Server_utilization_rate",
+                    "provisional_owner": "object",
+                    "attribute": "utilization_rate",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_base_ram_consumption",
@@ -837,7 +1236,19 @@
                 "unit": "GB_ram",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_base_ram_consumption",
+                    "input_id": "Server_base_ram_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_ram_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "Server_base_compute_consumption",
@@ -858,7 +1269,19 @@
                 "unit": "cpu_core",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_base_compute_consumption",
+                    "input_id": "Server_base_compute_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_compute_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     }

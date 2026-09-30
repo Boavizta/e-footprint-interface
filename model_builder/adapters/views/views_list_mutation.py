@@ -1,5 +1,6 @@
 """Mutation endpoints for opted-in, non-nested list relationships."""
 
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from efootprint.utils.tools import time_it
 
 from model_builder.adapters.presenters import HtmxPresenter
@@ -28,7 +29,7 @@ def _run_edit_and_present(request, model_web: ModelWeb, parent_obj, attr_name: s
     elif not link:
         child_ids = [child_id for child_id in child_ids if child_id != child_obj.id]
 
-    output = EditObjectUseCase(model_web).execute(
+    output = EditObjectUseCase(model_web, input_catalog).execute(
         EditObjectInput(
             object_id=parent_obj.id,
             form_data={attr_name: child_ids},

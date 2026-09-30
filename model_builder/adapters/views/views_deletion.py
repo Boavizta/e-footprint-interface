@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
 
 from django.views.decorators.http import require_POST
@@ -17,7 +18,7 @@ def ask_delete_object(request, object_id):
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)
 
     # Check if deletion is allowed and get context
-    use_case = DeleteObjectUseCase(model_web)
+    use_case = DeleteObjectUseCase(model_web, input_catalog)
     check_result = use_case.check_can_delete(object_id)
 
     # Present the confirmation modal
@@ -42,7 +43,7 @@ def delete_object(request, object_id):
     )
 
     # 2. Execute use case
-    use_case = DeleteObjectUseCase(model_web)
+    use_case = DeleteObjectUseCase(model_web, input_catalog)
     output = use_case.execute(input_data)
 
     # 3. Present result

@@ -42,6 +42,21 @@ include set overrides panel exclusions without changing normal-form output; opti
 numeric default and expose <code>allows_empty</code>. The simplified presenter groups these existing field dictionaries
 by actual type and owner, with System-ID/owner/attribute identities. The shared <code>selection_controls.html</code>
 partial owns inclusion, retained help and required-companion explanations; it also provides the later inline-disclosure seam.</p>
+<h3 id="inline-bookmarks">Inline simplified-input bookmarks</h3>
+<p><code>simplified_input_context.py</code> joins the authoritative catalog and saved definition with normal form
+fields; nested Storage fields carry Storage’s owner ID. <code>bookmark.html</code> discloses the shared
+<code>selection_controls.html</code> without changing membership on opening. Existing bookmarks send settings-only
+patches, update visible bookmark state, and keep surrounding value and independent help drafts in place. Undo sends an
+inverse membership patch checked against current dependencies. Edit forms close only for their own completed request,
+so a bookmark’s bubbling HTMX response cannot clear the panel.</p>
+<p>Creation bookmarks remain nameless DOM draft controls. Cross-owner <code>dynamic_lists</code> entries carry a
+<code>simplified_required_by</code> map derived from candidate controller addresses and saved selection; same-owner
+chains reuse their existing selector edges. Changing a candidate releases forced membership while retaining authored
+membership and help. The adapter serializes only active sections into one pending-settings JSON parameter. The creation
+use case resolves main and nested owner IDs after hooks, then completes selection before its final model save.</p>
+<p>Sources builds compact bookmark context from its existing hydrated model and fetches the shared controls only on
+first disclosure. That lazy GET targets its own element explicitly; provenance row-editor GETs retain their raw-JSON
+path and never hydrate <code>ModelWeb</code>. Catalog and definition reads are shared within each rendering batch.</p>
 <h2 id="object-factory">Object factory</h2>
 <p><a class="source" href="../../model_builder/domain/object_factory.py"><code>model_builder/domain/object_factory.py</code></a>:</p>
 <ul>

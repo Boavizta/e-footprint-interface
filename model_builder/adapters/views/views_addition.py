@@ -1,3 +1,4 @@
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
 
 from django.shortcuts import render
@@ -57,10 +58,11 @@ def add_object(request, object_type):
         object_type=object_type,
         form_data=parsed_form_data,
         parent_id=request.POST.get("efootprint_id_of_parent_to_link_to"),
+        simplified_settings=json.loads(request.POST.get("simplified_settings", "[]")),
     )
 
     # 3. Execute use case
-    use_case = CreateObjectUseCase(repository)
+    use_case = CreateObjectUseCase(repository, input_catalog)
     output = use_case.execute(input_data)
 
     # 4. Present result (with optional recomputation)

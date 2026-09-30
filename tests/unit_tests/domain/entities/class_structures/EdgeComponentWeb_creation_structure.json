@@ -38,7 +38,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "CPU component 1"
+                "default": "CPU component 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeCPUComponent_lifespan",
@@ -59,7 +60,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_lifespan",
+                    "input_id": "EdgeCPUComponent_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeCPUComponent_compute_per_unit",
@@ -80,7 +93,19 @@
                 "unit": "cpu_core",
                 "default": "4",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_compute_per_unit",
+                    "input_id": "EdgeCPUComponent_compute_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "compute_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeCPUComponent_nb_of_units",
@@ -101,7 +126,19 @@
                 "unit": "dimensionless",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_nb_of_units",
+                    "input_id": "EdgeCPUComponent_nb_of_units",
+                    "provisional_owner": "object",
+                    "attribute": "nb_of_units",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -124,7 +161,19 @@
                 "unit": "kg",
                 "default": "20",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_carbon_footprint_manufacturing_per_unit",
+                    "input_id": "EdgeCPUComponent_carbon_footprint_manufacturing_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeCPUComponent_power_per_unit",
@@ -145,7 +194,19 @@
                 "unit": "W",
                 "default": "15",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_power_per_unit",
+                    "input_id": "EdgeCPUComponent_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeCPUComponent_idle_power_per_unit",
@@ -166,7 +227,19 @@
                 "unit": "W",
                 "default": "3",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_idle_power_per_unit",
+                    "input_id": "EdgeCPUComponent_idle_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeCPUComponent_base_compute_consumption",
@@ -187,7 +260,19 @@
                 "unit": "cpu_core",
                 "default": "0",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeCPUComponent_base_compute_consumption",
+                    "input_id": "EdgeCPUComponent_base_compute_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_compute_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -201,7 +286,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "RAM component 1"
+                "default": "RAM component 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeRAMComponent_lifespan",
@@ -222,7 +308,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_lifespan",
+                    "input_id": "EdgeRAMComponent_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeRAMComponent_ram_per_unit",
@@ -243,7 +341,19 @@
                 "unit": "GB_ram",
                 "default": "8",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_ram_per_unit",
+                    "input_id": "EdgeRAMComponent_ram_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "ram_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeRAMComponent_nb_of_units",
@@ -264,7 +374,19 @@
                 "unit": "dimensionless",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_nb_of_units",
+                    "input_id": "EdgeRAMComponent_nb_of_units",
+                    "provisional_owner": "object",
+                    "attribute": "nb_of_units",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -287,7 +409,19 @@
                 "unit": "kg",
                 "default": "20",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_carbon_footprint_manufacturing_per_unit",
+                    "input_id": "EdgeRAMComponent_carbon_footprint_manufacturing_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeRAMComponent_power_per_unit",
@@ -308,7 +442,19 @@
                 "unit": "W",
                 "default": "10",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_power_per_unit",
+                    "input_id": "EdgeRAMComponent_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeRAMComponent_idle_power_per_unit",
@@ -329,7 +475,19 @@
                 "unit": "W",
                 "default": "2",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_idle_power_per_unit",
+                    "input_id": "EdgeRAMComponent_idle_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeRAMComponent_base_ram_consumption",
@@ -350,7 +508,19 @@
                 "unit": "GB_ram",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeRAMComponent_base_ram_consumption",
+                    "input_id": "EdgeRAMComponent_base_ram_consumption",
+                    "provisional_owner": "object",
+                    "attribute": "base_ram_consumption",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -364,7 +534,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Edge storage 1"
+                "default": "Edge storage 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeStorage_storage_capacity_per_unit",
@@ -385,7 +556,19 @@
                 "unit": "TB_stored",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeStorage_storage_capacity_per_unit",
+                    "input_id": "EdgeStorage_storage_capacity_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "storage_capacity_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeStorage_lifespan",
@@ -406,7 +589,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeStorage_lifespan",
+                    "input_id": "EdgeStorage_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeStorage_nb_of_units",
@@ -427,7 +622,19 @@
                 "unit": "dimensionless",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeStorage_nb_of_units",
+                    "input_id": "EdgeStorage_nb_of_units",
+                    "provisional_owner": "object",
+                    "attribute": "nb_of_units",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -450,7 +657,19 @@
                 "unit": "kg/TB_stored",
                 "default": "160",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeStorage_carbon_footprint_manufacturing_per_storage_capacity",
+                    "input_id": "EdgeStorage_carbon_footprint_manufacturing_per_storage_capacity",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_storage_capacity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeStorage_base_storage_need",
@@ -471,7 +690,19 @@
                 "unit": "GB_stored",
                 "default": "30",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeStorage_base_storage_need",
+                    "input_id": "EdgeStorage_base_storage_need",
+                    "provisional_owner": "object",
+                    "attribute": "base_storage_need",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     },
@@ -485,7 +716,8 @@
                 "label": "name",
                 "tooltip": null,
                 "input_type": "str",
-                "default": "Workload component 1"
+                "default": "Workload component 1",
+                "simplified_eligible": false
             },
             {
                 "web_id": "EdgeWorkloadComponent_lifespan",
@@ -506,7 +738,19 @@
                 "unit": "yr",
                 "default": "6",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeWorkloadComponent_lifespan",
+                    "input_id": "EdgeWorkloadComponent_lifespan",
+                    "provisional_owner": "object",
+                    "attribute": "lifespan",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeWorkloadComponent_nb_of_units",
@@ -527,7 +771,19 @@
                 "unit": "dimensionless",
                 "default": "1",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeWorkloadComponent_nb_of_units",
+                    "input_id": "EdgeWorkloadComponent_nb_of_units",
+                    "provisional_owner": "object",
+                    "attribute": "nb_of_units",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -550,7 +806,19 @@
                 "unit": "kg",
                 "default": "100",
                 "can_be_negative": false,
-                "step": "1"
+                "step": "1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeWorkloadComponent_carbon_footprint_manufacturing_per_unit",
+                    "input_id": "EdgeWorkloadComponent_carbon_footprint_manufacturing_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "carbon_footprint_manufacturing_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeWorkloadComponent_power_per_unit",
@@ -571,7 +839,19 @@
                 "unit": "W",
                 "default": "50",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeWorkloadComponent_power_per_unit",
+                    "input_id": "EdgeWorkloadComponent_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             },
             {
                 "web_id": "EdgeWorkloadComponent_idle_power_per_unit",
@@ -592,7 +872,19 @@
                 "unit": "W",
                 "default": "5",
                 "can_be_negative": false,
-                "step": "0.1"
+                "step": "0.1",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-EdgeWorkloadComponent_idle_power_per_unit",
+                    "input_id": "EdgeWorkloadComponent_idle_power_per_unit",
+                    "provisional_owner": "object",
+                    "attribute": "idle_power_per_unit",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ]
     }
