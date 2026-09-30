@@ -1,9 +1,10 @@
-<article class="simplified-field" id="{{ field.dom_id }}" data-field-address data-owner-id="{{ field.address.object_id }}" data-attribute="{{ field.address.attribute }}">
+<article class="simplified-field" id="{{ field.dom_id }}" {% if oob %}hx-swap-oob="outerHTML:#{{ field.dom_id }}"{% endif %} data-field-address data-owner-id="{{ field.address.object_id }}" data-attribute="{{ field.address.attribute }}">
     <div class="d-flex align-items-start gap-2 mb-2">
         <h3 class="h6 mb-0">{{ field.editor.label|capfirst }}</h3>
         {% if field.editor.tooltip %}{% include 'model_builder/side_panels/components/tooltip.html' with field=field.editor tooltip_html=True tooltip_wrapper_class="flex-shrink-0" %}{% endif %}
     </div>
     {% if not configure and field.setting.help %}<p class="simplified-field-help">{{ field.setting.help }}</p>{% endif %}
-    <p class="simplified-preview" data-current-value>{{ field.preview }}</p>
+    {% if configure %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>
+    {% else %}{% include 'model_builder/simplified_inputs/editor.html' %}{% endif %}
     {% if configure %}{% include 'model_builder/simplified_inputs/selection_controls.html' %}{% endif %}
 </article>

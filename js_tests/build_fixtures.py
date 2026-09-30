@@ -619,6 +619,17 @@ def render_simplified_bookmark(field):
     return render_to_string("model_builder/simplified_inputs/bookmark.html", {"field": field})
 
 
+def render_simplified_editor(_):
+    field = {"address": {"object_id": "server", "attribute": "lifespan"},
+             "editor": {"web_id": "si-test-server-lifespan-value", "input_type": "explainable_quantity",
+                        "label": "Lifespan", "default": 5, "step": 1, "unit": "year",
+                        "metadata": metadata_field(source=HYPOTHESIS, comment="Preserve comment")["metadata"]}}
+    context = {"quick_total": "20 kg", "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}}
+    return render_to_string("model_builder/simplified_inputs/editor.html", {"field": field}) + "".join(
+        render_to_string(f"model_builder/components/{name}.html", context)
+        for name in ("results_bar_button", "show_results_toolbar_button"))
+
+
 def render_simplified_creation(object_type):
     from model_builder.adapters.forms.form_context_builder import FormContextBuilder
     from model_builder.adapters.repositories import InMemorySystemRepository
@@ -647,6 +658,7 @@ SIMPLIFIED_BOOKMARK_CASES = {
 
 
 GROUPS = [
+    ({"simplified_editor": {}}, render_simplified_editor),
     ({"simplified_configure": {}}, render_simplified_workspace),
     (SIMPLIFIED_BOOKMARK_CASES, render_simplified_bookmark),
     ({"simplified_create_server": "Server", "simplified_create_edge_device": "EdgeDeviceBase"}, render_simplified_creation),

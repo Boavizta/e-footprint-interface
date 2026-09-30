@@ -6,6 +6,19 @@
    with `data-action="..."`, and only one name escapes to `window`
    (the reset listener via custom DOM event). See conventions.md → JavaScript. */
 (function () {
+    document.addEventListener("focusout", event => {
+        if (document.body.dataset.workspaceMutation === "updating") return;
+        const editor = event.target.closest("[data-simplified-editor] .source-editor");
+        if (!editor || !event.target.matches("input:not([type=hidden]), textarea")) return;
+        applySourceEditor(editor.dataset.fieldId);
+    });
+    document.addEventListener("keydown", event => {
+        const editor = event.target.closest("[data-simplified-editor] .source-editor");
+        if (editor && event.key === "Enter" && event.target.matches("input:not([type=hidden])")) {
+            event.preventDefault();
+            applySourceEditor(editor.dataset.fieldId);
+        }
+    });
     function _confWrap(fieldId) {
         return document.querySelector(`.confidence-wrap[data-field-id="${CSS.escape(fieldId)}"]`);
     }
@@ -107,7 +120,9 @@
         const stored = (level === "none") ? "" : level;
         if (hidden) hidden.value = stored;
 
-        if (wrap.dataset.autosaveUrl) {
+        if (wrap.closest("[data-simplified-editor]")) {
+            wrap.dispatchEvent(new CustomEvent("simplified-provenance:changed", {bubbles: true}));
+        } else if (wrap.dataset.autosaveUrl) {
             autosaveConfidence(wrap, stored);
         } else if (typeof tagFormAsModified === "function") {
             tagFormAsModified();
@@ -205,8 +220,9 @@
             // overwrite the listed source's identity on the server.
             const priorIdIsListed = Array.from(select.options).some(
                 opt => opt.value !== "__custom__" && opt.value === priorId);
-            sourceId = (priorId && !priorIdIsListed) ? priorId : crypto.randomUUID().slice(0, 6);
-            _broadcastNewSource(editor, sourceId, sourceName, sourceLink);
+            sourceId = editor.closest("[data-simplified-editor]") && !priorId && !sourceName && !sourceLink
+                ? "" : (priorId && !priorIdIsListed) ? priorId : crypto.randomUUID().slice(0, 6);
+            if (sourceId) _broadcastNewSource(editor, sourceId, sourceName, sourceLink);
         } else {
             const opt = select.options[select.selectedIndex];
             sourceId = opt.value;
@@ -230,6 +246,10 @@
 
         _updateSourceDisplay(fieldId, sourceName, sourceLink, comment.value);
         editor.classList.remove("open");
+        if (editor.closest("[data-simplified-editor]")) {
+            editor.dispatchEvent(new CustomEvent("simplified-provenance:changed", {bubbles: true}));
+            return;
+        }
         if (typeof tagFormAsModified === "function") tagFormAsModified();
     }
 
@@ -528,6 +548,9 @@
         if (!target) return;
         if (target.dataset.action === "source-select-change") {
             handleSourceSelect(target, _fieldIdOf(target));
+            if (target.closest("[data-simplified-editor]") && target.value !== "__custom__") {
+                applySourceEditor(_fieldIdOf(target));
+            }
         }
     });
 

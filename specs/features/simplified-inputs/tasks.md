@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Runs A–B complete, including independent task and global reviews. This is one interface-owned, cross-repository working set; Run C remains approved and pending. The deployment/merge prerequisite below remains outstanding.
+Status: Runs A–B complete, including independent task and global reviews. This is one interface-owned, cross-repository working set; Run C Task 9 is implemented and Task 10 remains approved and pending. The deployment/merge prerequisite below remains outstanding.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 
@@ -79,7 +79,7 @@ Repository: e-footprint-interface. Files touched: form/source-row contexts, shar
 
 ## Task 9 — Edit simple selected inputs and refresh totals
 
-Goal: Autosave scalar/select/provenance edits from Simplified inputs and show the accepted footprint in both Results controls. Status: approved. Brief: [task-9](briefs/task-9.md).
+Goal: Autosave scalar/select/provenance edits from Simplified inputs and show the accepted footprint in both Results controls. Status: complete. Brief: [task-9](briefs/task-9.md).
 
 Repository: e-footprint-interface. Files touched: simplified-input endpoints/presenter/field partials, error modal path, source metadata JS, OOB results renderer, modeling-object hooks and tests. Tests: Enter/blur deduplication, targeted updates, error-modal failure despite HTTP 200, preserved draft, both totals after successful mutations and last-saved total on failure. Acceptance: hidden fields are not offered by the view; accepted edits refresh only affected controls/results; failed edits remain visible and retryable. Depends on: Tasks 5–8. Implementation: standard — connect Task 5/6/7 outputs through existing error-modal signals, targeted swaps and Results OOB rendering.
 

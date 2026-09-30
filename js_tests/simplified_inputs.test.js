@@ -251,3 +251,53 @@ test("creation requirements follow candidates, release forced membership and ret
     document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: form, parameters}}));
     expect(JSON.parse(parameters.simplified_settings)).toEqual(pendingCreationSettings(form));
 });
+
+function mountEditor() {
+    mount();
+    document.querySelector('[data-simplified-workspace]').innerHTML = fs.readFileSync(path.join(__dirname, 'fixtures/simplified_editor.html'), 'utf8');
+    window.htmx.trigger = jest.fn();
+    require('../theme/static/scripts/simplified_inputs.js').initializeEdits();
+    return document.querySelector('[data-simplified-editor]');
+}
+
+test('Enter followed by blur saves once and failure keeps draft retryable with accepted totals', () => {
+    const form = mountEditor();
+    const input = form.querySelector('input');
+    input.value = '8';
+    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
+        detail: {elt: form, successful: false},
+    }));
+    expect(input.value).toBe('8');
+    expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
+    expect([...document.querySelectorAll('[data-quick-total]')].map(item => item.textContent)).toEqual(['20 kg', '20 kg']);
+    form.querySelector('[data-action="simplified-retry"]').click();
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+});
+
+test('unchanged blur does not save and an in-flight workspace mutation rejects new saves', () => {
+    const form = mountEditor();
+    const input = form.querySelector('input');
+    input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    document.body.dataset.workspaceMutation = 'updating';
+    input.value = '9';
+    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+});
+
+test("value saves omit unchanged provenance and confidence saves preserve omitted source and comment", () => {
+    const form = mountEditor();
+    const parameters = Object.fromEntries(new FormData(form));
+    const prefix = form.dataset.valuePrefix;
+    parameters[prefix] = "8";
+    parameters[prefix + "__confidence"] = "high";
+    document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: form, parameters}}));
+    expect(parameters[prefix + "__confidence"]).toBe("high");
+    expect(parameters[prefix + "__comment"]).toBeUndefined();
+    expect(parameters[prefix + "__source_id"]).toBeUndefined();
+    expect(parameters[prefix + "__source_name"]).toBeUndefined();
+    expect(parameters[prefix + "__source_link"]).toBeUndefined();
+});

@@ -66,6 +66,7 @@ Context variables:
            id="{{ source_editor_id }}__comment" value="{{ source_meta_current_comment|default:'' }}">
 
     <div class="editor-actions">
+        {% if not simplified_completion %}
         <button type="button"
                 class="btn btn-outline-secondary btn-sm"
                 {% if source_editor_cancel_target %}
@@ -73,6 +74,7 @@ Context variables:
                 {% else %}
                 data-action="cancel-source-editor"
                 {% endif %}>Cancel</button>
+        {% endif %}
         <button type="button"
                 class="btn btn-primary btn-sm"
                 data-action="apply-source-editor">Apply</button>

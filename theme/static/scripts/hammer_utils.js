@@ -33,6 +33,16 @@ function displayPanelResult() {
     }
 }
 
+// OOB button replacement restores server attributes during settlement, after the panel's
+// inline initialization ran. Reapply the open panel's layout once those swaps have settled.
+document.body.addEventListener("htmx:afterSettle", () => {
+    const panel = document.getElementById("panel-result-btn");
+    const results = document.getElementById("result-block");
+    if (panel?.style.height === "100%" && results?.style.display !== "none" && results?.innerHTML.trim()) {
+        displayPanelResult();
+    }
+});
+
 function hidePanelResult() {
     exitResultFullscreen();
     var panel = document.getElementById("panel-result-btn");

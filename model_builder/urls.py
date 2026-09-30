@@ -15,6 +15,8 @@ from .adapters.views import views
 from .adapters.views import sankey_views
 
 urlpatterns = [
+    path("edit-simplified-input/<object_id>/<str:attribute>/", views_simplified_inputs.edit_simplified_input,
+         name="edit-simplified-input"),
     path("patch-simplified-inputs/", views_simplified_inputs.patch_simplified_inputs, name="patch-simplified-inputs"),
     path("simplified-input-bookmark/<object_id>/<str:attribute>/", views_simplified_inputs.simplified_input_bookmark,
          name="simplified-input-bookmark"),

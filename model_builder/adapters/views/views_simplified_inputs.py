@@ -3,14 +3,17 @@ import json
 
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
+from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.forms.simplified_input_context import bookmark_context
 from model_builder.domain.services.simplified_inputs import FieldAddress, normalize_definition
 from django.views.decorators.http import require_POST
 
-from model_builder.adapters.presenters.simplified_inputs import build_workspace_context, input_catalog
+from model_builder.adapters.presenters.simplified_inputs import build_workspace_context, input_catalog, present_edited_input
 from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views.exception_handling import render_exception_modal
-from model_builder.application.use_cases.simplified_inputs import UpdateSimplifiedDefinitionUseCase
+from model_builder.application.use_cases.simplified_inputs import (
+    UpdateSimplifiedDefinitionUseCase, EditSimplifiedInput, EditSimplifiedInputUseCase,
+)
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
@@ -18,6 +21,30 @@ def simplified_inputs(request):
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     context = build_workspace_context(model_web, configure=request.GET.get("configure") == "1")
     return render(request, "model_builder/simplified_inputs/workspace.html", context)
+
+
+@require_POST
+def edit_simplified_input(request, object_id, attribute):
+    try:
+        model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
+        catalog = input_catalog(model_web)
+        owner = model_web.get_web_object_from_efootprint_id(object_id)
+        prefix = f"si-{model_web.system.efootprint_id}-{object_id}-{attribute}-value"
+        form_data = {}
+        for key in request.POST:
+            if key == prefix or key.startswith(prefix + "__"):
+                values = request.POST.getlist(key)
+                form_data[attribute + key[len(prefix):]] = ";".join(values)
+        if form_data.get(attribute) == "" and attribute + "__unit" in form_data:
+            form_data[attribute] = None
+            form_data.pop(attribute + "__unit", None)
+        parsed = parse_form_data(form_data, owner.class_as_simple_str)
+        output = EditSimplifiedInputUseCase(model_web, catalog).execute(
+            EditSimplifiedInput(FieldAddress(object_id, attribute), parsed[attribute]))
+        return present_edited_input(request, model_web, output, catalog,
+                                    recompute=request.POST.get("recomputation") == "true")
+    except Exception as error:
+        return render_exception_modal(request, error, preserve_panels=True)
 
 
 @require_POST

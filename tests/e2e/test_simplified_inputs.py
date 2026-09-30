@@ -193,7 +193,7 @@ class TestSimplifiedInputs:
         page.locator('#sidePanel #Server_lifespan').fill("7")
         builder.side_panel.submit_and_wait_for_close()
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
-        expect(workspace.locator("[data-current-value]")).to_contain_text("7")
+        expect(workspace.locator('input[type="number"]')).to_have_value("7")
 
     def test_mode_change_uses_existing_unsaved_panel_warning(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
@@ -510,3 +510,82 @@ class TestInlineBookmarks:
             bookmark.locator("[data-include-input]").uncheck()
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
         expect(draft).to_have_value("9876")
+
+    def test_simple_autosave_deduplicates_preserves_failed_draft_and_refreshes_results(self, minimal_complete_model_builder):
+        from urllib.parse import parse_qsl, urlencode
+
+        page = minimal_complete_model_builder.page
+        workspace = open_configure(page)
+        workspace.get_by_role("button", name="Expand all", exact=True).click()
+        field(workspace, "lifespan").locator("[data-include-input]").check()
+        field(workspace, "power").locator("[data-include-input]").check()
+        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+        workspace.get_by_role("button", name="Expand all", exact=True).click()
+        lifespan = field(workspace, "lifespan")
+        value = lifespan.locator('input[type="number"]')
+        power = field(workspace, "power").locator('input[type="number"]')
+        power_value = power.input_value()
+        pending = []
+        page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+        value.fill("8")
+        with page.expect_request("**/edit-simplified-input/**"):
+            value.press("Enter")
+        expect(value).to_be_disabled()
+        expect(power).to_be_disabled()
+        assert len(pending) == 1
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        expect(power).to_have_value(power_value)
+        expect(power).to_be_enabled()
+        totals = page.locator("[data-quick-total]")
+        assert totals.count() == 2
+        assert totals.nth(0).text_content() == totals.nth(1).text_content()
+        page.unroute("**/edit-simplified-input/**")
+        click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
+        expect(page.locator("#result-block")).not_to_be_empty()
+        saved_total = totals.nth(0).text_content()
+
+        def reject_value(route):
+            data = dict(parse_qsl(route.request.post_data))
+            value_key = next(key for key in data if key.endswith("-value"))
+            data[value_key] = "invalid"
+            route.fulfill(response=route.fetch(post_data=urlencode(data)))
+
+        page.route("**/edit-simplified-input/**", reject_value)
+        value.fill("9")
+        with page.expect_response("**/edit-simplified-input/**"):
+            value.press("Enter")
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Not saved")
+        expect(value).to_have_value("9")
+        expect(page.locator("#model-builder-modal")).to_be_visible()
+        expect(page.locator("#result-block")).not_to_be_empty()
+        assert totals.nth(0).text_content() == saved_total
+        page.get_by_role("button", name="Go back", exact=True).click()
+        page.unroute("**/edit-simplified-input/**")
+        click_and_wait_for_htmx(page, lifespan.get_by_role("button", name="Retry save", exact=True))
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        expect(value).to_have_value("9")
+        expect(page.locator("#result-block")).not_to_be_empty()
+        assert totals.nth(0).text_content() == totals.nth(1).text_content()
+        assert totals.nth(0).text_content() != saved_total
+        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.locator(".confidence-badge").click()
+        click_and_wait_for_htmx(page, lifespan.locator('.confidence-menu [data-level="high"]'))
+        expect(lifespan.locator(".confidence-badge")).to_have_attribute("data-level", "high")
+        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.locator('[data-action="open-source-editor"]').click()
+        comment = lifespan.locator(".source-editor-comment")
+        comment.fill("Reviewed modeling assumption")
+        with page.expect_response("**/edit-simplified-input/**"):
+            comment.press("Tab")
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        expect(lifespan.locator('.source-editor input[name$="__comment"]')).to_have_value("Reviewed modeling assumption")
+        minimal_complete_model_builder.close_result_panel()
+        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        prior = totals.nth(0).text_content()
+        click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
+        page.locator('#sidePanel #Server_lifespan').fill("12")
+        minimal_complete_model_builder.side_panel.submit_and_wait_for_close()
+        assert totals.nth(0).text_content() == totals.nth(1).text_content()
+        assert totals.nth(0).text_content() != prior

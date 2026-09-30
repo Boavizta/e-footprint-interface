@@ -70,12 +70,18 @@ def _render_model_canvas(model_web, params) -> str:
             f"hx-swap-oob='innerHTML:#model-canva-{slot}'>{content}</div>")
 
 
+def build_quick_total_context(model_web):
+    constraint = model_web.creation_constraints["__results__"]
+    return str(model_web.system.total_footprint.sum()) if constraint["enabled"] else constraint["reason"]
+
+
 def _render_results_buttons(model_web, params) -> str:
     del params
+    context = {"model_web": model_web, "oob": True, "quick_total": build_quick_total_context(model_web)}
     bar_html = render_to_string(
-        "model_builder/components/results_bar_button.html", {"model_web": model_web, "oob": True})
+        "model_builder/components/results_bar_button.html", context)
     toolbar_html = render_to_string(
-        "model_builder/components/show_results_toolbar_button.html", {"model_web": model_web, "oob": True})
+        "model_builder/components/show_results_toolbar_button.html", context)
     return bar_html + toolbar_html
 
 

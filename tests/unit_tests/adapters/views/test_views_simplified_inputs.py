@@ -143,3 +143,87 @@ class TestSimplifiedViews:
         response = client.get(f"/model_builder/simplified-input-bookmark/{owner}/storage_capacity/")
         assert "data-selection-controls" in response.content.decode()
         assert "bookmark-" + owner in response.content.decode()
+
+    def test_value_save_targets_one_field_and_both_totals_and_preserves_provenance(self, client, minimal_system_data):
+        model = self.save_model(client, minimal_system_data)
+        server = model.servers[0]
+        original = server.modeling_obj.lifespan
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            server.efootprint_id: {"lifespan": {"included": True, "help": ""}, "power": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{server.efootprint_id}-lifespan-value"
+        response = client.post(f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/", {
+            prefix: "10", prefix + "__unit": "year", "recomputation": "true"})
+        content = response.content.decode()
+        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert content.count("data-field-address") == 1
+        assert 'data-attribute="power"' not in content
+        assert content.count("data-quick-total>") == 2
+        assert 'id=\'result-block\'' in content
+        saved = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan
+        assert saved.value.magnitude == 10
+        assert saved.source.id == original.source.id
+        assert saved.confidence == original.confidence
+        assert saved.comment == original.comment
+
+    def test_invalid_value_error_preserves_editor_panels_and_saved_total(self, client, minimal_system_data, monkeypatch):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        server = model.servers[0]
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            server.efootprint_id: {"lifespan": {"included": True, "help": ""}}}})})
+        before = deepcopy(SessionSystemRepository(client.session).get_system_data())
+        prefix = f"si-{model.system.efootprint_id}-{server.efootprint_id}-lifespan-value"
+        response = client.post(f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/", {
+            prefix: "invalid", prefix + "__unit": "year"})
+        assert response.status_code == 200
+        assert response["HX-Reswap"] == "none"
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        content = response.content.decode()
+        assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
+        assert "data-quick-total" not in content
+        assert SessionSystemRepository(client.session).get_system_data() == before
+
+    def test_large_selected_model_value_save_builds_only_affected_editor(self, client, minimal_system_data):
+        from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+        from model_builder.application.use_cases.simplified_inputs import UpdateSimplifiedDefinitionUseCase
+
+        for index in range(60):
+            server = Server.from_defaults(f"Server {index}", storage=Storage.from_defaults(f"Storage {index}"))
+            fragment = system_to_json(server, save_computed_state=False)
+            for key, value in fragment.items():
+                if isinstance(value, dict):
+                    minimal_system_data.setdefault(key, {}).update(value)
+        model = self.save_model(client, minimal_system_data)
+        definition = {"fields": {server.efootprint_id: {"lifespan": {"included": True, "help": ""}}
+                                 for server in model.servers}}
+        UpdateSimplifiedDefinitionUseCase(model.repository, input_catalog(model)).execute(definition, replace=True)
+        owner_id = model.servers[0].efootprint_id
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}-lifespan-value"
+        original = FormContextBuilder.build_input_fields
+        calls = []
+
+        def build_fields(builder, owner, attributes):
+            calls.append((owner.efootprint_id, attributes))
+            return original(builder, owner, attributes)
+
+        with patch.object(FormContextBuilder, "build_input_fields", build_fields):
+            response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", {
+                prefix: "10", prefix + "__unit": "year"})
+        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert calls == [(owner_id, {"lifespan"})]
+        assert response.content.decode().count("data-field-address") == 1
+
+    def test_blank_optional_count_remains_empty_with_accepted_comment(self, client, minimal_system_data):
+        from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
+
+        model = self.save_model(client, minimal_system_data)
+        owner_id = model.servers[0].efootprint_id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"fixed_nb_of_instances": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}-fixed_nb_of_instances-value"
+        response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/fixed_nb_of_instances/", {
+            prefix: "", prefix + "__unit": "dimensionless", prefix + "__comment": "Automatic fleet size"})
+        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        count = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.fixed_nb_of_instances
+        assert isinstance(count, EmptyExplainableObject)
+        assert count.comment == "Automatic fleet size"

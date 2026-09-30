@@ -57,9 +57,8 @@ def test_creating_server_flips_job_constraint_and_emits_oob_regions():
         f"Expected base side-effect regions inside {emitted_keys}")
 
 
-def test_creating_object_without_constraint_flip_emits_no_regions():
-    """Creating a second server does not flip any constraint, so the base
-    `create_side_effects` returns an empty OOB-region list."""
+def test_creating_object_without_constraint_flip_refreshes_totals():
+    """Creating a second server refreshes totals without re-rendering the canvas."""
     repository = _fresh_repository()
     _create_server(repository)
 
@@ -67,7 +66,7 @@ def test_creating_object_without_constraint_flip_emits_no_regions():
     mutated = output.model_web
 
     assert mutated.constraint_changes == []
-    assert [region.key for region in output.oob_regions] == []
+    assert [region.key for region in output.oob_regions] == ["results_buttons"]
 
 
 def test_deleting_last_server_flips_job_constraint_off():

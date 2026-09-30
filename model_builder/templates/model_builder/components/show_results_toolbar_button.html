@@ -10,6 +10,8 @@
      hx-disabled-elt="button"
 >
     Show results
+    <small data-quick-total>{{ quick_total }}</small>
+    <small data-quick-total-status></small>
 </div>
 {% else %}
 <div id="show-results-toolbar-btn" data-workspace-control class="btn bg-radiant-reverse text-white rounded-pill mx-2"
@@ -20,6 +22,8 @@
      title="{{ results_constraint.reason }}"
 >
     Show results
+    <small data-quick-total>{{ quick_total }}</small>
+    <small data-quick-total-status></small>
 </div>
 {% endif %}
 {% endwith %}

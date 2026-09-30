@@ -5,6 +5,94 @@
     let savingForm = null;
     let replaying = false;
     let pendingRead = null;
+    const savedEdits = new WeakMap();
+
+    function editSnapshot(form) {
+        return JSON.stringify([...new FormData(form)].filter(([key]) => key !== "csrfmiddlewaretoken"));
+    }
+    function saveEdit(form, retry = false) {
+        if (!form || form.dataset.saving === "true" || document.body.dataset.workspaceMutation === "updating") return;
+        if (!retry && savedEdits.get(form) === editSnapshot(form)) return;
+        if (!form.reportValidity()) {
+            form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
+            form.querySelector('[data-action="simplified-retry"]').hidden = false;
+            return;
+        }
+        form.dataset.saving = "true";
+        form.querySelector("[data-simplified-save-status]").textContent = "Saving…";
+        window.htmx.trigger(form, "simplified-save");
+    }
+    document.addEventListener("focusout", event => {
+        if (event.target.matches('[data-simplified-editor] input[type="number"]')) {
+            saveEdit(event.target.closest("[data-simplified-editor]"));
+        }
+    });
+    document.addEventListener("keydown", event => {
+        const form = event.target.closest("[data-simplified-editor]");
+        if (form && event.key === "Enter" && event.target.matches('input[type="number"]')) {
+            event.preventDefault();
+            saveEdit(form);
+        }
+    });
+    document.addEventListener("change", event => {
+        if (event.target.matches("[data-simplified-editor] select[name]")) saveEdit(event.target.closest("form"));
+    });
+    document.addEventListener("simplified-provenance:changed", event => saveEdit(event.target.closest("[data-simplified-editor]")));
+    document.addEventListener("click", event => {
+        if (event.target.closest('[data-action="simplified-retry"]')) saveEdit(event.target.closest("form"), true);
+    });
+    document.addEventListener("submit", event => {
+        if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
+    });
+    document.body.addEventListener("htmx:configRequest", event => {
+        if (!event.detail.elt.matches("[data-simplified-editor]")) return;
+        const saved = new Map(JSON.parse(savedEdits.get(event.detail.elt) || "[]"));
+        const parameters = event.detail.parameters;
+        const sourceKeys = Object.keys(parameters).filter(key => /__source_(id|name|link)$/.test(key));
+        if (sourceKeys.every(key => parameters[key] === saved.get(key))) {
+            sourceKeys.forEach(key => { delete parameters[key]; });
+        }
+        Object.keys(parameters).filter(key => /__(confidence|comment)$/.test(key)).forEach(key => {
+            if (parameters[key] === saved.get(key)) delete parameters[key];
+        });
+        // HTMX form encoding collapses multiple selects; preserve their reference-ID list.
+        event.detail.elt.querySelectorAll("select[multiple][name]").forEach(select => {
+            event.detail.parameters[select.name] = [...select.selectedOptions].map(option => option.value).join(";");
+        });
+        if (window.recomputationVals?.().recomputation) event.detail.parameters.recomputation = "true";
+    });
+    document.body.addEventListener("workspace-mutation:started", () => {
+        document.querySelectorAll("[data-quick-total]").forEach(total => total.setAttribute("aria-busy", "true"));
+        document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = "Updating…"; });
+    });
+    document.body.addEventListener("workspace-mutation:finished", event => {
+        document.querySelectorAll("[data-quick-total]").forEach(total => total.removeAttribute("aria-busy"));
+        document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = ""; });
+        const form = event.detail.elt;
+        if (!form.matches("[data-simplified-editor]")) return;
+        delete form.dataset.saving;
+        if (event.detail.successful) return;
+        form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
+        form.querySelector('[data-action="simplified-retry"]').hidden = false;
+    });
+    document.body.addEventListener("simplifiedInputSaved", event => {
+        const notices = event.detail.notices || [];
+        if (notices.length) {
+            const notice = document.createElement("p");
+            notice.setAttribute("role", "status");
+            notice.dataset.simplifiedNotice = "";
+            notice.textContent = notices.join(" ");
+            activeWorkspace()?.querySelector("[data-simplified-notice]")?.remove();
+            activeWorkspace()?.querySelector(".simplified-header")?.after(notice);
+        }
+    });
+    function initializeEdits() {
+        document.querySelectorAll("[data-simplified-editor]").forEach(form => {
+            if (!savedEdits.has(form)) savedEdits.set(form, editSnapshot(form));
+        });
+    }
+    document.body.addEventListener("htmx:afterSettle", initializeEdits);
+    document.addEventListener("DOMContentLoaded", initializeEdits);
 
     function targetForActiveModel() {
         const slot = document.getElementById("model-tab-strip")?.dataset.activeSlot || "0";
@@ -461,6 +549,6 @@
     document.body.addEventListener("htmx:afterSettle", initialize);
     document.addEventListener("DOMContentLoaded", initialize);
     if (typeof module !== "undefined" && module.exports) {
-        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit, definitionFromForm, refreshCreationBookmarks, pendingCreationSettings, updateBookmark };
+        module.exports = { refreshSelection, refreshFilter, initialize, setBaseView, deferExit, definitionFromForm, refreshCreationBookmarks, pendingCreationSettings, updateBookmark, initializeEdits };
     }
 })();

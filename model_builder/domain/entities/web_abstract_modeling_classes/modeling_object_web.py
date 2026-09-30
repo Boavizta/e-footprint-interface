@@ -299,7 +299,7 @@ class ModelingObjectWeb:
         return [parent for parent in candidate_parents if parent.id != self.efootprint_id]
 
     def _recompute_state_and_emit_oob_regions(self) -> list:
-        """Diff post-mutation state vs. last-emitted state; return OOB regions for each flip.
+        """Refresh accepted totals and emit OOB regions for post-mutation state flips.
 
         Two diffs share this hook:
           * `model_web.creation_constraints` flips emit `model_canvas` + `results_buttons`
@@ -321,19 +321,12 @@ class ModelingObjectWeb:
                 continue
             if old_constraints[key]["enabled"] != value["enabled"]:
                 changes.append((key, "unlocked" if value["enabled"] else "locked"))
-        results_reason_changed = (
-            "__results__" in old_constraints
-            and old_constraints["__results__"].get("reason")
-                != new_constraints["__results__"].get("reason")
-        )
         model_web.creation_constraints = new_constraints
 
-        regions: list = []
+        regions: list = [OobRegion("results_buttons")]
         if changes:
             model_web.constraint_changes = changes
-            regions.extend([OobRegion("model_canvas"), OobRegion("results_buttons")])
-        elif results_reason_changed:
-            regions.append(OobRegion("results_buttons"))
+            regions.append(OobRegion("model_canvas"))
 
         new_has_edge = model_web.has_edge_objects
         if new_has_edge != model_web._last_emitted_has_edge_objects:

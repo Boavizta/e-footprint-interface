@@ -1,5 +1,9 @@
 """Current modeling inputs grouped by their actual type and owner for both focused views."""
 from collections import defaultdict
+import json
+
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -15,6 +19,27 @@ def input_catalog(model_web):
     return build_catalog(model_web, can_edit_timeseries=can_edit_timeseries)
 
 
+def present_edited_input(request, model_web, output, catalog, *, recompute=False):
+    from model_builder.adapters.presenters import HtmxPresenter
+    from model_builder.adapters.presenters.oob_regions import render_oob_regions
+    from model_builder.adapters.views.data_status import append_workspace_storage_status
+    from model_builder.domain.oob_region import OobRegion
+
+    context = build_workspace_context(model_web, catalog=catalog, addresses=output.changed_fields)
+    html = "".join(render_to_string("model_builder/simplified_inputs/field.html", {"field": field, "oob": True},
+                                 request=request)
+                   for group in context["groups"] for obj in group["objects"] for field in obj["fields"])
+    html += render_oob_regions(model_web, [OobRegion("results_buttons")])
+    triggers = {"simplifiedInputSaved": {"notices": output.notices}}
+    if recompute:
+        html += HtmxPresenter(request, model_web)._recomputation_html()
+        triggers["triggerResultRendering"] = ""
+    response = HttpResponse(html)
+    response["HX-Trigger-After-Settle"] = json.dumps(triggers)
+    append_workspace_storage_status(response, request.session)
+    return response
+
+
 def _preview(value):
     if isinstance(value, EmptyExplainableObject):
         return "No value"
@@ -25,13 +50,13 @@ def _preview(value):
     return str(value)
 
 
-def build_workspace_context(model_web, *, configure=False, catalog=None):
+def build_workspace_context(model_web, *, configure=False, catalog=None, addresses=None):
     catalog = catalog or input_catalog(model_web)
     definition = normalize_definition(model_web.repository.interface_config.get("simplified_inputs"))
     attributes_by_owner = defaultdict(set)
     for address, descriptor in catalog.fields.items():
         setting = definition["fields"].get(address.object_id, {}).get(address.attribute, {})
-        if descriptor.eligible and (configure or setting.get("included")):
+        if descriptor.eligible and (configure or setting.get("included")) and (addresses is None or address in addresses):
             attributes_by_owner[address.object_id].add(address.attribute)
     unavailable_inputs = []
     if configure:
@@ -52,9 +77,13 @@ def build_workspace_context(model_web, *, configure=False, catalog=None):
                                              "dom_id": f"si-{system_id}-type-{type_name}", "objects": []})
         fields = []
         for editor in form_builder.build_input_fields(web_obj, attributes):
+            if editor.get("hide_field"):
+                continue
             attribute = editor["attr_name"]
             address = FieldAddress(owner_id, attribute)
             descriptor = catalog.fields[address]
+            dom_id = f"si-{system_id}-{owner_id}-{attribute}"
+            editor["web_id"] = f"{dom_id}-value"
             fields.append({"address": address, "dom_id": f"si-{system_id}-{owner_id}-{attribute}",
                            "setting": definition["fields"].get(owner_id, {}).get(
                                attribute, {"included": False, "help": ""}),

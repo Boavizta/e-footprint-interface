@@ -146,7 +146,9 @@ def render_model_builder(request, model_web, show_example_picker, workspace=None
                 entry["simplified_context"] = build_workspace_context(entry["model_web"])
 
     model_is_empty = is_empty_model(model_web.system_data)
-    context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
+    from model_builder.adapters.presenters.oob_regions import build_quick_total_context
+    context = {"model_web": model_web, "quick_total": build_quick_total_context(model_web),
+               "class_help_info": build_canvas_class_help_info(),
                "show_example_picker": show_example_picker,
                "model_is_empty": model_is_empty,
                "workspace_slots": workspace_slots,

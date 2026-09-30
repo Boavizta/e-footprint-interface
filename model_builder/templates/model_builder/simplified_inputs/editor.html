@@ -1,0 +1,36 @@
+{% load l10n %}
+{% if field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' %}
+<form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
+      hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
+      hx-trigger="simplified-save" hx-swap="none">
+    {% csrf_token %}
+    {% with editor=field.editor %}
+    {% if editor.input_type == 'explainable_quantity' %}
+    <div class="input-group">
+        <input type="number" class="form-control" name="{{ editor.web_id }}" id="{{ editor.web_id }}"
+               aria-label="{{ editor.label }}" value="{{ editor.default|unlocalize }}" step="{{ editor.step|unlocalize }}"
+               {% if not editor.allows_empty %}required{% endif %} {% if not editor.can_be_negative %}min="0"{% endif %}>
+        <span class="input-group-text">{{ editor.unit }}</span>
+        <input type="hidden" name="{{ editor.web_id }}__unit" value="{{ editor.unit }}">
+    </div>
+    {% elif editor.input_type == 'select_multiple' %}
+    <select multiple class="form-select" name="{{ editor.web_id }}" id="{{ editor.web_id }}" aria-label="{{ editor.label }}">
+        {% for option in editor.selected %}<option value="{{ option.value }}" selected>{{ option.label }}</option>{% endfor %}
+        {% for option in editor.unselected %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+    </select>
+    {% else %}
+    <select class="form-select" name="{{ editor.web_id }}" id="{{ editor.web_id }}" aria-label="{{ editor.label }}">
+        {% for option in editor.options %}<option value="{{ option.value }}" {% if option.value == editor.selected %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
+    </select>
+    {% endif %}
+    {% if editor.metadata %}
+    <details><summary data-workspace-read>Source, confidence and comment</summary>
+        {% include 'model_builder/side_panels/dynamic_form_fields/confidence_badge.html' with conf_dom_id=editor.web_id conf_name_prefix=editor.web_id conf_current=editor.metadata.confidence %}
+        {% include 'model_builder/side_panels/dynamic_form_fields/source.html' with source_dom_id=editor.web_id source_name_prefix=editor.web_id source_meta_source=editor.metadata.source source_meta_comment=editor.metadata.comment source_meta_available=editor.metadata.available_sources simplified_completion=True %}
+    </details>
+    {% endif %}
+    {% endwith %}
+    <span class="small" data-simplified-save-status role="status">Saved</span>
+    <button type="button" class="btn btn-sm btn-outline-primary" data-action="simplified-retry" data-workspace-control hidden>Retry save</button>
+</form>
+{% else %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>{% endif %}
