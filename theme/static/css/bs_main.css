@@ -23866,4 +23866,146 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   background: #f0f6ff;
 }
 
+[data-simplified-target] {
+  height: calc(100% - var(--open-result-btn));
+  min-width: 0;
+}
+
+.simplified-workspace {
+  container-type: inline-size;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #f7faf8;
+}
+.simplified-workspace .simplified-header, .simplified-workspace .simplified-actions, .simplified-workspace .simplified-expand-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.simplified-workspace .simplified-header {
+  justify-content: space-between;
+}
+.simplified-workspace .simplified-description {
+  max-width: 52rem;
+  margin-bottom: 1rem;
+}
+.simplified-workspace .simplified-description label {
+  margin-top: 0.5rem;
+}
+.simplified-workspace [data-configure-form] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.simplified-workspace .simplified-layout {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: 1.25rem;
+  flex: 1;
+  min-height: 0;
+}
+.simplified-workspace .simplified-navigation {
+  overflow: auto;
+}
+.simplified-workspace .simplified-navigation-list > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.8rem;
+}
+.simplified-workspace .simplified-compact-navigation {
+  display: none;
+}
+.simplified-workspace .simplified-content {
+  min-width: 0;
+  overflow: auto;
+  padding-bottom: 4rem;
+}
+.simplified-workspace .simplified-group > summary {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+.simplified-workspace .simplified-object {
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid #dae4df;
+  border-radius: 0.5rem;
+  background: white;
+}
+.simplified-workspace .simplified-object > summary {
+  font-weight: 600;
+}
+.simplified-workspace .simplified-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+}
+.simplified-workspace .simplified-field {
+  min-width: 0;
+}
+.simplified-workspace .simplified-preview {
+  color: #53645d;
+  overflow-wrap: anywhere;
+}
+.simplified-workspace .simplified-field-help, .simplified-workspace .simplified-guidance {
+  white-space: pre-wrap;
+}
+.simplified-workspace .simplified-selection {
+  display: grid;
+  gap: 0.3rem;
+}
+.simplified-workspace .simplified-selection textarea {
+  min-height: 4rem;
+}
+.simplified-workspace [hidden] {
+  display: none !important;
+}
+
+@container (max-width: 1050px) {
+  .simplified-workspace .simplified-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 750px) {
+  .simplified-workspace .simplified-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .simplified-workspace .simplified-navigation {
+    position: static;
+  }
+  .simplified-workspace .simplified-navigation-list {
+    display: none;
+  }
+  .simplified-workspace .simplified-compact-navigation {
+    display: block;
+  }
+}
+@container (max-width: 500px) {
+  .simplified-workspace .simplified-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+#simplified-exit-dialog {
+  border: 1px solid #dae4df;
+  border-radius: 0.8rem;
+  padding: 1.5rem;
+  max-width: 28rem;
+}
+#simplified-exit-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+body[data-base-view=simplified] #edge-modeling-toggle-wrapper, body[data-base-view=simplified] #model-scroll-to-left, body[data-base-view=simplified] #model-scroll-to-right {
+  display: none !important;
+}
+
 /*# sourceMappingURL=bs_main.css.map */

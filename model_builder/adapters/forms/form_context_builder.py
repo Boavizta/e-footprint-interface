@@ -144,6 +144,19 @@ class FormContextBuilder:
         context.update(self.build_list_membership_section_context(obj_to_edit))
         return context
 
+    def build_input_fields(self, obj_to_edit, attributes: set[str]) -> list[dict]:
+        """Render catalog inputs through the normal generator, explicitly including panel exclusions."""
+        from model_builder.adapters.forms.form_field_generator import generate_dynamic_form
+        from model_builder.adapters.forms.strategies.field_utils import apply_field_transforms_to_fields
+
+        fields, advanced, _ = generate_dynamic_form(
+            obj_to_edit.class_as_simple_str, obj_to_edit.modeling_obj.__dict__, self.model_web,
+            obj_to_edit=obj_to_edit, include_attributes=attributes)
+        config = getattr(type(obj_to_edit), "form_edition_config", None) or {}
+        apply_field_transforms_to_fields(fields, config.get("field_transforms", {}))
+        apply_field_transforms_to_fields(advanced, config.get("field_transforms", {}))
+        return fields + advanced
+
     @staticmethod
     def build_dict_membership_section_context(web_obj: "ModelingObjectWeb") -> dict:
         """Build the dict-membership part of an edition context for a web object.

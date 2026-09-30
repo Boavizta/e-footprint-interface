@@ -29,7 +29,7 @@
             </button>
             <button
                 class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-desktop"
-                hx-get="{% url 'source-table' %}"
+                data-workspace-control hx-get="{% url 'source-table' %}"
                 hx-target="#source-block"
                 hx-swap="innerHTML"
                 hx-trigger="click once"
@@ -67,7 +67,7 @@
         </button>
         <button
             class="bg-transparent header-btn-result p-2 fs-3xl me-2 header-btn-result-sources-mobile"
-            hx-get="{% url 'source-table' %}"
+            data-workspace-control hx-get="{% url 'source-table' %}"
             hx-target="#source-block"
             hx-swap="innerHTML"
             hx-trigger="click once"

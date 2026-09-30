@@ -596,7 +596,27 @@ def render_support(case_ctx):
 # Main
 # ---------------------------------------------------------------------------
 
+def render_simplified_workspace(_):
+    objects = []
+    for owner, attrs in [("api", ["provider", "model"]), ("job", ["count"]), ("other", ["lifespan"])]:
+        fields = []
+        for attribute in attrs:
+            dom_id = f"si-test-{owner}-{attribute}"
+            dependencies = {"provider": ["si-test-api-model"], "model": ["si-test-job-count"]}
+            fields.append({"address": {"object_id": owner, "attribute": attribute}, "dom_id": dom_id,
+                           "editor": {"label": attribute.capitalize()}, "preview": "Current value",
+                           "setting": {"included": False, "help": "Retained Help"},
+                           "dependents": dependencies.get(attribute, [])})
+        objects.append({"object_id": owner, "dom_id": f"si-test-object-{owner}", "name": owner.capitalize(),
+                        "fields": fields, "selected_count": 0, "open": owner == "api"})
+    return render_to_string("model_builder/simplified_inputs/workspace.html", {
+        "system_id": "test", "slot": 0, "configure": True, "title": "Title", "guidance": "Guidance",
+        "groups": [{"object_type": "External API", "dom_id": "si-test-type-api", "objects": objects}]}) + render_to_string(
+            "model_builder/simplified_inputs/exit_dialog.html")
+
+
 GROUPS = [
+    ({"simplified_configure": {}}, render_simplified_workspace),
     (SOURCE_METADATA_CASES, render_metadata_field),
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),

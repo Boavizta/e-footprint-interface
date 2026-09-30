@@ -1,0 +1,20 @@
+<nav class="simplified-navigation" aria-label="Navigation">
+    <h2 class="h6">Navigation</h2>
+    <label class="simplified-compact-navigation" for="si-{{ system_id }}-object-selector">Object
+        <select id="si-{{ system_id }}-object-selector" class="form-select" data-object-selector>
+            {% for group in groups %}<optgroup label="{{ group.object_type }}" data-selector-group="{{ group.dom_id }}">
+                {% for object in group.objects %}<option value="{{ object.dom_id }}">{{ object.name }}</option>{% endfor %}
+            </optgroup>{% endfor %}
+        </select>
+    </label>
+    <div class="simplified-navigation-list">
+        {% for group in groups %}
+        <div data-navigation-group="{{ group.dom_id }}">
+            <strong>{{ group.object_type }}</strong>
+            {% for object in group.objects %}
+            <button type="button" class="btn btn-sm text-start" data-action="simplified-navigate" data-workspace-read data-navigation-object="{{ object.dom_id }}">{{ object.name }} <span data-navigation-count>({{ object.selected_count }})</span></button>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</nav>

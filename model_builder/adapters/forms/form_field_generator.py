@@ -4,6 +4,7 @@ from decimal import Decimal
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
 
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
@@ -218,7 +219,8 @@ def generate_select_multiple_field(
 
 
 def generate_dynamic_form(
-    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None
+    efootprint_class_str: str, default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None,
+    *, include_attributes: set[str] | None = None,
 ):
     structure_fields = []
     structure_fields_advanced = []
@@ -233,7 +235,9 @@ def generate_dynamic_form(
     corresponding_web_class = get_corresponding_web_class(efootprint_class)
     available_sources = [{"id": s.id, "name": s.name, "link": s.link} for s in model_web.available_sources]
     for attr_name in init_sig_params.keys():
-        if attr_name in corresponding_web_class.attributes_to_skip_in_forms + ["self"]:
+        if attr_name == "self" or (include_attributes is not None and attr_name not in include_attributes):
+            continue
+        if include_attributes is None and attr_name in corresponding_web_class.attributes_to_skip_in_forms:
             continue
         annotation = init_sig_params[attr_name].annotation
         if annotation is empty_annotation:
@@ -316,20 +320,23 @@ def generate_dynamic_form(
             }
             structure_field.update({"metadata": metadata})
             if issubclass(annotation, ExplainableQuantity):
-                default_value_decimal = Decimal(str(default.magnitude))
+                is_empty = isinstance(default, EmptyExplainableObject)
+                default_value_decimal = Decimal("0") if is_empty else Decimal(str(default.magnitude))
                 default_value = _format_decimal_for_number_input(default_value_decimal)
                 step = _get_compatible_step(default_value_decimal, field_config.get("step", 0.1))
                 structure_field.update(
                     {
                         "input_type": "explainable_quantity",
                         "unit": (
-                            "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}"
+                            "dimensionless" if is_empty or default.value.units == u.dimensionless else f"{default.value.units:~P}"
                         ),
-                        "default": default_value,
+                        "default": "" if is_empty else default_value,
                         "can_be_negative": attr_name in attributes_that_can_have_negative_values,
                         "step": step,
                     }
                 )
+                if include_attributes is not None:
+                    structure_field["allows_empty"] = EmptyExplainableObject in get_args(init_sig_params[attr_name].annotation)
             elif issubclass(annotation, ExplainableHourlyQuantities):
                 form_config = build_timeseries_form_config(annotation, default)
                 if form_config:

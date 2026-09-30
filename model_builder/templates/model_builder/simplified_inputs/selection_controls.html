@@ -1,0 +1,9 @@
+<div class="simplified-selection" data-selection-controls data-field-id="{{ field.dom_id }}" data-required-inputs="{{ field.dependents|join:' ' }}">
+    <label for="{{ field.dom_id }}-include">
+        <input id="{{ field.dom_id }}-include" type="checkbox" name="include:{{ field.address.object_id }}:{{ field.address.attribute }}" data-include-input {% if field.setting.included %}checked{% endif %}> Include
+    </label>
+    <input type="hidden" data-locked-include name="include:{{ field.address.object_id }}:{{ field.address.attribute }}" disabled value="on">
+    <p class="small text-muted" data-required-explanation hidden>Required by an included input.</p>
+    <label for="{{ field.dom_id }}-help">Help text</label>
+    <textarea id="{{ field.dom_id }}-help" class="form-control" name="help:{{ field.address.object_id }}:{{ field.address.attribute }}" data-field-help>{{ field.setting.help }}</textarea>
+</div>

@@ -21,6 +21,7 @@ from e_footprint_interface import __version__ as interface_version
 
 from model_builder.adapters.repositories import (
     SessionSystemRepository, SessionWorkspaceRepository, SessionCacheRepository)
+from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.adapters.card_order import CARD_ORDER_LIST_IDS, ordered_card_lists
 from model_builder.adapters.label_resolver import LabelResolver
 from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
@@ -132,6 +133,17 @@ def render_model_builder(request, model_web, show_example_picker, workspace=None
         {"slot": getattr(model_web.repository, "slot", 0), "model_web": model_web,
          "name": model_web.system.name, "is_active": True, "suffix": "", **ordered_card_lists(model_web)}]
     active_slot = next(s["slot"] for s in workspace_slots if s["is_active"])
+    from model_builder.adapters.presenters.simplified_inputs import build_workspace_context
+    opening_ids = request.session.pop("simplified_inputs_opening_ids", [])
+    for entry in workspace_slots:
+        repository = entry["model_web"].repository
+        system_id = entry["model_web"].system.efootprint_id
+        if system_id in opening_ids:
+            fields = repository.interface_config["simplified_inputs"]["fields"]
+            selected = any(setting["included"] for attributes in fields.values() for setting in attributes.values())
+            entry["opening_default"] = "simplified" if selected else "modeling"
+            if selected:
+                entry["simplified_context"] = build_workspace_context(entry["model_web"])
 
     model_is_empty = is_empty_model(model_web.system_data)
     context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
@@ -361,6 +373,8 @@ def upload_json(request):
                     # views import cycle.
                     from model_builder.adapters.views.views_workspace import _restore_workspace
                     _restore_workspace(workspace, data)
+                    request.session["simplified_inputs_opening_ids"] = [
+                        system_id_of(workspace.repository_for(slot).get_system_data()) for slot in workspace.list_slots()]
                     return redirect("model-builder")
 
                 system_data = SessionSystemRepository.upgrade_system_data(data)
@@ -373,6 +387,7 @@ def upload_json(request):
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
                 repository.interface_config = system_data_with_calculated_attributes.get("interface_config", {})
                 model_web.persist_to_cache()
+                request.session["simplified_inputs_opening_ids"] = [model_web.system.efootprint_id]
                 return redirect("model-builder")
             except Exception as e:
                 if os.environ.get("RAISE_EXCEPTIONS"):

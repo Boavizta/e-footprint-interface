@@ -10,10 +10,13 @@ import model_builder.adapters.views.views_onboarding
 import model_builder.adapters.views.views_timeseries_preview
 import model_builder.adapters.views.views_workspace
 import model_builder.adapters.views.views_support
+from .adapters.views import views_simplified_inputs
 from .adapters.views import views
 from .adapters.views import sankey_views
 
 urlpatterns = [
+    path("simplified-inputs/", views_simplified_inputs.simplified_inputs, name="simplified-inputs"),
+    path("save-simplified-inputs/", views_simplified_inputs.save_simplified_inputs, name="save-simplified-inputs"),
     path("", views.model_builder_main, name="model-builder"),
     path("support/", model_builder.adapters.views.views_support.support, name="model-builder-support"),
     path("data-privacy/", model_builder.adapters.views.views_support.data_privacy, name="data-privacy"),

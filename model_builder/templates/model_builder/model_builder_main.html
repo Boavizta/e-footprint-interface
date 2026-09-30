@@ -10,11 +10,16 @@ pattern — tab strip, then the active tab's toolbar beneath it).
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
     <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
         {% for slot_entry in workspace_slots %}
-        <div class="d-flex flex-row {% if not slot_entry.is_active %}d-none{% endif %}" id="model-canva-{{ slot_entry.slot }}" data-model-canvas="{{ slot_entry.slot }}">
+        <div class="d-flex flex-row {% if not slot_entry.is_active %}d-none{% endif %}" id="model-canva-{{ slot_entry.slot }}" data-model-canvas="{{ slot_entry.slot }}" data-system-id="{{ slot_entry.model_web.system.efootprint_id }}">
             {% include 'model_builder/components/model_canvas_content.html' with model_web=slot_entry.model_web slot_suffix=slot_entry.suffix is_active_canvas=slot_entry.is_active %}
         </div>
         {% endfor %}
     </div>
+    {% for slot_entry in workspace_slots %}
+    <div id="simplified-slot-{{ slot_entry.slot }}" class="d-none w-100" data-simplified-target="{{ slot_entry.slot }}" data-system-id="{{ slot_entry.model_web.system.efootprint_id }}" {% if slot_entry.opening_default %}data-opening-default="{{ slot_entry.opening_default }}"{% endif %}>
+        {% if slot_entry.simplified_context %}{% include 'model_builder/simplified_inputs/workspace.html' with system_id=slot_entry.simplified_context.system_id slot=slot_entry.slot configure=False title=slot_entry.simplified_context.title guidance=slot_entry.simplified_context.guidance groups=slot_entry.simplified_context.groups %}{% endif %}
+    </div>
+    {% endfor %}
     {% comment %}
     z-2 (one below the per-model toolbar's z-3) so toolbar dropdowns that open downward over the panel —
     e.g. the Help menu — paint on top instead of being trapped behind the panel at an equal z-index. Same
@@ -75,3 +80,5 @@ flex-column align-items-start overflow-y-auto overflow-x-hidden"></div>
 {% include "model_builder/modals/import_error_modal.html" with modal_id=import_error_modal_id message=import_error_message %}
 
 {% include "model_builder/modals/warn_before_side_panel_closing_modal.html" with message="The currently opened side panel has pending changes. Would you like to continue and lose them ?" modal_id="unsavedModal" %}
+
+{% include 'model_builder/simplified_inputs/exit_dialog.html' %}

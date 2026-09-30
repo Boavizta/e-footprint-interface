@@ -172,6 +172,8 @@ def add_model(request):
 
     workspace.set_active_slot(new_slot)
     model_web = ModelWeb(workspace.repository_for(new_slot))
+    if request.POST.get("source") == "import":
+        request.session["simplified_inputs_opening_ids"] = [model_web.system.efootprint_id]
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace)
 
 

@@ -392,6 +392,9 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     function lockControls() {
         if (!active) return;
         document.querySelectorAll(`${actionSelector}, ${editorSelector}`).forEach(element => {
+            // Editor forms contain stateless reading controls; lock their inputs and save actions,
+            // rather than declaring the whole form (and its reading controls) aria-disabled.
+            if (element.matches("form[data-workspace-editor]")) return;
             if (!active.controls.has(element)) {
                 active.controls.set(element, {
                     disabled: "disabled" in element
@@ -443,6 +446,7 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     ["click", "change", "input", "submit", "keydown", "mousedown", "touchstart"].forEach(type => {
         window.addEventListener(type, event => {
             if (!active || !(event.target instanceof Element)) return;
+            if (event.target.closest("[data-workspace-read]")) return;
             if (event.target.closest(`${actionSelector}, ${editorSelector}`)) suppress(event);
         }, true);
     });

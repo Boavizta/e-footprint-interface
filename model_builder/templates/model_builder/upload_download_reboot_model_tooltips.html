@@ -103,6 +103,7 @@
                     </li>
                 {% endif %}
                 <li class="nav-item d-lg-none"><hr class="dropdown-divider my-1"></li>
+                <li class="nav-item"><button type="button" class="btn btn-outline-primary mx-2" data-action="simplified-mode" data-workspace-control>Simplified inputs</button></li>
                 {% include 'model_builder/components/edge_modeling_toggle.html' %}
                 {% include 'model_builder/components/help_menu.html' %}
                 {% comment %}
@@ -226,12 +227,13 @@
     })
 
     function collapseNavbarIfShown() {
-        const isExpanded = document.getElementById("navbarSupportedContent").classList.contains("show");
-        if (isExpanded) {
-            const collapse = new bootstrap.Collapse(document.getElementById("navbarSupportedContent"), {
-                toggle: false
-            });
-            collapse.hide();
+        const menu = document.getElementById("navbarSupportedContent");
+        const hide = () => bootstrap.Collapse.getOrCreateInstance(menu, {toggle: false}).hide();
+        if (menu.classList.contains("collapsing")) {
+            menu.addEventListener("shown.bs.collapse", hide, {once: true});
+        } else if (menu.classList.contains("show")) {
+            hide();
         }
     }
+
 </script>

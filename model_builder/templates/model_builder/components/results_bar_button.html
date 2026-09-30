@@ -1,7 +1,7 @@
 {% load label_filters %}
 {% with results_constraint=model_web.creation_constraints|get_item:"__results__" %}
 {% if results_constraint.enabled %}
-<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
+<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result" data-workspace-control
     {% if oob %}hx-swap-oob="outerHTML:#btn-open-panel-result"{% endif %}
     hx-get="/model_builder/result-chart/"
     hx-target="#result-block"
@@ -10,7 +10,7 @@
     hx-disabled-elt="button"
 >
 {% else %}
-<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result"
+<div class="w-100 text-center h6 text-start bg-white rounded-2 shadow-sm-up h-100" id="btn-open-panel-result" data-workspace-control
     {% if oob %}hx-swap-oob="outerHTML:#btn-open-panel-result"{% endif %}
     style="opacity: 0.5; cursor: not-allowed;"
     data-bs-toggle="tooltip"
