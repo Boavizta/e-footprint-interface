@@ -161,20 +161,16 @@ test("internal saved-view reads bypass exit interception, using the resident set
 });
 
 function bookmark(owner, attribute, provisional = false) {
-    const element = document.createElement("details");
-    element.dataset.bookmark = "";
+    const fixture = document.createElement("div");
+    fixture.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_bookmark_empty.html"), "utf8");
+    const element = fixture.querySelector("[data-bookmark]");
     element.dataset.ownerId = owner;
     element.dataset.attribute = attribute;
-    element.dataset.savedIncluded = "false";
-    element.dataset.requiredLabel = "";
+    element.dataset.pendingPatch = JSON.stringify({fields: {[owner]: {[attribute]: {included: true}}}});
     if (provisional) {
         element.dataset.provisionalOwner = owner;
         element.dataset.inputId = `Job_${attribute}`;
     }
-    element.innerHTML = `<summary><i data-bookmark-icon></i></summary>
-        <div data-selection-controls><input type="checkbox" data-include-input>
-        <p data-required-explanation hidden></p><textarea data-field-help></textarea></div>
-        <small data-bookmark-status></small><button data-action="bookmark-undo" hidden>Undo</button>`;
     return element;
 }
 function bookmarkResponse(element, result, failed = false) {
@@ -227,10 +223,14 @@ test("creation requirements follow candidates, release forced membership and ret
     mount();
     const {refreshCreationBookmarks, pendingCreationSettings} = require("../theme/static/scripts/simplified_inputs.js");
     const form = document.createElement("form");
+    form.id = "sidePanelForm";
     form.innerHTML = '<select id="service_or_external_api"><option value="a">A</option><option value="b">B</option></select>';
     const resolution = bookmark("object", "resolution", true);
     form.appendChild(resolution);
-    document.body.appendChild(form);
+    const panel = document.createElement("div");
+    panel.id = "sidePanelContent";
+    panel.appendChild(form);
+    document.body.appendChild(panel);
     const script = document.createElement("script");
     script.id = "dynamic-form-data";
     script.type = "application/json";

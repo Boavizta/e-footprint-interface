@@ -171,12 +171,16 @@
             explanation.textContent = requiredBy ? `Required by ${requiredBy.label}.` : "";
         }
     }
+    function isActiveCreationBookmark(bookmark) {
+        // EdgeComputer's Storage is a sibling form hidden independently of the class sections.
+        return !bookmark.closest('[id^="item-"]')?.classList.contains("d-none")
+            && bookmark.closest("form")?.style.display !== "none";
+    }
     function refreshCreationBookmarks() {
         const script = document.getElementById("dynamic-form-data");
         if (!script) return;
         const data = JSON.parse(script.textContent);
         const bookmarks = [...document.querySelectorAll("[data-bookmark][data-provisional-owner]")];
-        const active = bookmark => !bookmark.closest('[id^="item-"]')?.classList.contains("d-none");
         bookmarks.forEach(bookmark => {
             const checkbox = bookmark.querySelector("[data-include-input]");
             if (bookmark.dataset.authoredIncluded === undefined) bookmark.dataset.authoredIncluded = String(checkbox.checked);
@@ -188,10 +192,10 @@
         for (let pass = 0; pass <= bookmarks.length; pass++) {
             let changed = false;
             (data.dynamic_lists || []).forEach(list => {
-                const bookmark = bookmarks.find(item => item.dataset.inputId === list.input_id && active(item));
+                const bookmark = bookmarks.find(item => item.dataset.inputId === list.input_id && isActiveCreationBookmark(item));
                 if (!bookmark) return;
                 const filter = document.getElementById(list.filter_by);
-                const controller = bookmarks.find(item => item.dataset.inputId === list.filter_by && active(item));
+                const controller = bookmarks.find(item => item.dataset.inputId === list.filter_by && isActiveCreationBookmark(item));
                 const requirement = list.simplified_required_by?.[filter?.value]
                     || (controller?.querySelector("[data-include-input]").checked
                         ? {label: document.querySelector(`label[for="${list.filter_by}"]`)?.textContent.trim()} : null);
@@ -210,9 +214,9 @@
                 bookmark.dataset.requiredLabel ? {label: bookmark.dataset.requiredLabel} : null);
         });
     }
-    function pendingCreationSettings(form) {
-        return [...form.querySelectorAll("[data-provisional-owner]")]
-            .filter(bookmark => !bookmark.closest('[id^="item-"]')?.classList.contains("d-none"))
+    function pendingCreationSettings(panel) {
+        return [...panel.querySelectorAll("[data-provisional-owner]")]
+            .filter(isActiveCreationBookmark)
             .map(bookmark => ({owner: bookmark.dataset.provisionalOwner, attribute: bookmark.dataset.attribute,
                 included: bookmark.querySelector("[data-include-input]").checked,
                 help: bookmark.querySelector("[data-field-help]").value}))
@@ -260,8 +264,9 @@
     document.body.addEventListener("htmx:configRequest", event => {
         const element = event.detail.elt;
         if (element.matches("[data-bookmark]")) event.detail.parameters.patch = element.dataset.pendingPatch;
-        if (element.querySelector("[data-provisional-owner]")) {
-            event.detail.parameters.simplified_settings = JSON.stringify(pendingCreationSettings(element));
+        const panel = element.matches("#sidePanelForm") ? element.closest("#sidePanelContent") : null;
+        if (panel?.querySelector("[data-provisional-owner]")) {
+            event.detail.parameters.simplified_settings = JSON.stringify(pendingCreationSettings(panel));
         }
     });
     document.body.addEventListener("htmx:afterRequest", event => {
@@ -272,17 +277,22 @@
         bookmark.querySelector("[data-bookmark-status]").textContent = failed ? "Not saved" : "Saved";
         if (failed) return;
         const result = JSON.parse(event.detail.xhr.responseText);
+        const submitted = JSON.parse(bookmark.dataset.pendingPatch).fields;
         result.fields.forEach(field => {
             document.querySelectorAll("[data-bookmark]").forEach(visible => {
                 if (visible.dataset.ownerId !== field.object_id || visible.dataset.attribute !== field.attribute) return;
-                // Help belongs to its own draft until its own request completes.
+                // A membership/Undo response must not replace help whose own save failed.
                 const help = visible.querySelector("[data-field-help]");
                 const draft = help?.value;
                 const dirtyHelp = help && draft !== help.defaultValue;
                 updateBookmark(visible, field.setting, field.required_by);
-                if (dirtyHelp && visible !== bookmark) help.value = draft;
+                const savedHelp = visible === bookmark
+                    && Object.hasOwn(submitted[field.object_id]?.[field.attribute] || {}, "help");
+                if (dirtyHelp && !savedHelp) help.value = draft;
             });
         });
+        const help = bookmark.querySelector("[data-field-help]");
+        if (help.value !== help.defaultValue) bookmark.querySelector("[data-bookmark-status]").textContent = "Not saved";
         if (Object.keys(result.inverse.fields).length && bookmark.dataset.pendingUndo !== "true") {
             bookmark.dataset.inversePatch = JSON.stringify(result.inverse);
             bookmark.querySelector('[data-action="bookmark-undo"]').hidden = false;
@@ -296,11 +306,17 @@
     });
     document.addEventListener("initDynamicForm", refreshCreationBookmarks);
 
-    function initialize() {
+    function refreshBookmarkLocks() {
+        if (document.body.dataset.workspaceMutation === "updating") return;
         document.querySelectorAll("[data-bookmark]:not([data-provisional-owner])").forEach(bookmark => {
             const checkbox = bookmark.querySelector("[data-include-input]");
             if (checkbox) checkbox.disabled = !!bookmark.dataset.requiredLabel;
         });
+    }
+    document.body.addEventListener("workspace-mutation:finished", refreshBookmarkLocks);
+
+    function initialize() {
+        refreshBookmarkLocks();
         if (pendingRead && pendingRead.target !== targetForActiveModel()) cancelPendingRead();
         document.querySelectorAll("[data-simplified-target]").forEach(target => {
             if (target.dataset.openingDefault) {

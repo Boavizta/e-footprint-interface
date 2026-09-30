@@ -355,10 +355,19 @@ class TestInlineBookmarks:
 
         builder.get_object_card("EcoLogitsVideoGenExternalAPI", "Video API A").click_edit_button()
         controller = page.locator('#field-group-EcoLogitsVideoGenExternalAPI_model_name [data-bookmark]')
-        controller.locator("summary").click()
+        provider = page.locator('#field-group-EcoLogitsVideoGenExternalAPI_provider [data-bookmark]')
+        provider.locator("summary").click()
         with page.expect_response("**/patch-simplified-inputs/"):
-            controller.locator("[data-include-input]").check()
-        expect(controller.locator("[data-bookmark-status]")).to_have_text("Saved")
+            provider.locator("[data-include-input]").check()
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        expect(controller.locator("[data-include-input]")).to_be_disabled()
+        with page.expect_response("**/patch-simplified-inputs/"):
+            provider.locator("[data-include-input]").uncheck()
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        expect(controller.locator("[data-include-input]")).to_be_enabled()
+        provider.locator("summary").click()
+        controller.locator("summary").click()
+        expect(controller.locator("[data-include-input]")).to_be_checked()
         page.locator("#btn-close-side-panel").click()
         expect(page.locator("#sidePanel")).not_to_be_visible()
         step = builder.get_object_card("UsageJourney", "Test Journey").get_nested_object_card(
@@ -403,6 +412,46 @@ class TestInlineBookmarks:
         assert api_a.id in fields
         assert not any(setting.get("help") == "Resolution help retained" for attributes in fields.values()
                        for setting in attributes.values())
+
+    def test_nested_creation_settings_and_failed_help_survive_membership_undo(self, minimal_complete_model_builder):
+        builder = minimal_complete_model_builder
+        page = builder.page
+        builder.click_add_server()
+        builder.side_panel.select_object_type("Server").fill_field("Server_name", "Bookmarked server")
+        bookmark = page.locator('#field-group-Storage_storage_capacity [data-bookmark]')
+        bookmark.locator("summary").click()
+        bookmark.locator("[data-include-input]").check()
+        bookmark.locator("textarea").fill("Nested storage help")
+        builder.side_panel.submit_and_wait_for_close()
+        card = builder.get_object_card("Server", "Bookmarked server")
+        card.click_edit_button()
+        bookmark.locator("summary").click()
+        expect(bookmark.locator("[data-include-input]")).to_be_checked()
+        help_field = bookmark.locator("textarea")
+        expect(help_field).to_have_value("Nested storage help")
+        page.route("**/patch-simplified-inputs/", lambda route: route.abort("failed"))
+        help_field.fill("Failed help draft")
+        help_field.press("Tab")
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        page.unroute("**/patch-simplified-inputs/")
+        with page.expect_response("**/patch-simplified-inputs/"):
+            bookmark.locator("[data-include-input]").uncheck()
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        expect(help_field).to_have_value("Failed help draft")
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
+        click_and_wait_for_htmx(page, bookmark.locator('[data-action="bookmark-undo"]'))
+        expect(bookmark.locator("[data-include-input]")).to_be_checked()
+        expect(help_field).to_have_value("Failed help draft")
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
+        help_field.fill("Retried storage help")
+        with page.expect_response("**/patch-simplified-inputs/"):
+            help_field.press("Enter")
+        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
+        builder.side_panel.close()
+        card.click_edit_button()
+        bookmark.locator("summary").click()
+        expect(help_field).to_have_value("Retried storage help")
 
     def test_cancelled_creation_discards_provisional_bookmarks(self, minimal_complete_model_builder, tmp_path):
         builder = minimal_complete_model_builder

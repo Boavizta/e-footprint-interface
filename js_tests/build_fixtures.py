@@ -615,8 +615,41 @@ def render_simplified_workspace(_):
             "model_builder/simplified_inputs/exit_dialog.html")
 
 
+def render_simplified_bookmark(field):
+    return render_to_string("model_builder/simplified_inputs/bookmark.html", {"field": field})
+
+
+def render_simplified_creation(object_type):
+    from model_builder.adapters.forms.form_context_builder import FormContextBuilder
+    from model_builder.adapters.repositories import InMemorySystemRepository
+    from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
+    from model_builder.domain.reference_data import DEFAULT_SYSTEM_DATA
+
+    model = ModelWeb(InMemorySystemRepository(initial_data=DEFAULT_SYSTEM_DATA))
+    web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type]
+    context = FormContextBuilder(model).build_creation_context(web_class, object_type)
+    return render_to_string(f"model_builder/side_panels/add/{web_class.add_template}", context)
+
+
+SIMPLIFIED_BOOKMARK_CASES = {
+    "simplified_bookmarks": [
+        {"address": {"object_id": "api", "attribute": attribute}, "attribute": attribute,
+         "dom_id": f"bookmark-api-{attribute}",
+         "setting": {"included": False, "help": "Old saved help"}, "required_by": None}
+        for attribute in ("provider", "model_name")
+    ],
+    "simplified_bookmark_empty": {
+        "address": {"object_id": "storage", "attribute": "storage_capacity"}, "attribute": "storage_capacity",
+        "dom_id": "bookmark-storage-capacity",
+        "setting": {"included": False, "help": ""}, "required_by": None},
+}
+
+
 GROUPS = [
     ({"simplified_configure": {}}, render_simplified_workspace),
+    (SIMPLIFIED_BOOKMARK_CASES, render_simplified_bookmark),
+    ({"simplified_create_server": "Server", "simplified_create_edge_device": "EdgeDeviceBase"}, render_simplified_creation),
     (SOURCE_METADATA_CASES, render_metadata_field),
     (ROW_EDITOR_CASES, render_row_editor),
     (SOURCE_TABLE_ROW_CASES, render_source_table_row),
