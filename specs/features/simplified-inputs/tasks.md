@@ -41,13 +41,13 @@ Repository: e-footprint. Files touched: `efootprint/abstract_modeling_classes/mo
 
 ## Task 3 — Establish the definition and eligible-field catalog
 
-Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: implementing. Brief: [task-3](briefs/task-3.md).
+Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: complete. Brief: [task-3](briefs/task-3.md).
 
 Repository: e-footprint-interface. Files touched: new `domain/services/simplified_inputs.py` and `domain/conditional_inputs.py`; form generator, timeseries registry, version normalization and focused tests. Tests: eligibility, nested owner addresses, dependent-only/chained selection, normal form and timeseries regressions. Acceptance: address keys are owner ID plus constructor attribute; unsupported structural fields stay excluded; `complete_selection` and validation agree; older files normalize to empty without copying values. Depends on: Task 2 for final shared-controller verification. Implementation: standard — integrate existing constructor/conditional metadata, form fields and timeseries builder lookup into one catalog.
 
 ## Task 4 — Save configuration and exchange independent models
 
-Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: approved. Brief: [task-4](briefs/task-4.md).
+Goal: Persist definition replacements and inline patches without recomputing the model; preserve distinct definitions through duplication and file round-trips. Status: implementing. Brief: [task-4](briefs/task-4.md).
 
 Repository: e-footprint-interface. Files touched: new `application/use_cases/simplified_inputs.py`; session/in-memory/workspace repositories; `views.py`, `views_workspace.py`, version normalization and repository/workspace tests. Tests: replacement versus patch, retained help/Clear, budget failure, per-slot recovery, independent duplicate, System-ID remapping, two-model import failure and round-trip. Acceptance: a failed configuration save publishes nothing; every file carries its model's definition; incoming models and combined size are checked before live workspace replacement. Depends on: Task 3. Implementation: standard — extend `save_interface_config()`, slot/ID helpers and `SystemImportService`; preflight both models before the current restore writes.
 

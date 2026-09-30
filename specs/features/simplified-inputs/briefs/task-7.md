@@ -37,3 +37,11 @@ No bookmark autosave, simple value autosave or timeseries editor. The selected s
 ## Form-context seam
 
 `FormContextBuilder.build_creation_context()` and `build_edition_context()` dispatch to the object's configured strategy, then add relationship sections; they already return template-ready field dictionaries. The presenter should consume those dictionaries for field wording and widgets, with representative object-family rendering checks during implementation rather than a new field metadata source.
+
+## Run A implementation handoff
+
+[IMPL-DECISION-01](../plan.html#impl-decision-01) keeps catalog eligibility independent of normal panel skip lists.
+`Server.fixed_nb_of_instances` (also present on Storage) is an eligible optional number even though ordinary
+panels skip it. When rendering catalog-selected fields, allow their explicit inclusion and handle
+`ExplainableQuantity | EmptyExplainableObject` as a numeric input, including conditional empty choices.
+The existing normal-form defaults must stay unchanged. See [Task 3 handoff](../handoffs/task-3.md).

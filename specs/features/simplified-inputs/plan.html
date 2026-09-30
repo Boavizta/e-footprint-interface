@@ -316,6 +316,11 @@
   <p><a href="#plan-update-01">[PLAN-UPDATE-01] Revalidate imported definitions — REJECTED</a></p>
 </aside>
 
+<aside id="impl-decisions" data-note="review">
+  <p><strong>Implementation decisions</strong></p>
+  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — APPLIED</a></p>
+</aside>
+
 <section id="approach">
   <h2>1. Follow the interactions through the code</h2>
   <p data-reading-note>Proposed changes, not implemented code. Select an interaction to highlight its
@@ -476,6 +481,17 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     </ul>
     <p>For example, including an API's Model also requires including Resolution for every video job
     linked to that API.</p>
+    <aside id="impl-decision-01" data-note="review">
+      <p><strong>[IMPL-DECISION-01] — APPLIED</strong></p>
+      <p>Run A, Task 3: eligibility follows constructor types and conditional metadata independently of
+      normal panels' form-specific skip lists. In particular, <code>fixed_nb_of_instances</code> is an
+      eligible optional number, so including <code>server_type</code> includes that companion. Applying
+      the normal Server panel's exclusions to this catalog would incorrectly remove the agreed
+      empty-number behavior. Existing Modeling forms keep their exclusions; Task 7 must render
+      catalog-selected optional numbers explicitly. See the
+      <a href="../../../model_builder/domain/services/simplified_inputs.py">field catalog</a> and
+      <a href="briefs/task-7.md">Task 7 brief</a>.</p>
+    </aside>
     <p>The next step joins this catalog to existing form contexts; the configuration save below uses
     the same answers to check the submitted selection.</p>
 
