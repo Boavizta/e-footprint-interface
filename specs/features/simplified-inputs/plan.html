@@ -321,6 +321,7 @@
   <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — APPLIED</a></p>
   <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
   <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
+  <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -693,6 +694,18 @@ repository.save_interface_config()
     <code>hx-disabled-elt="button"</code>, and <code>../theme/static/scripts/model_builder_main.js</code>
     already preserves pre-existing disabled states around HTMX requests. Extend that file to allow
     only one in-flight workspace mutation in this browser, including existing Modeling mutations.</p>
+    <p>Saved Sankey diagrams initialize through GET using their persisted settings; this render does
+    not publish a modeling snapshot after graph computation. New/default diagrams and settings changes
+    keep their guarded POST and persistence. Existing hydration/recovery and chart-cache boundaries remain.</p>
+    <aside id="impl-decision-04" data-note="review">
+      <p><strong>[IMPL-DECISION-04] — APPLIED</strong></p>
+      <p>Run B, Task 6 review: reopening several saved diagrams starts several automatic renders.
+      Treating those reads as configuration writes discards all but the first under the mutation guard.
+      Separate saved-diagram reads from new/settings writes, preserving default-diagram persistence
+      without introducing a queue or letting concurrent reads overwrite saved snapshots. See
+      <a href="../../../model_builder/adapters/views/sankey_views.py"><code>sankey_diagram()</code></a>
+      and the <a href="handoffs/task-6.md">Task 6 handoff</a>.</p>
+    </aside>
     <ol>
       <li>After capturing the request payload, lock relevant inputs, selects, textareas, mutation buttons,
       view/model switching and export links. Do not collect further edits for later submission.</li>

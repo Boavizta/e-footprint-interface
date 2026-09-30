@@ -2,14 +2,14 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending. The deployment/merge prerequisite below remains outstanding.
+Status: Run A complete, including independent task and global review. This is one interface-owned, cross-repository working set; Run B is in progress; Run C remains approved and pending. The deployment/merge prerequisite below remains outstanding.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 
 ## Runs
 
 - **Run A — foundations:** Tasks 1–5 complete.
-- **Run B — authoring:** Tasks 6–8.
+- **Run B — authoring:** Tasks 6–8 in progress.
 - **Run C — consumption:** Tasks 9–10.
 
 ## Overview
@@ -61,7 +61,7 @@ Repository: both. Files touched: interface `domain/object_factory.py`, `applicat
 
 ## Task 6 — Guard workspace mutations
 
-Goal: Allow only one mutation at a time across existing Modeling and new simplified-input controls. Status: approved. Brief: [task-6](briefs/task-6.md).
+Goal: Allow only one mutation at a time across existing Modeling and new simplified-input controls. Status: complete. Brief: [task-6](briefs/task-6.md).
 
 Repository: e-footprint-interface. Files touched: `theme/static/scripts/model_builder_main.js`, related shell controls and Jest/E2E guard tests. Tests: delayed mutation blocks editing, switching and export; disabled-state restoration and failure unlock. Acceptance: no second mutation or queued edit starts while one is active; read/scroll and stateless preview remain available. Depends on: none; land before Tasks 7–10. Implementation: standard — extend current HTMX request hooks and per-XHR disabled-state snapshot to mutation controls and response settlement.
 
