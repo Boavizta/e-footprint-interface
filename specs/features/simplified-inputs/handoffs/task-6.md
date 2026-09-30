@@ -1,6 +1,6 @@
 # Task 6 — Guard workspace mutations
 
-Repository and implementation range: `e-footprint-interface`, `0f6f64659d2bcaeff847d99dafd41dc9caeea347..71696aae1570b6d6f36333ee2577b3df53935dcd`. The library is unchanged from `d85de9753db5abe3551ccaa87fce9f714124877d`.
+Repository and implementation range: `e-footprint-interface`, `0f6f64659d2bcaeff847d99dafd41dc9caeea347..0481af00923dfeab5c93a901ccf6a103905803aa`. The library is unchanged from `d85de9753db5abe3551ccaa87fce9f714124877d`.
 
 ## Review pointers
 
@@ -8,6 +8,7 @@ Repository and implementation range: `e-footprint-interface`, `0f6f64659d2bcaeff
 - Later controls declare `data-workspace-control` for guarded navigation/export and `data-workspace-editor` around editable fields. Shared state is `body[data-workspace-mutation="updating"]`; `workspace-mutation:started` and `workspace-mutation:finished` carry `{xhr, elt}`, with `successful` on finish. HTTP-200 `openModalDialog` responses report failure. Fetch writes use cancelable `workspace-mutation:begin` and matching `workspace-mutation:end` events.
 - Card-order and Sankey diagram-deletion fetch writes participate in the same guard. `hammer_utils.js` keeps Results response targets attached through the interval after HTMX removes its request class but before settlement. Existing immediate-close/reopen Sankey and GenAI workflows cover this interaction alongside the new delayed-count browser case.
 - The owning pattern is documented in `specs/architecture/rendering.html`; the existing AGENTS.md rendering pointer already routes to it.
+- Saved-diagram reads and settings writes follow [IMPL-DECISION-04](../plan.html#impl-decision-04).
 
 ## Open concerns
 
