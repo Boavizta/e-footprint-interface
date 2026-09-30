@@ -7,7 +7,7 @@ invariants are enforced here as the single point for the whole feature:
   - the *summed* with-calc weight of all slots stays within ``MAX_PAYLOAD_SIZE_MB`` (the per-slot
     repository checks the budget on every save from the index; ``add_slot`` pre-checks it here too);
   - the two slots never hold the same system id — ``add_slot`` mints a fresh system id on any
-    cross-slot collision, covering every source (import, workspace import, template, blank, duplicate).
+    cross-slot collision, covering every source (import, workspace import, example, blank, duplicate).
 """
 from typing import List
 

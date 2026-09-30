@@ -209,7 +209,7 @@ class ModelWeb:
         """Snapshot of per-class creation gates plus __results__.
 
         For class-based entries the dict carries only {"enabled", "disabled"} — tooltip
-        copy is resolved at render time via the `constraint_tooltip` example filter so
+        copy is resolved at render time via the `constraint_tooltip` template filter so
         the domain never depends on adapter presentation strings. The special __results__
         entry additionally carries `reason` (the live validation errors) because those
         messages are computed here, not static copy.

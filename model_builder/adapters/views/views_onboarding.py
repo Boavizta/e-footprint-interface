@@ -52,10 +52,11 @@ def load_example_deeplink(request, example_id):
     to load (and a bare GET cannot run the picker's client-side replace-confirm), so it
     loads directly; an unknown id 404s like any other bad URL.
     """
-    repository = SessionWorkspaceRepository(request.session).active_repository()
+    workspace = SessionWorkspaceRepository(request.session)
+    repository = workspace.active_repository()
     try:
         raw_system_data = get_example_system_data(example_id)
     except KeyError:
         raise Http404(f"Unknown example: {example_id!r}")
-    load_system_into_session(repository, raw_system_data)
+    load_system_into_session(repository, raw_system_data, workspace=workspace)
     return redirect("model-builder")

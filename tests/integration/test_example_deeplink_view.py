@@ -7,7 +7,8 @@ id 404s like any other URL.
 """
 import pytest
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
+from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.domain.services import get_example_system_data
 
 
@@ -46,6 +47,26 @@ def test_deeplink_lands_on_the_loaded_canvas_without_the_first_run_picker(client
     assert response.status_code == 200
     # A loaded model lands on the canvas, not the empty-model onboarding picker.
     assert b'id="example-picker"' not in response.content
+
+
+@pytest.mark.django_db
+def test_deeplink_replaces_active_slot_without_colliding_with_sibling(client, monkeypatch):
+    """Loading the original example over its duplicate preserves distinct canvas namespaces."""
+    monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
+    assert client.get("/example/ecommerce/").status_code == 302
+    original = SessionWorkspaceRepository(client.session).repository_for(0).get_system_data()
+    assert client.post("/model_builder/add-model/", {"source": "duplicate"}).status_code == 200
+
+    response = client.get("/example/ecommerce/", follow=True)
+
+    assert response.status_code == 200
+    workspace = SessionWorkspaceRepository(client.session)
+    assert workspace.list_slots() == [0, 1]
+    assert workspace.active_slot() == 1
+    assert workspace.repository_for(0).get_system_data() == original
+    loaded = workspace.repository_for(1).get_system_data()
+    assert _system_name(loaded) == _system_name(original)
+    assert system_id_of(loaded) != system_id_of(original)
 
 
 @pytest.mark.django_db

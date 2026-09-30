@@ -150,7 +150,7 @@ document.body.addEventListener("htmx:beforeRequest", function (event) {
 // panel survives hidden behind it and a same-slot return resumes it intact — opening Compare discards
 // nothing. A cross-slot dismiss does discard, but it goes out as /switch-model/, which IS guarded.
 // remove-model also discards the panel but has its own destructive confirm in model_comparison.js,
-// made unsaved-aware there to avoid stacking two dialogs on one click; reset/template-load are exempt —
+// made unsaved-aware there to avoid stacking two dialogs on one click; reset/example-load are exempt —
 // they obviously discard the current model, so a separate unsaved warning would be noise.)
 // Request URL path segments (not Django route names). Slash-delimited so they can't partial-match a
 // neighbouring path.

@@ -3,7 +3,7 @@
    driver.js makes itself modal with `.driver-active * { pointer-events: none }`, re-enabling
    only the highlighted element and its own popover. That would trap the user — the spec
    requires the tour to be non-blocking. These rules keep the app chrome the tour points at
-   reachable while it runs: the toolbar Help menu (replay tour / open templates / docs) and the
+   reachable while it runs: the toolbar Help menu (replay tour / open examples / docs) and the
    help drawer that the help step opens. Both are lifted above driver's overlay and have pointer
    events restored on their whole subtree (the root alone is not enough — the actual buttons are
    descendants). The canvas itself stays dimmed and non-interactive, so the tour still frames it.

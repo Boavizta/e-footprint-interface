@@ -45,7 +45,7 @@ def _explore_example(model_builder: ModelBuilderPage, recorder: BenchmarkRecorde
     model_builder.example_picker.wait_for(state="visible")
 
     with recorder.measure("S1", "B2", "load_ecommerce_template"):
-        model_builder.pick_template("ecommerce")
+        model_builder.pick_example("ecommerce")
     model_builder.object_should_exist("UsageJourney", "Shopping journey")
 
     with recorder.measure("S1", "B5", "open_results_and_generate_cold_sankey"):

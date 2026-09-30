@@ -2,7 +2,7 @@
 
 A live, intentionally-unlinked page. Tokens render from the app's real compiled CSS
 custom properties; components are rendered live from a real sample ModelWeb (built from
-the maintained ecommerce intro template, in memory) through the real canvas and form
+the maintained ecommerce intro example, in memory) through the real canvas and form
 pipeline — so the catalogue can't drift from what ships. A 500 here means the canvas or
 the edit-panel pipeline broke against the sample model.
 """
