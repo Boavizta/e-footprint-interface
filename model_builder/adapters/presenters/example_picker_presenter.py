@@ -1,8 +1,8 @@
-"""Presenter turning the domain template catalog into picker-ready view models.
+"""Presenter turning the domain example catalog into picker-ready view models.
 
-The domain ``build_template_catalog`` returns raw entries carrying
+The domain ``build_example_catalog`` returns raw entries carrying
 ``showcased_concepts`` tokens and the how-to ``related_guides`` that document each
-template. Resolving those into display chips (with the class UI label and a
+example. Resolving those into display chips (with the class UI label and a
 help-drawer target) and mkdocs deep-link URLs needs ``CLASS_UI_CONFIG`` and
 ``MKDOCS_BASE_URL``, which live in the adapter layer — so it happens here, not in
 the domain.
@@ -11,8 +11,8 @@ from django.conf import settings
 from efootprint.utils.placeholder_resolver import resolve_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
-from model_builder.domain.reference_data.modeling_templates import CONCEPTS
-from model_builder.domain.services import build_template_catalog
+from model_builder.domain.reference_data.modeling_examples import CONCEPTS
+from model_builder.domain.services import build_example_catalog
 
 _CLASS_TOKEN_PREFIX = "{class:"
 _CLASS_TOKEN_SUFFIX = "}"
@@ -46,7 +46,7 @@ def _doc_url(doc_path: str) -> str:
 def build_picker_groups() -> list[dict]:
     """Picker view model: ordered groups of cards ready for the template."""
     groups = []
-    for group in build_template_catalog():
+    for group in build_example_catalog():
         entries = []
         for entry in group.entries:
             entries.append({

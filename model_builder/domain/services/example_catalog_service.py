@@ -1,14 +1,14 @@
-"""Template-catalog domain service for the first-run picker.
+"""Example-catalog domain service for the first-run picker.
 
 Merges the interface-owned introductory registry with the library's how-to
-templates (consumed at runtime via ``efootprint.modeling_templates``) and the
+examples (consumed at runtime via ``efootprint.modeling_examples``) and the
 first-class "Start from scratch" option into ordered picker groups. Resolving a
-``template_id`` to a raw serialized ``System`` dict also lives here so the load
+``example_id`` to a raw serialized ``System`` dict also lives here so the load
 endpoint stays a thin adapter.
 
-The picker is keyed by *loadable template*, but the how-to documentation is keyed
+The picker is keyed by *loadable example*, but the how-to documentation is keyed
 by *guide* — and several guides can share one scenario (the database and
-server-to-server guides both read the ``ecommerce`` template). So each card
+server-to-server guides both read the ``ecommerce`` example). So each card
 carries the how-to guides that walk through it, which keeps every how-to page
 referenced without duplicating the scenario across cards.
 
@@ -20,10 +20,10 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from efootprint.modeling_templates import (
-    get_template as get_how_to_template, list_how_to_guides, list_how_to_templates)
+from efootprint.modeling_examples import (
+    get_example as get_how_to_example, list_how_to_guides, list_how_to_examples)
 
-from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
+from model_builder.domain.reference_data.modeling_examples import INTRO_EXAMPLES
 
 SCRATCH_ID = "scratch"
 UPLOAD_ID = "upload"
@@ -34,7 +34,7 @@ DEFAULT_SYSTEM_DATA_PATH = Path(__file__).resolve().parents[1] / "reference_data
 
 @dataclass(frozen=True)
 class CatalogGuide:
-    """A how-to documentation page that walks through a template's scenario."""
+    """A how-to documentation page that walks through an example's scenario."""
     name: str
     doc_path: str  # e.g. "database_modeling.md"; resolved to an mkdocs URL in the presenter
 
@@ -47,7 +47,7 @@ class CatalogEntry:
     category: str                       # "introductory" | "how_to" | "scratch"
     icon: str | None = None             # introductory + scratch only (library how-to has none)
     showcased_concepts: tuple[str, ...] = ()   # introductory only
-    related_guides: tuple[CatalogGuide, ...] = ()   # how-to pages walking through this template
+    related_guides: tuple[CatalogGuide, ...] = ()   # how-to pages walking through this example
 
 
 @dataclass(frozen=True)
@@ -57,31 +57,31 @@ class CatalogGroup:
     entries: tuple[CatalogEntry, ...] = ()
 
 
-def _guides_by_template_id() -> dict[str, tuple[CatalogGuide, ...]]:
-    """Group the library's how-to guides by the template id each one walks through."""
+def _guides_by_example_id() -> dict[str, tuple[CatalogGuide, ...]]:
+    """Group the library's how-to guides by the example id each one walks through."""
     guides: dict[str, tuple[CatalogGuide, ...]] = {}
     for guide in list_how_to_guides():
-        guides[guide.template_id] = guides.get(guide.template_id, ()) + (
+        guides[guide.example_id] = guides.get(guide.example_id, ()) + (
             CatalogGuide(guide.name, guide.doc_path),)
     return guides
 
 
-def build_template_catalog() -> tuple[CatalogGroup, ...]:
-    """Ordered picker groups: one merged templates group, then the scratch baseline.
+def build_example_catalog() -> tuple[CatalogGroup, ...]:
+    """Ordered picker groups: one merged examples group, then the scratch baseline.
 
-    Introductory templates come first, then the library's deeper how-to templates;
+    Introductory examples come first, then the library's deeper how-to examples;
     each card carries the how-to guides that document its scenario.
     """
-    guides = _guides_by_template_id()
+    guides = _guides_by_example_id()
     introductory = tuple(
         CatalogEntry(t.id, t.name, t.description, t.category, icon=t.icon,
                      showcased_concepts=t.showcased_concepts,
                      related_guides=guides.get(t.id, ()))
-        for t in INTRO_TEMPLATES
+        for t in INTRO_EXAMPLES
     )
     how_to = tuple(
         CatalogEntry(t.id, t.name, t.description, t.category, related_guides=guides.get(t.id, ()))
-        for t in list_how_to_templates()
+        for t in list_how_to_examples()
     )
     scratch = (
         CatalogEntry(SCRATCH_ID, "Start from scratch",
@@ -90,21 +90,21 @@ def build_template_catalog() -> tuple[CatalogGroup, ...]:
                      "Open an existing model exported as .e-f.json.", "upload", icon="↥"),
     )
     return (
-        CatalogGroup("templates", "Templates", introductory + how_to),
+        CatalogGroup("examples", "Examples", introductory + how_to),
         CatalogGroup("scratch", "Or", scratch),
     )
 
 
-def get_template_system_data(template_id: str) -> dict:
-    """Resolve a picker ``template_id`` to its raw serialized ``System`` dict.
+def get_example_system_data(example_id: str) -> dict:
+    """Resolve a picker ``example_id`` to its raw serialized ``System`` dict.
 
     Raises ``KeyError`` for an unknown id so the adapter can map it to a 404.
     """
-    if template_id == SCRATCH_ID:
+    if example_id == SCRATCH_ID:
         json_path = DEFAULT_SYSTEM_DATA_PATH
     else:
-        intro = next((t for t in INTRO_TEMPLATES if t.id == template_id), None)
-        json_path = intro.json_path if intro is not None else get_how_to_template(template_id).json_path
+        intro = next((t for t in INTRO_EXAMPLES if t.id == example_id), None)
+        json_path = intro.json_path if intro is not None else get_how_to_example(example_id).json_path
 
     with open(json_path, "r") as file:
         return json.load(file)

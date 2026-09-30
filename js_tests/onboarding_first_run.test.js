@@ -9,7 +9,7 @@ function renderBuilder({ withPicker = false } = {}) {
     document.body.innerHTML = `
         <div id="main-content-block">
             <div id="model-builder-page">
-                ${withPicker ? '<div id="template-picker"></div>' : ""}
+                ${withPicker ? '<div id="example-picker"></div>' : ""}
             </div>
         </div>
     `;
@@ -44,7 +44,7 @@ describe("handleBuilderEntry", () => {
         expect(handler).toHaveBeenCalledTimes(1);
     });
 
-    test("does not emit while the template picker still overlays the canvas", () => {
+    test("does not emit while the example picker still overlays the canvas", () => {
         renderBuilder({ withPicker: true });
         const handler = jest.fn();
         document.body.addEventListener("onboarding:first-run", handler);
@@ -54,7 +54,7 @@ describe("handleBuilderEntry", () => {
         expect(onboardingSeen()).toBe(false);
     });
 
-    test("emits once the picker is gone (e.g. a template loaded)", () => {
+    test("emits once the picker is gone (e.g. an example loaded)", () => {
         renderBuilder({ withPicker: true });
         const handler = jest.fn();
         document.body.addEventListener("onboarding:first-run", handler);
@@ -62,7 +62,7 @@ describe("handleBuilderEntry", () => {
         handleBuilderEntry();           // picker present → deferred
         expect(handler).not.toHaveBeenCalled();
 
-        document.getElementById("template-picker").remove();
+        document.getElementById("example-picker").remove();
         handleBuilderEntry();           // picker gone → fires
         expect(handler).toHaveBeenCalledTimes(1);
         expect(onboardingSeen()).toBe(true);

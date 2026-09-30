@@ -1,6 +1,6 @@
-"""Metadata-consistency tests for the introductory template registry.
+"""Metadata-consistency tests for the introductory example registry.
 
-Mirrors the library's ``HowToTemplate`` validation: every template's
+Mirrors the library's ``HowToExample`` validation: every example's
 ``json_path`` exists, ``category`` is valid, ``icon`` is present, and every
 ``showcased_concepts`` token resolves (through ``{class:X}`` validation or the
 closed ``CONCEPTS`` mapping). Fails loudly on drift.
@@ -18,20 +18,20 @@ from efootprint.builders.timeseries import (
     ExplainableHourlyQuantitiesFromFormInputs,
     ExplainableRecurrentQuantitiesFromConstant,
 )
-from efootprint.modeling_templates import get_introductory_template
-from model_builder.domain.reference_data.modeling_templates import (
+from efootprint.modeling_examples import get_introductory_example
+from model_builder.domain.reference_data.modeling_examples import (
     CONCEPTS,
-    INTRO_TEMPLATES,
+    INTRO_EXAMPLES,
     resolve_concept_token,
 )
-from model_builder.domain.reference_data.modeling_templates.introductory.registry import CATEGORY
+from model_builder.domain.reference_data.modeling_examples.introductory.registry import CATEGORY
 
-_params = pytest.mark.parametrize("tpl", INTRO_TEMPLATES, ids=lambda t: t.id)
+_params = pytest.mark.parametrize("tpl", INTRO_EXAMPLES, ids=lambda t: t.id)
 
 
-def test_at_least_three_introductory_templates():
+def test_at_least_three_introductory_examples():
     # The spec ships e-commerce, AI chatbot and industrial IoT.
-    assert {tpl.id for tpl in INTRO_TEMPLATES} >= {"ecommerce", "ai_chatbot", "iot_industrial"}
+    assert {tpl.id for tpl in INTRO_EXAMPLES} >= {"ecommerce", "ai_chatbot", "iot_industrial"}
 
 
 @_params
@@ -40,7 +40,7 @@ def test_json_path_exists(tpl):
 
 
 @_params
-def test_template_input_timeseries_are_editable_builders(tpl):
+def test_example_input_timeseries_are_editable_builders(tpl):
     with open(tpl.json_path) as f:
         class_obj_dict, _, _ = json_to_system(json.load(f))
     system = next(iter(class_obj_dict["System"].values()))
@@ -82,14 +82,14 @@ def test_showcased_concepts_resolve(tpl):
         assert resolve_concept_token(token)
 
 
-def test_template_ids_unique():
-    ids = [tpl.id for tpl in INTRO_TEMPLATES]
-    assert len(ids) == len(set(ids)), f"Duplicate introductory template ids: {ids}"
+def test_example_ids_unique():
+    ids = [tpl.id for tpl in INTRO_EXAMPLES]
+    assert len(ids) == len(set(ids)), f"Duplicate introductory example ids: {ids}"
 
 
-def test_ecommerce_uses_library_owned_template_json():
-    ecommerce = next(tpl for tpl in INTRO_TEMPLATES if tpl.id == "ecommerce")
-    assert ecommerce.json_path == get_introductory_template("ecommerce").json_path
+def test_ecommerce_uses_library_owned_example_json():
+    ecommerce = next(tpl for tpl in INTRO_EXAMPLES if tpl.id == "ecommerce")
+    assert ecommerce.json_path == get_introductory_example("ecommerce").json_path
 
 
 def test_resolve_concept_token_rejects_unknown_class():

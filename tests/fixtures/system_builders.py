@@ -113,7 +113,7 @@ SEEDED_JOURNEY_STEP_NAME = "My first usage journey step"
 def build_seeded_journey_fragment() -> dict:
     """Serialized fragment of one usage journey + step.
 
-    Since Step 6 the shipped default is a truly empty System (the template picker
+    Since Step 6 the shipped default is a truly empty System (the example picker
     replaces the old seeded journey/step). Tests that need pre-existing journey
     content merge this fragment into their base system dict — integration into
     ``DEFAULT_SYSTEM_DATA``, e2e into ``EMPTY_SYSTEM_DICT`` — instead of relying

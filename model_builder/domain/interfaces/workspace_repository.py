@@ -22,7 +22,7 @@ class IWorkspaceRepository(ABC):
     Two invariants live here as the single enforcement point (see the session implementation):
       - the summed with-calculated-attributes weight of all slots stays within the shared payload budget;
       - the two slots never hold the same system id (a fresh system id is minted on any cross-slot
-        collision, whatever the source: import, workspace import, template, blank, duplicate).
+        collision, whatever the source: import, workspace import, example, blank, duplicate).
 
     Implementations:
         - SessionWorkspaceRepository: Django-session-backed (production).

@@ -1,9 +1,9 @@
 /* First-run onboarding state — a per-browser localStorage flag.
 
-   On the user's first-ever landing on a loaded builder canvas (after a template
+   On the user's first-ever landing on a loaded builder canvas (after an example
    loads, after "Start from scratch", or when the model already had content) this
    records `efootprint_onboarding_seen` and emits an `onboarding:first-run` event.
-   It defers while the template picker still overlays the canvas, so the guided tour
+   It defers while the example picker still overlays the canvas, so the guided tour
    The guided tour that listens for that event auto-runs on the loaded canvas, not on
    the bare picker. The picker itself is server-driven and does not depend on this flag.
    IIFE + custom-event, nothing on `window`. See conventions.md → JavaScript. */
@@ -27,11 +27,11 @@
     function handleBuilderEntry() {
         if (!document.getElementById("model-builder-page")) return;
         if (onboardingSeen()) return;
-        // While the template picker overlays the canvas, the user hasn't chosen a starting
+        // While the example picker overlays the canvas, the user hasn't chosen a starting
         // point yet. The guided tour orients them on a *loaded* canvas (or the empty "Start
         // from scratch" baseline), so defer the once-ever first-run signal until the picker
-        // is gone — i.e. a template was loaded, scratch was chosen, or the model had content.
-        if (document.getElementById("template-picker")) return;
+        // is gone — i.e. an example was loaded, scratch was chosen, or the model had content.
+        if (document.getElementById("example-picker")) return;
         document.body.dispatchEvent(new CustomEvent("onboarding:first-run"));
         markOnboardingSeen();
     }
@@ -55,7 +55,7 @@
         const target = event.detail && event.detail.target;
         if (!target) return;
         if (target.id === "sidePanel" || target.id === "helpDrawer") {
-            const picker = document.getElementById("template-picker");
+            const picker = document.getElementById("example-picker");
             if (picker) picker.remove();
         }
     });

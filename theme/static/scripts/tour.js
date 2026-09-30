@@ -146,13 +146,13 @@
         runTour();
     });
 
-    /* Re-opening the template picker (Help ▸ Open templates) ends the tour: the picker is
+    /* Re-opening the example picker (Help ▸ Open examples) ends the tour: the picker is
        a fresh "choose a starting point" surface that would otherwise sit under the tour's
        overlay, and the tour's targets no longer apply once the picker covers the canvas. */
     document.body.addEventListener("htmx:afterSwap", function (event) {
         const target = event.detail && event.detail.target;
         if (!activeTour || !target) return;
-        if (target.id === "template-picker" || (target.querySelector && target.querySelector("#template-picker"))) {
+        if (target.id === "example-picker" || (target.querySelector && target.querySelector("#example-picker"))) {
             activeTour.destroy();
         } else if (target.id === "helpDrawer") {
             // The drawer just opened and resized the canvas, moving the highlighted "?"

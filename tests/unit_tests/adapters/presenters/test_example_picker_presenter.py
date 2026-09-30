@@ -1,4 +1,4 @@
-"""Unit tests for the template-picker presenter.
+"""Unit tests for the example-picker presenter.
 
 The presenter is the only place that turns raw catalog entries into picker view
 models: it resolves ``showcased_concepts`` tokens to display chips (``{class:X}``
@@ -10,9 +10,9 @@ so a wrong chip label or malformed doc link fails here.
 from django.test import override_settings
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
-from model_builder.adapters.presenters.template_picker_presenter import (
+from model_builder.adapters.presenters.example_picker_presenter import (
     _doc_url, _resolve_chip, build_picker_groups)
-from model_builder.domain.reference_data.modeling_templates import CONCEPTS
+from model_builder.domain.reference_data.modeling_examples import CONCEPTS
 
 
 def test_resolve_chip_class_token_uses_class_ui_label_and_help_target():
@@ -49,7 +49,7 @@ def test_build_picker_groups_resolves_chips_and_guide_urls():
                for group in build_picker_groups()
                for entry in group["entries"]}
 
-    # Introductory templates carry showcased-concept chips.
+    # Introductory examples carry showcased-concept chips.
     ecommerce = entries["ecommerce"]
     assert ecommerce["chips"] and all(chip["label"] for chip in ecommerce["chips"])
 
@@ -61,5 +61,5 @@ def test_build_picker_groups_resolves_chips_and_guide_urls():
     ]
     assert all(g["name"] for g in ecommerce["guides"])
 
-    # A template with no how-to page surfaces no guide link.
+    # An example with no how-to page surfaces no guide link.
     assert entries["ai_chatbot"]["guides"] == []

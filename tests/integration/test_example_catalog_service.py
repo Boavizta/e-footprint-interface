@@ -1,48 +1,48 @@
-"""Integration tests for the first-run template-catalog service.
+"""Integration tests for the first-run example-catalog service.
 
 Exercises the merge of the interface-owned introductory registry with the
-library's how-to templates and how-to guides (``list_how_to_templates`` /
-``list_how_to_guides``) into a single picker group, plus the ``template_id`` →
+library's how-to examples and how-to guides (``list_how_to_examples`` /
+``list_how_to_guides``) into a single picker group, plus the ``example_id`` →
 serialized-System resolution that backs the load endpoint. Runs pure domain — no
 Django scaffolding.
 """
 import pytest
 from efootprint.api_utils.json_to_system import json_to_system
-from efootprint.modeling_templates import list_how_to_templates
+from efootprint.modeling_examples import list_how_to_examples
 
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.domain.reference_data.modeling_templates import INTRO_TEMPLATES
+from model_builder.domain.reference_data.modeling_examples import INTRO_EXAMPLES
 from model_builder.domain.services import (
-    SystemImportService, SCRATCH_ID, UPLOAD_ID, build_template_catalog, get_template_system_data)
+    SystemImportService, SCRATCH_ID, UPLOAD_ID, build_example_catalog, get_example_system_data)
 
 
 def _catalog_entries() -> dict:
-    """All loadable template entries keyed by id, flattened across groups.
+    """All loadable example entries keyed by id, flattened across groups.
 
     Excludes the non-loadable action cards (scratch baseline, json upload).
     """
     return {entry.id: entry
-            for group in build_template_catalog()
+            for group in build_example_catalog()
             for entry in group.entries
             if entry.category not in ("scratch", "upload")}
 
 
-def test_catalog_has_a_merged_templates_group_then_scratch():
-    groups = {group.id: group for group in build_template_catalog()}
-    assert list(groups) == ["templates", "scratch"]
+def test_catalog_has_a_merged_examples_group_then_scratch():
+    groups = {group.id: group for group in build_example_catalog()}
+    assert list(groups) == ["examples", "scratch"]
 
 
-def test_templates_group_lists_introductory_then_how_to_templates():
-    groups = {group.id: group for group in build_template_catalog()}
-    entries = groups["templates"].entries
-    expected = [t.id for t in INTRO_TEMPLATES] + [t.id for t in list_how_to_templates()]
+def test_examples_group_lists_introductory_then_how_to_examples():
+    groups = {group.id: group for group in build_example_catalog()}
+    entries = groups["examples"].entries
+    expected = [t.id for t in INTRO_EXAMPLES] + [t.id for t in list_how_to_examples()]
     assert [e.id for e in entries] == expected
 
 
 def test_introductory_entries_carry_their_picker_chips():
     entries = _catalog_entries()
-    for t in INTRO_TEMPLATES:
+    for t in INTRO_EXAMPLES:
         entry = entries[t.id]
         assert entry.category == "introductory"
         assert entry.icon and entry.showcased_concepts  # carried through for the picker chips
@@ -61,39 +61,39 @@ def test_machine_learning_card_references_its_single_guide():
     assert [g.doc_path for g in ml.related_guides] == ["machine_learning_workflow.md"]
 
 
-def test_templates_without_a_how_to_page_carry_no_guides():
+def test_examples_without_a_how_to_page_carry_no_guides():
     entries = _catalog_entries()
     assert entries["ai_chatbot"].related_guides == ()
     assert entries["iot_industrial"].related_guides == ()
 
 
 def test_scratch_group_offers_the_empty_baseline_and_json_upload():
-    groups = {group.id: group for group in build_template_catalog()}
+    groups = {group.id: group for group in build_example_catalog()}
     scratch_entries = groups["scratch"].entries
     assert [e.id for e in scratch_entries] == [SCRATCH_ID, UPLOAD_ID]
     assert scratch_entries[0].category == "scratch"
     assert scratch_entries[1].category == "upload"
 
 
-@pytest.mark.parametrize("template_id", ["scratch", "ecommerce", "ai_chatbot", "iot_industrial",
+@pytest.mark.parametrize("example_id", ["scratch", "ecommerce", "ai_chatbot", "iot_industrial",
                                          "machine_learning_workflow"])
-def test_get_template_system_data_resolves_a_loadable_system(template_id):
-    system_data = get_template_system_data(template_id)
+def test_get_example_system_data_resolves_a_loadable_system(example_id):
+    system_data = get_example_system_data(example_id)
     assert "System" in system_data
     # Exercise the resolved JSON through the library loader so a broken path/payload fails here.
     class_obj_dict, _, _ = json_to_system(system_data)
     assert class_obj_dict["System"]
 
 
-def test_every_card_resolves_to_a_loadable_template():
+def test_every_card_resolves_to_a_loadable_example():
     """No card can offer a scenario the load endpoint would 404 on."""
-    for template_id in _catalog_entries():
-        assert "System" in get_template_system_data(template_id)
+    for example_id in _catalog_entries():
+        assert "System" in get_example_system_data(example_id)
 
 
-def test_machine_learning_template_survives_interface_persistence_round_trip():
+def test_machine_learning_example_survives_interface_persistence_round_trip():
     imported = SystemImportService(max_payload_size_mb=30.0).import_system(
-        get_template_system_data("machine_learning_workflow"))
+        get_example_system_data("machine_learning_workflow"))
     repository = InMemorySystemRepository(initial_data=imported)
 
     ModelWeb(repository).persist_to_cache()
@@ -105,6 +105,6 @@ def test_machine_learning_template_survives_interface_persistence_round_trip():
     ]
 
 
-def test_get_template_system_data_unknown_id_raises():
+def test_get_example_system_data_unknown_id_raises():
     with pytest.raises(KeyError):
-        get_template_system_data("not-a-template")
+        get_example_system_data("not-an-example")

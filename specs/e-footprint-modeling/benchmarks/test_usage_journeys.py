@@ -42,7 +42,7 @@ def _explore_example(model_builder: ModelBuilderPage, recorder: BenchmarkRecorde
     page.goto("/")
     page.locator("#btn-start-modeling-my-service").click()
     model_builder.canvas.wait_for(state="visible")
-    model_builder.template_picker.wait_for(state="visible")
+    model_builder.example_picker.wait_for(state="visible")
 
     with recorder.measure("S1", "B2", "load_ecommerce_template"):
         model_builder.pick_template("ecommerce")

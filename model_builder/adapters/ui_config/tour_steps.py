@@ -10,7 +10,7 @@ The tour deliberately carries no domain-concept prose: it
 points at the canvas columns and the existing help affordances, never re-explaining
 what a usage journey or a server *is*. Two flavors share the same orientation steps:
 
-- ``loaded`` — a template was just loaded; steps point at the real cards.
+- ``loaded`` — an example was just loaded; steps point at the real cards.
 - ``blank`` — "Start from scratch"; the same steps anchor on the empty columns and
   a final step suggests the first concrete action (create a usage journey).
 
@@ -22,7 +22,7 @@ what a usage journey or a server *is*. Two flavors share the same orientation st
 - ``usage-patterns``  — the usage-patterns column
 - ``results``         — the results bar at the bottom
 - ``comparison``      — the model-comparison tab strip (＋Add a model / ⇄Compare; collapses into the burger below ``lg``)
-- ``help-menu``       — the toolbar Help menu (replay tour, templates, docs)
+- ``help-menu``       — the toolbar Help menu (replay tour, examples, docs)
 
 The help step is the one exception: it anchors on the "?" help button beside the
 "Add usage journey" button (``_HELP_BUTTON_SEL``) rather than a ``data-tour-target``
@@ -113,7 +113,7 @@ _SHARED_STEPS = [
         # uses this only when the primary target isn't visible.
         "mobile_target": ".navbar-toggler",
         "title": "Replay this any time",
-        "body": "The Help menu replays this tour, re-opens the templates, or jumps to the documentation.",
+        "body": "The Help menu replays this tour, re-opens the examples, or jumps to the documentation.",
         # Close the help drawer we opened on the previous step before highlighting the toolbar.
         "close_help": True,
     },

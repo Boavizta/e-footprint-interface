@@ -11,7 +11,7 @@ import pytest
 from model_builder.adapters.repositories import InMemoryWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.domain.services.template_catalog_service import INTRO_TEMPLATES
+from model_builder.domain.services.example_catalog_service import INTRO_EXAMPLES
 
 
 def _object_ids(system_data: dict) -> set:
@@ -49,11 +49,11 @@ def test_removing_the_only_slot_is_rejected(minimal_system_data):
     assert ws.list_slots() == [0]  # the rejected removal left the workspace intact
 
 
-def test_importing_same_template_into_both_slots_gets_distinct_system_ids():
-    raw = json.loads(open(INTRO_TEMPLATES[0].json_path).read())
+def test_importing_same_example_into_both_slots_gets_distinct_system_ids():
+    raw = json.loads(open(INTRO_EXAMPLES[0].json_path).read())
 
     ws = InMemoryWorkspaceRepository(initial_data=raw)
-    ws.add_slot(raw)  # same template document into the second slot
+    ws.add_slot(raw)  # same example document into the second slot
 
     data0 = ws.repository_for(0).get_system_data()
     data1 = ws.repository_for(1).get_system_data()

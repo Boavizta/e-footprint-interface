@@ -209,7 +209,7 @@ class ModelWeb:
         """Snapshot of per-class creation gates plus __results__.
 
         For class-based entries the dict carries only {"enabled", "disabled"} — tooltip
-        copy is resolved at render time via the `constraint_tooltip` template filter so
+        copy is resolved at render time via the `constraint_tooltip` example filter so
         the domain never depends on adapter presentation strings. The special __results__
         entry additionally carries `reason` (the live validation errors) because those
         messages are computed here, not static copy.
@@ -267,7 +267,7 @@ class ModelWeb:
                                      if obj not in existing_objects]
 
         # An existing system object shadows the catalog default with the same name, so selecting e.g. "France" reuses
-        # the country already in the system (templates ship their own copy keyed differently from the catalog) instead
+        # the country already in the system (examples ship their own copy keyed differently from the catalog) instead
         # of materializing a duplicate on submit.
         existing_names = {obj.name for obj in existing_objects}
         output_list = []

@@ -35,20 +35,20 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
 )
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import ExplainableObjectWeb
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error, render_recovery_page
-from model_builder.adapters.presenters.template_picker_presenter import build_picker_groups
+from model_builder.adapters.presenters.example_picker_presenter import build_picker_groups
 from model_builder.adapters.ui_config.tour_steps import build_tour_steps
 from model_builder.domain.services import (
-    SystemImportService, SCRATCH_ID, get_template_system_data, is_empty_model)
+    SystemImportService, SCRATCH_ID, get_example_system_data, is_empty_model)
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
 def load_system_into_session(repository, raw_system_data, workspace=None):
     """Upgrade, recompute, wrap and persist a raw system dict into a workspace slot.
 
-    Shared by reboot, template loading, and the empty-model initialization — the one place that
+    Shared by reboot, example loading, and the empty-model initialization — the one place that
     turns a serialized System into the session-backed current model. ``repository`` targets a slot
     (the active slot by default). When ``workspace`` is given and holds a second model, the incoming
-    system id is made distinct from the sibling slot first, so loading the same template/file into
+    system id is made distinct from the sibling slot first, so loading the same example/file into
     one slot while the other holds it never produces two slots with the same id (the web_id prefix
     invariant — see workspace_base).
     """
@@ -120,8 +120,8 @@ def compare_enabled(workspace_slots) -> bool:
     return all(validator.validate_for_computation(slot["model_web"]).is_valid for slot in workspace_slots)
 
 
-def render_model_builder(request, model_web, show_template_picker, workspace=None):
-    """Render the builder canvas, optionally overlaying the first-run template picker.
+def render_model_builder(request, model_web, show_example_picker, workspace=None):
+    """Render the builder canvas, optionally overlaying the first-run example picker.
 
     Renders the tab strip plus one resident canvas per workspace slot (active visible). When no
     ``workspace`` is given the caller already holds the active ``model_web`` only — a single-model
@@ -135,15 +135,15 @@ def render_model_builder(request, model_web, show_template_picker, workspace=Non
 
     model_is_empty = is_empty_model(model_web.system_data)
     context = {"model_web": model_web, "class_help_info": build_canvas_class_help_info(),
-               "show_template_picker": show_template_picker,
+               "show_example_picker": show_example_picker,
                "model_is_empty": model_is_empty,
                "workspace_slots": workspace_slots,
                "compare_enabled": compare_enabled(workspace_slots),
                "active_slot": active_slot,
                "data_status": build_data_status(request.session),
                "tour_steps": build_tour_steps(is_blank=model_is_empty)}
-    if show_template_picker:
-        context["template_picker_groups"] = build_picker_groups()
+    if show_example_picker:
+        context["example_picker_groups"] = build_picker_groups()
 
     http_response = htmx_render(request, "model_builder/model_builder_main.html", context=context)
 
@@ -169,7 +169,7 @@ def model_builder_main(request):
         model_web = ModelWeb(repository)
         if model_web.system_data is None:
             logger.info("No system data found in session, initializing with the empty 'scratch' baseline")
-            model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID))
+            model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID))
 
         if efootprint_version != model_web.initial_system_data_efootprint_version:
             logger.info(f"Upgrading system data from version "
@@ -186,9 +186,9 @@ def model_builder_main(request):
         return render_recovery_page(request, error=e)
 
     # An empty model (fresh session, reset, or a returning user who never built anything) is met with
-    # the template picker overlaid on the canvas; once there is content, entry goes straight to the model.
+    # the example picker overlaid on the canvas; once there is content, entry goes straight to the model.
     return render_model_builder(
-        request, model_web, show_template_picker=is_empty_model(model_web.system_data), workspace=workspace)
+        request, model_web, show_example_picker=is_empty_model(model_web.system_data), workspace=workspace)
 
 
 @require_POST
@@ -249,12 +249,12 @@ def reset_model(request):
     """
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
-    model_web = load_system_into_session(repository, get_template_system_data(SCRATCH_ID), workspace=workspace)
+    model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID), workspace=workspace)
     if request.headers.get("HX-Request") != "true":
         # Non-HTMX callers (e.g. the recovery page's plain form) get a clean redirect to a fresh
         # GET of the builder, rather than the toolbar's in-place fragment swap.
         return redirect("model-builder")
-    return render_model_builder(request, model_web, show_template_picker=True, workspace=workspace)
+    return render_model_builder(request, model_web, show_example_picker=True, workspace=workspace)
 
 
 def open_import_json_panel(request):

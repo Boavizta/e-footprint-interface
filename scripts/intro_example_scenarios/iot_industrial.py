@@ -1,4 +1,4 @@
-"""Build the ``iot_industrial`` introductory template.
+"""Build the ``iot_industrial`` introductory example.
 
 Factory sensors measure machine data, upload readings to a server, and analysts
 open a web dashboard to review the stored readings. Contains both edge and web

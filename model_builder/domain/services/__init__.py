@@ -9,9 +9,9 @@ from model_builder.domain.services.comparison_service import ComparisonService, 
 from model_builder.domain.services.edit_service import EditService, EditResult
 from model_builder.domain.services.system_import_service import SystemImportService
 from model_builder.domain.services.empty_model import is_empty_model
-from model_builder.domain.services.template_catalog_service import (
+from model_builder.domain.services.example_catalog_service import (
     CatalogEntry, CatalogGroup, CatalogGuide, SCRATCH_ID, UPLOAD_ID,
-    build_template_catalog, get_template_system_data,
+    build_example_catalog, get_example_system_data,
 )
 
 __all__ = [
@@ -23,5 +23,5 @@ __all__ = [
     "SystemImportService",
     "is_empty_model",
     "CatalogEntry", "CatalogGroup", "CatalogGuide", "SCRATCH_ID", "UPLOAD_ID",
-    "build_template_catalog", "get_template_system_data",
+    "build_example_catalog", "get_example_system_data",
 ]

@@ -1,13 +1,13 @@
-"""Registry of introductory modeling templates owned by the interface.
+"""Registry of introductory modeling examples owned by the interface.
 
-These are ready-to-mutate example {class:System}s shown in the first-run template
+These are ready-to-mutate example {class:System}s shown in the first-run example
 picker. Interface-owned serialized snapshots live next to this file as
 ``<id>.json`` and are (re)generated from the Python scenario constructors in
-``scripts/intro_template_scenarios/`` via ``scripts/build_intro_templates.py``.
+``scripts/intro_example_scenarios/`` via ``scripts/build_intro_examples.py``.
 The e-commerce snapshot is library-owned and referenced from
-``efootprint.modeling_templates`` so docs and interface cannot drift.
+``efootprint.modeling_examples`` so docs and interface cannot drift.
 
-``IntroTemplate`` mirrors the library's ``HowToTemplate`` so the catalog service
+``IntroExample`` mirrors the library's ``HowToExample`` so the catalog service
 can merge both into a single picker. ``showcased_concepts`` are display-only
 metadata tokens: each is either a ``{class:X}`` token (resolved against the
 efootprint class set, just like the SSOT placeholder handlers) or a key of the
@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
-from efootprint.modeling_templates import get_introductory_template
+from efootprint.modeling_examples import get_introductory_example
 
 HERE = Path(__file__).parent
 CATEGORY = "introductory"
@@ -47,7 +47,7 @@ _CLASS_TOKEN_SUFFIX = "}"
 
 
 @dataclass(frozen=True)
-class IntroTemplate:
+class IntroExample:
     id: str
     name: str
     description: str
@@ -78,16 +78,16 @@ def resolve_concept_token(token: str) -> str:
     return concept.label
 
 
-INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
-    IntroTemplate(
+INTRO_EXAMPLES: tuple[IntroExample, ...] = (
+    IntroExample(
         id="ecommerce",
         name="Classical e-commerce",
         description="A shopping journey served by a web application server calling a database server.",
         icon="🛒",
         showcased_concepts=("web_service", "{class:BoaviztaCloudServer}", "database"),
-        json_path=get_introductory_template("ecommerce").json_path,
+        json_path=get_introductory_example("ecommerce").json_path,
     ),
-    IntroTemplate(
+    IntroExample(
         id="ai_chatbot",
         name="AI chatbot",
         description="A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs.",
@@ -95,7 +95,7 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
         showcased_concepts=("web_service", "llm_inference", "{class:ExternalAPI}", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "ai_chatbot.json",
     ),
-    IntroTemplate(
+    IntroExample(
         id="genai_video",
         name="GenAI marketing video",
         description="A marketing team produces a short social-media video with generative-AI video "
@@ -105,7 +105,7 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
         showcased_concepts=("{class:EcoLogitsVideoGenExternalAPI}", "llm_inference", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "genai_video.json",
     ),
-    IntroTemplate(
+    IntroExample(
         id="iot_industrial",
         name="Industrial IoT",
         description="Factory sensors send readings to a server, and analysts use a dashboard to review "

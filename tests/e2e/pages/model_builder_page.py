@@ -36,13 +36,13 @@ class ModelBuilderPage:
         # The builder now hosts one resident canvas per workspace slot (model-comparison); the active
         # one is the visible (non-d-none) #model-canva-{slot}. A single-model session has just slot 0.
         self.canvas = page.locator("[data-model-canvas]:not(.d-none)")
-        self.template_picker = page.locator("#template-picker")
+        self.example_picker = page.locator("#example-picker")
 
     def goto(self):
         """Navigate to the model builder page."""
         self.page.goto("/model_builder/")
         self.canvas.wait_for(state="visible")
-        self.dismiss_template_picker_if_present()
+        self.dismiss_example_picker_if_present()
         return self
 
     def goto_home_and_start(self):
@@ -50,27 +50,27 @@ class ModelBuilderPage:
         self.page.goto("/")
         self.page.locator("#btn-start-modeling-my-service").click()
         self.canvas.wait_for(state="visible")
-        self.dismiss_template_picker_if_present()
+        self.dismiss_example_picker_if_present()
         return self
 
-    def dismiss_template_picker_if_present(self):
+    def dismiss_example_picker_if_present(self):
         """Close the first-run picker (revealing the empty canvas behind it).
 
-        Entering the builder with an empty model now overlays the template picker, so
+        Entering the builder with an empty model now overlays the example picker, so
         tests that want a blank usable canvas dismiss it. Closing only removes the
         overlay client-side; the empty model stays in the session. Idempotent — a no-op
         when the picker is not shown (e.g. a model that already has content).
         """
-        if self.template_picker.is_visible():
-            self.template_picker.locator(".btn-close").click()
-            self.template_picker.wait_for(state="detached")
+        if self.example_picker.is_visible():
+            self.example_picker.locator(".btn-close").click()
+            self.example_picker.wait_for(state="detached")
         return self
 
-    def open_template_picker_from_help_menu(self):
-        """Open Help ▸ Open templates from the toolbar."""
+    def open_example_picker_from_help_menu(self):
+        """Open Help ▸ Open examples from the toolbar."""
         self.page.locator("#help-menu-toggle").click()
         click_and_wait_for_htmx(self.page, self.page.locator(".dropdown-item[hx-get]"))
-        self.template_picker.wait_for(state="visible")
+        self.example_picker.wait_for(state="visible")
         return self
 
     def open_data_privacy_from_help_menu(self):
@@ -130,10 +130,10 @@ class ModelBuilderPage:
         self.page.locator("#sidePanelTitle", has_text="Report or give feedback").wait_for(state="visible")
         return self
 
-    def pick_template(self, template_id: str):
-        """Click a template card in the picker and wait for the canvas to load."""
-        click_and_wait_for_htmx(self.page, self.template_picker.locator(f"[data-template-id='{template_id}']"))
-        self.template_picker.wait_for(state="detached")
+    def pick_example(self, example_id: str):
+        """Click an example card in the picker and wait for the canvas to load."""
+        click_and_wait_for_htmx(self.page, self.example_picker.locator(f"[data-example-id='{example_id}']"))
+        self.example_picker.wait_for(state="detached")
         self.canvas.wait_for(state="visible")
         return self
 
@@ -146,8 +146,8 @@ class ModelBuilderPage:
         """
         self.page.once("dialog", lambda dialog: dialog.accept())
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-reboot-modeling"))
-        self.template_picker.wait_for(state="visible")
-        self.dismiss_template_picker_if_present()
+        self.example_picker.wait_for(state="visible")
+        self.dismiss_example_picker_if_present()
         return self
 
     def should_have_leader_line(self):
@@ -403,7 +403,7 @@ class ModelBuilderPage:
 
     def open_import_panel(self):
         """Open the JSON import panel."""
-        # Scope to the toolbar button: the empty-model template picker also carries an
+        # Scope to the toolbar button: the empty-model example picker also carries an
         # open-import-json-panel card ("Load a json file"), so an unscoped selector is ambiguous.
         toolbar_import_button = self.page.locator(
             "button[data-location='upload_download_reboot_model_tooltips'][hx-get*='open-import-json-panel']")

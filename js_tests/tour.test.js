@@ -234,15 +234,15 @@ describe("event wiring", () => {
         expect(window.driver.js.driver).toHaveBeenCalledTimes(1);
     });
 
-    test("re-opening the template picker ends an active tour", () => {
+    test("re-opening the example picker ends an active tour", () => {
         mount("tour_loaded");
         tour.runTour();
         const destroyedBefore = destroyCalls;
 
-        // Help ▸ Open templates swaps the picker back into #main-content-block; tour.js
+        // Help ▸ Open examples swaps the picker back into #main-content-block; tour.js
         // tears the tour down so the picker is not stranded under the overlay.
         const swapped = document.createElement("div");
-        swapped.innerHTML = '<div id="template-picker"></div>';
+        swapped.innerHTML = '<div id="example-picker"></div>';
         document.body.appendChild(swapped);
         document.body.dispatchEvent(new CustomEvent("htmx:afterSwap", { detail: { target: swapped } }));
         expect(destroyCalls).toBe(destroyedBefore + 1);

@@ -1,4 +1,4 @@
-"""Build the ``ai_chatbot`` introductory template.
+"""Build the ``ai_chatbot`` introductory example.
 
 An LLM assistant served by a web application and two external AI APIs: a small
 model handles routing and short replies, while a larger model handles detailed

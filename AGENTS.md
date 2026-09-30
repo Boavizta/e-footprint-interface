@@ -16,6 +16,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | If you need... | Read |
 |---|---|
 | Architecture (Clean Architecture map, web wrappers, dict relationships, timeseries, persistence, render layer) | [`specs/architecture/index.html`](specs/architecture/index.html) |
+| Onboarding examples, picker and guided tour | [`specs/architecture/onboarding.html`](specs/architecture/onboarding.html) |
 | Code style, performance preferences, agent behaviour rules | `specs/conventions.md` |
 | Testing patterns (unit / integration / E2E layers, fixtures) | `specs/testing.md` |
 | Tech stack and version bounds | `specs/tech_stack.md` |

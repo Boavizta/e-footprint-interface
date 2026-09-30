@@ -29,7 +29,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder, build_workspace_slots
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
-    ComparisonService, SystemImportService, SCRATCH_ID, get_template_system_data)
+    ComparisonService, SystemImportService, SCRATCH_ID, get_example_system_data)
 
 
 def _rendered_shared_chrome_oob(model_web) -> str:
@@ -147,7 +147,7 @@ def _system_data_for_add(request, workspace):
         return SessionSystemRepository.upgrade_system_data(raw)
 
     if source == "blank":
-        return get_template_system_data(SCRATCH_ID)
+        return get_example_system_data(SCRATCH_ID)
 
     active_model = ModelWeb(workspace.active_repository())
     duplicated = duplicate_system(active_model.system.modeling_obj)
@@ -169,7 +169,7 @@ def add_model(request):
 
     workspace.set_active_slot(new_slot)
     model_web = ModelWeb(workspace.repository_for(new_slot))
-    return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
+    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace)
 
 
 @render_exception_modal_if_error
@@ -181,7 +181,7 @@ def remove_model(request):
     workspace.remove_slot(slot)
 
     model_web = ModelWeb(workspace.active_repository())
-    return render_model_builder(request, model_web, show_template_picker=False, workspace=workspace)
+    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace)
 
 
 @render_exception_modal_if_error

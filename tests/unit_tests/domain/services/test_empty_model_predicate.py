@@ -8,7 +8,7 @@ keeps them excluded (guards against "empty-model predicate drift").
 """
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
 
-from model_builder.domain.services import SCRATCH_ID, get_template_system_data, is_empty_model
+from model_builder.domain.services import SCRATCH_ID, get_example_system_data, is_empty_model
 
 # Keys the serializers (library + interface) emit alongside the object blocks.
 SERIALIZER_METADATA_KEYS = {
@@ -35,7 +35,7 @@ def test_only_system_object_is_empty():
 def test_scratch_baseline_is_empty():
     # The shipped "Start from scratch" default must read as empty, or the picker would
     # never show on a fresh session.
-    assert is_empty_model(get_template_system_data(SCRATCH_ID)) is True
+    assert is_empty_model(get_example_system_data(SCRATCH_ID)) is True
 
 
 def test_model_with_real_object_is_not_empty():
@@ -47,9 +47,9 @@ def test_model_with_real_object_is_not_empty():
     assert is_empty_model(system_data) is False
 
 
-def test_introductory_template_is_not_empty():
-    # An introductory template carries journeys, servers and patterns.
-    assert is_empty_model(get_template_system_data("ecommerce")) is False
+def test_introductory_example_is_not_empty():
+    # An introductory example carries journeys, servers and patterns.
+    assert is_empty_model(get_example_system_data("ecommerce")) is False
 
 
 def test_serializer_metadata_keys_are_not_efootprint_classes():
@@ -61,7 +61,7 @@ def test_serializer_metadata_keys_are_not_efootprint_classes():
 
 
 def test_scratch_baseline_only_object_key_is_system():
-    scratch = get_template_system_data(SCRATCH_ID)
+    scratch = get_example_system_data(SCRATCH_ID)
     object_keys = {k for k in scratch if k in ALL_EFOOTPRINT_CLASSES_DICT}
     assert object_keys == {"System"}
     # Every non-object top-level key is known serializer metadata.

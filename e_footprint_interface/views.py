@@ -16,7 +16,7 @@ _DESIGN_SAMPLE_MODEL = {}
 
 
 def _design_sample_model():
-    """A real ModelWeb built from a maintained intro template via an in-memory repository.
+    """A real ModelWeb built from a maintained intro example via an in-memory repository.
 
     Reuses the onboarding catalogue's data — no bespoke fixture to keep in sync — and never
     touches the session, so /design can render the real canvas and a real edit panel from
@@ -25,9 +25,9 @@ def _design_sample_model():
     if "model_web" not in _DESIGN_SAMPLE_MODEL:
         from model_builder.adapters.repositories import InMemorySystemRepository
         from model_builder.adapters.views.views import load_system_into_session
-        from model_builder.domain.services import get_template_system_data
+        from model_builder.domain.services import get_example_system_data
         _DESIGN_SAMPLE_MODEL["model_web"] = load_system_into_session(
-            InMemorySystemRepository(), get_template_system_data("ecommerce"))
+            InMemorySystemRepository(), get_example_system_data("ecommerce"))
     return _DESIGN_SAMPLE_MODEL["model_web"]
 
 

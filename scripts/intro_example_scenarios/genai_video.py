@@ -1,4 +1,4 @@
-"""Build the ``genai_video`` introductory template.
+"""Build the ``genai_video`` introductory example.
 
 A marketing team producing a short social-media video with generative-AI video
 tools. There is **no web service of their own** — the team consumes external

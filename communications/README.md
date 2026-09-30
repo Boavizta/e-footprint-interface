@@ -16,7 +16,7 @@ Add new interface-side drafts to `articles/`, `linkedin/posts/`, or `release-not
 
 | Folder | Contents |
 |---|---|
-| `articles/` | Articles whose dominant subject is an interface feature (e.g. onboarding templates, edge toggle UX, guided tour) |
+| `articles/` | Articles whose dominant subject is an interface feature (e.g. onboarding examples, edge toggle UX, guided tour) |
 | `linkedin/posts/` | LinkedIn posts whose dominant subject is an interface feature |
 | `release-notes/` | Release notes tied to interface versions |
 

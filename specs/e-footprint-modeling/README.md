@@ -38,7 +38,7 @@ production aggregates after launch.
 
 | ID | Session | What the person accomplishes | Initial operation mix |
 |---|---|---|---|
-| S1 | **Explore an example** | Starts modeling, selects a maintained template, reads its footprint and inspects where it comes from. | 1 template load; 1 Results opening with cold Sankey; 3 warm Sankey refinements |
+| S1 | **Explore an example** | Starts modeling, selects a maintained example, reads its footprint and inspects where it comes from. | 1 example load; 1 Results opening with cold Sankey; 3 warm Sankey refinements |
 | S2 | **Build and refine a model** | Opens a model, changes assumptions and structure, checks the effect, audits selected values, then keeps a copy. | 1 load; 6 mutations with Results closed; 1 explicit Results opening; 2 mutations with Results open; 3 cold Sankeys; 1 warm Sankey refinement; 2 audit lookups; 1 model export |
 | S3 | **Compare an alternative** | Duplicates or imports a second model, edits the alternative, and checks whether the change helps. | 1 load; 1 duplication/import; 3 saved mutations; 2 comparisons; 1 workspace export |
 | S4 | **Audit and reuse a model** | Opens an existing model, traces evidence and derivations, exports sources, and saves the model or workspace. | 1 initial export and reset; 1 import; 1 Results opening; 3 value explanations; 2 calculus graphs; 1 sources export; 1 final model export |
@@ -70,7 +70,7 @@ model complete.
 |---|---|---|---|
 | B0 | **Provisioned idle hour** | Complete production stack with no user request; include periodic maintenance separately. | Clever Cloud deployment inventory; production logs |
 | B1 | **Hydrate builder** | Load a fixed session model and render the canvas; no result calculation. | Memory profiler `hydrate` scenario |
-| B2 | **Load/import model** | Validate, deserialize, recompute as required, persist, then render the usable canvas. Test template and uploaded-file variants. | Onboarding and save/load journeys |
+| B2 | **Load/import model** | Validate, deserialize, recompute as required, persist, then render the usable canvas. Test example and uploaded-file variants. | Onboarding and save/load journeys |
 | B3 | **Save a mutation, Results closed** | Open/edit is setup; time the POST through invalidation, persistence and all response fragments. Use a change that affects calculated state. | Build-a-model journey; full-journey E2E |
 | B4 | **Save a mutation, Results open** | Same change as B3, but include the regenerated standard-results response. Count the following Sankey request separately as B6. | Results recomputation E2E |
 | B5 | **Open standard results** | Hydrated model to completed yearly/cumulative result response, before attribution/Sankey. Record calculated-state cold and cached variants. | Memory profiler `results`; `result-chart/` |
@@ -107,9 +107,9 @@ useful complexity measure.
 
 | ID | Purpose | Starting point | Decision before measurement |
 |---|---|---|---|
-| F1 | Small, understandable web baseline | Maintained **Classical e-commerce** introductory template | Freeze an article-specific copy and record topology/duration |
-| F2 | Richer web and external-API topology | Maintained **AI chatbot** introductory template | Freeze a copy; do not count the modeled chatbot's emissions as emissions caused by running this interface |
-| F3 | Mixed web/edge coverage | Maintained **Industrial IoT** introductory template | Freeze a copy and use it for ordinary mixed-system paths |
+| F1 | Small, understandable web baseline | Maintained **Classical e-commerce** introductory example | Freeze an article-specific copy and record topology/duration |
+| F2 | Richer web and external-API topology | Maintained **AI chatbot** introductory example | Freeze a copy; do not count the modeled chatbot's emissions as emissions caused by running this interface |
+| F3 | Mixed web/edge coverage | Maintained **Industrial IoT** introductory example | Freeze a copy and use it for ordinary mixed-system paths |
 | F4 | Memory-stress boundary | Current smart-building shared-pattern scenario | Replace the untracked external file with a publishable, deterministic fixture or generator before it becomes article evidence |
 
 F1 is the initial default for complete user sessions. F2 and F3 check that results do not depend on one object family.
@@ -295,7 +295,7 @@ makes the conclusion useful even if actual adoption differs sharply from all thr
 ### Replace forecasts with evidence after launch
 
 Collect only privacy-safe aggregates needed to update the model: daily counts by normalized route, status and coarse
-latency/memory bucket; template/import choice; cold/warm attribution; exports; comparisons; guard interruptions; and
+latency/memory bucket; example/import choice; cold/warm attribution; exports; comparisons; guard interruptions; and
 concurrent-request/queueing indicators. Do not log model names, serialized content, calculated values, source labels,
 session identifiers or IP addresses. Define a short observation window after launch, publish the aggregation rules,
 then replace the provisional conversion, mix and cache-hit assumptions with ranges supported by those aggregates.
