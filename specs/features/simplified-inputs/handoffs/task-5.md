@@ -1,8 +1,8 @@
 # Task 5 — Apply one atomic selected-input edit
 
 Repositories and implementation ranges:
-- e-footprint-interface `d17c0e58de627fa7562288d931e37b03540148d8..e228911f24b1ecf41ffde5ea7de6a4e05ba9c3e6`.
-- e-footprint `a76ce657a1eae98f6b6ecb727d7378e35010e11e..d80d5e7fe70f59eab9fbae6c7d5039068ce10d0e`.
+- e-footprint-interface `d17c0e58de627fa7562288d931e37b03540148d8..c04add4a09af3df9add6eaf5be53874c8be5b025`.
+- e-footprint `a76ce657a1eae98f6b6ecb727d7378e35010e11e..8aa6683738226d73908f98e0d98bb04616172d7a`.
 
 ## Review pointers
 
@@ -20,8 +20,10 @@ Repositories and implementation ranges:
 
 ## Design decisions
 
-- [IMPL-DECISION-03](../plan.html#impl-decision-03): explicit zero and empty input absence are distinct transaction
-  changes; arithmetic equality remains unchanged. The interface preparer preserves the same distinction.
+- [IMPL-DECISION-03](../plan.html#impl-decision-03): the library's `input_values_match()` distinguishes empty input
+  absence from explicit zero and compares authored timeseries builder/form inputs before numerical equality.
+  Transaction no-ops, allowed-value validation, interface preparation and conditional reconciliation share that rule;
+  arithmetic equality remains unchanged.
 
 ## Open concerns
 
