@@ -38,6 +38,17 @@ class ModelBuilderPage:
         self.canvas = page.locator("[data-model-canvas]:not(.d-none)")
         self.example_picker = page.locator("#example-picker")
 
+    def edit_first_relationship_count(self, value):
+        count = self.canvas.locator("input.count-inline-edit").first
+        count.fill(str(value))
+        count.press("Tab")
+        return count
+
+    def attempt_locked_workspace_actions(self):
+        """Probe capture guards as well as native disabled buttons, without waiting for enablement."""
+        for selector in ("#model-tab-0", "#compare-tab", "a[href='download-json/']", "a[href='download-workspace/']"):
+            self.page.locator(selector).dispatch_event("click")
+
     def goto(self):
         """Navigate to the model builder page."""
         self.page.goto("/model_builder/")

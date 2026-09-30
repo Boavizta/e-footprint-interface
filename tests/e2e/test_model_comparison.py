@@ -9,6 +9,8 @@ The comparison dashboard is a resident in-flow sibling of the canvases: opening 
 builder chrome and reveals the #comparison-view block; a model tab dismisses it client-side (reveal the
 canvas), with no /model_builder/ reload — the perf win these tests guard.
 """
+from urllib.parse import parse_qs
+
 import pytest
 from playwright.sync_api import expect
 
@@ -17,6 +19,45 @@ from tests.e2e.utils import click_and_wait_for_htmx
 
 @pytest.mark.e2e
 class TestModelComparisonWorkspace:
+
+    def test_delayed_count_save_blocks_workspace_actions_and_failure_unlocks(self, minimal_complete_model_builder):
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+        model_builder.add_model_by_duplication()
+        pending = []
+        page.route("**/update-dict-count/**", lambda route: pending.append(route))
+        requests = []
+        page.on("request", lambda request: requests.append(request.url))
+
+        count = model_builder.edit_first_relationship_count(3)
+        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
+        expect(count).to_be_disabled()
+        expect(page.locator("#model-tab-0")).to_be_disabled()
+        expect(page.locator("#compare-tab")).to_be_disabled()
+        expect(page.locator("a[href='download-json/']")).to_have_attribute("aria-disabled", "true")
+        model_builder.attempt_locked_workspace_actions()
+        assert len(pending) == 1
+        assert model_builder.active_slot() == "1"
+        assert not any("switch-model" in url or "download-" in url or "/compare/" in url for url in requests)
+        assert parse_qs(pending[0].request.post_data)["count"] == ["3"]
+
+        with page.expect_response(lambda response: "update-dict-count" in response.url):
+            pending.pop().continue_()
+        expect(count).to_be_enabled()
+        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
+        expect(page.locator("#model-tab-0")).to_be_enabled()
+        expect(page.locator("a[href='download-json/']")).not_to_have_attribute("aria-disabled", "true")
+        assert len(pending) == 0
+
+        model_builder.edit_first_relationship_count(4)
+        expect(count).to_be_disabled()
+        with page.expect_response(lambda response: "update-dict-count" in response.url):
+            pending.pop().fulfill(status=500, body="Save failed")
+        expect(count).to_be_enabled()
+        expect(page.locator("#model-tab-0")).to_be_enabled()
+        page.unroute("**/update-dict-count/**")
+        model_builder.switch_to_model(0)
+        assert model_builder.active_slot() == "0"
 
     def test_duplicate_edit_refresh_and_remove(self, minimal_complete_model_builder):
         model_builder = minimal_complete_model_builder

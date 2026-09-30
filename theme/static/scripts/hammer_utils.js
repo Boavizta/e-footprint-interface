@@ -59,6 +59,13 @@ function hidePanelResult() {
         btn.style.display = "block";
     }
 
+    if (document.body.dataset.workspaceMutation) {
+        resultDiv.style.display = "none";
+        // HTMX removes its request class before settlement. Keep response targets attached
+        // through that final interval so the guard receives afterSettle before we clear them.
+        document.body.addEventListener("workspace-mutation:finished", emptyResultPanel, { once: true });
+        return;
+    }
     var pendingSankeyRequest = resultDiv.querySelector(".sankey-settings.htmx-request");
     if (pendingSankeyRequest) {
         resultDiv.style.display = "none";

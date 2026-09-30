@@ -208,6 +208,10 @@ function getCsrfToken() {
 function sankeyRemoveCard(cardId) {
     var card = document.getElementById('sankey-card-' + cardId);
     if (!card) return;
+    var xhr = {};
+    var begin = new CustomEvent('workspace-mutation:begin', {cancelable: true, detail: {xhr: xhr, elt: card}});
+    if (!document.body.dispatchEvent(begin)) return;
+    var successful = false;
     var plotEl = document.getElementById('sankey-plot-' + cardId);
     disposeSankeyPlot(plotEl);
     var deletionRequest = null;
@@ -220,13 +224,22 @@ function sankeyRemoveCard(cardId) {
             },
             body: 'card_id=' + encodeURIComponent(cardId)
         }).then(function(response) {
+            successful = response.ok;
             var statusRegion = document.getElementById('workspace-storage-status');
             if (!response.ok || !statusRegion || !window.htmx) return;
             return window.htmx.ajax('GET', '/model_builder/workspace-storage-status/', {
                 target: '#workspace-storage-status',
                 swap: 'none'
             });
-        }).catch(function() {});
+        }).catch(function() {}).finally(function() {
+            document.body.dispatchEvent(new CustomEvent('workspace-mutation:end', {
+                detail: {xhr: xhr, successful: successful}
+            }));
+        });
+    } else {
+        document.body.dispatchEvent(new CustomEvent('workspace-mutation:end', {
+            detail: {xhr: xhr, successful: false}
+        }));
     }
     card.style.transition = 'opacity 0.2s, transform 0.2s';
     card.style.opacity = '0';

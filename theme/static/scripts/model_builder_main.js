@@ -95,6 +95,10 @@ function saveCardOrder(sortables) {
     const cardOrder = Object.fromEntries(
         sortables.map(({listId, sortable}) => [listId, sortable.toArray()])
     );
+    const xhr = {};
+    const begin = new CustomEvent("workspace-mutation:begin", {cancelable: true, detail: {xhr}});
+    if (!document.body.dispatchEvent(begin)) return Promise.resolve();
+    let successful = false;
     return fetch("/model_builder/save-card-order/", {
         method: "POST",
         headers: {
@@ -103,8 +107,11 @@ function saveCardOrder(sortables) {
         },
         body: JSON.stringify(cardOrder),
     }).then(response => {
+        successful = response.ok;
         if (response.ok) requestWorkspaceStorageStatus();
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => {
+        document.body.dispatchEvent(new CustomEvent("workspace-mutation:end", {detail: {xhr, successful}}));
+    });
 }
 
 function initSortableObjectCards() {
@@ -355,31 +362,156 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     evt.detail.serverResponse = restoreAccordionStateInFragment(response);
 });
 
-// HTMX's `hx-disabled-elt="button"` is a plain CSS selector: it disables every
-// <button> in the document for the duration of the request and, on response,
-// unconditionally calls removeAttribute("disabled") on all of them — wiping the
-// real `disabled` from buttons that were genuinely disabled for UX reasons.
-// Snapshot pre-request state per XHR (WeakMap handles concurrent requests) and
-// re-apply after. Survivors of an OOB swap are restored; replaced elements are
-// disconnected and skipped so the server-rendered state wins.
-const disabledBeforeHtmxRequest = new WeakMap();
+// HTMX removes hx-disabled-elt states unconditionally. Keep the original constraint state
+// per XHR, and hold workspace controls until all response swaps have settled.
+(function () {
+    "use strict";
+    const disabledBeforeHtmxRequest = new WeakMap();
+    const constraintDisabled = new WeakMap();
+    const actionSelector = "[hx-post], [hx-put], [hx-patch], [hx-delete], [data-workspace-control], "
+        + "[hx-target='#sidePanel'], [hx-target='#comparison-view'], [data-model-tab], "
+        + "[data-action='open-add-model-import'], [data-action='edge-modeling-toggle'], "
+        + "[data-autosave-url], [data-action='source-table-row-edit'], "
+        + "[data-action='toggle-source-table-row-editor'], .grab";
+    const editorSelector = "#sidePanel input, #sidePanel select, #sidePanel textarea, #sidePanel button, "
+        + "[data-model-canvas] input, [data-model-canvas] select, [data-model-canvas] textarea, "
+        + "#result-block input, #result-block select, #result-block textarea, "
+        + "[data-workspace-editor] input, [data-workspace-editor] select, [data-workspace-editor] textarea";
+    let active = null;
 
-document.body.addEventListener("htmx:beforeRequest", function (evt) {
-    const snapshot = new Set();
-    document.querySelectorAll("button[disabled]").forEach(el => snapshot.add(el));
-    disabledBeforeHtmxRequest.set(evt.detail.xhr, snapshot);
-});
+    function isPreview(detail) {
+        const path = detail.path || detail.requestConfig?.path || "";
+        return path.split("?")[0].endsWith("/timeseries-preview/");
+    }
 
-document.body.addEventListener("htmx:afterRequest", function (evt) {
-    const snapshot = disabledBeforeHtmxRequest.get(evt.detail.xhr);
-    if (!snapshot) return;
-    snapshot.forEach(el => {
-        if (el.isConnected && !el.hasAttribute("disabled")) {
-            el.setAttribute("disabled", "");
-        }
+    function isMutation(detail) {
+        const verb = detail.verb || detail.requestConfig?.verb;
+        return verb && verb.toLowerCase() !== "get" && !isPreview(detail);
+    }
+
+    function lockControls() {
+        if (!active) return;
+        document.querySelectorAll(`${actionSelector}, ${editorSelector}`).forEach(element => {
+            if (!active.controls.has(element)) {
+                active.controls.set(element, {
+                    disabled: "disabled" in element
+                        ? (element.hasAttribute("data-disabled-by-htmx")
+                            ? constraintDisabled.get(element) ?? element.disabled : element.disabled)
+                        : null,
+                    ariaDisabled: element.getAttribute("aria-disabled"),
+                });
+            }
+            if ("disabled" in element) element.disabled = true;
+            else element.setAttribute("aria-disabled", "true");
+        });
+    }
+
+    function begin(xhr, elt) {
+        if (active) return false;
+        active = {xhr, elt, controls: new Map(), waitingForSettle: false, settled: false};
+        document.body.dataset.workspaceMutation = "updating";
+        lockControls();
+        document.body.dispatchEvent(new CustomEvent("workspace-mutation:started", {detail: {xhr, elt}}));
+        return true;
+    }
+
+    function finish(successful) {
+        const completed = active;
+        completed.controls.forEach((state, element) => {
+            if (!element.isConnected) return; // Replacements keep their server-rendered constraints.
+            if (state.disabled !== null) element.disabled = state.disabled;
+            if (state.ariaDisabled === null) element.removeAttribute("aria-disabled");
+            else element.setAttribute("aria-disabled", state.ariaDisabled);
+        });
+        active = null;
+        delete document.body.dataset.workspaceMutation;
+        document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+            detail: {xhr: completed.xhr, elt: completed.elt, successful},
+        }));
+    }
+
+    function suppress(event) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+
+    // HTMX queues same-element requests before beforeRequest. Reject at confirm and at the
+    // original interaction; window capture also precedes Compare's document-capture navigation.
+    ["click", "change", "input", "submit", "keydown", "mousedown", "touchstart"].forEach(type => {
+        window.addEventListener(type, event => {
+            if (!active || !(event.target instanceof Element)) return;
+            if (event.target.closest(`${actionSelector}, ${editorSelector}`)) suppress(event);
+        }, true);
     });
-    disabledBeforeHtmxRequest.delete(evt.detail.xhr);
-});
+    window.addEventListener("htmx:confirm", event => {
+        if (active && (isMutation(event.detail)
+            || event.detail.elt?.matches(actionSelector))) suppress(event);
+    }, true);
+    window.addEventListener("htmx:configRequest", event => {
+        if (active && isMutation(event.detail)) suppress(event);
+    }, true);
+
+    document.body.addEventListener("htmx:beforeRequest", event => {
+        if (event.defaultPrevented) return;
+        const {xhr, elt} = event.detail;
+        const snapshot = new Map();
+        document.querySelectorAll("button").forEach(element => {
+            const disabled = active?.controls.get(element)?.disabled
+                ?? (element.hasAttribute("data-disabled-by-htmx")
+                    ? constraintDisabled.get(element) ?? element.disabled : element.disabled);
+            constraintDisabled.set(element, disabled);
+            snapshot.set(element, disabled);
+        });
+        if (isMutation(event.detail) && !begin(xhr, elt)) {
+            suppress(event);
+            return;
+        }
+        disabledBeforeHtmxRequest.set(xhr, snapshot);
+    });
+
+    document.body.addEventListener("htmx:beforeSend", event => {
+        if (active?.xhr !== event.detail.xhr) return;
+        // hx-disabled-elt="button" must not also prevent reading/scrolling during a save.
+        disabledBeforeHtmxRequest.get(event.detail.xhr)?.forEach((disabled, element) => {
+            if (!active.controls.has(element)) element.disabled = disabled;
+        });
+    });
+    document.body.addEventListener("htmx:beforeSwap", event => {
+        if (active?.xhr === event.detail.xhr) active.waitingForSettle = event.detail.shouldSwap;
+    });
+    document.body.addEventListener("htmx:afterSwap", lockControls);
+    document.body.addEventListener("htmx:afterSettle", event => {
+        if (active?.xhr !== event.detail.xhr) return;
+        active.settled = true;
+        if (active.requestComplete) finish(active.successful);
+    });
+    document.body.addEventListener("htmx:afterRequest", event => {
+        const {xhr} = event.detail;
+        disabledBeforeHtmxRequest.get(xhr)?.forEach((disabled, element) => {
+            if (disabled && element.isConnected) element.disabled = true;
+        });
+        disabledBeforeHtmxRequest.delete(xhr);
+        if (active?.xhr === xhr) {
+            const triggers = xhr.getResponseHeader?.("HX-Trigger-After-Settle") || "";
+            active.successful = event.detail.successful === true && !triggers.includes("openModalDialog");
+            active.requestComplete = true;
+            if (!active.waitingForSettle || active.settled) finish(active.successful);
+            else lockControls();
+        } else lockControls();
+    });
+
+    document.body.addEventListener("htmx:onLoadError", event => {
+        if (active?.xhr === event.detail.xhr) finish(false);
+    });
+
+    // Card ordering and diagram deletion use fetch, but still write the same workspace.
+    document.body.addEventListener("workspace-mutation:begin", event => {
+        if (!begin(event.detail.xhr, event.detail.elt)) event.preventDefault();
+    });
+    document.body.addEventListener("workspace-mutation:end", event => {
+        if (active?.xhr === event.detail.xhr) finish(event.detail.successful);
+    });
+})();
 
 document.body.addEventListener("htmx:afterSettle", function (event) {
     initTruncatedTextTooltips(event.detail.elt);
