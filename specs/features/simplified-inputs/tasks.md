@@ -35,13 +35,13 @@ Repository: e-footprint and e-footprint-interface. Files touched: library `efoot
 
 ## Task 2 — Fix shared-controller dependent validation
 
-Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: implementing. Brief: [task-2](briefs/task-2.md).
+Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: complete. Brief: [task-2](briefs/task-2.md).
 
 Repository: e-footprint. Files touched: `efootprint/abstract_modeling_classes/modeling_object.py`, `tests/abstract_modeling_classes/test_modeling_object.py`. Tests: focused sibling-dependent regression and library suite. Acceptance: two conditional fields with one controller are both returned and both checked by the existing validator. Depends on: none. Implementation: easy — the wrong dictionary-key check in `attributes_with_depending_values()` is identified; the regression is focused.
 
 ## Task 3 — Establish the definition and eligible-field catalog
 
-Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: approved. Brief: [task-3](briefs/task-3.md).
+Goal: Give every model an empty-capable definition and derive eligible fields and required companions from existing modeling metadata. Status: implementing. Brief: [task-3](briefs/task-3.md).
 
 Repository: e-footprint-interface. Files touched: new `domain/services/simplified_inputs.py` and `domain/conditional_inputs.py`; form generator, timeseries registry, version normalization and focused tests. Tests: eligibility, nested owner addresses, dependent-only/chained selection, normal form and timeseries regressions. Acceptance: address keys are owner ID plus constructor attribute; unsupported structural fields stay excluded; `complete_selection` and validation agree; older files normalize to empty without copying values. Depends on: Task 2 for final shared-controller verification. Implementation: standard — integrate existing constructor/conditional metadata, form fields and timeseries builder lookup into one catalog.
 
