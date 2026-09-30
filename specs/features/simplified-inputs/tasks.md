@@ -6,9 +6,9 @@ Status: under review. This is one interface-owned, cross-repository working set;
 
 ## Runs
 
-- **Run A — foundations:** Tasks 1 and 2 may proceed independently; Task 3 follows Task 2 for final validation, Task 4 follows 3, and Task 5 follows 2–3.
-- **Run B — authoring:** Task 6 precedes all new browser saves. Task 7 follows 3–4 and 6; Task 8 follows 7.
-- **Run C — consumption:** Task 9 follows the atomic edit path, guard and shared UI; Task 10 completes timeseries/export and the integrated review.
+- **Run A — foundations:** Tasks 1–5.
+- **Run B — authoring:** Tasks 6–8.
+- **Run C — consumption:** Tasks 9–10.
 
 ## Overview
 
