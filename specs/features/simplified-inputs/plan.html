@@ -324,6 +324,7 @@
   <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Bound complete-configuration transport — APPLIED</a></p>
   <p><a href="#impl-decision-06">[IMPL-DECISION-06] Keep Sources bookmark controls lazy — APPLIED</a></p>
+  <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep simplified editing reachable with Results open — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -859,6 +860,16 @@ persist once</code></pre></div></div>
     retain the last saved total. Configuration-only saves do not recalculate. If detailed results are open
     after a successful value save, reuse the existing <code>recomputation: true</code> flow: replace
     <code>#result-block</code> with freshly rendered results and emit <code>triggerResultRendering</code>.</p>
+    <p>When detailed Results is open at desktop widths, Simplified inputs retains an upper editing area
+    and Results occupies the lower part of the viewport. Apply this layout only to the Simplified view.</p>
+    <aside id="impl-decision-07" data-note="review">
+      <p><strong>[IMPL-DECISION-07] — APPLIED</strong></p>
+      <p>Run C, Task 9: at the default Chromium viewport, the existing full-height Results panel covered
+      the simplified editor and intercepted Retry save. Share the height in Simplified inputs so users
+      can correct a failed edit while inspecting Results; preserve Modeling's established layout.
+      See <a href="../../../theme/static/scss/_simplified_inputs.scss"><code>_simplified_inputs.scss</code></a>
+      and the <a href="handoffs/task-9.md">Task 9 handoff</a>.</p>
+    </aside>
     <h4 id="timeseries">5 · Open and save one timeseries</h4>
     <p><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
     builder partials, parser and stateless preview endpoint. Render the string preview with the field;
