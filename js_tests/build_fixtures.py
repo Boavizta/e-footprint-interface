@@ -619,12 +619,13 @@ def render_simplified_bookmark(field):
     return render_to_string("model_builder/simplified_inputs/bookmark.html", {"field": field})
 
 
-def render_simplified_editor(_):
+def render_simplified_editor(case):
     field = {"dom_id": "si-test-server-lifespan", "address": {"object_id": "server", "attribute": "lifespan"},
              "editor": {"web_id": "si-test-server-lifespan-value", "input_type": "explainable_quantity",
                         "label": "Lifespan", "default": 5, "step": 1, "unit": "year",
                         "metadata": metadata_field(source=HYPOTHESIS, comment="Preserve comment")["metadata"]}}
     context = {"quick_total": "20 kg", "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}}
+    context.update(case)
     return (
         render_to_string("model_builder/simplified_inputs/editor.html", {"field": field})
         + render_to_string("model_builder/components/results_bar_button.html", context)
@@ -660,7 +661,7 @@ SIMPLIFIED_BOOKMARK_CASES = {
 
 
 GROUPS = [
-    ({"simplified_editor": {}}, render_simplified_editor),
+    ({"simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
     ({"simplified_configure": {}}, render_simplified_workspace),
     (SIMPLIFIED_BOOKMARK_CASES, render_simplified_bookmark),
     ({"simplified_create_server": "Server", "simplified_create_edge_device": "EdgeDeviceBase"}, render_simplified_creation),

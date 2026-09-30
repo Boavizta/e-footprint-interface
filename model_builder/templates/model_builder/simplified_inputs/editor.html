@@ -7,7 +7,7 @@
     {% with editor=field.editor %}
     {% if editor.input_type == 'recurrent_timeseries_builder' or editor.input_type == 'hourly_quantities_from_growth' %}
     <p class="simplified-preview" data-current-value>{{ field.preview }}</p>
-    <button type="button" class="btn btn-sm btn-outline-primary" data-workspace-control
+    <button type="button" class="btn btn-sm btn-outline-primary" data-workspace-control data-action="simplified-timeseries-open"
             hx-get="{% url 'simplified-timeseries-panel' field.address.object_id field.address.attribute %}"
             hx-target="#sidePanel" hx-swap="innerHTML">Edit timeseries</button>
     {% elif editor.input_type == 'explainable_quantity' %}

@@ -59,8 +59,6 @@
         } else queueMicrotask(() => replayClick(element));
     }
 
-    // Blur locks the export control before its click can fire. Capture the intended
-    // export from the press and continue only after the focused field settles.
     function completeFocusedEditForExport(element) {
         const focused = document.activeElement;
         const form = focused?.closest("[data-simplified-editor]");
@@ -74,29 +72,27 @@
         return false;
     }
     document.addEventListener("mousedown", event => {
-        const element = event.target.closest("[data-workspace-export]");
-        if (element && completeFocusedEditForExport(element)) event.preventDefault();
+        // Keep focus until activation: a blur save would disable the export control
+        // before click. Pressing alone (or cancelling the gesture) must not export.
+        if (event.button === 0 && event.target.closest("[data-workspace-export]")
+            && document.activeElement?.closest("[data-simplified-editor]")) event.preventDefault();
     }, true);
 
-    document.addEventListener("click", event => {
+    // Bootstrap delegates dropdown clicks in document capture, so intercept exports
+    // at window capture before the menu can toggle ahead of the save.
+    window.addEventListener("click", event => {
         const element = event.target.closest("[data-workspace-export]");
-        if (!element || replaying) return;
-        if (!configureForm() && document.body.dataset.workspaceMutation !== "updating"
-            && completeFocusedEditForExport(element)) {
+        if (!element || replaying || document.body.dataset.workspaceMutation === "updating") return;
+        if (!configureForm() && completeFocusedEditForExport(element)) {
             event.preventDefault();
             event.stopImmediatePropagation();
             return;
         }
-        if (!configureForm() && document.body.dataset.workspaceMutation !== "updating"
-            && !failedExportForm(element)) return;
+        if (!configureForm() && !failedExportForm(element)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         if (configureForm()) {
             deferExit(() => continueExport(element));
-            return;
-        }
-        if (document.body.dataset.workspaceMutation === "updating") {
-            pendingExport = element;
             return;
         }
         continueExport(element);
@@ -138,6 +134,23 @@
     });
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
+    });
+    document.body.addEventListener("htmx:confirm", event => {
+        const element = event.detail.elt;
+        let editor;
+        if (element.matches('[data-action="simplified-timeseries-open"]')) {
+            editor = element.closest("[data-simplified-editor]");
+        } else if (element.matches("[data-simplified-timeseries]")) {
+            editor = activeWorkspace()?.querySelector(
+                `[data-owner-id="${element.dataset.ownerId}"][data-attribute="${element.dataset.attribute}"] [data-simplified-editor]`);
+        }
+        if (editor?.dataset.saveFailed !== "true") return;
+        event.preventDefault();
+        const message = "Retry or discard the source, confidence or comment edit before saving this timeseries.";
+        showFailedEdit(editor, `Not saved. ${message}`);
+        if (element.matches("[data-simplified-timeseries]")) {
+            element.querySelector("[data-timeseries-save-status]").textContent = `Not saved. ${message}`;
+        }
     });
     document.body.addEventListener("htmx:configRequest", event => {
         if (event.detail.elt.matches("[data-simplified-timeseries]") && window.recomputationVals?.().recomputation) {

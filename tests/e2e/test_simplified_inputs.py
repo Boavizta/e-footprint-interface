@@ -827,3 +827,39 @@ def test_workspace_export_commits_focused_field_and_honors_other_model_failed_sa
     builder.import_json_file(str(tmp_path / "both.e-f.json"))
     expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
     expect(field(page.locator('[data-simplified-workspace]:visible'), "lifespan").locator('input[type="number"]')).to_have_value("8")
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize("two_models", [False, True])
+def test_export_waits_for_activation_and_runs_once(minimal_complete_model_builder, two_models):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    if two_models:
+        builder.add_model_by_duplication()
+    workspace = open_configure(page)
+    field(workspace, "lifespan").locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    value = field(workspace, "lifespan").locator('input[type="number"]')
+    value.fill("8")
+    saves, downloads = [], []
+    page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
+    page.on("download", lambda download: downloads.append(download))
+    control = builder.press_export_control()
+    expect(value).to_be_focused()
+    assert saves == [] and downloads == []
+    builder.release_export_control(activate=False)
+    assert saves == [] and downloads == []
+
+    builder.press_export_control()
+    expect(value).to_be_focused()
+    assert saves == [] and downloads == []
+    if two_models:
+        builder.release_export_control()
+        expect(control).to_have_attribute("aria-expanded", "true")
+        with page.expect_download():
+            page.locator("#download-workspace").click()
+    else:
+        with page.expect_download():
+            builder.release_export_control()
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
+    assert len(saves) == 1 and len(downloads) == 1

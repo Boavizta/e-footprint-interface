@@ -210,3 +210,48 @@ def test_focused_weekly_editor_keeps_strategy_drafts_and_discards_on_model_switc
     expect(page.locator("#sidePanel")).not_to_be_visible()
     builder.switch_to_model(1)
     expect(page.locator("[data-simplified-timeseries]")).to_have_count(0)
+
+
+@pytest.mark.e2e
+def test_focused_timeseries_requires_recovery_of_failed_provenance(recurrent_process_model, tmp_path):
+    from tests.e2e.test_simplified_inputs import open_configure, field
+    from tests.e2e.utils import click_and_wait_for_htmx
+
+    builder = recurrent_process_model
+    page = builder.page
+    workspace = open_configure(page)
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    selected = field(workspace, "recurrent_compute_needed")
+    selected.locator("[data-include-input]").check()
+    click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+    workspace.get_by_role("button", name="Expand all", exact=True).click()
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    panel = page.locator("[data-simplified-timeseries]")
+    value = panel.locator('[name$="__constant_value"]')
+    value.fill("3")
+    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=503))
+    selected.locator('[data-action="open-source-editor"]').click()
+    selected.locator(".source-editor-comment").fill("Keep this assumption")
+    with page.expect_response("**/edit-simplified-input/**"):
+        selected.locator(".source-editor-comment").press("Tab")
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    page.unroute("**/edit-simplified-input/**")
+    page.locator("#btn-submit-form").click()
+    expect(panel.locator("[data-timeseries-save-status]")).to_contain_text("Retry or discard")
+    expect(value).to_have_value("3")
+    expect(selected.locator('input[name$="__comment"]')).to_have_value("Keep this assumption")
+    page.locator('[data-action="simplified-timeseries-cancel"]').click()
+    selected.get_by_role("button", name="Edit timeseries").click()
+    expect(page.locator("[data-simplified-timeseries]")).to_have_count(0)
+    expect(selected.locator("[data-simplified-save-status]")).to_contain_text("Retry or discard")
+    selected.get_by_role("button", name="Retry save").click()
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    value.fill("4")
+    builder.side_panel.submit_and_wait_for_close()
+    filename = tmp_path / "recovered-timeseries.e-f.json"
+    builder.download_active_model(str(filename))
+    owner_id = selected.get_attribute("data-owner-id")
+    saved = json.loads(filename.read_text())["RecurrentEdgeProcess"][owner_id]["recurrent_compute_needed"]
+    assert saved["comment"] == "Keep this assumption"
+    assert float(saved["form_inputs"]["constant_value"]) == 4

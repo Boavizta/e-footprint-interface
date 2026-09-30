@@ -50,8 +50,9 @@ retained help on removed owners; structural edits preserve membership when a req
 <p>Source hoisting into the top-level <code>Sources</code> block scans both <code>__dict__</code> inputs and peeked computed slots (computed values live in reactive slots, not <code>__dict__</code>).</p>
 <p><code>ModelWeb.to_json()</code> itself remains passive (<code>descriptor.peek</code>, not pull), but <code>persist_to_cache()</code> first pulls <code>System.total_footprint</code>; this materializes every impact source's aggregate footprint pair so the payload-size guard measures the footprint-bearing steady state immediately after each mutation, while leaving projections such as the Sankey matrix lazy. Creating a Sankey card or changing its settings persists the materialized matrix; rendering a saved card by GET leaves newly computed state request-local.</p>
 <p>Explicit user download is the complete-snapshot boundary: <code>ModelWeb.export_json()</code> first calls the library-owned <code>materialize_serialized_state()</code> helper, then serializes, so the downloaded snapshot contains every <code>serialize=True</code> value and the resulting topology regardless of which projections the user visited.</p>
-<p>Toolbar exports complete a focused Simplified-input edit before requesting the saved file. The browser captures
-mouse-press intent before blur disables Bootstrap export controls; click activation uses the same settlement check.
+<p>Toolbar exports complete a focused Simplified-input edit before requesting the saved file. A primary mouse press
+keeps focus in the editor so blur cannot disable the export control before activation. Only the ensuing click starts
+the save and continuation; an abandoned press never exports. Keyboard activation uses the same settlement check.
 Direct links and the two-model menu retain the normal single-model/workspace endpoints. A failed autosave blocks the
 requested modeling(s) until corrected/retried or explicitly discarded using a fresh field-only read. Workspace export
 also checks failed forms in parked resident models; single-model export checks only the active model. Configure exits

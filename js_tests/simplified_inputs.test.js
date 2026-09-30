@@ -252,12 +252,12 @@ test("creation requirements follow candidates, release forced membership and ret
     expect(JSON.parse(parameters.simplified_settings)).toEqual(pendingCreationSettings(form));
 });
 
-function mountEditor() {
+function mountEditor(fixture = "simplified_editor") {
     mount();
     const workspace = document.querySelector('[data-simplified-workspace]');
     const group = workspace.querySelector('[data-simplified-group]').cloneNode(false);
     const object = workspace.querySelector('[data-simplified-object]').cloneNode(false);
-    object.innerHTML = fs.readFileSync(path.join(__dirname, 'fixtures/simplified_editor.html'), 'utf8');
+    object.innerHTML = fs.readFileSync(path.join(__dirname, `fixtures/${fixture}.html`), 'utf8');
     group.appendChild(object);
     workspace.replaceChildren(group);
     window.htmx.trigger = jest.fn();
@@ -343,7 +343,7 @@ test("accepted replacement baselines wait for the workspace guard to restore for
 });
 
 
-test("export press completes the focused field before downloading and failure blocks continuation", () => {
+test("export activation completes the focused field and failure blocks continuation", () => {
     const form = mountEditor();
     const input = form.querySelector('input[type="number"]');
     const link = document.getElementById("download-model");
@@ -351,6 +351,8 @@ test("export press completes the focused field before downloading and failure bl
     input.focus();
     input.value = "8";
     link.dispatchEvent(new MouseEvent("mousedown", {bubbles: true, cancelable: true}));
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    link.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
     expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
     expect(click).not.toHaveBeenCalled();
     document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
@@ -367,6 +369,40 @@ test("export press completes the focused field before downloading and failure bl
     }));
     expect(click).not.toHaveBeenCalled();
     click.mockRestore();
+});
+
+test.each([
+    ["simplified_editor", "download-model"],
+    ["simplified_editor_workspace", "download-menu-toggle"],
+])("%s exports once on activation and never from a press alone", async (fixture, id) => {
+    const form = mountEditor(fixture);
+    const input = form.querySelector('input[type="number"]');
+    const control = document.getElementById(id);
+    const download = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const toggle = jest.fn();
+    if (control.matches("button")) control.addEventListener("click", toggle);
+    input.focus();
+    input.value = "8";
+    control.dispatchEvent(new MouseEvent("mousedown", {button: 2, bubbles: true, cancelable: true}));
+    const press = new MouseEvent("mousedown", {button: 0, bubbles: true, cancelable: true});
+    control.dispatchEvent(press);
+    expect(press.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(input);
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    expect(download).not.toHaveBeenCalled();
+    expect(toggle).not.toHaveBeenCalled();
+
+    control.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    expect(download).not.toHaveBeenCalled();
+    expect(toggle).not.toHaveBeenCalled();
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, successful: true},
+    }));
+    await Promise.resolve();
+    expect(download).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
+    expect(toggle).toHaveBeenCalledTimes(control.matches("button") ? 1 : 0);
+    download.mockRestore();
 });
 
 test("direct click activation completes the focused-field save before resuming export", () => {

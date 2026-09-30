@@ -1,6 +1,7 @@
 {% extends "model_builder/side_panels/side_panel_structure.html" %}
 {% block panel_body %}
 <form id="sidePanelForm" data-simplified-timeseries data-workspace-editor autocomplete="off"
+      data-owner-id="{{ address.object_id }}" data-attribute="{{ address.attribute }}"
       hx-post="{% url 'edit-simplified-input' address.object_id address.attribute %}" hx-swap="none">
     {% csrf_token %}
     <input type="hidden" name="timeseries" value="true">

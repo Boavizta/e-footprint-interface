@@ -458,3 +458,17 @@ class ModelBuilderPage:
             self.page.locator("#download-workspace").click()
         download_info.value.save_as(file_path)
         return self
+
+    def press_export_control(self):
+        """Begin an export gesture without activating the link or menu yet."""
+        toggle = self.page.locator("#download-menu-toggle")
+        control = toggle if toggle.count() else self.page.locator("#download-model")
+        control.hover()
+        self.page.mouse.down()
+        return control
+
+    def release_export_control(self, *, activate=True):
+        if not activate:
+            self.page.mouse.move(0, 0)
+        self.page.mouse.up()
+        return self

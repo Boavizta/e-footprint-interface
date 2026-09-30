@@ -73,6 +73,8 @@ surface and hides sibling previews, so forms with several recurrent quantities n
 metadata autosaves through the same selected-input endpoint. Edit timeseries loads only the selected field into
 <code>simplified_inputs/timeseries_panel.html</code>, using ordinary singleton panel field IDs and the existing
 builder parser. The panel edits value only, so omitted provenance retains the latest accepted metadata.
+Opening or saving that panel requires retrying or discarding any failed provenance edit on the same field;
+the save check also covers provenance failures that arise while the panel is already open.
 Save closes the editor only after a successful <code>workspace-mutation:finished</code> event; an HTTP-200 error
 modal retains the draft for retry. Cancel discards it, and model switching uses the shared side-panel warning.
 Focused hourly and weekly previews share the placement shell to the panel's left on tablet/desktop and in form flow
