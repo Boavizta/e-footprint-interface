@@ -2,13 +2,13 @@
 
 Repositories and implementation ranges:
 
-- e-footprint-interface: `72aa659469990424cf091e766efc086a35223ebd..5463ada91d2d5c4bf33091d637cc8d70dbc2927e`.
+- e-footprint-interface: `72aa659469990424cf091e766efc086a35223ebd..12bfe44713764c4045ebeb0f93f5a7478d95a938`.
 - e-footprint: unchanged at `b03a48ce32afe61b7a92b081fa61741e0c515cff`.
 
 ## Review pointers
 
-- [Focused panel adapter](../../../../model_builder/adapters/views/views_simplified_inputs.py) reuses the ordinary builder field/parser and selected-input mutation. The panel edits value only; provenance autosaves in the field's existing disclosure. HTTP-200 modal errors retain the panel draft.
-- [Export and failure recovery](../../../../theme/static/scripts/simplified_inputs.js): capture mouse-press intent before blur disables Bootstrap controls; direct activation uses the click path. Continue only after successful mutation settlement. Active export checks its resident forms; workspace export checks both slots. Explicit discard reloads the affected field with zero settlement delay before initializing its accepted baseline.
+- [Focused panel adapter](../../../../model_builder/adapters/views/views_simplified_inputs.py) reuses the ordinary builder field/parser and selected-input mutation. The panel edits value only; provenance autosaves in the field's existing disclosure. Opening or saving the panel requires recovery of failed provenance on that field, including failures arising while the panel is open. HTTP-200 modal errors retain the panel draft.
+- [Export and failure recovery](../../../../theme/static/scripts/simplified_inputs.js): primary mouse press retains focus; activation starts the save and continuation at window capture before Bootstrap can toggle the menu. Continue only after successful mutation settlement. Active export checks its resident forms; workspace export checks both slots. Explicit discard reloads the affected field with zero settlement delay before initializing its accepted baseline.
 
 ## Design decisions
 
