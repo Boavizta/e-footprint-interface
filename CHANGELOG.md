@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.
 
 ### Fixed
+- Local usage accounting now prices `gpt-5.6-luna` requests, including automatic approval reviews, on both API-equivalent and Codex-credit surfaces.
 - Workspace imports validate all incoming modelings and the combined payload budget before replacing saved models; rejected single imports cannot overwrite recovered configuration.
 - Copies and System-ID remapping preserve disconnected modeling objects and independent per-model configuration, including selected System-owned fields. Recovery settings are scoped to the slot and System.
 - Example deep links preserve distinct System IDs in two-model workspaces, and value changes preserve omitted source, confidence and comment metadata while honoring explicit clears.
