@@ -917,13 +917,17 @@ persist once</code></pre></div></div>
     Keep existing single-model/workspace file formats.</p>
     <p>A failed simple-input edit remains in its resident Simplified view. Until Retry succeeds or the user
     chooses Discard edit, that model's Modeling and Configure actions keep the failed field in place; model
-    tab switching may park the view. Workspace download checks both requested slots and points to a failed
-    edit in the other model from the shared toolbar.</p>
+    tab switching may park the view. Actions that replace the workspace shell also require recovery for
+    every failed edit in a surviving model. Deliberate removal or reset of the failed model remains available
+    through its destructive confirmation, which mentions that unsaved edit. Workspace download checks both
+    requested slots and points to a failed edit in the other model from the shared toolbar.</p>
     <aside id="impl-decision-08" data-note="review">
       <p><strong>[IMPL-DECISION-08] — APPLIED</strong></p>
-      <p>Run C, Task 10: a normal Modeling → Simplified entry fetches fresh saved state. Leaving a failed edit
-      for Modeling and returning would silently erase the retryable draft while releasing the export block.
-      Keep that edit resident until explicit recovery, retaining normal fresh-entry behavior afterward.
+      <p>Run C, Task 10 and global review: a normal Modeling → Simplified entry fetches fresh saved state,
+      while add/import/example actions and some removals rerender the whole workspace shell. These paths
+      could silently erase a failed, retryable draft and release its export block. Require recovery before
+      any action that replaces a surviving failed model; allow explicitly confirmed deletion or reset of
+      that model, retaining normal fresh-entry behavior afterward.
       See <a href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a>
       and the <a href="handoffs/task-10.md">Task 10 handoff</a>.</p>
     </aside>

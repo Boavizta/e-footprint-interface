@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Runs A–B complete, including independent task and global reviews. Run C Tasks 9–10 are implemented and independently reviewed; cumulative Run C review remains pending. This is one interface-owned, cross-repository working set. The deployment/merge prerequisite below remains outstanding.
+Status: Runs A–C complete, including independent task and global reviews. This is one interface-owned, cross-repository working set. The deployment/merge prerequisite below remains outstanding.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 
