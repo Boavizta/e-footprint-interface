@@ -4,6 +4,22 @@ This file tracks active workstreams and the near/mid/far horizon. Detailed plans
 
 ## Active streams
 
+### Public modeling sharing — specification reviewed, implementation pending
+
+The [reviewed spec](features/public-model-sharing/spec.html) and
+[interactive journey](design/journeys/share-a-model.html) record the September 30 decisions:
+public snapshots in the normal workspace, fork in place, versioned publications with in-place metadata
+corrections, verified accounts, a fixed 100-version allowance, and deletion/moderation behavior.
+[Planning notes](features/public-model-sharing/planning-notes.md) capture reuse constraints and implementation checks.
+
+### Modeling upgrade comparison — draft prerequisite
+
+The [draft kickoff](features/modeling-upgrade-comparison/README.md) is reserved for a separate `spec-specify`
+session before sharing implementation. Define consistent old-JSON/shared-snapshot handling, a summary of
+all objects with changed footprints, and historical/current footprints together on a graph.
+Existing loading already recalculates after library changes but the interface loses the temporary
+historical baseline. This extends the library's existing upgrade-time drift visualization roadmap item.
+
 ### Workflow improvements — shadow-review observation
 
 Interface-led features participate in the library's [five-feature protocol](../../e-footprint/specs/features/workflow-improvements/tasks.md).
@@ -34,7 +50,7 @@ then a brief HTMX loading affordance on the drill-down/calculus-graph fetch is e
 
 ## Far horizon (no commitment)
 
-- Persistent per-user model libraries (multi-model save/load per user).
+- Private persistent per-user modeling libraries (public publications are tracked above).
 - Multi-user collaboration on a shared model (constitution §4 currently rejects this).
 - Mobile-first or responsive-first UX overhaul.
 

@@ -283,13 +283,18 @@
 <p class="lede">There are no accounts and no permanent server-side library here — a modeling lives in your session, and <b>persisting it means
   moving a file</b>. <b>save-and-load</b> is that round-trip: <b>Export</b> downloads a <code>.e-f.json</code>, <b>Open file</b> reads
   one back, and a single modeling or the whole two-model workspace travels the same way. Success isn't "a file downloaded" — it's a
-  <b>faithful round-trip</b>: the modeling (and its Sankey/UI settings) comes back intact, recomputed and verified. Session recovery is
+  <b>faithful round-trip</b>: the modeling (and its Sankey/UI settings) comes back intact, with version-aware reuse of saved results. Session recovery is
   deliberately time-limited; while a stored copy remains, a modeling that <em>can't</em> be opened routes to a recovery page that can
   still hand the raw data back.</p>
 <p class="note">Faithful to the deployed app. Draws from the per-model <b>toolbar</b> (<code>upload_download_reboot_model_tooltips.html</code>),
   the <b>Open a file</b> side panel, the <code>download-json</code> / <code>download-workspace</code> / <code>upload-json</code> views, and
   the standalone <code>recovery.html</code>. Code-level pointers — the file documents, content-routing, session persistence — are
   collected for agents in <a href="#pointers">Implementation pointers</a> at the foot.</p>
+
+<p class="note"><b>Planned replacement protection:</b> the <a href="share-a-model.html#replacement">reviewed sharing design</a>
+  adds a data-loss confirmation for affected editable modelings to both JSON and shared-publication loading, with failed loads
+  leaving the workspace intact. This is not yet implemented. A separate
+  <a href="../../features/modeling-upgrade-comparison/README.md">draft feature</a> will define historical/current footprint comparisons.</p>
 
 <!-- ============ PHASE A — SAVE (EXPORT) ============ -->
 <div class="phase">
@@ -318,8 +323,8 @@
   <div class="info-col">
     <div class="step"><span class="n">1</span><h3>Save = download a file</h3></div>
     <p>"Save" is a download. A single-model session exports straight to a <code>.e-f.json</code>; a two-model session lets you take
-       <b>just the active modeling</b> or the <b>whole workspace</b> in one file. The export deliberately drops calculated attributes
-       (they're recomputed on load) and carries your UI settings along — so the file stays small but round-trips faithfully.</p>
+       <b>just the active modeling</b> or the <b>whole workspace</b> in one file. The export includes selected calculated
+       results and your UI settings. Loading can reuse those results when the saved library version and computation graph match.</p>
     <div class="states">
       <div class="state"><span class="k">One modeling</span><span class="v">A direct <b>Export</b> link downloads the modeling immediately (new tab, no screen change).</span></div>
       <div class="state"><span class="k">Two modelings</span><span class="v"><b>Export ▾</b> → <b>This modeling</b> (<code>download-json</code>) or <b>Both modelings</b> (<code>download-workspace</code>, one envelope).</span></div>
@@ -331,7 +336,7 @@
 
 <!-- ============ PHASE B — LOAD (OPEN) ============ -->
 <div class="phase">
-  <span class="tag">B · Load — open a file</span><span class="conn">one side panel · routed by content · recomputed on the way in</span><span class="rule"></span>
+  <span class="tag">B · Load — open a file</span><span class="conn">one side panel · routed by content · version-aware loading</span><span class="rule"></span>
 </div>
 
 <!-- screen 2 — open file panel -->
@@ -360,11 +365,11 @@
     <div class="step"><span class="n">2</span><h3>Load = open a file</h3></div>
     <p>One <b>Open file</b> entry handles everything. You pick a <code>.e-f.json</code> and hit <b>Open</b>; the app inspects the
        contents and routes itself — a single-model file <b>replaces the active modeling</b>, a workspace file <b>restores both
-       slots</b>. Either way the modeling is re-deserialized and its calculated attributes <b>recomputed</b>, so what you see is
-       verified, not trusted from the file.</p>
+       slots</b>. The library reuses compatible saved results on an exact version match and recalculates missing or
+       incompatible values with the current engine. Older supported schemas are migrated as needed.</p>
     <div class="states">
       <div class="state"><span class="k">One entry, content-routed</span><span class="v">The same <b>Open</b> handles single vs workspace files — decided by the file's contents, not its name.</span></div>
-      <div class="state"><span class="k">Recomputed on load</span><span class="v">Calculated attributes are rebuilt on import; the modeling is migrated forward if it's from an older schema.</span></div>
+      <div class="state"><span class="k">Version-aware loading</span><span class="v">Compatible saved calculations can be reused; a different library version triggers recalculation. The interface does not yet show historical-result differences.</span></div>
       <div class="state"><span class="k">Success</span><span class="v">A clean load redirects to a freshly rendered builder — the canvas comes back with the loaded modeling.</span></div>
       <div class="state variant"><span class="k">Add-as-second is separate</span><span class="v">Importing a <em>second</em> modeling to compare is a different intent — the <b>＋ Add → Import from file…</b> panel (see <a href="compare-models.html">compare-models</a>). "Open file" opens-into-here; "Import" adds alongside.</span></div>
       <div class="state"><span class="k">Bad file</span><span class="v">An unreadable or non-e-footprint file is rejected with an explained modal — never a broken canvas (fold below).</span></div>
@@ -530,7 +535,7 @@
     <p>Where this lives in code. Start with <a href="../../architecture/persistence.html">Persistence and interface state</a> · <a href="../../architecture/workspace.html">Workspace and resident canvases</a> ("Persistence and <code>interface_config</code>", the workspace / multi-slot session). The toolbar is <code>upload_download_reboot_model_tooltips.html</code> (Open file · Export / Export ▾ · Reset).</p>
     <dl>
       <dt>Export (Phase A)</dt>
-      <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.to_json(save_calculated_attributes=False)</code> + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>
+      <dd><code>download-json/</code> → <code>download_json</code> (<code>_single_model_document</code> = <code>model_web.export_json()</code> (materializes the model and serializes selected calculated values) + <code>interface_config</code> + version; filename <code>{date} UTC {name}.e-f.json</code> via <code>sanitize_filename</code>/<code>smart_truncate</code>); <code>download-workspace/</code> → <code>download_workspace</code> (envelope <code>{efootprint_workspace_version, active_slot, models:[…]}</code>). Toolbar single <code>&lt;a&gt;</code> vs two-model <code>Export ▾</code> dropdown (<code>#download-menu-toggle</code>).</dd>
       <dt>Open / upload (Phase B)</dt>
       <dd><code>open-import-json-panel/</code> → <code>open_import_json_panel</code> → <code>side_panels/import_model.html</code> (<code>header_name="Open a file"</code>, <code>save_button_label="Open"</code>, label <em>Choose a file (.e-f.json)</em>, native <code>&lt;input type="file"&gt;</code>, no drag-drop). <code>upload-json/</code> → <code>upload_json</code>: content-routes on <code>"models" in data</code> → <code>views_workspace._restore_workspace</code>, else single-model (<code>upgrade_system_data</code> → <code>SystemImportService.import_system</code> → <code>distinctify_against_siblings</code> → <code>persist_to_cache</code>) → <code>redirect("model-builder")</code>. Failure → re-render with <code>error-import-modal</code> (<code>modals/import_error_modal.html</code>); messages in <code>upload_json</code>.</dd>
       <dt>Recovery &amp; reset (Phase C)</dt>

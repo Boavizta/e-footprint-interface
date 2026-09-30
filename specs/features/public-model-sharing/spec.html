@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Public model sharing — Spec</title>
+<title>Public modeling sharing — Spec</title>
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
          max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
@@ -21,334 +21,220 @@
 </style>
 </head>
 <body>
+<h1>Public modeling sharing</h1>
+<p class="status">Status: Spec — review decisions confirmed · 2026-09-30 · implementation pending</p>
 
-<h1>Public model sharing</h1>
-<p class="status">Status: Spec — under review · updated 2026-09-21</p>
-
-<section>
-  <h2>1. Problem and audience</h2>
-  <p>Today a modeling built at <a href="https://e-footprint.boavizta.org">e-footprint.boavizta.org</a>
-  lives at most 12 hours in an encrypted session cache, then disappears. The only way to persist or
-  transmit one is a JSON file download. There is consequently <strong>no way to reference a modeling
-  publicly</strong>: no stable URL to cite in an article, publish on a corporate transparency page,
-  or hand to a peer reviewer.</p>
-  <p>This feature lets a user publish a modeling as a <strong>long-lived, public, forkable web
-  page</strong> with a stable link, and lets anyone discover published modelings through a public,
-  searchable index.</p>
-  <table>
-    <tr><th>Persona</th><th>Problem solved</th></tr>
-    <tr><td>Company / product team practicing ecodesign</td>
-        <td>Publish a transparent, living account of the footprint of their digital service and the
-        effect of their ecodesign actions, updatable as the service evolves.</td></tr>
-    <tr><td>Green-IT writers and advocates (including the maintainer)</td>
-        <td>Illustrate articles with actual, explorable modelings rather than screenshots.</td></tr>
-    <tr><td>Journalists and researchers</td>
-        <td>Cite a modeling that readers and peers can open, audit down to every hypothesis, and
-        fork — with immutable version permalinks so a citation cannot silently change.</td></tr>
-    <tr><td>Readers / peers (no account)</td>
-        <td>Consult a shared modeling read-only and fork it into their own session to challenge
-        hypotheses, with zero sign-up friction.</td></tr>
-  </table>
-  <p><strong>Why now:</strong> e-footprint's differentiator is explainability — every value carries
-  its derivation. That value is currently locked inside private sessions. Public sharing turns each
-  published modeling into a demonstration of the methodology, compounding the tool's notoriety and
-  the transparency norms it promotes in the green-IT ecosystem.</p>
+<section id="problem">
+<h2>1. Problem and audience</h2>
+<p>A modeling currently lives in a temporary browser-session workspace. Keeping or exchanging it beyond
+that session requires a JSON file. There is no public address that a company can put on a transparency
+page, a writer can link in an article, or a researcher can cite for readers to inspect and reuse.</p>
+<p>This feature makes a single modeling or a two-modeling comparison a long-lived, public publication
+with a stable URL, version history, explainable results and an anonymous fork action.</p>
+<table>
+<tr><th>Audience</th><th>Outcome</th></tr>
+<tr><td>Companies and ecodesign teams</td><td>Publish and update the footprint of a service and its alternatives.</td></tr>
+<tr><td>Writers, journalists and researchers</td><td>Link to explorable assumptions and results, with version-specific citations.</td></tr>
+<tr><td>Readers and peers</td><td>Inspect, compare, download and fork without creating an account.</td></tr>
+</table>
+<p>Explainability becomes publicly inspectable while the existing workspace remains the place where
+people read and edit modelings. Prioritize value relative to complexity: reuse its import, comparison,
+export, caching and size-limit behavior.</p>
 </section>
 
-<section>
-  <h2>2. Success criteria</h2>
-  <p>Each criterion is user-observable and testable.</p>
-  <ul>
-    <li><strong>Publish:</strong> a signed-in user can publish the modeling in their current session
-    with a title, free-text tags, an optional link to the article or page that references it, and a
-    free-text public author/organization name specific to that modeling. Publishing yields a stable
-    public URL.</li>
-    <li><strong>Personalize the sharing URL:</strong> the publish form suggests a URL suffix from
-    the title and lets the publisher edit it before first publication, with a preview of the full
-    URL, for example <code>e-footprint.boavizta.org/shared/acme-streaming-footprint</code>. Suffixes
-    use lowercase letters, numbers and single hyphens between words, and must be unique across
-    published modelings. Invalid or unavailable suffixes prevent publication with a clear message
-    and preserve the form contents; availability is checked again when publishing. Once published,
-    the URL is fixed, even if the title changes.</li>
-    <li><strong>View without an account:</strong> anyone opening a share link sees the modeling
-    read-only — objects, hypotheses, results and visualizations, with the usual explainability
-    (every value's derivation reachable) — without signing in.</li>
-    <li><strong>Personal viewing preferences:</strong> visitors can adjust interface-only settings,
-    including Sankey display options and card order, directly at the shared URL without forking or
-    signing in. The published interface settings provide the initial defaults; subsequent changes
-    are saved in the visitor's session, scoped to that shared modeling, and survive navigation and
-    reloads within that session. They do not change the published modeling or its interface defaults,
-    affect another visitor's view, or carry over to other shared modelings. This applies to the owner
-    viewing the shared page too. Read-only prevents changes to modeling inputs and structure, not
-    personal presentation preferences.</li>
-    <li><strong>Fork without an account:</strong> from a shared modeling, any visitor can load a
-    copy into their own editing session and modify it freely. The fork is theirs; the original is
-    untouched. Forking requires no account (an account is only needed to <em>publish</em>). The fork
-    records the source modeling and exact source version so that, if later published, its public
-    page links visibly back to that provenance. A published fork gets its own independently chosen
-    sharing URL through the same publishing flow.</li>
-    <li><strong>Update with history:</strong> the owner can publish a new version of their modeling.
-    The chosen canonical link always shows the latest version; every previously published version
-    remains reachable at an immutable permalink, and the page makes it visible which version is displayed
-    and that history exists. Version permalinks extend the chosen URL, for example
-    <code>/shared/acme-streaming-footprint/versions/2</code>.</li>
-    <li><strong>Discover:</strong> a public index page lists all published modelings, searchable by
-    title and filterable by tag. Each entry shows title, author name, tags, last-update date, and
-    the article link when present.</li>
-    <li><strong>Thin accounts:</strong> a user can create an account with an email address and
-    password, and must prove control of that email before publishing. Email-and-password sign-in
-    allows credentials to be shared by members managing a modeling as a team. The account exists
-    solely to own published modelings; public author names belong to individual modelings and the
-    account email is never shown publicly.</li>
-    <li><strong>Erasure:</strong> a user can delete any of their published modelings, and can delete
-    their account entirely (which deletes all their published modelings, breaking their share
-    links); both actions take effect immediately and are user-triggered, with no Boavizta-volunteer
-    involvement. The author owns the reference: publishing publicly does not strip them of control
-    over their data. Forks already published by others are independent modelings and are
-    unaffected.</li>
-    <li><strong>Abuse resistance:</strong> publishing is quota-bound (per-account limits on number
-    of published modelings, modeling size, and publish rate) so that a hostile script with a burner
-    email cannot meaningfully grow the database. Exceeding a quota produces a clear, non-destructive
-    error.</li>
-    <li><strong>Moderation safety valve:</strong> each public modeling has a discreet email-based
-    report link that includes its URL, and an account with moderation privileges can unpublish it.
-    Administrators can grant or revoke that permission and promote other accounts to administrator;
-    the maintainer starts as the initial administrator. V1 does not require an internal reporting
-    or case-management workflow.</li>
-    <li><strong>No private storage channel:</strong> there is no way to store a modeling server-side
-    beyond the existing ephemeral session other than publishing it publicly (public by
-    construction).</li>
-  </ul>
+<section id="success">
+<h2>2. Success criteria</h2>
+<ul>
+<li><strong>Publish:</strong> a user with a verified email-and-password account can publish the active
+modeling or both workspace modelings as one publication. It has a title, a public author/organization
+name, free-text tags and an optional article link. Every included modeling must pass the existing
+“Show results” readiness checks. A failed check or publication keeps the workspace and form intact.</li>
+<li><strong>Choose a URL:</strong> suggest a suffix from the title and allow editing before first publication,
+with a full URL preview. Suffixes use lowercase letters, numbers and single hyphens between words.
+Validate format and availability again when publishing; errors preserve the form. The chosen URL is
+fixed across title edits and updates. Retired addresses remain reserved.</li>
+<li><strong>Open like a JSON file:</strong> a single-model publication replaces only the active slot;
+a two-modeling publication replaces the whole workspace, retaining its reference/comparison roles and
+active selection. A sibling outside a single-model replacement stays untouched. The loaded publication
+occupies the normal session workspace as a read-only copy, with the existing shared size limit and cache lifecycle.</li>
+<li><strong>Protect work being replaced:</strong> JSON imports and opening shared publications warn before
+discarding existing editable modelings, identify the affected modeling(s), and offer Download, Cancel
+and Replace. Validate the incoming content and full replacement size before discarding existing work.
+Cancellation or loading failure leaves the workspace intact. Empty destinations need no data-loss warning.
+A version switch affecting only read-only shared slots needs no data-loss confirmation; if it would also
+replace an editable sibling, confirmation remains required.</li>
+<li><strong>Read without an account:</strong> shared slots protect modeling inputs and structure on the
+server as well as in the controls, including for their owner. Objects, hypotheses, results, charts,
+explainability and the existing comparison feature remain available. A read-only shared slot can sit
+beside an independently editable modeling. Clearly show the displayed version, its publication date and public author.</li>
+<li><strong>Keep viewing controls local:</strong> each visitor changes viewing settings on their own cached
+copy, as with an imported JSON file. Changes survive normal navigation and refresh within that workspace's
+lifetime. Explicitly loading another publication or version replaces the affected content and its viewing
+settings with the selected snapshot's defaults. There is no preference migration between versions or
+separate per-publication preference store. Other visitors and the stored publication are unaffected.</li>
+<li><strong>Fork in place:</strong> Fork into my session makes the loaded publication's slot(s) independently
+editable, keeps their current presentation, and records the source citation. It does not allocate another
+slot or replace an unrelated sibling. Publishing the fork creates a separate publication with its own URL.
+The source title, public author, exact version, URL and license survive JSON export/import and later publication.
+If the source disappears, keep the captured citation unchanged; its link leads to the unavailable page.</li>
+<li><strong>Update explicitly:</strong> an owner can make the loaded copy editable for an update while keeping
+its publication and base-version association. Editing never changes the public snapshot until Publish update.
+Each change beyond the four metadata fields below produces a new version. The canonical URL follows the
+latest version, while numbered version URLs continue to identify their snapshots and history is visible.</li>
+<li><strong>Correct current metadata:</strong> edits limited to title, public author name, tags and article
+link update the current version in place. Its number and URL stay the same, and no quota unit is consumed.
+Once superseded, a version's metadata remains as last saved. Ordinary editing never rewrites historical
+metadata; exceptional attribution-removal requests are handled manually.</li>
+<li><strong>Handle stale updates simply:</strong> if the public version has advanced since the working copy
+was opened, preserve that copy and show a warning. The owner can cancel or explicitly publish it as the
+next version. Intervening versions remain available. There is no automatic merge or dedicated conflict-diff
+viewer; the normal comparison feature is available if the user wants to compare.</li>
+<li><strong>Share and download:</strong> one Share control provides Copy latest link and Copy this version’s
+link. JSON download behaves exactly as in the ordinary workspace, including This modeling / Both modelings
+when two slots exist. Neither downloading nor forking requires sign-in.</li>
+<li><strong>Discover:</strong> list all available publications in a public index, searchable by title and
+filterable by free-text tag. Entries show title, author, tags, last-update date and the optional article link.
+Publication is self-service and does not imply endorsement by Boavizta.</li>
+<li><strong>Manage an account:</strong> provide sign-up, email verification, sign-in, password recovery,
+email change and deletion. For email change, confirm the user's password and verify the new address before
+replacing the old one; the old address remains active until then and receives a notification of the change.
+No approval from the old mailbox is required. Publications and their URLs stay with the account. Account
+emails are never public; author names are separate per-publication metadata.</li>
+<li><strong>Bound publication history:</strong> each account may retain <strong>100 published versions</strong>
+in total across its publications. Initial versions, updates and moderator-unpublished versions all count;
+a two-modeling snapshot is one version and must fit the existing workspace size limit. Show the allowance
+only from <strong>80/100</strong>, with advice to email the shared contact if more is needed. At 100, reject
+new publications/versions without changing existing history or the working copy. Whole-publication deletion
+frees its retained-version count. Do not prune versions automatically.</li>
+<li><strong>Delete:</strong> the owner can permanently delete a whole publication, or delete the account and
+all its publications, without maintainer intervention. Public access and discovery cease immediately.
+Latest and version URLs remain reserved and show “This modeling is no longer available.” Published forks
+remain independent. Live account/publication deletion is immediate; existing backup copies expire through
+the seven-day PostgreSQL backup rotation, as disclosed in the privacy notice.</li>
+<li><strong>Moderate:</strong> a discreet Report by email link includes the publication URL. A moderator can
+unpublish the entire publication, hiding all versions and removing it from discovery. Its URLs show the
+same neutral unavailable page. Retain the content for a moderator to restore at the same URLs, unless the
+owner permanently deletes it. Administrators can grant/revoke moderation privileges and promote other
+administrators; the maintainer is the initial administrator.</li>
+</ul>
 </section>
 
-<section>
-  <h2>3. Scope</h2>
-  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
-  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
-  <code>plan.html</code>, not here.</blockquote>
-  <details open><summary>In scope</summary>
-    <ul>
-      <li>Thin user accounts: email-and-password sign-up with email verification; sign-in and
-      password recovery; account deletion.</li>
-      <li>Publishing the session's modeling as a public modeling: title, free-text tags, optional
-      article backlink, and a free-text author name stored per modeling.</li>
-      <li>A title-derived, editable sharing-URL suffix before first publication, with full URL
-      preview and format/availability validation; the chosen URL stays fixed thereafter.</li>
-      <li><strong>Public by construction:</strong> every long-lived stored modeling is public and
-      listed in the index. No private or unlisted drafts; the ephemeral session and the JSON
-      download remain the only private workspaces.</li>
-      <li>Read-only public view of a shared modeling, with full explainability and results
-      visualizations, accessible without an account.</li>
-      <li>Session-persisted personal viewing preferences on the shared page (including Sankey
-      settings and card order), initialized from published defaults and isolated per visitor and
-      shared modeling.</li>
-      <li>Fork-to-session from any shared modeling (any version), without an account, capturing the
-      source modeling and version for visible provenance if the fork is later published.</li>
-      <li>Versioning: canonical latest URL + immutable per-version permalinks + visible version
-      history.</li>
-      <li>Owner management: publish an update, edit metadata (title, tags, article link, author
-      name), delete a published modeling.</li>
-      <li>Public index: search by title, filter by free-text tags, sorted listing with basic
-      metadata. Tags remain unconstrained initially and may be consolidated once actual usage data
-      shows which vocabulary is useful.</li>
-      <li>Anti-abuse: per-account quotas (count, size, rate) and verified-email gate on
-      publishing.</li>
-      <li>Lightweight moderation: a visitor-facing email report link carrying the modeling URL;
-      moderator unpublish capability; administrators can promote other accounts to administrator
-      and grant or revoke moderation privileges, with the maintainer seeded as the initial
-      administrator.</li>
-      <li>Legal surfaces: privacy notice, terms of use covering published-content ownership and the
-      reuse implied by forking, consent at account creation.</li>
-      <li>Governance-doc updates shipped with the feature: amend <code>specs/mission.md</code>
-      (public model library replaces the "no persistent per-user libraries" exclusion) and
-      <code>specs/roadmap.md</code>.</li>
-    </ul>
-  </details>
-  <details><summary>Out of scope (this iteration)</summary>
-    <ul>
-      <li>Private or unlisted long-lived modelings, in any form.</li>
-      <li>Renaming a sharing URL after publication and redirects for renamed URLs; custom domains
-      and account-based URL namespaces.</li>
-      <li>Multi-user collaborative editing of the same modeling (constitution §4; forking is the
-      collaboration model).</li>
-      <li>Social features: comments, likes, follower feeds, user profile pages beyond the author
-      name.</li>
-      <li>Full-text or semantic search inside modeling contents; search covers title and tags
-      only.</li>
-      <li>Curating or consolidating the free-text tag vocabulary before usage data exists.</li>
-      <li>Third-party sign-in (OAuth/SSO).</li>
-      <li>Embeddable widgets for articles (readers click through to the public view).</li>
-      <li>DOI minting or formal academic-citation tooling (immutable permalinks are the v1
-      citation mechanism).</li>
-      <li>Subscription or activity-notification emails (e.g. "a modeling you forked was updated").
-      Account verification and password recovery emails remain in scope.</li>
-      <li>A stored moderation queue, dedicated dashboard, report tracking or statuses, automated
-      acknowledgements, and a public response-time commitment.</li>
-      <li>Automatic content-quality review of published modelings (publication is
-      self-service; moderation is reactive).</li>
-    </ul>
-  </details>
+<section id="scope">
+<h2>3. Scope</h2>
+<details open><summary>In scope</summary>
+<ul>
+<li>Verified accounts and their lifecycle; Brevo transactional emails.</li>
+<li>Public single-modeling and two-modeling publications, stable addresses, history and editable current metadata.</li>
+<li>Import-style workspace loading, per-slot read-only access, ordinary viewing/comparison/export and in-place forks.</li>
+<li>Safer replacement confirmation and failure behavior for JSON imports as well as shared-publication loading.</li>
+<li>Public discovery, owner management, the fixed version-count quota and lightweight reversible moderation.</li>
+<li>Publication terms, privacy notice, account-creation consent and publish-time CC BY 4.0 acknowledgment.</li>
+<li>Governance/documentation updates when the feature ships: mission, roadmap, persistence/workspace architecture,
+account and save/load journeys, and the existing Data &amp; privacy surface.</li>
+</ul>
+</details>
+<details open><summary>Out of scope for V1</summary>
+<ul>
+<li>User-controlled private or unlisted long-lived storage. Moderator-hidden publications are the narrow retention exception.</li>
+<li>Deleting individual versions; automatic history pruning; raising an individual account's allowance through code or UI.
+Revisit quota increases only if someone actually requests one.</li>
+<li>An additional account byte quota or a publication-specific rate limiter. The fixed version count and existing
+size limit bound retained storage per account; they do not promise to bound all request load.</li>
+<li>Renaming published URLs, redirects for renamed addresses, custom domains and account-based namespaces.</li>
+<li>Concurrent collaborative editing, automatic merging or a conflict-specific diff viewer.</li>
+<li>Preference migration across versions, a new saved-view indicator or a dedicated reset-to-published-view control.</li>
+<li>Comments, likes, follows, user-profile pages, OAuth/SSO, embeddable widgets and formal DOI/citation tooling.</li>
+<li>Searching inside modeling contents, semantic search, or a curated launch-time tag taxonomy.</li>
+<li>Activity-notification subscriptions, moderation queues/dashboards, case tracking, acknowledgments and response-time commitments.</li>
+<li>A dedicated attribution-removal interface or app wording. Existing Contact/Feedback routes support manual handling.</li>
+<li>Historical-engine replay. Upgrade-related footprint differences belong to the separate prerequisite draft linked below.</li>
+</ul>
+</details>
 </section>
 
-<section>
-  <h2>4. UX / interface</h2>
-  <p>The <a href="../../design/journeys/share-a-model.html">share-a-model journey</a> is the single
-  mockup reference. It places publishing, anonymous reading, forking, owner updates, and discovery
-  inside the surrounding application. It is a self-contained HTML file suitable for board review;
-  its example values are illustrative and its interactive controls do not publish anything.</p>
-  <p>At a shared URL, the modeling stays read-only for everyone, including its owner. A visitor
-  chooses <strong>Fork into my session</strong> to create an independent editable copy. An owner
-  can instead choose <strong>Edit and publish an update</strong> to open a working copy associated
-  with the existing publication. Both lead to the normal builder; neither changes the public
-  version until an explicit publish action. Personal viewing preferences remain editable directly
-  on the shared page.</p>
-  <p>New recommendations in the review questions below are labeled as proposals in the journey.
-  They must not be mistaken for approved scope.</p>
+<section id="ux">
+<h2>4. UX / interface</h2>
+<p>The <a href="../../design/journeys/share-a-model.html">share-a-model journey</a> is the single visual
+reference. It shows agreed future behavior inside the existing application, including mixed editable/read-only
+slots, replacement warnings, publishing, in-place forks, owner updates, metadata correction, quota states,
+email changes and unavailable links. It is a self-contained interactive storyboard, not the deployed feature.</p>
+<table>
+<tr><th>Action</th><th>Workspace effect</th></tr>
+<tr><td>Open one shared modeling</td><td>Replace active slot only, load published viewing defaults and mark that slot read-only.</td></tr>
+<tr><td>Open a shared comparison</td><td>Replace both slots with the published pair; both are read-only.</td></tr>
+<tr><td>Switch published version</td><td>Load that snapshot with the same single/pair replacement rules and its defaults.
+Warn if editable work would be discarded.</td></tr>
+<tr><td>Refresh the current view</td><td>Keep the cached copy and personal settings; a refresh is not a new import.</td></tr>
+<tr><td>Fork</td><td>Make the loaded publication's slot(s) editable with captured provenance and current presentation.</td></tr>
+<tr><td>Edit and publish an update</td><td>Prepare an editable copy linked to the owned publication; publish explicitly later.</td></tr>
+</table>
+<p>The publication URL and displayed version must remain consistent with the content on screen, including
+when another browser tab has changed the shared session workspace. Loading and confirmation must not silently
+discard edits from another slot or tab. Resolve the mechanics during planning using the existing workspace lifecycle.</p>
 </section>
 
-<section>
-  <h2>5. Constraints</h2>
-  <ul>
-    <li><strong>Data minimization:</strong> required account information is the email address,
-    password hash, and verification/authorization state. Public author names are modeling metadata.
-    This is a description of the feature's required fields, not a claim that Boavizta has never
-    processed personal data or that user-authored content cannot contain it. The privacy notice
-    must also account for sessions, the email provider, operational logs, and backup retention;
-    the board must validate the handling and erasure arrangements before production activation.</li>
-    <li><strong>Board approval gates production.</strong> The feature must be deployable and
-    demonstrable on pre-production (<code>dev.e-footprint.boavizta.org</code>) while the Boavizta
-    board decision is pending; production activation is a deliberate, separate step.</li>
-    <li><strong>Public content needs terms.</strong> Publishing implies anyone may view and fork.
-    The terms of use must state the license/reuse regime of published modelings explicitly at
-    publish time. A draft license regime lives in <code>content-license.md</code> in this feature
-    folder; it requires Boavizta board validation alongside the personal-data pitch.</li>
-    <li><strong>Longevity across schema evolution.</strong> Published modelings (including old
-    version snapshots) are long-lived while the <code>efootprint</code> schema evolves; they must
-    remain viewable and forkable after library upgrades, leveraging the existing upgrade path that
-    session/JSON round-trips already rely on.</li>
-    <li><strong>Bounded storage.</strong> Long-lived storage on Boavizta's hosting (Clever Cloud)
-    is a new standing cost; quotas must keep it bounded and predictable. Quota values are a plan
-    decision, referenced symbolically here.</li>
-    <li><strong>Public views use the standard request lifecycle.</strong> Anonymous read-only views
-    rebuild a <code>ModelWeb</code> from the serialized modeling data like editing requests do. They
-    do not require a separate no-rebuild path; their defining difference is that they cannot mutate
-    the published modeling. Saving a visitor's personal interface preferences is allowed, but must
-    never write to published snapshots or shared interface defaults, including when the visitor is
-    the owner.</li>
-    <li><strong>Constitution:</strong> Clean Architecture layering and HTMX-first apply to all new
-    surfaces; multi-user collaborative editing stays rejected (§4). No constitution amendment is
-    required, but <code>mission.md</code> and <code>roadmap.md</code> must be amended deliberately
-    alongside this feature (mission currently excludes persistent per-user model libraries).</li>
-    <li><strong>Accessibility of trust signals:</strong> the public view must make it unmistakable
-    which version is shown, when it was published, and by whom (author name), so citations are
-    auditable.</li>
-  </ul>
+<section id="constraints">
+<h2>5. Constraints and approved operating choices</h2>
+<ul>
+<li><strong>Governance:</strong> the maintainer confirmed approval of Boavizta hosting, accounts, public storage,
+Brevo use, CC BY 4.0, deletion and moderation on 30 September 2026, following the Mattermost consultation
+posted on 3 September, with feedback requested through 14 September and no objections for more than two weeks.
+This records the confirmed consultation outcome, not a formal board vote. Production activation remains a
+deliberate release operation, not an unresolved request for another governance approval.</li>
+<li><strong>License:</strong> use <a href="content-license.md">CC BY 4.0</a>. Preserve source/license notices and
+fork attribution. Verify compatibility of embedded third-party data during planning; publication does not
+relicense rights the publisher does not hold. Exceptional attribution requests use existing contact routes
+and manual intervention, including on historical citations.</li>
+<li><strong>Data and retention:</strong> collect only account email, password hash and technical verification/
+authorization data. The privacy notice must describe sessions, public content, moderator-retained hidden
+content, Brevo processing, logs and backups. Daily PostgreSQL backups rotate after seven days. Terms must
+explain that independent copies/forks can survive source deletion.</li>
+<li><strong>Email:</strong> Boavizta's Brevo service is confirmed and a dedicated API credential is available.
+Sender configuration, delivery failures, expiry/resend behavior and provider retention are planning work.</li>
+<li><strong>Contact:</strong> use <a href="mailto:vincent.villet@publicissapient.com">vincent.villet@publicissapient.com</a>
+for publication reports and quota guidance. These and existing equivalent contact uses must share one contact
+configuration value rather than hardcoded copies.</li>
+<li><strong>Runtime:</strong> use the normal visitor workspace, session cache lifecycle and shared payload-size
+limit. Read-only enforcement protects source snapshots; viewing preferences write only to the visitor's copy.
+No separate long-lived private workspace is introduced.</li>
+<li><strong>Library upgrades:</strong> old JSON and old shared publications must use the same upgrade behavior.
+Stored publication snapshots remain the source record; loading may migrate inputs and recalculate under the
+running library. Do not imply that a fixed version URL freezes every numerical result across engine changes.
+Before implementation, refine the separate <a href="../modeling-upgrade-comparison/README.md">modeling upgrade
+comparison draft</a> with <code>spec-specify</code>; the desired outcome is a summary of all objects with footprint
+divergences and a click-through overlay of historical and recalculated footprints.</li>
+<li><strong>Architecture:</strong> Clean Architecture and HTMX-first apply. Modeling truth and numerical
+comparison remain in the library. Existing construction, import, export and result-readiness mechanisms should
+be reused. No constitutional amendment is required; mission/architecture updates describe the feature when implemented.</li>
+</ul>
 </section>
 
-<section>
-  <h2>6. Decisions and remaining review questions</h2>
-  <ul>
-    <li><strong>Authentication:</strong> email and password, with email verification and password
-    recovery. This is easier for members of a team to share when they jointly manage published
-    modelings.</li>
-    <li><strong>Author name:</strong> free text stored per modeling, not a single account-level
-    display name.</li>
-    <li><strong>Tags:</strong> free text at launch. Consolidation or curation is deferred until
-    actual usage provides evidence for a useful vocabulary.</li>
-    <li><strong>Sharing URL:</strong> suggest a suffix from the title, allow customization with
-    availability checks before first publication, then keep it fixed across title edits and version
-    updates. Published forks choose their own URL. Renaming/redirects, custom domains and
-    account-based namespaces are outside V1.</li>
-    <li><strong>Read-only scope:</strong> modeling inputs and structure stay read-only at shared
-    URLs. Interface-only preferences remain editable and persist per visitor session and shared
-    modeling, starting from published defaults; no fork or account is needed.</li>
-    <li><strong>Moderation:</strong> V1 provides only a lightweight safety valve: a report-by-email
-    link containing the modeling URL and an unpublish permission that administrators may grant or
-    revoke. Administrators may promote other administrators, and the maintainer is the initial one.
-    Moderation queues, dashboards, case tracking, statuses, acknowledgements, and response
-    commitments are deferred until usage demonstrates a need.</li>
-    <li><strong>Fork provenance:</strong> capture the source modeling and exact version at fork time
-    and display that link if the fork is later published.</li>
-    <li><strong>Content license:</strong> drafted in <code>content-license.md</code> (this folder)
-    — CC BY 4.0 proposed. Remaining open point: Boavizta board validation, alongside the
-    personal-data pitch.</li>
-  </ul>
-  <h3>Product decisions still to confirm</h3>
-  <p>Review of 2026-09-21. The following are recommendations for discussion, not approved
-  requirements. They close behavior gaps without adding a social or collaborative-editing layer.</p>
-  <table>
-    <tr><th>Question</th><th>Suggested V1 behavior</th></tr>
-    <tr><td>What if a fork or owner edit meets a full workspace?</td>
-      <td>Use an available modeling slot; otherwise ask the user which modeling to replace, with an
-      export option and an explicit confirmation. Cancel leaves everything intact. Simply opening
-      a shared page never replaces the editing workspace.</td></tr>
-    <tr><td>What exactly is immutable after a library upgrade?</td>
-      <td>Preserve the published inputs, attribution, and published headline results with the
-      calculation-engine version. Distinguish any newly recomputed exploration from the original
-      results. Decide whether complete historical-result replay is required; schema upgrades alone
-      do not guarantee unchanged numerical results.</td></tr>
-    <tr><td>Can changing a title or author rewrite an old citation?</td>
-      <td>Allow current listing metadata to change, but snapshot title, author, license and initial
-      presentation with each version. A version permalink and its citation retain that context.
-      Decide how later attribution-removal requests are handled.</td></tr>
-    <tr><td>What survives deletion or moderator unpublishing?</td>
-      <td>Show a neutral unavailable page for direct/version links and remove the modeling from
-      discovery. Reserve a retired URL so an old citation cannot point to somebody else's work.
-      Forks retain source/version/license citation information, with an unavailable-source label;
-      determine any retained personal attribution with the board. Decide whether moderation hides
-      the whole publication and all versions, and how it can be restored.</td></tr>
-    <tr><td>How is growing version history bounded?</td>
-      <td>Count retained versions and total stored bytes in the account's quota. Reject new
-      publications/updates when full without pruning existing cited versions. Quota values,
-      publication rate limits, and backup capacity belong in the plan.</td></tr>
-    <tr><td>What if two team members publish from the same old version?</td>
-      <td>Check the base version before publishing an update. If the public version has advanced,
-      keep the working copy and explain the conflict; require a deliberate resolution, with no
-      automatic merge or silent overwrite. This also covers editing an older version.</td></tr>
-    <tr><td>How do personal preferences behave across versions and forks?</td>
-      <td>Keep valid viewing preferences across versions of the same modeling; ignore preferences
-      for objects no longer present. Offer “Reset to published view.” A fork starts with the
-      visitor's current presentation. Confirm whether provenance must survive JSON export/import;
-      recommending yes makes offline reuse traceable too.</td></tr>
-    <tr><td>Can an incomplete modeling be published?</td>
-      <td>Recommend requiring computable results for V1. State the failing prerequisite and preserve
-      the workspace and publication form when computation or publishing fails. Validate this gate
-      explicitly; it previously appeared only in the mockups.</td></tr>
-  </table>
-  <h3>Operational decisions before production</h3>
-  <p>Confirm the transactional-email provider and administrator, the moderation report inbox and
-  responsible person, initial-admin setup, the license and embedded-data compatibility, privacy
-  and retention terms, and the production approval. Brevo is a candidate based on public DNS,
-  not a confirmed available service. Provider quotas, email retry behavior, expired verification
-  links, password recovery, tag/URL length limits, search pagination, and empty/error states should
-  be detailed in the plan.</p>
-  <p><strong>Small UX suggestions:</strong> separate “Copy latest link” from “Copy this version
-  link,” show a visible “Your view · saved for this session” indicator, and offer a reset to the
-  published presentation. These are marked as proposals in the journey. A direct JSON download
-  from the shared page is another useful option to confirm.</p>
-
+<section id="planning">
+<h2>6. Remaining planning work</h2>
+<p>The product questions reviewed on 30 September are resolved. The historical-comparison prerequisite remains
+a draft to refine separately; the following details require grounding during <code>spec-plan</code>.</p>
+<ul>
+<li>Account implementation, initial-administrator setup, moderator restoration and permission management.</li>
+<li>Brevo sender/delivery configuration, verification and recovery link expiry, resend/failure states and operational retention.</li>
+<li>Embedded-data license compatibility and accurate publication/privacy wording, including backup restore handling of deletions.</li>
+<li>Tag and URL length/normalization rules, reserved URLs, ordering, pagination and empty/error states.</li>
+<li>Atomic replacement, quota/version concurrency, per-slot publication identity, multi-tab behavior and server-side read-only enforcement.</li>
+<li>Preserving publication association and fork citations through the appropriate persistence/export boundaries.</li>
+</ul>
+<p><a href="planning-notes.md">Planning notes</a> retain the verified code pointers and shared-contact requirement
+without turning this capability specification into an implementation plan.</p>
 </section>
 
-<section>
-  <h2>7. Resuming from cold context</h2>
-  <ol>
-    <li>Read this file end to end.</li>
-    <li>Read <code>plan.html</code> (when written) for ordered steps and test gates.</li>
-    <li>Re-read <a href="../../architecture/persistence.html">Persistence and interface state</a> · <a href="../../architecture/rendering.html">Rendering and mutation feedback</a> (session/persistence and render layers) and
-    <code>specs/conventions.md</code> for code-style and architectural constraints.</li>
-    <li>Context: decisions locked at spec time — public-by-construction (no private/unlisted
-    saves), all published modelings listed in the index, a sharing-URL suffix editable only before
-    first publication, latest-at-canonical-URL with immutable
-    version permalinks, accounts use verified email and password and exist solely to own published
-    modelings, author names and free-text tags belong to individual modelings, fork provenance is
-    captured at fork time, reports use an email link rather than an internal workflow, designated
-    moderators can unpublish content, administrators can promote other administrators and manage
-    moderator privileges with the maintainer as initial administrator, account deletion
-    cascades to the account's published modelings (author keeps agency over their data;
-    already-published forks by others are unaffected), and published content carries the license
-    drafted in <code>content-license.md</code> (CC BY 4.0, pending board validation).</li>
-  </ol>
+<section id="resume">
+<h2>7. Resuming from cold context</h2>
+<ol>
+<li>Read this spec, the sharing journey and the content-license decision.</li>
+<li>Refine the <a href="../modeling-upgrade-comparison/README.md">upgrade-comparison prerequisite</a> in its own session.</li>
+<li>Use <a href="planning-notes.md">planning notes</a> and the <a href="../../architecture/index.html">architecture router</a>
+to ground the implementation plan. Do not treat the storyboard as shipped code.</li>
+<li>Preserve the lean choices: normal workspace imports, in-place forks, fixed 100-version allowance, simple conflict
+confirmation, normal download/comparison controls, manual exceptional attribution handling.</li>
+</ol>
 </section>
-
 </body>
 </html>
