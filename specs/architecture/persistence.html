@@ -32,6 +32,11 @@ missing/empty definitions to empty title/guidance/fields on config reads, includ
 major-version migration. Normalization copies the definition into request-local config without writing stored model
 payloads. Definition validation checks catalog eligibility and required-selection completeness; reads do not revalidate
 saved selections.</p>
+<p><code>UpdateSimplifiedDefinitionUseCase(repository, catalog)</code> replaces a complete Configure definition or
+patches supplied inline field properties against the latest settings. It completes required selections, validates
+addresses and eligibility, retains authored help on ordinary deselection, and saves through
+<code>save_interface_config()</code>. An empty replacement field map clears retained help while preserving supplied
+title/guidance. The caller supplies the catalog; configuration persistence itself never hydrates the model.</p>
 <h2 id="backend-payloads-and-computation-boundaries">Backend payloads and computation boundaries</h2>
 <p><strong>Pull-based contract, efootprint ≥ 23.</strong> The library's canonical payload contains inputs, the serialize-flagged computed slots (footprint totals, per-source footprints, impact-repartition matrix, edge breakdown summaries) and a values-free <code>calculation_graph</code> topology section. <code>ModelWeb.to_json(save_computed_state=True)</code> emits that graph (built with the library's <code>calculation_graph_section</code> over <code>flat_efootprint_objs_dict</code>) so that on reload <code>json_to_system</code> — which recomputes nothing — attaches the stored values as trusted caches when the <code>efootprint_version</code> matches exactly (any mismatch demotes them and recomputes lazily on read).</p>
 <p>Redis stores this canonical representation for fast request hydration; Postgres stores a second inputs-only recovery representation from <code>to_json(save_computed_state=False)</code>, keeping synchronous durable-cache writes small while accepting lazy recomputation after a Redis miss. The shared workspace payload budget and slot-size index continue to measure the canonical Redis representation.</p>
@@ -42,6 +47,11 @@ saved selections.</p>
 Interface-only autosaves use <code>ISystemRepository.save_interface_config()</code>: the session repository patches the existing
 Redis canonical payload and Postgres inputs-only recovery payload independently, so a UI metadata change does not hydrate,
 compute, or reserialize <code>ModelWeb</code> and does not collapse the two backend representations into one.</p>
+<p>Config and model saves check the shared budget before publishing session fallback settings or backend payloads.
+The session fallback is keyed by slot and records its System ID, copied config and interface version; recovery reads
+accept it only for the same System in that slot, and clearing a slot removes only that slot's fallback. If Redis has
+expired, a config-only save adjusts the indexed canonical size by the recovery payload's metadata-size difference
+instead of replacing that weight with the smaller inputs-only payload.</p>
 <h2 id="canvas-card-order">Canvas card order</h2>
 <p><code>interface_config["card_order"]</code> stores the top-level modeling-canvas order for <code>up-list</code>, <code>uj-list</code>,
 <code>external-api-list</code>, <code>server-list</code>, <code>edge-device-groups-list</code>, and <code>edge-devices-list</code>. SortableJS reads each card's

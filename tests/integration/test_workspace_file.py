@@ -14,6 +14,7 @@ RAISE_EXCEPTIONS=1 so a crashing view surfaces as a non-200 instead of being abs
 except where a test deliberately asserts the graceful (modal) failure path, which clears it.
 """
 import json
+from copy import deepcopy
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -21,6 +22,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from model_builder.version_upgrade_handlers import normalize_interface_config
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
+from model_builder.adapters.repositories.workspace_base import with_fresh_system_id
+from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.services import SystemImportService
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from efootprint.api_utils.system_to_json import system_to_json
@@ -178,7 +181,7 @@ def test_open_workspace_file_after_suppressing_reference_restores_both_slots(cli
 def test_workspace_import_enforces_combined_budget(client, minimal_system, monkeypatch):
     """The shared budget is summed over both slots on workspace import: a file whose two models fit
     individually but not together is rejected (the combined budget is summed over both slots). The over-budget add fails
-    gracefully into the error modal (not a 500), leaving the session a clean single-model workspace."""
+    gracefully into the error modal while preserving both existing models."""
     _seed_active_slot(client, minimal_system)
     client.post("/model_builder/add-model/", {"source": "duplicate"})
     envelope = _download(client, "/model_builder/download-workspace/")
@@ -189,14 +192,18 @@ def test_workspace_import_enforces_combined_budget(client, minimal_system, monke
     one_model_mb = len(json.dumps(with_calc).encode()) / (1024 * 1024)
     monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", one_model_mb * 1.5)
 
-    fresh = client.__class__()
+    before = deepcopy(client.session)
+    old_models = [deepcopy(SessionWorkspaceRepository(client.session).repository_for(slot).get_system_data())
+                  for slot in [0, 1]]
+    next(iter(envelope["models"][0]["System"].values()))["name"] = "Incoming replacement"
     monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)  # exercise the graceful modal path
-    response = _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-f.json")
+    response = _upload(client, "/model_builder/upload-json/", envelope, "ws.e-f.json")
     assert response.status_code == 200
     assert "too large" in response.content.decode().lower()  # the budget message
-    # The first model loaded into slot 0 but the second was rejected before changing the slot index.
-    restored = SessionWorkspaceRepository(fresh.session)
-    assert restored.list_slots() == [0]
+    restored = SessionWorkspaceRepository(client.session)
+    assert restored.list_slots() == [0, 1]
+    assert dict(client.session) == dict(before)
+    assert [restored.repository_for(slot).get_system_data() for slot in [0, 1]] == old_models
 
 
 @pytest.mark.django_db
@@ -279,3 +286,105 @@ def test_single_model_file_via_open_file_in_two_model_session_replaces_active_sl
     assert after.list_slots() == [0, 1]  # still two models, no third slot added
     assert ModelWeb(after.repository_for(1)).system.name == "Opened Into Active"  # active slot replaced
     assert system_id_of(after.repository_for(0).get_system_data()) == slot_0_id_before  # slot 0 untouched
+
+
+@pytest.mark.django_db
+def test_malformed_second_model_keeps_both_live_models_and_active_slot(client, minimal_system, monkeypatch):
+    _seed_active_slot(client, minimal_system, {"simplified_inputs": {"title": "Reference", "fields": {}}})
+    client.post("/model_builder/add-model/", {"source": "duplicate"})
+    workspace = SessionWorkspaceRepository(client.session)
+    before = deepcopy(dict(client.session))
+    old_models = [deepcopy(workspace.repository_for(slot).get_system_data()) for slot in workspace.list_slots()]
+    envelope = _download(client, "/model_builder/download-workspace/")
+    next(iter(envelope["models"][0]["System"].values()))["name"] = "Incoming replacement"
+    envelope["models"][1]["Server"].clear()
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    response = _upload(client, "/model_builder/upload-json/", envelope, "ws.e-f.json")
+    assert response.status_code == 200
+    assert "not a valid e-footprint file" in response.content.decode().lower()
+    restored = SessionWorkspaceRepository(client.session)
+    assert restored.list_slots() == [0, 1]
+    assert restored.active_slot() == 1
+    assert dict(client.session) == before
+    assert [restored.repository_for(slot).get_system_data() for slot in [0, 1]] == old_models
+
+
+@pytest.mark.django_db
+def test_duplicate_independent_definitions_remap_system_addresses_and_export(client, minimal_system):
+    system_id = minimal_system.id
+    journey = next(iter(minimal_system.usage_patterns[0].usage_journeys))
+    step = next(iter(journey.uj_steps))
+    server_id = next(iter(step.jobs)).server.id
+    config = {"simplified_inputs": {"title": "Starter", "guidance": "Adapt", "fields": {
+        system_id: {"name": {"included": False, "help": "System guidance"}},
+        server_id: {"lifespan": {"included": True, "help": "Expected lifetime"}}}}}
+    _seed_active_slot(client, minimal_system, config)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})
+    workspace = SessionWorkspaceRepository(client.session)
+    duplicate_id = system_id_of(workspace.repository_for(1).get_system_data())
+    copied_config = workspace.repository_for(1).interface_config
+    copied_fields = copied_config["simplified_inputs"]["fields"]
+    assert system_id not in copied_fields
+    assert copied_fields[duplicate_id] == config["simplified_inputs"]["fields"][system_id]
+    copied_fields[server_id]["lifespan"]["help"] = "Independent help"
+    copied_repository = workspace.repository_for(1)
+    copied_repository.interface_config = copied_config
+    copied_repository.save_interface_config()
+    assert workspace.repository_for(0).interface_config["simplified_inputs"] == config["simplified_inputs"]
+    envelope = _download(client, "/model_builder/download-workspace/")
+    assert envelope["models"][0]["interface_config"]["simplified_inputs"] == config["simplified_inputs"]
+    assert envelope["models"][1]["interface_config"]["simplified_inputs"] == copied_config["simplified_inputs"]
+    fresh = client.__class__()
+    assert _upload(fresh, "/model_builder/upload-json/", envelope, "ws.e-f.json").status_code == 302
+    restored = SessionWorkspaceRepository(fresh.session)
+    for slot in [0, 1]:
+        assert (restored.repository_for(slot).interface_config["simplified_inputs"]
+                == envelope["models"][slot]["interface_config"]["simplified_inputs"])
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("budget_margin", [-1, 1])
+def test_workspace_preflight_measures_final_metadata_and_remapped_payload(
+        client, minimal_system, monkeypatch, budget_margin):
+    config = {"simplified_inputs": {"title": "Starter", "guidance": "Guide" * 100, "fields": {
+        minimal_system.id: {"name": {"included": False, "help": "Authored System help"}}}}}
+    _seed_active_slot(client, minimal_system, config)
+    client.post("/model_builder/add-model/", {"source": "duplicate"})
+    document = _download(client, "/model_builder/download-json/?slot=0")
+    envelope = {"models": [deepcopy(document), deepcopy(document)], "active_slot": 0}
+    imported_models = []
+    real_import = SystemImportService.import_system
+
+    def record_import(service, model):
+        imported = real_import(service, model)
+        imported_models.append(deepcopy(imported))
+        return imported
+
+    def measure_remapped_model(model):
+        remapped = with_fresh_system_id(model)
+        exact_size = compute_json_size(imported_models[0]).size_bytes + compute_json_size(remapped).size_bytes
+        monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB",
+                            (exact_size + budget_margin) / (1024 * 1024))
+        return remapped
+
+    monkeypatch.setattr(SystemImportService, "import_system", record_import)
+    monkeypatch.setattr("model_builder.adapters.views.views_workspace.with_fresh_system_id", measure_remapped_model)
+    old_models = [deepcopy(SessionWorkspaceRepository(client.session).repository_for(slot).get_system_data())
+                  for slot in [0, 1]]
+    before = deepcopy(dict(client.session))
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    response = _upload(client, "/model_builder/upload-json/", envelope, "ws.e-f.json")
+    restored = SessionWorkspaceRepository(client.session)
+    if budget_margin < 0:
+        assert response.status_code == 200
+        assert "too large" in response.content.decode().lower()
+        assert dict(client.session) == before
+        assert [restored.repository_for(slot).get_system_data() for slot in [0, 1]] == old_models
+    else:
+        assert response.status_code == 302
+        assert restored.active_slot() == 0
+        ids = [system_id_of(restored.repository_for(slot).get_system_data()) for slot in [0, 1]]
+        assert ids[0] != ids[1]
+        for slot in [0, 1]:
+            fields = restored.repository_for(slot).interface_config["simplified_inputs"]["fields"]
+            assert fields[ids[slot]]["name"]["help"] == "Authored System help"

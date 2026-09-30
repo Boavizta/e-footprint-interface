@@ -371,10 +371,7 @@ def upload_json(request):
                 system_data_with_calculated_attributes = workspace.distinctify_against_siblings(
                     system_data_with_calculated_attributes, repository.slot)
                 model_web = ModelWeb(repository, system_data_with_calculated_attributes)
-                if "interface_config" in data:
-                    repository.interface_config = data["interface_config"]
-                else:
-                    repository.interface_config = repository.load_interface_config_from_session()
+                repository.interface_config = system_data_with_calculated_attributes.get("interface_config", {})
                 model_web.persist_to_cache()
                 return redirect("model-builder")
             except Exception as e:

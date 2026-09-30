@@ -11,6 +11,7 @@ Subclasses provide ``list_slots``, ``active_slot``, ``set_active_slot``, ``repos
 ``_register_slot`` / ``_deregister_slot`` hooks.
 """
 from abc import abstractmethod
+from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from model_builder.domain.interfaces import IWorkspaceRepository, ISystemRepository
@@ -136,9 +137,22 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
         system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
     materialize_serialized_state(flat_efootprint_objs.values())
+    old_system_id = system.id
     assign_fresh_system_id(system)
     reserialized = system_to_json(system, save_computed_state=True)
     for metadata_key in ("interface_config", "efootprint_interface_version"):
         if metadata_key in system_data:
-            reserialized[metadata_key] = system_data[metadata_key]
+            reserialized[metadata_key] = deepcopy(system_data[metadata_key])
+    if "interface_config" in reserialized:
+        reserialized["interface_config"] = copy_interface_config_for_system(
+            reserialized["interface_config"], old_system_id, system.id)
     return reserialized
+
+
+def copy_interface_config_for_system(config: dict, old_system_id: str, new_system_id: str) -> dict:
+    """Copy UI settings independently and move addresses owned by the reminted System."""
+    copied = deepcopy(config)
+    fields = copied.get("simplified_inputs", {}).get("fields", {})
+    if old_system_id in fields and old_system_id != new_system_id:
+        fields[new_system_id] = fields.pop(old_system_id)
+    return copied

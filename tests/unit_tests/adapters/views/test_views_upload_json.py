@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from io import BytesIO
 from unittest.mock import patch
 
@@ -16,7 +17,7 @@ def _json_upload_file(payload: dict, name: str = "model.json"):
 
 @pytest.mark.django_db
 class TestUploadJsonInterfaceConfigPersistence:
-    def test_upload_without_interface_config_preserves_existing_sankey_config(self, client, minimal_system_data):
+    def test_upload_with_matching_model_config_preserves_saved_sankey_config(self, client, minimal_system_data):
         repository = SessionSystemRepository(client.session)
         repository.interface_config = {"sankey_diagrams": [{"id": "deadbeef"}]}
         repository.save_data(minimal_system_data)
@@ -30,6 +31,20 @@ class TestUploadJsonInterfaceConfigPersistence:
         assert response.status_code == 302
         saved_data = SessionSystemRepository(client.session).get_system_data()
         assert saved_data["interface_config"] == {"sankey_diagrams": [{"id": "deadbeef"}]}
+
+    def test_upload_without_config_does_not_inherit_replaced_model_guidance(self, client, minimal_system_data):
+        session = client.session
+        repository = SessionSystemRepository(session)
+        repository.interface_config = {"simplified_inputs": {"title": "Old starter", "fields": {}}}
+        repository.save_data(minimal_system_data)
+        session.save()
+        incoming = deepcopy(minimal_system_data)
+        incoming.pop("interface_config")
+        incoming.pop("efootprint_interface_version")
+        response = client.post("/model_builder/upload-json/", {"import-json-input": _json_upload_file(incoming)})
+        assert response.status_code == 302
+        assert SessionSystemRepository(client.session).interface_config["simplified_inputs"] == {
+            "title": "", "guidance": "", "fields": {}}
 
     def test_upload_with_interface_config_replaces_existing_config_including_card_order(
         self, client, minimal_system_data
@@ -47,7 +62,7 @@ class TestUploadJsonInterfaceConfigPersistence:
             "efootprint_interface_version": "1.0.0",
         }
 
-        with patch("model_builder.adapters.views.views.SystemImportService.import_system", return_value=minimal_system_data):
+        with patch("model_builder.adapters.views.views.SystemImportService.import_system", return_value=uploaded_data):
             response = client.post(
                 "/model_builder/upload-json/",
                 {"import-json-input": _json_upload_file(uploaded_data)},

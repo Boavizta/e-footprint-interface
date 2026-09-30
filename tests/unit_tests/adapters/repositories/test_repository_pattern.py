@@ -173,10 +173,11 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         session = FakeSession()
         cached_data = {"interface_config": config, "efootprint_interface_version": interface_version}
         if source == "session":
-            session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = config
+            session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {
+                "0": {"system_id": "sys-1", "config": config, "version": interface_version}}
             session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = interface_version
         repository = SessionSystemRepository(session)
-        result = (cached_data, "redis") if source == "redis" else (None, None)
+        result = (cached_data, "redis") if source == "redis" else ({"System": {"sys-1": {}}}, "postgres")
         with patch.object(repository._cache_backend, "get_with_source", return_value=result), \
                 patch.object(repository._cache_backend, "set") as cache_set:
             assert repository.interface_config == {
@@ -186,13 +187,16 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         assert "simplified_inputs" not in config
         assert "simplified_inputs" not in cached_data["interface_config"]
 
-    def test_interface_config_falls_back_to_session_when_cache_empty(self):
+    def test_interface_config_falls_back_to_session_when_payload_omits_config(self):
         session = FakeSession()
-        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"sankey_diagrams": [{"id": "deadbeef"}]}
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {
+            "0": {"system_id": "sys-1", "config": {"sankey_diagrams": [{"id": "deadbeef"}]},
+                  "version": "1.0.0"}}
         session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
         repository = SessionSystemRepository(session)
 
-        with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.get_with_source", return_value=(None, None)):
+        with patch.object(repository._cache_backend, "get_with_source",
+                          return_value=({"System": {"sys-1": {}}}, "postgres")):
             assert repository.interface_config == {
                 "sankey_diagrams": [{"id": "deadbeef"}],
                 "simplified_inputs": {"title": "", "guidance": "", "fields": {}},
@@ -208,8 +212,10 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         with patch("model_builder.adapters.repositories.session_system_repository.CacheBackend.set") as cache_set:
             repository.save_data(canonical_data, recovery_data=recovery_data)
 
-        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == {"sankey_diagrams": [{"id": "deadbeef"}]}
-        assert session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY]
+        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY]["0"]["config"] == {
+            "sankey_diagrams": [{"id": "deadbeef"}]}
+        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY]["0"]["system_id"] == "sys-1"
+        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY]["0"]["version"]
         assert canonical_data["interface_config"] == recovery_data["interface_config"]
         assert canonical_data["efootprint_interface_version"] == recovery_data["efootprint_interface_version"]
 
@@ -250,11 +256,14 @@ class TestSessionSystemRepositoryInterfaceConfigFallback:
         assert saved_canonical["interface_config"] == saved_recovery["interface_config"] == {
             "card_order": {"server-list": ["Server_a"]}
         }
-        assert session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == saved_canonical["interface_config"]
+        assert (session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY]["0"]["config"]
+                == saved_canonical["interface_config"])
 
     def test_clear_removes_interface_config_session_keys(self):
         session = FakeSession()
-        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"sankey_diagrams": [{"id": "deadbeef"}]}
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {
+            "0": {"system_id": "sys-1", "config": {"sankey_diagrams": [{"id": "deadbeef"}]},
+                  "version": "1.0.0"}}
         session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
         repository = SessionSystemRepository(session)
 

@@ -231,7 +231,9 @@ class TestSankeyCards:
                 }
             ]
         }
-        session[SessionSystemRepository.INTERFACE_VERSION_SESSION_KEY] = "1.0.0"
+        session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] = {"0": {
+            "system_id": next(iter(minimal_system_data["System"])),
+            "config": session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY], "version": "1.0.0"}}
         session.save()
 
         # Slot-aware repo: the suffixed slot-0 key misses, so the model is served from the legacy

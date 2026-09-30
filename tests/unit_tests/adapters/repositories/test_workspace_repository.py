@@ -4,6 +4,7 @@ Covers the slot-aware cache key + one-release legacy read-fallback, the workspac
 (add / switch / remove), the shared payload budget (summed over slots, not per slot), and the
 distinct-system-id invariant (an incoming id colliding with another slot is re-minted).
 """
+from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
@@ -32,6 +33,67 @@ class DictSession(dict):
 def _data(system_id: str, payload: str = "x") -> dict:
     return {"efootprint_version": "22.1.0", "System": {system_id: {"id": system_id, "name": system_id}},
             "payload": payload}
+
+
+def test_config_recovery_is_scoped_to_slot_and_system_id():
+    session = DictSession()
+    first = SessionSystemRepository(session, slot=0)
+    second = SessionSystemRepository(session, slot=1)
+    with patch.object(CacheBackend, "set"), patch.object(CacheBackend, "delete"):
+        first.interface_config = {"simplified_inputs": {"title": "Reference", "fields": {}}}
+        first.save_data(_data("reference"))
+        second.interface_config = {"simplified_inputs": {"title": "Comparison", "fields": {}}}
+        second.save_data(_data("comparison"))
+        first.clear()
+    with patch.object(CacheBackend, "get_with_source", return_value=(_data("comparison"), "postgres")):
+        assert SessionSystemRepository(session, slot=1).interface_config["simplified_inputs"]["title"] == "Comparison"
+    for slot, system_id in [(0, "comparison"), (1, "replacement")]:
+        with patch.object(CacheBackend, "get_with_source", return_value=(_data(system_id), "postgres")):
+            assert SessionSystemRepository(session, slot=slot).interface_config["simplified_inputs"]["title"] == ""
+
+
+@pytest.mark.parametrize("config_only", [False, True])
+@pytest.mark.parametrize("redis_available", [False, True])
+def test_budget_failure_publishes_neither_config_nor_payload(config_only, redis_available):
+    session = DictSession()
+    repository = SessionSystemRepository(session)
+    repository.interface_config = {"simplified_inputs": {"title": "Saved"}}
+    with patch.object(CacheBackend, "set"):
+        repository.save_data(_data("saved"))
+    before = deepcopy(session)
+    repository.interface_config = {"simplified_inputs": {"title": "x" * 1000}}
+    repository.MAX_PAYLOAD_SIZE_MB = 0.0001
+    with patch.object(CacheBackend, "set") as cache_set, \
+            patch.object(CacheBackend, "get_from", side_effect=[_data("saved") if redis_available else None,
+                                                               _data("saved")]):
+        with pytest.raises(PayloadSizeLimitExceeded):
+            if config_only:
+                repository.save_interface_config()
+            else:
+                repository.save_data(_data("saved"))
+        cache_set.assert_not_called()
+    assert session == before
+
+
+def test_recovery_only_config_save_keeps_canonical_weight_in_shared_budget():
+    session = DictSession()
+    repository = SessionSystemRepository(session)
+    original_config = {"simplified_inputs": {"title": "Saved"}}
+    repository.interface_config = original_config
+    canonical = _data("saved", payload="x" * 10000)
+    recovery = _data("saved")
+    with patch.object(CacheBackend, "set"):
+        repository.save_data(canonical, recovery_data=recovery)
+    previous_size = WorkspaceIndex(session).slot_sizes()[0]
+    before = deepcopy(session)
+    repository.interface_config = {"simplified_inputs": {"title": "x" * 100}}
+    repository.MAX_PAYLOAD_SIZE_MB = (previous_size + 1) / (1024 * 1024)
+    with patch.object(CacheBackend, "get_from", side_effect=[None, recovery]), \
+            patch.object(CacheBackend, "set") as cache_set:
+        with pytest.raises(PayloadSizeLimitExceeded):
+            repository.save_interface_config()
+        cache_set.assert_not_called()
+    assert session == before
 
 
 # --------------------------------------------------------------------------- #

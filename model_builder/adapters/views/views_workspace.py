@@ -15,6 +15,7 @@ Thin HTTP adapters over ``SessionWorkspaceRepository``:
     ``ComparisonService`` adapter (the library is the domain truth).
 """
 import json
+from copy import deepcopy
 
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -24,9 +25,15 @@ from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.comparison.duplication import duplicate_system
 from efootprint.utils.tools import time_it
 
-from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
+from model_builder.adapters.repositories import (
+    InMemorySystemRepository, SessionWorkspaceRepository, SessionSystemRepository)
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
-from model_builder.adapters.views.views import load_system_into_session, render_model_builder, build_workspace_slots
+from model_builder.adapters.views.views import render_model_builder, build_workspace_slots
+from model_builder.adapters.repositories.workspace_base import (
+    MAX_SLOTS, copy_interface_config_for_system, system_id_of, with_fresh_system_id)
+from e_footprint_interface.json_payload_utils import compute_json_size
+from model_builder.domain.exceptions import PayloadSizeLimitExceeded
+from e_footprint_interface import __version__ as interface_version
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
     ComparisonService, SystemImportService, SCRATCH_ID, get_example_system_data)
@@ -87,40 +94,36 @@ def open_add_model_import_panel(request):
 
 
 def _restore_workspace(workspace, data: dict) -> None:
-    """Restore both slots from a workspace envelope, then set the active pointer.
+    """Prepare every model and its aggregate size before replacing any live slot."""
+    models = data.get("models")
+    if not isinstance(models, list) or not 1 <= len(models) <= MAX_SLOTS:
+        raise ValueError(f"Workspace file must contain between 1 and {MAX_SLOTS} models.")
+    import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
+    prepared = []
+    system_ids = set()
+    for model in models:
+        incoming = import_service.import_system(SessionSystemRepository.upgrade_system_data(deepcopy(model)))
+        if system_id_of(incoming) in system_ids:
+            incoming = with_fresh_system_id(incoming)
+        system_ids.add(system_id_of(incoming))
+        prepared.append(incoming)
+    size_mb = sum(compute_json_size(model).size_bytes for model in prepared) / (1024 * 1024)
+    if size_mb > SessionSystemRepository.MAX_PAYLOAD_SIZE_MB:
+        raise PayloadSizeLimitExceeded(size_mb, SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
 
-    The whole workspace is replaced. Every existing slot's *data* is discarded first (rather than
-    ``remove_slot``-ing the non-zero slots), which serves two purposes: the shared budget starts clean
-    so loading model[0] is weighed alone, and it sidesteps ``remove_slot``'s "can't drop the only slot"
-    guard — that guard fires when the sole surviving slot is slot 1, the state reached by suppressing the
-    Reference (slot 0) so the Comparison is promoted into slot 1 (slot order is role order, not numeric —
-    see ``workspace_index``). model[0] is then loaded into slot 0, re-establishing it so the leftover
-    slot can be dropped safely; any remaining models are added through ``add_slot`` so the
-    distinct-system-id guard and the shared budget both apply (a save that would blow the budget is
-    rejected before the index changes). The import therefore always lands a clean, canonically-packed
-    ``[0, 1]`` workspace regardless of the layout it replaces.
-    """
-    models = data.get("models") or []
-    if not models:
-        raise ValueError("Workspace file contains no models.")
+    first_recovery = ModelWeb(InMemorySystemRepository(prepared[0])).to_json(save_computed_state=False)
+    for key in ("interface_config", "efootprint_interface_version"):
+        if key in prepared[0]:
+            first_recovery[key] = deepcopy(prepared[0][key])
 
     for slot in workspace.list_slots():
         workspace.repository_for(slot).clear()
-
-    # Each embedded model carries its own interface_config (Sankey settings etc.); restore it per slot
-    # so the round-trip preserves it as the single-model upload does. Slot 0: set it on the
-    # repository before persist. Slot 1+: SystemImportService already carries it into the with-calc
-    # dict, which add_slot's save writes through (and with_fresh_system_id preserves it on a re-mint).
-    slot_0_repository = workspace.repository_for(0)
-    if "interface_config" in models[0]:
-        slot_0_repository.interface_config = models[0]["interface_config"]
-    load_system_into_session(slot_0_repository, models[0])
+    workspace.repository_for(0).save_data(prepared[0], recovery_data=first_recovery)
     for slot in workspace.list_slots():
         if slot != 0:
             workspace.remove_slot(slot)
-    for model in models[1:]:
-        import_service = SystemImportService(SessionSystemRepository.MAX_PAYLOAD_SIZE_MB)
-        workspace.add_slot(import_service.import_system(SessionSystemRepository.upgrade_system_data(model)))
+    for model in prepared[1:]:
+        workspace.add_slot(model)
 
     slots = workspace.list_slots()
     requested = data.get("active_slot", 0)
@@ -154,6 +157,9 @@ def _system_data_for_add(request, workspace):
     system_data = system_to_json(duplicated, save_computed_state=False)
     system_block = system_data["System"][duplicated.id]
     system_block["name"] = f"Copy of {active_model.system.name}"
+    system_data["interface_config"] = copy_interface_config_for_system(
+        workspace.active_repository().interface_config, active_model.system.efootprint_id, duplicated.id)
+    system_data["efootprint_interface_version"] = interface_version
     return system_data
 
 

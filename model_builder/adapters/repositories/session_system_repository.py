@@ -20,6 +20,7 @@ from model_builder.adapters.repositories.recovery_retention import (
     get_recovery_retention_seconds,
 )
 from model_builder.adapters.repositories.workspace_index import WorkspaceIndex
+from model_builder.adapters.repositories.workspace_base import system_id_of
 
 
 class SessionSystemRepository(ISystemRepository):
@@ -55,6 +56,7 @@ class SessionSystemRepository(ISystemRepository):
         self._session = session
         self._cache_backend = CacheBackend()
         self._interface_config: Optional[Dict[str, Any]] = None
+        self._system_id = None
         self._index = WorkspaceIndex(session)
         self._slot = self._index.active_slot() if slot is None else slot
 
@@ -109,6 +111,7 @@ class SessionSystemRepository(ISystemRepository):
             if cached_data is not None:
                 if source == "postgres":
                     logger.info("No data in Redis cache; falling back to Postgres cache.")
+                self._system_id = system_id_of(cached_data)
                 if self._interface_config is None and "interface_config" in cached_data:
                     # Only adopt the payload's config; an absent key leaves the session fallback
                     # (interface_config property) reachable.
@@ -138,29 +141,26 @@ class SessionSystemRepository(ISystemRepository):
         return cached_data, source
 
     def load_interface_config_from_session(self) -> dict:
-        """Load interface config fallback from Django session."""
-        config = self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {})
-        json_interface_version = self._session.get(self.INTERFACE_VERSION_SESSION_KEY, "0.14.5")
+        """Recover only settings belonging to this slot's current System."""
+        saved = self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {}).get(str(self._slot), {})
+        if self._system_id is None or saved.get("system_id") != self._system_id:
+            return {}
+        config = deepcopy(saved.get("config", {}))
+        from model_builder.version_upgrade_handlers import upgrade_interface_config
 
-        if config:
-            from model_builder.version_upgrade_handlers import upgrade_interface_config
-
-            current_major = int(interface_version.split(".")[0])
-            json_major = int(json_interface_version.split(".")[0])
-            if json_major < current_major:
-                config = upgrade_interface_config(config, json_major)
-                self._session[self.INTERFACE_CONFIG_SESSION_KEY] = config
-                self._session[self.INTERFACE_VERSION_SESSION_KEY] = interface_version
-                self._session.modified = True
-
+        json_major = int(saved.get("version", "0.14.5").split(".")[0])
+        if json_major < int(interface_version.split(".")[0]):
+            config = upgrade_interface_config(config, json_major)
         return config
 
     def _save_interface_config_to_session(self) -> None:
-        """Persist interface config fallback into Django session."""
-        if self._interface_config is None:
+        """Publish a copied fallback scoped by slot and System identity."""
+        if self._interface_config is None or self._system_id is None:
             return
-        self._session[self.INTERFACE_CONFIG_SESSION_KEY] = self._interface_config
-        self._session[self.INTERFACE_VERSION_SESSION_KEY] = interface_version
+        saved = dict(self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {}))
+        saved[str(self._slot)] = {"system_id": self._system_id, "config": deepcopy(self._interface_config),
+                                  "version": interface_version}
+        self._session[self.INTERFACE_CONFIG_SESSION_KEY] = saved
         self._session.modified = True
 
     @property
@@ -203,12 +203,20 @@ class SessionSystemRepository(ISystemRepository):
                 "efootprint_interface_version": interface_version,
             }
 
+        original_postgres_data = postgres_data
         redis_data = with_interface_config(redis_data)
         postgres_data = with_interface_config(postgres_data)
 
-        if redis_data is not None:
-            size_result = compute_json_size(redis_data)
-            workspace_size_mb = self._index.workspace_size_mb_with(self._slot, size_result.size_bytes)
+        budget_data = redis_data if redis_data is not None else postgres_data
+        if budget_data is not None:
+            size_result = compute_json_size(budget_data)
+            slot_size_bytes = size_result.size_bytes
+            if redis_data is None:
+                # Retain the canonical weight when only compact recovery data remains available.
+                previous_size = self._index.slot_sizes().get(self._slot, 0)
+                metadata_delta = slot_size_bytes - compute_json_size(original_postgres_data).size_bytes
+                slot_size_bytes = max(slot_size_bytes, previous_size + metadata_delta)
+            workspace_size_mb = self._index.workspace_size_mb_with(self._slot, slot_size_bytes)
             if workspace_size_mb > self.MAX_PAYLOAD_SIZE_MB:
                 raise PayloadSizeLimitExceeded(workspace_size_mb, self.MAX_PAYLOAD_SIZE_MB)
 
@@ -219,7 +227,8 @@ class SessionSystemRepository(ISystemRepository):
                 redis_timeout_seconds=self.REDIS_CACHE_TIMEOUT_SECONDS,
                 write_postgres=False,
             )
-            self._index.set_slot_size(self._slot, size_result.size_bytes)
+        if budget_data is not None:
+            self._index.set_slot_size(self._slot, slot_size_bytes)
         if postgres_data is not None:
             self._cache_backend.set(
                 cache_key,
@@ -228,6 +237,7 @@ class SessionSystemRepository(ISystemRepository):
                 write_redis=False,
             )
 
+        self._system_id = system_id_of(budget_data)
         self._save_interface_config_to_session()
 
     def save_data(self, data: Dict[str, Any], recovery_data: Optional[Dict[str, Any]] = None) -> None:
@@ -245,9 +255,8 @@ class SessionSystemRepository(ISystemRepository):
         if self._interface_config is not None:
             for payload in (data, recovery_data):
                 if payload is not None:
-                    payload["interface_config"] = self._interface_config
+                    payload["interface_config"] = deepcopy(self._interface_config)
                     payload["efootprint_interface_version"] = interface_version
-            self._save_interface_config_to_session()
 
         size_result = compute_json_size(data)
         logger.info(
@@ -278,6 +287,11 @@ class SessionSystemRepository(ISystemRepository):
             self._index.set_slot_size(self._slot, size_result.size_bytes)
             self._session.modified = True
 
+        self._system_id = system_id_of(data)
+        if self._interface_config is None and "interface_config" in data:
+            self._interface_config = deepcopy(data["interface_config"])
+        self._save_interface_config_to_session()
+
         if self.SYSTEM_DATA_KEY in self._session:
             self._session.pop(self.SYSTEM_DATA_KEY, None)
             self._session.modified = True
@@ -307,10 +321,16 @@ class SessionSystemRepository(ISystemRepository):
 
         self._index.forget_slot_size(self._slot)
         self._session.pop(self.SYSTEM_DATA_KEY, None)
-        self._session.pop(self.INTERFACE_CONFIG_SESSION_KEY, None)
+        saved = dict(self._session.get(self.INTERFACE_CONFIG_SESSION_KEY, {}))
+        saved.pop(str(self._slot), None)
+        if saved:
+            self._session[self.INTERFACE_CONFIG_SESSION_KEY] = saved
+        else:
+            self._session.pop(self.INTERFACE_CONFIG_SESSION_KEY, None)
         self._session.pop(self.INTERFACE_VERSION_SESSION_KEY, None)
         self._session.modified = True
         self._interface_config = None
+        self._system_id = None
 
     @property
     def session(self) -> SessionBase:
