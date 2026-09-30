@@ -11,3 +11,10 @@ This file is local to this repository; the synchronization script never overwrit
 - Documentation promotion: owning architecture pages, conventions, testing and user-journey pages under `specs/design/`. Keep `CHANGELOG.md` and the roadmap accurate. Never automatically retire Django migration or serialization-upgrade tests at archive.
 
 Workflow/tooling instructions and commands: `specs/agent-tooling.md`.
+
+## Active workflow experiment
+
+At `feature-implement` setup, read the library's [five-feature shadow-review protocol](../../e-footprint/specs/features/workflow-improvements/tasks.md).
+Use its main-checkout record for interface-led features too; do not create an interface copy.
+From an interface worktree, first locate the main interface checkout with `git worktree list`,
+then its sibling `e-footprint` checkout; the relative link assumes the usual workspace layout.
