@@ -2,7 +2,7 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: approved. This is one interface-owned, cross-repository working set; implementation begins in a fresh session.
+Status: Run A in progress. This is one interface-owned, cross-repository working set; Runs B and C remain approved and pending.
 
 ## Runs
 
@@ -29,13 +29,13 @@ The [agent tooling](../../agent-tooling.md) routes easy, standard and hard to th
 
 ## Task 1 — Rename ready-made modelings to Examples
 
-Goal: Complete the coordinated terminology and API cutover while preserving scenario IDs, data, results and guide associations. Status: approved. Brief: [task-1](briefs/task-1.md).
+Goal: Complete the coordinated terminology and API cutover while preserving scenario IDs, data, results and guide associations. Status: complete. Brief: [task-1](briefs/task-1.md).
 
 Repository: e-footprint and e-footprint-interface. Files touched: library `efootprint/modeling_templates/`, `tests/test_modeling_templates.py`, package resources, live docs; interface catalog, picker, routes, tour/help, authoring scripts, callers and tests. Tests: both catalog suites, package-resource and deep-link checks, full suites and library strict docs build. Acceptance: renamed imports/commands/picker/deep links work from installed artifacts; historical content and Django rendering-template names remain intact. Depends on: none. Implementation: easy — the rename map and Django rendering-template boundary are explicit.
 
 ## Task 2 — Fix shared-controller dependent validation
 
-Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: approved. Brief: [task-2](briefs/task-2.md).
+Goal: Correct [SI-1](known-issues.md) in the library without an interface workaround. Status: implementing. Brief: [task-2](briefs/task-2.md).
 
 Repository: e-footprint. Files touched: `efootprint/abstract_modeling_classes/modeling_object.py`, `tests/abstract_modeling_classes/test_modeling_object.py`. Tests: focused sibling-dependent regression and library suite. Acceptance: two conditional fields with one controller are both returned and both checked by the existing validator. Depends on: none. Implementation: easy — the wrong dictionary-key check in `attributes_with_depending_values()` is identified; the regression is focused.
 
