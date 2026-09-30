@@ -3,7 +3,7 @@
 ## Implementation ranges
 
 - `e-footprint`: `b718142e075f1e4216af7ea556b75be1a920082d..84d8a950a4262e84ceb27a7fe389e45130fbf4dd`
-- `e-footprint-interface`: `741979aefdf7c4e9f8677654d43b300683fbf6c0..5cf35c224683ff46914c2ca73e1634a3ab70a104`
+- `e-footprint-interface`: `741979aefdf7c4e9f8677654d43b300683fbf6c0..76d2a14274943a0da68c619c7d0104d17d58228c`
 
 ## Review pointers
 
