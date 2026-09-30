@@ -1,7 +1,7 @@
 # Task 4 — Save configuration and exchange independent models
 
 Repository and implementation range: e-footprint-interface
-`9e94e06da77922c2f087a246d59ee94cd800723a..8e881aaab1e5f1ca964f05e2edc3c0fd88c6f510`.
+`9e94e06da77922c2f087a246d59ee94cd800723a..b5db72318892104278504d951077019a43443c49`.
 Library dependency: e-footprint `99962fad05692c1ab14f1d2a89735eb920347b69`, unchanged by this task.
 
 ## Review pointers
@@ -14,8 +14,9 @@ Library dependency: e-footprint `99962fad05692c1ab14f1d2a89735eb920347b69`, unch
   Reads require the current slot's System ID; clear removes only that slot's record. Config saves preserve both
   backend representations and adjust indexed canonical weight when only compact recovery remains available.
 - `_restore_workspace` imports every model, remaps colliding System IDs, measures final canonical documents,
-  and prepares slot-0 recovery before clears. `SystemImportService` remains unchanged and does not validate
-  definitions. Duplication and single-model import adopt copied/remapped interface settings.
+  and prepares slot-0 recovery before clears. Imports do not validate definitions. Duplication and System-ID
+  remapping preserve the complete flat modeling document through `SystemImportService.serialize_system_and_orphans()`;
+  see [the complete-document decision](../plan.html#impl-decision-02).
 
 ## Open concerns
 
