@@ -176,7 +176,7 @@ class FormContextBuilder:
 
         fields, advanced, _ = generate_dynamic_form(
             obj_to_edit.class_as_simple_str, obj_to_edit.modeling_obj.__dict__, self.model_web,
-            obj_to_edit=obj_to_edit, include_attributes=attributes)
+            obj_to_edit=obj_to_edit, include_attributes=attributes, resolve_conditional_options=True)
         config = getattr(type(obj_to_edit), "form_edition_config", None) or {}
         apply_field_transforms_to_fields(fields, config.get("field_transforms", {}))
         apply_field_transforms_to_fields(advanced, config.get("field_transforms", {}))

@@ -25,6 +25,41 @@ def field(workspace, attribute):
 
 @pytest.mark.e2e
 class TestSimplifiedInputs:
+    def test_provider_save_keeps_accepted_model_and_job_choices_editable(self, minimal_system, model_builder_page):
+        from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.abstract_modeling_classes.source_objects import SourceObject
+        from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
+            EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob,
+        )
+        from tests.e2e.conftest import load_system_dict_into_browser
+        from tests.e2e.utils import add_only_update
+
+        api = EcoLogitsVideoGenExternalAPI.from_defaults("Video API")
+        job = EcoLogitsVideoGenExternalAPIJob.from_defaults("Video job", external_api=api)
+        data = system_to_json(minimal_system, save_computed_state=False)
+        add_only_update(data, system_to_json(job, save_computed_state=False))
+        page = load_system_dict_into_browser(model_builder_page, data).page
+        workspace = open_configure(page)
+        workspace.get_by_role("button", name="Expand all", exact=True).click()
+        field(workspace, "provider").locator("[data-include-input]").check()
+        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return", exact=True))
+        workspace.get_by_role("button", name="Expand all", exact=True).click()
+        model_select = field(workspace, "model_name").locator("select[name]")
+        resolution_select = field(workspace, "resolution").locator("select[name]")
+        expect(model_select).to_have_value(api.model_name.value)
+        expect(resolution_select).to_have_value(job.resolution.value)
+        models = api.conditional_list_values["model_name"]["conditional_list_values"][SourceObject("bytedance")]
+        resolutions = job.conditional_list_values["resolution"]["conditional_list_values"][models[0]]
+        with page.expect_response("**/edit-simplified-input/**"):
+            field(workspace, "provider").locator("select[name]").select_option("bytedance")
+        expect(model_select).to_have_value(models[0].value)
+        expect(model_select.locator("option")).to_have_text([str(model) for model in models])
+        expect(resolution_select.locator("option")).to_have_text([str(value) for value in resolutions])
+        expect(resolution_select).to_have_value(job.resolution.value)
+        with page.expect_response("**/edit-simplified-input/**"):
+            resolution_select.select_option(resolutions[0].value)
+        expect(resolution_select).to_have_value(resolutions[0].value)
+
     def test_repeated_configure_entry_does_not_queue_a_draft_replacement(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
         open_simplified(page)
@@ -538,6 +573,10 @@ class TestInlineBookmarks:
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(power).to_have_value(power_value)
         expect(power).to_be_enabled()
+        value.focus()
+        power.focus()
+        expect(power).to_be_enabled()
+        assert pending == []
         totals = page.locator("[data-quick-total]")
         assert totals.count() == 2
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
@@ -581,6 +620,23 @@ class TestInlineBookmarks:
             comment.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.locator('.source-editor input[name$="__comment"]')).to_have_value("Reviewed modeling assumption")
+        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.locator('[data-action="open-source-editor"]').click()
+        source_editor = lifespan.locator(".source-editor")
+        source_editor.locator(".source-editor-select").select_option("__custom__")
+        source_name = source_editor.locator(".source-editor-custom-name")
+        source_link = source_editor.locator(".source-editor-custom-link")
+        source_name.fill("Reviewed report")
+        source_name.press("Tab")
+        expect(source_link).to_be_focused()
+        expect(source_link).to_be_visible()
+        source_link.fill("https://example.com/report")
+        with page.expect_response("**/edit-simplified-input/**"):
+            source_link.press("Tab")
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        expect(lifespan.get_by_role("link", name="Reviewed report", exact=True)).to_have_attribute(
+            "href", "https://example.com/report")
         minimal_complete_model_builder.close_result_panel()
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
         prior = totals.nth(0).text_content()

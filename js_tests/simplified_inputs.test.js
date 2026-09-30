@@ -301,3 +301,38 @@ test("value saves omit unchanged provenance and confidence saves preserve omitte
     expect(parameters[prefix + "__source_name"]).toBeUndefined();
     expect(parameters[prefix + "__source_link"]).toBeUndefined();
 });
+
+test("accepted replacement baselines wait for the workspace guard to restore form controls", () => {
+    const form = mountEditor();
+    // Match base.html: the simplified module registers its settlement listener before the guard.
+    require("../theme/static/scripts/model_builder_main.js");
+    const xhr = {getResponseHeader: () => ""};
+    const emit = (name, detail) => document.body.dispatchEvent(new CustomEvent(name, {detail}));
+    form.querySelector("input").value = "8";
+    form.querySelector("input").dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    emit("htmx:beforeRequest", {xhr, elt: form, requestConfig: {verb: "post"}});
+    expect(form.querySelector("input").disabled).toBe(true);
+    emit("htmx:beforeSwap", {xhr, shouldSwap: true});
+    const fragment = document.createElement("template");
+    fragment.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_editor.html"), "utf8");
+    const replacement = fragment.content.querySelector("form");
+    replacement.querySelector("input").value = "8";
+    form.replaceWith(replacement);
+    emit("htmx:afterSwap", {xhr, elt: replacement});
+    expect(replacement.querySelector("input").disabled).toBe(true);
+    emit("htmx:afterRequest", {xhr, successful: true});
+    emit("htmx:afterSettle", {xhr, elt: replacement});
+    expect(replacement.querySelector("input").disabled).toBe(false);
+
+    const input = replacement.querySelector("input");
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    const parameters = Object.fromEntries(new FormData(replacement));
+    emit("htmx:configRequest", {elt: replacement, parameters});
+    expect(parameters).toEqual({[replacement.dataset.valuePrefix]: "8",
+        [replacement.dataset.valuePrefix + "__unit"]: "year"});
+    input.value = "9";
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+});

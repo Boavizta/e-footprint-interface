@@ -1,4 +1,4 @@
-from model_builder.adapters.presenters.simplified_inputs import input_catalog
+from model_builder.adapters.presenters.simplified_inputs import build_workspace_context, input_catalog
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -112,6 +112,21 @@ def test_provider_reconciles_chain_and_every_linked_job_in_one_batch(video_model
     jobs = [model.flat_efootprint_objs_dict[object_id] for object_id in job_ids]
     provider = FieldAddress(api_id, "provider")
     use_case = _select(model, provider)
+
+    def assert_conditional_editors(addresses=None):
+        context = build_workspace_context(model, addresses=addresses)
+        editors = {field["address"]: field["editor"]
+                   for group in context["groups"] for obj in group["objects"] for field in obj["fields"]}
+        for owner, attribute, controller in [(api, "model_name", api.provider),
+                                              *((job, "resolution", api.model_name) for job in jobs)]:
+            editor = editors[FieldAddress(owner.id, attribute)]
+            choices = owner.conditional_list_values[attribute]["conditional_list_values"][controller]
+            assert {"selected": editor["selected"], "options": editor["options"]} == {
+                "selected": getattr(owner, attribute).value,
+                "options": [{"label": str(choice), "value": str(choice)} for choice in choices],
+            }
+
+    assert_conditional_editors()
     old_resolution = jobs[0].resolution
     new_provider = SourceObject("bytedance")
     expected_model = api.conditional_list_values["model_name"]["conditional_list_values"][new_provider][0]
@@ -135,6 +150,7 @@ def test_provider_reconciles_chain_and_every_linked_job_in_one_batch(video_model
                                      *(FieldAddress(job.id, "resolution") for job in jobs)}
     assert len(result.notices) == 3
     assert "Adjusted A" in result.notices[1] and str(allowed[0]) in result.notices[1]
+    assert_conditional_editors(result.changed_fields)
     restored = ModelWeb(model.repository)
     for job in jobs:
         value = restored.flat_efootprint_objs_dict[job.id].resolution

@@ -10,6 +10,9 @@
         if (document.body.dataset.workspaceMutation === "updating") return;
         const editor = event.target.closest("[data-simplified-editor] .source-editor");
         if (!editor || !event.target.matches("input:not([type=hidden]), textarea")) return;
+        // A custom source's name and link form one value; tabbing between them is not completion.
+        const customFields = event.target.closest(".custom-fields");
+        if (customFields?.contains(event.relatedTarget)) return;
         applySourceEditor(editor.dataset.fieldId);
     });
     document.addEventListener("keydown", event => {

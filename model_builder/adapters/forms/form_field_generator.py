@@ -222,7 +222,7 @@ def generate_select_multiple_field(
 
 def generate_dynamic_form(
     efootprint_class_str: str, default_values: dict, model_web: "ModelWeb", obj_to_edit: "ModelingObjectWeb" = None,
-    *, include_attributes: set[str] | None = None,
+    *, include_attributes: set[str] | None = None, resolve_conditional_options: bool = False,
 ):
     structure_fields = []
     structure_fields_advanced = []
@@ -391,11 +391,12 @@ def generate_dynamic_form(
                         str(conditional_value): [str(possible_value) for possible_value in possible_values]
                         for conditional_value, possible_values in conditional_values.items()
                     }
-                    dependency_is_fixed_on_edit = (
+                    resolve_current_dependency = (
                         obj_to_edit is not None
-                        and first_segment in corresponding_web_class.attributes_to_skip_in_forms
+                        and (resolve_conditional_options
+                             or first_segment in corresponding_web_class.attributes_to_skip_in_forms)
                     )
-                    if dependency_is_fixed_on_edit:
+                    if resolve_current_dependency:
                         owner, attribute = resolve_input_path(obj_to_edit.modeling_obj, depends_on)
                         resolved = getattr(owner, attribute)
                         structure_field["options"] = [
@@ -429,7 +430,7 @@ def generate_dynamic_form(
                     else:
                         filter_by = f"{efootprint_class_str}_{depends_on}"
                         list_value = values_by_conditional_value
-                    if not dependency_is_fixed_on_edit:
+                    if not resolve_current_dependency:
                         dynamic_lists.append(
                             {
                                 "input_id": f"{efootprint_class_str}_{attr_name}",

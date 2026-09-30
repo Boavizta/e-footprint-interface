@@ -66,6 +66,7 @@
         document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = "Updating…"; });
     });
     document.body.addEventListener("workspace-mutation:finished", event => {
+        initializeEdits();
         document.querySelectorAll("[data-quick-total]").forEach(total => total.removeAttribute("aria-busy"));
         document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = ""; });
         const form = event.detail.elt;
@@ -87,6 +88,9 @@
         }
     });
     function initializeEdits() {
+        // Replacement controls stay disabled until the shared guard finishes settling.
+        // FormData omits disabled inputs, so record their accepted values only after unlock.
+        if (document.body.dataset.workspaceMutation === "updating") return;
         document.querySelectorAll("[data-simplified-editor]").forEach(form => {
             if (!savedEdits.has(form)) savedEdits.set(form, editSnapshot(form));
         });
