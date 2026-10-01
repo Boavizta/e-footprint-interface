@@ -28,6 +28,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
+| LinkedIn post drafts and captioned demo video scripts | `communications/README.md` and `communications/video/README.md` |
 | Active feature work | `specs/features/<feature-name>/` |
 | Feature plan links, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
 | Final plan review guide (preserved structure, implementation links, consolidated decisions) | `.agents/skills/plan-review-guide/SKILL.md`; delegated at `feature-implement` close-out to the `plan-review-guide` agent, with supervisor-owned decisions |

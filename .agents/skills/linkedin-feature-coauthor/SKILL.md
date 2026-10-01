@@ -15,9 +15,9 @@ Ask for **both** (1) the story or angle they want to tell and (2) their rough vi
 
 Use the supplied story and flow as the starting point. Read available previous LinkedIn posts for voice and format, the communication strategy for channel positioning, and the interface design hub (`specs/design/index.html`) for product understanding. Follow its pointer to the relevant journey; inspect documentation or code only far enough to check claims that matter to this piece. Verify numerical comparisons against the example model when used. Distinguish the feature's broader capability from the illustrative angle chosen for the post or video.
 
-Propose a cleaned video outline before writing the post. For each beat, show the on-screen action, a proposed caption, and the point the beat demonstrates. Preserve the author's intended sequence and example while making transitions and claims clear. Keep captions short, one idea at a time, and avoid narrating obvious clicks. Open with the feature and what it enables; close on its benefit. Use no narration unless requested.
+Propose an exhaustive, ordered video outline before writing the post. Show every planned on-screen action (including scrolls, hovers, clicks, control changes, and transitions) and **every visible caption with its exact proposed wording**. Number the captions and state which actions happen while each remains on screen; include actions without captions and off-camera preparation. Do not collapse multiple captions into a single thematic "caption point." Preserve the author's intended sequence and example while making transitions and claims clear. Keep captions short, one idea at a time, and avoid narrating obvious clicks. Open with the feature and what it enables; close on its benefit. Use no narration unless requested.
 
-**Wait for the author's validation of the video outline before drafting the LinkedIn post.** Incorporate their corrections into the outline first.
+**Wait for the author's validation of the full action-and-caption sequence before drafting the LinkedIn post.** Incorporate their corrections into the outline first. If recording later calls for additional or changed captions or visible actions, show the revised sequence for validation before producing the video.
 
 ## Draft and revise the post
 
@@ -25,4 +25,4 @@ After validation, draft a concise post that tells the supplied story and explain
 
 Read the latest draft before every revision, especially after the author edits it. Preserve wording and structure they explicitly favor, and change only what their feedback calls for. Treat maintainer experience as their account; ground technical mechanisms and numerical claims in the project. Never claim a feature is the first or only one of its kind without support.
 
-Save the video outline and post in the owning repository's `communications/linkedin/` area when working in a checkout. Interface feature pieces belong in the interface repository; cross-repo modeling facts may need the companion library. Follow a specified worktree. Recording, editing, and publication are separate tasks.
+Save video outlines and posts in the interface repository's `communications/linkedin/` area, the single LinkedIn authoring home. Cross-repo modeling facts may need the companion library. Follow a specified worktree. Recording, editing, and publication are separate tasks.
