@@ -43,6 +43,8 @@ class TestResultsPanel:
         toolbar_button = page.locator("#show-results-toolbar-btn")
         expect(toolbar_button).not_to_have_attribute("hx-get", "/model_builder/result-chart/")
         expect(toolbar_button).to_have_attribute("data-bs-toggle", "tooltip")
+        expect(toolbar_button).to_have_text("Show results")
+        expect(bar_button.locator("[data-quick-total]")).to_be_empty()
 
         # Result panel should NOT be visible
         expect(page.locator("#lineChart")).not_to_be_visible()

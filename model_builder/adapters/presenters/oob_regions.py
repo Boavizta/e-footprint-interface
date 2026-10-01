@@ -72,7 +72,7 @@ def _render_model_canvas(model_web, params) -> str:
 
 def build_quick_total_context(model_web):
     constraint = model_web.creation_constraints["__results__"]
-    return str(model_web.system.total_footprint.sum()) if constraint["enabled"] else constraint["reason"]
+    return str(model_web.system.total_footprint.sum()) if constraint["enabled"] else ""
 
 
 def _render_results_buttons(model_web, params) -> str:
