@@ -306,7 +306,8 @@ def generate_dynamic_form(
                 }
             )
         else:
-            default = default_values[attr_name]
+            allows_empty = EmptyExplainableObject in get_args(init_sig_params[attr_name].annotation)
+            default = default_values.get(attr_name, EmptyExplainableObject()) if allows_empty else default_values[attr_name]
             metadata = {
                 "confidence": default.confidence,
                 "comment": default.comment,
@@ -330,16 +331,30 @@ def generate_dynamic_form(
                 structure_field.update(
                     {
                         "input_type": "explainable_quantity",
-                        "unit": (
-                            "dimensionless" if is_empty or default.value.units == u.dimensionless else f"{default.value.units:~P}"
-                        ),
+                        "unit": (field_config.get("empty_unit", "dimensionless") if is_empty else
+                                 "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}"),
                         "default": "" if is_empty else default_value,
                         "can_be_negative": attr_name in attributes_that_can_have_negative_values,
                         "step": step,
                     }
                 )
-                if include_attributes is not None:
-                    structure_field["allows_empty"] = EmptyExplainableObject in get_args(init_sig_params[attr_name].annotation)
+                if allows_empty:
+                    structure_field["allows_empty"] = True
+                if field_config.get("auto_sizing"):
+                    structure_field["auto_sizing"] = True
+                if "placeholder" in field_config:
+                    structure_field["placeholder"] = field_config["placeholder"]
+                if field_config.get("hide_unit"):
+                    structure_field["hide_unit"] = True
+                if attr_name in conditional_list_values:
+                    condition = conditional_list_values[attr_name]
+                    empty_only = [str(controller) for controller, values in condition["conditional_list_values"].items()
+                                  if values and all(isinstance(value, EmptyExplainableObject) for value in values)]
+                    if empty_only and "." not in condition["depends_on"]:
+                        controller_attr = condition["depends_on"]
+                        structure_field["auto_only_for"] = empty_only
+                        structure_field["auto_controller_id"] = f"{efootprint_class_str}_{controller_attr}"
+                        structure_field["auto_controller_value"] = str(default_values[controller_attr])
             elif issubclass(annotation, ExplainableHourlyQuantities):
                 form_config = build_timeseries_form_config(annotation, default)
                 if form_config:

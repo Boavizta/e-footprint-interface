@@ -7,8 +7,9 @@ from domain construction logic.
 """
 
 import json
-from typing import Any, Dict, Mapping, get_origin, List
+from typing import Any, Dict, Mapping, get_args, get_origin, List
 
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
@@ -157,8 +158,9 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
             base_attr = attr_key[:-6]
             if base_attr not in parsed or "value" not in parsed[base_attr]:
                 raise ValueError(f"Received unit field for unknown quantity {base_attr} in {object_type} form data.")
-            parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
-            parsed[base_attr]["unit"] = value
+            if parsed[base_attr]["value"] is not None:
+                parsed[base_attr]["value"] = float(parsed[base_attr]["value"])
+                parsed[base_attr]["unit"] = value
         elif attr_key.endswith("__confidence"):
             base_attr = attr_key[: -len("__confidence")]
             parsed.setdefault(base_attr, {})["confidence"] = value if value else None
@@ -226,7 +228,8 @@ def parse_form_data(form_data: Mapping[str, Any], object_type: str) -> Dict[str,
         elif issubclass(annotation, ModelingObject):
             parsed[attr_key] = value
         elif issubclass(annotation, ExplainableObject):
-            parsed[attr_key] = {"value": value, "label": "no label"}
+            allows_empty = EmptyExplainableObject in get_args(init_sig_params[attr_key].annotation)
+            parsed[attr_key] = {"value": None if allows_empty and value == "" else value, "label": "no label"}
         else:
             raise ValueError(f"Unable to parse {attr_key} in {object_type} form data.")
 

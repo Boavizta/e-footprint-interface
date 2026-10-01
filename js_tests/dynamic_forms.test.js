@@ -4,6 +4,7 @@
 // single form ever holds a three-level chain.)
 
 require("../theme/static/scripts/dynamic_forms.js");
+require("../theme/static/scripts/optional_quantity.js");
 const {initializeAll} = require("../theme/static/scripts/weekly_pattern_builder.js");
 
 const fs = require("fs");
@@ -55,6 +56,51 @@ test("conditional select restores its default and clears it when the parent make
     expect(optionValues("Cls_model_name")).toEqual(["veo-3"]);
     expect(document.getElementById("Cls_model_name").value).toBe("");
     expect(document.getElementById("Cls_model_name").selectedIndex).toBe(-1);
+});
+
+test("optional count clears and hides when its controller requires an empty value", () => {
+    document.body.innerHTML = `
+        <form><select id="Server_server_type"><option value="on-premise">On premise</option>
+            <option value="autoscaling">Autoscaling</option></select>
+        <div data-optional-quantity data-auto-controller-id="Server_server_type"
+                   data-auto-controller-value="on-premise" data-auto-only-for="autoscaling">
+            <input type="checkbox" data-action="optional-quantity-auto">
+            <div data-optional-quantity-value>
+                <input id="Server_fixed_nb_of_instances" name="Server_fixed_nb_of_instances" type="number" value="3">
+                <input name="Server_fixed_nb_of_instances__unit" value="concurrent">
+            </div>
+        </div>
+        </form>
+        <script id="dynamic-form-data" type="application/json"></script>`;
+    document.getElementById("dynamic-form-data").textContent = "{}";
+    document.dispatchEvent(new Event("initDynamicForm"));
+
+    const type = document.getElementById("Server_server_type");
+    const count = document.getElementById("Server_fixed_nb_of_instances");
+    const group = document.querySelector("[data-optional-quantity-value]");
+    const toggle = document.querySelector('[data-action="optional-quantity-auto"]');
+    expect(count.value).toBe("3");
+    expect(count.required).toBe(true);
+    expect(group.classList.contains("d-none")).toBe(false);
+    toggle.checked = true;
+    toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(count.value).toBe("");
+    expect(count.required).toBe(false);
+    expect(group.classList.contains("d-none")).toBe(true);
+    toggle.checked = false;
+    toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    count.value = "4";
+    type.value = "autoscaling";
+    type.dispatchEvent(new Event("change"));
+    expect(count.value).toBe("");
+    expect(toggle.checked).toBe(true);
+    expect(toggle.disabled).toBe(true);
+    expect(group.classList.contains("d-none")).toBe(true);
+    type.value = "on-premise";
+    type.dispatchEvent(new Event("change"));
+    expect(toggle.disabled).toBe(false);
+    expect(group.classList.contains("d-none")).toBe(true);
+    expect(count.value).toBe("");
 });
 
 test("selection attribution appears only for the attributed option", () => {

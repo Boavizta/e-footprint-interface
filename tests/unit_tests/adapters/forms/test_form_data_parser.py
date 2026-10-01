@@ -67,6 +67,18 @@ class TestParseFormData:
         assert result["compute"] == {"value": 4, "unit": "core", "label": "no label"}
         assert result["ram"] == {"value": 16, "unit": "GB", "label": "no label"}
 
+    def test_optional_instance_count_keeps_blank_distinct_from_zero(self):
+        blank = parse_form_data({"Server_fixed_nb_of_instances": "",
+                                 "Server_fixed_nb_of_instances__unit": "concurrent"}, "Server")
+        zero = parse_form_data({"Server_fixed_nb_of_instances": "0",
+                                "Server_fixed_nb_of_instances__unit": "concurrent"}, "Server")
+        assert blank["fixed_nb_of_instances"] == {"value": None, "label": "no label"}
+        assert zero["fixed_nb_of_instances"] == {"value": 0.0, "unit": "concurrent", "label": "no label"}
+
+        storage = parse_form_data({"Storage_fixed_nb_of_instances": "",
+                                   "Storage_fixed_nb_of_instances__unit": "concurrent"}, "Storage")
+        assert storage["fixed_nb_of_instances"]["value"] is None
+
     def test_keeps_real_fields_ending_with_unit_as_regular_fields(self, monkeypatch):
         """Should not confuse real *_unit attributes with quantity helper fields."""
 

@@ -180,6 +180,45 @@
                     },
                     "required_by": null
                 }
+            },
+            {
+                "web_id": "GPUServer_fixed_nb_of_instances",
+                "attr_name": "fixed_nb_of_instances",
+                "label": "fixed nb of instances",
+                "tooltip": "On-premise only: number of physical machines deployed. Used to detect when traffic exceeds capacity. Leave empty for autoscaling and serverless server types.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": null,
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "concurrent",
+                "default": "",
+                "can_be_negative": false,
+                "step": "1",
+                "allows_empty": true,
+                "auto_sizing": true,
+                "placeholder": "Leave blank for automatic sizing",
+                "hide_unit": true,
+                "auto_only_for": [
+                    "autoscaling",
+                    "serverless"
+                ],
+                "auto_controller_id": "GPUServer_server_type",
+                "auto_controller_value": "serverless",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-GPUServer_fixed_nb_of_instances",
+                    "input_id": "GPUServer_fixed_nb_of_instances",
+                    "provisional_owner": "object",
+                    "attribute": "fixed_nb_of_instances",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -690,6 +729,45 @@
                     },
                     "required_by": null
                 }
+            },
+            {
+                "web_id": "BoaviztaCloudServer_fixed_nb_of_instances",
+                "attr_name": "fixed_nb_of_instances",
+                "label": "fixed nb of instances",
+                "tooltip": "On-premise only: number of physical machines deployed. Used to detect when traffic exceeds capacity. Leave empty for autoscaling and serverless server types.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": null,
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "concurrent",
+                "default": "",
+                "can_be_negative": false,
+                "step": "1",
+                "allows_empty": true,
+                "auto_sizing": true,
+                "placeholder": "Leave blank for automatic sizing",
+                "hide_unit": true,
+                "auto_only_for": [
+                    "autoscaling",
+                    "serverless"
+                ],
+                "auto_controller_id": "BoaviztaCloudServer_server_type",
+                "auto_controller_value": "autoscaling",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-BoaviztaCloudServer_fixed_nb_of_instances",
+                    "input_id": "BoaviztaCloudServer_fixed_nb_of_instances",
+                    "provisional_owner": "object",
+                    "attribute": "fixed_nb_of_instances",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
@@ -1043,6 +1121,45 @@
                     "input_id": "Server_average_carbon_intensity",
                     "provisional_owner": "object",
                     "attribute": "average_carbon_intensity",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
+            },
+            {
+                "web_id": "Server_fixed_nb_of_instances",
+                "attr_name": "fixed_nb_of_instances",
+                "label": "fixed nb of instances",
+                "tooltip": "On-premise only: number of physical machines deployed. Used to detect when traffic exceeds capacity. Leave empty for autoscaling and serverless server types.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": null,
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "concurrent",
+                "default": "",
+                "can_be_negative": false,
+                "step": "1",
+                "allows_empty": true,
+                "auto_sizing": true,
+                "placeholder": "Leave blank for automatic sizing",
+                "hide_unit": true,
+                "auto_only_for": [
+                    "autoscaling",
+                    "serverless"
+                ],
+                "auto_controller_id": "Server_server_type",
+                "auto_controller_value": "autoscaling",
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Server_fixed_nb_of_instances",
+                    "input_id": "Server_fixed_nb_of_instances",
+                    "provisional_owner": "object",
+                    "attribute": "fixed_nb_of_instances",
                     "setting": {
                         "included": false,
                         "help": ""

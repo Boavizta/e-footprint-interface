@@ -2,4 +2,4 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 
 
 class StorageWeb(ModelingObjectWeb):
-    attributes_to_skip_in_forms = ["fixed_nb_of_instances"]
+    pass

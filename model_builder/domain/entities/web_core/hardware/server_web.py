@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class ServerWeb(ModelingObjectWeb):
     add_template = "add_object_with_storage.html"
     edit_template = "../server/server_edit.html"
-    attributes_to_skip_in_forms = ["storage", "fixed_nb_of_instances"]
+    attributes_to_skip_in_forms = ["storage"]
     gets_deleted_if_unique_mod_obj_container_gets_deleted = False
 
     # Declarative form configuration - used by FormContextBuilder in adapters layer

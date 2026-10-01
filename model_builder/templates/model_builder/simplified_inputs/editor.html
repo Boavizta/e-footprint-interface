@@ -11,13 +11,25 @@
             hx-get="{% url 'simplified-timeseries-panel' field.address.object_id field.address.attribute %}"
             hx-target="#sidePanel" hx-swap="innerHTML">Edit timeseries</button>
     {% elif editor.input_type == 'explainable_quantity' %}
-    <div class="input-group">
+    {% if editor.auto_sizing %}<div data-optional-quantity data-auto-controller-id="{{ editor.auto_controller_id|default:'' }}"
+         data-auto-controller-value="{{ editor.auto_controller_value|default:'' }}"
+         data-auto-only-for="{{ editor.auto_only_for|join:',' }}">
+        <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="{{ editor.web_id }}__auto"
+                   data-action="optional-quantity-auto" {% if not editor.default %}checked{% endif %}>
+            <label class="form-check-label" for="{{ editor.web_id }}__auto">Size instances automatically</label>
+        </div>
+        <p class="form-text mb-2" data-optional-quantity-help>Uses modeled demand. Turn off to set a fixed number of instances.</p>
+    {% endif %}
+    <div class="input-group{% if editor.auto_sizing and not editor.default %} d-none{% endif %}"{% if editor.auto_sizing %} data-optional-quantity-value{% endif %}>
         <input type="number" class="form-control" name="{{ editor.web_id }}" id="{{ editor.web_id }}"
                aria-label="{{ editor.label }}" value="{{ editor.default|unlocalize }}" step="{{ editor.step|unlocalize }}"
-               {% if not editor.allows_empty %}required{% endif %} {% if not editor.can_be_negative %}min="0"{% endif %}>
-        <span class="input-group-text">{{ editor.unit }}</span>
+               {% if not editor.allows_empty or editor.auto_sizing and editor.default %}required{% endif %}
+               {% if not editor.can_be_negative %}min="0"{% endif %}>
+        {% if editor.unit != 'dimensionless' and not editor.hide_unit %}<span class="input-group-text">{{ editor.unit }}</span>{% endif %}
         <input type="hidden" name="{{ editor.web_id }}__unit" value="{{ editor.unit }}">
     </div>
+    {% if editor.auto_sizing %}</div>{% endif %}
     {% elif editor.input_type == 'select_multiple' %}
     <select multiple class="form-select" name="{{ editor.web_id }}" id="{{ editor.web_id }}" aria-label="{{ editor.label }}">
         {% for option in editor.selected %}<option value="{{ option.value }}" selected>{{ option.label }}</option>{% endfor %}

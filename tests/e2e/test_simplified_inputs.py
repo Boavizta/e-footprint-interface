@@ -25,6 +25,37 @@ def field(workspace, attribute):
 
 @pytest.mark.e2e
 class TestSimplifiedInputs:
+    def test_instance_sizing_switch_in_modeling_and_simplified_inputs(self, minimal_complete_model_builder):
+        builder = minimal_complete_model_builder
+        page = builder.page
+        edit = page.locator("#server-list button[hx-get*='open-edit-object-panel']").first
+        server_id = edit.get_attribute("hx-get").rstrip("/").split("/")[-1]
+        click_and_wait_for_htmx(page, edit)
+        toggle = page.locator("#sidePanel #Server_fixed_nb_of_instances__auto")
+        number = page.locator("#sidePanel #Server_fixed_nb_of_instances")
+        expect(toggle).to_be_checked()
+        expect(toggle).to_be_disabled()
+        page.locator("#sidePanel #Server_server_type").select_option("on-premise")
+        expect(toggle).to_be_enabled()
+        toggle.uncheck()
+        expect(number).to_be_visible()
+        expect(number).to_have_attribute("required", "")
+        number.fill("1000")
+        builder.side_panel.submit_and_wait_for_close()
+
+        workspace = open_configure(page)
+        workspace.locator(f'[data-navigation-object$="object-{server_id}"]').click()
+        count = workspace.locator(f'[data-owner-id="{server_id}"][data-attribute="fixed_nb_of_instances"]')
+        count.locator("[data-include-input]").check()
+        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
+        count = workspace.locator(f'[data-owner-id="{server_id}"][data-attribute="fixed_nb_of_instances"]')
+        toggle = count.locator('[data-action="optional-quantity-auto"]')
+        expect(toggle).not_to_be_checked()
+        with page.expect_response("**/edit-simplified-input/**"):
+            toggle.check()
+        expect(count.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        expect(count.locator('input[type="number"]')).to_have_value("")
+
     def test_provider_save_keeps_accepted_model_and_job_choices_editable(self, minimal_system, model_builder_page):
         from efootprint.api_utils.system_to_json import system_to_json
         from efootprint.abstract_modeling_classes.source_objects import SourceObject

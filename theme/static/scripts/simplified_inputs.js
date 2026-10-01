@@ -131,6 +131,9 @@
     document.addEventListener("change", event => {
         if (event.target.matches("[data-simplified-editor] select[name]")) saveEdit(event.target.closest("form"));
     });
+    document.addEventListener("optional-quantity:changed", event => {
+        if (event.detail.automatic) saveEdit(event.target.closest("[data-simplified-editor]"));
+    });
     document.addEventListener("simplified-provenance:changed", event => saveEdit(event.target.closest("[data-simplified-editor]")));
     document.addEventListener("click", event => {
         if (event.target.closest('[data-action="simplified-retry"]')) saveEdit(event.target.closest("form"), true);

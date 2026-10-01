@@ -72,9 +72,6 @@ def edit_simplified_input(request, object_id, attribute):
             if key == prefix or key.startswith(prefix + "__"):
                 values = request.POST.getlist(key)
                 form_data[attribute + key[len(prefix):]] = ";".join(values)
-        if form_data.get(attribute) == "" and attribute + "__unit" in form_data:
-            form_data[attribute] = None
-            form_data.pop(attribute + "__unit", None)
         parsed = parse_form_data(form_data, owner.class_as_simple_str)
         output = EditSimplifiedInputUseCase(model_web, catalog).execute(
             EditSimplifiedInput(FieldAddress(object_id, attribute), parsed[attribute]))

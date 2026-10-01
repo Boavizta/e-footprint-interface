@@ -41,8 +41,10 @@ def test_selected_view_contains_only_saved_fields_and_authored_help(minimal_mode
     assert "1 input" in html
 
 
-def test_normal_forms_still_exclude_instance_count(minimal_model_web):
+def test_normal_forms_include_optional_instance_count(minimal_model_web):
     server = minimal_model_web.servers[0]
     normal, advanced, _ = generate_dynamic_form(server.class_as_simple_str, server.modeling_obj.__dict__,
                                                 minimal_model_web, obj_to_edit=server)
-    assert "fixed_nb_of_instances" not in {field["attr_name"] for field in normal + advanced}
+    count = next(field for field in normal + advanced if field["attr_name"] == "fixed_nb_of_instances")
+    assert count["allows_empty"] and count["default"] == ""
+    assert count["unit"] == "concurrent"

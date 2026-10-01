@@ -16,6 +16,7 @@ import json
 
 import pytest
 from efootprint.abstract_modeling_classes.reactive_core import observe_computations
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
 from efootprint.constants.units import u
 
@@ -90,6 +91,30 @@ def test_edit_server_updates_nested_storage(default_system_repository):
     assert sd["Server"][server_id]["carbon_footprint_manufacturing"]["value"] == 60.0
     assert sd["Storage"][storage_id]["name"] == "Updated Storage"
     assert sd["Storage"][storage_id]["carbon_footprint_manufacturing_per_storage_capacity"]["value"] == 160.0
+
+
+def test_normal_forms_create_and_clear_optional_server_and_storage_counts(default_system_repository):
+    storage_data = create_post_data_from_class_default_values("Counted storage", "Storage")
+    storage_data.update({"Storage_fixed_nb_of_instances": "2",
+                         "Storage_fixed_nb_of_instances__unit": "concurrent"})
+    server_data = create_post_data_from_class_default_values(
+        "Counted server", "Server", server_type="on-premise", fixed_nb_of_instances="1000",
+        fixed_nb_of_instances__unit="concurrent", Storage_form_data=storage_data)
+    server_id = create_object(default_system_repository, server_data)
+    server = ModelWeb(default_system_repository).get_web_object_from_efootprint_id(server_id)
+    assert server.modeling_obj.fixed_nb_of_instances.magnitude == 1000
+    assert server.storage.modeling_obj.fixed_nb_of_instances.magnitude == 2
+
+    edit_object(default_system_repository, server_id, "Server", {
+        "Server_server_type": "autoscaling", "Server_fixed_nb_of_instances": "",
+        "Server_fixed_nb_of_instances__unit": "concurrent",
+        "Storage_form_data": json.dumps({"type_object_available": "Storage",
+                                         "Storage_fixed_nb_of_instances": "",
+                                         "Storage_fixed_nb_of_instances__unit": "concurrent"}),
+    })
+    server = ModelWeb(default_system_repository).get_web_object_from_efootprint_id(server_id)
+    assert isinstance(server.modeling_obj.fixed_nb_of_instances, EmptyExplainableObject)
+    assert isinstance(server.storage.modeling_obj.fixed_nb_of_instances, EmptyExplainableObject)
 
 
 def test_memory_interruption_rolls_transactional_edit_back_without_persisting(

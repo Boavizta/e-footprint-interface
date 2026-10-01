@@ -95,6 +95,29 @@ def test_generate_dynamic_form_keeps_integer_step_for_integral_values(minimal_mo
     assert power_field["step"] == "1"
 
 
+def test_normal_server_and_storage_forms_render_blank_optional_instance_counts(minimal_model_web):
+    from efootprint.core.hardware.storage import Storage
+
+    server = minimal_model_web.servers[0]
+    fields, advanced, _ = generate_dynamic_form(
+        "Server", server.modeling_obj.__dict__, minimal_model_web, obj_to_edit=server)
+    count = _get_field_by_web_id(fields + advanced, "Server_fixed_nb_of_instances")
+    assert count["allows_empty"] and count["default"] == "" and count["unit"] == "concurrent"
+    assert count["auto_sizing"]
+    assert count["auto_controller_id"] == "Server_server_type"
+    assert count["auto_only_for"] == ["autoscaling", "serverless"]
+    html = render_to_string("model_builder/side_panels/dynamic_form_fields/explainable_quantity.html", {"field": count})
+    assert "required" not in html
+    assert 'name="Server_fixed_nb_of_instances__unit"' in html
+
+    storage_defaults = {"name": "New storage", **Storage.default_values}
+    fields, advanced, _ = generate_dynamic_form("Storage", storage_defaults, minimal_model_web)
+    storage_count = _get_field_by_web_id(fields + advanced, "Storage_fixed_nb_of_instances")
+    assert storage_count["allows_empty"] and storage_count["default"] == ""
+    assert storage_count["unit"] == "concurrent"
+    assert storage_count["auto_sizing"]
+
+
 def test_generate_dynamic_form_registers_both_recurrent_builders_with_constant_defaults(minimal_model_web):
     recurrent_class = MODELING_OBJECT_CLASSES_DICT["RecurrentEdgeProcess"]
     recurrent_web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING["RecurrentEdgeProcess"]

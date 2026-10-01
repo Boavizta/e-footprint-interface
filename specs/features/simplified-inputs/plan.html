@@ -318,7 +318,7 @@
 
 <aside id="impl-decisions" data-note="review">
   <p><strong>Implementation decisions</strong></p>
-  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — APPLIED</a></p>
+  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — SUPERSEDED</a></p>
   <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
   <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
   <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
@@ -326,6 +326,7 @@
   <p><a href="#impl-decision-06">[IMPL-DECISION-06] Keep Sources bookmark controls lazy — APPLIED</a></p>
   <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep simplified editing reachable with Results open — APPLIED</a></p>
   <p><a href="#impl-decision-08">[IMPL-DECISION-08] Require explicit recovery of a failed edit before leaving its view — APPLIED</a></p>
+  <p><a href="#impl-decision-09">[IMPL-DECISION-09] Show optional instance counts in normal forms — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -489,7 +490,7 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     <p>For example, including an API's Model also requires including Resolution for every video job
     linked to that API.</p>
     <aside id="impl-decision-01" data-note="review">
-      <p><strong>[IMPL-DECISION-01] — APPLIED</strong></p>
+      <p><strong>[IMPL-DECISION-01] — SUPERSEDED</strong></p>
       <p>Run A, Task 3: eligibility follows constructor types and conditional metadata independently of
       normal panels' form-specific skip lists. In particular, <code>fixed_nb_of_instances</code> is an
       eligible optional number, so including <code>server_type</code> includes that companion. Applying
@@ -497,7 +498,15 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
       empty-number behavior. Existing Modeling forms keep their exclusions; Task 7 must render
       catalog-selected optional numbers explicitly. See the
       <a href="../../../model_builder/domain/services/simplified_inputs.py">field catalog</a> and
-      <a href="briefs/task-7.md">Task 7 brief</a>.</p>
+      <a href="briefs/task-7.md">Task 7 brief</a>. The normal-panel exclusion was later removed by
+      <a href="#impl-decision-09">IMPL-DECISION-09</a>.</p>
+    </aside>
+    <aside id="impl-decision-09" data-note="review">
+      <p><strong>[IMPL-DECISION-09] — APPLIED</strong></p>
+      <p>Server and Storage <code>fixed_nb_of_instances</code> now appear in ordinary forms as optional numbers.
+      A shared automatic-sizing switch makes the empty value explicit; turning it off requires a fixed count.
+      Autoscaling and serverless require the empty value. Normal and simplified forms use the same number parser
+      and library validation, so the catalog no longer needs a form-exclusion exception for these fields.</p>
     </aside>
     <p>The next step joins this catalog to existing form contexts; the configuration save below uses
     the same answers to check the submitted selection.</p>

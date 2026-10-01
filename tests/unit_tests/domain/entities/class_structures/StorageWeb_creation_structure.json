@@ -160,6 +160,39 @@
                     },
                     "required_by": null
                 }
+            },
+            {
+                "web_id": "Storage_fixed_nb_of_instances",
+                "attr_name": "fixed_nb_of_instances",
+                "label": "fixed nb of instances",
+                "tooltip": "Number of physical storage units deployed when capacity is provisioned ahead of time. Leave empty to let e-footprint size capacity from the cumulative storage need.",
+                "metadata": {
+                    "confidence": null,
+                    "comment": null,
+                    "source": null,
+                    "available_sources": []
+                },
+                "input_type": "explainable_quantity",
+                "unit": "concurrent",
+                "default": "",
+                "can_be_negative": false,
+                "step": "1",
+                "allows_empty": true,
+                "auto_sizing": true,
+                "placeholder": "Leave blank for automatic sizing",
+                "hide_unit": true,
+                "simplified_eligible": true,
+                "bookmark": {
+                    "dom_id": "bookmark-new-Storage_fixed_nb_of_instances",
+                    "input_id": "Storage_fixed_nb_of_instances",
+                    "provisional_owner": "object",
+                    "attribute": "fixed_nb_of_instances",
+                    "setting": {
+                        "included": false,
+                        "help": ""
+                    },
+                    "required_by": null
+                }
             }
         ],
         "advanced_fields": [
