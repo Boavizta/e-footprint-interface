@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Codex per-task and global reviews now use GPT-6.1 Sol/high; the paired Astra/Sol shadow-review experiment ended early after one feature by user decision.
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
 - Workspace mutations run one at a time, protecting edits, navigation and exports until the save settles while keeping reading and stateless previews available.
 - Modeling and workspace downloads finish a focused simplified edit and wait for its accepted save; failed edits remain retryable or explicitly discardable and block affected downloads.

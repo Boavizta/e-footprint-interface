@@ -63,7 +63,6 @@ recording only consequential decisions in context in the plan.
 
 Investigations and ad-hoc design work are exempt; the four-stage flow is for features that ship.
 Conversational bug batches use `bug-fixes`: diagnostics plus `tasks.md`, followed by the normal implement/review/archive stages.
-`feature-implement` also follows the active experiment linked from [`.agents/repository.md`](.agents/repository.md), using the library's shared five-feature observation record.
 
 ## Documentation upkeep
 

@@ -4,12 +4,6 @@ This file tracks active workstreams and the near/mid/far horizon. Detailed plans
 
 ## Active streams
 
-### Workflow improvements — shadow-review observation
-
-Interface-led features participate in the library's [five-feature protocol](../../e-footprint/specs/features/workflow-improvements/tasks.md).
-Its [shared observation record](../../e-footprint/specs/features/workflow-improvements/shadow-review.md)
-tracks progress across both repositories; there is no separate interface counter.
-
 ### Timeseries builders — unify `builders/timeseries` with `time_builders` (planned, parked)
 
 The class-based `builders/timeseries` objects (form-input-driven, editable in the interface) currently cover exponential growth, constant recurrent values, and the shipped recurrent-quantities weekly-pattern builder, while the richer functional helpers in the library's `time_builders` module (linear growth, sinusoidal/daily fluctuation, calendar/frequency, from-list) are not available as editable objects. Unify them: expose the `time_builders` patterns as form-input objects (with a `form_inputs` attribute) so any usage series can be built and edited in the interface. Origin: EcoScan feedback (`user_research/2026-05-19-ecoscan.md`); the library tutorial already covers timeseries discoverability in the meantime.
@@ -39,6 +33,8 @@ then a brief HTMX loading affordance on the drill-down/calculus-graph fetch is e
 - Mobile-first or responsive-first UX overhaul.
 
 ## Stable / not in flight
+
+- The library's [Astra/Sol shadow-review experiment](../../e-footprint/specs/features/workflow-improvements/shadow-review.md) ended early by user decision; Codex task and global reviews use GPT-6.1 Sol/high.
 
 - Clean Architecture domain/application/adapters layout.
 - HTMX-driven partial updates and the form-rendering pipeline.
