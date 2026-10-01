@@ -25,6 +25,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
+| LinkedIn post drafts and captioned demo video scripts | `communications/README.md` and `communications/video/README.md` |
 | Active feature work | `specs/features/<feature-name>/` |
 | Past investigations and dated decisions | `archives/` |
 

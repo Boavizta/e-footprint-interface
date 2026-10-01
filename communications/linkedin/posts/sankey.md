@@ -11,3 +11,5 @@ That attribution logic has been one of e-footprint’s hardest parts to build, a
 But the result is well worth it: the Sankey makes complex systems understandable at a glance. It shows where impact flows, and where the hotspots are.
 
 🎥 Watch the video to see it in action on an example e-commerce model and visualize how different electricity carbon intensities shape use-phase impact in France and the US.
+
+#efootprint #boavizta #greenit
