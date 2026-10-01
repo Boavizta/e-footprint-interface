@@ -343,6 +343,8 @@
     function navigate(workspace, objectId) {
         const object = document.getElementById(objectId);
         if (!object || object.hidden) return;
+        workspace.querySelectorAll("[data-navigation-object][aria-current]").forEach(button => button.removeAttribute("aria-current"));
+        workspace.querySelector(`[data-navigation-object="${objectId}"]`)?.setAttribute("aria-current", "true");
         object.closest("[data-simplified-group]").open = true;
         object.open = true;
         object.scrollIntoView({ block: "nearest" });
@@ -378,7 +380,7 @@
             const count = workspace.dataset.mode === "configure"
                 ? [...object.querySelectorAll("[data-include-input]")].filter(input => input.checked).length
                 : object.querySelectorAll("[data-field-address]").length;
-            object.querySelector("[data-object-count]").textContent = `(${count} selected)`;
+            object.querySelector("[data-object-count]").textContent = `${count} input${count === 1 ? "" : "s"}`;
             object.hidden = filtered && count === 0;
             if (!object.hidden) visibleCount++;
             const navigation = workspace.querySelector(`[data-navigation-object="${object.id}"]`);
@@ -389,7 +391,9 @@
             option.disabled = object.hidden;
         });
         workspace.querySelectorAll("[data-simplified-group]").forEach(group => {
-            group.hidden = ![...group.querySelectorAll("[data-simplified-object]")].some(object => !object.hidden);
+            const visibleObjects = [...group.querySelectorAll("[data-simplified-object]")].filter(object => !object.hidden);
+            group.hidden = visibleObjects.length === 0;
+            group.querySelector("[data-group-count]").textContent = `${visibleObjects.length} object${visibleObjects.length === 1 ? "" : "s"}`;
             workspace.querySelector(`[data-navigation-group="${group.id}"]`).hidden = group.hidden;
             workspace.querySelector(`[data-selector-group="${group.id}"]`).hidden = group.hidden;
         });

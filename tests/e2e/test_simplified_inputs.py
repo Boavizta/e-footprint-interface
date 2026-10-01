@@ -125,7 +125,7 @@ class TestSimplifiedInputs:
         expect(workspace).to_have_attribute("data-mode", "configure")
         workspace.locator("[data-selected-object-filter]").check()
         page.once("dialog", lambda dialog: dialog.accept())
-        workspace.get_by_role("button", name="Clear simplified inputs", exact=True).click()
+        workspace.get_by_role("button", name="Clear all", exact=True).click()
         expect(workspace.locator("[data-filter-empty]")).to_be_visible()
         expect(workspace.locator('[name="title"]')).to_have_value("Adapt This Modeling")
         expect(workspace.locator('[name="guidance"]')).to_have_value("General Guidance")
@@ -321,6 +321,10 @@ class TestSimplifiedInputs:
         if width < 992:
             page.locator("#toolbar-nav .navbar-toggler").click()
         workspace = open_configure(page)
+        expect(workspace.locator(".simplified-header-actions").get_by_role("button", name="Clear all")).to_be_visible()
+        expect(workspace.locator(".simplified-header-actions").get_by_role("button", name="Save and return")).to_be_visible()
+        expect(workspace.locator(".simplified-header-actions").get_by_role("button", name="Cancel")).to_be_visible()
+        expect(workspace.locator(".simplified-expand-controls [data-selected-object-filter]")).to_be_visible()
         rendered = workspace.locator(".simplified-fields").first.evaluate(
             "el => getComputedStyle(el).gridTemplateColumns.split(' ').length")
         assert rendered == columns
@@ -610,13 +614,13 @@ class TestInlineBookmarks:
         expect(page.locator("#result-block")).not_to_be_empty()
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
         assert totals.nth(0).text_content() != saved_total
-        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator(".confidence-badge").click()
         with page.expect_response("**/edit-simplified-input/**"):
             lifespan.locator('.confidence-menu [data-level="high"]').click()
         page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
         expect(lifespan.locator(".confidence-badge")).to_have_attribute("data-level", "high")
-        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator('[data-action="open-source-editor"]').click()
         comment = lifespan.locator(".source-editor-comment")
         comment.fill("Reviewed modeling assumption")
@@ -624,7 +628,7 @@ class TestInlineBookmarks:
             comment.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.locator('.source-editor input[name$="__comment"]')).to_have_value("Reviewed modeling assumption")
-        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator('[data-action="open-source-editor"]').click()
         source_editor = lifespan.locator(".source-editor")
         source_editor.locator(".source-editor-select").select_option("__custom__")
@@ -638,7 +642,7 @@ class TestInlineBookmarks:
         with page.expect_response("**/edit-simplified-input/**"):
             source_link.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
-        lifespan.get_by_text("Source, confidence and comment", exact=True).click()
+        lifespan.get_by_text("Source and comment", exact=True).click()
         expect(lifespan.get_by_role("link", name="Reviewed report", exact=True)).to_have_attribute(
             "href", "https://example.com/report")
         minimal_complete_model_builder.close_result_panel()
@@ -698,7 +702,7 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     page.unroute("**/edit-simplified-input/**")
     builder.side_panel.submit_and_wait_for_close()
     expect(selected.locator("[data-current-value]")).not_to_have_text(before)
-    selected.get_by_text("Source, confidence and comment", exact=True).click()
+    selected.get_by_text("Source and comment", exact=True).click()
     selected.locator('[data-action="open-source-editor"]').click()
     comment = selected.locator(".source-editor-comment")
     comment.fill("Forecast assumption")
@@ -725,7 +729,7 @@ def test_focused_edit_export_waits_for_save_and_failed_edit_blocks_until_discard
     owner_id = field(workspace, "lifespan").get_attribute("data-owner-id")
     assert data["Storage"][owner_id]["lifespan"]["value"] == 8
     selected = field(workspace, "lifespan")
-    selected.get_by_text("Source, confidence and comment", exact=True).click()
+    selected.get_by_text("Source and comment", exact=True).click()
     selected.locator('[data-action="open-source-editor"]').click()
     selected.locator(".source-editor-comment").fill("Export the final metadata too")
     builder.download_active_model(filename)

@@ -95,6 +95,8 @@ def build_workspace_context(model_web, *, configure=False, catalog=None, address
                                  "name": web_obj.name, "fields": fields, "open": first,
                                  "selected_count": sum(field["setting"]["included"] for field in fields)})
         first = False
+    selected_input_count = sum(obj["selected_count"] for group in groups.values() for obj in group["objects"])
     return {"system_id": system_id, "slot": getattr(model_web.repository, "slot", 0),
             "configure": configure, "title": definition["title"], "guidance": definition["guidance"],
-            "groups": list(groups.values()), "unavailable_inputs": unavailable_inputs}
+            "groups": list(groups.values()), "selected_input_count": selected_input_count,
+            "unavailable_inputs": unavailable_inputs}

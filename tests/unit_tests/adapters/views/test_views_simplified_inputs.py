@@ -245,7 +245,7 @@ class TestSimplifiedViews:
             prefix + "__comment": "Reviewed projection"})
         assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
         html = response.content.decode()
-        assert "Edit timeseries" in html and "Source, confidence and comment" in html
+        assert "Edit timeseries" in html and "Source and comment" in html
         inputs = dict(owner.hourly_occurrences.form_inputs)
         inputs["initial_volume"] = 45
         data = {"UsagePattern_hourly_occurrences__" + key: value for key, value in inputs.items()}

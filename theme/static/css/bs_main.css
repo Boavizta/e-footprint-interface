@@ -23873,23 +23873,41 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 
 .simplified-workspace {
   container-type: inline-size;
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   text-align: left;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #f7faf8;
+  background: white;
+  color: #111928;
 }
-.simplified-workspace .simplified-header, .simplified-workspace .simplified-actions, .simplified-workspace .simplified-expand-controls {
+.simplified-workspace .simplified-header, .simplified-workspace .simplified-header-actions, .simplified-workspace .simplified-expand-controls {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-bottom: 1rem;
 }
 .simplified-workspace .simplified-header {
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.simplified-workspace .simplified-header h1 {
+  margin: 0;
+  font-weight: 650;
+}
+.simplified-workspace .simplified-input-count {
+  margin: 0.2rem 0 0;
+  color: #526177;
+  font-size: 0.9rem;
+}
+.simplified-workspace .simplified-guidance {
+  margin: 0.2rem 0 1.25rem;
+  line-height: 1.5;
+}
+.simplified-workspace .simplified-header-actions {
+  justify-content: flex-end;
 }
 .simplified-workspace .simplified-description {
   max-width: 52rem;
@@ -23906,18 +23924,54 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 }
 .simplified-workspace .simplified-layout {
   display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  gap: 1rem;
   flex: 1;
   min-height: 0;
 }
 .simplified-workspace .simplified-navigation {
+  align-self: start;
+  max-height: 100%;
   overflow: auto;
+  padding: 0.7rem;
+  border: 1px solid #ccd4df;
+  border-radius: 0.4rem;
+  background: #fafbfc;
+}
+.simplified-workspace .simplified-navigation h2 {
+  margin-bottom: 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 650;
 }
 .simplified-workspace .simplified-navigation-list > div {
   display: flex;
   flex-direction: column;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.7rem;
+}
+.simplified-workspace .simplified-navigation-list > div:last-child {
+  margin-bottom: 0;
+}
+.simplified-workspace .simplified-navigation-list strong {
+  padding: 0 0.25rem;
+  color: #526177;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.simplified-workspace .simplified-navigation-list button {
+  width: 100%;
+  border: 0;
+  padding: 0.3rem 0.4rem;
+  color: #34445a;
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+.simplified-workspace .simplified-navigation-list button:hover, .simplified-workspace .simplified-navigation-list button[aria-current=true] {
+  background: #e8eef7;
+}
+.simplified-workspace .simplified-navigation-list [data-navigation-count] {
+  color: #69768a;
 }
 .simplified-workspace .simplified-compact-navigation {
   display: none;
@@ -23927,36 +23981,108 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   overflow: auto;
   padding-bottom: 4rem;
 }
-.simplified-workspace .simplified-group > summary {
-  font-size: 1.15rem;
-  font-weight: 600;
+.simplified-workspace .simplified-expand-controls {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+  padding: 0 0 0.5rem;
+  border-bottom: 1px solid #e1e5ea;
+  background: white;
+}
+.simplified-workspace .simplified-selected-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: auto;
+  color: #43546b;
+  font-size: 0.82rem;
+}
+.simplified-workspace .simplified-group {
   margin-bottom: 0.7rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #aeb9c7;
+  border-radius: 0.4rem;
+  background: #f7f9fc;
+}
+.simplified-workspace .simplified-group > summary {
+  color: #243b64;
+  font-size: 1rem;
+  font-weight: 650;
+}
+.simplified-workspace .simplified-group > summary span {
+  margin-left: 0.35rem;
+  color: #69768a;
+  font-size: 0.82rem;
+  font-weight: 400;
 }
 .simplified-workspace .simplified-object {
-  padding: 0.8rem;
-  margin-bottom: 0.8rem;
-  border: 1px solid #dae4df;
-  border-radius: 0.5rem;
+  margin: 0.5rem 0 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #d8dfe8;
+  border-radius: 0.4rem;
   background: white;
 }
 .simplified-workspace .simplified-object > summary {
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+.simplified-workspace .simplified-object > summary span {
+  margin-left: 0.35rem;
+  color: #69768a;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 .simplified-workspace .simplified-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
 }
 .simplified-workspace .simplified-field {
   min-width: 0;
 }
+.simplified-workspace .simplified-field h3 {
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+.simplified-workspace .simplified-field-help {
+  margin: -0.25rem 0 0.45rem;
+  color: #637083;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.simplified-workspace .simplified-field .input-group-text {
+  background: #f7f9fc;
+}
 .simplified-workspace .simplified-preview {
-  color: #53645d;
+  color: #526177;
   overflow-wrap: anywhere;
 }
 .simplified-workspace .simplified-field-help, .simplified-workspace .simplified-guidance {
   white-space: pre-wrap;
+}
+.simplified-workspace .simplified-provenance {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid #e0e4e9;
+  border-radius: 0.4rem;
+  background: #fafbfc;
+}
+.simplified-workspace .simplified-provenance > summary {
+  color: #43546b;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.simplified-workspace [data-simplified-save-status] {
+  display: block;
+  margin-top: 0.3rem;
+  color: #69768a;
+  font-size: 0.72rem;
+}
+.simplified-workspace [data-save-failed=true] [data-simplified-save-status] {
+  color: #a32929;
 }
 .simplified-workspace .simplified-selection {
   display: grid;
@@ -23965,10 +24091,27 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 .simplified-workspace .simplified-selection textarea {
   min-height: 4rem;
 }
+.simplified-workspace[data-mode=configure] .simplified-field {
+  padding: 0.65rem;
+  border: 1px solid #d8dfe8;
+  border-radius: 0.4rem;
+}
+.simplified-workspace[data-mode=configure] .simplified-field:has([data-include-input]:not(:checked)) {
+  border-style: dashed;
+  background: #fafbfc;
+}
 .simplified-workspace [hidden] {
   display: none !important;
 }
 
+@container (min-width: 1051px) {
+  .simplified-workspace .simplified-fields:has(> .simplified-field:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .simplified-workspace .simplified-fields:has(> .simplified-field:only-child) {
+    grid-template-columns: minmax(0, min(100%, 34rem));
+  }
+}
 @container (max-width: 1050px) {
   .simplified-workspace .simplified-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));

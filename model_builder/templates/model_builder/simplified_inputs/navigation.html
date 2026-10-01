@@ -12,7 +12,7 @@
         <div data-navigation-group="{{ group.dom_id }}">
             <strong>{{ group.object_type }}</strong>
             {% for object in group.objects %}
-            <button type="button" class="btn btn-sm text-start" data-action="simplified-navigate" data-workspace-read data-navigation-object="{{ object.dom_id }}">{{ object.name }} <span data-navigation-count>({{ object.selected_count }})</span></button>
+            <button type="button" class="btn btn-sm text-start" data-action="simplified-navigate" data-workspace-read data-navigation-object="{{ object.dom_id }}" {% if object.open %}aria-current="true"{% endif %}>{{ object.name }} <span data-navigation-count>({{ object.selected_count }})</span></button>
             {% endfor %}
         </div>
         {% endfor %}

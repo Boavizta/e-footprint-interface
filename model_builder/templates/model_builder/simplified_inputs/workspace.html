@@ -1,13 +1,24 @@
 <section class="simplified-workspace" data-simplified-workspace data-system-id="{{ system_id }}" data-slot="{{ slot }}" data-mode="{% if configure %}configure{% else %}simplified{% endif %}">
-    <header class="simplified-header">
-        <h1 class="h4">{% if configure %}Configure simplified inputs{% else %}Simplified inputs{% endif %}</h1>
-        {% if not configure %}
-        <button type="button" class="btn btn-outline-primary" data-action="simplified-configure" data-workspace-control>Configure</button>
-        {% endif %}
-    </header>
     {% if configure %}
     <form data-configure-form data-workspace-editor hx-post="{% url 'save-simplified-inputs' %}" hx-target="#simplified-slot-{{ slot }}" hx-swap="innerHTML" hx-params="csrfmiddlewaretoken">
         {% csrf_token %}
+    {% endif %}
+    <header class="simplified-header">
+        <div>
+            <h1 class="h4">{% if configure %}Configure simplified inputs{% elif title %}{{ title }}{% else %}Simplified inputs{% endif %}</h1>
+            {% if not configure %}<p class="simplified-input-count">{{ selected_input_count }} input{{ selected_input_count|pluralize }}</p>{% endif %}
+        </div>
+        {% if configure %}
+        <div class="simplified-header-actions">
+            <button type="button" class="btn btn-outline-secondary" data-action="simplified-clear">Clear all</button>
+            <button type="submit" class="btn btn-primary" data-workspace-control>Save and return</button>
+            <button type="button" class="btn btn-outline-secondary" data-action="simplified-cancel" data-workspace-control>Cancel</button>
+        </div>
+        {% else %}
+        <button type="button" class="btn btn-outline-secondary" data-action="simplified-configure" data-workspace-control>Configure</button>
+        {% endif %}
+    </header>
+    {% if configure %}
         <div class="simplified-description">
             <label for="si-{{ system_id }}-title">Title</label>
             <input id="si-{{ system_id }}-title" class="form-control" name="title" value="{{ title }}">
@@ -15,26 +26,20 @@
             <textarea id="si-{{ system_id }}-guidance" class="form-control" name="guidance">{{ guidance }}</textarea>
         </div>
         {% for notice in unavailable_inputs %}<p class="small text-muted">{{ notice }}</p>{% endfor %}
-        <div class="simplified-actions">
-            <label><input type="checkbox" data-selected-object-filter data-workspace-read> Only objects with selected inputs</label>
-            <button type="button" class="btn btn-outline-secondary" data-action="simplified-clear">Clear simplified inputs</button>
-            <button type="submit" class="btn btn-primary" data-workspace-control>Save and return</button>
-            <button type="button" class="btn btn-outline-secondary" data-action="simplified-cancel" data-workspace-control>Cancel</button>
-        </div>
     {% else %}
-        {% if title %}<h2 class="h5">{{ title }}</h2>{% endif %}
         {% if guidance %}<p class="simplified-guidance">{{ guidance }}</p>{% endif %}
     {% endif %}
-    <div class="simplified-expand-controls">
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-expand" data-workspace-read>Expand all</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-collapse" data-workspace-read>Collapse all</button>
-    </div>
     <div class="simplified-layout">
         {% include 'model_builder/simplified_inputs/navigation.html' %}
         <main class="simplified-content" aria-label="{% if configure %}Eligible inputs{% else %}Selected inputs{% endif %}">
+            <div class="simplified-expand-controls">
+                {% if configure %}<label class="simplified-selected-filter"><input type="checkbox" data-selected-object-filter data-workspace-read> Only objects with selected inputs</label>{% endif %}
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-expand" data-workspace-read>Expand all</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-collapse" data-workspace-read>Collapse all</button>
+            </div>
             {% for group in groups %}
             <details class="simplified-group" id="{{ group.dom_id }}" data-simplified-group open>
-                <summary data-workspace-read>{{ group.object_type }}</summary>
+                <summary data-workspace-read>{{ group.object_type }} <span data-group-count>{{ group.objects|length }} object{{ group.objects|length|pluralize }}</span></summary>
                 {% for object in group.objects %}{% include 'model_builder/simplified_inputs/object.html' %}{% endfor %}
             </details>
             {% empty %}

@@ -36,6 +36,9 @@ def test_selected_view_contains_only_saved_fields_and_authored_help(minimal_mode
     assert "Preserve This Help" in html
     assert "data-selection-controls" not in html
     assert context["title"] == "Keep My Title"
+    assert context["selected_input_count"] == 1
+    assert "<h1 class=\"h4\">Keep My Title</h1>" in html
+    assert "1 input" in html
 
 
 def test_normal_forms_still_exclude_instance_count(minimal_model_web):

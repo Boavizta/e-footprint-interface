@@ -1,5 +1,5 @@
 <details class="simplified-object" id="{{ object.dom_id }}" data-simplified-object data-owner-id="{{ object.object_id }}" {% if object.open %}open{% endif %}>
-    <summary tabindex="0" data-workspace-read>{{ object.name }} <span data-object-count>({{ object.selected_count }} selected)</span></summary>
+    <summary tabindex="0" data-workspace-read>{{ object.name }} <span data-object-count>{{ object.selected_count }} input{{ object.selected_count|pluralize }}</span></summary>
     <div class="simplified-fields">
         {% for field in object.fields %}{% include 'model_builder/simplified_inputs/field.html' %}{% endfor %}
     </div>

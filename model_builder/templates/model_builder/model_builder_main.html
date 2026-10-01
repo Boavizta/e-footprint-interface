@@ -17,7 +17,7 @@ pattern — tab strip, then the active tab's toolbar beneath it).
     </div>
     {% for slot_entry in workspace_slots %}
     <div id="simplified-slot-{{ slot_entry.slot }}" class="d-none w-100" data-simplified-target="{{ slot_entry.slot }}" data-system-id="{{ slot_entry.model_web.system.efootprint_id }}" {% if slot_entry.opening_default %}data-opening-default="{{ slot_entry.opening_default }}"{% endif %}>
-        {% if slot_entry.simplified_context %}{% include 'model_builder/simplified_inputs/workspace.html' with system_id=slot_entry.simplified_context.system_id slot=slot_entry.slot configure=False title=slot_entry.simplified_context.title guidance=slot_entry.simplified_context.guidance groups=slot_entry.simplified_context.groups %}{% endif %}
+        {% if slot_entry.simplified_context %}{% include 'model_builder/simplified_inputs/workspace.html' with system_id=slot_entry.simplified_context.system_id slot=slot_entry.slot configure=False title=slot_entry.simplified_context.title guidance=slot_entry.simplified_context.guidance groups=slot_entry.simplified_context.groups selected_input_count=slot_entry.simplified_context.selected_input_count %}{% endif %}
     </div>
     {% endfor %}
     {% comment %}
