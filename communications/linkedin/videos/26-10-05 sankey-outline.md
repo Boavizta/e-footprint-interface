@@ -1,8 +1,8 @@
 # Sankey feature video — exact caption and action sequence
 
-Companion to [the LinkedIn post](../posts/sankey.md). This records the current [Sankey script](../../video/sankey.py), so the wording and order below describe the rendered video rather than a condensed set of themes. There is no narration. Each caption stays visible through the actions in its row, until the next caption replaces it.
+Companion to [the LinkedIn post](../posts/26-10-05%20sankey.md). This records the current [Sankey script](../../video/26_10_05_sankey.py), so the wording and order below describe the rendered video rather than a condensed set of themes. There is no narration. Each caption stays visible through the actions in its row, until the next caption replaces it.
 
-**LinkedIn video thumbnail:** Use [the Sankey cover image](../../video/output/sankey_thumbnail.png), with the first diagram as the main visual. Upload it as the video's custom thumbnail. The video itself still opens on the model builder.
+**LinkedIn video thumbnail:** Use [the Sankey cover image](../../video/output/26_10_05_sankey_thumbnail.png), with the first diagram as the main visual. Upload it as the video's custom thumbnail. The video itself still opens on the model builder.
 
 **Prepared off-camera:** Import the introductory **E-commerce web and database system** model with equal-volume shopper patterns in France and the US. Open Results and configure its one Sankey to show **Total impact → Phase → Usage journeys → Steps / Functions → Hardware**, with a **1%** aggregation threshold. Close the setup page; the recording begins on the model builder with Results closed.
 

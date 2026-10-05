@@ -191,6 +191,9 @@ def run_video(name: str, demo_fn, setup_fn=None, viewport=VIDEO_SIZE) -> Path:
 
     if not webm_path or not webm_path.exists():
         raise RuntimeError("Playwright did not produce a video")
+    dated_webm_path = webm_path.with_name(f"{name}_{webm_path.name}")
+    webm_path.rename(dated_webm_path)
+    webm_path = dated_webm_path
     output = OUTPUT / f"{name}.mp4"
     command = ["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{trim_start:.2f}",
                "-i", str(webm_path), "-c:v", "libx264", "-crf", "20",
