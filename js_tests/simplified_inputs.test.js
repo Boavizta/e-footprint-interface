@@ -265,6 +265,42 @@ function mountEditor(fixture = "simplified_editor") {
     return document.querySelector('[data-simplified-editor]');
 }
 
+test('simplified provenance follows the side-panel field layout', () => {
+    const form = mountEditor();
+    const row = form.querySelector('.simplified-input-row');
+    expect(row.querySelector('.simplified-input-control input[type="number"]')).not.toBeNull();
+    expect(row.querySelector(':scope > .confidence-wrap')).not.toBeNull();
+    expect(form.querySelector('.source-comment')).toBe(row.nextElementSibling);
+    expect(form.querySelector('.source-line[data-action="open-source-editor"]')).not.toBeNull();
+    expect(form.querySelector('details.simplified-provenance')).toBeNull();
+});
+
+test('save status starts empty, appears after an accepted replacement, and clears', () => {
+    jest.useFakeTimers();
+    try {
+        const form = mountEditor();
+        expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('');
+        const input = form.querySelector('input[type="number"]');
+        input.value = '8';
+        input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+        expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Saving…');
+        const replacement = form.cloneNode(true);
+        replacement.querySelector('[data-simplified-save-status]').textContent = '';
+        form.replaceWith(replacement);
+        document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
+            detail: {elt: form, successful: true},
+        }));
+        const status = replacement.querySelector('[data-simplified-save-status]');
+        expect(status.textContent).toBe('Saved');
+        jest.advanceTimersByTime(2999);
+        expect(status.textContent).toBe('Saved');
+        jest.advanceTimersByTime(1);
+        expect(status.textContent).toBe('');
+    } finally {
+        jest.useRealTimers();
+    }
+});
+
 test('Enter followed by blur saves once and failure keeps draft retryable with accepted totals', () => {
     const form = mountEditor();
     const input = form.querySelector('input');

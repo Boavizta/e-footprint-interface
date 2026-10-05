@@ -5,6 +5,8 @@
       hx-trigger="simplified-save" hx-swap="none">
     {% csrf_token %}
     {% with editor=field.editor %}
+    <div class="simplified-input-row">
+    <div class="simplified-input-control">
     {% if editor.input_type == 'recurrent_timeseries_builder' or editor.input_type == 'hourly_quantities_from_growth' %}
     <p class="simplified-preview" data-current-value>{{ field.preview }}</p>
     <button type="button" class="btn btn-sm btn-outline-primary" data-workspace-control data-action="simplified-timeseries-open"
@@ -40,14 +42,16 @@
         {% for option in editor.options %}<option value="{{ option.value }}" {% if option.value == editor.selected %}selected{% endif %}>{{ option.label }}</option>{% endfor %}
     </select>
     {% endif %}
+    </div>
     {% if editor.metadata %}
-    <details class="simplified-provenance"><summary data-workspace-read>Source and comment</summary>
-        {% include 'model_builder/side_panels/dynamic_form_fields/confidence_badge.html' with conf_dom_id=editor.web_id conf_name_prefix=editor.web_id conf_current=editor.metadata.confidence %}
-        {% include 'model_builder/side_panels/dynamic_form_fields/source.html' with source_dom_id=editor.web_id source_name_prefix=editor.web_id source_meta_source=editor.metadata.source source_meta_comment=editor.metadata.comment source_meta_available=editor.metadata.available_sources simplified_completion=True %}
-    </details>
+    {% include 'model_builder/side_panels/dynamic_form_fields/confidence_badge.html' with conf_dom_id=editor.web_id conf_name_prefix=editor.web_id conf_current=editor.metadata.confidence %}
+    {% endif %}
+    </div>
+    {% if editor.metadata %}
+    {% include 'model_builder/side_panels/dynamic_form_fields/source.html' with source_dom_id=editor.web_id source_name_prefix=editor.web_id source_meta_source=editor.metadata.source source_meta_comment=editor.metadata.comment source_meta_available=editor.metadata.available_sources simplified_completion=True %}
     {% endif %}
     {% endwith %}
-    <span class="small" data-simplified-save-status role="status">Saved</span>
+    <span class="small" data-simplified-save-status role="status"></span>
     <button type="button" class="btn btn-sm btn-outline-primary" data-action="simplified-retry" data-workspace-control hidden>Retry save</button>
     <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-discard" data-workspace-control hidden
             hx-get="{% url 'simplified-input-field' field.address.object_id field.address.attribute %}"

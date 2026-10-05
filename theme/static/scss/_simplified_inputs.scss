@@ -49,9 +49,11 @@
   .simplified-field .input-group-text { background: #f7f9fc; }
   .simplified-preview { color: #526177; overflow-wrap: anywhere; }
   .simplified-field-help, .simplified-guidance { white-space: pre-wrap; }
-  .simplified-provenance { margin-top: .5rem; padding: .3rem .55rem; border: 1px solid #e0e4e9; border-radius: .4rem; background: #fafbfc; }
-  .simplified-provenance > summary { color: #43546b; font-size: .8rem; font-weight: 600; }
+  .simplified-input-row { display: flex; align-items: center; gap: .5rem; width: 100%; max-width: 28rem; }
+  .simplified-input-control { flex: 1; min-width: 0; }
+  .simplified-input-row .confidence-wrap { flex: none; }
   [data-simplified-save-status] { display: block; margin-top: .3rem; color: #69768a; font-size: .72rem; }
+  [data-simplified-save-status]:empty { display: none; }
   [data-save-failed="true"] [data-simplified-save-status] { color: #a32929; }
   .simplified-selection { display: grid; gap: .3rem; }
   .simplified-selection textarea { min-height: 4rem; }

@@ -7,12 +7,20 @@
     let pendingRead = null;
     const savedEdits = new WeakMap();
     const failedEdits = new WeakMap();
+    const saveStatusTimers = new WeakMap();
     let pendingExport = null;
+
+    function setSaveStatus(form, message, duration = 0) {
+        const status = form.querySelector("[data-simplified-save-status]");
+        clearTimeout(saveStatusTimers.get(status));
+        status.textContent = message;
+        if (duration) saveStatusTimers.set(status, setTimeout(() => { status.textContent = ""; }, duration));
+    }
 
     function markEditFailed(form) {
         form.dataset.saveFailed = "true";
         failedEdits.set(form, editSnapshot(form));
-        form.querySelector("[data-simplified-save-status]").textContent = "Not saved";
+        setSaveStatus(form, "Not saved");
         form.querySelector('[data-action="simplified-retry"]').hidden = false;
         form.querySelector('[data-action="simplified-discard"]')?.removeAttribute("hidden");
     }
@@ -24,7 +32,7 @@
     }
 
     function showFailedEdit(form, message) {
-        form.querySelector("[data-simplified-save-status]").textContent = message;
+        setSaveStatus(form, message);
         form.closest("[data-simplified-object]").open = true;
         form.closest("[data-simplified-group]").open = true;
         form.scrollIntoView({block: "nearest"});
@@ -33,7 +41,7 @@
     function requireEditRecovery(form, action) {
         document.querySelector("[data-simplified-recovery-status]")?.remove();
         const message = `Not saved. Retry or discard this edit before ${action}.`;
-        form.querySelector("[data-simplified-save-status]").textContent = message;
+        setSaveStatus(form, message);
         const active = form.closest("[data-simplified-target]") === targetForActiveModel();
         if (active && document.body.dataset.baseView === "simplified") {
             showFailedEdit(form, message);
@@ -113,7 +121,7 @@
             return;
         }
         form.dataset.saving = "true";
-        form.querySelector("[data-simplified-save-status]").textContent = "Saving…";
+        setSaveStatus(form, "Saving…");
         window.htmx.trigger(form, "simplified-save");
     }
     document.addEventListener("focusout", event => {
@@ -208,7 +216,12 @@
         const form = event.detail.elt;
         if (!form.matches("[data-simplified-editor]")) return;
         delete form.dataset.saving;
-        if (event.detail.successful) return;
+        if (event.detail.successful) {
+            const acceptedForm = [...document.querySelectorAll("[data-simplified-editor]")]
+                .find(candidate => candidate.dataset.valuePrefix === form.dataset.valuePrefix);
+            if (acceptedForm) setSaveStatus(acceptedForm, "Saved", 3000);
+            return;
+        }
         markEditFailed(form);
     });
     document.body.addEventListener("workspace-mutation:finished", event => {

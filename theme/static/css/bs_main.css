@@ -24063,23 +24063,28 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 .simplified-workspace .simplified-field-help, .simplified-workspace .simplified-guidance {
   white-space: pre-wrap;
 }
-.simplified-workspace .simplified-provenance {
-  margin-top: 0.5rem;
-  padding: 0.3rem 0.55rem;
-  border: 1px solid #e0e4e9;
-  border-radius: 0.4rem;
-  background: #fafbfc;
+.simplified-workspace .simplified-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 28rem;
 }
-.simplified-workspace .simplified-provenance > summary {
-  color: #43546b;
-  font-size: 0.8rem;
-  font-weight: 600;
+.simplified-workspace .simplified-input-control {
+  flex: 1;
+  min-width: 0;
+}
+.simplified-workspace .simplified-input-row .confidence-wrap {
+  flex: none;
 }
 .simplified-workspace [data-simplified-save-status] {
   display: block;
   margin-top: 0.3rem;
   color: #69768a;
   font-size: 0.72rem;
+}
+.simplified-workspace [data-simplified-save-status]:empty {
+  display: none;
 }
 .simplified-workspace [data-save-failed=true] [data-simplified-save-status] {
   color: #a32929;

@@ -594,6 +594,11 @@ class TestInlineBookmarks:
         workspace.get_by_role("button", name="Expand all", exact=True).click()
         lifespan = field(workspace, "lifespan")
         value = lifespan.locator('input[type="number"]')
+        expect(lifespan.locator("[data-simplified-save-status]")).to_be_empty()
+        expect(lifespan.locator(".simplified-input-row .simplified-input-control input[type='number']")).to_be_visible()
+        expect(lifespan.locator(".simplified-input-row > .confidence-wrap")).to_be_visible()
+        expect(lifespan.locator(".source-comment .source-line")).to_be_visible()
+        expect(lifespan.locator(".simplified-provenance")).to_have_count(0)
         power = field(workspace, "power").locator('input[type="number"]')
         power_value = power.input_value()
         pending = []
@@ -645,13 +650,11 @@ class TestInlineBookmarks:
         expect(page.locator("#result-block")).not_to_be_empty()
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
         assert totals.nth(0).text_content() != saved_total
-        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator(".confidence-badge").click()
         with page.expect_response("**/edit-simplified-input/**"):
             lifespan.locator('.confidence-menu [data-level="high"]').click()
         page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
         expect(lifespan.locator(".confidence-badge")).to_have_attribute("data-level", "high")
-        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator('[data-action="open-source-editor"]').click()
         comment = lifespan.locator(".source-editor-comment")
         comment.fill("Reviewed modeling assumption")
@@ -659,7 +662,6 @@ class TestInlineBookmarks:
             comment.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.locator('.source-editor input[name$="__comment"]')).to_have_value("Reviewed modeling assumption")
-        lifespan.get_by_text("Source and comment", exact=True).click()
         lifespan.locator('[data-action="open-source-editor"]').click()
         source_editor = lifespan.locator(".source-editor")
         source_editor.locator(".source-editor-select").select_option("__custom__")
@@ -673,7 +675,6 @@ class TestInlineBookmarks:
         with page.expect_response("**/edit-simplified-input/**"):
             source_link.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
-        lifespan.get_by_text("Source and comment", exact=True).click()
         expect(lifespan.get_by_role("link", name="Reviewed report", exact=True)).to_have_attribute(
             "href", "https://example.com/report")
         minimal_complete_model_builder.close_result_panel()
@@ -733,7 +734,6 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     page.unroute("**/edit-simplified-input/**")
     builder.side_panel.submit_and_wait_for_close()
     expect(selected.locator("[data-current-value]")).not_to_have_text(before)
-    selected.get_by_text("Source and comment", exact=True).click()
     selected.locator('[data-action="open-source-editor"]').click()
     comment = selected.locator(".source-editor-comment")
     comment.fill("Forecast assumption")
@@ -760,7 +760,6 @@ def test_focused_edit_export_waits_for_save_and_failed_edit_blocks_until_discard
     owner_id = field(workspace, "lifespan").get_attribute("data-owner-id")
     assert data["Storage"][owner_id]["lifespan"]["value"] == 8
     selected = field(workspace, "lifespan")
-    selected.get_by_text("Source and comment", exact=True).click()
     selected.locator('[data-action="open-source-editor"]').click()
     selected.locator(".source-editor-comment").fill("Export the final metadata too")
     builder.download_active_model(filename)
