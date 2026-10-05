@@ -23,6 +23,15 @@ function include(bookmark, included) {
     checkbox.dispatchEvent(new Event("change", {bubbles: true}));
 }
 
+test("bookmark checkbox names its simplified-input destination", () => {
+    mount("simplified_bookmarks");
+    const checkbox = document.querySelector('[data-bookmark] [data-include-input]');
+    expect(checkbox.closest("label").textContent.trim()).toBe("Include in simplified inputs");
+    mount("simplified_configure");
+    const configureCheckbox = document.querySelector('[data-simplified-workspace] [data-include-input]');
+    expect(configureCheckbox.closest("label").textContent.trim()).toBe("Include");
+});
+
 test.each([
     ["simplified_create_server", "Server", "Storage", "storage_capacity"],
     ["simplified_create_edge_device", "EdgeComputer", "EdgeStorage", "storage_capacity_per_unit"],

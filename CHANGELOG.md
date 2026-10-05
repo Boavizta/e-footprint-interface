@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.
 
 ### Fixed
+- Side-panel simplified-input bookmarks label their checkbox “Include in simplified inputs”; Configure keeps “Include.”
 - Simplified inputs place confidence beside compact value controls and show the clickable source and comment directly below. Their Saved status appears only briefly after an accepted update.
 - Simplified inputs now uses the feature mockup's navigation card, grouped sections, field and provenance styling, with its selected-input count and a right-aligned Results total. Configure actions sit in the header, the object filter sits with expand controls, and the Results bar retains the Modeling style.
 - Disabled Results controls keep the validation explanation in a tooltip without expanding the Show results button.

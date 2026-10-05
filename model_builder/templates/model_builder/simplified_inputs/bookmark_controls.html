@@ -1,4 +1,4 @@
-{% include 'model_builder/simplified_inputs/selection_controls.html' %}
+{% include 'model_builder/simplified_inputs/selection_controls.html' with bookmark_label=True %}
 {% if field.provisional_owner %}<p class="small text-muted">Included when this object is created.</p>{% endif %}
 <small data-bookmark-status role="status"></small>
 {% if not field.provisional_owner %}<button type="button" class="btn btn-sm btn-link" data-action="bookmark-undo" hidden>Undo membership change</button>{% endif %}
