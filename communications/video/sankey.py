@@ -66,7 +66,7 @@ def demo(d: Demo) -> float:
     first = sankey.first_card()
     first.wait_for_diagram_update(timeout=120000)
     d.smooth_scroll_to(first._container, block="start", settle=1.4)
-    d.caption("Each column accounts for the full impact shown. Flow widths reveal hotspots.", hold=3.0)
+    d.caption("Each column accounts for the full impact shown. Flow heights reveal hotspots.", hold=3.0)
 
     plot = first.plot_locator()
     d.smooth_scroll_to(plot, settle=1.1)
@@ -78,7 +78,7 @@ def demo(d: Demo) -> float:
     threshold = first._container.locator('[name="aggregation_threshold_percent"]')
     d.smooth_scroll_to(threshold, settle=0.8)
     d.move_to(threshold)
-    d.caption("At 1%, smaller contributors are grouped together.", hold=2.1)
+    d.caption("At 1%, aggregation threshold groups together nodes whose impact is less than 1%.", hold=3.2)
     with page.expect_response(lambda response: "sankey-diagram" in response.url):
         d.set_range_to_minimum(threshold)
     assert first.aggregation_threshold() == 0
@@ -88,7 +88,7 @@ def demo(d: Demo) -> float:
     d.hover_sankey_node(plot, "Product database ser", hold=1.7)
 
     d.hover_sankey_node(plot, "Default laptop", hold=1.8)
-    d.caption("Laptops dominate this view. We can focus on the rest of the system.", hold=2.9)
+    d.caption("Laptops dominate this view. We can focus on the rest of the system by excluding them.", hold=2.9)
     d.smooth_scroll_to(first._container.locator(".advanced-toggle"), settle=0.8)
     d.click(first._container.locator(".advanced-toggle"), settle=0.5)
     d.caption("Exclude Devices in Advanced options.", hold=1.6)
@@ -114,7 +114,7 @@ def demo(d: Demo) -> float:
     plot = second.plot_locator()
     d.smooth_scroll_to(plot, settle=1.1)
     d.hover_sankey_node(plot, "Manufacturing", hold=0.6)
-    d.caption("The two patterns have the same volumes, so manufacturing impact is nearly equal.", hold=2.4)
+    d.caption("The two patterns have the same volumes, so manufacturing impact is equal.", hold=2.4)
     d.hover_sankey_node(plot, "France", occurrence=0, hold=1.4)
     d.hover_sankey_node(plot, "United States", occurrence=0, hold=1.4)
 

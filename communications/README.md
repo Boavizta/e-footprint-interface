@@ -18,6 +18,7 @@ Add articles and release notes here when their subject is the interface. Author 
 |---|---|
 | `articles/` | Articles whose dominant subject is an interface feature (e.g. onboarding examples, edge toggle UX, guided tour) |
 | `linkedin/posts/` | All e-footprint LinkedIn post drafts |
+| `linkedin/backlog.md` | Ideas for future LinkedIn posts |
 | `linkedin/archive/` | Superseded LinkedIn plans, retained for context |
 | `video/` | Reusable recording code, one script per video, and ignored outputs |
 | `release-notes/` | Release notes tied to interface versions |
