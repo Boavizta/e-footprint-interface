@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Regression coverage for required simplified inputs across owner boundaries, including rejected exclusion patches and completed replacement saves.
 - Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.
 - A grouped Configure view lets authors choose simplified inputs and guidance, with required selections, filtering, navigation, and Save/Discard/Stay protection for drafts. Each modeling remembers its base view.
 - Inline bookmarks in Modeling panels and Sources let authors select inputs without saving surrounding value drafts; new-object selections are saved on creation, and deletion warns about and removes affected selections.

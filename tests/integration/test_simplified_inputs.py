@@ -106,6 +106,25 @@ def video_model(minimal_model_web):
     return ModelWeb(minimal_model_web.repository), api.id, [job.id for job in jobs]
 
 
+def test_cross_owner_required_input_cannot_be_excluded_while_controller_is_included(video_model):
+    model, api_id, job_ids = video_model
+    repository = model.repository
+    use_case = UpdateSimplifiedDefinitionUseCase(
+        repository, build_catalog(model, can_edit_timeseries=can_edit_timeseries))
+    use_case.execute({"fields": {api_id: {"model_name": {"included": True}}}})
+    before = deepcopy(repository.interface_config)
+    assert all(before["simplified_inputs"]["fields"][job_id]["resolution"]["included"] for job_id in job_ids)
+
+    with pytest.raises(ValueError, match="required input cannot be excluded"):
+        use_case.execute({"fields": {job_ids[0]: {"resolution": {"included": False}}}})
+    assert repository.interface_config == before
+
+    replacement = deepcopy(before["simplified_inputs"])
+    replacement["fields"][job_ids[0]]["resolution"]["included"] = False
+    use_case.execute(replacement, replace=True)
+    assert repository.interface_config == before
+
+
 def test_provider_reconciles_chain_and_every_linked_job_in_one_batch(video_model):
     model, api_id, job_ids = video_model
     api = model.flat_efootprint_objs_dict[api_id]
