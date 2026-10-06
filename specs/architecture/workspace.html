@@ -25,10 +25,11 @@
 <p><strong>One unified "Open file" upload (<code>upload_json</code>)</strong> ingests either format and <strong>content-routes on the <code>models</code> key</strong> (authoritative): single-model and comparison files share the <code>.e-f.json</code> extension, so content is the only signal — a comparison file ⇒ <code>_restore_workspace</code> restores both slots + the active pointer; a single-model file ⇒ replace the active model.</p>
 <p>On import each model is recomputed (<code>SystemImportService</code>) and the second slot is added through <code>add_slot</code>, so the shared budget <em>and</em> the distinct-system-id invariant both apply (the two embedded models may legitimately share an id); each restored slot's <code>interface_config</code> is re-attached so Sankey settings survive per model (<code>with_fresh_system_id</code> carries the interface-only metadata across a re-mint). The single toolbar <strong>Open file</strong> entry renders in every session, closing the gap where a single-model session could not open a comparison file; <strong>Download</strong> keeps the two-granularity menu (this model / both models) only when two models exist (a single-model session has just one model to export), so its plain <code>download-json/</code> link and E2E selector stay unchanged.</p>
 <p><strong>Adding a second model from a file</strong> is a distinct intent kept on the tab strip ("+Add → Import from file…", single-model files only) — "Open file" opens-into-here, "+Add → Import" adds-as-second.</p>
-<p>Duplication copies repository-owned interface settings independently and remaps any simplified-input field address
-owned by the newly minted System; ordinary object addresses stay unchanged. It starts from the complete
-<code>ModelWeb</code> document, including objects not yet connected to usage. Re-ID uses
-<code>SystemImportService.serialize_system_and_orphans()</code> to retain those objects and their selected inputs.
+<p>Duplication starts from the active repository's complete cached JSON document, including objects not yet
+connected to usage and saved interface settings. <code>with_fresh_system_id()</code> remints only the System ID,
+copies those settings independently, and remaps its simplified-input field addresses; ordinary object IDs and
+addresses stay unchanged. Re-ID uses <code>SystemImportService.serialize_system_and_orphans()</code> to retain
+disconnected objects and their selected inputs.
 Workspace opening prepares every incoming
 model through <code>SystemImportService</code>, resolves incoming System-ID collisions, and checks the summed final
 payload size before clearing any live slot. Its slot-0 inputs-only recovery document is prepared before replacement

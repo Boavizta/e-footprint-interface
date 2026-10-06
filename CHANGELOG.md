@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
 - Optional quantities in Modeling and Simplified inputs now use a generic “Leave unset” switch and model-declared units; fixed counts remain editable when allowed, and autoscaling or serverless selections clear them.
 - Codex per-task and global reviews now use GPT-6.1 Sol/high; the paired Astra/Sol shadow-review experiment ended early after one feature by user decision.
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
