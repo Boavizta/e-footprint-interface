@@ -1,7 +1,7 @@
 # Derived optional quantity controls — tasks
 
 Plan and approved scope: [plan.html](plan.html) · Separate spec: none
-Status: under review — the plan was confirmed as validated scope on 2026-10-06; this task breakdown awaits review.
+Status: implementation in progress — run A authorized on 2026-10-06.
 
 ## Implementation runs
 
@@ -19,7 +19,7 @@ Status: under review — the plan was confirmed as validated scope on 2026-10-06
 ## Task 1 — Declare and validate optional quantity units
 
 Goal: Give optional instance counts a single declared unit and apply the same dimensionality and sign checks to nonempty updates that ordinary quantities receive.
-Status: under review.
+Status: implemented and reviewed.
 Brief: [briefs/task-1.md](briefs/task-1.md)
 Repository: `e-footprint`.
 Files touched: `efootprint/utils/tools.py`; `efootprint/core/hardware/{hardware_base,server_base,server,gpu_server,storage}.py`; `efootprint/builders/hardware/{boavizta_cloud_server,boavizta_server_from_config}.py`; `efootprint/abstract_modeling_classes/modeling_object.py`; `tests/abstract_modeling_classes/test_modeling_update.py`; `specs/architecture/layers-and-modeling.html`.
@@ -31,7 +31,7 @@ Implementation: standard — the unit lookup must coordinate class defaults with
 ## Task 2 — Render and save derived optional controls
 
 Goal: Make normal and simplified quantity editors show a generic unset switch only when the constructor allows an empty value, with no instance-specific UI flag or copy.
-Status: under review.
+Status: implementing against the reviewed Task 1 library checkout.
 Brief: [briefs/task-2.md](briefs/task-2.md)
 Repository: `e-footprint-interface`.
 Files touched: `model_builder/adapters/forms/form_field_generator.py`; `model_builder/adapters/ui_config/field_ui_config.json`; `model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html` and new `optional_explainable_quantity.html`; `model_builder/templates/model_builder/simplified_inputs/editor.html` and new `explainable_quantity.html` and `optional_explainable_quantity.html`; `theme/static/scripts/{optional_quantity,simplified_inputs}.js`; `tests/fixtures/form_data_builders.py`; `tests/unit_tests/adapters/forms/test_form_field_generator.py`; `tests/unit_tests/domain/entities/class_structures/{ServerWeb,StorageWeb}_creation_structure.json`; `js_tests/dynamic_forms.test.js`; `tests/integration/test_simplified_inputs.py`; `tests/e2e/test_simplified_inputs.py`; `specs/architecture/forms-and-relationships.html`. Adjust existing parser tests only if the unchanged blank-versus-zero contract needs additional coverage.
