@@ -12,7 +12,7 @@ def test_configure_groups_current_inputs_by_true_owner_and_keeps_existing_labels
     assert server.id in owners and server.storage.id in owners
     assert [obj["open"] for obj in objects].count(True) == 1
     count = next(field for field in owners[server.id]["fields"] if field["address"].attribute == "fixed_nb_of_instances")
-    assert count["editor"]["input_type"] == "explainable_quantity"
+    assert count["editor"]["input_type"] == "optional_explainable_quantity"
     assert count["editor"]["default"] == ""
     assert count["preview"] == "No value"
     assert count["editor"]["allows_empty"]

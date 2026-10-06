@@ -1,5 +1,6 @@
 import re
 from types import SimpleNamespace
+from typing import Annotated
 from unittest.mock import MagicMock
 
 import pytest
@@ -7,6 +8,8 @@ from django.template.loader import render_to_string
 from django.utils import translation
 
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
+from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
+from efootprint.utils.tools import InputUnit
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.source_objects import SourceObject
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
@@ -103,11 +106,13 @@ def test_normal_server_and_storage_forms_render_blank_optional_instance_counts(m
         "Server", server.modeling_obj.__dict__, minimal_model_web, obj_to_edit=server)
     count = _get_field_by_web_id(fields + advanced, "Server_fixed_nb_of_instances")
     assert count["allows_empty"] and count["default"] == "" and count["unit"] == "concurrent"
-    assert count["auto_sizing"]
-    assert count["auto_controller_id"] == "Server_server_type"
-    assert count["auto_only_for"] == ["autoscaling", "serverless"]
-    html = render_to_string("model_builder/side_panels/dynamic_form_fields/explainable_quantity.html", {"field": count})
+    assert count["input_type"] == "optional_explainable_quantity"
+    assert count["empty_controller_id"] == "Server_server_type"
+    assert count["empty_only_for"] == ["autoscaling", "serverless"]
+    html = render_to_string("model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html", {"field": count})
     assert "required" not in html
+    assert "Leave unset" in html
+    assert "Uses modeled demand" not in html
     assert 'name="Server_fixed_nb_of_instances__unit"' in html
 
     storage_defaults = {"name": "New storage", **Storage.default_values}
@@ -115,7 +120,7 @@ def test_normal_server_and_storage_forms_render_blank_optional_instance_counts(m
     storage_count = _get_field_by_web_id(fields + advanced, "Storage_fixed_nb_of_instances")
     assert storage_count["allows_empty"] and storage_count["default"] == ""
     assert storage_count["unit"] == "concurrent"
-    assert storage_count["auto_sizing"]
+    assert storage_count["input_type"] == "optional_explainable_quantity"
 
 
 def test_generate_dynamic_form_registers_both_recurrent_builders_with_constant_defaults(minimal_model_web):
@@ -526,3 +531,70 @@ def test_generate_dynamic_form_resolves_skipped_conditional_dependency_from_edit
         {"label": "1080p", "value": "1080p"},
     ]
     assert dynamic_lists == []
+
+
+class _SyntheticOptionalQuantity(ModelingObject):
+    default_values = {}
+    list_values = {}
+    conditional_list_values = {}
+
+    def __init__(self, name: str, count: Annotated[ExplainableQuantity, InputUnit(u.concurrent)] | EmptyExplainableObject):
+        pass
+
+
+class _SyntheticMissingUnit(ModelingObject):
+    default_values = {}
+    list_values = {}
+    conditional_list_values = {}
+
+    def __init__(self, name: str, count: ExplainableQuantity | EmptyExplainableObject):
+        pass
+
+
+@pytest.mark.parametrize("class_default, expected", [(None, "concurrent"), (2 * u.W, "W"),
+                                                   (2 * u.dimensionless, "dimensionless")])
+def test_empty_optional_quantity_uses_declared_unit(monkeypatch, minimal_model_web, class_default, expected):
+    cls = _SyntheticOptionalQuantity
+    _register_synthetic_class(monkeypatch, cls)
+    defaults = {} if class_default is None else {"count": ExplainableQuantity(class_default, label="Count")}
+    monkeypatch.setattr(cls, "default_values", defaults)
+    fields, _, _ = generate_dynamic_form(cls.__name__, {"name": "Example", "count": EmptyExplainableObject()},
+                                         minimal_model_web)
+    assert fields[1]["input_type"] == "optional_explainable_quantity"
+    assert fields[1]["unit"] == expected
+
+
+def test_empty_optional_quantity_without_declared_unit_raises(monkeypatch, minimal_model_web):
+    _register_synthetic_class(monkeypatch, _SyntheticMissingUnit)
+    with pytest.raises(TypeError, match="_SyntheticMissingUnit.count"):
+        generate_dynamic_form(_SyntheticMissingUnit.__name__, {"name": "Example", "count": EmptyExplainableObject()},
+                              minimal_model_web)
+
+
+@pytest.mark.parametrize("magnitude", [0, 3])
+def test_saved_optional_quantity_renders_required_number_and_unchecked_switch(
+    monkeypatch, minimal_model_web, magnitude
+):
+    _register_synthetic_class(monkeypatch, _SyntheticOptionalQuantity)
+    fields, _, _ = generate_dynamic_form(_SyntheticOptionalQuantity.__name__,
+        {"name": "Example", "count": ExplainableQuantity(magnitude * u.W, label="Count")}, minimal_model_web)
+    count = fields[1]
+    assert count["unit"] == "W"
+    for template, context in [("side_panels/dynamic_form_fields", {"field": count}),
+                              ("simplified_inputs", {"editor": count})]:
+        html = render_to_string(f"model_builder/{template}/optional_explainable_quantity.html", context)
+        assert "required" in html
+        assert "checked" not in html
+        assert "Leave unset" in html
+
+
+def test_ordinary_quantity_renders_required_number_without_switch(minimal_model_web):
+    server = minimal_model_web.servers[0].modeling_obj
+    _, fields, _ = generate_dynamic_form("Server", server.__dict__, minimal_model_web)
+    power = _get_field_by_web_id(fields, "Server_power")
+    assert power["input_type"] == "explainable_quantity"
+    for template, context in [("side_panels/dynamic_form_fields", {"field": power}),
+                              ("simplified_inputs", {"editor": power})]:
+        html = render_to_string(f"model_builder/{template}/explainable_quantity.html", context)
+        assert "required" in html
+        assert "data-optional-quantity" not in html

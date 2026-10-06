@@ -172,14 +172,12 @@
                     "source": null,
                     "available_sources": []
                 },
-                "input_type": "explainable_quantity",
+                "input_type": "optional_explainable_quantity",
                 "unit": "concurrent",
                 "default": "",
                 "can_be_negative": false,
                 "step": "1",
                 "allows_empty": true,
-                "auto_sizing": true,
-                "placeholder": "Leave blank for automatic sizing",
                 "hide_unit": true,
                 "simplified_eligible": true,
                 "bookmark": {

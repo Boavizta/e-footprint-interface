@@ -1,0 +1,12 @@
+<div data-optional-quantity data-empty-controller-id="{{ editor.empty_controller_id|default:'' }}"
+     data-empty-controller-value="{{ editor.empty_controller_value|default:'' }}"
+     data-empty-only-for="{{ editor.empty_only_for|join:',' }}">
+    <div class="form-check form-switch mb-2">
+        <input class="form-check-input" type="checkbox" id="{{ editor.web_id }}__empty"
+               data-action="optional-quantity-empty" {% if not editor.default %}checked{% endif %}>
+        <label class="form-check-label" for="{{ editor.web_id }}__empty">Leave unset</label>
+    </div>
+    <div data-optional-quantity-value{% if not editor.default %} class="d-none"{% endif %}>
+        {% include 'model_builder/simplified_inputs/explainable_quantity.html' with optional_quantity=True %}
+    </div>
+</div>

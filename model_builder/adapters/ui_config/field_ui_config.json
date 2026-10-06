@@ -192,10 +192,7 @@
             "Storage"
         ],
         "label": "fixed nb of instances",
-        "empty_unit": "concurrent",
-        "auto_sizing": true,
         "hide_unit": true,
-        "placeholder": "Leave blank for automatic sizing",
         "step": 1
     },
     "fraction_of_usage_time": {

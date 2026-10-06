@@ -7,7 +7,7 @@ from typing import Any
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 
-from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
+from efootprint.utils.tools import get_expected_input_unit
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
@@ -67,7 +67,7 @@ def create_post_data_from_class_default_values(
             if isinstance(default_value, EmptyExplainableObject):
                 data[f"{efootprint_class_name}_{attr_name}"] = ""
                 data[f"{efootprint_class_name}_{attr_name}__unit"] = (
-                    FieldUIConfigProvider.get_config(attr_name, efootprint_class_name).get("empty_unit", "dimensionless"))
+                    str(get_expected_input_unit(efootprint_class, attr_name)))
                 continue
             magnitude = getattr(default_value, "magnitude", None)
             unit = getattr(default_value, "unit", None)

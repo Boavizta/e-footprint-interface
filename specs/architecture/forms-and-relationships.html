@@ -37,10 +37,11 @@ but same-value/provenance-only saves affect only the submitted address. Conditio
 the library's <code>input_values_match()</code>: absence differs from zero, and authored timeseries builder/input changes
 remain edits even when their calculated values are equal. A rejected request discards its local model.</p>
 <p><code>FormContextBuilder.build_input_fields()</code> consumes eligible owner attributes through the shared
-<code>generate_dynamic_form(..., include_attributes=...)</code> generator and ordinary edition transforms. Optional
-empty quantities render a blank numeric default and expose <code>allows_empty</code>. Server and Storage
-<code>fixed_nb_of_instances</code> also appear in normal forms: an automatic-sizing switch submits the empty value,
-while a fixed choice requires a number; autoscaling and serverless force automatic sizing. The simplified presenter groups these existing field dictionaries
+<code>generate_dynamic_form(..., include_attributes=...)</code> generator and ordinary edition transforms. Quantity constructor unions admitting <code>EmptyExplainableObject</code> select the optional numeric partial
+in normal and simplified forms, with a generic “Leave unset” switch. Empty values get their unit from the library’s
+<code>get_expected_input_unit()</code> (class quantity default, then <code>InputUnit</code> annotation); saved numbers
+keep their display unit. A direct conditional controller can force empty and lock the switch; autoscaling and
+serverless do so for instance counts. Ordinary quantities remain required numeric controls. The simplified presenter groups these existing field dictionaries
 by actual type and owner, with System-ID/owner/attribute identities. The shared <code>selection_controls.html</code>
 partial owns inclusion, retained help and required-companion explanations in both Configure and inline disclosures.</p>
 <p>Simplified editors request <code>resolve_conditional_options=True</code> so choices follow the accepted model

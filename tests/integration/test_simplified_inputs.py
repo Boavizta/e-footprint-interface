@@ -218,6 +218,12 @@ def test_optional_server_count_and_unrestricted_branch_round_trip(minimal_model_
                              "Server_fixed_nb_of_instances__comment": "Fleet count"}, "Server")
     use_case.execute(EditSimplifiedInput(count, parsed["fixed_nb_of_instances"]))
     assert ModelWeb(model.repository).flat_efootprint_objs_dict[server.id].fixed_nb_of_instances.magnitude == 1000000
+    parsed_empty = parse_form_data({"Server_fixed_nb_of_instances": "",
+                                   "Server_fixed_nb_of_instances__unit": "concurrent"}, "Server")
+    use_case.execute(EditSimplifiedInput(count, parsed_empty["fixed_nb_of_instances"]))
+    assert isinstance(ModelWeb(model.repository).flat_efootprint_objs_dict[server.id].fixed_nb_of_instances,
+                      EmptyExplainableObject)
+    use_case.execute(EditSimplifiedInput(count, parsed["fixed_nb_of_instances"]))
     with patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update:
         result = use_case.execute(EditSimplifiedInput(kind, {"value": ServerTypes.autoscaling().value}))
     update.assert_called_once()

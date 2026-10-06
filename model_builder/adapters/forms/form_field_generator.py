@@ -13,7 +13,7 @@ from efootprint.abstract_modeling_classes.explainable_recurrent_quantities impor
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.constants.units import u
 from efootprint.logger import logger
-from efootprint.utils.tools import get_init_signature_params
+from efootprint.utils.tools import get_expected_input_unit, get_init_signature_params
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
@@ -325,14 +325,14 @@ def generate_dynamic_form(
             structure_field.update({"metadata": metadata})
             if issubclass(annotation, ExplainableQuantity):
                 is_empty = isinstance(default, EmptyExplainableObject)
+                unit = get_expected_input_unit(efootprint_class, attr_name) if is_empty else default.value.units
                 default_value_decimal = Decimal("0") if is_empty else Decimal(str(default.magnitude))
                 default_value = _format_decimal_for_number_input(default_value_decimal)
                 step = _get_compatible_step(default_value_decimal, field_config.get("step", 0.1))
                 structure_field.update(
                     {
-                        "input_type": "explainable_quantity",
-                        "unit": (field_config.get("empty_unit", "dimensionless") if is_empty else
-                                 "dimensionless" if default.value.units == u.dimensionless else f"{default.value.units:~P}"),
+                        "input_type": "optional_explainable_quantity" if allows_empty else "explainable_quantity",
+                        "unit": "dimensionless" if unit == u.dimensionless else f"{unit:~P}",
                         "default": "" if is_empty else default_value,
                         "can_be_negative": attr_name in attributes_that_can_have_negative_values,
                         "step": step,
@@ -340,8 +340,6 @@ def generate_dynamic_form(
                 )
                 if allows_empty:
                     structure_field["allows_empty"] = True
-                if field_config.get("auto_sizing"):
-                    structure_field["auto_sizing"] = True
                 if "placeholder" in field_config:
                     structure_field["placeholder"] = field_config["placeholder"]
                 if field_config.get("hide_unit"):
@@ -350,11 +348,12 @@ def generate_dynamic_form(
                     condition = conditional_list_values[attr_name]
                     empty_only = [str(controller) for controller, values in condition["conditional_list_values"].items()
                                   if values and all(isinstance(value, EmptyExplainableObject) for value in values)]
-                    if empty_only and "." not in condition["depends_on"]:
+                    # Dotted controller paths need separate handling; they are not DOM IDs.
+                    if allows_empty and empty_only and "." not in condition["depends_on"]:
                         controller_attr = condition["depends_on"]
-                        structure_field["auto_only_for"] = empty_only
-                        structure_field["auto_controller_id"] = f"{efootprint_class_str}_{controller_attr}"
-                        structure_field["auto_controller_value"] = str(default_values[controller_attr])
+                        structure_field["empty_only_for"] = empty_only
+                        structure_field["empty_controller_id"] = f"{efootprint_class_str}_{controller_attr}"
+                        structure_field["empty_controller_value"] = str(default_values[controller_attr])
             elif issubclass(annotation, ExplainableHourlyQuantities):
                 form_config = build_timeseries_form_config(annotation, default)
                 if form_config:

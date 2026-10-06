@@ -25,14 +25,15 @@ def field(workspace, attribute):
 
 @pytest.mark.e2e
 class TestSimplifiedInputs:
-    def test_instance_sizing_switch_in_modeling_and_simplified_inputs(self, minimal_complete_model_builder):
+    def test_optional_count_switch_in_modeling_and_simplified_inputs(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
         page = builder.page
         edit = page.locator("#server-list button[hx-get*='open-edit-object-panel']").first
         server_id = edit.get_attribute("hx-get").rstrip("/").split("/")[-1]
         click_and_wait_for_htmx(page, edit)
-        toggle = page.locator("#sidePanel #Server_fixed_nb_of_instances__auto")
+        toggle = page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")
         number = page.locator("#sidePanel #Server_fixed_nb_of_instances")
+        expect(page.locator("#sidePanel").get_by_text("Leave unset", exact=True).first).to_be_visible()
         expect(toggle).to_be_checked()
         expect(toggle).to_be_disabled()
         page.locator("#sidePanel #Server_server_type").select_option("on-premise")
@@ -49,12 +50,27 @@ class TestSimplifiedInputs:
         count.locator("[data-include-input]").check()
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
         count = workspace.locator(f'[data-owner-id="{server_id}"][data-attribute="fixed_nb_of_instances"]')
-        toggle = count.locator('[data-action="optional-quantity-auto"]')
+        toggle = count.locator('[data-action="optional-quantity-empty"]')
         expect(toggle).not_to_be_checked()
         with page.expect_response("**/edit-simplified-input/**"):
             toggle.check()
         expect(count.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(count.locator('input[type="number"]')).to_have_value("")
+        toggle.uncheck()
+        number = count.locator('input[type="number"]')
+        number.fill("2000")
+        with page.expect_response("**/edit-simplified-input/**"):
+            number.press("Enter")
+        expect(count.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, edit)
+        expect(page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")).not_to_be_checked()
+        expect(page.locator("#sidePanel #Server_fixed_nb_of_instances")).to_have_value("2000")
+        page.locator("#sidePanel #Server_fixed_nb_of_instances__empty").check()
+        builder.side_panel.submit_and_wait_for_close()
+        click_and_wait_for_htmx(page, edit)
+        expect(page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")).to_be_checked()
+        expect(page.locator("#sidePanel #Server_fixed_nb_of_instances")).to_have_value("")
 
     def test_provider_save_keeps_accepted_model_and_job_choices_editable(self, minimal_system, model_builder_page):
         from efootprint.api_utils.system_to_json import system_to_json

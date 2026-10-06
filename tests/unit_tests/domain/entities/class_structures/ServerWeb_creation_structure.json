@@ -192,21 +192,19 @@
                     "source": null,
                     "available_sources": []
                 },
-                "input_type": "explainable_quantity",
+                "input_type": "optional_explainable_quantity",
                 "unit": "concurrent",
                 "default": "",
                 "can_be_negative": false,
                 "step": "1",
                 "allows_empty": true,
-                "auto_sizing": true,
-                "placeholder": "Leave blank for automatic sizing",
                 "hide_unit": true,
-                "auto_only_for": [
+                "empty_only_for": [
                     "autoscaling",
                     "serverless"
                 ],
-                "auto_controller_id": "GPUServer_server_type",
-                "auto_controller_value": "serverless",
+                "empty_controller_id": "GPUServer_server_type",
+                "empty_controller_value": "serverless",
                 "simplified_eligible": true,
                 "bookmark": {
                     "dom_id": "bookmark-new-GPUServer_fixed_nb_of_instances",
@@ -741,21 +739,19 @@
                     "source": null,
                     "available_sources": []
                 },
-                "input_type": "explainable_quantity",
+                "input_type": "optional_explainable_quantity",
                 "unit": "concurrent",
                 "default": "",
                 "can_be_negative": false,
                 "step": "1",
                 "allows_empty": true,
-                "auto_sizing": true,
-                "placeholder": "Leave blank for automatic sizing",
                 "hide_unit": true,
-                "auto_only_for": [
+                "empty_only_for": [
                     "autoscaling",
                     "serverless"
                 ],
-                "auto_controller_id": "BoaviztaCloudServer_server_type",
-                "auto_controller_value": "autoscaling",
+                "empty_controller_id": "BoaviztaCloudServer_server_type",
+                "empty_controller_value": "autoscaling",
                 "simplified_eligible": true,
                 "bookmark": {
                     "dom_id": "bookmark-new-BoaviztaCloudServer_fixed_nb_of_instances",
@@ -1139,21 +1135,19 @@
                     "source": null,
                     "available_sources": []
                 },
-                "input_type": "explainable_quantity",
+                "input_type": "optional_explainable_quantity",
                 "unit": "concurrent",
                 "default": "",
                 "can_be_negative": false,
                 "step": "1",
                 "allows_empty": true,
-                "auto_sizing": true,
-                "placeholder": "Leave blank for automatic sizing",
                 "hide_unit": true,
-                "auto_only_for": [
+                "empty_only_for": [
                     "autoscaling",
                     "serverless"
                 ],
-                "auto_controller_id": "Server_server_type",
-                "auto_controller_value": "autoscaling",
+                "empty_controller_id": "Server_server_type",
+                "empty_controller_value": "autoscaling",
                 "simplified_eligible": true,
                 "bookmark": {
                     "dom_id": "bookmark-new-Server_fixed_nb_of_instances",

@@ -1,0 +1,9 @@
+{% load l10n %}
+<div class="input-group">
+    <input type="number" class="form-control" name="{{ editor.web_id }}" id="{{ editor.web_id }}"
+           aria-label="{{ editor.label }}" value="{{ editor.default|unlocalize }}" step="{{ editor.step|unlocalize }}"
+           {% if not optional_quantity or editor.default %}required{% endif %}
+           {% if not editor.can_be_negative %}min="0"{% endif %}>
+    {% if editor.unit != 'dimensionless' and not editor.hide_unit %}<span class="input-group-text">{{ editor.unit }}</span>{% endif %}
+    <input type="hidden" name="{{ editor.web_id }}__unit" value="{{ editor.unit }}">
+</div>

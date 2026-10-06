@@ -1,14 +1,4 @@
-{% if field.auto_sizing %}<div data-optional-quantity data-auto-controller-id="{{ field.auto_controller_id|default:'' }}"
-     data-auto-controller-value="{{ field.auto_controller_value|default:'' }}"
-     data-auto-only-for="{{ field.auto_only_for|join:',' }}">
-    <div class="form-check form-switch mb-2">
-        <input class="form-check-input" type="checkbox" id="{{ field.web_id }}__auto"
-               data-action="optional-quantity-auto" {% if not field.default %}checked{% endif %}>
-        <label class="form-check-label" for="{{ field.web_id }}__auto">Size instances automatically</label>
-    </div>
-    <p class="form-text mb-2" data-optional-quantity-help>Uses modeled demand. Turn off to set a fixed number of instances.</p>
-{% endif %}
-<div class="input-group{% if field.auto_sizing and not field.default %} d-none{% endif %}"{% if field.auto_sizing %} data-optional-quantity-value{% endif %}>
+<div class="input-group">
     <input type="number"
            class="form-control input_with_add_on
            {% if field.unit != "dimensionless" and not field.hide_unit %} rounded-start-2 w-75{% else %} rounded-2 w-100 {% endif %}"
@@ -17,7 +7,7 @@
            value="{{ field.default }}"
            step="{{ field.step }}"
            placeholder="{{ field.placeholder|default:'Enter value' }}"
-           {% if not field.allows_empty or field.auto_sizing and field.default %}required{% endif %}
+           {% if not optional_quantity or field.default %}required{% endif %}
         {% if field.metadata.source %}
            data-default-value="{{ field.default }}"
            oninput="onInputValueChange(this.id);tagFormAsModified();"
@@ -37,4 +27,3 @@
         {% endif %}
     >
 </div>
-{% if field.auto_sizing %}</div>{% endif %}

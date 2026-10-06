@@ -140,7 +140,7 @@
         if (event.target.matches("[data-simplified-editor] select[name]")) saveEdit(event.target.closest("form"));
     });
     document.addEventListener("optional-quantity:changed", event => {
-        if (event.detail.automatic) saveEdit(event.target.closest("[data-simplified-editor]"));
+        if (event.detail.empty) saveEdit(event.target.closest("[data-simplified-editor]"));
     });
     document.addEventListener("simplified-provenance:changed", event => saveEdit(event.target.closest("[data-simplified-editor]")));
     document.addEventListener("click", event => {

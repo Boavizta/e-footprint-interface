@@ -58,39 +58,33 @@ test("conditional select restores its default and clears it when the parent make
     expect(document.getElementById("Cls_model_name").selectedIndex).toBe(-1);
 });
 
-test("optional count clears and hides when its controller requires an empty value", () => {
-    document.body.innerHTML = `
-        <form><select id="Server_server_type"><option value="on-premise">On premise</option>
-            <option value="autoscaling">Autoscaling</option></select>
-        <div data-optional-quantity data-auto-controller-id="Server_server_type"
-                   data-auto-controller-value="on-premise" data-auto-only-for="autoscaling">
-            <input type="checkbox" data-action="optional-quantity-auto">
-            <div data-optional-quantity-value>
-                <input id="Server_fixed_nb_of_instances" name="Server_fixed_nb_of_instances" type="number" value="3">
-                <input name="Server_fixed_nb_of_instances__unit" value="concurrent">
-            </div>
-        </div>
-        </form>
-        <script id="dynamic-form-data" type="application/json"></script>`;
+test.each(["autoscaling", "serverless"])("optional count clears when controller requires empty: %s", forcedValue => {
+    mount("optional_quantity_fixed");
+    document.body.insertAdjacentHTML("beforeend", '<script id="dynamic-form-data" type="application/json"></script>');
     document.getElementById("dynamic-form-data").textContent = "{}";
     document.dispatchEvent(new Event("initDynamicForm"));
 
     const type = document.getElementById("Server_server_type");
     const count = document.getElementById("Server_fixed_nb_of_instances");
     const group = document.querySelector("[data-optional-quantity-value]");
-    const toggle = document.querySelector('[data-action="optional-quantity-auto"]');
+    const toggle = document.querySelector('[data-action="optional-quantity-empty"]');
     expect(count.value).toBe("3");
     expect(count.required).toBe(true);
     expect(group.classList.contains("d-none")).toBe(false);
+    const changed = jest.fn();
+    group.parentElement.addEventListener("optional-quantity:changed", changed);
     toggle.checked = true;
     toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(changed.mock.calls[0][0].detail).toEqual({empty: true});
     expect(count.value).toBe("");
     expect(count.required).toBe(false);
     expect(group.classList.contains("d-none")).toBe(true);
     toggle.checked = false;
     toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(changed.mock.calls[1][0].detail).toEqual({empty: false});
+    expect(document.activeElement).toBe(count);
     count.value = "4";
-    type.value = "autoscaling";
+    type.value = forcedValue;
     type.dispatchEvent(new Event("change"));
     expect(count.value).toBe("");
     expect(toggle.checked).toBe(true);
@@ -176,4 +170,32 @@ test("object-type switching preserves control state owned by a nested timeseries
     typeSelector.dispatchEvent(new Event("change", {bubbles: true}));
 
     expect(namedControlStates()).toEqual(expectedStates);
+});
+
+
+test("simplified optional quantity saves empty immediately and waits for numeric completion", () => {
+    require("../theme/static/scripts/simplified_inputs.js");
+    mount("simplified_optional_quantity");
+    document.body.insertAdjacentHTML("beforeend", '<script id="dynamic-form-data" type="application/json">{}</script>');
+    window.htmx = {trigger: jest.fn()};
+    delete document.body.dataset.workspaceMutation;
+    document.dispatchEvent(new Event("initDynamicForm"));
+    document.dispatchEvent(new Event("DOMContentLoaded"));
+    const form = document.querySelector("[data-simplified-editor]");
+    const toggle = form.querySelector('[data-action="optional-quantity-empty"]');
+    expect(toggle.disabled).toBe(false);
+    expect(form.querySelector('input[type="number"]').value).toBe("5");
+    toggle.checked = true;
+    toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
+    expect(form.querySelector('input[type="number"]').value).toBe("");
+    form.dataset.saving = "false";
+    window.htmx.trigger.mockClear();
+    toggle.checked = false;
+    toggle.dispatchEvent(new Event("change", {bubbles: true}));
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    const number = form.querySelector('input[type="number"]');
+    number.value = "7";
+    number.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
 });

@@ -624,6 +624,8 @@ def render_simplified_editor(case):
              "editor": {"web_id": "si-test-server-lifespan-value", "input_type": "explainable_quantity",
                         "label": "Lifespan", "default": 5, "step": 1, "unit": "year",
                         "metadata": metadata_field(source=HYPOTHESIS, comment="Preserve comment")["metadata"]}}
+    if case.get("optional_quantity"):
+        field["editor"].update(input_type="optional_explainable_quantity")
     context = {"quick_total": "20 kg", "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}}
     context.update(case)
     return (
@@ -660,8 +662,27 @@ SIMPLIFIED_BOOKMARK_CASES = {
 }
 
 
+OPTIONAL_QUANTITY_CASES = {
+    "optional_quantity_fixed": {"web_id": "Server_fixed_nb_of_instances", "default": "3", "step": "1",
+        "unit": "concurrent", "hide_unit": True, "empty_controller_id": "Server_server_type",
+        "empty_controller_value": "on-premise", "empty_only_for": ["autoscaling", "serverless"]},
+}
+
+
+def render_optional_quantity(field):
+    controller = render_to_string("model_builder/side_panels/dynamic_form_fields/select_str_input.html", {"field": {
+        "web_id": "Server_server_type", "selected": "on-premise", "options": [
+            {"label": "On premise", "value": "on-premise"}, {"label": "Autoscaling", "value": "autoscaling"},
+            {"label": "Serverless", "value": "serverless"}]}})
+    quantity = render_to_string("model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html",
+                               {"field": field})
+    return f"<form>{controller}{quantity}</form>"
+
+
 GROUPS = [
-    ({"simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
+    (OPTIONAL_QUANTITY_CASES, render_optional_quantity),
+    ({"simplified_optional_quantity": {"optional_quantity": True},
+      "simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
     ({"simplified_configure": {}}, render_simplified_workspace),
     (SIMPLIFIED_BOOKMARK_CASES, render_simplified_bookmark),
     ({"simplified_create_server": "Server", "simplified_create_edge_device": "EdgeDeviceBase"}, render_simplified_creation),
