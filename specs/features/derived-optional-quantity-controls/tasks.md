@@ -1,7 +1,7 @@
 # Derived optional quantity controls — tasks
 
 Plan and approved scope: [plan.html](plan.html) · Separate spec: none
-Status: implementation in progress — run A authorized on 2026-10-06.
+Status: implementation and review complete — deployment dependency pending.
 
 ## Implementation runs
 
@@ -31,7 +31,7 @@ Implementation: standard — the unit lookup must coordinate class defaults with
 ## Task 2 — Render and save derived optional controls
 
 Goal: Make normal and simplified quantity editors show a generic unset switch only when the constructor allows an empty value, with no instance-specific UI flag or copy.
-Status: implementing against the reviewed Task 1 library checkout.
+Status: implemented and reviewed.
 Brief: [briefs/task-2.md](briefs/task-2.md)
 Repository: `e-footprint-interface`.
 Files touched: `model_builder/adapters/forms/form_field_generator.py`; `model_builder/adapters/ui_config/field_ui_config.json`; `model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html` and new `optional_explainable_quantity.html`; `model_builder/templates/model_builder/simplified_inputs/editor.html` and new `explainable_quantity.html` and `optional_explainable_quantity.html`; `theme/static/scripts/{optional_quantity,simplified_inputs}.js`; `tests/fixtures/form_data_builders.py`; `tests/unit_tests/adapters/forms/test_form_field_generator.py`; `tests/unit_tests/domain/entities/class_structures/{ServerWeb,StorageWeb}_creation_structure.json`; `js_tests/dynamic_forms.test.js`; `tests/integration/test_simplified_inputs.py`; `tests/e2e/test_simplified_inputs.py`; `specs/architecture/forms-and-relationships.html`. Adjust existing parser tests only if the unchanged blank-versus-zero contract needs additional coverage.
@@ -40,7 +40,6 @@ Acceptance: optional quantities select the optional partial, ordinary quantities
 Depends on: Task 1's expected-unit lookup and annotated count constructors.
 Implementation: standard — the established generator, templates and shared switch script must be updated together across normal and simplified form lifecycles.
 
-## Gates and prerequisites
+## Outstanding prerequisite
 
-- **Blocks an interface implementation commit:** restore the interface's `pyproject.toml` and `poetry.lock` from the current local editable library dependency to the PyPI dependency before committing. These are pre-existing working-tree edits and must not be overwritten during task preparation. Check the intended dependency version once the library change is available.
-- **Implementation verification:** library `poetry run pytest`, `mkdocs build --strict` and count JSON round-trip; interface `poetry run pytest tests --ignore=tests/e2e`, `npm run jest`, then `poetry run pytest tests/e2e -n 4` with the required local server and the Task 1 library checkout. Record any unavailable gate as unresolved, not passed. Add consolidated `CHANGELOG.md` entries under `Unreleased` when the feature run is complete.
+- **Deployment only:** release the library version containing `get_expected_input_unit` and the annotated count constructors, then update the interface's committed PyPI `efootprint` dependency and lockfile from 25.0.0. The pre-existing local editable dependency edits remain uncommitted for co-development.
