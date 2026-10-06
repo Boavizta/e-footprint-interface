@@ -33,6 +33,7 @@
         if (event.target.dataset.action !== "optional-quantity-empty") return;
         const control = event.target.closest("[data-optional-quantity]");
         sync(control);
+        if (control.closest("#sidePanelForm")) window.tagFormAsModified();
         control.dispatchEvent(new CustomEvent("optional-quantity:changed", {
             bubbles: true, detail: {empty: event.target.checked},
         }));

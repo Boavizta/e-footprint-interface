@@ -135,6 +135,7 @@ def test_delete_ecologits_job_then_service(default_system_repository_with_journe
     delete_object(default_system_repository, api_id)
 
     sd = default_system_repository.get_system_data()
+    assert api_id not in sd.get("EcoLogitsGenAIExternalAPI", {})
     assert "EcoLogitsGenAIExternalAPIServer" not in sd
 
 
@@ -210,7 +211,6 @@ def test_create_2_external_api_jobs_then_delete_one(default_system_repository_wi
     delete_object(default_system_repository, job1_id)
 
     sd = default_system_repository.get_system_data()
-    assert "EcoLogitsGenAIExternalAPIJob" in sd
-    assert job2_id in sd["EcoLogitsGenAIExternalAPIJob"]
+    assert set(sd["EcoLogitsGenAIExternalAPIJob"]) == {job2_id}
     assert "EcoLogitsGenAIExternalAPIServer" in sd
     assert api_id in sd["EcoLogitsGenAIExternalAPI"]
