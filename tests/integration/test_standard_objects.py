@@ -9,6 +9,8 @@ Dropped:
 """
 import pytest
 
+from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
+
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.reference_data import DEFAULT_COUNTRIES, DEFAULT_DEVICES, DEFAULT_NETWORKS
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
@@ -221,7 +223,8 @@ def test_create_ecologits_external_api_and_job(default_system_repository_with_jo
         default_system_repository,
         create_post_data_from_class_default_values(
             "Test GenAI API", "EcoLogitsGenAIExternalAPI",
-            provider="mistralai", model_name="open-mistral-7b",
+            provider=EcoLogitsGenAIExternalAPI.default_values["provider"].value,
+            model_name=EcoLogitsGenAIExternalAPI.default_values["model_name"].value,
         ),
     )
     job_id = create_object(

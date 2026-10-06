@@ -6,6 +6,8 @@ Dropped:
   - test_delete_job_linked_to_service_then_service (GenAIJob/GenAIModel): both classes removed.
     Equivalent covered by test_delete_ecologits_job_then_service.
 """
+from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
+
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from tests.fixtures.form_data_builders import create_post_data_from_class_default_values
 from tests.fixtures.use_case_helpers import create_object, delete_object
@@ -112,7 +114,9 @@ def test_delete_ecologits_job_then_service(default_system_repository_with_journe
     api_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test GenAI API", "EcoLogitsGenAIExternalAPI", provider="mistralai", model_name="open-mistral-7b"),
+            "Test GenAI API", "EcoLogitsGenAIExternalAPI",
+            provider=EcoLogitsGenAIExternalAPI.default_values["provider"].value,
+            model_name=EcoLogitsGenAIExternalAPI.default_values["model_name"].value),
     )
     job_id = create_object(
         default_system_repository,
@@ -186,7 +190,9 @@ def test_create_2_external_api_jobs_then_delete_one(default_system_repository_wi
     api_id = create_object(
         default_system_repository,
         create_post_data_from_class_default_values(
-            "Test GenAI API", "EcoLogitsGenAIExternalAPI", provider="mistralai", model_name="open-mistral-7b"),
+            "Test GenAI API", "EcoLogitsGenAIExternalAPI",
+            provider=EcoLogitsGenAIExternalAPI.default_values["provider"].value,
+            model_name=EcoLogitsGenAIExternalAPI.default_values["model_name"].value),
     )
     job1_id = create_object(
         default_system_repository,
