@@ -31,7 +31,6 @@ from model_builder.adapters.repositories.workspace_base import (
     MAX_SLOTS, system_id_of, with_fresh_system_id)
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
-from e_footprint_interface import __version__ as interface_version
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import (
     ComparisonService, SystemImportService, SCRATCH_ID, get_example_system_data)
@@ -150,13 +149,10 @@ def _system_data_for_add(request, workspace):
     if source == "blank":
         return get_example_system_data(SCRATCH_ID)
 
-    repository = workspace.active_repository()
-    active_model = ModelWeb(repository)
-    system_data = active_model.to_json()
-    system_data["interface_config"] = repository.interface_config
-    system_data["efootprint_interface_version"] = interface_version
+    system_data = workspace.active_repository().get_system_data()
+    original_name = system_data["System"][system_id_of(system_data)]["name"]
     system_data = with_fresh_system_id(system_data)
-    system_data["System"][system_id_of(system_data)]["name"] = f"Copy of {active_model.system.name}"
+    system_data["System"][system_id_of(system_data)]["name"] = f"Copy of {original_name}"
     return system_data
 
 
