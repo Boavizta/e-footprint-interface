@@ -19,6 +19,8 @@ Scope: interface labels, docs, and training material. English (US spelling).
   **modeling** in UI labels and prose: "your modeling", "a second modeling", "Reference
   modeling". The verb **model** is also correct for the activity of constructing an
   e-footprint modeling: "Model it", "How to model a database".
+- **File formats** in capitals when named as formats: "a JSON file", "save as PDF", "export to
+  XLSX". Lowercase only inside a file name or an extension: `my-modeling.json`, `.e-f.json`.
 
 ## Units
 
