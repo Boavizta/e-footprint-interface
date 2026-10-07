@@ -18,8 +18,21 @@
   body > a:focus { top: 1rem; }
   #layout { display: grid; grid-template-columns: 23rem minmax(0, 64rem); gap: 2rem;
     max-width: 96rem; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 64rem); }
   #sidebar { position: sticky; top: 1.25rem; align-self: start; max-height: calc(100vh - 2.5rem);
-    overflow: auto; overscroll-behavior: contain; scroll-padding: 17rem 1rem 1rem; padding-right: .5rem; }
+    overflow: auto; overscroll-behavior: contain; scroll-padding: 17rem 1rem 1rem; padding: 0 .5rem 0 0;
+    border: 0; border-radius: 0; background: transparent; margin: 0; }
+  #sidebar:not([open]) { overflow: visible; padding-right: 0; }
+  #sidebar > summary { position: sticky; top: 0; z-index: 3; list-style: none; display: flex;
+    align-items: center; gap: .4rem; width: max-content; max-width: 100%; margin: 0 0 .7rem;
+    padding: .3rem .55rem; border: 1px solid var(--line); border-radius: .4rem;
+    background: var(--paper); color: var(--green); font-size: .8rem; }
+  #sidebar > summary::-webkit-details-marker { display: none; }
+  #sidebar > summary::before { content: "☰"; font-size: 1.1rem; line-height: 1; }
+  #sidebar:not([open]) > summary { width: 2.75rem; height: 2.75rem; justify-content: center;
+    margin-bottom: 0; padding: 0; }
+  #sidebar:not([open]) > summary span { position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   #navigation { position: sticky; top: 0; z-index: 2; background: var(--bg); padding-bottom: .4rem; font-size: .84rem; }
   #navigation > p:first-child { text-transform: uppercase; letter-spacing: .12em; font-size: .7rem; font-weight: 750; color: var(--green); }
   #navigation strong { font-size: 1.12rem; }
@@ -139,7 +152,8 @@
   @media (max-width: 900px) {
     #layout { display: flex; flex-direction: column; padding: 1.2rem; }
     main { order: 1; width: 100%; }
-    #sidebar { order: 2; position: static; max-height: none; overflow: visible; padding: 0; width: 100%; }
+    #sidebar { order: 0; position: static; max-height: min(45vh, 24rem); padding: 0; width: 100%; }
+    #sidebar:not([open]) { width: 2.75rem; }
     #navigation { position: static; max-height: none; padding: 0; margin-bottom: 1.6rem; }
     #navigation ol { display: flex; flex-wrap: wrap; gap: .1rem .4rem; margin: .7rem 0; }
     #navigation li { margin: 0; }
@@ -154,8 +168,8 @@
   @media print {
     body { background: white; font-size: 10pt; }
     #layout { display: block; padding: 0; }
-    #navigation, body > a { display: none; }
-    #sidebar { position: static; max-height: none; overflow: visible; }
+    #navigation, body > a, #sidebar > summary { display: none; }
+    #sidebar, #sidebar:not([open]) { position: static; width: 100%; max-height: none; overflow: visible; }
     #modules { break-before: page; }
     main > section { margin-top: 1.5rem; }
     figure, article, tr { break-inside: avoid; }
@@ -170,7 +184,8 @@
 <body>
 <a href="#main">Skip to plan</a>
 <div id="layout">
-<aside id="sidebar" aria-label="Code review navigation and changed files">
+<details id="sidebar" aria-label="Code review navigation and changed files" open>
+<summary title="Show or hide navigation and changed files"><span>Navigation and changed files</span></summary>
 <nav id="navigation" aria-label="Reading order">
   <p>Reading order</p>
   <ol>
@@ -304,7 +319,7 @@
     </details>
   </div>
 </section>
-</aside>
+</details>
 <main id="main">
 <header id="overview">
   <p>Plan · under review · 23 September 2026</p>
