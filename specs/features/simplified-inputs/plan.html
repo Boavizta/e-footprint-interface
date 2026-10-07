@@ -338,8 +338,8 @@
   <p><a href="#impl-decision-03">[IMPL-DECISION-03] Use authored-state matching in value updates and validation — VALIDATED</a></p>
   <p><a href="#impl-decision-04">[IMPL-DECISION-04] Render saved Sankey diagrams without writing settings — VALIDATED</a></p>
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Send Configure as one JSON definition — VALIDATED</a></p>
-  <p><a href="#impl-decision-06">[IMPL-DECISION-06] Load Sources bookmark controls on disclosure — APPLIED</a></p>
-  <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep the simplified editor reachable below Results — APPLIED</a></p>
+  <p><a href="#impl-decision-06">[IMPL-DECISION-06] Load Sources bookmark controls on disclosure — VALIDATED</a></p>
+  <p><a href="#impl-decision-07">[IMPL-DECISION-07] Remove the Simplified-only Results split — SUPERSEDED</a></p>
   <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — APPLIED</a></p>
   <p><a href="#impl-decision-09">[IMPL-DECISION-09] Expose optional instance counts in ordinary forms — APPLIED</a></p>
 </aside>
@@ -692,7 +692,7 @@ repository.save_interface_config()
     the separate pencil button in each Sources row opens its source-and-comment editor, whose
     <code>source_table_row_editor_context.py</code> reads the cached JSON without hydrating a model.</p>
     <aside id="impl-decision-06" data-note="review">
-      <p><strong>[IMPL-DECISION-06] — APPLIED</strong></p>
+      <p><strong>[IMPL-DECISION-06] — VALIDATED</strong></p>
       <p><strong>Run B, Task 8 — Sources response size:</strong> each Sources row shows an input's value,
       source, confidence and comment. Its pencil button opens an inline editor for the source and
       comment; the confidence badge is edited separately. The Simplified inputs bookmark beside the
@@ -988,20 +988,27 @@ persist once</code></pre></div></div>
     retain the last saved total. Configuration-only saves do not recalculate. If detailed results are open
     after a successful value save, reuse the existing <code>recomputation: true</code> flow: replace
     <code>#result-block</code> with freshly rendered results and emit <code>triggerResultRendering</code>.</p>
-    <p>When detailed Results is open at desktop widths, Simplified inputs retains an upper editing area
-    and Results occupies the lower part of the viewport. Apply this layout only to the Simplified view.</p>
+    <p>Detailed Results uses the same full-height overlay in Modeling and Simplified inputs. Close it
+    to edit the Simplified workspace; both quick totals refresh without opening detailed Results.</p>
     <aside id="impl-decision-07" data-note="review">
-      <p><strong>[IMPL-DECISION-07] — APPLIED</strong></p>
-      <p><strong>Run C, Task 9 — blocked Retry control:</strong> with detailed Results open at the
-      default desktop viewport, its full-height panel covered the Simplified editor and intercepted
-      Retry after a failed save.</p>
-      <p>In <a href="../../../theme/static/scss/_simplified_inputs.scss"><code>_simplified_inputs.scss</code></a>,
-      the desktop media rule (<code>min-width: 1200px</code>) targets the Simplified base view when
-      <code>#panel-result-btn</code> has full height: <code>[data-simplified-target]</code> gets 50% height
-      and the Results panel gets a 50% maximum. The editor and failed field stay reachable while
-      Results remains open; Modeling's panel sizing is unaffected. The
-      <a href="../../../tests/e2e/test_simplified_inputs.py">autosave/Results browser flow</a> retries
-      a failed field with detailed Results still open.</p>
+      <p><strong>[IMPL-DECISION-07] — SUPERSEDED</strong></p>
+      <p><strong>Run C, Task 9; removed after plan review:</strong> a Simplified-only desktop CSS rule
+      split the viewport so users could edit while detailed Results stayed open. Its rationale was
+      that the ordinary full-height panel might block Retry after a failed autosave. But the existing
+      <a href="../../../theme/static/scripts/hammer_utils.js#L13:1"><code>displayPanelResult()</code></a>
+      expands the absolutely positioned Results panel to the full height of the shared workspace,
+      so a pointer user could not start an edit beneath it in the first place. The
+      <a href="../../../theme/static/scripts/model_builder_main.js#L371:1">workspace mutation guard</a>
+      also disables Show results during a save. The test that opened Results, then edited and retried
+      only exercised the new split; it did not establish the claimed Retry obstruction.</p>
+      <p>The review removed that rule from
+      <a href="../../../theme/static/scss/_simplified_inputs.scss"><code>_simplified_inputs.scss</code></a>
+      and rebuilt the theme CSS in commit <code>8cca63cc</code>. Results now overlays the canvas at
+      full height in both base views. The
+      <a href="../../../tests/e2e/test_simplified_inputs.py">autosave/Results browser flow</a>
+      checks the full-height overlay, closes Results before editing, retries a failed save, then
+      reopens Results to check refreshed totals. The shared one-at-a-time save guard, failed-draft
+      recovery and detailed-result recomputation remain unchanged.</p>
     </aside>
     <h4 id="timeseries">5 · Open and save one timeseries</h4>
     <p><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
