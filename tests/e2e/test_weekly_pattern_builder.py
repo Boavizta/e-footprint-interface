@@ -214,7 +214,7 @@ def test_focused_weekly_editor_keeps_strategy_drafts_and_discards_on_model_switc
 
 @pytest.mark.e2e
 def test_focused_timeseries_restores_rejected_provenance_and_discards_failed_save_draft(recurrent_process_model, tmp_path):
-    from tests.e2e.test_simplified_inputs import open_configure, field, reject_simplified_edit
+    from tests.e2e.test_simplified_inputs import open_configure, open_simplified, field, reject_simplified_edit
     from tests.e2e.utils import click_and_wait_for_htmx
 
     builder = recurrent_process_model
@@ -248,6 +248,9 @@ def test_focused_timeseries_restores_rejected_provenance_and_discards_failed_sav
     expect(selected.locator("[data-current-value]")).to_have_text(before)
     page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
+    page.locator('[data-action="simplified-mode"]').click()
+    expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+    open_simplified(page)
     click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
     expect(value).to_have_value("1")
     value.fill("4")

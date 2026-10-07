@@ -472,12 +472,13 @@
     <li><strong>Autosave simple edits:</strong> numerical inputs and text metadata save on blur or
     Enter, not on every keystroke; selects save on change. Source, confidence, and comment follow
     the same rules. There is no Apply simple changes action. Discreet status distinguishes saving,
-    saved, and failed changes. A rejected save shows the existing error modal; the entered value
-    remains visible and marked Not saved for correction or retry, without changing the saved modeling.
+    saved, and failed changes. A rejected save shows the existing error modal and replaces the attempted
+    field with its accepted repository value, marked Not saved; the rejected value is not retained.
     Native browser validation remains available; invalid fields open their object.</li>
     <li><strong>One save at a time:</strong> while a save is running, temporarily disable further edits,
     structural actions, view/model switching and export across the workspace. Re-enable them when the
-    request finishes; failed edits remain visible for correction or retry. Users can still read and
+    request finishes; a rejected edit leaves the accepted field visible and does not block navigation.
+    Users can still read and
     scroll. Do not collect further edits for later submission. There is no form-wide commit button or
     automatic/manual saving preference in this iteration.</li>
     <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
@@ -492,7 +493,7 @@
     compatible timeseries strategies available in normal editing. Saving the panel persists the
     selected strategy and authored inputs together, closes the panel, and refreshes the string preview.
     These timeseries edits remain a draft until Save timeseries; Cancel discards them. A rejected save
-    shows the existing error modal without closing or clearing this editor. Switching models reuses the ordinary side-panel unsaved-changes
+    shows the existing error modal, closes the panel, and restores the accepted field value. Switching models reuses the ordinary side-panel unsaved-changes
     warning: stay to save first, or discard and switch. Returning does not reopen that editor or restore
     its draft. Ordinary modeling panels and Configure retain their explicit Save / Cancel boundaries.</li>
     <li><strong>No collateral mutation:</strong> saving a simplified input changes that input and its
@@ -524,8 +525,8 @@
     <li><strong>Export follows completed saves:</strong> the ordinary export actions cannot run while
     a relevant save is in flight, including a final field committed when focus leaves it. Exporting
     both modelings waits for both. Every export entry point is protected, including menu links, with
-    no extra confirmation for this wait. A failed autosave remains visibly unresolved; export must
-    not silently imply it includes that edit. Configure uses its Save / Discard / Stay exit guard.
+    no extra confirmation for this wait. A focused edit that fails or is invalid cancels that export
+    activation; later exports use the accepted saved values. Configure uses its Save / Discard / Stay exit guard.
     Ordinary modeling panels retain their current export behavior, without a new unsaved-changes
     warning: exports contain saved values, not unfinished panel edits, including timeseries drafts.</li>
     <li><strong>Familiar configuration:</strong> configuration and Simplified inputs share Navigation,
@@ -539,7 +540,7 @@
     membership and help changes together; Cancel leaves the saved configuration intact.
     Leaving with unsaved changes offers
     Save / Discard / Stay, including model switching, Compare, Results/Sources, file opening and export.
-    Save continues only after success; a failed save keeps the form and edits available.
+    Save continues only after success; a failed Configure save keeps its draft and exit guard available.
     Opening Sources therefore cannot make inline configuration changes alongside a Configure draft.</li>
     <li><strong>Depth remains available:</strong> switching to Modeling makes every assumption and
     structural action available. Mode labels and navigation communicate the current view without
@@ -610,7 +611,7 @@
       Country, Network, and Device selectors are the only object-relationship exceptions.</li>
       <li>Conditional selection completeness and atomic dependent-value fallbacks, derived from
       existing modeling rules rather than an additional author-maintained dependency configuration.</li>
-      <li>Autosaving simple values and provenance metadata, with visible failure/retry behavior and
+      <li>Autosaving simple values and provenance metadata, with visible save-failure status and
       export protection; explicit Save / Cancel for timeseries and configuration drafts.</li>
       <li>A synchronized active-model total in the top-right Show results control and bottom Results
       banner, refreshed on successful modeling changes and unavailable when computation is impossible.</li>
@@ -2453,9 +2454,8 @@
 <section>
   <h2>6. Open questions</h2>
   <p>No blocking capability questions remain. Input eligibility, conditional choices, autosave,
-  export protection, and the two quick-total displays are settled above. The planning stage must
-  detail selection validation, one-at-a-time save protection and retention of failed simplified-input
-  edits without changing ordinary modeling-panel error handling.</p>
+  accepted-field restoration after rejected saves, export protection, and the two quick-total displays
+  are settled above. Ordinary modeling-panel and Configure draft handling remains distinct.</p>
 </section>
 
 <section>

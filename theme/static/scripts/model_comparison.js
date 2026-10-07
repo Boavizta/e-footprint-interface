@@ -258,16 +258,12 @@
 
     // Confirm before removing the second model (live-state confirm, body-delegated so it survives swaps).
     // remove-model replaces the whole builder, discarding an open side panel. It has its own destructive
-    // confirm (not the shared unsaved modal), so the two never stack; instead fold the unsaved-changes
-    // warning into this single dialog when the open panel has pending edits.
+    // confirm (not the shared unsaved modal), so fold the ordinary side-panel warning into this dialog.
     document.body.addEventListener("htmx:confirm", function (evt) {
         const elt = evt.target.closest("[data-confirm-remove-model]");
         if (!elt) return;
         evt.preventDefault();
         let message = elt.getAttribute("data-confirm-remove-model");
-        if (evt.detail.discardsSimplifiedEdits) {
-            message += " Its unsaved Simplified input edits will also be discarded.";
-        }
         if (typeof window.isSidePanelFormModified === "function" && window.isSidePanelFormModified()) {
             message += " You also have unsaved changes in the open panel that will be lost.";
         }

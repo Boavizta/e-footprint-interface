@@ -172,6 +172,12 @@ Side-panel form submissions use `SidePanelPage.submit_and_wait_for_close()`, whi
 processed before clicking, validates the form response, and waits for HTMX request/settling classes to clear before returning.
 Opening Results also starts descendant Sankey configuration requests; wait for that complete HTMX cascade before the next edit.
 
+For rejected Simplified value/provenance saves, assert that the error modal and accepted-field replacement both process,
+the field shows `Not saved`, and its submitted value is gone. A rejected focused timeseries Save also closes the panel.
+Focused export tests cover a failed save cancelling that activation, native-invalid input issuing no request/download, and
+a later activation exporting accepted state. Configure failures retain their draft and Save/Discard/Stay guard; bookmark
+help and membership Undo retain their independent draft behavior. Workspace exports include accepted values from parked models.
+
 ### Edge-paradigm tests
 
 Edge add-buttons are hidden by default (`body.edge-modeling-off`). Tests that click them must opt in via the `edge_modeling_enabled` fixture — typically `@pytest.mark.usefixtures("edge_modeling_enabled")` on the test class.

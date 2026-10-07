@@ -151,6 +151,23 @@ test("HTMX button restoration does not overwrite control state changed during a 
     expect(payload.disabled).toBe(false);
 });
 
+test("model replacement keeps its ordinary destructive confirmation", () => {
+    document.body.innerHTML = `
+        <div class="model-builder-card">Current modeling</div>
+        <button data-confirm-when-model-not-empty="Start blank?">Start blank</button>
+    `;
+    loadModule();
+    const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);
+    const issueRequest = jest.fn();
+    const event = new CustomEvent("htmx:confirm", {bubbles: true, cancelable: true, detail: {issueRequest}});
+
+    document.querySelector("button").dispatchEvent(event);
+
+    expect(confirm).toHaveBeenCalledWith("Start blank?");
+    expect(issueRequest).toHaveBeenCalledWith(true);
+    confirm.mockRestore();
+});
+
 function requestEvent(type, detail, target = document.body) {
     const event = new CustomEvent(type, {bubbles: true, cancelable: true, detail});
     target.dispatchEvent(event);

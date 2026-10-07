@@ -319,11 +319,51 @@ test('Enter followed by blur saves once and rejection marks the accepted replace
     }));
     expect(replacement.querySelector('input[type="number"]').value).toBe(acceptedValue);
     expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
-    expect(replacement.hasAttribute('data-save-failed')).toBe(false);
-    expect(replacement.querySelector('[data-action="simplified-retry"]')).toBeNull();
-    expect(replacement.querySelector('[data-action="simplified-discard"]')).toBeNull();
     expect([...document.querySelectorAll('[data-quick-total]')].map(item => item.textContent)).toEqual(['20 kg', '20 kg']);
     replacement.querySelector('input[type="number"]').dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+});
+
+test('a rejected focused save cancels its export activation and leaves accepted-state export available', () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    const acceptedValue = input.value;
+    input.value = '8';
+    input.focus();
+    const link = document.createElement('a');
+    link.href = '/model_builder/download-json/';
+    link.dataset.workspaceExport = 'active';
+    document.body.append(link);
+
+    const activation = new MouseEvent('click', {bubbles: true, cancelable: true});
+    link.dispatchEvent(activation);
+    expect(activation.defaultPrevented).toBe(true);
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+
+    const acceptedForm = form.cloneNode(true);
+    acceptedForm.querySelector('input[type="number"]').value = acceptedValue;
+    delete acceptedForm.dataset.saving;
+    form.replaceWith(acceptedForm);
+    document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
+        detail: {elt: form, successful: false},
+    }));
+    expect(acceptedForm.querySelector('input[type="number"]').value).toBe(acceptedValue);
+    expect(acceptedForm.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
+
+    const target = document.createElement('div');
+    target.id = 'main-content-block';
+    document.body.append(target);
+    const action = document.createElement('button');
+    document.body.append(action);
+    const navigation = new CustomEvent('htmx:confirm', {bubbles: true, cancelable: true,
+        detail: {target, elt: action, issueRequest: jest.fn()}});
+    action.dispatchEvent(navigation);
+    expect(navigation.defaultPrevented).toBe(false);
+
+    const laterActivation = new MouseEvent('click', {bubbles: true, cancelable: true});
+    link.dispatchEvent(laterActivation);
+    expect(laterActivation.defaultPrevented).toBe(false);
+    expect(link.getAttribute('href')).toBe('/model_builder/download-json/');
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 

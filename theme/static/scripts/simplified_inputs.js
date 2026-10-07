@@ -16,42 +16,7 @@
         if (duration) saveStatusTimers.set(status, setTimeout(() => { status.textContent = ""; }, duration));
     }
 
-    function failedExportForm(element) {
-        const targets = element.dataset.workspaceExport === "all"
-            ? document.querySelectorAll("[data-simplified-target]") : [targetForActiveModel()];
-        return [...targets].map(target => target?.querySelector('[data-save-failed="true"]')).find(Boolean);
-    }
-
-    function showFailedEdit(form, message) {
-        setSaveStatus(form, message);
-        form.closest("[data-simplified-object]").open = true;
-        form.closest("[data-simplified-group]").open = true;
-        form.scrollIntoView({block: "nearest"});
-    }
-
-    function requireEditRecovery(form, action) {
-        document.querySelector("[data-simplified-recovery-status]")?.remove();
-        const message = `Not saved. Retry or discard this edit before ${action}.`;
-        setSaveStatus(form, message);
-        const active = form.closest("[data-simplified-target]") === targetForActiveModel();
-        if (active && document.body.dataset.baseView === "simplified") {
-            showFailedEdit(form, message);
-        } else {
-            const notice = document.createElement("p");
-            notice.dataset.simplifiedRecoveryStatus = "";
-            notice.setAttribute("role", "status");
-            notice.className = "small text-danger px-4";
-            notice.textContent = active
-                ? `An input was not saved. Open Simplified inputs and retry or discard the edit before ${action}.`
-                : `Another modeling has an unsaved input. Open it and retry or discard the edit before ${action}.`;
-            document.querySelector("#toolbar-nav")?.after(notice);
-        }
-    }
-
     function continueExport(element) {
-        document.querySelector("[data-simplified-recovery-status]")?.remove();
-        const failed = failedExportForm(element);
-        if (failed) return requireEditRecovery(failed, "exporting");
         if (element.matches("a")) {
             // Save settlement can outlive the click's popup permission. Download in the current
             // browsing context; the attachment response leaves the workspace in place.
@@ -95,7 +60,7 @@
             event.stopImmediatePropagation();
             return;
         }
-        if (!configureForm() && !failedExportForm(element)) return;
+        if (!configureForm()) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         if (configureForm()) {
@@ -141,25 +106,6 @@
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
     });
-    // Add/remove/import/reset and the Examples picker rebuild every resident view.
-    // Preserve failed drafts in surviving models; explicit model removal/replacement
-    // folds the discarded draft into its existing destructive confirmation.
-    window.addEventListener("htmx:confirm", event => {
-        if (event.detail.target?.id !== "main-content-block") return;
-        const element = event.detail.elt;
-        const removedSlot = element.dataset.removeModelSlot;
-        const discardedTarget = removedSlot !== undefined
-            ? document.querySelector(`[data-simplified-target="${removedSlot}"]`)
-            : element.hasAttribute("data-confirm-when-model-not-empty") ? targetForActiveModel() : null;
-        event.detail.discardsSimplifiedEdits = !!discardedTarget?.querySelector('[data-save-failed="true"]');
-        const failed = [...document.querySelectorAll("[data-simplified-target]")]
-            .filter(target => target !== discardedTarget)
-            .map(target => target.querySelector('[data-save-failed="true"]')).find(Boolean);
-        if (!failed) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        requireEditRecovery(failed, "continuing");
-    }, true);
     document.body.addEventListener("htmx:configRequest", event => {
         if (event.detail.elt.matches("[data-simplified-timeseries]") && window.recomputationVals?.().recomputation) {
             event.detail.parameters.recomputation = "true";
@@ -594,15 +540,6 @@
     document.addEventListener("click", event => {
         if (replaying || document.body.dataset.workspaceMutation === "updating") return;
         const element = event.target.closest("a, button, [hx-get], [hx-post], [data-action]");
-        // Both destinations replace fields on fresh entry. Recover explicitly first,
-        // so a failed draft cannot silently become a saved export after navigation.
-        const failed = targetForActiveModel()?.querySelector('[data-save-failed="true"]');
-        if (failed && ["simplified-mode", "simplified-configure"].includes(element?.dataset.action)) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            showFailedEdit(failed, "Not saved. Retry or discard this edit before changing views.");
-            return;
-        }
         if (!element || element.closest("[data-simplified-workspace], #simplified-exit-dialog, #modal-container")) return;
         if (!element.matches("a[href], [hx-get], [hx-post], [data-workspace-control], [data-action]")) return;
         // A pending entry must not land after the user has chosen another destination.
