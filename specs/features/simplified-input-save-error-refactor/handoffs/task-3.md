@@ -1,12 +1,13 @@
 # Task 3 — Remove obsolete failed-edit guards and synchronize docs
 
-Repository and implementation range: `e-footprint-interface` `8333ab63..61e7caf6`.
+Repository and implementation range: `e-footprint-interface` `8333ab63..606cf186`.
 
 ## Review pointers
 
 - `theme/static/scripts/simplified_inputs.js` removes failed-edit export and view-entry gates while retaining focused-save export sequencing, the in-flight mutation lock, and Configure Save/Discard/Stay.
 - `theme/static/scripts/model_builder_main.js` and `model_comparison.js` keep ordinary destructive confirmation and side-panel warning copy without failed-inline-edit wording.
 - `tests/e2e/test_simplified_inputs.py` uses a real HTTP 422 rejection to verify accepted-field restoration, later accepted-state exports, and navigation/model actions. The timeseries E2E case verifies that a rejected focused Save closes its panel.
+- The Configure failure case sends an invalid definition to the real endpoint and verifies its 422 modal OOB preserves the dirty draft and exit guard.
 
 ## Open concerns
 
