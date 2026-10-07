@@ -1,6 +1,6 @@
 # Simplified input save errors — tasks
 Spec: [original Simplified-input spec](../simplified-inputs/spec.html) · Plan: [approved refactor plan](plan.html)
-Status: in progress — Task 1 implemented and reviewed; full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
+Status: in progress — Tasks 1–2 implemented and reviewed; full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
 
 ## Implementation runs
 
@@ -21,6 +21,7 @@ Status: in progress — Task 1 implemented and reviewed; full workspace gates pe
 Goal: Recognized save validation returns HTTP 422; unclassified exceptions return HTTP 500. Both still display the existing modal OOB, leave the main target intact, and settle the workspace mutation as failed.
 Status: implemented and reviewed — full workspace gates pending
 Brief: [briefs/task-1.md](briefs/task-1.md)
+Decision: [typed validation boundary](plan.html#impl-decision-01).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/exception_handling.py`, `views_addition.py`, `views_edition.py`, `views_simplified_inputs.py`; `theme/static/scripts/modal_utils.js`, `model_builder_main.js`, `simplified_inputs.js`; focused view, integration, middleware and Jest tests.
 Tests: Assert 422 on identified parsing/domain rejections, including `WeeklyPatternValidationError`; 500 on generic or persistence failures; modal OOB and `HX-Reswap: none` on both; no whole-builder replacement; status-driven mutation and bookmark failure.
@@ -31,8 +32,9 @@ Implementation: standard — Validation must be identified at its source while t
 ## Task 2 — Restore accepted Simplified fields on rejected saves
 
 Goal: On a rejected inline value or provenance save, render the selected field from a fresh active repository read; show `Not saved` on the replacement without preserving a retryable draft. A rejected timeseries Save closes its panel after the accepted field is restored.
-Status: approved — implementation pending
+Status: implemented and reviewed — full workspace gates pending
 Brief: [briefs/task-2.md](briefs/task-2.md)
+Decision: [late dependent-field recovery](plan.html#impl-decision-02).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/views_simplified_inputs.py`, `model_builder/adapters/presenters/simplified_inputs.py`, `model_builder/templates/model_builder/simplified_inputs/{editor,timeseries_panel}.html`, `theme/static/scripts/simplified_inputs.js`, `theme/static/scss/_simplified_inputs.scss`, generated `theme/static/css/bs_main.css` and `.map`; targeted Python, Jest and E2E tests.
 Tests: Rejections before persistence restore old value and metadata; a failure after persistence restores the newly stored field; quick total and Results stay at accepted content; invalid browser input issues no save or download; failed timeseries Save closes the panel and discards its draft.
