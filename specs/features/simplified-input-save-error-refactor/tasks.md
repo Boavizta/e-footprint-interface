@@ -1,6 +1,6 @@
 # Simplified input save errors — tasks
 Spec: [original Simplified-input spec](../simplified-inputs/spec.html) · Plan: [approved refactor plan](plan.html)
-Status: in progress — Tasks 1–2 implemented and reviewed; full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
+Status: implementation and task reviews complete — full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
 
 ## Implementation runs
 
@@ -38,14 +38,14 @@ Decision: [late dependent-field recovery](plan.html#impl-decision-02).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/views_simplified_inputs.py`, `model_builder/adapters/presenters/simplified_inputs.py`, `model_builder/templates/model_builder/simplified_inputs/{editor,timeseries_panel}.html`, `theme/static/scripts/simplified_inputs.js`, `theme/static/scss/_simplified_inputs.scss`, generated `theme/static/css/bs_main.css` and `.map`; targeted Python, Jest and E2E tests.
 Tests: Rejections before persistence restore old value and metadata; a failure after persistence restores the newly stored field; quick total and Results stay at accepted content; invalid browser input issues no save or download; failed timeseries Save closes the panel and discards its draft.
-Acceptance: The error response carries one accepted-field OOB fragment plus the existing modal, without a full workspace or total re-render. Retry/Discard and `data-save-failed` are gone; successful save and focused export sequencing remain.
+Acceptance: The error response carries the accepted submitted-field OOB fragment plus the existing modal; a late presentation failure also restores persisted dependent fields, without a full workspace or total re-render. Retry/Discard and `data-save-failed` are gone; successful save and focused export sequencing remain.
 Depends on: Task 1's 422/500 modal contract and status-driven mutation settlement.
 Implementation: standard — The endpoint must distinguish request-local mutations from the repository's accepted state across failures before, during and after persistence, then coordinate OOB replacement with save completion.
 
 ## Task 3 — Remove obsolete failed-edit guards and synchronize docs
 
 Goal: Remove navigation, model-replacement and export recovery checks that existed for retained failed inline drafts. Preserve Configure's explicit Save/Discard/Stay guard, ordinary side-panel protection and save-aware focused export.
-Status: approved — implementation pending
+Status: implemented and reviewed — full workspace gates pending
 Brief: [briefs/task-3.md](briefs/task-3.md)
 Repository: e-footprint-interface only.
 Files touched: `theme/static/scripts/{simplified_inputs,model_builder_main,model_comparison}.js`; `js_tests/{simplified_inputs,model_builder_main}.test.js`; `tests/e2e/{test_simplified_inputs,test_weekly_pattern_builder}.py`; `specs/features/simplified-inputs/{spec,plan}.html`; owning architecture pages (`runtime-and-recovery`, `rendering`, `workspace`, `persistence`, `timeseries`), `specs/testing.md`, `CHANGELOG.md`.

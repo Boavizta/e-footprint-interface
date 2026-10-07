@@ -340,7 +340,7 @@
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Send Configure as one JSON definition — VALIDATED</a></p>
   <p><a href="#impl-decision-06">[IMPL-DECISION-06] Load Sources bookmark controls on disclosure — VALIDATED</a></p>
   <p><a href="#impl-decision-07">[IMPL-DECISION-07] Remove the Simplified-only Results split — SUPERSEDED</a></p>
-  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — APPLIED</a></p>
+  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — SUPERSEDED by save-error refactor Run A</a></p>
   <p><a href="#impl-decision-09">[IMPL-DECISION-09] Expose optional instance counts in ordinary forms — APPLIED</a></p>
 </aside>
 
@@ -838,8 +838,8 @@ repository.save_interface_config()
       <li>Keep the guard through response updates and restore controls on success or failure, preserving
       their constraint-disabled states. Avoid duplicate saves from Enter followed by blur. Stateless
       timeseries previews stay outside this guard; reading and scrolling remain available.</li>
-      <li>On a failed simplified-input save, show the existing error modal, retain the entered value and
-      mark it Not saved. Restore controls for correction/retry without retrying automatically.</li>
+      <li>On a failed simplified-input save, show the existing error modal, restore the accepted field
+      from the active repository and mark it Not saved. The submitted value is not retained for retry.</li>
     </ol>
     <p><strong>Reuse the error modal:</strong>
     <a href="#file-error-handler"><code>adapters/views/exception_handling.py</code></a>'s
@@ -847,14 +847,13 @@ repository.save_interface_config()
     form untouched. Add an optional <code>preserve_panels=False</code> argument, passed through to
     <a href="#file-error-modal"><code>templates/model_builder/modals/modal_template.html</code></a>.
     Simplified-input save endpoints opt in so the modal skips <code>closeAndEmptySidePanel()</code>
-    and <code>hidePanelResult()</code>: failed timeseries saves keep their editor, and failed bookmark
-    saves keep the surrounding panel or Sources-row draft.
+    and <code>hidePanelResult()</code>: failed bookmark saves keep the surrounding panel or Sources-row
+    draft. A failed focused timeseries Save closes and empties its editor after the accepted field returns.
     Ordinary Modeling create/edit errors keep the default behavior.</p>
-    <p><strong>Browser:</strong> recognize the existing <code>openModalDialog</code> trigger in the
-    response's <code>HX-Trigger-After-Settle</code> header as a failed save, even though the modal response
-    is HTTP 200. Do not mark the edit saved, close its editor or continue a pending export.
-    Error details stay in the modal; the field only needs its Not saved status. Native browser input
-    validation remains unchanged.</p>
+    <p><strong>Browser:</strong> HTTP 422 identifies recognized validation rejection and HTTP 500 identifies
+    unexpected failure. HTMX processes the error body's OOB field and modal while <code>HX-Reswap: none</code>
+    preserves the main target. The <code>openModalDialog</code> trigger only opens the modal; HTTP success
+    controls save settlement. A rejected or natively invalid focused edit cannot continue a pending export.</p>
     <h4 id="atomic-edit">3 · Save Provider and affected values together</h4>
     <p>Extract input conversion and change collection from the existing object edit function so a simplified edit can submit
     one library <code>ModelingUpdate</code> across all affected owners. Do not call the existing one-owner edit
@@ -1006,9 +1005,10 @@ persist once</code></pre></div></div>
       and rebuilt the theme CSS in commit <code>8cca63cc</code>. Results now overlays the canvas at
       full height in both base views. The
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">autosave/Results browser flow</a>
-      checks the full-height overlay, closes Results before editing, retries a failed save, then
-      reopens Results to check refreshed totals. The shared one-at-a-time save guard, failed-draft
-      recovery and detailed-result recomputation remain unchanged.</p>
+      checks the full-height overlay and closes Results before editing. Run A's
+      <a href="../simplified-input-save-error-refactor/plan.html#inline-edit">save-error refactor</a>
+      replaced failed-draft retry with a repository-backed field restoration; the shared
+      one-at-a-time save guard and detailed-result recomputation remain.</p>
     </aside>
     <h4 id="timeseries">5 · Open and save one timeseries</h4>
     <p><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
@@ -1049,39 +1049,25 @@ persist once</code></pre></div></div>
     <p>If Download is activated while a simplified input has an uncommitted edit,
     <code>../theme/static/scripts/simplified_inputs.js</code> saves that field first and downloads only
     after the save succeeds. Export controls are otherwise disabled during a mutation.</p>
-    <p>Direct links and menus share this guard. Failed simplified autosaves in the requested model(s)
-    require correction/retry or discard. Configure uses its Save / Discard / Stay exit guard.
+    <p>Direct links and menus share this guard. Failed simplified autosaves restore accepted values,
+    so a later export can proceed without an edit-recovery action. Configure uses its Save / Discard / Stay exit guard.
     Ordinary Modeling panels currently have no unsaved-export warning; keep that behavior.
     Exports contain saved values, not unfinished panel edits, including timeseries drafts.
     Keep existing single-model/workspace file formats.</p>
-    <p>A failed simple-input edit remains in its resident Simplified view. Until Retry succeeds or the user
-    chooses Discard edit, that model's Modeling and Configure actions keep the failed field in place; model
-    tab switching may park the view. Actions that replace the workspace shell also require recovery for
-    every failed edit in a surviving model. Deliberate removal or reset of the failed model remains available
-    through its destructive confirmation, which mentions that unsaved edit. Workspace download checks both
-    requested slots and points to a failed edit in the other model from the shared toolbar.</p>
+    <p>A failed simple-input edit restores the selected field from the active repository. Modeling and
+    Configure entry, model switching and workspace-shell actions can then proceed normally. The shared
+    in-flight mutation lock still prevents those actions while a save request is running. Ordinary model
+    removal confirmation and side-panel draft protection remain.</p>
     <aside id="impl-decision-08" data-note="review">
-      <p><strong>[IMPL-DECISION-08] — APPLIED</strong></p>
-      <p><strong>Run C, Task 10 and global review — lost failed draft:</strong> a failed simplified
-      autosave leaves a retryable value in the resident view. Re-entering Simplified from Modeling
-      fetches saved state, while add/import/example and some remove actions replace the entire
-      workspace shell. Either path could erase the failed value and silently lift its export block.</p>
-      <ul>
-        <li><strong>View entry:</strong> the click guard in
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a>
-        stops Simplified or Configure entry while the active model has <code>data-save-failed</code>,
-        then exposes the failed field and its Retry/Discard controls.</li>
-        <li><strong>Shell replacement:</strong> the same file's <code>htmx:confirm</code> handler checks
-        failed edits in every resident model before a <code>#main-content-block</code> swap.
-        <code>requireEditRecovery()</code> blocks an action that would replace a surviving failed model,
-        including when its other model is active. Deliberately confirmed removal or reset may discard
-        the affected model's draft; another model's failure still blocks that replacement.</li>
-      </ul>
-      <p>Retry or Discard edit restores normal navigation/export; an accidental fresh read cannot turn
-      an unsaved draft into an apparently saved export. The
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">parked-failure browser regression</a>
-      covers cross-model replacement and explicit removal; see the
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/handoffs/task-10.md" data-review-source-href="handoffs/task-10.md">Task 10 handoff</a>.</p>
+      <p><strong>[IMPL-DECISION-08] — SUPERSEDED by
+      <a href="../simplified-input-save-error-refactor/plan.html#inline-edit">save-error refactor Run A</a></strong></p>
+      <p><strong>Original Run C, Task 10:</strong> failed inline values remained as retryable drafts;
+      view entry and workspace-shell guards protected them from being silently replaced. Run A instead
+      restores each rejected field from a fresh active repository read, including saved dependent fields
+      after a late presentation failure. The draft, Retry/Discard controls and their navigation/export
+      guards no longer exist. A focused changed field still saves before download; a rejected or invalid
+      save cancels that click. See the original
+      <a href="handoffs/task-10.md">Task 10 handoff</a> for the earlier design.</p>
     </aside>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
     <p><code>adapters/views/views_workspace.py</code> duplicates the complete flat modeling document
@@ -1176,8 +1162,8 @@ persist once</code></pre></div></div>
         <tr><td>Value/provenance updates</td><td>Keep a valid dependent or choose the first allowed value; an invalid batch persists neither values nor metadata. Include the Server empty-count case.</td><td>Framework-free integration using ModelingUpdate</td></tr>
         <tr><td>Configuration and imports</td><td>Membership/help round-trip; independent copies and System-ID remapping; malformed second model or combined-budget rejection leaves the previous workspace unchanged.</td><td>Repository/workspace integration; one import E2E</td></tr>
         <tr><td>Inline authoring and lifecycle</td><td>Bookmarks update visible controls without saving or replacing value drafts; correct nested owner; creation previews required inclusion, updates the lock when the API changes, and keeps help editable. Successful creation enforces inclusion; failure/cancel leaves no references. Clear/Undo/delete respect retained help and dependencies.</td><td>Use-case integration; one combined authoring E2E</td></tr>
-        <tr><td>Requests and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; a modal error leaves the edit Not saved and retryable, keeps its timeseries/bookmark panel open and does not continue export despite HTTP 200. Ordinary Modeling errors keep their existing behavior. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
-        <tr><td>Workspace and timeseries</td><td>Returning from Modeling shows current values, selection and counts after structural changes; selected-object filtering and keyboard navigation; Configure Save returns the complete Simplified inputs view; exit Save/Discard/Stay, failed-save recovery and fresh entry defaults; per-model base view; timeseries Save/Cancel and existing discard warning on model switch.</td><td>Presenter/Jest tests; focused browser flow at wide and compact widths</td></tr>
+        <tr><td>Requests and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; a 422/500 modal error restores accepted inline fields with Not saved status and does not continue export. A failed timeseries Save closes its panel; a failed bookmark save keeps its separate draft. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
+        <tr><td>Workspace and timeseries</td><td>Returning from Modeling shows current values, selection and counts after structural changes; selected-object filtering and keyboard navigation; Configure Save returns the complete Simplified inputs view; exit Save/Discard/Stay and fresh entry defaults; per-model base view; timeseries Save/Cancel and existing discard warning on model switch.</td><td>Presenter/Jest tests; focused browser flow at wide and compact widths</td></tr>
         <tr><td>Results and large models</td><td>Both totals update when computability stays true; failure retains the last saved total. Check a representative large model for unnecessary full rendering/recalculation.</td><td>OOB/integration tests; targeted render measurement</td></tr>
         <tr><td>Examples rename</td><td>Same IDs/data/results; installed resources, picker, deep links, guide associations and authoring commands still work.</td><td>Both repositories' existing suites and package/docs checks</td></tr>
       </tbody>
@@ -1223,7 +1209,8 @@ persist once</code></pre></div></div>
     use the library's multi-owner update instead.</li>
     <li><strong>Queued autosave, manual batch save or a mode toggle:</strong> extra pending-edit and
     recovery machinery is not justified for this iteration. Use one-at-a-time autosave; accept the
-    brief editing pause during saves. Preserving failed simplified-input edits is necessary with every approach.</li>
+    brief editing pause during saves. Run A restores accepted fields after rejected saves instead of
+    retaining failed inline drafts.</li>
     <li><strong>Full-page refreshes during inline edits:</strong> discard drafts and focus; update only
     the relevant visible controls. Entering Simplified inputs from Modeling instead uses a fresh full-view render.</li>
     <li><strong>Preserved Configure drafts and bookmark reconciliation:</strong> unnecessary with the
