@@ -44,10 +44,13 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
     reusable partial, so the home-page band, the home-page drawer and the existing in-builder overlay all
     render the same cards from the same <code>build_picker_groups()</code> output. The three differ only in
     chrome (a section heading, a drawer shell, an overlay shell) and in whether chips/guides are shown.</li>
-    <li><strong>Give <code>views.home</code> the catalog context</strong> and add one new GET endpoint that
-    returns the drawer fragment, HTMX-swapped into a container on the home page. Fetching the drawer at
-    click time (rather than rendering it hidden at page load) keeps the "continue where you left off" state
-    and the replace-confirmation truthful even if the session changed in another tab.</li>
+    <li><strong>Assemble the home-page view model in a new presenter</strong>
+    (<code>adapters/presenters/starting_point_presenter.py</code>, beside the existing
+    <code>template_picker_presenter</code>) and have both <code>views.home</code> and a new drawer endpoint
+    import it. The presenter imports neither view module, which is what keeps
+    <code>e_footprint_interface.views → views_onboarding → model_builder…views</code> from closing into a
+    cycle. The drawer is fetched on click rather than rendered hidden at page load, so its resume state and
+    emptiness flag are as fresh as the click.</li>
     <li><strong>Stop auto-showing the overlay.</strong> <code>model_builder_main</code> passes
     <code>show_template_picker=False</code> unconditionally; <code>is_empty_model</code> keeps its other two
     jobs (the <code>model_is_empty</code> context flag and the blank-flavoured tour). The overlay lives on
@@ -107,13 +110,26 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
       <tr>
         <td><code>e_footprint_interface/views.py::home</code></td>
         <td>modified</td>
-        <td>Today a one-liner rendering <code>home.html</code> with no context. Gains
-        <code>template_picker_groups=build_picker_groups()</code> plus the resume state. The band takes the
-        catalog's whole <code>templates</code> group (all five, the library how-to included); only the
-        <code>scratch</code> group — start-from-scratch and load-a-file — is drawer-only. Reading the session here is new for this view — read-only via
+        <td>Today a one-liner rendering <code>home.html</code> with no context. Calls the new
+        starting-point presenter for the catalog groups, the resume state and the emptiness flag. Import it
+        at module level from <code>adapters/presenters/</code>, <strong>not</strong> from
+        <code>views_onboarding</code> — the latter imports <code>model_builder…views</code>, so a top-level
+        import would close a cycle and force a function-level import (the prototype's workaround, and a
+        smell rather than a design). The band takes the catalog's whole <code>templates</code> group (all
+        five, the library how-to included); only the <code>scratch</code> group — start-from-scratch and
+        load-a-file — is drawer-only. Reading the session here is new for this view — read-only via
         <code>SessionWorkspaceRepository(request.session)</code>; it must <strong>not</strong> seed the
         scratch baseline the way <code>model_builder_main</code> does, or every home-page visit would
         create a session model.</td>
+      </tr>
+      <tr>
+        <td><code>model_builder/adapters/presenters/starting_point_presenter.py</code></td>
+        <td>new</td>
+        <td>Assembles the home-page and drawer view model: catalog groups from
+        <code>build_picker_groups()</code>, the <code>templates</code> group for the band, the resume
+        model's name, and the server-side emptiness flag. Reads the session read-only and
+        <strong>must short-circuit on a session-less visitor</strong> — see §4 risk 2. Imports no view
+        module, so nothing can cycle through it.</td>
       </tr>
       <tr>
         <td><code>theme/templates/home.html</code></td>
@@ -129,7 +145,9 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
         <td>new</td>
         <td>The card grid extracted verbatim from <code>template_picker.html</code>, parameterised by
         <code>groups</code>, whether to show chips/guides, and the HTMX target/push-url (the builder-hosted
-        overlay needs no push; home-page cards must push <code>/model_builder/</code>).</td>
+        overlay needs no push; home-page cards must push <code>/model_builder/</code>). Every replacing card
+        carries <code>data-confirm-when-model-not-empty</code> on <em>every</em> surface — no
+        <code>hx-confirm</code> branch — so the single delegated listener governs all of them.</td>
       </tr>
       <tr>
         <td><code>model_builder/templates/model_builder/onboarding/starting_point_drawer.html</code></td>
@@ -148,10 +166,16 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
       <tr>
         <td><code>model_builder/adapters/views/views_onboarding.py</code></td>
         <td>modified</td>
-        <td>New <code>starting_point_drawer(request)</code> — a GET returning only the drawer fragment. It
-        reads the session read-only to decide whether to offer resume, and renders
-        <code>build_picker_groups()</code>. <code>open_template_picker</code>, <code>load_template</code>
-        and <code>load_template_deeplink</code> are unchanged.</td>
+        <td>New <code>starting_point_drawer(request)</code> — a GET returning only the drawer fragment,
+        rendering whatever the presenter hands it. Also needs an answer for the <strong>upload card</strong>:
+        "Load a json file" targets <code>#sidePanel</code>, which is a child of the builder and does not
+        exist on the home page. The prototype landed on the builder and then fired <code>htmx.ajax</code>
+        from an inline <code>hx-on::after-settle</code> — inline JS, against the <code>data-action</code>
+        convention and hostile to a future CSP. Prefer a server-driven hand-off: one endpoint that renders
+        the builder <em>and</em> returns <code>HX-Trigger-After-Settle</code> asking the side panel to open,
+        mirroring how <code>render_model_builder</code> already emits <code>initModelBuilderMain</code>.
+        <code>open_template_picker</code>, <code>load_template</code> and
+        <code>load_template_deeplink</code> are otherwise unchanged.</td>
       </tr>
       <tr>
         <td><code>model_builder/adapters/views/views.py::model_builder_main</code></td>
@@ -170,8 +194,13 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
         <td><code>theme/static/scripts/starting_point_drawer.js</code></td>
         <td>new</td>
         <td>The only JS: open/close, backdrop click, <kbd>Esc</kbd>, focus trap, restore focus to the CTA on
-        close. IIFE, nothing on <code>window</code>, per <code>conventions.md</code> → JavaScript. Opening
-        itself is HTMX; this module handles dismissal and focus.</td>
+        close. IIFE, nothing on <code>window</code>. Dispatch via <code>data-action</code> on
+        <em>both</em> sides — <code>data-action="close-starting-point-drawer"</code> and a matching
+        <code>data-action="open-starting-point-drawer"</code> on the CTA and the band's "Other ways to
+        start" link. The prototype detected the opener with an <code>[hx-get$="starting-points/"]</code>
+        attribute selector, which couples the module to a URL; <code>conventions.md</code> → JavaScript
+        asks for intent-declaring attributes instead. Opening is still HTMX; this module only handles
+        dismissal and focus.</td>
       </tr>
       <tr>
         <td><code>theme/static/scripts/onboarding_first_run.js</code></td>
@@ -185,11 +214,14 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
       <tr>
         <td><code>theme/static/scripts/model_builder_main.js</code></td>
         <td>modified</td>
-        <td>The body-delegated <code>htmx:confirm</code> listener behind
-        <code>data-confirm-when-model-not-empty</code> reads emptiness live from the DOM
-        (<code>.model-builder-card</code>). On the home page there are no cards, so it would read "empty"
-        and skip the confirmation. See §4 risk 1 — the home-page surfaces need a server-decided confirmation
-        instead.</td>
+        <td><strong>Extend the emptiness resolution</strong> in the body-delegated
+        <code>htmx:confirm</code> listener. Today it reads <code>.model-builder-card</code> presence, which
+        is the live truth on the canvas but reads "empty" on the home page, where no cards exist — so the
+        confirmation would be silently skipped. New order: cards present → use them (unchanged on the
+        canvas); otherwise fall back to a server-set emptiness flag on the page. One mechanism on every
+        surface, so <code>conventions.md</code>'s "conditional confirmation depends on live state, not a
+        server-rendered <code>hx-confirm</code>" rule is upheld rather than excepted. Residual staleness is
+        narrow and documented in §4 risk 1.</td>
       </tr>
       <tr>
         <td><code>theme/static/css/</code> (or <code>custom.scss</code>)</td>
@@ -249,12 +281,16 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
   <ol>
     <li><strong>The replace-confirmation silently stops working from the home page.</strong> The existing
     guard reads emptiness from canvas cards in the DOM, which the home page doesn't have — so a returning
-    visitor could lose their model with no prompt. This is the sharpest correctness risk in the feature.
-    Mitigation: the home view and the drawer endpoint both know emptiness server-side at render time, and
-    the drawer is fetched at click time, so a plain <code>hx-confirm</code> rendered onto home-page cards
-    when the session is non-empty is honest here — the staleness argument that forced the delegated listener
-    inside the builder (a long-lived toolbar outliving partial swaps) does not apply to a freshly fetched
-    fragment. Cover it with an explicit e2e assertion.</li>
+    visitor could lose their model with no prompt. This is the sharpest correctness risk in the feature,
+    and the prototype shipped it wrong (a server-rendered <code>hx-confirm</code>, which
+    <code>conventions.md</code> explicitly forbids). <strong>Decision:</strong> extend the delegated
+    listener's emptiness resolution instead — cards when a canvas is present, otherwise a server-set flag.
+    One mechanism, convention intact.
+    <br><strong>Named residual:</strong> on the home page that flag is only as fresh as the page render, so
+    a visitor who loads a model in a second tab and then clicks a band card in the first will not be
+    prompted. Accepted, because the home page cannot mutate the session in place (the only way to change it
+    is to leave), and the drawer's per-click refetch narrows the window to a single page view. Do not claim
+    the flag is live — document it where it is set.</li>
     <li><strong>The home view starts touching the session.</strong> If it accidentally seeds the scratch
     baseline (as <code>model_builder_main</code> deliberately does), every home-page visit mints a session
     model, <code>is_empty_model</code> stays true but a session is written for every anonymous visitor, and
@@ -305,6 +341,13 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
     navigation is exactly the abruptness the feature is removing.</li>
     <li><strong>A second hand-written template list on the home page.</strong> Rejected outright — the
     duplication hazard is the whole reason for the shared partial.</li>
+    <li><strong>Server-rendered <code>hx-confirm</code> on home-page cards, with a
+    <code>conventions.md</code> amendment carving out freshly-fetched fragments.</strong> Rejected: it
+    splits one guarantee across two mechanisms, and the band (rendered at page load, not fetched per click)
+    would not even satisfy the carve-out it asked for.</li>
+    <li><strong>Band cards open the drawer instead of loading directly.</strong> Rejected: it would make
+    every confirmation decision fresh, but at the cost of the one-click template load that is the band's
+    entire reason to exist.</li>
   </ul>
 </section>
 
@@ -323,6 +366,11 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
     before anything reaches main.</li>
     <li><strong>§4 desktop-first.</strong> The drawer must not break narrow viewports, but is designed for
     desktop. No amendment needed anywhere.</li>
+    <li><strong><code>conventions.md</code> → JavaScript.</strong> Two rules bind this feature directly:
+    conditional confirmation is decided at click time from live state (never a server-rendered
+    <code>hx-confirm</code>), and new modules dispatch via <code>data-action</code>. Both are honoured
+    rather than excepted, so no convention amendment is needed. The prototype broke both; do not copy it
+    verbatim.</li>
     <li><strong>§3.1 never paper over a bug.</strong> Specifically relevant to risk 1: if the confirmation
     gap is found mid-implementation, fix it rather than dropping the assertion.</li>
   </ul>
@@ -330,23 +378,38 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
 
 <section>
   <h2>7. Open questions</h2>
+  <details open><summary>Settled during the <code>spec-plan</code> pass (2026-10-07)</summary>
+    <ul>
+      <li><strong>Where the shared context is assembled</strong> — a new
+      <code>adapters/presenters/starting_point_presenter.py</code>, not <code>views_onboarding</code>.
+      Breaks the import cycle the prototype worked around with a function-level import.</li>
+      <li><strong>How the replace-confirmation works</strong> — extend the delegated
+      <code>htmx:confirm</code> listener; see §4 risk 1 and §5.</li>
+      <li><strong>Where the band sits</strong> — directly under the hero, per the spec.</li>
+      <li><strong>Which namespace the drawer route lives in</strong> — <code>model_builder</code>, beside
+      <code>load-template</code>. Confirmed workable in the prototype.</li>
+      <li><strong>Whether a fetch per open is fast enough</strong> — yes; the fragment is small and the
+      catalog build is already on the home-page path.</li>
+      <li><strong>Whether the band renders how-to templates</strong> — yes, the whole
+      <code>templates</code> group, no <code>category</code> filtering.</li>
+    </ul>
+  </details>
+  <p>Still open, to resolve before or during <code>spec-tasks</code>:</p>
   <ul>
-    <li>Does the drawer fragment route live under the <code>model_builder</code> namespace (its content is
-    builder-owned, and <code>load-template</code> already lives there) or at the project root next to
-    <code>home</code> (it is a home-page fragment)? The deep-link precedent shows root-level routes for
-    onboarding entry points are acceptable.</li>
-    <li>Does <code>views.home</code> call <code>build_picker_groups()</code> directly, or should the resume
-    state and the groups be assembled by one small presenter shared by the home view and the drawer
-    endpoint? The latter if the resume logic turns out to be more than three lines.</li>
-    <li><s>Does the home-page band render the how-to templates too?</s> <strong>Settled
-    (2026-10-07): all five render inline</strong> — the band takes the catalog's whole
-    <code>templates</code> group with no <code>category</code> filtering, so a template added to the
-    catalog appears on the home page with no further work.</li>
-    <li>Does the CTA's <code>hx-get</code> need a <code>hx-trigger</code>/<code>hx-swap</code> pairing that
-    lets the drawer be re-opened without re-fetching, or is a fetch per open acceptable? A fetch per open is
-    simpler and keeps the state fresh; confirm it isn't perceptibly slow.</li>
-    <li>Should the band's cards show concept chips (as the picker's do) or stay minimal? Chips are
-    pedagogically useful but are the main driver of home-page visual weight.</li>
+    <li><strong>Should the band's cards show concept chips?</strong> The prototype showed they stack
+    one-per-line in a narrow column and become most of a card's visual weight. Chips are pedagogically
+    useful and already free (the presenter resolves them), but they are the single biggest contributor to
+    band height. Leaning toward dropping them in the band and keeping them in the drawer, where the columns
+    are wider.</li>
+    <li><strong>Does the catalog copy need shortening for the band?</strong> The GenAI marketing video
+    description runs five lines in a band column and sets the height of its whole row. Shortening it is a
+    catalog change — out of scope per the spec's §3 — so either the spec's scope widens by one line, or the
+    band truncates, or the row stays uneven. Worth settling deliberately rather than discovering at review.</li>
+    <li><strong>What exactly carries the server-set emptiness flag</strong> — an attribute on
+    <code>&lt;body&gt;</code>, on the band container, or a dedicated element the listener looks up. Needs
+    to be reachable identically from the band (page render) and the drawer (per-click fetch).</li>
+    <li><strong>Does the upload hand-off reuse the existing side-panel open route</strong>, or warrant its
+    own endpoint? Depends on whether <code>HX-Trigger-After-Settle</code> can carry the panel URL cleanly.</li>
   </ul>
 </section>
 
