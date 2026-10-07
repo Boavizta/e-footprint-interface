@@ -1,6 +1,6 @@
 # Simplified input save errors — tasks
 Spec: [original Simplified-input spec](../simplified-inputs/spec.html) · Plan: [approved refactor plan](plan.html)
-Status: approved — implementation pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
+Status: in progress — Task 1 implemented and reviewed; full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
 
 ## Implementation runs
 
@@ -19,7 +19,7 @@ Status: approved — implementation pending. This refactor uses the existing fea
 ## Task 1 — Return real error statuses and process modal OOB
 
 Goal: Recognized save validation returns HTTP 422; unclassified exceptions return HTTP 500. Both still display the existing modal OOB, leave the main target intact, and settle the workspace mutation as failed.
-Status: approved — implementation pending
+Status: implemented and reviewed — full workspace gates pending
 Brief: [briefs/task-1.md](briefs/task-1.md)
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/exception_handling.py`, `views_addition.py`, `views_edition.py`, `views_simplified_inputs.py`; `theme/static/scripts/modal_utils.js`, `model_builder_main.js`, `simplified_inputs.js`; focused view, integration, middleware and Jest tests.
@@ -56,4 +56,5 @@ Implementation: easy — Once Task 2 removes retained failed-edit state, this is
 
 - **Blocks implementation:** none identified. No library change or Django model migration is planned.
 - **Blocks completion of run A:** `poetry run pytest tests --ignore=tests/e2e`, `npm run jest`, and `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000` against the intended local interface checkout and its running Django server. The E2E server must use the same local code and test configuration. Rebuild generated CSS with Sass after the SCSS edit.
+- **Current workspace gate failures:** the pre-existing editable `efootprint` entry in `pyproject.toml` fails `tests/test_no_dev_dependency.py`; the pre-existing untracked `tools/vscode-plan-review-links/extension.test.js` is discovered by plain Jest but cannot import `vscode`. Product-suite diagnostic runs exclude only those cases. They do not satisfy the plain required commands; clear these conditions before closing run A.
 - **Before a commit reaches `main`:** verify `pyproject.toml` and `poetry.lock` reference the PyPI `efootprint` dependency. Both files already have unrelated local edits at task preparation and are outside this working set.
