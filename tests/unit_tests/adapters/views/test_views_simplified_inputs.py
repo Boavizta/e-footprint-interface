@@ -360,6 +360,36 @@ class TestSimplifiedViews:
         assert values == InputValues(accepted.content.decode(), prefix).values
         assert values[prefix + "__comment"] == current.get("comment", "")
 
+    def test_late_controller_failure_restores_accepted_dependent(self, client, minimal_system_data, monkeypatch):
+        from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
+
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        owner_id = model.servers[0].efootprint_id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"server_type": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}"
+        endpoint = f"/model_builder/edit-simplified-input/{owner_id}"
+        assert client.post(endpoint + "/server_type/", {prefix + "-server_type-value": "on-premise"}).status_code == 200
+        count_prefix = prefix + "-fixed_nb_of_instances-value"
+        assert client.post(endpoint + "/fixed_nb_of_instances/", {
+            count_prefix: "1000000", count_prefix + "__unit": "concurrent"}).status_code == 200
+        saved_before = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj
+        assert saved_before.fixed_nb_of_instances.magnitude == 1000000
+        with patch("model_builder.adapters.views.views_simplified_inputs.present_edited_input",
+                   side_effect=ValueError("Presentation failed")):
+            response = client.post(endpoint + "/server_type/", {prefix + "-server_type-value": "autoscaling"})
+        saved = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj
+        assert saved.server_type.value == "autoscaling"
+        assert isinstance(saved.fixed_nb_of_instances, EmptyExplainableObject)
+        assert response.status_code == 500
+        content = response.content.decode()
+        assert content.count("data-field-address") == 2
+        assert f'hx-swap-oob="outerHTML:#{prefix}-fixed_nb_of_instances"' in content
+        assert "data-quick-total" not in content and "result-block" not in content
+        accepted = client.get(f"/model_builder/simplified-input-field/{owner_id}/fixed_nb_of_instances/")
+        assert InputValues(content, count_prefix).values == InputValues(accepted.content.decode(), count_prefix).values
+
     def test_bookmark_persistence_value_error_remains_server_error(self, client, minimal_system_data, monkeypatch):
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         model = self.save_model(client, minimal_system_data)

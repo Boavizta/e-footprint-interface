@@ -63,17 +63,18 @@ def simplified_timeseries_panel(request, object_id, attribute):
         return render_exception_modal(request, error, preserve_panels=True)
 
 
-def _rejected_simplified_input(request, error, address, *, status=500):
+def _rejected_simplified_input(request, error, addresses, *, status=500):
     response = render_exception_modal(request, error, status=status, preserve_panels=True)
     # Persistence and presentation can fail after the request-local model has changed.
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
-    response.write(render_input_fields_oob(request, model_web, {address}))
+    response.write(render_input_fields_oob(request, model_web, addresses))
     return response
 
 
 @require_POST
 def edit_simplified_input(request, object_id, attribute):
     address = FieldAddress(object_id, attribute)
+    recovery_addresses = {address}
     try:
         model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
         catalog = input_catalog(model_web)
@@ -89,16 +90,17 @@ def edit_simplified_input(request, object_id, attribute):
         try:
             parsed = parse_form_data(form_data, owner.class_as_simple_str)
         except ValueError as error:
-            return _rejected_simplified_input(request, error, address, status=422)
+            return _rejected_simplified_input(request, error, recovery_addresses, status=422)
         try:
             output = EditSimplifiedInputUseCase(model_web, catalog).execute(
                 EditSimplifiedInput(address, parsed[attribute]))
         except (InputValidationError, WeeklyPatternValidationError) as error:
-            return _rejected_simplified_input(request, error, address, status=422)
+            return _rejected_simplified_input(request, error, recovery_addresses, status=422)
+        recovery_addresses = output.changed_fields
         return present_edited_input(request, model_web, output, catalog,
                                     recompute=request.POST.get("recomputation") == "true")
     except Exception as error:
-        return _rejected_simplified_input(request, error, address)
+        return _rejected_simplified_input(request, error, recovery_addresses)
 
 
 @require_POST

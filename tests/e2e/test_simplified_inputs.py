@@ -660,8 +660,7 @@ class TestInlineBookmarks:
         panel_height = page.locator("#panel-result-btn").evaluate("el => el.getBoundingClientRect().height")
         canvas_height = page.locator("#model-builder-page").evaluate("el => el.getBoundingClientRect().height")
         assert abs(panel_height - canvas_height) < 1
-        minimal_complete_model_builder.close_result_panel()
-        expect(page.locator("#result-block")).to_be_empty()
+        saved_results = page.locator("#result-block").inner_html()
         saved_total = totals.nth(0).text_content()
 
         def reject_value(route):
@@ -678,9 +677,10 @@ class TestInlineBookmarks:
         expect(value).to_have_value("8")
         expect(lifespan.locator('[data-action="simplified-retry"], [data-action="simplified-discard"]')).to_have_count(0)
         expect(page.locator("#model-builder-modal")).to_be_visible()
-        expect(page.locator("#result-block")).to_be_empty()
+        assert page.locator("#result-block").inner_html() == saved_results
         assert totals.nth(0).text_content() == saved_total
         page.get_by_role("button", name="Go back", exact=True).click()
+        minimal_complete_model_builder.close_result_panel()
         page.unroute("**/edit-simplified-input/**")
         value.fill("9")
         with page.expect_response("**/edit-simplified-input/**"):
