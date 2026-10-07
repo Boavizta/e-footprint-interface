@@ -606,6 +606,7 @@ class TestInlineBookmarks:
         from urllib.parse import parse_qsl, urlencode
 
         page = minimal_complete_model_builder.page
+        page.set_viewport_size({"width": 1440, "height": 900})
         workspace = open_configure(page)
         workspace.get_by_role("button", name="Expand all", exact=True).click()
         field(workspace, "lifespan").locator("[data-include-input]").check()
@@ -645,6 +646,11 @@ class TestInlineBookmarks:
         click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
         expect(page.locator("#result-block")).not_to_be_empty()
         page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        panel_height = page.locator("#panel-result-btn").evaluate("el => el.getBoundingClientRect().height")
+        canvas_height = page.locator("#model-builder-page").evaluate("el => el.getBoundingClientRect().height")
+        assert abs(panel_height - canvas_height) < 1
+        minimal_complete_model_builder.close_result_panel()
+        expect(page.locator("#result-block")).to_be_empty()
         saved_total = totals.nth(0).text_content()
 
         def reject_value(route):
@@ -660,16 +666,18 @@ class TestInlineBookmarks:
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Not saved")
         expect(value).to_have_value("9")
         expect(page.locator("#model-builder-modal")).to_be_visible()
-        expect(page.locator("#result-block")).not_to_be_empty()
+        expect(page.locator("#result-block")).to_be_empty()
         assert totals.nth(0).text_content() == saved_total
         page.get_by_role("button", name="Go back", exact=True).click()
         page.unroute("**/edit-simplified-input/**")
         click_and_wait_for_htmx(page, lifespan.get_by_role("button", name="Retry save", exact=True))
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(value).to_have_value("9")
+        click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
         expect(page.locator("#result-block")).not_to_be_empty()
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
         assert totals.nth(0).text_content() != saved_total
+        minimal_complete_model_builder.close_result_panel()
         lifespan.locator(".confidence-badge").click()
         with page.expect_response("**/edit-simplified-input/**"):
             lifespan.locator('.confidence-menu [data-level="high"]').click()
@@ -697,7 +705,6 @@ class TestInlineBookmarks:
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.get_by_role("link", name="Reviewed report", exact=True)).to_have_attribute(
             "href", "https://example.com/report")
-        minimal_complete_model_builder.close_result_panel()
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
         prior = totals.nth(0).text_content()
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)

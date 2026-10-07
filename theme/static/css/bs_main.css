@@ -24156,14 +24156,6 @@ body[data-base-view=simplified] #edge-modeling-toggle-wrapper, body[data-base-vi
   display: none !important;
 }
 
-@media (min-width: 1200px) {
-  body[data-base-view=simplified]:has(#panel-result-btn[style*="height: 100%"]) [data-simplified-target] {
-    height: 50%;
-  }
-  body[data-base-view=simplified] #panel-result-btn {
-    max-height: 50%;
-  }
-}
 .simplified-bookmark {
   position: relative;
   display: inline-block;
