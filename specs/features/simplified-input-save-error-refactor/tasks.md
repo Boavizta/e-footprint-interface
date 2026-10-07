@@ -1,6 +1,6 @@
 # Simplified input save errors — tasks
 Spec: [original Simplified-input spec](../simplified-inputs/spec.html) · Plan: [approved refactor plan](plan.html)
-Status: implementation and task reviews complete — full workspace gates pending. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
+Status: Run A implemented, reviewed and validated on the committed snapshot. This refactor uses the existing feature spec; the plan intentionally creates no new `spec.html`.
 
 ## Implementation runs
 
@@ -19,7 +19,7 @@ Status: implementation and task reviews complete — full workspace gates pendin
 ## Task 1 — Return real error statuses and process modal OOB
 
 Goal: Recognized save validation returns HTTP 422; unclassified exceptions return HTTP 500. Both still display the existing modal OOB, leave the main target intact, and settle the workspace mutation as failed.
-Status: implemented and reviewed — full workspace gates pending
+Status: complete — implemented and reviewed
 Brief: [briefs/task-1.md](briefs/task-1.md)
 Decision: [typed validation boundary](plan.html#impl-decision-01).
 Repository: e-footprint-interface only.
@@ -32,9 +32,9 @@ Implementation: standard — Validation must be identified at its source while t
 ## Task 2 — Restore accepted Simplified fields on rejected saves
 
 Goal: On a rejected inline value or provenance save, render the selected field from a fresh active repository read; show `Not saved` on the replacement without preserving a retryable draft. A rejected timeseries Save closes its panel after the accepted field is restored.
-Status: implemented and reviewed — full workspace gates pending
+Status: complete — implemented and reviewed
 Brief: [briefs/task-2.md](briefs/task-2.md)
-Decision: [late dependent-field recovery](plan.html#impl-decision-02).
+Decisions: [late dependent-field recovery](plan.html#impl-decision-02), [expired-model modal fallback](plan.html#impl-decision-03).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/views_simplified_inputs.py`, `model_builder/adapters/presenters/simplified_inputs.py`, `model_builder/templates/model_builder/simplified_inputs/{editor,timeseries_panel}.html`, `theme/static/scripts/simplified_inputs.js`, `theme/static/scss/_simplified_inputs.scss`, generated `theme/static/css/bs_main.css` and `.map`; targeted Python, Jest and E2E tests.
 Tests: Rejections before persistence restore old value and metadata; a failure after persistence restores the newly stored field; quick total and Results stay at accepted content; invalid browser input issues no save or download; failed timeseries Save closes the panel and discards its draft.
@@ -45,8 +45,9 @@ Implementation: standard — The endpoint must distinguish request-local mutatio
 ## Task 3 — Remove obsolete failed-edit guards and synchronize docs
 
 Goal: Remove navigation, model-replacement and export recovery checks that existed for retained failed inline drafts. Preserve Configure's explicit Save/Discard/Stay guard, ordinary side-panel protection and save-aware focused export.
-Status: implemented and reviewed — full workspace gates pending
+Status: complete — implemented and reviewed
 Brief: [briefs/task-3.md](briefs/task-3.md)
+Boundary: [HTTP response versus no-response transport failure](plan.html#impl-decision-04).
 Repository: e-footprint-interface only.
 Files touched: `theme/static/scripts/{simplified_inputs,model_builder_main,model_comparison}.js`; `js_tests/{simplified_inputs,model_builder_main}.test.js`; `tests/e2e/{test_simplified_inputs,test_weekly_pattern_builder}.py`; `specs/features/simplified-inputs/{spec,plan}.html`; owning architecture pages (`runtime-and-recovery`, `rendering`, `workspace`, `persistence`, `timeseries`), `specs/testing.md`, `CHANGELOG.md`.
 Tests: Failed focused export cancels that click; later export uses accepted state. Model/view/shell actions proceed after a failed inline save. Failed Configure Save retains its draft and exit guard; bookmark help/Undo drafts and ordinary side-panel confirmation remain. Run the complete required gates.
@@ -56,7 +57,6 @@ Implementation: easy — Once Task 2 removes retained failed-edit state, this is
 
 ## Gates and prerequisites
 
-- **Blocks implementation:** none identified. No library change or Django model migration is planned.
-- **Blocks completion of run A:** `poetry run pytest tests --ignore=tests/e2e`, `npm run jest`, and `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000` against the intended local interface checkout and its running Django server. The E2E server must use the same local code and test configuration. Rebuild generated CSS with Sass after the SCSS edit.
-- **Current workspace gate failures:** the pre-existing editable `efootprint` entry in `pyproject.toml` fails `tests/test_no_dev_dependency.py`; the pre-existing untracked `tools/vscode-plan-review-links/extension.test.js` is discovered by plain Jest but cannot import `vscode`. Product-suite diagnostic runs exclude only those cases. They do not satisfy the plain required commands; clear these conditions before closing run A.
-- **Before a commit reaches `main`:** verify `pyproject.toml` and `poetry.lock` reference the PyPI `efootprint` dependency. Both files already have unrelated local edits at task preparation and are outside this working set.
+- **Implementation and validation:** no unresolved blocker or migration. Required Python and Jest commands were run on a clean archive of the committed feature with the existing installed dependencies; browser validation used the same local interface code and test configuration. See [global review](handoffs/global-review.md) for coverage limits.
+- **Before a commit reaches `main`:** restore `pyproject.toml` and `poetry.lock` to the PyPI `efootprint` dependency. Their pre-existing local editable changes are outside this working set and make the literal Python gate fail in the dirty checkout. The pre-existing untracked `tools/vscode-plan-review-links/extension.test.js` also makes its literal Jest command fail because `vscode` is unavailable. The clean committed archive excludes that untracked file.
+- **Non-blocking transport limit:** no-response failures cannot carry an accepted-field OOB fragment; see [Decision 04](plan.html#impl-decision-04). The HTTP rejection contract is complete.
