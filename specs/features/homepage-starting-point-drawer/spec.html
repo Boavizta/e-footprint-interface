@@ -23,7 +23,7 @@
 <body>
 
 <h1>Home-page starting-point drawer</h1>
-<p class="status">Status: Spec — under review · 2026-09-24</p>
+<p class="status">Status: Spec — under review · 2026-10-07</p>
 
 <section>
   <h2>1. Problem and audience</h2>
@@ -105,9 +105,10 @@
   <details open><summary>In scope</summary>
     <ul>
       <li><strong>A named-template section on the home page.</strong> A visible band presenting
-      <strong>all four</strong> starter templates by name and description — none held back behind the
-      drawer — positioned so a visitor meets it while reading the page rather than having to hunt for it.
-      Each entry is itself a way in: selecting it loads that model.</li>
+      <strong>all five</strong> templates in the catalog by name and description — the four introductory
+      scenarios and the library's how-to scenario, none held back behind the drawer — positioned so a
+      visitor meets it while reading the page rather than having to hunt for it. Each entry is itself a
+      way in: selecting it loads that model.</li>
       <li><strong>An in-page starting-point drawer behind the main call to action.</strong> <em>Start
       modeling</em> no longer navigates; it opens a chooser over the home page containing the full set of
       starting points — templates, start from scratch, load a JSON file — with the home page still visible
@@ -187,9 +188,9 @@
           <div style="border-top:1px solid #eee; padding-top:1rem;">
             <div style="font-weight:700; font-size:.95rem;">Start from a template</div>
             <div style="color:#666; font-size:.8rem; margin-bottom:.7rem;">
-              A realistic model, already built. Load one and change anything.
+              A realistic model, already built. Load one and change anything. All five, inline.
             </div>
-            <div id="mk-strip" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem;"></div>
+            <div id="mk-strip" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:.5rem;"></div>
             <div style="margin-top:.6rem; font-size:.8rem;">
               <a href="#" id="mk-more" style="color:#1f7a4d;">Other ways to start →</a>
             </div>
@@ -226,7 +227,7 @@
           <div style="font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; color:#888; font-weight:600; margin-bottom:.4rem;">
             Templates
           </div>
-          <div id="mk-drawer-templates" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.5rem; margin-bottom:.9rem;"></div>
+          <div id="mk-drawer-templates" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:.5rem; margin-bottom:.9rem;"></div>
 
           <div style="font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; color:#888; font-weight:600; margin-bottom:.4rem;">
             Or
@@ -253,11 +254,14 @@
 
     <script>
     (function () {
+      /* The live catalog, verbatim: four introductory scenarios plus the library's how-to.
+         All five appear in the home-page band and in the drawer. */
       var TEMPLATES = [
-        { icon: "🛒", name: "Classical e-commerce", desc: "A shopping journey served by a web app calling a database.", chips: ["Web service", "Cloud server", "Database"] },
-        { icon: "🤖", name: "AI chatbot", desc: "A chatbot routing simple and complex prompts to small and large LLM APIs.", chips: ["Web service", "LLM inference"] },
-        { icon: "📟", name: "Industrial IoT", desc: "Factory sensors send readings to a server; analysts review a dashboard.", chips: ["Connected sensors", "Analysis dashboard"] },
-        { icon: "🧠", name: "Machine learning workflow", desc: "Training on a GPU server plus recurrent inference jobs.", chips: ["GPU server"] }
+        { icon: "🛒", name: "Classical e-commerce", desc: "A shopping journey served by a web application server calling a database server.", chips: ["Web service", "Cloud server", "Database"] },
+        { icon: "🤖", name: "AI chatbot", desc: "A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs.", chips: ["Web service", "LLM inference", "External API", "Cloud server"] },
+        { icon: "🎬", name: "GenAI marketing video", desc: "A marketing team produces a short social-media video with generative-AI video providers: writing prompts, exploring drafts, generating final clips, editing locally, and publishing to a CDN. No web service of their own.", chips: ["Gen AI video external API", "LLM inference", "Cloud server"] },
+        { icon: "📟", name: "Industrial IoT", desc: "Factory sensors send readings to a server, and analysts use a dashboard to review that server data.", chips: ["Connected sensors", "Sensor uploads", "Analysis dashboard", "Cloud server"] },
+        { icon: "", name: "Machine learning workflow", desc: "Training on a AI server plus recurrent inference jobs.", chips: [] }
       ];
 
       function card(t, withChips) {
@@ -267,7 +271,7 @@
         }).join("") : "";
         return '<button style="text-align:left; border:1px solid #ddd; background:#fff; border-radius:8px;' +
                ' padding:.55rem .7rem; cursor:pointer;">' +
-               '<div style="font-weight:600; font-size:.83rem;">' + t.icon + ' ' + t.name + '</div>' +
+               '<div style="font-weight:600; font-size:.83rem;">' + (t.icon ? t.icon + ' ' : '') + t.name + '</div>' +
                '<div style="color:#666; font-size:.76rem;">' + t.desc + '</div>' + chips + '</button>';
       }
 
@@ -330,9 +334,10 @@
     <li><strong>Constitution §4 — desktop-first.</strong> The drawer must not break on a narrow viewport,
     but mobile is best-effort.</li>
     <li><strong>Mission — "no one left behind, depth available on demand."</strong> The band must read as an
-    invitation, not a wall of options. All four starter templates are shown inline (decided), so the
-    burden of keeping the page calm falls on layout and copy density rather than on hiding options —
-    compact cards, short descriptions, one row if the width allows.</li>
+    invitation, not a wall of options. All five templates are shown inline (decided), so the burden of
+    keeping the page calm falls on layout and copy density rather than on hiding options — compact cards
+    and short descriptions. Five cards do not divide evenly into a single row, so the band wraps (three
+    then two at desktop width); the catalog's longest description currently sets the row height.</li>
     <li><strong>Session model, not user accounts.</strong> "Continue where you left off" can only mean the
     current session's model. A visitor returning after their session expired sees the ordinary drawer; the
     continue option must never promise work that is gone.</li>
@@ -348,17 +353,21 @@
 <section>
   <h2>6. Open questions</h2>
   <ul>
-    <li><strong>How many templates go in the home-page band?</strong> <em>Decided (2026-09-24): all four
-    introductory templates, inline.</em> Discoverability wins over page calm here — a template the visitor
-    cannot see is a template that does not exist to them. Keeping the page calm is now a layout and
-    copy-density problem (see §5), not a reason to hide options.</li>
+    <li><strong>How many templates go in the home-page band?</strong> <em>Decided (2026-10-07): all five
+    templates in the catalog, inline.</em> Discoverability wins over page calm here — a template the
+    visitor cannot see is a template that does not exist to them. Keeping the page calm is now a layout
+    and copy-density problem (see §5), not a reason to hide options. The band renders the catalog's whole
+    Templates group; only "Start from scratch" and "Load a json file" stay drawer-only, since they are not
+    templates to browse.</li>
     <li><strong>Where does the band sit?</strong> Directly under the hero (maximum visibility, but pushes the
     explanatory sections down) or after "How does it work?" (read in context, but below the fold). Leaning
     toward directly under the hero, since a visitor who already knows they want to try should not have to
     scroll past the pitch.</li>
-    <li><strong>Do the library's how-to scenarios appear on the home page at all</strong>, or only in the
-    drawer and the in-app chooser? They are more pedagogical than exemplary and there will be more of them
-    over time, which argues for drawer-only.</li>
+    <li><strong>Do the library's how-to scenarios appear on the home page at all?</strong>
+    <em>Decided (2026-10-07): yes.</em> The band shows the whole Templates group as the catalog presents
+    it, rather than second-guessing which entries are "introductory enough". Revisit only if the how-to
+    set grows large enough to unbalance the band — at which point the question becomes how to group them,
+    not whether to hide them.</li>
     <li><strong>Does the main call to action keep its current label?</strong> "Start modeling →" now opens a
     question rather than starting anything. A label naming the choice may set expectations better, at the
     cost of sounding less decisive.</li>

@@ -25,7 +25,7 @@
 
 <h1>Home-page starting-point drawer — Implementation plan</h1>
 <p class="status">Status: <strong>Draft</strong> — captured during <code>spec-specify</code> from the kickoff
-conversation; to be refined in the <code>spec-plan</code> stage · 2026-09-24 · Spec:
+conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 · Spec:
 <a href="spec.html">spec.html</a></p>
 
 <section>
@@ -108,8 +108,9 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-09-24 ·
         <td><code>e_footprint_interface/views.py::home</code></td>
         <td>modified</td>
         <td>Today a one-liner rendering <code>home.html</code> with no context. Gains
-        <code>template_picker_groups=build_picker_groups()</code> (or just the introductory group for the
-        band) plus the resume state. Reading the session here is new for this view — read-only via
+        <code>template_picker_groups=build_picker_groups()</code> plus the resume state. The band takes the
+        catalog's whole <code>templates</code> group (all five, the library how-to included); only the
+        <code>scratch</code> group — start-from-scratch and load-a-file — is drawer-only. Reading the session here is new for this view — read-only via
         <code>SessionWorkspaceRepository(request.session)</code>; it must <strong>not</strong> seed the
         scratch baseline the way <code>model_builder_main</code> does, or every home-page visit would
         create a session model.</td>
@@ -273,11 +274,13 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-09-24 ·
     risk is that "the home page needs a slightly different card" erodes it. Mitigation: parameterise the
     partial, never fork it, and assert in an integration test that the names rendered on the home page match
     <code>build_picker_groups()</code>.</li>
-    <li><strong>Home-page bloat — the thing the user explicitly wants to avoid.</strong> All four cards plus
-    a drawer is more page than exists today, and trimming the count is no longer an available escape hatch
-    (that decision is made). The remaining levers are layout and density: a single row of compact cards at
-    desktop width, short descriptions, and chips only if they earn their weight. Build it, look at it at
-    full width and at the narrowest supported desktop width, and if it reads as a catalogue rather than an
+    <li><strong>Home-page bloat — the thing the user explicitly wants to avoid.</strong> All five cards
+    plus a drawer is more page than exists today, and trimming the count is no longer an available escape
+    hatch (that decision is made). Five also does not fit one row, so the band wraps three-then-two and
+    the tallest card sets each row's height — today that is the GenAI marketing video description, which
+    was written for a roomy overlay. The remaining levers are layout and density: shorter card copy, and
+    chips only if they earn their weight. Observed in the prototype: chips stack one-per-line in a narrow
+    column and become most of a card's visual weight. If the band reads as a catalogue rather than an
     invitation, fix it in the card design — not by hiding templates.</li>
     <li><strong>Losing the "just get me in" path.</strong> Today the CTA lands you somewhere; now it asks a
     question. Mitigation is copy, not code — "Start from scratch" must read as an obvious first-class
@@ -335,11 +338,10 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-09-24 ·
     <li>Does <code>views.home</code> call <code>build_picker_groups()</code> directly, or should the resume
     state and the groups be assembled by one small presenter shared by the home view and the drawer
     endpoint? The latter if the resume logic turns out to be more than three lines.</li>
-    <li>Does the home-page band render the how-to templates too, or only the introductory group? The count
-    question is settled — <strong>all four introductory templates render inline</strong>, so the band never
-    takes a subset of that group. What remains open is whether the library's how-to scenarios join them;
-    if not, the band filters <code>build_picker_groups()</code> down to the introductory entries by
-    <code>category</code> rather than taking the whole output.</li>
+    <li><s>Does the home-page band render the how-to templates too?</s> <strong>Settled
+    (2026-10-07): all five render inline</strong> — the band takes the catalog's whole
+    <code>templates</code> group with no <code>category</code> filtering, so a template added to the
+    catalog appears on the home page with no further work.</li>
     <li>Does the CTA's <code>hx-get</code> need a <code>hx-trigger</code>/<code>hx-swap</code> pairing that
     lets the drawer be re-opened without re-fetching, or is a fetch per open acceptable? A fetch per open is
     simpler and keeps the state fresh; confirm it isn't perceptibly slow.</li>
