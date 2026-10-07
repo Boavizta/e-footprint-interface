@@ -208,6 +208,27 @@ class TestSimplifiedViews:
         assert InputValues(content, prefix).values == InputValues(accepted.content.decode(), prefix).values
         assert SessionSystemRepository(client.session).get_system_data() == before
 
+    def test_expired_model_edit_returns_modal_without_attempting_field_recovery(
+            self, client, minimal_system_data, monkeypatch):
+        from model_builder.adapters.repositories.cache_backend import CacheBackend
+
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        owner_id = model.servers[0].efootprint_id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"lifespan": {"included": True, "help": ""}}}})})
+        cache_key = f"{SessionSystemRepository.SYSTEM_DATA_KEY}:{client.session.session_key}:0"
+        CacheBackend().delete(cache_key)
+        response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", {})
+        assert response.status_code == 500
+        assert response["HX-Reswap"] == "none"
+        assert "openModalDialog" in json.loads(response["HX-Trigger-After-Settle"])
+        content = response.content.decode()
+        assert "Your session has expired" in content
+        assert 'id="modal-container" hx-swap-oob="true"' in content
+        assert "data-field-address" not in content
+        assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
+
     def test_large_selected_model_value_save_builds_only_affected_editor(self, client, minimal_system_data):
         from model_builder.adapters.forms.form_context_builder import FormContextBuilder
         from model_builder.application.use_cases.simplified_inputs import UpdateSimplifiedDefinitionUseCase

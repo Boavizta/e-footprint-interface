@@ -367,6 +367,34 @@ test('a rejected focused save cancels its export activation and leaves accepted-
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 
+test('a transport failure cancels focused export and permits another save of the visible draft', () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    input.value = '8';
+    input.focus();
+    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    document.getElementById("download-model").dispatchEvent(new MouseEvent("click", {
+        bubbles: true, cancelable: true,
+    }));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, xhr: {status: 0}, successful: false},
+    }));
+    expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
+    expect(input.value).toBe('8');
+    expect(form.dataset.saving).toBeUndefined();
+    expect(click).not.toHaveBeenCalled();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: form, successful: true},
+    }));
+    expect(click).not.toHaveBeenCalled();
+    click.mockRestore();
+});
+
 test('unchanged blur does not save and an in-flight workspace mutation rejects new saves', () => {
     const form = mountEditor();
     const input = form.querySelector('input');

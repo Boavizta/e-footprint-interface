@@ -78,6 +78,9 @@ def edit_simplified_input(request, object_id, attribute):
     try:
         model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
         catalog = input_catalog(model_web)
+    except Exception as error:
+        return render_exception_modal(request, error, preserve_panels=True)
+    try:
         owner = model_web.get_web_object_from_efootprint_id(object_id)
         prefix = f"si-{model_web.system.efootprint_id}-{object_id}-{attribute}-value"
         if request.POST.get("timeseries") == "true":
