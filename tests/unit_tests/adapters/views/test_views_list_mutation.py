@@ -97,6 +97,6 @@ class TestListMutationViews:
 
         rejected_response = client.post(f"/model_builder/unlink-list-entry/{pattern_id}/{second_journey_id}/")
 
-        assert rejected_response.status_code == 200
+        assert rejected_response.status_code == 500
         assert "requires at least one edge usage journey" in rejected_response.content.decode()
         assert _pattern_journey_ids(client, pattern_id) == [second_journey_id]

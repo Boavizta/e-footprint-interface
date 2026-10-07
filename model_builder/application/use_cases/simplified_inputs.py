@@ -6,6 +6,8 @@ from typing import Any
 from efootprint.abstract_modeling_classes.input_values import input_values_match
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 
+from model_builder.domain.exceptions import InputValidationError
+
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.domain.object_factory import prepare_input_changes
@@ -37,15 +39,18 @@ class EditSimplifiedInputUseCase:
         definition = normalize_definition(self.model_web.repository.interface_config.get("simplified_inputs"))
         setting = definition["fields"].get(address.object_id, {}).get(address.attribute, {})
         if not setting.get("included"):
-            raise ValueError(f"Input {address.object_id}.{address.attribute} is not selected.")
+            raise InputValidationError(f"Input {address.object_id}.{address.attribute} is not selected.")
 
         available_sources = self.model_web.available_sources
         pending_sources = {}
 
         def prepare(field, value):
             owner = self.model_web.get_web_object_from_efootprint_id(field.object_id)
-            return prepare_input_changes(
-                {field.attribute: value}, owner, available_sources=available_sources, pending_sources=pending_sources)
+            try:
+                return prepare_input_changes(
+                    {field.attribute: value}, owner, available_sources=available_sources, pending_sources=pending_sources)
+            except ValueError as error:
+                raise InputValidationError(str(error)) from error
 
         changes = prepare(address, command.parsed_value)
         candidates = {address: changes[0][1]} if changes else {}
@@ -62,12 +67,12 @@ class EditSimplifiedInputUseCase:
                 if allowed is None:
                     continue
                 if not allowed:
-                    raise ValueError(f"No allowed value for {owner.name}.{dependent.attribute}.")
+                    raise InputValidationError(f"No allowed value for {owner.name}.{dependent.attribute}.")
                 current = candidates.get(dependent, getattr(owner, dependent.attribute))
                 if any(input_values_match(current, option) for option in allowed):
                     continue
                 if dependent == address:
-                    raise ValueError("The submitted value conflicts with its conditional inputs.")
+                    raise InputValidationError("The submitted value conflicts with its conditional inputs.")
                 # Metadata lists are shared library constants. Convert their first value through
                 # the usual factory, preserving this owner's provenance rather than the option's.
                 value = {key: value for key, value in allowed[0].to_json().items()
@@ -91,7 +96,7 @@ class UpdateSimplifiedDefinitionUseCase:
 
     def execute(self, settings: dict, *, replace: bool = False, persist: bool = True) -> SimplifiedInputsOutput:
         if not isinstance(settings, dict) or settings.keys() - {"title", "guidance", "fields"}:
-            raise ValueError("Simplified inputs may contain only title, guidance, and fields.")
+            raise InputValidationError("Simplified inputs may contain only title, guidance, and fields.")
         current_config = deepcopy(self.repository.interface_config)
         previous = normalize_definition(current_config.get("simplified_inputs"))
         candidate = normalize_definition(settings) if replace else deepcopy(previous)
@@ -102,13 +107,13 @@ class UpdateSimplifiedDefinitionUseCase:
                     candidate[name] = settings[name]
             fields = settings.get("fields", {})
             if not isinstance(fields, dict):
-                raise ValueError("Simplified inputs fields must map owner IDs to inputs.")
+                raise InputValidationError("Simplified inputs fields must map owner IDs to inputs.")
             for object_id, attributes in fields.items():
                 if not isinstance(object_id, str) or not isinstance(attributes, dict):
-                    raise ValueError("Simplified inputs fields must map owner IDs to inputs.")
+                    raise InputValidationError("Simplified inputs fields must map owner IDs to inputs.")
                 for attribute, patch in attributes.items():
                     if not isinstance(attribute, str) or not isinstance(patch, dict):
-                        raise ValueError("Each input patch must be an object.")
+                        raise InputValidationError("Each input patch must be an object.")
                     setting = candidate["fields"].setdefault(object_id, {}).setdefault(
                         attribute, {"included": False, "help": ""})
                     setting.update(patch)
@@ -128,7 +133,7 @@ class UpdateSimplifiedDefinitionUseCase:
                     for attribute, setting in attributes.items() if setting["included"]}
         completed = complete_selection(self.catalog, selected)
         if completed & explicitly_excluded:
-            raise ValueError("A required input cannot be excluded while its controlling input is included.")
+            raise InputValidationError("A required input cannot be excluded while its controlling input is included.")
         for address in completed:
             candidate["fields"].setdefault(address.object_id, {}).setdefault(
                 address.attribute, {"included": False, "help": ""})["included"] = True
@@ -160,12 +165,12 @@ def reconcile_simplified_definition(model_web, catalog_factory, pending=None, cr
                             if owner in model_web.flat_efootprint_objs_dict}
     for setting in pending or []:
         if not isinstance(setting, dict) or setting.keys() != {"owner", "attribute", "included", "help"}:
-            raise ValueError("Invalid pending simplified input.")
+            raise InputValidationError("Invalid pending simplified input.")
         owner = created_object
         if setting["owner"] == "storage":
             owner = created_object.storage
         elif setting["owner"] != "object":
-            raise ValueError("Unknown pending input owner.")
+            raise InputValidationError("Unknown pending input owner.")
         definition["fields"].setdefault(owner.efootprint_id, {})[setting["attribute"]] = {
             "included": setting["included"], "help": setting["help"]}
     submitted = {FieldAddress(owner, attribute) for owner, fields in definition["fields"].items()

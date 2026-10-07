@@ -415,7 +415,7 @@ class TestSankeyDiagramStructure:
         response = sankey_client.post("/model_builder/sankey-diagram/", default_post)
 
         content = response.content.decode()
-        assert response.status_code == 200
+        assert response.status_code == 500
         assert response.headers["HX-Reswap"] == "none"
         assert ComputationMemoryLimitExceeded.safe_message in content
         assert 'id="modal-container"' in content

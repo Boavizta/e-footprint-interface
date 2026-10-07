@@ -588,7 +588,7 @@ def test_undecorated_route_uses_generic_memory_limit_modal_fallback(monkeypatch)
     response = Client().get("/model_builder/capacity-fail/")
 
     body = response.content.decode()
-    assert response.status_code == 200
+    assert response.status_code == 500
     assert response.headers["HX-Reswap"] == "none"
     assert ComputationMemoryLimitExceeded.safe_message in body
     records = _records(log)
@@ -621,7 +621,7 @@ def test_memory_limited_export_preserves_persisted_model(monkeypatch, minimal_sy
 
     response = client.get("/model_builder/download-json/")
 
-    assert response.status_code == 200
+    assert response.status_code == 500
     assert ComputationMemoryLimitExceeded.safe_message in response.content.decode()
     assert SessionSystemRepository(client.session).get_system_data() == persisted_before
 

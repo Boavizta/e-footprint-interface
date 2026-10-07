@@ -4,6 +4,7 @@ const path = require("path");
 const FIXTURE = path.join(__dirname, "fixtures", "sortable_canvas_six_lists.html");
 
 function loadModule() {
+    require("../theme/static/scripts/modal_utils.js");
     return require("../theme/static/scripts/model_builder_main.js");
 }
 
@@ -228,14 +229,14 @@ test.each([true, false])("exports have no native link destination until completi
     expect(destinations()).toEqual(before);
 });
 
-test.each(["HTTP error", "abort", "HTTP-200 error modal"])("%s unlocks and reports an unsuccessful mutation", failure => {
+test.each(["HTTP error", "abort", "HTTP error modal"])("%s unlocks and reports an unsuccessful mutation", failure => {
     document.body.innerHTML = '<div id="sidePanel"><input value="unsaved"></div>';
     loadModule();
     const finished = jest.fn();
     document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
     const xhr = startMutation();
-    if (failure === "HTTP-200 error modal") xhr.getResponseHeader.mockReturnValue('{"openModalDialog": {}}');
-    completeMutation(xhr, {successful: failure === "HTTP-200 error modal", swap: failure === "HTTP-200 error modal"});
+    if (failure === "HTTP error modal") xhr.getResponseHeader.mockReturnValue('{"openModalDialog": {}}');
+    completeMutation(xhr, {successful: false, swap: failure === "HTTP error modal"});
     expect(finished.mock.calls[0][0].detail.successful).toBe(false);
     expect(document.querySelector("input").disabled).toBe(false);
     expect(document.querySelector("input").value).toBe("unsaved");
@@ -308,4 +309,35 @@ test("a nested mutation distinguishes temporary HTMX disabling from constraint d
     expect(document.getElementById("read").disabled).toBe(false);
     expect(document.querySelector("[hx-post]").disabled).toBe(false);
     expect(document.getElementById("constraint").disabled).toBe(true);
+});
+
+
+test.each([422, 500])("HTTP %s modal processes OOB content and stays locked until settlement", status => {
+    require("../theme/static/scripts/modal_utils.js");
+    loadModule();
+    const finished = jest.fn();
+    document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
+    const xhr = startMutation();
+    xhr.status = status;
+    xhr.getResponseHeader.mockImplementation(name => name === "HX-Reswap" ? "none" : null);
+    const event = requestEvent("htmx:beforeSwap", {xhr, shouldSwap: false, isError: true});
+    expect(event.detail.shouldSwap).toBe(true);
+    expect(event.detail.isError).toBe(true);
+    expect(xhr.getResponseHeader("HX-Reswap")).toBe("none");
+    requestEvent("htmx:afterRequest", {xhr, successful: false});
+    expect(finished).not.toHaveBeenCalled();
+    expect(document.body.dataset.workspaceMutation).toBe("updating");
+    requestEvent("htmx:afterSettle", {xhr});
+    expect(finished.mock.calls[0][0].detail.successful).toBe(false);
+    expect(document.body.dataset.workspaceMutation).toBeUndefined();
+});
+
+test("a successful modal action is not mistaken for a failed save", () => {
+    loadModule();
+    const finished = jest.fn();
+    document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
+    const xhr = startMutation();
+    xhr.getResponseHeader.mockReturnValue('{"openModalDialog": {}}');
+    completeMutation(xhr);
+    expect(finished.mock.calls[0][0].detail.successful).toBe(true);
 });

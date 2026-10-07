@@ -40,8 +40,34 @@ def test_weekly_library_validation_error_uses_standard_modal_without_mutating_se
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 422
     assert response.headers["HX-Reswap"] == "none"
     assert "Day 1 must be assigned to exactly one profile" in response.content.decode()
     execute.assert_called_once()
     assert SessionSystemRepository(client.session).get_system_data() == saved_before
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("error,status", [(ValueError("Unexpected failure"), 500), (RuntimeError("Failure"), 500)])
+def test_unclassified_creation_failure_uses_server_error_modal(client, minimal_system_data, monkeypatch, error, status):
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    SessionSystemRepository(client.session).save_data(minimal_system_data)
+    monkeypatch.setattr("model_builder.adapters.views.views_addition.CreateObjectUseCase.execute",
+                        MagicMock(side_effect=error))
+    response = client.post("/model_builder/add-object/Server/", {"type_object_available": "Server"})
+    assert response.status_code == status
+    assert response["HX-Reswap"] == "none"
+    assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_creation_form_parsing_failure_uses_validation_modal(client, minimal_system_data, monkeypatch):
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    SessionSystemRepository(client.session).save_data(minimal_system_data)
+    execute = MagicMock()
+    monkeypatch.setattr("model_builder.adapters.views.views_addition.CreateObjectUseCase.execute", execute)
+    response = client.post("/model_builder/add-object/Server/", {
+        "type_object_available": "Server", "Server_lifespan": "invalid", "Server_lifespan__unit": "year"})
+    assert response.status_code == 422
+    assert response["HX-Reswap"] == "none"
+    execute.assert_not_called()

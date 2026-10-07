@@ -25,6 +25,12 @@ document.addEventListener('show.bs.modal', function(event) {
 });
 
 document.body.addEventListener('htmx:beforeSwap', function(event) {
+    const {xhr} = event.detail;
+    if (xhr.status >= 400 && xhr.getResponseHeader("HX-Reswap") === "none") {
+        // Process OOB error content while the response header suppresses the main target swap.
+        event.detail.shouldSwap = true;
+        event.detail.isError = true;
+    }
     document.querySelectorAll('.modal-backdrop').forEach(function(el) {
         el.remove();
     });

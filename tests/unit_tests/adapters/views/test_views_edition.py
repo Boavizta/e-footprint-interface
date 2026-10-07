@@ -81,7 +81,7 @@ class TestViewsEdition:
             },
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 422
         assert response.headers["HX-Reswap"] == "none"
         assert "Day 1 must be assigned to exactly one profile" in response.content.decode()
         execute.assert_called_once()
@@ -107,7 +107,7 @@ class TestViewsEdition:
 
         response = client.post(f"/model_builder/edit-object/{object_id}/", {})
 
-        assert response.status_code == 200
+        assert response.status_code == 500
         assert response.headers["HX-Reswap"] == "none"
         assert ComputationMemoryLimitExceeded.safe_message in response.content.decode()
         assert SessionSystemRepository(client.session).get_system_data() == saved_before

@@ -3,6 +3,7 @@ import json
 
 from django.shortcuts import render
 from efootprint.utils.tools import time_it
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.form_data_parser import parse_form_data
@@ -11,7 +12,8 @@ from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import CreateObjectUseCase, CreateObjectInput
 from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+from model_builder.adapters.views.exception_handling import render_exception_modal, render_exception_modal_if_error
+from model_builder.domain.exceptions import InputValidationError
 
 
 @render_exception_modal_if_error
@@ -51,19 +53,26 @@ def add_object(request, object_type):
     repository = SessionWorkspaceRepository(request.session).active_repository()
 
     # 1. Parse form data (adapter responsibility - before use case)
-    parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
+    try:
+        parsed_form_data = parse_form_data(request.POST, request.POST.get("type_object_available"))
+        simplified_settings = json.loads(request.POST.get("simplified_settings", "[]"))
+    except ValueError as error:
+        return render_exception_modal(request, error, status=422)
 
     # 2. Map request to use case input (with parsed data)
     input_data = CreateObjectInput(
         object_type=object_type,
         form_data=parsed_form_data,
         parent_id=request.POST.get("efootprint_id_of_parent_to_link_to"),
-        simplified_settings=json.loads(request.POST.get("simplified_settings", "[]")),
+        simplified_settings=simplified_settings,
     )
 
     # 3. Execute use case
     use_case = CreateObjectUseCase(repository, input_catalog)
-    output = use_case.execute(input_data)
+    try:
+        output = use_case.execute(input_data)
+    except (InputValidationError, WeeklyPatternValidationError) as error:
+        return render_exception_modal(request, error, status=422)
 
     # 4. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))

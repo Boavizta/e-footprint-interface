@@ -116,7 +116,7 @@ def test_add_model_error_surfaces_oob_modal_without_wiping_the_builder(client, m
     response = client.post("/model_builder/add-model/", {"source": "import"})
     body = response.content.decode()
 
-    assert response.status_code == 200
+    assert response.status_code == 500
     assert response["HX-Reswap"] == "none"                       # the main swap is suppressed...
     assert 'id="modal-container"' in body and "hx-swap-oob" in body  # ...so the modal lands OOB
     assert 'id="model-builder-modal"' in body

@@ -499,8 +499,7 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
         });
         disabledBeforeHtmxRequest.delete(xhr);
         if (active?.xhr === xhr) {
-            const triggers = xhr.getResponseHeader?.("HX-Trigger-After-Settle") || "";
-            active.successful = event.detail.successful === true && !triggers.includes("openModalDialog");
+            active.successful = event.detail.successful === true;
             active.requestComplete = true;
             if (!active.waitingForSettle || active.settled) finish(active.successful);
             else lockControls();

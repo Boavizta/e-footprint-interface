@@ -116,12 +116,12 @@ def render_recovery_page(request, error=None, status=200):
     return render(request, "model_builder/recovery.html", context, status=status)
 
 
-def render_exception_modal(request, exception, *, preserve_workspace=False, preserve_panels=False):
+def render_exception_modal(request, exception, *, status=500, preserve_workspace=False, preserve_panels=False):
     if os.environ.get("RAISE_EXCEPTIONS"):
         raise exception
     http_response = render(request, "model_builder/modals/exception_modal.html", {
         "modal_id": "model-builder-modal", "message": exception,
-        "preserve_workspace": preserve_workspace or preserve_panels})
+        "preserve_workspace": preserve_workspace or preserve_panels}, status=status)
 
     # The modal is delivered entirely out-of-band into #modal-container, so the main response body is
     # empty. Without this, that empty body would be swapped into the triggering element's target —

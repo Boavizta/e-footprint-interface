@@ -7,6 +7,10 @@ system operations, independent of the web framework.
 from efootprint.logger import logger
 
 
+class InputValidationError(ValueError):
+    """Submitted inputs fail an identified authoring validation boundary."""
+
+
 class SessionExpiredError(Exception):
     """Raised when the user's session has expired and model data is no longer available."""
 

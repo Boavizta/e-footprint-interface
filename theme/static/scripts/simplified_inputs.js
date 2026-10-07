@@ -539,8 +539,7 @@
     document.body.addEventListener("htmx:afterRequest", event => {
         const bookmark = event.detail.elt;
         if (!bookmark?.matches("[data-bookmark]")) return;
-        const failed = event.detail.successful !== true
-            || (event.detail.xhr.getResponseHeader("HX-Trigger-After-Settle") || "").includes("openModalDialog");
+        const failed = event.detail.successful !== true;
         bookmark.querySelector("[data-bookmark-status]").textContent = failed ? "Not saved" : "Saved";
         if (failed) return;
         const result = JSON.parse(event.detail.xhr.responseText);

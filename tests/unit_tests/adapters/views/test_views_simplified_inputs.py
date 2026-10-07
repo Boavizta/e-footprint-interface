@@ -48,6 +48,7 @@ class TestSimplifiedViews:
             response = client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({
                 "fields": {model.servers[0].efootprint_id: {
                     "lifespan": {"included": True, "help": "Keep Draft"}}}})})
+        assert response.status_code == 500
         assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in json.loads(response["HX-Trigger-After-Settle"])
         assert "closeAndEmptySidePanel" not in response.content.decode()
@@ -81,7 +82,9 @@ class TestSimplifiedViews:
         self.save_model(client, minimal_system_data)
         before = deepcopy(SessionSystemRepository(client.session).interface_config)
         response = client.post("/model_builder/save-simplified-inputs/", {"definition": definition})
+        assert response.status_code == 422
         assert response["HX-Reswap"] == "none"
+        assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
         assert SessionSystemRepository(client.session).interface_config == before
 
     def test_json_opening_defaults_are_applied_once_independently_per_slot(self, client, minimal_system_data):
@@ -129,6 +132,8 @@ class TestSimplifiedViews:
         original = deepcopy(SessionSystemRepository(client.session).get_system_data())
         response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
             server_id: {"fixed_nb_of_instances": {"included": False}}}})})
+        assert response.status_code == 422
+        assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
         html = response.content.decode()
         assert "closeAndEmptySidePanel()" not in html and "hidePanelResult()" not in html
@@ -175,7 +180,7 @@ class TestSimplifiedViews:
         prefix = f"si-{model.system.efootprint_id}-{server.efootprint_id}-lifespan-value"
         response = client.post(f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/", {
             prefix: "invalid", prefix + "__unit": "year"})
-        assert response.status_code == 200
+        assert response.status_code == 422
         assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
         content = response.content.decode()
@@ -269,3 +274,52 @@ class TestSimplifiedViews:
             server_id: {"lifespan": {"included": True, "help": ""}}}})})
         response = client.get(f"/model_builder/simplified-timeseries-panel/{server_id}/lifespan/")
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+
+
+    @pytest.mark.parametrize("endpoint,parameter", [
+        ("save-simplified-inputs", "definition"), ("patch-simplified-inputs", "patch"),
+    ])
+    @pytest.mark.parametrize("payload", [None, "not-json", '{"fields": {"unknown": {"power": {"included": true}}}}'])
+    def test_definition_validation_has_error_status_and_oob_modal(
+            self, client, minimal_system_data, monkeypatch, endpoint, parameter, payload):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        self.save_model(client, minimal_system_data)
+        before = deepcopy(SessionSystemRepository(client.session).get_system_data())
+        response = client.post(f"/model_builder/{endpoint}/", {} if payload is None else {parameter: payload})
+        assert response.status_code == 422
+        assert response["HX-Reswap"] == "none"
+        assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        assert SessionSystemRepository(client.session).get_system_data() == before
+
+    @pytest.mark.parametrize("failure_boundary", ["persist", "present"])
+    def test_inline_unexpected_value_error_remains_server_error(
+            self, client, minimal_system_data, monkeypatch, failure_boundary):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        owner_id = model.servers[0].efootprint_id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"lifespan": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}-lifespan-value"
+        target = ("model_builder.domain.entities.web_core.model_web.ModelWeb.persist_to_cache"
+                  if failure_boundary == "persist"
+                  else "model_builder.adapters.views.views_simplified_inputs.present_edited_input")
+        with patch(target, side_effect=ValueError("Unexpected save failure")):
+            response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", {
+                prefix: "10", prefix + "__unit": "year"})
+        assert response.status_code == 500
+        assert response["HX-Reswap"] == "none"
+        assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
+        assert "closeAndEmptySidePanel" not in response.content.decode()
+
+    def test_bookmark_persistence_value_error_remains_server_error(self, client, minimal_system_data, monkeypatch):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        before = deepcopy(SessionSystemRepository(client.session).interface_config)
+        with patch.object(SessionSystemRepository, "save_interface_config", side_effect=ValueError("Save rejected")):
+            response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
+                model.servers[0].efootprint_id: {"lifespan": {"included": True}}}})})
+        assert response.status_code == 500
+        assert response["HX-Reswap"] == "none"
+        assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        assert SessionSystemRepository(client.session).interface_config == before

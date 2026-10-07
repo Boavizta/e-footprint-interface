@@ -175,8 +175,8 @@ function bookmark(owner, attribute, provisional = false) {
 }
 function bookmarkResponse(element, result, failed = false) {
     document.body.dispatchEvent(new CustomEvent("htmx:afterRequest", {bubbles: true, detail: {
-        elt: element, successful: true, xhr: {responseText: JSON.stringify(result),
-            getResponseHeader: () => failed ? "openModalDialog" : null}
+        elt: element, successful: !failed, xhr: {responseText: JSON.stringify(result),
+            status: failed ? 422 : 200}
     }}));
 }
 

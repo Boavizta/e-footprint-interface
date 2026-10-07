@@ -68,7 +68,7 @@ def _system_data_with_recurrent_server_need(minimal_system_data: dict) -> dict:
 
 def _assert_error_modal_response(response, message: str) -> None:
     body = response.content.decode()
-    assert response.status_code == 200
+    assert response.status_code == 500
     assert message in body
     assert "openModalDialog" in response["HX-Trigger-After-Settle"]
 

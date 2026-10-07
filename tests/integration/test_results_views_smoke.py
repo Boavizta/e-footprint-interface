@@ -11,9 +11,8 @@ Each archetype × endpoint pair is one test. Endpoints covered:
 - GET /model_builder/result-chart/    — fires the moment "Results" is clicked
 - POST /model_builder/sankey-diagram/ — fires when the panel settles
 
-RAISE_EXCEPTIONS=1 is critical: without it, render_exception_modal_if_error
-absorbs view exceptions into a modal returned with status 200, and a status-code
-assertion would silently pass.
+RAISE_EXCEPTIONS=1 exposes the original traceback on view failures instead of
+rendering an HTTP-500 error modal, making smoke-test failures easier to diagnose.
 """
 
 from copy import deepcopy

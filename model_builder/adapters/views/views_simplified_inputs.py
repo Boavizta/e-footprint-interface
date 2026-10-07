@@ -1,11 +1,14 @@
 """Thin focused-view rendering and explicit configuration-save adapters."""
 import json
 
+from efootprint.builders.timeseries import WeeklyPatternValidationError
+
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.simplified_input_context import bookmark_context
+from model_builder.domain.exceptions import InputValidationError
 from model_builder.domain.services.simplified_inputs import FieldAddress, normalize_definition
 from django.views.decorators.http import require_POST
 
@@ -72,9 +75,15 @@ def edit_simplified_input(request, object_id, attribute):
             if key == prefix or key.startswith(prefix + "__"):
                 values = request.POST.getlist(key)
                 form_data[attribute + key[len(prefix):]] = ";".join(values)
-        parsed = parse_form_data(form_data, owner.class_as_simple_str)
-        output = EditSimplifiedInputUseCase(model_web, catalog).execute(
-            EditSimplifiedInput(FieldAddress(object_id, attribute), parsed[attribute]))
+        try:
+            parsed = parse_form_data(form_data, owner.class_as_simple_str)
+        except ValueError as error:
+            return render_exception_modal(request, error, status=422, preserve_panels=True)
+        try:
+            output = EditSimplifiedInputUseCase(model_web, catalog).execute(
+                EditSimplifiedInput(FieldAddress(object_id, attribute), parsed[attribute]))
+        except (InputValidationError, WeeklyPatternValidationError) as error:
+            return render_exception_modal(request, error, status=422, preserve_panels=True)
         return present_edited_input(request, model_web, output, catalog,
                                     recompute=request.POST.get("recomputation") == "true")
     except Exception as error:
@@ -87,8 +96,14 @@ def save_simplified_inputs(request):
         repository = SessionWorkspaceRepository(request.session).active_repository()
         model_web = ModelWeb(repository)
         catalog = input_catalog(model_web)
-        definition = json.loads(request.POST["definition"])
-        UpdateSimplifiedDefinitionUseCase(repository, catalog).execute(definition, replace=True)
+        try:
+            definition = json.loads(request.POST["definition"])
+        except (json.JSONDecodeError, KeyError) as error:
+            return render_exception_modal(request, error, status=422, preserve_workspace=True)
+        try:
+            UpdateSimplifiedDefinitionUseCase(repository, catalog).execute(definition, replace=True)
+        except InputValidationError as error:
+            return render_exception_modal(request, error, status=422, preserve_workspace=True)
         return render(request, "model_builder/simplified_inputs/workspace.html",
                       build_workspace_context(model_web, catalog=catalog))
     except Exception as error:
@@ -110,8 +125,14 @@ def patch_simplified_inputs(request):
         model_web = ModelWeb(repository)
         catalog = input_catalog(model_web)
         previous = normalize_definition(repository.interface_config.get("simplified_inputs"))
-        patch = json.loads(request.POST["patch"])
-        output = UpdateSimplifiedDefinitionUseCase(repository, catalog).execute(patch)
+        try:
+            patch = json.loads(request.POST["patch"])
+        except (json.JSONDecodeError, KeyError) as error:
+            return render_exception_modal(request, error, status=422, preserve_workspace=True)
+        try:
+            output = UpdateSimplifiedDefinitionUseCase(repository, catalog).execute(patch)
+        except InputValidationError as error:
+            return render_exception_modal(request, error, status=422, preserve_workspace=True)
         current = normalize_definition(repository.interface_config.get("simplified_inputs"))
         affected = set(output.changed_fields)
         affected.update(FieldAddress(owner, attribute) for owner, attributes in patch.get("fields", {}).items()

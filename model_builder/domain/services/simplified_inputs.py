@@ -16,6 +16,8 @@ from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.utils.tools import get_init_signature_params
 
+from model_builder.domain.exceptions import InputValidationError
+
 from model_builder.domain.conditional_inputs import resolve_input_path
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
@@ -137,9 +139,9 @@ def complete_selection(catalog: FieldCatalog, selected) -> set[FieldAddress]:
     for address in pending:
         field = catalog.fields.get(address)
         if field is None:
-            raise ValueError(f"Unknown input {address.object_id}.{address.attribute}.")
+            raise InputValidationError(f"Unknown input {address.object_id}.{address.attribute}.")
         if not field.eligible:
-            raise ValueError(f"Input {address.object_id}.{address.attribute} cannot be included: {field.reason}")
+            raise InputValidationError(f"Input {address.object_id}.{address.attribute} cannot be included: {field.reason}")
         for dependent in catalog.dependents.get(address, ()):
             if dependent not in completed:
                 completed.add(dependent)
@@ -150,36 +152,36 @@ def complete_selection(catalog: FieldCatalog, selected) -> set[FieldAddress]:
 def validate_definition(catalog: FieldCatalog, definition: dict | None) -> SimplifiedInputsDefinition:
     """Validate saved membership/help and reject removal of a required companion."""
     if definition is not None and not isinstance(definition, dict):
-        raise ValueError("Simplified inputs must be an object.")
+        raise InputValidationError("Simplified inputs must be an object.")
     if definition is not None and definition.keys() - {"title", "guidance", "fields"}:
-        raise ValueError("Simplified inputs may contain only title, guidance, and fields.")
+        raise InputValidationError("Simplified inputs may contain only title, guidance, and fields.")
     normalized = normalize_definition(definition)
     for name in ("title", "guidance"):
         if not isinstance(normalized[name], str):
-            raise ValueError(f"Simplified inputs {name} must be text.")
+            raise InputValidationError(f"Simplified inputs {name} must be text.")
     if not isinstance(normalized["fields"], dict):
-        raise ValueError("Simplified inputs fields must map owner IDs to inputs.")
+        raise InputValidationError("Simplified inputs fields must map owner IDs to inputs.")
     selected = set()
     for object_id, settings in normalized["fields"].items():
         if not isinstance(object_id, str) or not isinstance(settings, dict):
-            raise ValueError(f"Invalid input owner {object_id!r}.")
+            raise InputValidationError(f"Invalid input owner {object_id!r}.")
         for attribute, setting in settings.items():
             if not isinstance(attribute, str):
-                raise ValueError(f"Invalid input attribute on owner {object_id}.")
+                raise InputValidationError(f"Invalid input attribute on owner {object_id}.")
             address = FieldAddress(object_id, attribute)
             field = catalog.fields.get(address)
             if field is None:
-                raise ValueError(f"Unknown input {object_id}.{attribute}.")
+                raise InputValidationError(f"Unknown input {object_id}.{attribute}.")
             if not field.eligible:
-                raise ValueError(f"Input {object_id}.{attribute} cannot be included: {field.reason}")
+                raise InputValidationError(f"Input {object_id}.{attribute} cannot be included: {field.reason}")
             if (not isinstance(setting, dict) or type(setting.get("included")) is not bool
                     or not isinstance(setting.get("help"), str) or setting.keys() - {"included", "help"}):
-                raise ValueError(f"Input {object_id}.{attribute} requires an included boolean and help text.")
+                raise InputValidationError(f"Input {object_id}.{attribute} requires an included boolean and help text.")
             if setting["included"]:
                 selected.add(address)
     required = complete_selection(catalog, selected) - selected
     if required:
         missing = ", ".join(f"{address.object_id}.{address.attribute}" for address in sorted(
             required, key=lambda address: (address.object_id, address.attribute)))
-        raise ValueError(f"Required inputs are missing from the selection: {missing}.")
+        raise InputValidationError(f"Required inputs are missing from the selection: {missing}.")
     return normalized

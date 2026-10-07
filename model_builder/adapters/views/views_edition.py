@@ -4,6 +4,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from efootprint.utils.tools import time_it
+from efootprint.builders.timeseries import WeeklyPatternValidationError
 
 from model_builder.adapters.forms.form_context_builder import FormContextBuilder
 from model_builder.adapters.forms.form_data_parser import parse_form_data
@@ -12,7 +13,8 @@ from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import EditObjectUseCase, EditObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.object_factory import edit_object_from_parsed_data
-from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
+from model_builder.adapters.views.exception_handling import render_exception_modal, render_exception_modal_if_error
+from model_builder.domain.exceptions import InputValidationError
 
 
 @render_exception_modal_if_error
@@ -57,14 +59,20 @@ def edit_object(request, object_id, trigger_result_display=False):
     object_type = obj_to_edit.class_as_simple_str
 
     # 2. Parse form data (adapter responsibility - before use case)
-    parsed_form_data = parse_form_data(request.POST, object_type)
+    try:
+        parsed_form_data = parse_form_data(request.POST, object_type)
+    except ValueError as error:
+        return render_exception_modal(request, error, status=422)
 
     # 3. Map request to use case input (with parsed data)
     input_data = EditObjectInput(object_id=object_id, form_data=parsed_form_data)
 
     # 4. Execute use case
     use_case = EditObjectUseCase(model_web, input_catalog)
-    output = use_case.execute(input_data)
+    try:
+        output = use_case.execute(input_data)
+    except (InputValidationError, WeeklyPatternValidationError) as error:
+        return render_exception_modal(request, error, status=422)
 
     # 5. Present result (with optional recomputation)
     recompute = bool(request.POST.get("recomputation", False))
