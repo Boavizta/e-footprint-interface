@@ -36,9 +36,5 @@
     {% endif %}
     {% endwith %}
     <span class="small" data-simplified-save-status role="status"></span>
-    <button type="button" class="btn btn-sm btn-outline-primary" data-action="simplified-retry" data-workspace-control hidden>Retry save</button>
-    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="simplified-discard" data-workspace-control hidden
-            hx-get="{% url 'simplified-input-field' field.address.object_id field.address.attribute %}"
-            hx-target="#{{ field.dom_id }}" hx-swap="outerHTML settle:0">Discard edit</button>
 </form>
 {% else %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>{% endif %}

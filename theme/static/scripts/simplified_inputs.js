@@ -6,7 +6,6 @@
     let replaying = false;
     let pendingRead = null;
     const savedEdits = new WeakMap();
-    const failedEdits = new WeakMap();
     const saveStatusTimers = new WeakMap();
     let pendingExport = null;
 
@@ -15,14 +14,6 @@
         clearTimeout(saveStatusTimers.get(status));
         status.textContent = message;
         if (duration) saveStatusTimers.set(status, setTimeout(() => { status.textContent = ""; }, duration));
-    }
-
-    function markEditFailed(form) {
-        form.dataset.saveFailed = "true";
-        failedEdits.set(form, editSnapshot(form));
-        setSaveStatus(form, "Not saved");
-        form.querySelector('[data-action="simplified-retry"]').hidden = false;
-        form.querySelector('[data-action="simplified-discard"]')?.removeAttribute("hidden");
     }
 
     function failedExportForm(element) {
@@ -74,6 +65,11 @@
         const focused = document.activeElement;
         const form = focused?.closest("[data-simplified-editor]");
         if (!form) return false;
+        if (!form.reportValidity()) {
+            pendingExport = null;
+            setSaveStatus(form, "Not saved");
+            return true;
+        }
         pendingExport = element;
         // Source controls write their named hidden inputs on completion of the group.
         focused.blur();
@@ -112,12 +108,11 @@
     function editSnapshot(form) {
         return JSON.stringify([...new FormData(form)].filter(([key]) => key !== "csrfmiddlewaretoken"));
     }
-    function saveEdit(form, retry = false) {
+    function saveEdit(form) {
         if (!form || form.dataset.saving === "true" || document.body.dataset.workspaceMutation === "updating") return;
-        if (!retry && savedEdits.get(form) === editSnapshot(form)) return;
-        if (!retry && failedEdits.get(form) === editSnapshot(form)) return;
+        if (savedEdits.get(form) === editSnapshot(form)) return;
         if (!form.reportValidity()) {
-            markEditFailed(form);
+            setSaveStatus(form, "Not saved");
             return;
         }
         form.dataset.saving = "true";
@@ -143,9 +138,6 @@
         if (event.detail.empty) saveEdit(event.target.closest("[data-simplified-editor]"));
     });
     document.addEventListener("simplified-provenance:changed", event => saveEdit(event.target.closest("[data-simplified-editor]")));
-    document.addEventListener("click", event => {
-        if (event.target.closest('[data-action="simplified-retry"]')) saveEdit(event.target.closest("form"), true);
-    });
     document.addEventListener("submit", event => {
         if (event.target.matches("[data-simplified-editor]")) { event.preventDefault(); saveEdit(event.target); }
     });
@@ -168,23 +160,6 @@
         event.stopImmediatePropagation();
         requireEditRecovery(failed, "continuing");
     }, true);
-    document.body.addEventListener("htmx:confirm", event => {
-        const element = event.detail.elt;
-        let editor;
-        if (element.matches('[data-action="simplified-timeseries-open"]')) {
-            editor = element.closest("[data-simplified-editor]");
-        } else if (element.matches("[data-simplified-timeseries]")) {
-            editor = activeWorkspace()?.querySelector(
-                `[data-owner-id="${element.dataset.ownerId}"][data-attribute="${element.dataset.attribute}"] [data-simplified-editor]`);
-        }
-        if (editor?.dataset.saveFailed !== "true") return;
-        event.preventDefault();
-        const message = "Retry or discard the source, confidence or comment edit before saving this timeseries.";
-        showFailedEdit(editor, `Not saved. ${message}`);
-        if (element.matches("[data-simplified-timeseries]")) {
-            element.querySelector("[data-timeseries-save-status]").textContent = `Not saved. ${message}`;
-        }
-    });
     document.body.addEventListener("htmx:configRequest", event => {
         if (event.detail.elt.matches("[data-simplified-timeseries]") && window.recomputationVals?.().recomputation) {
             event.detail.parameters.recomputation = "true";
@@ -214,21 +189,23 @@
         document.querySelectorAll("[data-quick-total]").forEach(total => total.removeAttribute("aria-busy"));
         document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = ""; });
         const form = event.detail.elt;
-        if (!form.matches("[data-simplified-editor]")) return;
-        delete form.dataset.saving;
-        if (event.detail.successful) {
-            const acceptedForm = [...document.querySelectorAll("[data-simplified-editor]")]
+        let acceptedForm;
+        if (form.matches("[data-simplified-editor]")) {
+            delete form.dataset.saving;
+            acceptedForm = [...document.querySelectorAll("[data-simplified-editor]")]
                 .find(candidate => candidate.dataset.valuePrefix === form.dataset.valuePrefix);
-            if (acceptedForm) setSaveStatus(acceptedForm, "Saved", 3000);
-            return;
+        } else if (form.matches("[data-simplified-timeseries]")) {
+            acceptedForm = activeWorkspace()?.querySelector(
+                `[data-owner-id="${form.dataset.ownerId}"][data-attribute="${form.dataset.attribute}"] [data-simplified-editor]`);
         }
-        markEditFailed(form);
+        if (acceptedForm) {
+            setSaveStatus(acceptedForm, event.detail.successful ? "Saved" : "Not saved", event.detail.successful ? 3000 : 0);
+        }
     });
     document.body.addEventListener("workspace-mutation:finished", event => {
         const form = event.detail.elt;
         if (form.matches("[data-simplified-timeseries]")) {
-            if (event.detail.successful) window.closeAndEmptySidePanel();
-            else form.querySelector("[data-timeseries-save-status]").textContent = "Not saved. Correct the input and retry Save.";
+            window.closeAndEmptySidePanel();
         }
         const element = pendingExport;
         pendingExport = null;

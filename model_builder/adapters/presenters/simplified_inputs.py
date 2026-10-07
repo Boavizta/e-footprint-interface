@@ -25,10 +25,7 @@ def present_edited_input(request, model_web, output, catalog, *, recompute=False
     from model_builder.adapters.views.data_status import append_workspace_storage_status
     from model_builder.domain.oob_region import OobRegion
 
-    context = build_workspace_context(model_web, catalog=catalog, addresses=output.changed_fields)
-    html = "".join(render_to_string("model_builder/simplified_inputs/field.html", {"field": field, "oob": True},
-                                 request=request)
-                   for group in context["groups"] for obj in group["objects"] for field in obj["fields"])
+    html = render_input_fields_oob(request, model_web, output.changed_fields, catalog=catalog)
     html += render_oob_regions(model_web, [OobRegion("results_buttons")])
     triggers = {"simplifiedInputSaved": {"notices": output.notices}}
     if recompute:
@@ -38,6 +35,13 @@ def present_edited_input(request, model_web, output, catalog, *, recompute=False
     response["HX-Trigger-After-Settle"] = json.dumps(triggers)
     append_workspace_storage_status(response, request.session)
     return response
+
+
+def render_input_fields_oob(request, model_web, addresses, *, catalog=None):
+    context = build_workspace_context(model_web, catalog=catalog, addresses=addresses)
+    return "".join(render_to_string("model_builder/simplified_inputs/field.html", {"field": field, "oob": True},
+                                  request=request)
+                   for group in context["groups"] for obj in group["objects"] for field in obj["fields"])
 
 
 def _preview(value):

@@ -23,6 +23,17 @@ def field(workspace, attribute):
     return workspace.locator(f'[data-field-address][data-attribute="{attribute}"]').first
 
 
+def reject_simplified_edit(route):
+    from urllib.parse import parse_qsl, urlencode
+
+    data = dict(parse_qsl(route.request.post_data))
+    prefix = next(key for key in data if key not in {"csrfmiddlewaretoken", "timeseries", "recomputation"})
+    prefix = prefix.split("__", 1)[0]
+    data[prefix] = "invalid"
+    data[prefix + "__unit"] = "dimensionless"
+    route.fulfill(response=route.fetch(post_data=urlencode(data)))
+
+
 @pytest.mark.e2e
 class TestSimplifiedInputs:
     def test_optional_count_switch_in_modeling_and_simplified_inputs(self, minimal_complete_model_builder):
@@ -602,7 +613,7 @@ class TestInlineBookmarks:
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
         expect(draft).to_have_value("9876")
 
-    def test_simple_autosave_deduplicates_preserves_failed_draft_and_refreshes_results(self, minimal_complete_model_builder):
+    def test_simple_autosave_deduplicates_restores_rejected_field_and_refreshes_results(self, minimal_complete_model_builder):
         from urllib.parse import parse_qsl, urlencode
 
         page = minimal_complete_model_builder.page
@@ -664,13 +675,16 @@ class TestInlineBookmarks:
         with page.expect_response("**/edit-simplified-input/**"):
             value.press("Enter")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Not saved")
-        expect(value).to_have_value("9")
+        expect(value).to_have_value("8")
+        expect(lifespan.locator('[data-action="simplified-retry"], [data-action="simplified-discard"]')).to_have_count(0)
         expect(page.locator("#model-builder-modal")).to_be_visible()
         expect(page.locator("#result-block")).to_be_empty()
         assert totals.nth(0).text_content() == saved_total
         page.get_by_role("button", name="Go back", exact=True).click()
         page.unroute("**/edit-simplified-input/**")
-        click_and_wait_for_htmx(page, lifespan.get_by_role("button", name="Retry save", exact=True))
+        value.fill("9")
+        with page.expect_response("**/edit-simplified-input/**"):
+            value.press("Enter")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(value).to_have_value("9")
         click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
@@ -749,16 +763,18 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     page.wait_for_function("() => document.querySelector('[data-simplified-timeseries] canvas')._timeseriesPreviewChart")
     page.set_viewport_size({"width": 1440, "height": 1000})
     volume.fill("40")
-    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=200, body="", headers={
-        "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
-    page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
-        if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
-    }, true)""")
+    page.route("**/edit-simplified-input/**", reject_simplified_edit)
     click_and_wait_for_htmx(page, page.locator("#btn-submit-form"))
-    expect(panel).to_be_visible()
-    expect(volume).to_have_value("40")
-    expect(panel.locator("[data-timeseries-save-status]")).to_contain_text("Not saved")
+    expect(page.locator("#model-builder-modal")).to_be_visible()
+    expect(page.locator("#sidePanel")).not_to_be_visible()
+    expect(panel).to_have_count(0)
+    expect(selected.locator("[data-current-value]")).to_have_text(before)
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
+    click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
+    expect(volume).to_have_value(accepted_volume)
+    volume.fill("40")
     builder.side_panel.submit_and_wait_for_close()
     expect(selected.locator("[data-current-value]")).not_to_have_text(before)
     selected.locator('[data-action="open-source-editor"]').click()
@@ -772,7 +788,7 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
 
 
 @pytest.mark.e2e
-def test_focused_edit_export_waits_for_save_and_failed_edit_blocks_until_discard(
+def test_focused_edit_export_waits_for_save_and_rejected_or_invalid_edit_cancels_download(
         minimal_complete_model_builder, tmp_path):
     builder = minimal_complete_model_builder
     page = builder.page
@@ -792,33 +808,25 @@ def test_focused_edit_export_waits_for_save_and_failed_edit_blocks_until_discard
     builder.download_active_model(filename)
     data = json.loads((tmp_path / "final-field.e-f.json").read_text())
     assert data["Storage"][owner_id]["lifespan"]["comment"] == "Export the final metadata too"
-    page.route("**/edit-simplified-input/**", lambda route: route.fulfill(status=200, body="", headers={
-        "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
-    page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
-        if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
-    }, true)""")
+    page.route("**/edit-simplified-input/**", reject_simplified_edit)
+    downloads, saves = [], []
+    page.on("download", lambda download: downloads.append(download))
+    page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
     value.fill("9")
     with page.expect_response("**/edit-simplified-input/**"):
-        value.press("Enter")
-    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Not saved")
-    downloads = []
-    page.on("download", lambda download: downloads.append(download))
-    page.locator("#download-model").click()
-    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_contain_text("Retry or discard")
-    assert downloads == []
-    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
-    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
-    expect(value).to_have_value("9")
-    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_contain_text("before changing views")
-    workspace.get_by_role("button", name="Configure", exact=True).click()
-    expect(workspace).to_have_attribute("data-mode", "simplified")
+        page.locator("#download-model").click()
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Not saved")
+    expect(value).to_have_value("8")
+    expect(selected.locator('input[name$="__comment"]')).to_have_value("Export the final metadata too")
+    expect(page.locator("#model-builder-modal")).to_be_visible()
+    assert len(saves) == 1 and downloads == []
+    page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
-    click_and_wait_for_htmx(page, field(workspace, "lifespan").get_by_role("button", name="Discard edit"))
-    expect(value).to_have_value("8")
-    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
-    expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
-    open_simplified(page)
-    expect(value).to_have_value("8")
+    value.fill("")
+    page.locator("#download-model").click()
+    expect(value).to_be_focused()
+    assert not value.evaluate("el => el.checkValidity()")
+    assert len(saves) == 1 and downloads == []
     value.fill("10")
     with page.expect_response("**/edit-simplified-input/**"):
         value.press("Tab")

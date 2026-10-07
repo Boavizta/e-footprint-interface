@@ -301,21 +301,30 @@ test('save status starts empty, appears after an accepted replacement, and clear
     }
 });
 
-test('Enter followed by blur saves once and failure keeps draft retryable with accepted totals', () => {
+test('Enter followed by blur saves once and rejection marks the accepted replacement', () => {
     const form = mountEditor();
-    const input = form.querySelector('input');
+    const input = form.querySelector('input[type="number"]');
+    const acceptedValue = input.value;
     input.value = '8';
     input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
     input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    const replacement = form.cloneNode(true);
+    replacement.querySelector('input[type="number"]').value = acceptedValue;
+    replacement.querySelector('[data-simplified-save-status]').textContent = '';
+    delete replacement.dataset.saving;
+    form.replaceWith(replacement);
     document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
         detail: {elt: form, successful: false},
     }));
-    expect(input.value).toBe('8');
-    expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
+    expect(replacement.querySelector('input[type="number"]').value).toBe(acceptedValue);
+    expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
+    expect(replacement.hasAttribute('data-save-failed')).toBe(false);
+    expect(replacement.querySelector('[data-action="simplified-retry"]')).toBeNull();
+    expect(replacement.querySelector('[data-action="simplified-discard"]')).toBeNull();
     expect([...document.querySelectorAll('[data-quick-total]')].map(item => item.textContent)).toEqual(['20 kg', '20 kg']);
-    form.querySelector('[data-action="simplified-retry"]').click();
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+    replacement.querySelector('input[type="number"]').dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 
 test('unchanged blur does not save and an in-flight workspace mutation rejects new saves', () => {
@@ -379,7 +388,7 @@ test("accepted replacement baselines wait for the workspace guard to restore for
 });
 
 
-test("export activation completes the focused field and failure blocks continuation", () => {
+test("export activation completes the focused field and failure cancels that download", () => {
     const form = mountEditor();
     const input = form.querySelector('input[type="number"]');
     const link = document.getElementById("download-model");
@@ -391,20 +400,53 @@ test("export activation completes the focused field and failure blocks continuat
     link.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
     expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
     expect(click).not.toHaveBeenCalled();
+    const replacement = form.cloneNode(true);
+    delete replacement.dataset.saving;
+    form.replaceWith(replacement);
     document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
         detail: {elt: form, successful: false},
     }));
     expect(click).not.toHaveBeenCalled();
-    link.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
-    expect(form.querySelector("[data-simplified-save-status]").textContent).toContain("Retry or discard");
-    expect(form.querySelector('[data-action="simplified-discard"]').hidden).toBe(false);
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
+        detail: {elt: replacement, successful: true},
+    }));
     expect(click).not.toHaveBeenCalled();
-    form.querySelector('[data-action="simplified-retry"]').click();
+    click.mockRestore();
+});
+
+test("invalid focused input cancels export without sending a request or leaving a pending download", () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    input.focus();
+    input.value = "-1";
+    const validity = jest.spyOn(form, "reportValidity").mockReturnValue(false);
+    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const activation = new MouseEvent("click", {bubbles: true, cancelable: true});
+    document.getElementById("download-model").dispatchEvent(activation);
+    expect(activation.defaultPrevented).toBe(true);
+    expect(validity).toHaveBeenCalled();
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    expect(click).not.toHaveBeenCalled();
     document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
         detail: {elt: form, successful: true},
     }));
     expect(click).not.toHaveBeenCalled();
     click.mockRestore();
+});
+
+test.each([true, false])("timeseries Save closes its panel on successful=%s and marks the accepted field", successful => {
+    const acceptedForm = mountEditor();
+    const field = acceptedForm.closest("[data-simplified-object]");
+    field.dataset.ownerId = "owner";
+    field.dataset.attribute = "timeseries";
+    const form = document.createElement("form");
+    form.dataset.simplifiedTimeseries = "";
+    form.dataset.ownerId = "owner";
+    form.dataset.attribute = "timeseries";
+    document.body.appendChild(form);
+    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {detail: {elt: form, successful}}));
+    expect(window.closeAndEmptySidePanel).toHaveBeenCalledTimes(1);
+    expect(acceptedForm.querySelector("[data-simplified-save-status]").textContent).toBe(successful ? "Saved" : "Not saved");
 });
 
 test.each([

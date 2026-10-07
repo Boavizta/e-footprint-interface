@@ -1,5 +1,6 @@
 import json
 from copy import deepcopy
+from html.parser import HTMLParser
 from unittest.mock import patch
 
 import pytest
@@ -10,6 +11,20 @@ from efootprint.core.hardware.storage import Storage
 from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.adapters.repositories import SessionSystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+
+
+class InputValues(HTMLParser):
+    def __init__(self, html, prefix):
+        super().__init__()
+        self.values = {}
+        self.prefix = prefix
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        name = attrs.get("name", "")
+        if tag == "input" and name.startswith(self.prefix):
+            self.values[name] = attrs.get("value", "")
 
 
 @pytest.mark.django_db
@@ -170,7 +185,7 @@ class TestSimplifiedViews:
         assert saved.confidence == original.confidence
         assert saved.comment == original.comment
 
-    def test_invalid_value_error_preserves_editor_panels_and_saved_total(self, client, minimal_system_data, monkeypatch):
+    def test_invalid_value_error_restores_editor_and_preserves_panels_and_saved_total(self, client, minimal_system_data, monkeypatch):
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         model = self.save_model(client, minimal_system_data)
         server = model.servers[0]
@@ -186,6 +201,11 @@ class TestSimplifiedViews:
         content = response.content.decode()
         assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
         assert "data-quick-total" not in content
+        assert "result-block" not in content
+        assert content.count("data-field-address") == 1
+        assert f'hx-swap-oob="outerHTML:#{prefix.removesuffix("-value")}"' in content
+        accepted = client.get(f"/model_builder/simplified-input-field/{server.efootprint_id}/lifespan/")
+        assert InputValues(content, prefix).values == InputValues(accepted.content.decode(), prefix).values
         assert SessionSystemRepository(client.session).get_system_data() == before
 
     def test_large_selected_model_value_save_builds_only_affected_editor(self, client, minimal_system_data):
@@ -292,25 +312,53 @@ class TestSimplifiedViews:
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
         assert SessionSystemRepository(client.session).get_system_data() == before
 
-    @pytest.mark.parametrize("failure_boundary", ["persist", "present"])
-    def test_inline_unexpected_value_error_remains_server_error(
-            self, client, minimal_system_data, monkeypatch, failure_boundary):
+    @pytest.mark.parametrize("failure_boundary", ["update", "persist", "present"])
+    @pytest.mark.parametrize("metadata_only", [False, True])
+    def test_rejected_inline_edit_restores_fresh_repository_value_and_provenance(
+            self, client, minimal_system_data, monkeypatch, failure_boundary, metadata_only):
+        from model_builder.domain.exceptions import InputValidationError
+
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         model = self.save_model(client, minimal_system_data)
         owner_id = model.servers[0].efootprint_id
         client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
-            owner_id: {"lifespan": {"included": True, "help": ""}}}})})
+            owner_id: {"lifespan": {"included": True, "help": ""}, "power": {"included": True, "help": ""}}}})})
+        before = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan.to_json()
         prefix = f"si-{model.system.efootprint_id}-{owner_id}-lifespan-value"
-        target = ("model_builder.domain.entities.web_core.model_web.ModelWeb.persist_to_cache"
-                  if failure_boundary == "persist"
-                  else "model_builder.adapters.views.views_simplified_inputs.present_edited_input")
-        with patch(target, side_effect=ValueError("Unexpected save failure")):
-            response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", {
-                prefix: "10", prefix + "__unit": "year"})
-        assert response.status_code == 500
+        payload = {} if metadata_only else {prefix: "10", prefix + "__unit": "year"}
+        payload.update({prefix + "__confidence": "high", prefix + "__comment": "Submitted comment",
+                        prefix + "__source_name": "Submitted report", prefix + "__source_link": "https://example.test/report"})
+        payload["recomputation"] = "true"
+        target = {
+            "update": "model_builder.adapters.views.views_simplified_inputs.EditSimplifiedInputUseCase.execute",
+            "persist": "model_builder.domain.entities.web_core.model_web.ModelWeb.persist_to_cache",
+            "present": "model_builder.adapters.views.views_simplified_inputs.present_edited_input",
+        }[failure_boundary]
+        error = InputValidationError("Edit rejected") if failure_boundary == "update" else ValueError("Save failure")
+        with patch(target, side_effect=error):
+            response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", payload)
+        saved = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan
+        current = saved.to_json()
+        if failure_boundary == "present":
+            assert current["comment"] == "Submitted comment"
+            assert current["confidence"] == "high"
+            assert saved.source.name == "Submitted report"
+            assert current["value"] == (before["value"] if metadata_only else 10)
+        else:
+            assert current == before
+        assert response.status_code == (422 if failure_boundary == "update" else 500)
         assert response["HX-Reswap"] == "none"
-        assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
-        assert "closeAndEmptySidePanel" not in response.content.decode()
+        content = response.content.decode()
+        assert 'id="modal-container" hx-swap-oob="true"' in content
+        assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
+        assert content.count("data-field-address") == 1
+        assert f'hx-swap-oob="outerHTML:#{prefix.removesuffix("-value")}"' in content
+        assert "data-quick-total" not in content and "result-block" not in content
+        assert 'data-attribute="power"' not in content
+        accepted = client.get(f"/model_builder/simplified-input-field/{owner_id}/lifespan/")
+        values = InputValues(content, prefix).values
+        assert values == InputValues(accepted.content.decode(), prefix).values
+        assert values[prefix + "__comment"] == current.get("comment", "")
 
     def test_bookmark_persistence_value_error_remains_server_error(self, client, minimal_system_data, monkeypatch):
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)

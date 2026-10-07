@@ -54,7 +54,6 @@
   .simplified-input-row .confidence-wrap { flex: none; }
   [data-simplified-save-status] { display: block; margin-top: .3rem; color: #69768a; font-size: .72rem; }
   [data-simplified-save-status]:empty { display: none; }
-  [data-save-failed="true"] [data-simplified-save-status] { color: #a32929; }
   .simplified-selection { display: grid; gap: .3rem; }
   .simplified-selection textarea { min-height: 4rem; }
   &[data-mode="configure"] .simplified-field { padding: .65rem; border: 1px solid #d8dfe8; border-radius: .4rem; }

@@ -6,7 +6,6 @@
     {% csrf_token %}
     <input type="hidden" name="timeseries" value="true">
     {% include "model_builder/side_panels/dynamic_form_fields/dynamic_form_field.html" %}
-    <p data-timeseries-save-status role="status"></p>
 </form>
 {% endblock %}
 {% block save_button %}
