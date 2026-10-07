@@ -109,7 +109,7 @@ For testing edge device groups and other dict-based relationships, use the dict 
 
 Two patterns are load-bearing and must be preserved when extending:
 
-- **`monkeypatch.setenv("RAISE_EXCEPTIONS", "1")`** — `render_exception_modal_if_error` otherwise absorbs view exceptions into a status-200 modal, so a status-code assertion would silently pass on a crashing endpoint.
+- **`monkeypatch.setenv("RAISE_EXCEPTIONS", "1")`** — bubbles the underlying view exception for direct diagnostics instead of wrapping it in an HTTP 500 error-modal response.
 - **Do not mock `ImpactRepartitionSankey` or other results builders.** The unit tests in `tests/unit_tests/adapters/views/test_sankey_views.py` mock it for speed; this smoke deliberately doesn't, so attribution-path bugs in efootprint surface here.
 
 ### Coverage rule for new efootprint API consumption

@@ -63,11 +63,7 @@
         if (!configureForm()) return;
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (configureForm()) {
-            deferExit(() => continueExport(element));
-            return;
-        }
-        continueExport(element);
+        deferExit(() => continueExport(element));
     }, true);
 
     function editSnapshot(form) {

@@ -205,19 +205,28 @@ class TestSimplifiedInputs:
         expect(field(workspace, "lifespan").locator("textarea")).to_have_value("Keep My Capitals")
 
     def test_configure_save_failure_retains_the_draft_and_exit_guard(self, minimal_complete_model_builder):
+        from urllib.parse import parse_qsl, urlencode
+
         page = minimal_complete_model_builder.page
         workspace = open_configure(page)
         field(workspace, "lifespan").locator("[data-include-input]").check()
-        page.route("**/save-simplified-inputs/", lambda route: route.fulfill(status=422, body="", headers={
-            "HX-Reswap": "none", "HX-Trigger-After-Settle": json.dumps({"openModalDialog": {"modal_id": "test-error"}})}))
-        page.evaluate("""() => document.body.addEventListener('openModalDialog', event => {
-            if (event.detail.modal_id === 'test-error') event.stopImmediatePropagation();
-        }, true)""")
+
+        def reject_definition(route):
+            data = dict(parse_qsl(route.request.post_data))
+            data["definition"] = json.dumps({"fields": {"missing-owner": {"lifespan": {"included": True}}}})
+            route.fulfill(response=route.fetch(post_data=urlencode(data)))
+
+        page.route("**/save-simplified-inputs/", reject_definition)
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
-        page.get_by_role("button", name="Save", exact=True).click()
+        with page.expect_response("**/save-simplified-inputs/") as response_info:
+            page.get_by_role("button", name="Save", exact=True).click()
+        assert response_info.value.status == 422
+        expect(page.locator("#model-builder-modal")).to_be_visible()
         expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(workspace).to_have_attribute("data-mode", "configure")
+        expect(workspace.locator("[data-configure-form]")).to_have_attribute("data-dirty", "true")
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
+        page.get_by_role("button", name="Go back", exact=True).click()
         downloads = []
         page.on("download", lambda download: downloads.append(download))
         page.locator("a[href='download-json/']").click()
