@@ -318,15 +318,15 @@
 
 <aside id="impl-decisions" data-note="review">
   <p><strong>Implementation decisions</strong></p>
-  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Eligibility is independent of normal panel exclusions — SUPERSEDED</a></p>
-  <p><a href="#impl-decision-02">[IMPL-DECISION-02] Preserve disconnected objects when copying a modeling — APPLIED</a></p>
-  <p><a href="#impl-decision-03">[IMPL-DECISION-03] Preserve authored input state under numerical equality — APPLIED</a></p>
-  <p><a href="#impl-decision-04">[IMPL-DECISION-04] Separate saved-diagram rendering from settings writes — APPLIED</a></p>
-  <p><a href="#impl-decision-05">[IMPL-DECISION-05] Bound complete-configuration transport — APPLIED</a></p>
-  <p><a href="#impl-decision-06">[IMPL-DECISION-06] Keep Sources bookmark controls lazy — APPLIED</a></p>
-  <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep simplified editing reachable with Results open — APPLIED</a></p>
-  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Require explicit recovery of a failed edit before leaving its view — APPLIED</a></p>
-  <p><a href="#impl-decision-09">[IMPL-DECISION-09] Show optional instance counts in normal forms — APPLIED</a></p>
+  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Bypass the panel-skipped Server count — SUPERSEDED</a></p>
+  <p><a href="#impl-decision-02">[IMPL-DECISION-02] Fix pre-existing loss of disconnected objects during copy — VALIDATED</a></p>
+  <p><a href="#impl-decision-03">[IMPL-DECISION-03] Use authored-state matching in value updates and validation — VALIDATED</a></p>
+  <p><a href="#impl-decision-04">[IMPL-DECISION-04] Render saved Sankey diagrams without writing settings — VALIDATED</a></p>
+  <p><a href="#impl-decision-05">[IMPL-DECISION-05] Send Configure as one JSON definition — VALIDATED</a></p>
+  <p><a href="#impl-decision-06">[IMPL-DECISION-06] Load Sources bookmark controls on disclosure — APPLIED</a></p>
+  <p><a href="#impl-decision-07">[IMPL-DECISION-07] Keep the simplified editor reachable below Results — APPLIED</a></p>
+  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — APPLIED</a></p>
+  <p><a href="#impl-decision-09">[IMPL-DECISION-09] Expose optional instance counts in ordinary forms — APPLIED</a></p>
 </aside>
 
 <section id="approach">
@@ -491,22 +491,46 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     linked to that API.</p>
     <aside id="impl-decision-01" data-note="review">
       <p><strong>[IMPL-DECISION-01] — SUPERSEDED</strong></p>
-      <p>Run A, Task 3: eligibility follows constructor types and conditional metadata independently of
-      normal panels' form-specific skip lists. In particular, <code>fixed_nb_of_instances</code> is an
-      eligible optional number, so including <code>server_type</code> includes that companion. Applying
-      the normal Server panel's exclusions to this catalog would incorrectly remove the agreed
-      empty-number behavior. Existing Modeling forms keep their exclusions; Task 7 must render
-      catalog-selected optional numbers explicitly. See the
-      <a href="../../../model_builder/domain/services/simplified_inputs.py">field catalog</a> and
-      <a href="briefs/task-7.md">Task 7 brief</a>. The normal-panel exclusion was later removed by
-      <a href="#impl-decision-09">IMPL-DECISION-09</a>.</p>
+      <p><strong>Run A, Task 3:</strong> the normal Server panel originally skipped
+      <code>fixed_nb_of_instances</code>, but selecting <code>server_type</code> in Simplified inputs
+      requires that optional count as a conditional companion. Using panel skip lists for eligibility
+      would have made the approved selection impossible.
+      <a href="../../../model_builder/domain/services/simplified_inputs.py"><code>build_catalog()</code></a>
+      instead reads constructor types and conditional links across the flat model, and
+      <code>complete_selection()</code> adds required companions. For Task 7,
+      <a href="../../../model_builder/adapters/forms/form_context_builder.py"><code>FormContextBuilder.build_input_fields()</code></a>
+      passed the selected attributes explicitly to the normal form generator. <a href="#impl-decision-09">IMPL-DECISION-09</a>
+      later made optional counts available in ordinary forms, eliminating the mismatch that prompted
+      this decision. No count-specific bypass remains. The catalog's metadata-based eligibility and
+      explicit selected-attribute rendering remain generic parts of the design described above.</p>
     </aside>
     <aside id="impl-decision-09" data-note="review">
       <p><strong>[IMPL-DECISION-09] — APPLIED</strong></p>
-      <p>Server and Storage <code>fixed_nb_of_instances</code> now appear in ordinary forms as optional numbers.
-      A shared automatic-sizing switch makes the empty value explicit; turning it off requires a fixed count.
-      Autoscaling and serverless require the empty value. Normal and simplified forms use the same number parser
-      and library validation, so the catalog no longer needs a form-exclusion exception for these fields.</p>
+      <p><strong>Follow-up to Tasks 3 and 7:</strong> ordinary Server and Storage panels hid
+      <code>fixed_nb_of_instances</code> while the constructor-derived catalog could select it. That
+      mismatch led to the temporary panel-skip bypass in <a href="#impl-decision-01">IMPL-DECISION-01</a>.</p>
+      <ul>
+        <li><strong>Panel availability:</strong> remove the count from
+        <a href="../../../model_builder/domain/entities/web_core/hardware/server_web.py"><code>ServerWeb.attributes_to_skip_in_forms</code></a>
+        and <a href="../../../model_builder/domain/entities/web_core/hardware/storage_web.py"><code>StorageWeb.attributes_to_skip_in_forms</code></a>.
+        Ordinary create/edit panels now show the count.</li>
+        <li><strong>Shared editor:</strong>
+        <a href="../../../model_builder/adapters/forms/form_field_generator.py"><code>generate_dynamic_form()</code></a>
+        reads the constructor union with <code>EmptyExplainableObject</code> and the declared input unit
+        to choose an optional quantity field in both ordinary and simplified forms. Its conditional
+        metadata marks Server types that permit only empty. The
+        <a href="../../../theme/static/scripts/optional_quantity.js"><code>optional_quantity.js</code></a>
+        switch clears the number for “Leave unset,” requires one when off, and locks empty for those types.</li>
+        <li><strong>Submitted value:</strong>
+        <a href="../../../model_builder/adapters/forms/form_data_parser.py"><code>parse_form_data()</code></a>
+        passes blank as absent and zero as a number; library validation checks the count against the
+        selected Server type.</li>
+      </ul>
+      <p>The count is editable in either view under the same rules, with no count-specific catalog or
+      form bypass left. <a href="../../../tests/integration/test_edition.py">Normal-form integration</a>,
+      <a href="../../../tests/unit_tests/adapters/forms/test_form_data_parser.py">parser</a>, and
+      <a href="../../../tests/e2e/test_simplified_inputs.py">combined-view browser</a> tests cover the
+      blank/numeric transitions.</p>
     </aside>
     <p>The next step joins this catalog to existing form contexts; the configuration save below uses
     the same answers to check the submitted selection.</p>
@@ -589,13 +613,35 @@ class UpdateSimplifiedDefinitionUseCase:
     a copied JavaScript definition. Submit the complete configuration under the
     <a href="#saves">one-at-a-time save guard</a>. Cancel discards unsaved changes.</p>
     <aside id="impl-decision-05" data-note="review">
-      <p><strong>[IMPL-DECISION-05] — APPLIED</strong></p>
-      <p>Run B, Task 7 review: a supported modeling with 61 ordinary servers and their storage has
-      more eligible fields than Django's 1,000-parameter form limit, even with nothing selected.
-      Submit one serialized definition instead of a parameter per control. Controls remain the
-      only draft state, complete replacement remains unchanged, and global request limits stay
-      intact. See <a href="../../../theme/static/scripts/simplified_inputs.js"><code>definitionFromForm()</code></a>
-      and the <a href="handoffs/task-7.md">Task 7 handoff</a>.</p>
+      <p><strong>[IMPL-DECISION-05] — VALIDATED</strong></p>
+      <p><strong>Run B, Task 7 review — transport limit:</strong> the old Configure form gave every
+      eligible field a named help textarea, even if its help was blank and the field was excluded.
+      With 61 Servers and their Storage, those controls alone exceeded Django's 1,000-parameter POST
+      limit before the view could validate the definition. These were configuration controls, not
+      the modeling's numeric values; Configure only displays value previews.</p>
+      <ul>
+        <li><strong>Browser:</strong> the
+        <a href="../../../model_builder/templates/model_builder/simplified_inputs/workspace.html">Configure form</a>
+        sends CSRF as its ordinary field. At <code>htmx:configRequest</code>,
+        <a href="../../../theme/static/scripts/simplified_inputs.js"><code>definitionFromForm()</code></a>
+        scans the controls and includes a field only when it is selected or has nonempty help,
+        then adds title, guidance and these sparse field settings as one JSON <code>definition</code>
+        parameter. Excluded fields with blank help are omitted. The controls remain the sole draft state.</li>
+        <li><strong>Server:</strong>
+        <a href="../../../model_builder/adapters/views/views_simplified_inputs.py"><code>save_simplified_inputs()</code></a>
+        decodes that parameter and passes a complete replacement to
+        <a href="../../../model_builder/application/use_cases/simplified_inputs.py"><code>UpdateSimplifiedDefinitionUseCase.execute()</code></a>,
+        which completes required companions, validates dependencies and persists interface settings.
+        Other omitted fields are excluded; retained help on an excluded field survives only if that
+        field is present in the definition.</li>
+      </ul>
+      <p>Sending only selected fields would erase help intentionally kept on excluded fields;
+      the current JSON already omits excluded fields without help. The Django parameter limit remains
+      unchanged, while the number of POST parameters stays bounded even when many fields are selected.
+      <a href="../../../js_tests/simplified_inputs.test.js">Browser serialization tests</a> cover the
+      sparse definition and retained help; the
+      <a href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py">large-model view regression</a>
+      saves more than 1,000 selected fields through one JSON parameter.</p>
     </aside>
     <p>Before leaving a dirty Configure form, offer <strong>Save / Discard / Stay</strong>.
     Save continues the requested action only after success; failure keeps the form open.
@@ -628,14 +674,35 @@ repository.save_interface_config()
     eligible field, including Storage fields displayed inside a Server panel.
     Sources' existing <code>source_table()</code> model load supplies catalog-backed bookmark summaries
     for eligible input rows. Opening a disclosure loads the shared settings controls on demand;
-    <code>source_table_row_editor_context.py</code> retains its raw-JSON metadata path and current value editor.</p>
+    the separate pencil button in each Sources row opens its source-and-comment editor, whose
+    <code>source_table_row_editor_context.py</code> reads the cached JSON without hydrating a model.</p>
     <aside id="impl-decision-06" data-note="review">
       <p><strong>[IMPL-DECISION-06] — APPLIED</strong></p>
-      <p>Run B, Task 8: derive Sources bookmark eligibility during the existing hydrated table render,
-      then load settings controls only when opened. This reuses the authoritative catalog without
-      adding model hydration to provenance-row editing or eagerly rendering every row's controls.
-      See <a href="../../../model_builder/adapters/views/views.py"><code>source_table()</code></a> and
-      <a href="../../../model_builder/adapters/views/views_simplified_inputs.py"><code>simplified_input_bookmark()</code></a>.</p>
+      <p><strong>Run B, Task 8 — Sources response size:</strong> each Sources row shows an input's value,
+      source, confidence and comment. Its pencil button opens an inline editor for the source and
+      comment; the confidence badge is edited separately. The Simplified inputs bookmark beside the
+      row name opens an “Include in simplified inputs” checkbox and a Help text textarea. Rendering
+      those two controls in every eligible row would enlarge every Sources table response. Like the
+      existing pencil editor, the bookmark therefore loads its controls only when opened.</p>
+      <ul>
+        <li><strong>Table render:</strong>
+        <a href="../../../model_builder/adapters/views/views.py#L544:1"><code>source_table()</code></a> builds one
+        catalog from its existing <code>ModelWeb</code> and attaches only the saved bookmark summary
+        and eligibility to each source row.</li>
+        <li><strong>First disclosure:</strong> the
+        <a href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark.html#L11:1">bookmark partial</a>
+        makes one GET on <code>bookmark-open once</code> to
+        <a href="../../../model_builder/adapters/views/views_simplified_inputs.py#L98:1"><code>simplified_input_bookmark()</code></a>,
+        which renders the shared inclusion and help controls for that field.</li>
+        <li><strong>Source/comment pencil:</strong> the
+        <a href="../../../model_builder/templates/model_builder/result/source_table_row.html#L56:1">row template</a>
+        loads <a href="../../../model_builder/adapters/views/views.py#L563:1"><code>source_table_row_editor()</code></a>
+        only when the pencil is clicked. Its context builder reads the cached system JSON for the
+        source/comment form without rebuilding <code>ModelWeb</code>. Opening the independent bookmark
+        neither submits an unfinished source/comment edit nor replaces that editor.</li>
+      </ul>
+      <p>The <a href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L137:1">view test</a>
+      checks that the table omits controls until the field's disclosure GET.</p>
     </aside>
     <p><code>templates/model_builder/simplified_inputs/bookmark.html</code> discloses the shared
     <code>templates/model_builder/simplified_inputs/selection_controls.html</code> controls.
@@ -730,13 +797,25 @@ repository.save_interface_config()
     not publish a modeling snapshot after graph computation. New/default diagrams and settings changes
     keep their guarded POST and persistence. Existing hydration/recovery and chart-cache boundaries remain.</p>
     <aside id="impl-decision-04" data-note="review">
-      <p><strong>[IMPL-DECISION-04] — APPLIED</strong></p>
-      <p>Run B, Task 6 review: reopening several saved diagrams starts several automatic renders.
-      Treating those reads as configuration writes discards all but the first under the mutation guard.
-      Separate saved-diagram reads from new/settings writes, preserving default-diagram persistence
-      without introducing a queue or letting concurrent reads overwrite saved snapshots. See
-      <a href="../../../model_builder/adapters/views/sankey_views.py"><code>sankey_diagram()</code></a>
-      and the <a href="handoffs/task-6.md">Task 6 handoff</a>.</p>
+      <p><strong>[IMPL-DECISION-04] — VALIDATED</strong></p>
+      <p><strong>Run B, Task 6 review — feature interaction:</strong> opening Results loads every
+      saved Sankey card. Previously each card's form sent a POST on load, so the new one-at-a-time
+      mutation guard could reject simultaneous renders as competing writes.</p>
+      <ul>
+        <li><strong>Template:</strong> in
+        <a href="../../../model_builder/templates/model_builder/result/sankey_card.html"><code>sankey_card.html</code></a>,
+        a saved card's diagram area now loads through GET with its card ID; its settings form POSTs
+        only after a user changes a setting. A new/default card still POSTs on load to save its defaults.</li>
+        <li><strong>View:</strong>
+        <a href="../../../model_builder/adapters/views/sankey_views.py"><code>sankey_diagram()</code></a>
+        reads GET settings by card ID from <code>repository.interface_config["sankey_diagrams"]</code>
+        and renders the graph without <code>persist_to_cache()</code>. POST reads submitted settings,
+        adds or replaces that card's saved entry, then persists the model snapshot.</li>
+      </ul>
+      <p>Saved cards can render concurrently without changing settings. The
+      <a href="../../../tests/integration/test_results_views_smoke.py">GET smoke test</a> checks that
+      rendering a saved graph does not publish a snapshot; see the
+      <a href="handoffs/task-6.md">Task 6 handoff</a>.</p>
     </aside>
     <ol>
       <li>After capturing the request payload, lock relevant inputs, selects, textareas, mutation buttons,
@@ -837,15 +916,39 @@ persist once</code></pre></div></div>
     dependents sharing a controller. Keep the <a href="known-issues.md">SI-1 fix and regression</a> in the
     library; the new edit path must not compensate for it in interface code.</p>
     <aside id="impl-decision-03" data-note="review">
-      <p><strong>[IMPL-DECISION-03] — APPLIED</strong></p>
-      <p>Run A, Task 5 and its review: authored input state can differ even when numerical values
-      compare equal. Empty versus zero Server counts must transact and satisfy conditional choices;
-      timeseries builder settings must persist even when they produce the same series. Library-owned
-      input matching distinguishes these states in validation and transaction no-op detection, and
-      the interface reuses that rule. Arithmetic equality remains unchanged. This prevents successful
-      saves from silently discarding authored settings or accompanying provenance. See
-      <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py">ModelingUpdate</a>
-      and <a href="handoffs/task-5.md">Task 5 handoff</a>.</p>
+      <p><strong>[IMPL-DECISION-03] — VALIDATED</strong></p>
+      <p><strong>Run A, Task 5 review — pre-existing equality gap:</strong> an empty Server count and
+      explicit zero can compare equal even though conditional rules treat them differently. Timeseries
+      with identical calculated values can have different builder types or <code>form_inputs</code>.
+      Before this fix, library allowed-value checks could accept zero where only empty was allowed,
+      while <code>ModelingUpdate</code> could discard an equal-output timeseries edit and its new
+      authoring state. The new simplified edit cascade also used ordinary equality when deciding
+      whether to keep a dependent. The existing normal-form preparer already had its own presence
+      and <code>form_inputs</code> checks; the library update could still skip the change it prepared.</p>
+      <ul>
+        <li><strong>Library comparison:</strong> new
+        <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/input_values.py"><code>input_values_match()</code></a>
+        checks empty versus present, then timeseries type and <code>form_inputs</code>, before ordinary
+        value equality. Arithmetic equality itself is unchanged.</li>
+        <li><strong>Library callers:</strong>
+        <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py"><code>ModelingUpdate.parse_changes_list()</code></a>
+        uses that rule before dropping a no-op;
+        <a href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>ModelingObject.check_belonging_to_authorized_values()</code></a>
+        uses it for fixed and conditional allowed-value lists.</li>
+        <li><strong>Interface callers:</strong>
+        <a href="../../../model_builder/domain/object_factory.py"><code>prepare_input_changes()</code></a>
+        replaces its duplicate local comparison with the library helper, and
+        <a href="../../../model_builder/application/use_cases/simplified_inputs.py"><code>EditSimplifiedInputUseCase.execute()</code></a>
+        uses it before retaining a dependent instead of choosing an allowed replacement.</li>
+      </ul>
+      <p>As a result, empty-to-zero edits reach conditional/capacity validation, switching to an
+      empty-only Server type replaces a zero count with empty, and edits to timeseries builder inputs
+      persist even when calculated values do not change. Interface
+      <a href="../../../tests/integration/test_simplified_inputs.py">integration tests</a> cover both
+      normal and simplified timeseries edits, count transitions, and unchanged-value provenance;
+      the <a href="../../../../e-footprint/tests/abstract_modeling_classes/test_modeling_update.py">library
+      regression</a> covers update and conditional matching. See the
+      <a href="handoffs/task-5.md">Task 5 handoff</a> for the implementation review.</p>
     </aside>
     <p>The presenter replaces only affected fields/objects, with accepted dependent choices and notices.
     It does not replace unrelated dirty controls. Omitted provenance properties remain unchanged.</p>
@@ -874,11 +977,16 @@ persist once</code></pre></div></div>
     and Results occupies the lower part of the viewport. Apply this layout only to the Simplified view.</p>
     <aside id="impl-decision-07" data-note="review">
       <p><strong>[IMPL-DECISION-07] — APPLIED</strong></p>
-      <p>Run C, Task 9: at the default Chromium viewport, the existing full-height Results panel covered
-      the simplified editor and intercepted Retry save. Share the height in Simplified inputs so users
-      can correct a failed edit while inspecting Results; preserve Modeling's established layout.
-      See <a href="../../../theme/static/scss/_simplified_inputs.scss"><code>_simplified_inputs.scss</code></a>
-      and the <a href="handoffs/task-9.md">Task 9 handoff</a>.</p>
+      <p><strong>Run C, Task 9 — blocked Retry control:</strong> with detailed Results open at the
+      default desktop viewport, its full-height panel covered the Simplified editor and intercepted
+      Retry after a failed save.</p>
+      <p>In <a href="../../../theme/static/scss/_simplified_inputs.scss"><code>_simplified_inputs.scss</code></a>,
+      the desktop media rule (<code>min-width: 1200px</code>) targets the Simplified base view when
+      <code>#panel-result-btn</code> has full height: <code>[data-simplified-target]</code> gets 50% height
+      and the Results panel gets a 50% maximum. The editor and failed field stay reachable while
+      Results remains open; Modeling's panel sizing is unaffected. The
+      <a href="../../../tests/e2e/test_simplified_inputs.py">autosave/Results browser flow</a> retries
+      a failed field with detailed Results still open.</p>
     </aside>
     <h4 id="timeseries">5 · Open and save one timeseries</h4>
     <p><code>templates/model_builder/simplified_inputs/timeseries_panel.html</code> reuses the registry,
@@ -932,26 +1040,53 @@ persist once</code></pre></div></div>
     requested slots and points to a failed edit in the other model from the shared toolbar.</p>
     <aside id="impl-decision-08" data-note="review">
       <p><strong>[IMPL-DECISION-08] — APPLIED</strong></p>
-      <p>Run C, Task 10 and global review: a normal Modeling → Simplified entry fetches fresh saved state,
-      while add/import/example actions and some removals rerender the whole workspace shell. These paths
-      could silently erase a failed, retryable draft and release its export block. Require recovery before
-      any action that replaces a surviving failed model; allow explicitly confirmed deletion or reset of
-      that model, retaining normal fresh-entry behavior afterward.
-      See <a href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a>
-      and the <a href="handoffs/task-10.md">Task 10 handoff</a>.</p>
+      <p><strong>Run C, Task 10 and global review — lost failed draft:</strong> a failed simplified
+      autosave leaves a retryable value in the resident view. Re-entering Simplified from Modeling
+      fetches saved state, while add/import/example and some remove actions replace the entire
+      workspace shell. Either path could erase the failed value and silently lift its export block.</p>
+      <ul>
+        <li><strong>View entry:</strong> the click guard in
+        <a href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a>
+        stops Simplified or Configure entry while the active model has <code>data-save-failed</code>,
+        then exposes the failed field and its Retry/Discard controls.</li>
+        <li><strong>Shell replacement:</strong> the same file's <code>htmx:confirm</code> handler checks
+        failed edits in every resident model before a <code>#main-content-block</code> swap.
+        <code>requireEditRecovery()</code> blocks an action that would replace a surviving failed model,
+        including when its other model is active. Deliberately confirmed removal or reset may discard
+        the affected model's draft; another model's failure still blocks that replacement.</li>
+      </ul>
+      <p>Retry or Discard edit restores normal navigation/export; an accidental fresh read cannot turn
+      an unsaved draft into an apparently saved export. The
+      <a href="../../../tests/e2e/test_simplified_inputs.py">parked-failure browser regression</a>
+      covers cross-model replacement and explicit removal; see the
+      <a href="handoffs/task-10.md">Task 10 handoff</a>.</p>
     </aside>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
     <p><code>adapters/views/views_workspace.py</code> duplicates the complete flat modeling document
     and its independent interface settings. Remap System-owned field addresses when that ID changes,
     and start an independent browser context.</p>
     <aside id="impl-decision-02" data-note="review">
-      <p><strong>[IMPL-DECISION-02] — APPLIED</strong></p>
-      <p>Run A, Task 4 review: copying only the System-connected graph drops ordinarily created but
-      unused objects while retaining their selected-field addresses. Duplicate and System-ID remint
-      now preserve the complete flat object set through the existing System-and-orphans serializer
-      in <a href="../../../model_builder/domain/services/system_import_service.py">SystemImportService</a>.
-      This preserves both model contents and valid definitions without adding import-time definition
-      validation. See <a href="handoffs/task-4.md">Task 4 handoff</a>.</p>
+      <p><strong>[IMPL-DECISION-02] — VALIDATED</strong></p>
+      <p><strong>Pre-existing bug found in Run A, Task 4 review:</strong> duplication and System-ID
+      remint serialized only objects connected to the System. An unused Server and its Storage could
+      disappear from a copy, while Simplified inputs kept a field address pointing to that missing
+      Server. The feature exposed the inconsistency; it did not introduce the object loss.</p>
+      <p><a href="../../../model_builder/adapters/views/views_workspace.py"><code>_system_data_for_add()</code></a>
+      now takes the complete cached document from <code>active_repository().get_system_data()</code>,
+      remembers its name, calls <code>with_fresh_system_id()</code> and names the result “Copy of …”.
+      <a href="../../../model_builder/adapters/repositories/workspace_base.py"><code>with_fresh_system_id()</code></a>
+      uses <a href="../../../model_builder/domain/services/system_import_service.py"><code>SystemImportService.serialize_system_and_orphans()</code></a>
+      to write the connected graph plus every disconnected object after reminting. It preserves
+      non-System IDs and cached interface metadata, and remaps field addresses whose owner was the
+      old System ID. The follow-up simplification is commit <code>722ad7c4</code>; it removed the extra
+      <code>ModelWeb.to_json()</code> round trip and manual metadata attachment.</p>
+      <p><a href="../../../tests/integration/test_workspace_file.py"><code>test_copy_preserves_disconnected_objects_and_their_selected_inputs</code></a>
+      covers duplicate, add-from-file and replace-from-file, including the selected field;
+      <code>test_duplicate_independent_definitions_remap_system_addresses_and_export</code> in the same
+      file covers System-owned address remapping and independent settings.
+      <strong>Remaining processing:</strong> <code>add_model()</code> still runs <code>import_system()</code>
+      after duplicate remint; that extra pass was not part of this cleanup. Import-time definition
+      validation is unchanged. See the <a href="handoffs/task-4.md">Task 4 handoff</a>.</p>
     </aside>
     <p><strong>Import-order correction:</strong> <code>adapters/views/views_workspace.py</code> currently
     clears slots before loading their replacements. Run every incoming model through the unchanged
@@ -1015,7 +1150,7 @@ persist once</code></pre></div></div>
       <thead><tr><th>Spec behavior</th><th>Critical assertions</th><th>Owning test layer</th></tr></thead>
       <tbody>
         <tr><td>Catalog and forms</td><td>Eligible versus excluded input kinds, including empty optional numbers and unsupported timeseries; normal creation/edit forms unchanged.</td><td>Catalog and existing form tests</td></tr>
-        <tr><td>Required selections</td><td>Provider/Model and linked video-job Resolution; chained inclusion, dependent-only selection and locked required-inclusion controls. SI-1 preserves both siblings.</td><td>Interface unit/integration; focused library regression for SI-1</td></tr>
+        <tr><td>Required selections</td><td>Provider/Model and linked video-job Resolution; chained inclusion, dependent-only selection and locked required-inclusion controls. Explicit exclusion of a required field is rejected across owners without changing saved settings; complete saves restore any omitted companion. SI-1 preserves both siblings.</td><td>Interface unit/integration; focused library regression for SI-1</td></tr>
         <tr><td>Value/provenance updates</td><td>Keep a valid dependent or choose the first allowed value; an invalid batch persists neither values nor metadata. Include the Server empty-count case.</td><td>Framework-free integration using ModelingUpdate</td></tr>
         <tr><td>Configuration and imports</td><td>Membership/help round-trip; independent copies and System-ID remapping; malformed second model or combined-budget rejection leaves the previous workspace unchanged.</td><td>Repository/workspace integration; one import E2E</td></tr>
         <tr><td>Inline authoring and lifecycle</td><td>Bookmarks update visible controls without saving or replacing value drafts; correct nested owner; creation previews required inclusion, updates the lock when the API changes, and keeps help editable. Successful creation enforces inclusion; failure/cancel leaves no references. Clear/Undo/delete respect retained help and dependencies.</td><td>Use-case integration; one combined authoring E2E</td></tr>
