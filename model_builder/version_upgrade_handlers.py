@@ -1,5 +1,6 @@
 from efootprint.logger import logger
 from efootprint.api_utils.version_upgrade_handlers import rename_dict_key
+from model_builder.domain.interface_config import normalize_interface_config
 
 
 # --- One-release migration note: workspace slot-suffixed cache keys -----------------------------
@@ -114,15 +115,6 @@ def upgrade_interface_config(config: dict, from_major_version: int) -> dict:
         if handler:
             config = handler(config)
     return normalize_interface_config(config)
-
-
-def normalize_interface_config(config: dict) -> dict:
-    """Add optional definition defaults on every read, including current-version files."""
-    from model_builder.domain.services.simplified_inputs import normalize_definition
-
-    config = dict(config)
-    config["simplified_inputs"] = normalize_definition(config.get("simplified_inputs"))
-    return config
 
 
 INTERFACE_CONFIG_UPGRADE_HANDLERS = {}

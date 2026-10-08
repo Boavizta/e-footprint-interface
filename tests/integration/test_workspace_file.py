@@ -19,7 +19,7 @@ from copy import deepcopy
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from model_builder.version_upgrade_handlers import normalize_interface_config
+from model_builder.domain.interface_config import normalize_interface_config
 from model_builder.adapters.repositories import SessionSystemRepository, SessionWorkspaceRepository
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.adapters.repositories.workspace_base import with_fresh_system_id

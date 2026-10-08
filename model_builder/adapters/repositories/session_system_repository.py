@@ -13,6 +13,7 @@ from e_footprint_interface import __version__ as interface_version
 
 from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
+from model_builder.domain.interface_config import normalize_interface_config
 from model_builder.domain.interfaces import ISystemRepository
 from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.recovery_retention import (
@@ -170,8 +171,6 @@ class SessionSystemRepository(ISystemRepository):
             self.get_system_data_with_source()
         if self._interface_config is None:
             self._interface_config = self.load_interface_config_from_session()
-        from model_builder.version_upgrade_handlers import normalize_interface_config
-
         self._interface_config = normalize_interface_config(self._interface_config or {})
         return self._interface_config
 

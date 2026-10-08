@@ -27,7 +27,8 @@
 </ul>
 <p><code>interface_config.simplified_inputs</code> is a JSON-shaped definition with <code>title</code>,
 <code>guidance</code>, and <code>fields</code> keyed by owner ID then constructor attribute; each setting contains
-<code>included</code> and authored <code>help</code>, without modeling values or provenance. Both repositories normalize
+<code>included</code> and authored <code>help</code>, without modeling values or provenance. Both repositories use
+<a class="source" href="../../model_builder/domain/interface_config.py"><code>domain/interface_config.py</code></a> to normalize
 missing/empty definitions to empty title/guidance/fields on config reads, including current-version files that bypass
 major-version migration. Normalization copies the definition into request-local config without writing stored model
 payloads. Definition validation checks catalog eligibility and required-selection completeness; reads do not revalidate
