@@ -21,7 +21,6 @@ Status: Run A implemented, reviewed and validated on the committed snapshot. Thi
 Goal: Recognized save validation returns HTTP 422; unclassified exceptions return HTTP 500. Both still display the existing modal OOB, leave the main target intact, and settle the workspace mutation as failed.
 Status: complete — implemented and reviewed
 Brief: [briefs/task-1.md](briefs/task-1.md)
-Decision: [typed validation boundary](plan.html#impl-decision-01).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/exception_handling.py`, `views_addition.py`, `views_edition.py`, `views_simplified_inputs.py`; `theme/static/scripts/modal_utils.js`, `model_builder_main.js`, `simplified_inputs.js`; focused view, integration, middleware and Jest tests.
 Tests: Assert 422 on identified parsing/domain rejections, including `WeeklyPatternValidationError`; 500 on generic or persistence failures; modal OOB and `HX-Reswap: none` on both; no whole-builder replacement; status-driven mutation and bookmark failure.
@@ -34,7 +33,6 @@ Implementation: standard — Validation must be identified at its source while t
 Goal: On a rejected inline value or provenance save, render the selected field from a fresh active repository read; show `Not saved` on the replacement without preserving a retryable draft. A rejected timeseries Save closes its panel after the accepted field is restored.
 Status: complete — implemented and reviewed
 Brief: [briefs/task-2.md](briefs/task-2.md)
-Decisions: [late dependent-field recovery](plan.html#impl-decision-02), [expired-model modal fallback](plan.html#impl-decision-03).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/views_simplified_inputs.py`, `model_builder/adapters/presenters/simplified_inputs.py`, `model_builder/templates/model_builder/simplified_inputs/{editor,timeseries_panel}.html`, `theme/static/scripts/simplified_inputs.js`, `theme/static/scss/_simplified_inputs.scss`, generated `theme/static/css/bs_main.css` and `.map`; targeted Python, Jest and E2E tests.
 Tests: Rejections before persistence restore old value and metadata; a failure after persistence restores the newly stored field; quick total and Results stay at accepted content; invalid browser input issues no save or download; failed timeseries Save closes the panel and discards its draft.
@@ -47,7 +45,6 @@ Implementation: standard — The endpoint must distinguish request-local mutatio
 Goal: Remove navigation, model-replacement and export recovery checks that existed for retained failed inline drafts. Preserve Configure's explicit Save/Discard/Stay guard, ordinary side-panel protection and save-aware focused export.
 Status: complete — implemented and reviewed
 Brief: [briefs/task-3.md](briefs/task-3.md)
-Boundary: [HTTP response versus no-response transport failure](plan.html#impl-decision-04).
 Repository: e-footprint-interface only.
 Files touched: `theme/static/scripts/{simplified_inputs,model_builder_main,model_comparison}.js`; `js_tests/{simplified_inputs,model_builder_main}.test.js`; `tests/e2e/{test_simplified_inputs,test_weekly_pattern_builder}.py`; `specs/features/simplified-inputs/{spec,plan}.html`; owning architecture pages (`runtime-and-recovery`, `rendering`, `workspace`, `persistence`, `timeseries`), `specs/testing.md`, `CHANGELOG.md`.
 Tests: Failed focused export cancels that click; later export uses accepted state. Model/view/shell actions proceed after a failed inline save. Failed Configure Save retains its draft and exit guard; bookmark help/Undo drafts and ordinary side-panel confirmation remain. Run the complete required gates.
@@ -59,4 +56,4 @@ Implementation: easy — Once Task 2 removes retained failed-edit state, this is
 
 - **Implementation and validation:** no unresolved blocker or migration. Required Python and Jest commands were run on a clean archive of the committed feature with the existing installed dependencies; browser validation used the same local interface code and test configuration. See [global review](handoffs/global-review.md) for coverage limits.
 - **Before a commit reaches `main`:** restore `pyproject.toml` and `poetry.lock` to the PyPI `efootprint` dependency. Their pre-existing local editable changes are outside this working set and make the literal Python gate fail in the dirty checkout. The pre-existing untracked `tools/vscode-plan-review-links/extension.test.js` also makes its literal Jest command fail because `vscode` is unavailable. The clean committed archive excludes that untracked file.
-- **Non-blocking transport limit:** no-response failures cannot carry an accepted-field OOB fragment; see [Decision 04](plan.html#impl-decision-04). The HTTP rejection contract is complete.
+- **Non-blocking transport limit:** no-response failures cannot carry an accepted-field OOB fragment; see the [global review](handoffs/global-review.md#non-blocking-transport-gap). The HTTP rejection contract is complete.
