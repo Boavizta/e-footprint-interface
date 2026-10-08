@@ -10,6 +10,8 @@ two user-visible deliveries. Each leaves the app in a working, shippable state.
 
 ## Task 1 — One card grid behind the picker, and the oversized description trimmed
 
+**Status:** Done.
+
 **Goal:** Extract the template-picker card markup into a shared partial that later surfaces can
 reuse, and bring the GenAI marketing video description in line with its peers. Nothing about the
 user's flow changes: the picker still auto-fires on an empty model and still looks the same, except

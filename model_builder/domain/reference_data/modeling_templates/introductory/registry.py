@@ -98,9 +98,8 @@ INTRO_TEMPLATES: tuple[IntroTemplate, ...] = (
     IntroTemplate(
         id="genai_video",
         name="GenAI marketing video",
-        description="A marketing team produces a short social-media video with generative-AI video "
-                    "providers: writing prompts, exploring drafts, generating final clips, editing "
-                    "locally, and publishing to a CDN. No web service of their own.",
+        description="A marketing team generates a social-media video with AI video providers, then "
+                    "edits and publishes it.",
         icon="🎬",
         showcased_concepts=("{class:EcoLogitsVideoGenExternalAPI}", "llm_inference", "{class:BoaviztaCloudServer}"),
         json_path=HERE / "genai_video.json",

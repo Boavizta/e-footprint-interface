@@ -1,0 +1,67 @@
+{% comment %}
+The template-catalog card grid, rendered from the picker view model built by
+build_picker_groups(). Kept as its own partial so every surface that offers a starting
+point draws the same cards from the same data — they cannot drift in content or order.
+
+Callers pass every parameter explicitly:
+
+  groups             ordered picker groups, or a subset of them
+  show_group_titles  render each group's heading above its cards
+  show_chips         render the showcased-concept chips
+  show_guides        render the how-to guide links in the card footer
+  cols_class         Bootstrap row-cols-* classes for the grid
+{% endcomment %}
+{% for group in groups %}
+<section class="mb-3">
+    {% if show_group_titles %}
+    <h3 class="text-uppercase text-muted fw-semibold mb-2" style="font-size: .75rem; letter-spacing: .04em;">
+        {{ group.title }}
+    </h3>
+    {% endif %}
+    <div class="row g-2 {{ cols_class|default:'row-cols-1 row-cols-sm-2 row-cols-lg-3' }} text-start">
+        {% for entry in group.entries %}
+        <div class="col">
+            <div class="card h-100">
+                <button type="button"
+                        class="btn text-start card-body d-flex flex-column gap-1 h-100 border-0
+                               {% if entry.category == 'scratch' or entry.category == 'upload' %}border-2 border-dashed{% endif %}"
+                        {% if entry.category == 'upload' %}
+                        hx-get="{% url 'open-import-json-panel' %}"
+                        hx-target="#sidePanel"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="this"
+                        hx-on::after-request="document.getElementById('template-picker')?.remove()"
+                        {% else %}
+                        data-template-id="{{ entry.id }}"
+                        hx-post="{% url 'load-template' entry.id %}"
+                        hx-target="#main-content-block"
+                        hx-swap="innerHTML"
+                        hx-disabled-elt="this"
+                        data-confirm-when-model-not-empty="This will replace your current modeling. Continue?"
+                        {% endif %}>
+                    <span class="fw-semibold">
+                        {% if entry.icon %}{{ entry.icon }} {% endif %}{{ entry.name }}
+                    </span>
+                    <span class="small text-muted">{{ entry.description }}</span>
+                    {% if show_chips and entry.chips %}
+                    <span class="mt-1">
+                        {% for chip in entry.chips %}
+                        <span class="badge rounded-pill text-bg-light border me-1 mb-1">{{ chip.label }}</span>
+                        {% endfor %}
+                    </span>
+                    {% endif %}
+                </button>
+                {% if show_guides and entry.guides %}
+                <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3 d-flex flex-column gap-1">
+                    {% for guide in entry.guides %}
+                    <a href="{{ guide.doc_url }}" target="_blank" rel="noopener noreferrer"
+                       class="small text-decoration-none">{{ guide.name }} ↗</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endfor %}

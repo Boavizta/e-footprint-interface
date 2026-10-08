@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- The GenAI marketing video template description is shorter, so it reads at a glance alongside the other templates.
+
 ## [V1.13.0] - 2026-09-15
 
 ### Added
