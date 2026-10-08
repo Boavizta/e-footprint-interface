@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Implementation-decision callouts now deep-link every cited code artifact to a verified source line; shared plan skills require the same audit for future decisions and amendments.
 - Plan skills now use one shared amber index and visible callout format for plan amendments and implementation decisions.
 - Shared plan skills now preserve VS Code file links and right-click diffs when drafting plans, proposing plan updates and recording implementation decisions.
 - Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
