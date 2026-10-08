@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoped simplified-input catalog — refactor kickoff</title>
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; max-width: 56rem; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1, h2 { line-height: 1.3; }
+    code { background: #f3f3f3; padding: .1rem .25rem; }
+    .status { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Scoped simplified-input catalog</h1>
+  <p class="status">REFACTO · Planning kickoff · 8 October 2026 · Interface-owned</p>
+  <p>This working set captures an authorized planning handoff. The implementation scope and API are proposals
+  for review, not an approved plan. Read the <a href="context.md">self-contained context and audit</a> before
+  running <code>spec-plan</code>. No application implementation is authorized by this document.</p>
+
+  <h2>Problem</h2>
+  <p>Narrow interactions such as opening one bookmark or refreshing one selected field currently evaluate
+  every constructor field in the model to build a simplified-input catalog. Ordinary structural changes
+  also build a catalog when no saved or pending field settings require reconciliation. This adds measurable
+  server work on large models.</p>
+  <p>Catalog construction accounted for about 18% of a 5,002-object edit-panel view in a local in-memory
+  benchmark. A scoped prototype reduced catalog-only work substantially, but hydration and other request
+  costs remain. These results establish an opportunity, not a guaranteed browser speedup.</p>
+
+  <h2>Desired outcome</h2>
+  <p>Reduce unnecessary catalog work where justified while preserving simplified-input eligibility,
+  required selections, cross-object dependencies, bookmark state, rendering, validation, and persistence
+  behavior. The same model and request must retain the same accepted result and error behavior.</p>
+
+  <h2>Candidate scope to decide in planning</h2>
+  <ul>
+    <li>Avoid catalog construction during structural reconciliation with no retained or pending field settings.</li>
+    <li>Share scoped catalog construction for narrow readers, including required dependent closure.</li>
+    <li>Keep complete discovery for Configure and initially retain existing write-path catalog behavior,
+    except for an independently justified empty-settings shortcut.</li>
+  </ul>
+  <p>The context brief audits each caller and distinguishes low-cost opportunities from changes with a
+  larger validation burden. Planning should select the smallest useful delivery rather than assume all
+  candidates are required.</p>
+
+  <h2>Constraints and non-goals</h2>
+  <ul>
+    <li>Reuse one domain eligibility/dependency contract. Preserve transitive ineligibility and cross-owner links.</li>
+    <li>Retain strategy-provided field owners; do not restore Storage-specific logic in generic builders.</li>
+    <li>Preserve fresh accepted-state error restoration and validation of retained help-only settings.</li>
+    <li>No UI behavior, JSON schema, model calculations, or library API changes are intended.</li>
+    <li>Partial model hydration, persistent catalog caches, and stored metadata indexes are outside this kickoff.</li>
+  </ul>
+
+  <h2>Success criteria for the eventual approved scope</h2>
+  <ul>
+    <li>Scoped readers produce the same field/bookmark contexts and errors as the complete-catalog path.</li>
+    <li>Cross-object chains and unsupported required descendants retain current eligibility and selection behavior.</li>
+    <li>If included, the empty-settings shortcut preserves structural persistence and rollback while avoiding catalog work.</li>
+    <li>Bounded benchmarks demonstrate savings on large models and report catalog-only and request-level costs separately.</li>
+    <li>Configure and broad selections retain their complete behavior without a material unexplained performance regression.</li>
+  </ul>
+  <p>Use <a href="context.md">context.md</a> for source entry points, existing tests, measured evidence,
+  complexity estimates, and open planning decisions.</p>
+</body>
+</html>
