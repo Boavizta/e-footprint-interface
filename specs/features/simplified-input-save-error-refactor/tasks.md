@@ -21,6 +21,7 @@ Status: Run A implemented, reviewed and validated on the committed snapshot. Thi
 Goal: Recognized save validation returns HTTP 422; unclassified exceptions return HTTP 500. Both still display the existing modal OOB, leave the main target intact, and settle the workspace mutation as failed.
 Status: complete — implemented and reviewed
 Brief: [briefs/task-1.md](briefs/task-1.md)
+Decision: [typed validation contract and complexity](plan.html#impl-decision-01).
 Repository: e-footprint-interface only.
 Files touched: `model_builder/adapters/views/exception_handling.py`, `views_addition.py`, `views_edition.py`, `views_simplified_inputs.py`; `theme/static/scripts/modal_utils.js`, `model_builder_main.js`, `simplified_inputs.js`; focused view, integration, middleware and Jest tests.
 Tests: Assert 422 on identified parsing/domain rejections, including `WeeklyPatternValidationError`; 500 on generic or persistence failures; modal OOB and `HX-Reswap: none` on both; no whole-builder replacement; status-driven mutation and bookmark failure.
