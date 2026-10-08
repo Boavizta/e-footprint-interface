@@ -1,5 +1,7 @@
 # Task 10 — Complete timeseries, export and release checks
 
+Updated 8 October 2026 to match the [consolidated review adjustments](../plan.html#save-errors); the original task boundary and baseline below are retained.
+
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
 Plan: [timeseries](../plan.html#timeseries), [exports](../plan.html#exports), [verification](../plan.html#verification). Task: [overview](../tasks.md#task-10). Status: approved.
 Implementation: standard — use the existing timeseries registry/panel and Task 6/9 save state in current export controls, then run integrated gates.
@@ -12,7 +14,7 @@ Implementation: standard — use the existing timeseries registry/panel and Task
 
 ## Change along the code path
 
-Add a field-only timeseries side panel with existing strategy selector, builder partials, parser and stateless preview. Load it when Edit timeseries is clicked beside the string preview. Keep the visual chart left of the panel at tablet/desktop widths and in form flow on phones. Save through Task 5's selected-input use case; Cancel discards; failure keeps panel and draft for retry. Model switching uses the existing side-panel discard warning and closes the editor when continued. Extend export handling so a focused simplified field saves before download, all export links/menus wait for relevant in-flight saves, and failed autosaves block export until corrected/retried or explicitly discarded. Configure's Task 7 exit guard applies to export; ordinary Modeling panel export behavior stays as it is. Finish critical integrated flows, documentation, changelogs and release gates.
+Add a field-only timeseries side panel with existing strategy selector, builder partials, parser and stateless preview. Load it when Edit timeseries is clicked beside the string preview. Keep the visual chart left of the panel at tablet/desktop widths and in form flow on phones. Save through Task 5's selected-input use case; Cancel discards; failure restores the accepted field and closes/empties the panel, discarding its draft. Model switching uses the existing side-panel discard warning and closes the editor when continued. Extend export handling so a focused simplified field saves before download, all export links/menus wait for relevant in-flight saves, and a rejected or natively invalid focused save cancels that download click. After an HTTP rejection restores accepted values, a later click can export without an edit-recovery gate. Configure's Task 7 exit guard applies to export; ordinary Modeling panel export behavior stays as it is. Finish critical integrated flows, documentation, changelogs and release gates.
 
 ## Earlier tasks
 
@@ -24,11 +26,11 @@ Use current timeseries registry/preview, `side_panel_utils.js` discard warning, 
 
 ## Invariants and traps
 
-Only one timeseries editor/preview is active. A modal error is HTTP 200; do not close the panel or continue export on it. An unfinished timeseries panel exports the last saved value, like ordinary Modeling panels. The last focused simple field must commit before export; export of both models waits for saves in the requested models. Opening Results/Sources and switching models also honor Configure's Save/Discard/Stay guard. Reconcile complete/failed saves with UI status before treating exported data as current.
+Only one timeseries editor/preview is active. A modal error returns HTTP 422/500; a failed timeseries Save closes its panel after accepted-field restoration and must not continue a pending export. An unfinished timeseries panel exports the last saved value, like ordinary Modeling panels. The last focused simple field must commit before export; export of both models waits for saves in the requested models. Opening Results/Sources and switching models also honor Configure's Save/Discard/Stay guard. Reconcile complete/failed saves with UI status before treating exported data as current.
 
 ## Validation
 
-Run focused `poetry run pytest tests/e2e/test_simplified_inputs.py tests/e2e/test_timeseries.py --base-url http://localhost:8000` against a local server, plus simplified-input/export Jest tests. Cover strategy switch and preview, Save/Cancel, rejected save retry, model-switch discard, final focused-field download, failed-save export stop, two-model export and JSON reopen. Then run full interface `poetry run pytest tests --ignore=tests/e2e`, `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000` and `npm run jest`; run full library `poetry run pytest`, `poetry run mkdocs build --strict` and installed-resource checks. Confirm the interface dependency in `pyproject.toml` and `poetry.lock` points to PyPI before any merge to main; do not overwrite the pre-existing local edits during task preparation. Add consolidated Unreleased changelog entries and update owning architecture, design and relevant AGENTS/CLAUDE pointers for the new patterns.
+Run focused `poetry run pytest tests/e2e/test_simplified_inputs.py tests/e2e/test_timeseries.py --base-url http://localhost:8000` against a local server, plus simplified-input/export Jest tests. Cover strategy switch and preview, Save/Cancel, rejected-save restoration and panel closure, model-switch discard, final focused-field download, failed-save export stop, two-model export and JSON reopen. Then run full interface `poetry run pytest tests --ignore=tests/e2e`, `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000` and `npm run jest`; run full library `poetry run pytest`, `poetry run mkdocs build --strict` and installed-resource checks. Confirm the interface dependency in `pyproject.toml` and `poetry.lock` points to PyPI before any merge to main; do not overwrite the pre-existing local edits during task preparation. Add consolidated Unreleased changelog entries and update owning architecture, design and relevant AGENTS/CLAUDE pointers for the new patterns.
 
 ## Out of scope
 

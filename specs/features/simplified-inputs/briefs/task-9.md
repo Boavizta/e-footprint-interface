@@ -1,18 +1,20 @@
 # Task 9 — Edit simple selected inputs and refresh totals
 
+Updated 8 October 2026 to match the [consolidated review adjustments](../plan.html#save-errors); the original task boundary and baseline below are retained.
+
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
 Plan: [consumption](../plan.html#consume), [saves](../plan.html#saves), [totals](../plan.html#totals). Task: [overview](../tasks.md#task-9). Status: approved.
-Implementation: standard — connect Task 5/6/7 outputs through existing error-modal signals, targeted swaps and Results OOB rendering.
+Implementation: standard — connect Task 5/6/7 outputs through HTTP save status, targeted swaps and Results OOB rendering.
 
 ## Start here
 
 - Task 5 `EditSimplifiedInputUseCase` and Task 7 grouped presenter/partials (new symbols, not yet in baseline); [`parse_form_data()`](../../../../model_builder/adapters/forms/form_data_parser.py): current value/source parsing.
-- [`render_exception_modal()`](../../../../model_builder/adapters/views/exception_handling.py) and [`modal_template.html`](../../../../model_builder/templates/model_builder/modals/modal_template.html): error response uses `HX-Reswap: none` and `openModalDialog` despite HTTP 200.
+- [`render_exception_modal()`](../../../../model_builder/adapters/views/exception_handling.py) and [`modal_template.html`](../../../../model_builder/templates/model_builder/modals/modal_template.html): error responses use HTTP 422/500, `HX-Reswap: none` and an OOB modal; `openModalDialog` only opens it.
 - [`_render_results_buttons()`](../../../../model_builder/adapters/presenters/oob_regions.py), [`ModelingObjectWeb._recompute_state_and_emit_oob_regions()`](../../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py): current Results button refresh; [`views_edition.edit_object()`](../../../../model_builder/adapters/views/views_edition.py): detailed-result recomputation path.
 
 ## Change along the code path
 
-Render saved selected fields as normal number/select inputs with source/confidence/comment disclosure; retain existing labels, unit handling and authored help. On blur/Enter for number/text metadata or change for selects, send one request through Task 6 guard to Task 5's use case. Detect Enter-then-blur once. A successful response replaces only affected field/bookmark controls, reports dependent fallback and refreshes detailed results when open. A simplified-save error opts into `preserve_panels` in the existing modal renderer, keeps the entered value and surrounding editor, and shows Not saved; `openModalDialog` is the failure signal even with HTTP 200. Build one active-model total context and render it into both existing Results controls. Emit the `results_buttons` OOB region after successful Modeling value, structural, creation and deletion changes even when computability has not flipped.
+Render saved selected fields as normal number/select inputs with source/confidence/comment disclosure; retain existing labels, unit handling and authored help. On blur/Enter for number/text metadata or change for selects, send one request through Task 6 guard to Task 5's use case. Detect Enter-then-blur once. A successful response replaces only affected field/bookmark controls, reports dependent fallback and refreshes detailed results when open. A simplified-save error opts into `preserve_panels`, reads the active repository afresh, restores accepted field fragments OOB and shows Not saved. Initial model/catalog failure returns only the 500 modal. Known validation uses `InputValidationError` and returns 422; persistence and unexpected failures remain 500. Discard the rejected inline value without Retry/Discard state; Configure and bookmark drafts remain separate. Build one active-model total context and render it into both existing Results controls. Emit the `results_buttons` OOB region after successful Modeling value, structural, creation and deletion changes even when computability has not flipped.
 
 ## Earlier tasks
 
@@ -24,11 +26,11 @@ Keep existing library display formatting, `ModelWeb.persist_to_cache()` total pu
 
 ## Invariants and traps
 
-Successful save and failure must be distinguished by modal trigger, not status code. On failure, both totals show the last saved result and the field remains retryable. Preserve unrelated unsaved controls during targeted updates. The source/comment editor must not erase omitted provenance. The shared guard covers Modeling mutations too; always restore constraint-disabled buttons. Avoid rendering hidden structural inputs as simplified editors.
+HTTP success distinguishes save outcome. On failure, both totals keep their existing content and the field shows repository state. Before use-case success restore the submitted address; after a late presentation failure restore all persisted changed fields, including conditional dependents. Preserve unrelated unsaved controls during targeted updates. The source/comment editor must not erase omitted provenance. The shared guard covers Modeling mutations too; always restore constraint-disabled buttons. Avoid rendering hidden structural inputs as simplified editors.
 
 ## Validation
 
-Run `poetry run pytest tests/integration/test_simplified_inputs.py` plus focused OOB and results tests under `tests/unit_tests/adapters/` and `tests/integration/test_results_views_smoke.py`; run `npm run jest -- --runInBand js_tests/simplified_inputs.test.js js_tests/model_builder_main.test.js`. Use a critical E2E flow with delayed save, Enter/blur, failed HTTP-200 modal/retry, open Results panel and a successful Modeling edit to confirm both totals update. Check a representative large model for avoidable full rendering; record the environment/build used.
+Run `poetry run pytest tests/integration/test_simplified_inputs.py` plus focused OOB and results tests under `tests/unit_tests/adapters/` and `tests/integration/test_results_views_smoke.py`; run `npm run jest -- --runInBand js_tests/simplified_inputs.test.js js_tests/model_builder_main.test.js`. Use a critical E2E flow with delayed save, Enter/blur, 422/500 modal and accepted-value restoration, open Results panel and a successful Modeling edit to confirm both totals update. Check a representative large model for avoidable full rendering; record the environment/build used.
 
 ## Out of scope
 

@@ -1,5 +1,7 @@
 # Task 6 — Guard workspace mutations
 
+Updated 8 October 2026 to match the [consolidated review adjustments](../plan.html#save-errors); the original task boundary and baseline below are retained.
+
 Written 2026-09-30 against e-footprint `96ea0d39` and e-footprint-interface `fe6c04e5`.
 Plan: [one-at-a-time saves](../plan.html#saves). Task: [overview](../tasks.md#task-6). Status: approved.
 Implementation: standard — extend current HTMX request hooks and per-XHR disabled-state snapshot to mutation controls and response settlement.
@@ -24,7 +26,7 @@ Build on the `WeakMap` snapshot for `hx-disabled-elt="button"` rather than repla
 
 ## Invariants and traps
 
-HTMX may report error-modal responses as HTTP 200; do not use status alone as proof that a mutation succeeded. A disabled button may have been disabled by a model constraint before the request; it must remain so. Restore state after success and failure, including DOM replacements and aborted requests. Check links and menu entries, not just buttons, for export and switching. This is UI serialization of actions, not a new server authorization boundary.
+Recognized validation modals return HTTP 422 and unexpected errors return HTTP 500. Use HTTP success for save settlement; `openModalDialog` only opens the modal. Process their OOB content without replacing the main target. A disabled button may have been disabled by a model constraint before the request; it must remain so. Restore state after success and failure, including DOM replacements and aborted requests. Check links and menu entries, not just buttons, for export and switching. This is UI serialization of actions, not a new server authorization boundary.
 
 ## Validation
 

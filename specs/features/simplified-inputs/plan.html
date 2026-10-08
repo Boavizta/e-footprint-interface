@@ -218,6 +218,7 @@
           <ul>
             <li id="file-domain" data-steps="contract configure lifecycle consume"><code>services/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#contract" title="Shared data">1.1</a> <a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Definition, field addresses, eligibility and conditional closure using existing class metadata. <a href="#contract">Data / catalog</a></small></li>
             <li id="file-conditional-inputs" data-steps="configure"><code>conditional_inputs.py</code> <span data-change="new">Extracted</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a></span><small>Small dotted-path resolver shared by normal forms and simplified-input dependency indexing.</small></li>
+            <li id="file-input-validation" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/exceptions.py" data-review-source-href="../../../model_builder/domain/exceptions.py"><code>exceptions.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#save-errors">1.4</a></span><small>Typed validation contract for the 422/500 distinction.</small></li>
             <li id="file-factory" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/object_factory.py" data-review-source-href="../../../model_builder/domain/object_factory.py"><code>object_factory.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract input conversion and collection for multi-owner updates; reuse metadata helpers. <a href="#atomic-edit">Mutation</a></small></li>
             <li id="file-model-web" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py"><code>entities/web_core/model_web.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Reuse eager persistence; expose accepted modeling data, not interface configuration ownership.</small></li>
             <li id="file-hooks" data-steps="lifecycle consume"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Request total refresh on successful changes, not only constraint transitions. <a href="#totals">Results</a></small></li>
@@ -236,9 +237,11 @@
           <summary>adapters/</summary>
           <ul>
             <li id="file-views" data-steps="configure consume navigation-flow"><code>views/views_simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Thin mode/config/field endpoints; fresh rendering on entry from Modeling, active-model edits and existing error-modal reuse.</small></li>
-            <li id="file-error-handler" data-steps="configure lifecycle consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py"><code>views/exception_handling.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#saves" title="Save errors">1.4</a></span><small>Optional panel preservation when rendering errors for simplified-input saves; existing callers unchanged.</small></li>
+            <li id="file-error-handler" data-steps="configure lifecycle consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py"><code>views/exception_handling.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#saves" title="Save errors">1.4</a></span><small>HTTP 422 for identified validation, 500 otherwise; existing OOB modal and selective panel/workspace preservation.</small></li>
             <li id="file-presenter" data-steps="configure consume navigation-flow"><code>presenters/simplified_inputs.py</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shared catalog → grouped navigation, fields, bookmarks and context. <a href="#workspace">Rendering</a></small></li>
-            <li id="file-forms" data-steps="configure lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Reuse existing field metadata; add true owner addresses and creation-time required-selection context.</small></li>
+            <li id="file-forms" data-steps="configure lifecycle"><code>forms/{form_context_builder,form_field_generator}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Reuse field metadata and true owner addresses; derive optional quantity type, unit and empty-only controller values.</small></li>
+            <li id="file-quantity-config" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/ui_config/field_ui_config.json" data-review-source-href="../../../model_builder/adapters/ui_config/field_ui_config.json"><code>ui_config/field_ui_config.json</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Remove redundant optional-count flags, empty unit and instance-specific copy.</small></li>
+            <li id="file-validation-views" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_addition.py" data-review-source-href="../../../model_builder/adapters/views/views_addition.py"><code>views/views_addition.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#save-errors">1.4</a></span><small>Recognized ordinary creation validation returns 422; unexpected errors use 500.</small></li>
             <li id="file-timeseries-registry" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/timeseries_builder_registry.py" data-review-source-href="../../../model_builder/adapters/forms/timeseries_builder_registry.py"><code>forms/timeseries_builder_registry.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Extract a lightweight current-builder lookup shared by rendering and eligibility; keep the existing registry.</small></li>
             <li id="file-views-existing" data-steps="lifecycle navigation-flow"><code>views/{views,views_edition,views_workspace}.py</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Shell entry/defaults, panel integration, copy settings, import-order correction and slot identity.</small></li>
             <li id="file-sources" data-steps="lifecycle"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py" data-review-source-href="../../../model_builder/adapters/views/views.py"><code>views/views.py</code></a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py"><code>views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#lifecycle" title="Author in Modeling">1.3</a></span><small>Catalog-backed bookmark summaries in Sources; lazy controls leave the provenance-row editor's raw-JSON path intact.</small></li>
@@ -253,6 +256,10 @@
           <summary>templates/model_builder/ <small>— keep “templates” for rendering files</small></summary>
           <ul>
             <li id="file-partials" data-steps="configure lifecycle consume"><code>simplified_inputs/</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a></span><small>Workspace, navigation, object, field and timeseries partials; shared <code>selection_controls.html</code> and its <code>bookmark.html</code> disclosure wrapper. <a href="#workspace">Rendering / hooks</a></small></li>
+            <li id="file-normal-quantity" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html"><code>side_panels/dynamic_form_fields/explainable_quantity.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Plain required numeric control.</small></li>
+            <li id="file-normal-optional" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html"><code>side_panels/dynamic_form_fields/optional_explainable_quantity.html</code></a> <span data-change="new">New</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Generic unset wrapper around the ordinary numeric partial.</small></li>
+            <li id="file-simplified-quantity" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/explainable_quantity.html"><code>simplified_inputs/explainable_quantity.html</code></a> <span data-change="new">New</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Simplified numeric partial, included by the optional wrapper.</small></li>
+            <li id="file-simplified-optional" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/optional_explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/optional_explainable_quantity.html"><code>simplified_inputs/optional_explainable_quantity.html</code></a> <span data-change="new">New</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Generic unset wrapper; no retry/discard controls.</small></li>
             <li id="file-shell" data-steps="navigation-flow"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Simplified-input render targets alongside the existing model canvases.</small></li>
             <li id="file-toolbar" data-steps="consume navigation-flow"><code>components/{edge_modeling_toggle,show_results_toolbar_button,results_bar_button}.html</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Destination-mode control, Edge visibility and matching totals.</small></li>
             <li id="file-downloads" data-steps="navigation-flow"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Guard standard exports during simplified autosaves and unsaved Configure changes.</small></li>
@@ -272,6 +279,8 @@
         <summary>theme/ <small>— shared shell and small client modules</small></summary>
         <ul>
           <li id="file-client" data-steps="configure lifecycle consume navigation-flow"><code>static/scripts/simplified_inputs.js</code> <span data-change="new">New</span><span data-reading-links><a data-read href="#configure" title="Configure">1.2</a> <a data-read href="#lifecycle" title="Author in Modeling">1.3</a> <a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Mode/draft/filter behavior, bookmarks, creation-time inclusion locks and field completion events.</small></li>
+            <li id="file-optional-js" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/optional_quantity.js" data-review-source-href="../../../theme/static/scripts/optional_quantity.js"><code>static/scripts/optional_quantity.js</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Shared empty-state switch/controller behavior; ordinary panel dirty tracking.</small></li>
+            <li id="file-modal-js" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js" data-review-source-href="../../../theme/static/scripts/modal_utils.js"><code>static/scripts/modal_utils.js</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#save-errors">1.4</a></span><small>Process OOB HTTP-error bodies while preserving failed status and the main target.</small></li>
           <li id="file-request-guard" data-steps="consume navigation-flow"><code>static/scripts/model_builder_main.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Extend existing HTMX disabled-state handling with a shared in-flight guard; no queued edits. <a href="#saves">Save guard</a></small></li>
           <li id="file-browser-existing" data-steps="consume navigation-flow"><code>static/scripts/{model_comparison,side_panel_utils,source_metadata}.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a> <a data-read href="#navigation-flow" title="Navigate &amp; files">1.5</a></span><small>Per-model base view, existing panel navigation protection and provenance autosave integration.</small></li>
           <li id="file-dynamic-forms" data-steps="consume"><code>static/scripts/dynamic_forms.js</code> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Scoped initialization and server-selected dependent options; preserve normal form behavior.</small></li>
@@ -288,6 +297,10 @@
           <li><code>tests/integration/{test_workspace_file,test_workspace_integration}.py</code> <span data-change="modified">Modified</span><small>Independent definitions, duplication, System IDs and import failures before workspace replacement.</small></li>
           <li><code>tests/e2e/test_simplified_inputs.py · tests/e2e/pages/</code> <span data-change="new">New + modified</span><small>Critical end-to-end workflows through page objects; not duplicate permutations.</small></li>
           <li><code>js_tests/{simplified_inputs,model_builder_main}.test.js</code> <span data-change="new">New + modified</span><small>One-at-a-time protection, failure recovery, Enter/blur/export and draft/filter behavior.</small></li>
+            <li id="file-quantity-tests" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/forms/test_form_field_generator.py" data-review-source-href="../../../tests/unit_tests/adapters/forms/test_form_field_generator.py"><code>tests/unit_tests/adapters/forms/test_form_field_generator.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Optional/plain templates, units, controller locks and generic copy.</small></li>
+            <li id="file-save-error-tests" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py"><code>tests/unit_tests/adapters/views/test_views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#save-errors">1.4</a></span><small>422/500, persistence rejection, fresh repository restoration, late presentation failure and initial hydration failure.</small></li>
+            <li id="file-form-data-builder" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/fixtures/form_data_builders.py" data-review-source-href="../../../tests/fixtures/form_data_builders.py"><code>tests/fixtures/form_data_builders.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Resolve optional units in generated form payloads.</small></li>
+            <li id="file-dynamic-form-tests" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/dynamic_forms.test.js" data-review-source-href="../../../js_tests/dynamic_forms.test.js"><code>js_tests/dynamic_forms.test.js</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Optional switches, controller transitions and side-panel dirty state.</small></li>
           <li><code>js_tests/build_fixtures.py</code> <span data-change="modified">Modified</span><small>Render real Django partials for JS tests.</small></li>
           <li><code>catalog / registry / picker / deep-link / onboarding test families</code> <span data-change="rename">Renamed + modified</span><small>Retire template terminology in filenames, imports, fixtures and assertions; preserve behavior.</small></li>
         </ul>
@@ -303,11 +316,20 @@
       </details>
     </details>
     <details open>
-      <summary>e-footprint/ <small>— examples rename and tracked validation fix</small></summary>
+      <summary>e-footprint/ <small>— examples, validation and optional quantity units</small></summary>
       <details>
         <summary>efootprint/ · tests/</summary>
         <ul>
-          <li id="file-dependency-fix" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>efootprint/abstract_modeling_classes/modeling_object.py</code></a> <span data-change="modified">Planned fix</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Preserve every dependent sharing a controller. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/known-issues.md" data-review-source-href="known-issues.md">SI-1 reproduction</a>; regression in <code>tests/abstract_modeling_classes/test_modeling_object.py</code>.</small></li>
+          <li id="file-dependency-fix" data-steps="consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>efootprint/abstract_modeling_classes/modeling_object.py</code></a> <span data-change="modified">Planned fix</span><span data-reading-links><a data-read href="#consume" title="Use inputs">1.4</a></span><small>Preserve every dependent sharing a controller; validate optional quantity units and signs. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/known-issues.md" data-review-source-href="known-issues.md">SI-1 reproduction</a>; regression in <code>tests/abstract_modeling_classes/test_modeling_object.py</code>.</small></li>
+            <li id="file-input-unit" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/utils/tools.py" data-review-source-href="../../../../e-footprint/efootprint/utils/tools.py"><code>efootprint/utils/tools.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Quantity-default-first unit lookup, with InputUnit annotation fallback.</small></li>
+            <li id="file-count-contract" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/hardware_base.py" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/hardware_base.py"><code>efootprint/core/hardware/hardware_base.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Shared annotated count type consumed by ServerBase, Server, GPUServer and Storage.</small></li>
+            <li id="file-count-server_base" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/server_base.py" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/server_base.py"><code>efootprint/core/hardware/server_base.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the shared annotated count quantity member.</small></li>
+            <li id="file-count-server" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/server.py" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/server.py"><code>efootprint/core/hardware/server.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the shared annotated count quantity member.</small></li>
+            <li id="file-count-gpu_server" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/gpu_server.py" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/gpu_server.py"><code>efootprint/core/hardware/gpu_server.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the shared annotated count quantity member.</small></li>
+            <li id="file-count-storage" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/storage.py" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/storage.py"><code>efootprint/core/hardware/storage.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the shared annotated count quantity member.</small></li>
+            <li id="file-count-boavizta_cloud_server" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/hardware/boavizta_cloud_server.py" data-review-source-href="../../../../e-footprint/efootprint/builders/hardware/boavizta_cloud_server.py"><code>efootprint/builders/hardware/boavizta_cloud_server.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the annotated quantity member and retain the existing None option.</small></li>
+            <li id="file-count-boavizta_server_from_config" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/hardware/boavizta_server_from_config.py" data-review-source-href="../../../../e-footprint/efootprint/builders/hardware/boavizta_server_from_config.py"><code>efootprint/builders/hardware/boavizta_server_from_config.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Use the annotated quantity member and retain the existing None option.</small></li>
+            <li id="file-count-tests" data-steps="configure consume"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/tests/abstract_modeling_classes/test_modeling_update.py" data-review-source-href="../../../../e-footprint/tests/abstract_modeling_classes/test_modeling_update.py"><code>tests/abstract_modeling_classes/test_modeling_update.py</code></a> <span data-change="modified">Modified</span><span data-reading-links><a data-read href="#optional-quantities">1.2</a> <a data-read href="#optional-value-completion">1.4</a></span><small>Optional unit/default precedence, missing unit, sign and count round-trip regressions.</small></li>
           <li id="file-library-rename" data-steps="examples"><code>efootprint/modeling_templates/ → modeling_examples/</code> <span data-change="rename">Renamed</span><span data-reading-links><a data-read href="#examples" title="Examples rename">1.6</a></span><small>Introductory/how-to registries, packaged data, authoring helpers, public imports. <a href="#examples">Rename</a></small></li>
           <li><code>tests/test_modeling_templates.py → test_modeling_examples.py</code> <span data-change="rename">Renamed</span><small>Registry completeness, package loading, computation and JSON round-trip.</small></li>
           <li><code>in-repo catalog callers and tests</code> <span data-change="modified">Modified</span><small>Coordinated API cutover; no deprecated aliases.</small></li>
@@ -320,7 +342,7 @@
           <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/specs/architecture/layers-and-modeling.html" data-review-source-href="../../../../e-footprint/specs/architecture/layers-and-modeling.html"><code>specs/architecture/layers-and-modeling.html</code></a> <span data-change="modified">Modified</span><small>Example ownership and developer-facing naming; relevant AGENTS/CLAUDE pointers.</small></li>
         </ul>
       </details>
-      <p><small>No new library configuration object, calculation API or serialization format is planned.
+      <p><small>No new library configuration object, calculation API or serialization format is needed; unit annotations extend the existing input contract.
       Existing conditional metadata, ModelingUpdate, timeseries builders and display helpers are reused.
       The confirmed dependency-helper defect is tracked separately as <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/known-issues.md" data-review-source-href="known-issues.md">SI-1</a>.</small></p>
     </details>
@@ -329,8 +351,11 @@
 </details>
 <main id="main">
 <header id="overview">
-  <p>Plan · under review · 23 September 2026</p>
+  <p>Plan · final review · 8 October 2026</p>
   <h1>Simplified inputs — implementation plan</h1>
+  <p>The implemented review adjustments are consolidated here: <a href="#optional-quantities">type-derived optional quantities</a>,
+  <a href="#save-errors">HTTP save errors and accepted-field restoration</a>, and the
+  <a href="#impl-decision-10">validated typed-validation decision</a>. This is the complete plan for the final review pass.</p>
   <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/spec.html" data-review-source-href="spec.html">Spec &amp; mockup</a> · <a href="#modules">Changed files</a></p>
 </header>
 <aside id="plan-updates" data-note="review">
@@ -347,13 +372,14 @@
   <p><a href="#impl-decision-05">[IMPL-DECISION-05] Send Configure as one JSON definition — VALIDATED</a></p>
   <p><a href="#impl-decision-06">[IMPL-DECISION-06] Load Sources bookmark controls on disclosure — VALIDATED</a></p>
   <p><a href="#impl-decision-07">[IMPL-DECISION-07] Remove the Simplified-only Results split — SUPERSEDED</a></p>
-  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — SUPERSEDED by save-error refactor Run A</a></p>
+  <p><a href="#impl-decision-08">[IMPL-DECISION-08] Recover failed edits before replacing surviving views — SUPERSEDED</a></p>
   <p><a href="#impl-decision-09">[IMPL-DECISION-09] Expose optional instance counts in ordinary forms — APPLIED</a></p>
+  <p><a href="#impl-decision-10">[IMPL-DECISION-10] Typed validation across save layers — VALIDATED</a></p>
 </aside>
 
 <section id="approach">
   <h2>1. Follow the interactions through the code</h2>
-  <p data-reading-note>Proposed changes, not implemented code. Select an interaction to highlight its
+  <p data-reading-note>The reviewed design, with implemented adjustments and decisions beside their owning interactions. Select an interaction to highlight its
   files in the left-hand tree. Code-block paths are relative to <code>model_builder/</code>;
   paths outside it start with <code>../</code>.</p>
   <article id="contract" data-decision>
@@ -528,32 +554,50 @@ def complete_selection(catalog, selected) -&gt; set[FieldAddress]: ...
     </aside>
     <aside id="impl-decision-09" data-note="review">
       <p><strong>[IMPL-DECISION-09] — APPLIED</strong></p>
-      <p><strong>Follow-up to Tasks 3 and 7:</strong> ordinary Server and Storage panels hid
-      <code>fixed_nb_of_instances</code> while the constructor-derived catalog could select it. That
-      mismatch led to the temporary panel-skip bypass in <a href="#impl-decision-01">IMPL-DECISION-01</a>.</p>
-      <ul>
-        <li><strong>Panel availability:</strong> remove the count from
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/hardware/server_web.py" data-review-source-href="../../../model_builder/domain/entities/web_core/hardware/server_web.py"><code>ServerWeb.attributes_to_skip_in_forms</code></a>
-        and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/hardware/storage_web.py" data-review-source-href="../../../model_builder/domain/entities/web_core/hardware/storage_web.py"><code>StorageWeb.attributes_to_skip_in_forms</code></a>.
-        Ordinary create/edit panels now show the count.</li>
-        <li><strong>Shared editor:</strong>
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_field_generator.py" data-review-source-href="../../../model_builder/adapters/forms/form_field_generator.py"><code>generate_dynamic_form()</code></a>
-        reads the constructor union with <code>EmptyExplainableObject</code> and the declared input unit
-        to choose an optional quantity field in both ordinary and simplified forms. Its conditional
-        metadata marks Server types that permit only empty. The
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/optional_quantity.js" data-review-source-href="../../../theme/static/scripts/optional_quantity.js"><code>optional_quantity.js</code></a>
-        switch clears the number for “Leave unset,” requires one when off, and locks empty for those types.</li>
-        <li><strong>Submitted value:</strong>
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_data_parser.py" data-review-source-href="../../../model_builder/adapters/forms/form_data_parser.py"><code>parse_form_data()</code></a>
-        passes blank as absent and zero as a number; library validation checks the count against the
-        selected Server type.</li>
-      </ul>
-      <p>The count is editable in either view under the same rules, with no count-specific catalog or
-      form bypass left. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_edition.py" data-review-source-href="../../../tests/integration/test_edition.py">Normal-form integration</a>,
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/forms/test_form_data_parser.py" data-review-source-href="../../../tests/unit_tests/adapters/forms/test_form_data_parser.py">parser</a>, and
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">combined-view browser</a> tests cover the
-      blank/numeric transitions.</p>
+      <p><strong>Follow-up to Tasks 3 and 7:</strong> ordinary Server and Storage panels hid the instance count while
+      the constructor-derived catalog could select it. Remove that count from
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/hardware/server_web.py:18:1" data-review-source-href="../../../model_builder/domain/entities/web_core/hardware/server_web.py#L18:1"><code>ServerWeb.attributes_to_skip_in_forms</code></a>
+      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/forms/test_form_field_generator.py:101:1" data-review-source-href="../../../tests/unit_tests/adapters/forms/test_form_field_generator.py#L101:1">Storage form exclusions</a>.
+      The same optional editor is now available in both views, eliminating the temporary
+      <a href="#impl-decision-01">panel-skip bypass</a>. The derived controls below replace the initial instance-specific UI flags and helper copy.</p>
     </aside>
+    <h5 id="optional-quantities">Optional quantities · one contract for ordinary and simplified forms</h5>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/utils/tools.py:19:1" data-review-source-href="../../../../e-footprint/efootprint/utils/tools.py#L19:1"><code>get_expected_input_unit()</code></a> first uses a quantity in the class defaults;
+    otherwise it reads <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/utils/tools.py:14:1" data-review-source-href="../../../../e-footprint/efootprint/utils/tools.py#L14:1"><code>InputUnit</code></a> metadata on the annotated quantity member of the constructor union.
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/utils/tools.py:41:1" data-review-source-href="../../../../e-footprint/efootprint/utils/tools.py#L41:1"><code>get_init_signature_params()</code></a> still returns ordinary resolved types for existing callers.
+    An empty class default supplies no unit. Missing both sources raises a descriptive type error naming the class and parameter,
+    including when the submitted value is empty; there is no implicit dimensionless fallback.</p>
+    <div data-code><p data-code-file><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/hardware_base.py:11:1" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/hardware_base.py#L11:1"><code>../../e-footprint/efootprint/core/hardware/hardware_base.py</code></a><small>Implemented quantity annotation; imports omitted</small></p><pre><code>InstanceCountQuantity = Annotated[ExplainableQuantity, InputUnit(u.concurrent)]
+# Core count constructors:
+fixed_nb_of_instances: InstanceCountQuantity | EmptyExplainableObject = None
+# Builder overrides also retain: | None</code></pre></div>
+    <p>The shared count alias is used by
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/server_base.py:75:1" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/server_base.py#L75:1"><code>ServerBase</code></a>,
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/server.py:12:1" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/server.py#L12:1"><code>Server</code></a>,
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/gpu_server.py:14:1" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/gpu_server.py#L14:1"><code>GPUServer</code></a>,
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/hardware/storage.py:49:1" data-review-source-href="../../../../e-footprint/efootprint/core/hardware/storage.py#L49:1"><code>Storage</code></a> and the
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/hardware/boavizta_cloud_server.py:91:1" data-review-source-href="../../../../e-footprint/efootprint/builders/hardware/boavizta_cloud_server.py#L91:1"><code>cloud-server builder</code></a>
+    and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/hardware/boavizta_server_from_config.py:43:1" data-review-source-href="../../../../e-footprint/efootprint/builders/hardware/boavizta_server_from_config.py#L43:1"><code>configuration-server builder</code></a> count parameters.
+    Ordinary quantities continue to use their class defaults; annotation metadata is only the fallback for parameters without a quantity default.
+    The library's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:374:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L374:1">optional quantity validation</a> resolves the unit before accepting empty,
+    then applies its existing dimensionality and sign checks to nonempty quantities. Empty values remain unit-neutral in copying and JSON.</p>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_field_generator.py:223:1" data-review-source-href="../../../model_builder/adapters/forms/form_field_generator.py#L223:1"><code>generate_dynamic_form()</code></a> derives optionality from the constructor union with
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/empty_explainable_object.py:7:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/empty_explainable_object.py#L7:1"><code>EmptyExplainableObject</code></a>.
+    It selects <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_field_generator.py:334:1" data-review-source-href="../../../model_builder/adapters/forms/form_field_generator.py#L334:1"><code>optional_explainable_quantity</code></a> for empty-capable quantities;
+    ordinary quantities keep a required plain number. The normal form router selects the corresponding partial by input type;
+    the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html"><code>simplified editor</code></a> dispatches the two types explicitly.</p>
+    <p>The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/optional_explainable_quantity.html"><code>ordinary optional partial</code></a>
+    and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/optional_explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/optional_explainable_quantity.html"><code>simplified optional partial</code></a>
+    each wrap their numeric partial with a generic “Leave unset” switch. A saved number opens with the switch off; an empty value opens with it on.
+    The existing field tooltip explains what unset means for that parameter. The
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/ui_config/field_ui_config.json" data-review-source-href="../../../model_builder/adapters/ui_config/field_ui_config.json">UI configuration</a> no longer declares automatic sizing, an empty unit,
+    or instance-specific placeholder copy; step size and unit visibility remain presentation choices.</p>
+    <p>For an empty saved value, the generator and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/fixtures/form_data_builders.py" data-review-source-href="../../../tests/fixtures/form_data_builders.py">test form-data builder</a> use the library unit lookup;
+    a nonempty saved value displays its actual unit. The generator derives empty-only controller values from existing conditional metadata.
+    Its <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_field_generator.py:351:1" data-review-source-href="../../../model_builder/adapters/forms/form_field_generator.py#L351:1">controller derivation</a> handles direct controller paths;
+    dotted paths are not DOM IDs and need separate handling. See the owning
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html" data-review-source-href="../../architecture/forms-and-relationships.html">forms architecture</a> and
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/specs/architecture/layers-and-modeling.html" data-review-source-href="../../../../e-footprint/specs/architecture/layers-and-modeling.html">library unit contract</a>.</p>
     <p>The next step joins this catalog to existing form contexts; the configuration save below uses
     the same answers to check the submitted selection.</p>
 
@@ -848,19 +892,60 @@ repository.save_interface_config()
       <li>On a failed simplified-input save, show the existing error modal, restore the accepted field
       from the active repository and mark it Not saved. The submitted value is not retained for retry.</li>
     </ol>
-    <p><strong>Reuse the error modal:</strong>
-    <a href="#file-error-handler"><code>adapters/views/exception_handling.py</code></a>'s
-    <code>render_exception_modal()</code> already uses <code>HX-Reswap: none</code> to leave the main
-    form untouched. Add an optional <code>preserve_panels=False</code> argument, passed through to
-    <a href="#file-error-modal"><code>templates/model_builder/modals/modal_template.html</code></a>.
-    Simplified-input save endpoints opt in so the modal skips <code>closeAndEmptySidePanel()</code>
-    and <code>hidePanelResult()</code>: failed bookmark saves keep the surrounding panel or Sources-row
-    draft. A failed focused timeseries Save closes and empties its editor after the accepted field returns.
-    Ordinary Modeling create/edit errors keep the default behavior.</p>
-    <p><strong>Browser:</strong> HTTP 422 identifies recognized validation rejection and HTTP 500 identifies
-    unexpected failure. HTMX processes the error body's OOB field and modal while <code>HX-Reswap: none</code>
-    preserves the main target. The <code>openModalDialog</code> trigger only opens the modal; HTTP success
-    controls save settlement. A rejected or natively invalid focused edit cannot continue a pending export.</p>
+    <h5 id="save-errors">HTTP errors · restore the accepted field</h5>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:119:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L119:1"><code>render_exception_modal()</code></a> defaults to HTTP 500 for unclassified failures.
+    Known parsing and domain validation in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:75:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L75:1"><code>edit_simplified_input()</code></a>,
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:110:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L110:1"><code>save_simplified_inputs()</code></a> and
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>patch_simplified_inputs()</code></a> returns HTTP 422.
+    The same distinction applies to recognized ordinary create/edit validation, including
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/timeseries/explainable_recurrent_quantities_from_weekly_pattern.py:16:1" data-review-source-href="../../../../e-footprint/efootprint/builders/timeseries/explainable_recurrent_quantities_from_weekly_pattern.py#L16:1"><code>WeeklyPatternValidationError</code></a>.
+    The shared <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:137:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L137:1">exception decorator</a> remains the 500 fallback;
+    a generic value error alone does not establish a validation rejection.</p>
+    <p>The existing modal stays out of band with <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:131:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L131:1"><code>HX-Reswap: none</code></a>.
+    Simplified saves request panel/workspace preservation so Configure and failed bookmark saves keep their explicit drafts.
+    The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1"><code>htmx:beforeSwap</code></a> listener permits HTTP error bodies carrying that header,
+    while retaining the error status, so HTMX processes OOB fragments without replacing the main target. It runs before the guard's swap listener.
+    The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:502:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L502:1">mutation guard</a> and
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:461:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L461:1">bookmark handler</a> use HTTP success to settle saves;
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:132:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L132:1"><code>openModalDialog</code></a> only opens the modal.</p>
+    <aside id="impl-decision-10" data-note="review">
+      <p><strong>[IMPL-DECISION-10] — VALIDATED · Typed validation across save layers</strong></p>
+      <p><strong>Save-error adjustment, Decision 01 · validated by the user on 8 October 2026.</strong>
+      The agreed 422/500 distinction requires a typed validation contract:
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/repositories/session_system_repository.py:182:1" data-review-source-href="../../../model_builder/adapters/repositories/session_system_repository.py#L182:1"><code>save_interface_config()</code></a>
+      can also raise a value error during persistence, which must remain a 500 storage failure.</p>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/exceptions.py:10:1" data-review-source-href="../../../model_builder/domain/exceptions.py#L10:1"><code>InputValidationError</code></a> is raised by explicit validation producers such as
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/simplified_inputs.py:152:1" data-review-source-href="../../../model_builder/domain/services/simplified_inputs.py#L152:1"><code>validate_definition()</code></a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:36:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L36:1"><code>EditSimplifiedInputUseCase.execute()</code></a>.
+      The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:100:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L100:1">view catchers</a> return 422 for that contract;
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:119:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L119:1"><code>render_exception_modal()</code></a> defaults other errors to 500.
+      This contract adds lasting coordination between validation producers and view catchers. Both statuses show the same modal;
+      one generic error status would avoid the type but would lose the accepted distinction.</p>
+      <p>The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py:414:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L414:1">repository rejection regression</a>
+      confirms a persistence value error remains 500. This is the former save-error Decision 01, renumbered here to preserve the original plan's existing decisions.</p>
+    </aside>
+    <p>After initial model hydration and catalog construction succeed,
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code></a> reads the active repository afresh and renders accepted field fragments
+    with the modal. A request-local value or metadata change may precede a failed persistence call; conversely, presentation may fail after persistence succeeded.
+    The repository determines what the browser shows. Before use-case success, restore the submitted address;
+    after execution, restore all <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L22:1"><code>changed_fields</code></a> so persisted conditional dependents also appear.
+    Reuse <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:40:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L40:1"><code>render_input_fields_oob()</code></a>, its targeted workspace context and existing field template.
+    Error responses neither replace the full workspace nor recompute quick totals or Results. If initial hydration/catalog construction fails,
+    return only the 500 modal because no accepted field is available.</p>
+    <p>After OOB replacement, the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:129:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L129:1"><code>workspace-mutation:finished</code></a> handler marks the restored field “Not saved”.
+    The failed submitted value is discarded: no Retry/Discard buttons, failed-draft store or recovery guard remains.
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:8:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L8:1"><code>savedEdits</code></a> still supports unchanged-input suppression and omission of unchanged provenance.
+    Native <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:33:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L33:1"><code>reportValidity()</code></a> prevents invalid submissions and cancels focused-field export even when no request starts.
+    Configure retains its Save / Discard / Stay guard; bookmark help and Undo retain their separate drafts.
+    A failed focused timeseries Save restores the accepted field, then closes and empties the editor after settlement, just as on success.
+    Ordinary Modeling errors keep their existing panel cleanup. Request-with-no-response messaging remains in the
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/backlog/network-interruption-message/problem.md" data-review-source-href="../../backlog/network-interruption-message/problem.md">network-interruption backlog</a>.</p>
+    <p id="optional-value-completion"><strong>Optional value completion:</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/optional_quantity.js" data-review-source-href="../../../theme/static/scripts/optional_quantity.js"><code>optional_quantity.js</code></a>
+    clears and hides the numeric control while “Leave unset” is on, requires a number when off, and locks empty for restricted controller choices.
+    The simplified <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:98:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L98:1"><code>optional-quantity:changed</code></a> handler saves immediately when switched to empty;
+    numeric entry completes normally. Ordinary optional switches mark their side panel dirty and use its existing exit warning.
+    The shared <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/form_data_parser.py:96:1" data-review-source-href="../../../model_builder/adapters/forms/form_data_parser.py#L96:1"><code>parse_form_data()</code></a> keeps blank distinct from zero;
+    the existing empty/quantity value types and JSON format are reused.</p>
     <h4 id="atomic-edit">3 · Save Provider and affected values together</h4>
     <p>Extract input conversion and change collection from the existing object edit function so a simplified edit can submit
     one library <code>ModelingUpdate</code> across all affected owners. Do not call the existing one-owner edit
@@ -927,7 +1012,7 @@ persist once</code></pre></div></div>
       the first allowed value. A missing conditional branch adds no restriction; an empty allowed list rejects
       the change. The library remains the final validator.</li>
       <li>Apply the whole value batch with <code>ModelingUpdate</code> and persist once on success.
-      Validation failure discards the request-local model and preserves the simplified-input edit in the browser.</li>
+      Validation failure discards the request-local model; the error response restores accepted fields from the repository.</li>
     </ol>
     <p><strong>Reuse the existing persistence boundary:</strong> <code>ModelWeb</code> reconstructs the
     model per request, and normal edits persist only after success. Metadata can still change on that
@@ -1012,8 +1097,7 @@ persist once</code></pre></div></div>
       and rebuilt the theme CSS in commit <code>8cca63cc</code>. Results now overlays the canvas at
       full height in both base views. The
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">autosave/Results browser flow</a>
-      checks the full-height overlay and closes Results before editing. Run A's
-      <a href="../simplified-input-save-error-refactor/plan.html#inline-edit">save-error refactor</a>
+      checks the full-height overlay and closes Results before editing. The <a href="#save-errors">accepted-field restoration</a> adjustment
       replaced failed-draft retry with a repository-backed field restoration; the shared
       one-at-a-time save guard and detailed-result recomputation remain.</p>
     </aside>
@@ -1022,7 +1106,7 @@ persist once</code></pre></div></div>
     builder partials, parser and stateless preview endpoint. Render the string preview with the field;
     load its side-panel editor when the user clicks Edit timeseries, keeping the chart to the panel's
     left. Strategy drafts remain in that editor; Save uses the same
-    selected-input use case, Cancel discards the editor draft. Model switching uses the existing
+    selected-input use case. A failed Save restores the accepted field and closes the editor; Cancel discards its draft. Model switching uses the existing
     side-panel unsaved-changes warning and closes the editor; no draft is parked for return.</p>
   </article>
 
@@ -1055,7 +1139,7 @@ persist once</code></pre></div></div>
     <h4 id="exports">2 · Download through the normal toolbar</h4>
     <p>If Download is activated while a simplified input has an uncommitted edit,
     <code>../theme/static/scripts/simplified_inputs.js</code> saves that field first and downloads only
-    after the save succeeds. Export controls are otherwise disabled during a mutation.</p>
+    after the save succeeds. A rejected save cancels that download click and restores accepted fields, so a later click can export them without recovery controls. Native browser validation also cancels the click while the field is invalid. Export controls are otherwise disabled during a mutation.</p>
     <p>Direct links and menus share this guard. Failed simplified autosaves restore accepted values,
     so a later export can proceed without an edit-recovery action. Configure uses its Save / Discard / Stay exit guard.
     Ordinary Modeling panels currently have no unsaved-export warning; keep that behavior.
@@ -1066,15 +1150,14 @@ persist once</code></pre></div></div>
     in-flight mutation lock still prevents those actions while a save request is running. Ordinary model
     removal confirmation and side-panel draft protection remain.</p>
     <aside id="impl-decision-08" data-note="review">
-      <p><strong>[IMPL-DECISION-08] — SUPERSEDED by
-      <a href="../simplified-input-save-error-refactor/plan.html#inline-edit">save-error refactor Run A</a></strong></p>
+      <p><strong>[IMPL-DECISION-08] — SUPERSEDED by <a href="#save-errors">accepted-field restoration</a></strong></p>
       <p><strong>Original Run C, Task 10:</strong> failed inline values remained as retryable drafts;
-      view entry and workspace-shell guards protected them from being silently replaced. Run A instead
+      view entry and workspace-shell guards protected them from being silently replaced. The reviewed adjustment instead
       restores each rejected field from a fresh active repository read, including saved dependent fields
       after a late presentation failure. The draft, Retry/Discard controls and their navigation/export
       guards no longer exist. A focused changed field still saves before download; a rejected or invalid
       save cancels that click. See the original
-      <a href="handoffs/task-10.md">Task 10 handoff</a> for the earlier design.</p>
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/handoffs/task-10.md" data-review-source-href="handoffs/task-10.md">Task 10 handoff</a> for the earlier design.</p>
     </aside>
     <h4 id="persistence">3 · Duplicate a model or replace the workspace from JSON</h4>
     <p><code>adapters/views/views_workspace.py</code> duplicates the complete flat modeling document
@@ -1149,27 +1232,29 @@ persist once</code></pre></div></div>
   <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/known-issues.md" data-review-source-href="known-issues.md">SI-1 library fix</a> independently reviewable in the later task breakdown.</p>
   <ol id="phases">
     <li><strong>Examples terminology</strong>Coordinated cross-repo rename, resources, callers and independent verification.<small>Independent workstream; can run alongside B–E.</small></li>
-    <li><strong>Definition and eligible-field catalog</strong>Address SI-1; reuse metadata and editor helpers; add addresses, configuration and selection validation.<small>Foundation for C and D.</small></li>
+    <li><strong>Definition and eligible-field catalog</strong>Address SI-1; reuse metadata and editor helpers; add addresses, configuration and selection validation; declare optional count units and validate quantity/empty updates.<small>Foundation for C and D.</small></li>
     <li><strong>Persistence and lifecycle</strong>Config patching, copy/remap, import-order correction, provisional creation and deletion cleanup.<small>Depends on B · tested without the new browser surface.</small></li>
     <li><strong>Atomic input-edit path</strong>Collect converted changes across owners, apply one ModelingUpdate and persist once after success.<small>Depends on B; reuse existing metadata and persistence behavior.</small></li>
-    <li><strong>Views and coordinated interaction</strong>Shared consumption/config UI, bookmarks, Configure exit guard, focused timeseries and one-at-a-time save/export protection.<small>Depends on C + D; extend the existing request guard before acceptance.</small></li>
+    <li><strong>Views and coordinated interaction</strong>Shared consumption/config UI, derived optional quantity controls, bookmarks, Configure exit guard, focused timeseries and one-at-a-time save/export protection; typed 422/500 errors and targeted accepted-field restoration.<small>Depends on C + D; extend the existing request guard before acceptance.</small></li>
     <li><strong>Live results and release verification</strong>Paired total updates across all mutation paths, critical E2E flows, documentation and final terminology audit.<small>Depends on A–E · total presenter can be developed alongside E.</small></li>
   </ol>
 
   <h3 id="verification">Verification map</h3>
   <p>Cover behavior at its owning layer; reserve browser tests for critical combined flows.
   Extend existing tests instead of duplicating library validation or pinning helper internals.
-  The coverage below is planned, not executed.</p>
+  The map below describes required coverage. Completed implementation validation and its limits are retained in <a href="tasks.md#consolidated-review-adjustments">tasks.md</a>; this documentation consolidation runs link and layout checks only.</p>
   <div data-table-scroll>
     <table id="verification-table">
       <thead><tr><th>Spec behavior</th><th>Critical assertions</th><th>Owning test layer</th></tr></thead>
       <tbody>
-        <tr><td>Catalog and forms</td><td>Eligible versus excluded input kinds, including empty optional numbers and unsupported timeseries; normal creation/edit forms unchanged.</td><td>Catalog and existing form tests</td></tr>
+        <tr><td>Catalog and forms</td><td>Eligible versus excluded input kinds, including empty optional numbers and unsupported timeseries; ordinary and simplified quantity editors share type-derived optional controls, generic unset copy and conditional locks.</td><td>Catalog and existing form tests</td></tr>
+        <tr><td>Optional quantity contract</td><td>A quantity class default takes precedence over annotation metadata; a saved empty value retains the expected unit; absent declarations fail even for empty. Compatible nonnegative values and empty succeed; incompatible units and negatives fail. Blank and zero remain distinct; server-type transitions lock empty.</td><td>Library ModelingUpdate/JSON round-trip; generator/templates, form-data builder, snapshots, parser/integration, Jest and combined ordinary/simplified E2E</td></tr>
+        <tr><td>HTTP errors and accepted state</td><td>Recognized validation returns 422; generic or persistence failures return 500. OOB fields/modal never wipe the main target. Rejections before persistence restore old value/provenance; presentation failure after persistence restores the accepted field and conditional dependents. Initial hydration failure returns a modal without field recovery. Totals/Results are not recomputed on error.</td><td>View and Django integration tests; mutation/modal Jest; critical E2E</td></tr>
         <tr><td>Required selections</td><td>Provider/Model and linked video-job Resolution; chained inclusion, dependent-only selection and locked required-inclusion controls. Explicit exclusion of a required field is rejected across owners without changing saved settings; complete saves restore any omitted companion. SI-1 preserves both siblings.</td><td>Interface unit/integration; focused library regression for SI-1</td></tr>
         <tr><td>Value/provenance updates</td><td>Keep a valid dependent or choose the first allowed value; an invalid batch persists neither values nor metadata. Include the Server empty-count case.</td><td>Framework-free integration using ModelingUpdate</td></tr>
         <tr><td>Configuration and imports</td><td>Membership/help round-trip; independent copies and System-ID remapping; malformed second model or combined-budget rejection leaves the previous workspace unchanged.</td><td>Repository/workspace integration; one import E2E</td></tr>
         <tr><td>Inline authoring and lifecycle</td><td>Bookmarks update visible controls without saving or replacing value drafts; correct nested owner; creation previews required inclusion, updates the lock when the API changes, and keeps help editable. Successful creation enforces inclusion; failure/cancel leaves no references. Clear/Undo/delete respect retained help and dependencies.</td><td>Use-case integration; one combined authoring E2E</td></tr>
-        <tr><td>Requests and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; a 422/500 modal error restores accepted inline fields with Not saved status and does not continue export. A failed timeseries Save closes its panel; a failed bookmark save keeps its separate draft. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
+        <tr><td>Requests, explicit drafts and exports</td><td>Block a second mutation, editing, switching and export during a delayed save; a 422/500 modal error restores accepted inline fields with Not saved status and does not continue export. A failed timeseries Save closes its panel; Configure and bookmark failures retain their separate drafts and guards. A subsequent export uses accepted values without Retry/Discard; native invalidity also cancels the initial download. Enter/blur saves once; final focused-field export waits for success.</td><td>Existing request-guard Jest tests plus simplified-input tests; critical E2E</td></tr>
         <tr><td>Workspace and timeseries</td><td>Returning from Modeling shows current values, selection and counts after structural changes; selected-object filtering and keyboard navigation; Configure Save returns the complete Simplified inputs view; exit Save/Discard/Stay and fresh entry defaults; per-model base view; timeseries Save/Cancel and existing discard warning on model switch.</td><td>Presenter/Jest tests; focused browser flow at wide and compact widths</td></tr>
         <tr><td>Results and large models</td><td>Both totals update when computability stays true; failure retains the last saved total. Check a representative large model for unnecessary full rendering/recalculation.</td><td>OOB/integration tests; targeted render measurement</td></tr>
         <tr><td>Examples rename</td><td>Same IDs/data/results; installed resources, picker, deep links, guide associations and authoring commands still work.</td><td>Both repositories' existing suites and package/docs checks</td></tr>
@@ -1216,7 +1301,7 @@ persist once</code></pre></div></div>
     use the library's multi-owner update instead.</li>
     <li><strong>Queued autosave, manual batch save or a mode toggle:</strong> extra pending-edit and
     recovery machinery is not justified for this iteration. Use one-at-a-time autosave; accept the
-    brief editing pause during saves. Run A restores accepted fields after rejected saves instead of
+    brief editing pause during saves. Restore accepted fields after rejected saves instead of
     retaining failed inline drafts.</li>
     <li><strong>Full-page refreshes during inline edits:</strong> discard drafts and focus; update only
     the relevant visible controls. Entering Simplified inputs from Modeling instead uses a fresh full-view render.</li>
@@ -1237,17 +1322,19 @@ persist once</code></pre></div></div>
 </section>
 
 <section id="review">
-  <h2>7. Review points before tasks</h2>
+  <h2>7. Final review points</h2>
   <ol>
     <li><strong>Approach:</strong> review atomic dependent updates, import ordering, the in-flight guard and Configure exit protection.</li>
     <li><strong>Format:</strong> can you follow each interaction through its files and proposed changes without jumping between technical layers?</li>
   </ol>
-  <p>Next, after approval: <code>spec-tasks</code>, including the separate rename and
-  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/known-issues.md" data-review-source-href="known-issues.md">SI-1 fix</a>. The planning skill remains unchanged; feedback is retained in
-  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/plan-review-feedback.md" data-review-source-href="plan-review-feedback.md">plan-review-feedback.md</a>.</p>
+  <p>Implementation and independent reviews are complete. Review the consolidated optional quantity contract,
+  accepted-field restoration and <a href="#impl-decision-10">validated typed-validation contract</a> in this final pass.
+  <a href="tasks.md#consolidated-review-adjustments">Tasks and prerequisites</a> retain the adjustment ranges,
+  validation limits and pending published-library dependency. The planning skill remains unchanged;
+  feedback is retained in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/plan-review-feedback.md" data-review-source-href="plan-review-feedback.md">plan-review-feedback.md</a>.</p>
 </section>
 <footer>Review-format experiment · Interaction-led code walkthrough, linked change tree and proposed signatures ·
-No application implementation or test results are claimed by this document.</footer>
+Implemented review adjustments are consolidated above; validation evidence and release prerequisites remain in tasks.md.</footer>
 </main>
 </div>
 <script src="../../review-links.js" defer></script>
