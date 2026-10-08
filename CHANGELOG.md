@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
 - Interface-config normalization lives in the domain and is shared by repositories and version migrations.
+- Feature close-out now delegates a plan review guide to Luna/medium: preserve the approved plan, link implemented claims to actual code, and consolidate decisions under supervisor ownership.
 - Implementation-decision callouts now deep-link every cited code artifact to a verified source line; shared plan skills require the same audit for future decisions and amendments.
 - Plan skills now use one shared amber index and visible callout format for plan amendments and implementation decisions.
 - Shared plan skills now preserve VS Code file links and right-click diffs when drafting plans, proposing plan updates and recording implementation decisions.
