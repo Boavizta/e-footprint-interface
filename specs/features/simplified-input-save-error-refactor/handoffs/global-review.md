@@ -6,9 +6,9 @@ Repository and reviewed feature range: `e-footprint-interface` `56f8278addf36c95
 
 - `edit_simplified_input()` returns the generic 500 modal when initial hydration/catalog construction fails. A request arriving after both repository payloads expire has no accepted field to render; attempting the field-recovery helper repeated `SessionExpiredError` and lost the modal. The adapter regression evicts actual stored cache payloads and submits the stale field address. Accepted-field recovery remains on the edit path after the initial model/catalog are usable.
 
-## Non-blocking transport gap
+## Deferred network interruption UX
 
-- Run A's accepted-field restoration contract covers HTTP rejection responses with OOB fragments. An abort, timeout, or connection failure supplies no authoritative repository field. The client marks the still-visible inline draft `Not saved`, cancels the queued focused export, and allows another Enter/blur save once transport returns. It does not restore that draft from local guesses or reinstate failed-draft navigation/export guards. A later navigation may discard the visible draft, and an unfocused export uses saved state. The supervisor explicitly retained this HTTP scope; no-response recovery remains a separate policy gap.
+- Request-with-no-response messaging is parked in the [network-interruption-message backlog](../../../backlog/network-interruption-message/problem.md). Run A covers HTTP 422/500 responses and adds no dedicated network message or reconciliation.
 
 ## Coverage limits
 
