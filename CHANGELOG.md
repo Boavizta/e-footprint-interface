@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Regression coverage ensures visible form controllers have no skipped conditional dependents, including cross-object controller paths.
 - The simplified-inputs plan offers a right-click VS Code diff against local `main` for linked files, backed by an installable local VS Code extension; ordinary clicks still open the file.
 - Regression coverage for required simplified inputs across owner boundaries, including rejected exclusion patches and completed replacement saves.
 - Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.

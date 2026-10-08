@@ -9,7 +9,7 @@ from django.utils import translation
 
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
-from efootprint.utils.tools import InputUnit
+from efootprint.utils.tools import InputUnit, get_init_signature_params
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.source_objects import SourceObject
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
@@ -22,8 +22,12 @@ from model_builder.adapters.forms.form_field_generator import (
     generate_select_multiple_field,
 )
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
-from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
+from model_builder.domain.efootprint_to_web_mapping import (
+    EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING,
+    get_corresponding_web_class,
+)
 from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web import ModelingObjectWeb
+from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
 class _StubReferencedAPI:
@@ -36,6 +40,29 @@ class _StubReferencedAPI:
 
 def _get_field_by_web_id(fields: list[dict], web_id: str) -> dict:
     return next(field for field in fields if field["web_id"] == web_id)
+
+
+@pytest.mark.parametrize(
+    "owner_class",
+    [cls for name, cls in sorted(MODELING_OBJECT_CLASSES_DICT.items())
+     if name in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING],
+    ids=lambda cls: cls.__name__,
+)
+def test_visible_form_controllers_have_no_skipped_dependents(owner_class):
+    skipped_dependents = get_corresponding_web_class(owner_class).attributes_to_skip_in_forms
+    for dependent, condition in owner_class.conditional_list_values.items():
+        *relationships, controller = condition["depends_on"].split(".")
+        controller_class = owner_class
+        # A dotted path's controller belongs to the referenced object's form, not the relationship selector.
+        for relationship in relationships:
+            annotation = get_init_signature_params(controller_class)[relationship].annotation
+            controller_class = resolve_optional_annotation(annotation)
+        skipped_controllers = get_corresponding_web_class(controller_class).attributes_to_skip_in_forms
+        if controller not in skipped_controllers:
+            assert dependent not in skipped_dependents, (
+                f"{owner_class.__name__}.{dependent} is skipped in forms while its controller "
+                f"{controller_class.__name__}.{controller} is visible."
+            )
 
 
 def test_select_multiple_field_is_hidden_when_nothing_to_pick_and_nothing_selected():
