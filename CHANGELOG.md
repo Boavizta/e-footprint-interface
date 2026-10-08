@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- The simplified-inputs plan offers a right-click VS Code diff against local `main` for linked files, backed by an installable local VS Code extension; ordinary clicks still open the file.
 - Regression coverage for required simplified inputs across owner boundaries, including rejected exclusion patches and completed replacement saves.
 - Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.
 - A grouped Configure view lets authors choose simplified inputs and guidance, with required selections, filtering, navigation, and Save/Discard/Stay protection for drafts. Each modeling remembers its base view.
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Shared plan skills now preserve VS Code file links and right-click diffs when drafting plans, proposing plan updates and recording implementation decisions.
 - Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
 - Optional quantities in Modeling and Simplified inputs now use a generic “Leave unset” switch and model-declared units; fixed counts remain editable when allowed, and autoscaling or serverless selections clear them.
 - Codex per-task and global reviews now use GPT-6.1 Sol/high; the paired Astra/Sol shadow-review experiment ended early after one feature by user decision.

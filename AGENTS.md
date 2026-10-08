@@ -28,6 +28,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
 | Active feature work | `specs/features/<feature-name>/` |
+| VS Code diffs from plan file links | `.agents/skills/spec-plan/references/plan-review-links.md` and `tools/vscode-plan-review-links/README.md` |
 | Past investigations and dated decisions | `archives/` |
 
 ## Dev commands

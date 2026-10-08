@@ -1,0 +1,20 @@
+{
+  "name": "plan-review-links",
+  "displayName": "Plan Review Links",
+  "description": "Open a plan's linked source file as a working-tree diff against main.",
+  "version": "0.0.2",
+  "publisher": "local",
+  "license": "Apache-2.0",
+  "files": [
+    "extension.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onUri"
+  ]
+}

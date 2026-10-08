@@ -14,6 +14,12 @@
   a { color: var(--green); text-underline-offset: .18em; }
   a:hover { color: #103f32; }
   a:focus-visible, summary:focus-visible { outline: 3px solid #3974b3; outline-offset: 4px; border-radius: 3px; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem;
+    border: 1px solid var(--line); border-radius: .5rem; background: var(--paper);
+    box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
   body > a { position: absolute; left: 1rem; top: -5rem; background: white; padding: .7rem; z-index: 5; }
   body > a:focus { top: 1rem; }
   #layout { display: grid; grid-template-columns: 23rem minmax(0, 64rem); gap: 2rem;
@@ -166,6 +172,7 @@
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   @media print {
+    #review-link-menu { display: none; }
     body { background: white; font-size: 10pt; }
     #layout { display: block; padding: 0; }
     #navigation, body > a, #sidebar > summary { display: none; }
@@ -200,7 +207,7 @@
 </nav>
 <section id="modules">
   <h2>2. Changed files</h2>
-  <p>Highlighted paths belong to the selected step. File links open existing code; numbered links return to the walkthrough.</p>
+  <p>Highlighted paths belong to the selected step. Click a linked file to open it in VS Code, or right-click it for a diff against <code>main</code>. Numbered links return to the walkthrough.</p>
   <div id="change-tree" aria-label="Affected files by repository">
     <details open>
       <summary>e-footprint-interface/ <small>— feature owner</small></summary>
@@ -1243,5 +1250,6 @@ persist once</code></pre></div></div>
 No application implementation or test results are claimed by this document.</footer>
 </main>
 </div>
+<script src="../../review-links.js" defer></script>
 </body>
 </html>
