@@ -25,7 +25,7 @@
 
 <h1>Home-page starting-point drawer — Implementation plan</h1>
 <p class="status">Status: <strong>Draft</strong> — captured during <code>spec-specify</code> from the kickoff
-conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 · Spec:
+conversation; refined in the <code>spec-plan</code> stage · 2026-10-08 · Spec:
 <a href="spec.html">spec.html</a></p>
 
 <section>
@@ -230,6 +230,17 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
         to a handful of rules; the existing picker got by with utilities alone.</td>
       </tr>
       <tr>
+        <td><code>model_builder/domain/reference_data/modeling_templates/introductory/registry.py</code></td>
+        <td>modified</td>
+        <td>One field: the <code>genai_video</code> entry's <code>description</code>, shortened to
+        "A marketing team generates a social-media video with AI video providers, then edits and publishes
+        it." (101 characters, against 218 today and 54–99 for its peers). The only catalog edit in scope —
+        the spec admits it explicitly. It changes the copy on <em>every</em> surface, the drawer and the
+        in-builder chooser included, because there is one source. No test asserts this string, and the
+        scenario constructor's docstring in <code>scripts/intro_template_scenarios/genai_video.py</code> is
+        separate prose that does not need to follow.</td>
+      </tr>
+      <tr>
         <td><code>specs/architecture.md</code> → "First-run template picker"</td>
         <td>modified</td>
         <td>That section (≈ line 483–487) documents the auto-overlay as the entry point. It becomes the
@@ -314,10 +325,12 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
     plus a drawer is more page than exists today, and trimming the count is no longer an available escape
     hatch (that decision is made). Five also does not fit one row, so the band wraps three-then-two and
     the tallest card sets each row's height — today that is the GenAI marketing video description, which
-    was written for a roomy overlay. The remaining levers are layout and density: shorter card copy, and
-    chips only if they earn their weight. Observed in the prototype: chips stack one-per-line in a narrow
-    column and become most of a card's visual weight. If the band reads as a catalogue rather than an
-    invitation, fix it in the card design — not by hiding templates.</li>
+    was written for a roomy overlay. Observed in the prototype: chips stack one-per-line in a narrow column
+    and become most of a card's visual weight. Both levers are now decided — <strong>chips stay</strong>
+    (they are the clearest signal of what a template demonstrates, which is the band's whole purpose), and
+    the one oversized description is <strong>shortened</strong> instead. That is the entire budget: if the
+    band still reads as a catalogue rather than an invitation, fix it in card design — not by hiding
+    templates or stripping chips.</li>
     <li><strong>Losing the "just get me in" path.</strong> Today the CTA lands you somewhere; now it asks a
     question. Mitigation is copy, not code — "Start from scratch" must read as an obvious first-class
     option, not a consolation prize.</li>
@@ -392,19 +405,14 @@ conversation; to be refined in the <code>spec-plan</code> stage · 2026-10-07 ·
       catalog build is already on the home-page path.</li>
       <li><strong>Whether the band renders how-to templates</strong> — yes, the whole
       <code>templates</code> group, no <code>category</code> filtering.</li>
+      <li><strong>Whether band cards show concept chips</strong> — yes, the same chips the in-app chooser
+      shows (decided 2026-10-08).</li>
+      <li><strong>Whether the catalog copy is shortened for the band</strong> — yes, for the one
+      oversized entry; the spec widens scope by that single line (decided 2026-10-08).</li>
     </ul>
   </details>
   <p>Still open, to resolve before or during <code>spec-tasks</code>:</p>
   <ul>
-    <li><strong>Should the band's cards show concept chips?</strong> The prototype showed they stack
-    one-per-line in a narrow column and become most of a card's visual weight. Chips are pedagogically
-    useful and already free (the presenter resolves them), but they are the single biggest contributor to
-    band height. Leaning toward dropping them in the band and keeping them in the drawer, where the columns
-    are wider.</li>
-    <li><strong>Does the catalog copy need shortening for the band?</strong> The GenAI marketing video
-    description runs five lines in a band column and sets the height of its whole row. Shortening it is a
-    catalog change — out of scope per the spec's §3 — so either the spec's scope widens by one line, or the
-    band truncates, or the row stays uneven. Worth settling deliberately rather than discovering at review.</li>
     <li><strong>What exactly carries the server-set emptiness flag</strong> — an attribute on
     <code>&lt;body&gt;</code>, on the band container, or a dedicated element the listener looks up. Needs
     to be reachable identically from the band (page render) and the drawer (per-click fetch).</li>

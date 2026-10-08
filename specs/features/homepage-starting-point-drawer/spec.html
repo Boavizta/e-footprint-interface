@@ -23,14 +23,14 @@
 <body>
 
 <h1>Home-page starting-point drawer</h1>
-<p class="status">Status: Spec — under review · 2026-10-07</p>
+<p class="status">Status: Spec — under review · 2026-10-08</p>
 
 <section>
   <h2>1. Problem and audience</h2>
 
-  <p><strong>What is wrong today.</strong> e-footprint ships four starter templates — a classical
-  e-commerce journey, an AI chatbot, an industrial IoT fleet, a machine-learning workflow — plus the
-  library's how-to scenarios. They are the fastest route from "I have never modeled anything" to "I am
+  <p><strong>What is wrong today.</strong> e-footprint ships five templates — a classical e-commerce
+  journey, an AI chatbot, a GenAI marketing video, an industrial IoT fleet, and the library's
+  machine-learning workflow. They are the fastest route from "I have never modeled anything" to "I am
   looking at a realistic model I can poke at". The home page never mentions that any of them exist.
   A visitor sees one call to action, <em>Start modeling →</em>, and has no way to know whether it leads
   to a blank page or a worked example.</p>
@@ -108,7 +108,13 @@
       <strong>all five</strong> templates in the catalog by name and description — the four introductory
       scenarios and the library's how-to scenario, none held back behind the drawer — positioned so a
       visitor meets it while reading the page rather than having to hunt for it. Each entry is itself a
-      way in: selecting it loads that model.</li>
+      way in: selecting it loads that model, and each carries the same concept chips the in-app chooser
+      shows, so a visitor can tell at a glance which modeling ideas a template demonstrates.</li>
+      <li><strong>One template description shortened.</strong> The GenAI marketing video entry runs roughly
+      twice the length of every other card (218 characters against 54–99) because it enumerates each step
+      of the scenario. In a card grid it sets the height of its whole row. Its copy is shortened to sit in
+      line with its peers; the concepts it was spelling out are already carried by its chips. This is the
+      only catalog edit in scope.</li>
       <li><strong>An in-page starting-point drawer behind the main call to action.</strong> <em>Start
       modeling</em> no longer navigates; it opens a chooser over the home page containing the full set of
       starting points — templates, start from scratch, load a JSON file — with the home page still visible
@@ -130,9 +136,10 @@
 
   <details><summary>Out of scope (this iteration)</summary>
     <ul>
-      <li><strong>Changing the template catalog itself</strong> — no new templates, no renamed or
-      re-described ones, no re-grouping. This feature changes where the catalog is shown, not what is in
-      it.</li>
+      <li><strong>Changing the template catalog itself</strong> — no new templates, no renamed ones, no
+      re-grouping, and no re-described ones <em>beyond the single GenAI marketing video description named
+      in scope above</em>. This feature changes where the catalog is shown, not what is in it; that one
+      edit is admitted deliberately because the card grid is what exposed the imbalance.</li>
       <li><strong>Previews of a template's contents</strong> before loading it — a thumbnail of the canvas,
       an impact figure, a sample result. Worth considering later; not needed to make the names visible.</li>
       <li><strong>Search, filtering or tag-based browsing</strong> of templates. The catalog is small enough
@@ -259,7 +266,7 @@
       var TEMPLATES = [
         { icon: "🛒", name: "Classical e-commerce", desc: "A shopping journey served by a web application server calling a database server.", chips: ["Web service", "Cloud server", "Database"] },
         { icon: "🤖", name: "AI chatbot", desc: "A chatbot served by a web app that routes simple and complex prompts to small and large LLM APIs.", chips: ["Web service", "LLM inference", "External API", "Cloud server"] },
-        { icon: "🎬", name: "GenAI marketing video", desc: "A marketing team produces a short social-media video with generative-AI video providers: writing prompts, exploring drafts, generating final clips, editing locally, and publishing to a CDN. No web service of their own.", chips: ["Gen AI video external API", "LLM inference", "Cloud server"] },
+        { icon: "🎬", name: "GenAI marketing video", desc: "A marketing team generates a social-media video with AI video providers, then edits and publishes it.", chips: ["Gen AI video external API", "LLM inference", "Cloud server"] },
         { icon: "📟", name: "Industrial IoT", desc: "Factory sensors send readings to a server, and analysts use a dashboard to review that server data.", chips: ["Connected sensors", "Sensor uploads", "Analysis dashboard", "Cloud server"] },
         { icon: "", name: "Machine learning workflow", desc: "Training on a AI server plus recurrent inference jobs.", chips: [] }
       ];
