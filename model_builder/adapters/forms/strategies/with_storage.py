@@ -1,4 +1,5 @@
 """With-storage form strategy for objects that have an associated storage."""
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Type
 
 from model_builder.adapters.forms.form_field_generator import (
@@ -118,3 +119,14 @@ class WithStorageFormStrategy(FormStrategy):
         })
 
         return context_data
+
+    def iter_edition_fields(self, context: dict) -> Iterator[tuple["ModelingObjectWeb", dict]]:
+        yield from super().iter_edition_fields(context)
+        for field in context["storage_form_fields"] + context["storage_form_fields_advanced"]:
+            yield context["storage_to_edit"], field
+
+    def iter_creation_fields(self, context: dict) -> Iterator[tuple[str, dict]]:
+        yield from super().iter_creation_fields(context)
+        for section in context["storage_form_sections"]:
+            for field in section.get("fields", []) + section.get("advanced_fields", []):
+                yield "storage", field

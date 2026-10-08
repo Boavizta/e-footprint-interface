@@ -102,7 +102,7 @@ class FormContextBuilder:
         if efootprint_id_of_parent_to_link_to:
             context["parent_link_count_field"] = self._build_parent_link_count_field(
                 efootprint_id_of_parent_to_link_to, object_type)
-        self._attach_creation_bookmarks(context)
+        self._attach_creation_bookmarks(strategy.iter_creation_fields(context))
         return context
 
     def _build_parent_link_count_field(self, parent_id: str, object_type: str) -> dict | None:
@@ -149,25 +149,20 @@ class FormContextBuilder:
 
         catalog = build_catalog(self.model_web, can_edit_timeseries=can_edit_timeseries)
         definition = normalize_definition(self.model_web.repository.interface_config.get("simplified_inputs"))
-        for prefix, owner in (("", obj_to_edit), ("storage_", context.get("storage_to_edit"))):
-            if owner is None:
-                continue
-            for field in context.get(f"{prefix}form_fields", []) + context.get(f"{prefix}form_fields_advanced", []):
-                field["bookmark"] = bookmark_context(
-                    self.model_web, FieldAddress(owner.efootprint_id, field["attr_name"]), catalog=catalog, definition=definition)
+        for owner, field in strategy.iter_edition_fields(context):
+            field["bookmark"] = bookmark_context(
+                self.model_web, FieldAddress(owner.efootprint_id, field["attr_name"]), catalog=catalog, definition=definition)
         return context
 
     @staticmethod
-    def _attach_creation_bookmarks(context):
-        for prefix, owner in (("", "object"), ("storage_", "storage")):
-            for section in context.get(f"{prefix}form_sections", []):
-                for field in section.get("fields", []) + section.get("advanced_fields", []):
-                    if not field.get("simplified_eligible"):
-                        continue
-                    field["bookmark"] = {
-                        "dom_id": f"bookmark-new-{field['web_id']}", "input_id": field["web_id"],
-                        "provisional_owner": owner, "attribute": field["attr_name"],
-                        "setting": {"included": False, "help": ""}, "required_by": None}
+    def _attach_creation_bookmarks(fields):
+        for owner, field in fields:
+            if not field.get("simplified_eligible"):
+                continue
+            field["bookmark"] = {
+                "dom_id": f"bookmark-new-{field['web_id']}", "input_id": field["web_id"],
+                "provisional_owner": owner, "attribute": field["attr_name"],
+                "setting": {"included": False, "help": ""}, "required_by": None}
 
     def build_input_fields(self, obj_to_edit, attributes: set[str]) -> list[dict]:
         """Render catalog inputs through the normal generator, explicitly including panel exclusions."""

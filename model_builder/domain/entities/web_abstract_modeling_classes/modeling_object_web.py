@@ -25,6 +25,8 @@ class ModelingObjectWeb:
     add_template = "add_panel__generic.html"
     edit_template = "edit_panel__generic.html"
     attributes_to_skip_in_forms = []
+    # Nested objects created alongside this object that can receive provisional input settings.
+    nested_input_owner_attributes = ()
     # Maps the first segment of a cross-object conditional_list_values `depends_on` path
     # (e.g. "external_api" in "external_api.model_name") to the DOM id of the field that
     # actually carries that referenced object's selection, when it isn't rendered as

@@ -31,6 +31,8 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Feature plan links, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
 | Past investigations and dated decisions | `archives/` |
 
+Composite forms expose owner–field pairs through their strategies; wrappers declare nested input owners. See [Forms and relationships](specs/architecture/forms-and-relationships.html#form-adapters).
+
 ## Dev commands
 
 ```bash

@@ -167,8 +167,8 @@ def reconcile_simplified_definition(model_web, catalog_factory, pending=None, cr
         if not isinstance(setting, dict) or setting.keys() != {"owner", "attribute", "included", "help"}:
             raise InputValidationError("Invalid pending simplified input.")
         owner = created_object
-        if setting["owner"] == "storage":
-            owner = created_object.storage
+        if setting["owner"] in created_object.nested_input_owner_attributes:
+            owner = getattr(created_object, setting["owner"])
         elif setting["owner"] != "object":
             raise InputValidationError("Unknown pending input owner.")
         definition["fields"].setdefault(owner.efootprint_id, {})[setting["attribute"]] = {

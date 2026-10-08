@@ -1,5 +1,7 @@
 """Unit tests for FormContextBuilder-specific custom context."""
 
+import pytest
+
 from efootprint.core.hardware.edge.edge_device import EdgeDevice
 from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 
@@ -155,6 +157,20 @@ def test_nested_storage_bookmarks_have_storage_identity(minimal_model_web):
     assert field["bookmark"]["address"].object_id == server.storage.efootprint_id
     assert field["bookmark"]["address"].object_id != server.efootprint_id
     assert next(field for field in context["form_fields"] if field["attr_name"] == "name")["bookmark"] is None
+
+
+@pytest.mark.parametrize("object_type", ["UsageJourneyStep", "Server", "EdgeDeviceBase"])
+def test_creation_bookmarks_keep_each_form_owner_and_cover_advanced_fields(minimal_model_web, object_type):
+    context = FormContextBuilder(minimal_model_web).build_creation_context(
+        EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING[object_type], object_type)
+    for key, owner in (("form_sections", "object"), ("storage_form_sections", "storage")):
+        for section in context.get(key, []):
+            for field in section.get("fields", []) + section.get("advanced_fields", []):
+                if field.get("simplified_eligible"):
+                    assert field["bookmark"]["provisional_owner"] == owner
+                    assert field["bookmark"]["attribute"] == field["attr_name"]
+                else:
+                    assert "bookmark" not in field
 
 
 def test_creation_requirement_metadata_tracks_selected_controller_candidates(minimal_model_web):

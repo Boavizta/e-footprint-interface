@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 class EdgeComputerWeb(EdgeDeviceBaseWeb):
     edit_template = "../server/server_edit.html"
+    nested_input_owner_attributes = ("storage",)
 
     # Declarative form configuration for edition - used by FormContextBuilder in adapters layer
     form_edition_config = {

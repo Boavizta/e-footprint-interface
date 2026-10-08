@@ -1,5 +1,6 @@
 """Base class for form generation strategies."""
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
@@ -62,3 +63,14 @@ class FormStrategy(ABC):
             Dictionary with form context data ready for template rendering
         """
         raise NotImplementedError(f"{self.__class__.__name__} does not support edition context")
+
+    def iter_edition_fields(self, context: dict) -> Iterator[tuple["ModelingObjectWeb", dict]]:
+        """Yield each editable field with its actual owner."""
+        for field in context["form_fields"] + context["form_fields_advanced"]:
+            yield context["object_to_edit"], field
+
+    def iter_creation_fields(self, context: dict) -> Iterator[tuple[str, dict]]:
+        """Yield each creation field with its provisional owner name."""
+        for section in context["form_sections"]:
+            for field in section.get("fields", []) + section.get("advanced_fields", []):
+                yield "object", field

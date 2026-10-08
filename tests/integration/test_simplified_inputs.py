@@ -398,6 +398,35 @@ def test_creation_resolves_nested_settings_and_saves_model_once(minimal_reposito
     assert fields[server.storage.efootprint_id]["storage_capacity"] == {"included": False, "help": "Retained capacity"}
 
 
+def test_creation_settings_resolve_declared_nested_owner_names(minimal_repository, monkeypatch):
+    from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
+    from model_builder.domain.entities.web_core.hardware.server_web import ServerWeb
+
+    monkeypatch.setattr(ServerWeb, "nested_input_owner_attributes", ("archive",))
+    monkeypatch.setattr(ServerWeb, "archive", property(lambda self: self.storage), raising=False)
+    pending = [{"owner": "archive", "attribute": "storage_capacity", "included": True, "help": "Archive capacity"}]
+    result = CreateObjectUseCase(minimal_repository, input_catalog).execute(CreateObjectInput(
+        "Server", {"name": "Archive server", "_parsed_Storage": {"name": "Archive storage"}},
+        simplified_settings=pending))
+
+    server = ModelWeb(minimal_repository).get_web_object_from_efootprint_id(result.created_object_id)
+    fields = minimal_repository.interface_config["simplified_inputs"]["fields"]
+    assert fields[server.storage.efootprint_id]["storage_capacity"] == {
+        "included": True, "help": "Archive capacity"}
+
+
+def test_creation_settings_reject_undeclared_nested_owners(minimal_repository):
+    from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
+
+    original = deepcopy(minimal_repository.get_system_data())
+    pending = [{"owner": "archive", "attribute": "storage_capacity", "included": True, "help": ""}]
+    with pytest.raises(ValueError, match="Unknown pending input owner"):
+        CreateObjectUseCase(minimal_repository, input_catalog).execute(CreateObjectInput(
+            "Server", {"name": "Rejected server", "_parsed_Storage": {"name": "Nested storage"}},
+            simplified_settings=pending))
+    assert minimal_repository.get_system_data() == original
+
+
 @pytest.mark.parametrize("failure", ["hook", "settings", "budget"])
 def test_failed_creation_publishes_neither_object_nor_pending_settings(minimal_repository, failure):
     from model_builder.application.use_cases.create_object import CreateObjectInput, CreateObjectUseCase
