@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simple workspace mutation gate — Spec</title>
+<style>
+  body { font: 16px/1.6 system-ui, sans-serif; max-width: 54rem; margin: 2rem auto; padding: 0 1.2rem; color: #222; }
+  h1, h2 { line-height: 1.3; } h1 { border-bottom: 2px solid #ddd; padding-bottom: .4rem; }
+  h2 { margin-top: 2rem; } a { color: #176751; } small { color: #666; }
+  code { background: #f3f3f3; padding: .1rem .25rem; } li { margin: .4rem 0; }
+  table { width: 100%; border-collapse: collapse; } th, td { padding: .6rem; text-align: left; vertical-align: top; border: 1px solid #ddd; }
+  th { background: #f5f7f3; } figure { margin: 1rem 0; padding: 1rem; border: 1px solid #ddd; border-radius: .5rem; }
+  svg { display: block; width: 100%; height: auto; } figcaption { color: #666; font-size: .9rem; }
+  blockquote { border-left: 3px solid #c69b53; margin: 1rem 0; padding: .4rem 1rem; background: #fff7e9; }
+  :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<h1>Simple workspace mutation gate</h1>
+<p><small>Spec — under review · 8 October 2026 · Interface-owned</small></p>
+<p>This feature replaces comprehensive save-time interaction locking with a small cancellation policy.
+The user authorized this specification and a <a href="plan.html">draft plan</a>; application implementation
+and implementation tasks require later review. Refine the draft with <code>spec-plan</code> in a fresh session.</p>
+
+<section id="problem">
+<h2>1. Problem and audience</h2>
+<p>Simplified-input autosave currently prevents editing, structural actions, navigation and export across
+the workspace during a save. Coordinating those controls has substantially increased browser-code complexity.</p>
+<p>The expected usage is sequential editing with usually low request latency. This is a working assumption,
+not a measured latency guarantee. Occasional overlapping actions should receive clear cancellation feedback;
+optimizing rapid input through queues or comprehensive interaction locking is not a priority.</p>
+<p>The audience is people editing models through Simplified inputs, Modeling, Sources and Results.
+The goal is a smaller, understandable implementation with predictable behavior when saves overlap.</p>
+</section>
+
+<section id="success">
+<h2>2. Success criteria</h2>
+<ol>
+  <li>Within one browser workspace, only one operation that writes workspace state can be active at a time.
+  An overlapping write is canceled before transmission; the first operation continues normally.</li>
+  <li>The canceled operation never runs later automatically. A concise notice explains that another save
+  was running and asks the user to try the action again after it finishes.</li>
+  <li>A canceled field save is marked <strong>Not saved</strong>, rather than Saved or indefinitely Saving.
+  While its editor remains present, its attempted value stays available for manual resubmission through the
+  ordinary edit-completion action. Finishing the first save does not submit it.</li>
+  <li>The workspace does not blanket-disable editing or harmless navigation during a save. Reads,
+  previews, reading and scrolling remain available. Existing prerequisites and unsaved-form confirmations still apply.</li>
+  <li>An export attempted during an active write does not download an older snapshot. It receives busy
+  feedback and can be activated again afterward. Existing focused-field save-before-export behavior remains.</li>
+  <li>Success, rejection and transport failure all release the active-operation state. A later action works
+  normally, and a concurrent read cannot release another operation's gate.</li>
+</ol>
+</section>
+
+<section id="scope">
+<h2>3. Scope</h2>
+<p>Apply the cancellation policy to existing workspace writes, including input and metadata saves,
+configuration saves, object and relationship changes, model switching/replacement, card order and diagram
+settings/deletion. Read-only actions and stateless previews do not occupy the write gate.</p>
+<p>Keep feedback local where an existing field status is available, with one concise notice for the action.
+An overlap is a busy-workspace cancellation, not a server validation error.</p>
+<p>Queueing, automatic retries, background resubmission, a new draft store, generic request middleware,
+cross-tab coordination and backend persistence redesign are outside this feature. No durability is promised
+for a canceled value across leaving or replacing its editor. Existing explicit Configure and bookmark drafts
+retain their current behavior; this feature does not add navigation guards for canceled field edits.</p>
+</section>
+
+<section id="experience">
+<h2>4. UX / interface</h2>
+<figure>
+<svg viewBox="0 0 740 280" role="img" aria-labelledby="flow-title flow-desc">
+  <title id="flow-title">A second save is canceled while the first save finishes</title>
+  <desc id="flow-desc">Field A saves. Field B remains editable, but its save is canceled while A is busy.
+  B displays Not saved and a notice. After A finishes, B is saved only when the user completes its edit again.</desc>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5e706e"/></marker></defs>
+  <g font-family="system-ui, sans-serif" font-size="15" fill="#222">
+    <rect x="10" y="15" width="210" height="83" rx="8" fill="#eaf3ed" stroke="#b5d3c2"/>
+    <text x="25" y="42">Field A: 12 → 15</text><text x="25" y="70">Saving…</text>
+    <rect x="265" y="15" width="210" height="83" rx="8" fill="#fff5e5" stroke="#d6b77d"/>
+    <text x="280" y="42">Field B: 20 → 25</text><text x="280" y="70">Save canceled · Not saved</text>
+    <rect x="520" y="15" width="210" height="83" rx="8" fill="#eaf3ed" stroke="#b5d3c2"/>
+    <text x="535" y="42">Field A: 15</text><text x="535" y="70">Saved</text>
+    <path d="M 225 56 H 258" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M 480 56 H 513" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="10" y="125" width="720" height="65" rx="8" fill="#f5f7f3" stroke="#dbe4df"/>
+    <text x="25" y="151">Another save was running. This change was not saved.</text>
+    <text x="25" y="175">Complete the edit again after that save finishes.</text>
+    <text x="10" y="220">B still shows 25 while its editor remains open. It is not submitted automatically.</text>
+    <text x="10" y="249">The user completes B’s edit again → B saves normally.</text>
+  </g>
+</svg>
+<figcaption>Conceptual interaction. Notice placement and exact copy are proposals for planning.</figcaption>
+</figure>
+</section>
+
+<section id="constraints">
+<h2>5. Constraints</h2>
+<p>Use the smallest extension of existing request and feedback mechanisms. Prefer a central write gate and
+a narrow export check over coordinating every input and action. Preserve accepted server-side mutations,
+validation, calculations, HTTP error handling and existing domain constraints.</p>
+<blockquote>This intentionally changes the original simplified-inputs requirement to disable further edits,
+structural actions and view/model navigation while saving. It retains one active write and removes automatic
+queueing from consideration. The older requirement must be reconciled when this feature is implemented.</blockquote>
+<p>The feature stays within the <a href="../../mission.md">mission</a> and
+<a href="../../constitution.md">constitution</a>, particularly HTMX-first interaction and minimal JavaScript.
+Current behavior is described in <a href="../../architecture/rendering.html">Rendering</a>,
+<a href="../../architecture/workspace.html">Workspace</a> and
+<a href="../../architecture/persistence.html">Persistence</a>.</p>
+</section>
+
+<section id="questions">
+<h2>6. Open questions</h2>
+<p>No queue-versus-cancellation decision remains: this draft uses cancellation. Planning should settle
+notice placement and the smallest integration with existing save statuses. If normal response updates
+replace a canceled editor, do not invent draft-preservation machinery; show the concrete interaction and
+resolve the behavior with the user before expanding scope.</p>
+</section>
+
+<section id="resume">
+<h2>7. Resuming from cold context</h2>
+<ol>
+  <li>Review this specification, then read <a href="plan.html">plan.html</a>. The plan is a kickoff draft,
+  not an approved patch or a complete implementation design.</li>
+  <li>Start a fresh session: “Use spec-plan for simple-workspace-mutation-gate in e-footprint-interface.
+  Read spec.html and refine its draft plan.html. Keep the cancellation policy small, audit current callers,
+  and surface material choices for review. Do not generate tasks or implement application changes.”</li>
+  <li>Follow the <a href="../../architecture/index.html">architecture router</a> and
+  <a href="../../conventions.md">conventions</a>; recheck the current checkout and preserve unrelated edits.</li>
+</ol>
+</section>
+</body>
+</html>
