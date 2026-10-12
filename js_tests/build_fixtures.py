@@ -596,7 +596,8 @@ def render_support(case_ctx):
 # Main
 # ---------------------------------------------------------------------------
 
-def render_simplified_workspace(_):
+def render_simplified_workspace(case):
+    toolbar_context = {"model_web": {"creation_constraints": {"__results__": {"enabled": True}}}, **case}
     objects = []
     for owner, attrs in [("api", ["provider", "model"]), ("job", ["count"]), ("other", ["lifespan"])]:
         fields = []
@@ -610,9 +611,11 @@ def render_simplified_workspace(_):
         objects.append({"object_id": owner, "dom_id": f"si-test-object-{owner}", "name": owner.capitalize(),
                         "fields": fields, "selected_count": 0, "open": owner == "api"})
     return render_to_string("model_builder/simplified_inputs/workspace.html", {
-        "system_id": "test", "slot": 0, "configure": True, "title": "Title", "guidance": "Guidance",
+        "system_id": "test", "slot": 0, "configure": case.get("configure", True),
+        "title": "Title", "guidance": "Guidance",
         "groups": [{"object_type": "External API", "dom_id": "si-test-type-api", "objects": objects}]}) + render_to_string(
-            "model_builder/simplified_inputs/exit_dialog.html")
+            "model_builder/simplified_inputs/exit_dialog.html") + (render_to_string(
+            "model_builder/upload_download_reboot_model_tooltips.html", toolbar_context) if case.get("toolbar") else "")
 
 
 def render_simplified_bookmark(field):
@@ -683,7 +686,10 @@ GROUPS = [
     (OPTIONAL_QUANTITY_CASES, render_optional_quantity),
     ({"simplified_optional_quantity": {"optional_quantity": True},
       "simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
-    ({"simplified_configure": {}}, render_simplified_workspace),
+    ({"simplified_configure": {}, "simplified_saved": {"configure": False},
+      "simplified_configure_export": {"toolbar": True},
+      "simplified_configure_workspace": {"toolbar": True, "workspace_slots": [{}, {}]}},
+     render_simplified_workspace),
     (SIMPLIFIED_BOOKMARK_CASES, render_simplified_bookmark),
     ({"simplified_create_server": "Server", "simplified_create_edge_device": "EdgeDeviceBase"}, render_simplified_creation),
     (SOURCE_METADATA_CASES, render_metadata_field),

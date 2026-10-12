@@ -1,35 +1,15 @@
 "use strict";
 
-// Inline value/provenance saves, accepted snapshots and focused-field exports.
-// The workspace coordinator supplies access to the active view; export replay
-// stays at the entry point so the editor does not depend on Configure exits.
-function createFieldEdits({ activeWorkspace, continueExport }) {
+// Inline value/provenance saves and accepted snapshots.
+function createFieldEdits({ activeWorkspace }) {
     const savedEdits = new WeakMap();
     const saveStatusTimers = new WeakMap();
-    let pendingExport = null;
 
     function setSaveStatus(form, message, duration = 0) {
         const status = form.querySelector("[data-simplified-save-status]");
         clearTimeout(saveStatusTimers.get(status));
         status.textContent = message;
         if (duration) saveStatusTimers.set(status, setTimeout(() => { status.textContent = ""; }, duration));
-    }
-    function completeFocusedEditForExport(element) {
-        const focused = document.activeElement;
-        const form = focused?.closest("[data-simplified-editor]");
-        if (!form) return false;
-        if (!form.reportValidity()) {
-            pendingExport = null;
-            setSaveStatus(form, "Not saved");
-            return true;
-        }
-        pendingExport = element;
-        // Source controls write their named hidden inputs on completion of the group.
-        focused.blur();
-        saveEdit(form);
-        if (form.dataset.saving === "true") return true;
-        pendingExport = null;
-        return false;
     }
     function editSnapshot(form) {
         return JSON.stringify([...new FormData(form)].filter(([key]) => key !== "csrfmiddlewaretoken"));
@@ -124,9 +104,6 @@ function createFieldEdits({ activeWorkspace, continueExport }) {
             if (form.matches("[data-simplified-timeseries]")) {
                 window.closeAndEmptySidePanel();
             }
-            const element = pendingExport;
-            pendingExport = null;
-            if (element && event.detail.successful) continueExport(element);
         });
         document.addEventListener("input", event => {
             if (event.target.closest("[data-simplified-timeseries]")) window.tagFormAsModified();
@@ -152,7 +129,7 @@ function createFieldEdits({ activeWorkspace, continueExport }) {
         document.addEventListener("DOMContentLoaded", initializeEdits);
     }
 
-    return { initializeEdits, completeFocusedEditForExport, registerFieldEdits };
+    return { initializeEdits, registerFieldEdits };
 }
 
 module.exports = { createFieldEdits };

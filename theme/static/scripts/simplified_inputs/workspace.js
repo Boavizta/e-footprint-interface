@@ -125,7 +125,8 @@ function createWorkspace() {
         document.addEventListener("click", event => {
             if (replaying || document.body.dataset.workspaceMutation === "updating") return;
             const element = event.target.closest("a, button, [hx-get], [hx-post], [data-action]");
-            if (!element || element.closest("[data-simplified-workspace], #simplified-exit-dialog, #modal-container")) return;
+            if (!element || element.closest("[data-workspace-export], [data-simplified-workspace], "
+                + "#simplified-exit-dialog, #modal-container")) return;
             if (!element.matches("a[href], [hx-get], [hx-post], [data-workspace-control], [data-action]")) return;
             // A pending entry must not land after the user has chosen another destination.
             // Repeated Modeling → Simplified clicks instead share the first pending read.
@@ -189,8 +190,7 @@ function createWorkspace() {
         document.addEventListener("DOMContentLoaded", initialize);
     }
 
-    return { activeWorkspace, configureForm, initialize, setBaseView, loadView, deferExit,
-        replayClick, isReplaying: () => replaying, registerWorkspace };
+    return { activeWorkspace, configureForm, initialize, setBaseView, loadView, deferExit, registerWorkspace };
 }
 
 module.exports = { createWorkspace };

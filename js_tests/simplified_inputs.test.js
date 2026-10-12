@@ -2,9 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
 const { workspace: { initialize, deferExit }, fieldEdits: { initializeEdits } } = require("../theme/static/scripts/simplified_inputs/index.js");
+// Match base.html listener ordering and register the shared guard only once.
+require("../theme/static/scripts/model_builder_main.js");
 
-function mount() {
-    document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_configure.html"), "utf8");
+function mount(fixture = "simplified_configure") {
+    document.body.innerHTML = fs.readFileSync(path.join(__dirname, `fixtures/${fixture}.html`), "utf8");
     const workspace = document.querySelector("[data-simplified-workspace]");
     const target = document.createElement("div");
     target.dataset.simplifiedTarget = "0";
@@ -325,49 +327,6 @@ test('Enter followed by blur saves once and rejection marks the accepted replace
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 
-test('a rejected focused save cancels its export activation and leaves accepted-state export available', () => {
-    const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    const acceptedValue = input.value;
-    input.value = '8';
-    input.focus();
-    const link = document.createElement('a');
-    link.href = '/model_builder/download-json/';
-    link.dataset.workspaceExport = 'active';
-    document.body.append(link);
-
-    const activation = new MouseEvent('click', {bubbles: true, cancelable: true});
-    link.dispatchEvent(activation);
-    expect(activation.defaultPrevented).toBe(true);
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-
-    const acceptedForm = form.cloneNode(true);
-    acceptedForm.querySelector('input[type="number"]').value = acceptedValue;
-    delete acceptedForm.dataset.saving;
-    form.replaceWith(acceptedForm);
-    document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
-        detail: {elt: form, successful: false},
-    }));
-    expect(acceptedForm.querySelector('input[type="number"]').value).toBe(acceptedValue);
-    expect(acceptedForm.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
-
-    const target = document.createElement('div');
-    target.id = 'main-content-block';
-    document.body.append(target);
-    const action = document.createElement('button');
-    document.body.append(action);
-    const navigation = new CustomEvent('htmx:confirm', {bubbles: true, cancelable: true,
-        detail: {target, elt: action, issueRequest: jest.fn()}});
-    action.dispatchEvent(navigation);
-    expect(navigation.defaultPrevented).toBe(false);
-
-    const laterActivation = new MouseEvent('click', {bubbles: true, cancelable: true});
-    link.dispatchEvent(laterActivation);
-    expect(laterActivation.defaultPrevented).toBe(false);
-    expect(link.getAttribute('href')).toBe('/model_builder/download-json/');
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-});
-
 test('unchanged blur does not save and an in-flight workspace mutation rejects new saves', () => {
     const form = mountEditor();
     const input = form.querySelector('input');
@@ -395,8 +354,6 @@ test("value saves omit unchanged provenance and confidence saves preserve omitte
 
 test("accepted replacement baselines wait for the workspace guard to restore form controls", () => {
     const form = mountEditor();
-    // Match base.html: the simplified module registers its settlement listener before the guard.
-    require("../theme/static/scripts/model_builder_main.js");
     const xhr = {getResponseHeader: () => ""};
     const emit = (name, detail) => document.body.dispatchEvent(new CustomEvent(name, {detail}));
     form.querySelector("input").value = "8";
@@ -429,50 +386,31 @@ test("accepted replacement baselines wait for the workspace guard to restore for
 });
 
 
-test("export activation completes the focused field and failure cancels that download", () => {
-    const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    const link = document.getElementById("download-model");
-    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    input.focus();
-    input.value = "8";
-    link.dispatchEvent(new MouseEvent("mousedown", {bubbles: true, cancelable: true}));
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-    link.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
-    expect(click).not.toHaveBeenCalled();
-    const replacement = form.cloneNode(true);
-    delete replacement.dataset.saving;
-    form.replaceWith(replacement);
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-        detail: {elt: form, successful: false},
-    }));
-    expect(click).not.toHaveBeenCalled();
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-        detail: {elt: replacement, successful: true},
-    }));
-    expect(click).not.toHaveBeenCalled();
-    click.mockRestore();
-});
-
-test("invalid focused input cancels export without sending a request or leaving a pending download", () => {
+test.each(["8", "-1"])("idle export neither saves nor validates a focused draft %s", value => {
     const form = mountEditor();
     const input = form.querySelector('input[type="number"]');
     input.focus();
-    input.value = "-1";
-    const validity = jest.spyOn(form, "reportValidity").mockReturnValue(false);
-    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    input.value = value;
+    const validity = jest.spyOn(form, "reportValidity");
     const activation = new MouseEvent("click", {bubbles: true, cancelable: true});
     document.getElementById("download-model").dispatchEvent(activation);
-    expect(activation.defaultPrevented).toBe(true);
-    expect(validity).toHaveBeenCalled();
+    expect(activation.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(input);
+    expect(validity).not.toHaveBeenCalled();
     expect(window.htmx.trigger).not.toHaveBeenCalled();
-    expect(click).not.toHaveBeenCalled();
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-        detail: {elt: form, successful: true},
-    }));
-    expect(click).not.toHaveBeenCalled();
-    click.mockRestore();
+});
+
+test("invalid ordinary blur marks the draft unsaved without changing export admission", () => {
+    const form = mountEditor();
+    const input = form.querySelector('input[type="number"]');
+    input.value = "-1";
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+    expect(form.querySelector("[data-simplified-save-status]").textContent).toBe("Not saved");
+    const activation = new MouseEvent("click", {bubbles: true, cancelable: true});
+    document.getElementById("download-model").dispatchEvent(activation);
+    expect(activation.defaultPrevented).toBe(false);
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
 });
 
 test.each([true, false])("timeseries Save closes its panel on successful=%s and marks the accepted field", successful => {
@@ -490,51 +428,190 @@ test.each([true, false])("timeseries Save closes its panel on successful=%s and 
     expect(acceptedForm.querySelector("[data-simplified-save-status]").textContent).toBe(successful ? "Saved" : "Not saved");
 });
 
-test.each([
+function mutationEvent(name, detail, target = document.body) {
+    target.dispatchEvent(new CustomEvent(name, {bubbles: true, detail}));
+}
+function startMutation(form) {
+    const xhr = {getResponseHeader: () => null};
+    mutationEvent("htmx:beforeRequest", {xhr, elt: form, requestConfig: {verb: "post"}});
+    return xhr;
+}
+function finishMutation(xhr, successful = true) {
+    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: false});
+    mutationEvent("htmx:afterRequest", {xhr, successful});
+}
+function activate(control) {
+    const event = new MouseEvent("click", {bubbles: true, cancelable: true});
+    control.dispatchEvent(event);
+    return event;
+}
+const EXPORT_FIXTURES = [
     ["simplified_editor", "download-model"],
     ["simplified_editor_workspace", "download-menu-toggle"],
-])("%s exports once on activation and never from a press alone", async (fixture, id) => {
+    ["simplified_editor_workspace", "download-model"],
+    ["simplified_editor_workspace", "download-workspace"],
+];
+
+test.each(EXPORT_FIXTURES)("%s %s leaves a press untouched and never saves on direct activation", (fixture, id) => {
     const form = mountEditor(fixture);
     const input = form.querySelector('input[type="number"]');
     const control = document.getElementById(id);
-    const download = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    const toggle = jest.fn();
-    if (control.matches("button")) control.addEventListener("click", toggle);
     input.focus();
     input.value = "8";
-    control.dispatchEvent(new MouseEvent("mousedown", {button: 2, bubbles: true, cancelable: true}));
     const press = new MouseEvent("mousedown", {button: 0, bubbles: true, cancelable: true});
     control.dispatchEvent(press);
-    expect(press.defaultPrevented).toBe(true);
-    expect(document.activeElement).toBe(input);
+    expect(press.defaultPrevented).toBe(false);
     expect(window.htmx.trigger).not.toHaveBeenCalled();
-    expect(download).not.toHaveBeenCalled();
-    expect(toggle).not.toHaveBeenCalled();
+    expect(activate(control).defaultPrevented).toBe(false);
+    expect(window.htmx.trigger).not.toHaveBeenCalled();
+});
 
-    control.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    expect(download).not.toHaveBeenCalled();
-    expect(toggle).not.toHaveBeenCalled();
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-        detail: {elt: form, successful: true},
-    }));
+test.each(EXPORT_FIXTURES.flatMap(([fixture, id]) => [true, false].map(successful => [fixture, id, successful])))
+("%s %s requires fresh activation after ordinary save settles (successful=%s)", async (fixture, id, successful) => {
+    const form = mountEditor(fixture);
+    const input = form.querySelector('input[type="number"]');
+    const control = document.getElementById(id);
+    const href = control.getAttribute("href");
+    const activated = jest.fn();
+    control.addEventListener("click", activated);
+    const download = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    input.value = "8";
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
+    const xhr = startMutation(form);
+    expect(document.body.dataset.workspaceMutation).toBe("updating");
+    if (control.matches("a")) expect(control.hasAttribute("href")).toBe(false);
+    else expect(control.disabled).toBe(true);
+    expect(activate(control).defaultPrevented).toBe(true);
+    expect(activated).not.toHaveBeenCalled();
+    finishMutation(xhr, successful);
     await Promise.resolve();
-    expect(download).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
-    expect(toggle).toHaveBeenCalledTimes(control.matches("button") ? 1 : 0);
+    expect(download).not.toHaveBeenCalled();
+    expect(activated).not.toHaveBeenCalled();
+    expect(control.getAttribute("href")).toBe(href);
+    expect(activate(control).defaultPrevented).toBe(false);
+    expect(activated).toHaveBeenCalledTimes(1);
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
     download.mockRestore();
 });
 
-test("direct click activation completes the focused-field save before resuming export", () => {
+test("ordinary provenance changes save once and never replay a blocked export", async () => {
     const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    input.focus();
-    input.value = "9";
-    const click = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    document.getElementById("download-model").dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
-    expect(click).not.toHaveBeenCalled();
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-        detail: {elt: form, successful: true},
-    }));
-    expect(click).toHaveBeenCalledTimes(1);
-    click.mockRestore();
+    const comment = form.querySelector('[name$="__comment"]');
+    comment.value = "Updated comment";
+    mutationEvent("simplified-provenance:changed", {}, comment);
+    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
+    mutationEvent("simplified-provenance:changed", {}, comment);
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    const link = document.getElementById("download-model");
+    const activated = jest.fn();
+    link.addEventListener("click", activated);
+    const xhr = startMutation(form);
+    expect(activate(link).defaultPrevented).toBe(true);
+    finishMutation(xhr);
+    await Promise.resolve();
+    expect(activated).not.toHaveBeenCalled();
+    expect(activate(link).defaultPrevented).toBe(false);
+    expect(activated).toHaveBeenCalledTimes(1);
+});
+
+const CONFIGURE_EXPORT_FIXTURES = EXPORT_FIXTURES.map(([fixture, id]) => [
+    fixture === "simplified_editor" ? "simplified_configure_export" : "simplified_configure_workspace", id,
+]);
+test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s exports from clean Configure without reads or exits", (fixture, id) => {
+    const workspace = mount(fixture);
+    const form = workspace.querySelector("[data-configure-form]");
+    form.requestSubmit = jest.fn();
+    const control = document.getElementById(id);
+    const captured = jest.fn();
+    document.addEventListener("click", captured, {capture: true, once: true});
+    expect(activate(control.querySelector("i") || control).defaultPrevented).toBe(false);
+    expect(captured).toHaveBeenCalledTimes(1);
+    expect(form.isConnected).toBe(true);
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
+    expect(form.requestSubmit).not.toHaveBeenCalled();
+    expect(document.querySelector("dialog").showModal).not.toHaveBeenCalled();
+});
+
+test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before document capture and replaces its notice", (fixture, id) => {
+    const workspace = mount(fixture);
+    include("lifespan");
+    const form = workspace.querySelector("form");
+    form.requestSubmit = jest.fn();
+    const control = document.getElementById(id);
+    const captured = jest.fn();
+    document.addEventListener("click", captured, true);
+    try {
+        expect(activate(control.querySelector("i") || control).defaultPrevented).toBe(true);
+        const previousNotice = workspace.querySelector("[data-simplified-notice]");
+        expect(activate(control).defaultPrevented).toBe(true);
+        expect(previousNotice.isConnected).toBe(false);
+        const notices = workspace.querySelectorAll("[data-simplified-notice]");
+        expect(notices).toHaveLength(1);
+        expect(notices[0].getAttribute("role")).toBe("status");
+        expect(notices[0].previousElementSibling).toBe(workspace.querySelector(".simplified-header"));
+        expect(notices[0].textContent).toBe("Save or discard Configure changes before exporting.");
+        expect(captured).not.toHaveBeenCalled();
+        expect(window.htmx.ajax).not.toHaveBeenCalled();
+        expect(form.requestSubmit).not.toHaveBeenCalled();
+        expect(document.querySelector("dialog").showModal).not.toHaveBeenCalled();
+        expect(form.dataset.dirty).toBe("true");
+    } finally {
+        document.removeEventListener("click", captured, true);
+    }
+});
+
+test.each(["save", "discard", "failed save"])("%s resolves Configure explicitly without continuing an export", async resolution => {
+    const workspace = mount("simplified_configure_workspace");
+    include("lifespan");
+    const form = workspace.querySelector("form");
+    const control = document.getElementById("download-menu-toggle");
+    const activated = jest.fn();
+    control.addEventListener("click", activated);
+    const replaceWorkspace = () => {
+        const template = document.createElement("template");
+        template.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_saved.html"), "utf8");
+        workspace.replaceWith(template.content.querySelector("[data-simplified-workspace]"));
+    };
+    expect(activate(control).defaultPrevented).toBe(true);
+    if (resolution === "discard") {
+        document.querySelector('[data-action="simplified-cancel"]').click();
+        expect(document.querySelector("dialog").showModal).toHaveBeenCalledTimes(1);
+        document.querySelector('[data-action="simplified-exit-discard"]').click();
+        const target = document.querySelector("[data-simplified-target]");
+        const xhr = {};
+        mutationEvent("htmx:beforeRequest", {elt: target, xhr}, target);
+        replaceWorkspace();
+        mutationEvent("htmx:afterSettle", {xhr}, target);
+    } else {
+        const save = form.querySelector('button[type="submit"]');
+        form.requestSubmit = jest.fn();
+        expect(activate(save).defaultPrevented).toBe(false);
+        const xhr = startMutation(form);
+        if (resolution === "save") replaceWorkspace();
+        finishMutation(xhr, resolution === "save");
+    }
+    await Promise.resolve();
+    expect(activated).not.toHaveBeenCalled();
+    if (resolution === "failed save") {
+        expect(form.dataset.dirty).toBe("true");
+        expect(workspace.querySelector("[data-simplified-notice]")).not.toBeNull();
+        expect(activate(control).defaultPrevented).toBe(true);
+    } else {
+        expect(workspace.isConnected).toBe(false);
+        expect(document.querySelector("[data-simplified-notice]")).toBeNull();
+        expect(activate(control).defaultPrevented).toBe(false);
+        expect(activated).toHaveBeenCalledTimes(1);
+    }
+});
+
+test("clean Configure export does not cancel a pending saved-view read", () => {
+    mount("simplified_configure_export");
+    deferExit(() => {});
+    const target = document.querySelector("[data-simplified-target]");
+    const xhr = {abort: jest.fn()};
+    mutationEvent("htmx:beforeRequest", {elt: target, xhr}, target);
+    expect(activate(document.getElementById("download-model")).defaultPrevented).toBe(false);
+    expect(xhr.abort).not.toHaveBeenCalled();
+    mutationEvent("htmx:afterRequest", {xhr, successful: false}, target);
 });
