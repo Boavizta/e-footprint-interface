@@ -51,7 +51,8 @@ right-click for a diff against main. Select a reading step to highlight its file
 <div id="change-tree">
 <details open><summary>theme/static/scripts/</summary><ul>
   <li id="file-main" data-steps="gate cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span><small>Replace comprehensive locking with a central mutation gate. <a href="#gate">1</a> · <a href="#cancel">2</a></small></li>
-  <li id="file-simple" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js"><code>simplified_inputs/index.js</code></a> <span data-change="modified">Modified</span><small>Remove focused-export interception if still present; preserve Configure exits and busy-export admission. <a href="#reads-export">3</a></small></li>
+  <li id="file-simple" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js"><code>simplified_inputs/index.js</code></a> <span data-change="modified">Modified</span><small>Remove all export continuation if still present; block dirty Configure exports and busy exports. <a href="#reads-export">3</a></small></li>
+  <li id="file-simple-workspace" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js"><code>simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified if needed</span><small>Exclude exports from Configure exit interception; preserve other navigation continuations.</small></li>
   <li id="file-fields" data-steps="cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js"><code>simplified_inputs/field_edits.js</code></a> <span data-change="modified">Modified</span><small>Reset canceled saves and show Not saved; remove focused-export completion and pending continuation if still present. <a href="#cancel">2</a> · <a href="#reads-export">3</a></small></li>
   <li id="file-source" data-steps="cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js" data-review-source-href="../../../theme/static/scripts/source_metadata.js"><code>source_metadata.js</code></a> <span data-change="modified">Modified</span><small>Route provenance completion and confidence writes through visible cancellation feedback. <a href="#cancel">2</a></small></li>
   <li id="file-sankey" data-steps="gate cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js" data-review-source-href="../../../theme/static/scripts/sankey.js"><code>sankey.js</code></a> <span data-change="modified">Modified if needed</span><small>Reuse the existing fetch bridge; reject before optimistic removal. <a href="#gate">1</a></small></li>
@@ -157,7 +158,7 @@ mark a different canceled editor Saved or clear its Not saved status.</p>
 <section id="reads-export" data-step>
 <h2>3. Read, navigate and export</h2>
 <p>Keep harmless reads and previews available. Model switching, imports, reset and destructive actions
-remain workspace writes and receive cancellation feedback while busy. Existing Configure exit confirmation
+remain workspace writes and receive cancellation feedback while busy. Existing non-export Configure exit confirmation
 and ordinary side-panel dirty-form handling remain owned by their current flows.</p>
 <p>Allowing edits during a write changes the assumptions around
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:45:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L45:1">workspace reads</a>,
@@ -169,16 +170,23 @@ promise draft durability across replacing that editor.</p>
 <p>Keep a narrow check for <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:31:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L31:1">export activation</a>.
 Ordinary download anchors bypass HTMX/fetch interception, so their busy behavior needs an explicit hook.
 While a write is active, single-model and whole-workspace exports receive busy feedback and do not download.
-Once the write settles, only a fresh activation exports the accepted saved state. Outside Configure, opening
+Once the write settles, only a fresh activation exports the accepted saved state. Opening
 the two-model menu must not retain an activation or schedule a later menu opening or download.</p>
 <p>Apply the agreed <a href="../simplified-input-export-simplification/plan.html#activation">export-simplification approach</a>:
 remove the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1">focused-field completion</a>,
 pending export and successful-save continuation, together with the export-specific mouse-press interception
 and invalid-edit blocking. Ordinary focusout autosave remains; validate its ordering against the narrow export
 check in the real browser. If no write is active, a browser-invalid draft can coexist with export of the
-previous saved state without an export-specific validation warning. Server rejection retains error feedback
-and accepted-field restoration, with no download on settlement. Preserve Configure's exit guard and its
-continuation, plus exports of saved values from unfinished Modeling and timeseries panels.</p>
+previous saved state without an export-specific validation warning. Inline server rejection retains error feedback
+and accepted-field restoration, with no download on settlement.</p>
+<p>Apply the <a href="../simplified-input-export-simplification/plan.html#configure">Configure export extension</a>
+as well: remove <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:13:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L13:1"><code>continueExport()</code></a>
+entirely and exclude exports from the generic Configure exit interception. Dirty Configure blocks export
+with feedback to save or discard through existing controls, without opening the exit dialog or retaining
+the export request. Saving or discarding never downloads or opens the menu; a fresh activation is required.
+A rejected Configure save retains its draft and keeps export blocked while dirty. Clean Configure with no
+active write exports directly without leaving the screen. Preserve Configure's exit guard and navigation
+continuations for other actions, plus saved-value exports from unfinished Modeling and timeseries panels.</p>
 <p>Recheck native new-tab/context-menu activation against the
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html">toolbar links</a>;
 scope any destination suppression to export controls only.</p>
@@ -186,7 +194,8 @@ scope any destination suppression to export controls only.</p>
 <a href="../simplified-input-export-simplification/plan.html">export simplification</a> now agree on the behavior.
 Planning must coordinate the overlapping changes once against the current checkout. If export simplification
 lands first, retain its saved-state behavior when replacing the shared guard. If the mutation gate lands first,
-apply the agreed removal with its narrow export check; do not preserve or reintroduce focused-export continuation.</aside>
+apply the agreed removal with its narrow export check; do not preserve or reintroduce inline-edit or
+Configure export continuation.</aside>
 <p>The remaining <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/show_results_toolbar_button.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/components/show_results_toolbar_button.html#L10:1">global button disabling on Results reads</a>
 can still conflict with a request-only policy. Planning must compare retaining the small pre-existing
 disabled-button restoration helper with narrowing the broad disabling attributes in affected templates.
@@ -204,12 +213,14 @@ not an implementation task list.</p>
   <tr><td>Overlapping writes</td><td>The second write never reaches the server and never runs after the first completes; both same-element HTMX and fetch entry points are covered.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js">model_builder_main.test.js</a></td></tr>
   <tr><td>Canceled autosave</td><td>The attempted value remains in its surviving editor, is marked Not saved, and can be manually resubmitted without changing it again; unrelated success does not mark it saved.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">simplified_inputs.test.js</a>; extend relevant source/bookmark tests only where changed.</td></tr>
   <tr><td>Lifecycle and reads</td><td>Success, 422/500, abort and transport failure release the matching write; concurrent reads and previews neither block nor release it. Existing disabled prerequisites survive.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js">model_builder_main.test.js</a></td></tr>
-  <tr><td>Saved-state export</td><td>Mouse and keyboard activation block single-model and workspace downloads during a write, with no download or deferred menu opening on settlement; a fresh activation exports saved values. A browser-invalid edit does not block export when idle. Configure exit protection remains.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">simplified_inputs.test.js</a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">test_simplified_inputs.py</a>; coordinate with export simplification.</td></tr>
+  <tr><td>Saved-state export</td><td>Mouse and keyboard activation block single-model and workspace downloads during a write or dirty Configure, with no download or deferred menu opening after saving or discarding; a fresh activation exports saved values. A browser-invalid inline edit does not block export when idle. Clean Configure exports stay on that screen; other Configure exits retain protection.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">simplified_inputs.test.js</a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">test_simplified_inputs.py</a>; coordinate with export simplification.</td></tr>
   <tr><td>Actual browser interaction</td><td>Delay A's save, complete B, observe one cancellation and no B request; finish A and manually save B. Include export-busy behavior and existing error restoration without page reload.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:627:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L627:1">simplified-input autosave E2E</a>; retain existing export and model-switch regressions.</td></tr>
 </tbody></table></div>
 <p>Replace tests whose blanket-lock and focused-export continuation expectations are intentionally obsolete.
 Adapt focused-edit export regressions to ordinary autosave, saved-state downloads and fresh activation after
-a blocked click. Keep tests of accepted-field restoration, Configure exits, bookmarks and genuine domain constraints. Application tests
+a blocked click. Adapt Configure export regressions to dirty blocking, clean export without leaving the screen,
+and no continuation after saving or discarding. Keep tests of accepted-field restoration, other Configure exits,
+bookmarks and genuine domain constraints. Application tests
 above are planned, not executed in this specification pass.</p>
 <p>When implementing, update the candidate architecture pages, the original simplified-inputs requirement
 and review guide, and the changelog together. Existing AGENTS.md routes to those pages; suggest a one-line

@@ -49,8 +49,11 @@ The goal is a smaller, understandable implementation with predictable behavior w
   <li>Single-model and whole-workspace exports are blocked during an active write, with busy feedback;
   the user activates Export again afterward. In ordinary Simplified-input editing, Export uses the accepted
   saved state without forcing a focused edit to save, retaining the export request or resuming it after a save.
-  Ordinary autosave on edit completion still applies. When no write is active, a browser-invalid edit remains
+  Ordinary autosave on edit completion still applies. When no write is active, a browser-invalid inline edit remains
   unsaved and Export may download the previous saved state without an export-specific validation warning.
+  Unsaved Configure changes also block Export: the user saves or discards through existing controls,
+  then activates Export again. Resolving the draft never downloads a file or opens the menu. Clean
+  Configure exports work directly without leaving that screen.
   Mouse and keyboard activation, including the two-model export menu, use this same policy.</li>
   <li>Success, rejection and transport failure all release the active-operation state. A later action works
   normally, and a concurrent read cannot release another operation's gate.</li>
@@ -66,8 +69,10 @@ settings/deletion. Read-only actions and stateless previews do not occupy the wr
 An overlap is a busy-workspace cancellation, not a server validation error.</p>
 <p>Exports use the saved-state policy in
 <a href="../simplified-input-export-simplification/spec.html">Simplified-input export simplification</a>.
-Server-rejected saves retain their error feedback and accepted-field restoration; settlement never triggers
-an ordinary export. Configure keeps Save / Discard / Stay, and unfinished Modeling or timeseries panels
+Server-rejected inline saves retain their error feedback and accepted-field restoration; settlement never triggers
+an export. Configure keeps Save / Discard / Stay for other exits; Export does not open that dialog or
+retain an exit continuation. Failed Configure saves retain their drafts, keeping Export blocked while dirty.
+Unfinished Modeling or timeseries panels
 continue to export saved values.</p>
 <p>Queueing, automatic retries, background resubmission, a new draft store, generic request middleware,
 cross-tab coordination and backend persistence redesign are outside this feature. No durability is promised
@@ -112,7 +117,7 @@ validation, calculations, HTTP error handling and existing domain constraints.</
 structural actions and view/model navigation while saving. It retains one active write and removes automatic
 queueing from consideration. Together with
 <a href="../simplified-input-export-simplification/spec.html">export simplification</a>, it also replaces
-focused-field save-before-export, automatic export continuation and export-specific invalid-edit blocking
+focused-field save-before-export, automatic export continuation (including Configure) and export-specific invalid-edit blocking
 with the agreed saved-state policy. The original Simplified-input requirements must be reconciled when
 these features are implemented.</blockquote>
 <p>The feature stays within the <a href="../../mission.md">mission</a> and

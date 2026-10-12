@@ -31,6 +31,9 @@
   after a successful save. This adds browser coordination for a convenience that the user considers
   unnecessary. People exporting a model can wait for its ordinary autosave to finish and activate
   Export again if their first activation was blocked.</p>
+  <p>Configure also postpones Export through its Save / Discard / Stay exit flow. The same
+  simplification applies there: block Export while configuration changes are unsaved, let the user
+  resolve them through the existing controls, and require a fresh Export activation afterward.</p>
   <p>The goal is to simplify this behavior while preserving normal saves, error feedback and reliable
   exports of the saved model.</p>
 </section>
@@ -38,20 +41,27 @@
 <section id="success">
   <h2>2. Success criteria</h2>
   <ol>
-    <li>In ordinary Simplified-input editing, Export downloads the model's accepted saved state. It does not force a focused edit to save,
-    retain an export request, or resume a blocked export when a save finishes.</li>
+    <li>Export downloads the model's accepted saved state. It does not force a focused edit or
+    Configure draft to save, retain an export request, or resume a blocked export after saving or discarding.</li>
     <li>Leaving a valid changed inline value or provenance control still triggers its ordinary autosave.
     If that save is running when Export is activated, no file downloads. After the save completes,
     a fresh activation works. If the save has already completed, Export may work on the first click.</li>
     <li>During an active workspace write, single-model and whole-workspace exports remain unavailable.
     The existing saving feedback remains; no extra export confirmation or recovery control is introduced.</li>
-    <li>A server-rejected save still shows its error and restores accepted fields. It never triggers
+    <li>A server-rejected inline save still shows its error and restores accepted fields. It never triggers
     a download on completion. After dismissing the error, a fresh activation exports the accepted state.</li>
-    <li>A browser-invalid edit remains unsaved. When no write is active, Export may download the previous
+    <li>A browser-invalid inline edit remains unsaved. When no write is active, Export may download the previous
     saved state without an export-specific validation warning. It does not save the invalid edit.</li>
-    <li>Mouse and keyboard activation use the same saved-state policy. Outside Configure, opening the two-model export menu
-    does not schedule a later menu opening or download. Existing Configure exit protection and exports
-    of saved values from unfinished Modeling or timeseries panels continue to work.</li>
+    <li>While Configure has unsaved changes, single-model and whole-workspace exports are blocked,
+    with concise feedback to save or discard first. Export does not open Save / Discard / Stay or leave
+    Configure. Saving or discarding through the existing controls never triggers a download or opens
+    the export menu; the user activates Export again. A failed Configure save retains its draft and
+    error feedback, and Export stays blocked while the draft is unsaved.</li>
+    <li>With a clean Configure form and no active write, Export works directly from Configure without
+    leaving that screen. Save / Discard / Stay remains unchanged for other Configure exits.</li>
+    <li>Mouse and keyboard activation use the same saved-state policy. Opening the two-model export
+    menu does not schedule a later menu opening or download, including from Configure. Exports of
+    saved values from unfinished Modeling or timeseries panels continue to work.</li>
   </ol>
 </section>
 
@@ -59,12 +69,12 @@
   <h2>3. Scope</h2>
   <details open><summary>In scope</summary>
     <p>Simplified-input inline value/provenance edits followed by the ordinary single-model or
-    whole-workspace Export action; repeated activation after a save; saved-state export after
-    browser validation failure or server rejection.</p>
+    whole-workspace Export action; Configure export with clean or unsaved configuration; repeated
+    activation after saving or discarding; saved-state export after browser validation failure or server rejection.</p>
   </details>
   <details><summary>Out of scope</summary>
     <p>Redesigning the shared workspace write policy, autosave, validation, accepted-field restoration,
-    Configure exits, file formats or server persistence. No new export queue, automatic retry,
+    other Configure exits, file formats or server persistence. No new export queue, automatic retry,
     unsaved-export dialog or UI control.</p>
   </details>
 </section>
@@ -100,6 +110,33 @@
     <figcaption>Illustrative mouse flow when autosave is still running at activation. An additional
     click is acceptable; it is not required when no save is in progress.</figcaption>
   </figure>
+  <figure>
+    <svg viewBox="0 0 780 145" role="img" aria-labelledby="configure-flow-title configure-flow-desc">
+      <title id="configure-flow-title">Resolve Configure changes, then activate Export again</title>
+      <desc id="configure-flow-desc">Export is blocked while Configure has unsaved changes.
+      The user saves or discards through existing controls. No export follows that action.
+      A fresh Export activation downloads the saved model. A clean Configure screen can export directly.</desc>
+      <g font-family="system-ui, sans-serif" font-size="15" fill="#21312f">
+        <rect x="10" y="10" width="235" height="100" rx="8" fill="#fff5e5" stroke="#d6b77d"/>
+        <text x="25" y="36">Configure: unsaved changes</text>
+        <text x="25" y="64">Export blocked</text>
+        <text x="25" y="92">Save or discard first</text>
+        <path d="M 250 60 H 271" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="280" y="10" width="205" height="100" rx="8" fill="#f5f7f3" stroke="#dbe4df"/>
+        <text x="295" y="36">Resolve the draft</text>
+        <text x="295" y="64">Use existing controls</text>
+        <text x="295" y="92">No automatic export</text>
+        <path d="M 490 60 H 511" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="520" y="10" width="250" height="100" rx="8" fill="#eaf3ed" stroke="#b5d3c2"/>
+        <text x="535" y="36">Click Export again</text>
+        <text x="535" y="64">Download saved model</text>
+        <text x="535" y="92">No queued menu opening</text>
+        <text x="10" y="136">Clean Configure: Export works directly and leaves Configure open.</text>
+      </g>
+    </svg>
+    <figcaption>Configure exports require a fresh activation after saving or discarding. Other
+    navigation retains the existing Save / Discard / Stay protection.</figcaption>
+  </figure>
 </section>
 
 <section id="constraints">
@@ -111,16 +148,19 @@
   <a href="../../architecture/rendering.html">Rendering</a>.</p>
   <blockquote>This intentionally replaces the original Simplified-input requirement to finish
   a focused edit before export, resume export after saving, and cancel export for a browser-invalid edit.
+  It also replaces Configure's deferred export with blocking while dirty and a fresh activation after
+  saving or discarding; clean Configure exports no longer leave the screen.
   The <a href="../simple-workspace-mutation-gate/spec.html">workspace mutation-gate spec</a>
   uses the same saved-state export policy defined here. Both features retain one active workspace
-  write and block exports during that write; Configure keeps its existing exit protection.</blockquote>
+  write and block exports during that write; other Configure exits keep their existing protection.</blockquote>
 </section>
 
 <section id="questions">
   <h2>6. Open questions</h2>
   <p>No product decision remains from the kickoff. Requiring another activation after a blocked
-  click and allowing export of the previous saved state while an edit is invalid are accepted
-  tradeoffs. Planning must verify the ordinary focus/save ordering against the current checkout.</p>
+  click, including after resolving a Configure draft, and allowing export of the previous saved state
+  while an inline edit is invalid are accepted tradeoffs. Planning must verify ordinary focus/save
+  ordering and use an existing feedback surface for dirty Configure export blocking.</p>
 </section>
 
 <section id="resume">
