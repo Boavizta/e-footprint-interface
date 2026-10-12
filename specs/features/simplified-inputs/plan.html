@@ -1151,9 +1151,62 @@ persist once</code></pre></div></div>
     Remember only the last base view by System ID; do not add scroll, expansion or filter restoration.
     Apply simplified-versus-modeling opening defaults only when importing JSON, not on every tab switch.</p>
     <h4 id="exports">2 · Download through the normal toolbar</h4>
-    <p>If Download is activated while a simplified input has an uncommitted edit,
-    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js"><code>../theme/static/scripts/simplified_inputs/field_edits.js</code></a> saves that field first and downloads only
-    after the save succeeds. A rejected save cancels that download click and restores accepted fields, so a later click can export them without recovery controls. Native browser validation also cancels the click while the field is invalid. Export controls are otherwise disabled during a mutation.</p>
+    <p>Download completes the currently focused Simplified-input editor before exporting saved state.
+    The toolbar's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:134:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L134:1"><code>data-workspace-export</code> controls</a>
+    cover the single-model link, the two-model dropdown toggle and both download entries. The flow is:</p>
+    <ol>
+      <li><strong>Intercept activation before navigation or dropdown opening.</strong>
+      The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:22:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L22:1"><code>mousedown</code> handler in <code>index.js</code></a>
+      prevents a primary mouse press from blurring the editor: otherwise its autosave would disable Download before the click.
+      Pressing alone never saves or exports. The following <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:31:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L31:1">window-capture <code>click</code> handler</a>
+      calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1"><code>completeFocusedEditForExport()</code></a> before Bootstrap handles the dropdown, and cancels the original
+      click with <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:35:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L35:1"><code>preventDefault()</code></a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:36:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L36:1"><code>stopImmediatePropagation()</code></a> when completion must wait or is invalid.</li>
+      <li><strong>Validate and save the focused field once.</strong>
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1"><code>completeFocusedEditForExport()</code> in <code>field_edits.js</code></a>
+      finds <code>document.activeElement</code>'s <code>[data-simplified-editor]</code> form, runs <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:21:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L21:1"><code>reportValidity()</code></a>,
+      remembers the activated export control in <code>pendingExport</code>, then calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:28:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L28:1"><code>focused.blur()</code></a> so source controls finish
+      writing their hidden values. It calls
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:37:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L37:1"><code>saveEdit()</code></a>,
+      which compares <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:34:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L34:1"><code>editSnapshot(form)</code></a> with its <code>savedEdits</code> snapshot, suppresses duplicate saves, marks it
+      <code>data-saving="true"</code> and triggers <code>simplified-save</code>.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1"><code>simplified_inputs/editor.html</code></a>
+      maps that event to the field's HTMX POST. If there is no focused editor or its values are unchanged, no save starts
+      and the original export click proceeds normally.</li>
+      <li><strong>Wait for the response and its DOM replacements to settle.</strong>
+      The shared mutation guard in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:392:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L392:1"><code>lockControls()</code> in <code>model_builder_main.js</code></a>
+      disables editing and export controls during the POST, temporarily removing guarded links' <code>href</code>.
+      Its <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:490:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L490:1">request/settlement handlers</a>
+      wait for the request and response swaps; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:423:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L423:1"><code>finish(successful)</code></a>
+      restores controls and link destinations before emitting <code>workspace-mutation:finished</code>.</li>
+      <li><strong>Continue only on success; discard the continuation on rejection.</strong>
+      The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:122:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L122:1">export settlement listener in <code>field_edits.js</code></a>
+      takes and clears <code>pendingExport</code> on every completion, calling <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:13:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L13:1"><code>continueExport(element)</code></a> only when
+      <code>event.detail.successful</code> is true.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:13:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L13:1"><code>continueExport()</code> in <code>index.js</code></a>
+      activates a download anchor in the current browsing context, or calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:118:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L118:1"><code>replayClick()</code></a> on the dropdown button so the user can choose
+      a file. A rejected save never replays that activation.</li>
+      <li><strong>Restore accepted fields so a later click can export normally.</strong>
+      Restoration is server-owned:
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code> in <code>views_simplified_inputs.py</code></a>
+      returns the error modal plus accepted-field OOB fragments built from a fresh active-repository read through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:40:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L40:1"><code>render_input_fields_oob()</code></a>.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:75:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L75:1"><code>edit_simplified_input()</code></a>
+      restores the selected field on validation rejection, or all <code>output.changed_fields</code> after a late presentation
+      failure. The client's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:104:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L104:1">first settlement listener</a>
+      calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:48:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L48:1"><code>initializeEdits()</code></a> to record the replacement forms' accepted snapshots after unlock and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:11:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L11:1"><code>setSaveStatus()</code></a> to mark the restored editor “Not saved”.
+      After dismissing the error modal, a later Download click exports the repository's accepted state without Retry/Discard
+      controls or another save of unchanged values. A late failure can occur after persistence, so accepted state means the
+      fresh repository state, not necessarily the value from before the attempted save.</li>
+    </ol>
+    <p><strong>Native validation:</strong> if <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:21:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L21:1"><code>reportValidity()</code></a> fails, completion clears <code>pendingExport</code>,
+    marks the editor “Not saved” and cancels the click without sending a POST. The invalid value remains for correction;
+    accepted-field restoration applies to server-rejected saves. The
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:802:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L802:1">focused-edit export E2E test</a>
+    covers final value/provenance persistence, rejection without download, a later accepted-state download, and cancellation
+    by native validation; the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:905:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L905:1">activation E2E test</a>
+    covers abandoned presses and one save per completed activation.</p>
     <p>Direct links and menus share this guard. Failed simplified autosaves restore accepted values,
     so a later export can proceed without an edit-recovery action. Configure uses its Save / Discard / Stay exit guard.
     Ordinary Modeling panels have no unsaved-export warning; retain the existing behavior.

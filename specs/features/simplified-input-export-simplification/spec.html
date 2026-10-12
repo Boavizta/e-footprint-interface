@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simplified-input export simplification — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+    max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; line-height: 1.25; }
+  h2 { margin-top: 1.8rem; font-size: 1.25rem; }
+  a { color: #176751; text-underline-offset: .18em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  figure { margin: 1rem 0; border: 1px solid #dbe4df; border-radius: 8px; padding: .8rem; }
+  svg { display: block; width: 100%; height: auto; }
+  figcaption, header p { color: #555; font-size: .9rem; }
+  blockquote { border-left: 3px solid #c69b53; margin: 1rem 0; padding: .3rem 1rem; background: #fff5e5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simplified-input export simplification</h1>
+  <p>Status: Spec — under review · 2026-10-12</p>
+  <p>Small follow-up to Simplified inputs · <a href="plan.html">Kickoff draft plan</a></p>
+</header>
+
+<section id="problem">
+  <h2>1. Problem and audience</h2>
+  <p>Export currently completes a focused Simplified-input edit and resumes the export automatically
+  after a successful save. This adds browser coordination for a convenience that the user considers
+  unnecessary. People exporting a model can wait for its ordinary autosave to finish and activate
+  Export again if their first activation was blocked.</p>
+  <p>The goal is to simplify this behavior while preserving normal saves, error feedback and reliable
+  exports of the saved model.</p>
+</section>
+
+<section id="success">
+  <h2>2. Success criteria</h2>
+  <ol>
+    <li>In ordinary Simplified-input editing, Export downloads the model's accepted saved state. It does not force a focused edit to save,
+    retain an export request, or resume a blocked export when a save finishes.</li>
+    <li>Leaving a valid changed inline value or provenance control still triggers its ordinary autosave.
+    If that save is running when Export is activated, no file downloads. After the save completes,
+    a fresh activation works. If the save has already completed, Export may work on the first click.</li>
+    <li>During an active workspace write, single-model and whole-workspace exports remain unavailable.
+    The existing saving feedback remains; no extra export confirmation or recovery control is introduced.</li>
+    <li>A server-rejected save still shows its error and restores accepted fields. It never triggers
+    a download on completion. After dismissing the error, a fresh activation exports the accepted state.</li>
+    <li>A browser-invalid edit remains unsaved. When no write is active, Export may download the previous
+    saved state without an export-specific validation warning. It does not save the invalid edit.</li>
+    <li>Mouse and keyboard activation use the same saved-state policy. Outside Configure, opening the two-model export menu
+    does not schedule a later menu opening or download. Existing Configure exit protection and exports
+    of saved values from unfinished Modeling or timeseries panels continue to work.</li>
+  </ol>
+</section>
+
+<section id="scope">
+  <h2>3. Scope</h2>
+  <details open><summary>In scope</summary>
+    <p>Simplified-input inline value/provenance edits followed by the ordinary single-model or
+    whole-workspace Export action; repeated activation after a save; saved-state export after
+    browser validation failure or server rejection.</p>
+  </details>
+  <details><summary>Out of scope</summary>
+    <p>Redesigning the shared workspace write policy, autosave, validation, accepted-field restoration,
+    Configure exits, file formats or server persistence. No new export queue, automatic retry,
+    unsaved-export dialog or UI control.</p>
+  </details>
+</section>
+
+<section id="experience">
+  <h2>4. UX / interface</h2>
+  <figure>
+    <svg viewBox="0 0 780 205" role="img" aria-labelledby="flow-title flow-desc">
+      <title id="flow-title">Save finishes, then the user activates Export again</title>
+      <desc id="flow-desc">A lifespan changes from 8 to 9. Pressing Export leaves the field and
+      starts saving. While saving, export is blocked. Saving finishes without a download.
+      The user clicks Export again and downloads the saved value 9.</desc>
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5e706e"/></marker></defs>
+      <g font-family="system-ui, sans-serif" font-size="15" fill="#21312f">
+        <rect x="10" y="18" width="235" height="112" rx="8" fill="#eaf3ed" stroke="#b5d3c2"/>
+        <text x="25" y="45">Edit lifespan: 8 → 9</text>
+        <text x="25" y="75">Press Export → Saving…</text>
+        <text x="25" y="105">Export blocked while busy</text>
+        <path d="M 250 73 H 271" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="280" y="18" width="205" height="112" rx="8" fill="#f5f7f3" stroke="#dbe4df"/>
+        <text x="295" y="45">Lifespan: 9 · Saved</text>
+        <text x="295" y="75">Export available again</text>
+        <text x="295" y="105">No automatic download</text>
+        <path d="M 490 73 H 511" stroke="#5e706e" stroke-width="2" marker-end="url(#arrow)"/>
+        <rect x="520" y="18" width="250" height="112" rx="8" fill="#eaf3ed" stroke="#b5d3c2"/>
+        <text x="535" y="45">Click Export again</text>
+        <text x="535" y="75">Download saved model</text>
+        <text x="535" y="105">File contains lifespan: 9</text>
+        <text x="10" y="163">Invalid edit: no save starts → Export can download the previous saved value.</text>
+        <text x="10" y="190">Rejected save: accepted field returns → dismiss error → activate Export again.</text>
+      </g>
+    </svg>
+    <figcaption>Illustrative mouse flow when autosave is still running at activation. An additional
+    click is acceptable; it is not required when no save is in progress.</figcaption>
+  </figure>
+</section>
+
+<section id="constraints">
+  <h2>5. Constraints</h2>
+  <p>Stay within the <a href="../../mission.md">mission</a> and
+  <a href="../../constitution.md">constitution</a>, particularly minimal browser JavaScript.
+  Preserve the existing write guard and accepted-state ownership described in
+  <a href="../../architecture/persistence.html">Persistence</a> and
+  <a href="../../architecture/rendering.html">Rendering</a>.</p>
+  <blockquote>This intentionally replaces the original Simplified-input requirement to finish
+  a focused edit before export and cancel export for a browser-invalid edit. The separate
+  <a href="../simple-workspace-mutation-gate/spec.html">workspace mutation-gate spec</a> currently
+  retains that behavior; its export requirement must be reconciled when this change is planned.</blockquote>
+</section>
+
+<section id="questions">
+  <h2>6. Open questions</h2>
+  <p>No product decision remains from the kickoff. Requiring another activation after a blocked
+  click and allowing export of the previous saved state while an edit is invalid are accepted
+  tradeoffs. Planning must verify the ordinary focus/save ordering against the current checkout.</p>
+</section>
+
+<section id="resume">
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Review this specification and its <a href="plan.html">draft plan</a>.</li>
+    <li>After spec approval, use spec-plan in a fresh session to refine this feature's draft.
+    Reconcile overlapping export requirements; do not generate tasks or implement yet.</li>
+    <li>Start code exploration at the <a href="../../architecture/index.html">architecture router</a>
+    and follow <a href="../../conventions.md">conventions</a>.</li>
+  </ol>
+</section>
+</body>
+</html>
