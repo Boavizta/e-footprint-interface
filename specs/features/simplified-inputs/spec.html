@@ -1534,6 +1534,9 @@
             button.disabled = saving;
             button.title = button.disabled ? 'Wait for the active save to finish before exporting.' : '';
           });
+          mockup.querySelectorAll('[data-export-menu] > summary').forEach(function (summary) {
+            summary.setAttribute('aria-disabled', String(saving));
+          });
           mockup.querySelector('#reopen-current-json').disabled = saving || invalidControls.size > 0;
         }
         mockup.querySelector('#demo-noncomputable').addEventListener('change', renderFootprint);
@@ -1594,7 +1597,7 @@
                 return false;
               });
               if (invalidDependency) {
-                invalidControls.add(control);
+                writeControl(control, previous);
                 status.textContent = 'Not saved.';
                 status.dataset.error = 'true';
                 renderFootprint();
@@ -1883,16 +1886,14 @@
         mockup.querySelectorAll('[data-demo-action]').forEach(function (button) {
           button.addEventListener('click', function () {
             if (button.dataset.demoAction.indexOf('Export ') === 0) {
-              var activeState = snapshot();
-              workspace[activeModel] = activeState;
               var otherModel = activeModel === 'reference' ? 'comparison' : 'reference';
               var states = button.dataset.demoAction === 'Export both modelings'
-                ? [activeState, workspace[otherModel]] : [activeState];
+                ? [modelingValues, workspace[otherModel].values] : [modelingValues];
               var descriptions = states.map(function (state, index) {
                 var model = button.dataset.demoAction === 'Export both modelings'
                   ? (index === 0 ? activeModel : otherModel) : activeModel;
                 var role = model === 'reference' ? 'Reference' : 'Comparison';
-                return role + ' · Video origin lifetime ' + state.values['server-lifetime'] + ' years';
+                return role + ' · Video origin lifetime ' + state['server-lifetime'] + ' years';
               });
               mockup.querySelector('#open-result').textContent = 'Mockup only: Exported accepted saved state — ' +
                 descriptions.join('; ') + '. No file is created.';
@@ -2062,6 +2063,7 @@
             configurationDirty = false;
           }, function () {
             show('simplified');
+            mockup.querySelector('#open-result').textContent = 'Configure changes saved. Activate Export to download accepted state.';
             if (afterSave) afterSave();
           }, false);
         }
@@ -2072,24 +2074,30 @@
           button.addEventListener('click', function () {
             restoreDraft();
             show('simplified');
+            mockup.querySelector('#open-result').textContent = 'Configure changes discarded. Activate Export to download accepted state.';
           });
         });
 
-        // Resolve Configure before another surface can edit the same saved settings.
+        // Block busy exports; resolve Configure before another surface can edit the same saved settings.
         mockup.addEventListener('click', function (event) {
-          if (currentMode !== 'configuration') return;
           var exportAction = event.target.closest('[data-demo-action^="Export"], [data-export-menu] > summary');
           if (exportAction) {
-            if (!configurationDirty) return;
+            if (saving) {
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              return;
+            }
+            if (currentMode !== 'configuration' || !configurationDirty) return;
             event.preventDefault();
             event.stopImmediatePropagation();
             mockup.querySelector('#open-result').textContent =
               'Export blocked: save or discard Configure changes first. This screen stays open.';
             return;
           }
+          if (currentMode !== 'configuration') return;
           var destination = event.target.closest('[data-workspace-model], [data-open-comparison], ' +
             '[data-mode], [data-show-results], [data-open-file], #open-regular-json, #open-simplified-json, ' +
-            '#reopen-current-json, [data-demo-action^="Export"], [data-demo-action^="Remove"], ' +
+            '#reopen-current-json, [data-demo-action^="Remove"], ' +
             '[data-demo-action="Reset to default modeling"], [data-demo-action="Open examples"]');
           if (!destination || destination.disabled || destination.dataset.workspaceModel === activeModel) return;
           if (saving) {
@@ -2117,6 +2125,7 @@
             } else {
               restoreDraft();
               show('simplified');
+              mockup.querySelector('#open-result').textContent = 'Configure changes discarded. Activate Export to download accepted state.';
               destination.click();
             }
           });
