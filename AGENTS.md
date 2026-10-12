@@ -8,7 +8,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 
 1. **[`specs/architecture/index.html`](specs/architecture/index.html)** — the structural map and task router; follow only the relevant detail pages.
 2. **`specs/constitution.md`** — the project's immutable rules. Every change respects them.
-3. **`specs/mission.md`** — what e-footprint-interface is and isn't.
+3. **`specs/mission.md`** — scope, audience, and eco-design priorities for weighing user value against complexity.
 4. The companion library: `../e-footprint/` (or upstream PyPI). The interface assumes familiarity with the library's modeling concepts; when in doubt, read [`../e-footprint/specs/architecture/index.html`](../e-footprint/specs/architecture/index.html).
 
 ## Where things live
