@@ -4,7 +4,7 @@ import json
 import pytest
 from playwright.sync_api import expect
 
-from tests.e2e.utils import click_and_wait_for_htmx
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 def open_simplified(page):
@@ -229,12 +229,16 @@ class TestSimplifiedInputs:
         expect(workspace.locator("[data-configure-form]")).to_have_attribute("data-dirty", "true")
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
         page.get_by_role("button", name="Go back", exact=True).click()
-        downloads = []
+        downloads, requests = [], []
         page.on("download", lambda download: downloads.append(download))
-        page.locator("a[href='download-json/']").click()
-        expect(page.locator("#simplified-exit-dialog")).to_be_visible()
-        page.get_by_role("button", name="Stay", exact=True).click()
-        assert downloads == []
+        page.on("request", lambda request: requests.append(request.url))
+        minimal_complete_model_builder.press_export_control()
+        minimal_complete_model_builder.release_export_control()
+        expect(workspace.locator("[data-simplified-notice]")).to_have_text(
+            "Save or discard Configure changes before exporting.")
+        expect(page.locator("#simplified-exit-dialog")).not_to_be_visible()
+        expect(workspace).to_have_attribute("data-mode", "configure")
+        assert downloads == [] and requests == []
         page.unroute("**/save-simplified-inputs/")
         page.locator('[data-action="simplified-mode"]').click()
         click_and_wait_for_htmx(page, page.get_by_role("button", name="Save", exact=True))
@@ -299,7 +303,15 @@ class TestSimplifiedInputs:
         expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
-        page.locator('#sidePanel #Server_lifespan').fill("7")
+        modeling_value = page.locator('#sidePanel #Server_lifespan')
+        accepted_value = modeling_value.input_value()
+        modeling_value.fill("7")
+        builder.download_active_model(filename)
+        exported = json.loads((tmp_path / "selected.e-f.json").read_text())
+        assert exported["Server"][server_id]["lifespan"]["value"] == float(accepted_value)
+        expect(page.locator("#sidePanel")).to_be_visible()
+        expect(modeling_value).to_have_value("7")
+        expect(page.locator("#unsavedModal")).not_to_be_visible()
         builder.side_panel.submit_and_wait_for_close()
         click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
         expect(workspace.locator('input[type="number"]')).to_have_value("7")
@@ -799,63 +811,90 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
 
 
 @pytest.mark.e2e
-def test_focused_edit_export_waits_for_save_and_rejected_or_invalid_edit_cancels_download(
-        minimal_complete_model_builder, tmp_path):
+@pytest.mark.parametrize("two_models", [False, True])
+def test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_state(
+        minimal_complete_model_builder, tmp_path, two_models):
     builder = minimal_complete_model_builder
     page = builder.page
+    if two_models:
+        builder.add_model_by_duplication()
     workspace = open_configure(page)
     field(workspace, "lifespan").locator("[data-include-input]").check()
     click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
-    value = field(workspace, "lifespan").locator('input[type="number"]')
-    value.fill("8")
-    filename = str(tmp_path / "final-field.e-f.json")
-    builder.download_active_model(filename)
-    data = json.loads((tmp_path / "final-field.e-f.json").read_text())
-    owner_id = field(workspace, "lifespan").get_attribute("data-owner-id")
-    assert data["Storage"][owner_id]["lifespan"]["value"] == 8
     selected = field(workspace, "lifespan")
-    selected.locator('[data-action="open-source-editor"]').click()
-    selected.locator(".source-editor-comment").fill("Export the final metadata too")
-    builder.download_active_model(filename)
-    data = json.loads((tmp_path / "final-field.e-f.json").read_text())
-    assert data["Storage"][owner_id]["lifespan"]["comment"] == "Export the final metadata too"
-    page.route("**/edit-simplified-input/**", reject_simplified_edit)
-    downloads, saves = [], []
+    value = selected.locator('input[type="number"]')
+    owner_id = selected.get_attribute("data-owner-id")
+    filename = tmp_path / "accepted.e-f.json"
+    downloads, saves, pending = [], [], []
     page.on("download", lambda download: downloads.append(download))
     page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
+    page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+
+    for metadata in (False, True):
+        if metadata:
+            selected.locator('[data-action="open-source-editor"]').click()
+            editor = selected.locator(".source-editor-comment")
+            editor.fill("Export the final metadata too")
+        else:
+            editor = value
+            editor.fill("8")
+        save_count, download_count = len(saves), len(downloads)
+        control = builder.press_export_control()
+        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
+        assert len(pending) == 1 and len(saves) == save_count + 1
+        builder.release_export_control()
+        assert len(downloads) == download_count
+        if two_models:
+            expect(control).not_to_have_attribute("aria-expanded", "true")
+        pending.pop().continue_()
+        expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        wait_for_htmx_idle(page)
+        assert len(downloads) == download_count
+        if two_models:
+            expect(control).not_to_have_attribute("aria-expanded", "true")
+        builder.download_active_model(str(filename))
+        data = json.loads(filename.read_text())
+        assert data["Storage"][owner_id]["lifespan"]["value"] == 8
+        if metadata:
+            assert data["Storage"][owner_id]["lifespan"]["comment"] == "Export the final metadata too"
+        assert len(saves) == save_count + 1 and len(downloads) == download_count + 1
+
+    page.unroute("**/edit-simplified-input/**")
+    page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
     value.fill("9")
+    builder.press_export_control()
+    expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
+    builder.release_export_control()
     with page.expect_response("**/edit-simplified-input/**") as response_info:
-        page.locator("#download-model").click()
+        reject_simplified_edit(pending.pop())
     assert response_info.value.status == 422
     expect(selected.locator("[data-simplified-save-status]")).to_have_text("Not saved")
     expect(value).to_have_value("8")
-    expect(selected.locator('input[name$="__comment"]')).to_have_value("Export the final metadata too")
     expect(page.locator("#model-builder-modal")).to_be_visible()
-    assert len(saves) == 1 and downloads == []
+    wait_for_htmx_idle(page)
+    assert len(saves) == 3 and len(downloads) == 2
     page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
-    with page.expect_download() as accepted_download:
-        page.locator("#download-model").click()
-    accepted_download.value.save_as(filename)
-    accepted_data = json.loads((tmp_path / "final-field.e-f.json").read_text())
-    assert accepted_data["Storage"][owner_id]["lifespan"]["value"] == 8
-    assert len(downloads) == 1
+    builder.download_active_model(str(filename))
+    assert json.loads(filename.read_text())["Storage"][owner_id]["lifespan"]["value"] == 8
+
     value.fill("")
-    page.locator("#download-model").click()
+    builder.press_export_control()
+    builder.release_export_control()
     expect(value).to_be_focused()
     assert not value.evaluate("el => el.checkValidity()")
-    assert len(saves) == 1 and len(downloads) == 1
-    value.fill("10")
-    with page.expect_response("**/edit-simplified-input/**"):
-        value.press("Tab")
-    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
-    expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
-    with page.expect_download() as download:
-        page.locator("#download-model").press("Enter")
-    download.value.save_as(filename)
-    builder.import_json_file(filename)
-    expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
-    expect(field(page.locator('[data-simplified-workspace]:visible'), "lifespan").locator('input[type="number"]')).to_have_value("10")
+    assert len(saves) == 3 and len(downloads) == 3
+    # Native validity can consume the first gesture by restoring focus.
+    if two_models:
+        expect(builder.export_control()).to_have_attribute("aria-expanded", "true")
+        with page.expect_download() as accepted_download:
+            page.locator("#download-model").click()
+        accepted_download.value.save_as(str(filename))
+    else:
+        builder.export_control().focus()
+        builder.download_active_model(str(filename))
+    assert json.loads(filename.read_text())["Storage"][owner_id]["lifespan"]["value"] == 8
+    assert len(saves) == 3 and len(downloads) == 4
 
 
 @pytest.mark.e2e
@@ -885,7 +924,12 @@ def test_workspace_export_uses_accepted_state_after_other_model_rejection(
     workspace = open_configure(page)
     field(workspace, "lifespan").locator("[data-include-input]").check()
     click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
-    field(workspace, "lifespan").locator('input[type="number"]').fill("7")
+    later_value = field(workspace, "lifespan").locator('input[type="number"]')
+    later_value.fill("7")
+    with page.expect_response("**/edit-simplified-input/**"):
+        later_value.press("Tab")
+    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
+    wait_for_htmx_idle(page)
     builder.download_active_model(str(tmp_path / "active.e-f.json"))
     expect(page.locator('[data-simplified-target="1"] [data-simplified-save-status]')).to_have_text("Saved")
     page.locator('[data-action="simplified-mode"]').click()
@@ -902,7 +946,9 @@ def test_workspace_export_uses_accepted_state_after_other_model_rejection(
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("two_models", [False, True])
-def test_export_waits_for_activation_and_runs_once(minimal_complete_model_builder, two_models):
+@pytest.mark.parametrize("gesture", ["abandoned", "keyboard"])
+def test_blocked_export_never_replays_and_fresh_native_activation_runs_once(
+        minimal_complete_model_builder, tmp_path, two_models, gesture):
     builder = minimal_complete_model_builder
     page = builder.page
     if two_models:
@@ -910,30 +956,107 @@ def test_export_waits_for_activation_and_runs_once(minimal_complete_model_builde
     workspace = open_configure(page)
     field(workspace, "lifespan").locator("[data-include-input]").check()
     click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
-    value = field(workspace, "lifespan").locator('input[type="number"]')
+    selected = field(workspace, "lifespan")
+    value = selected.locator('input[type="number"]')
     value.fill("8")
-    saves, downloads = [], []
+    saves, downloads, pending = [], [], []
     page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
     page.on("download", lambda download: downloads.append(download))
-    control = builder.press_export_control()
-    expect(value).to_be_focused()
-    assert saves == [] and downloads == []
-    builder.release_export_control(activate=False)
-    assert saves == [] and downloads == []
-
-    builder.press_export_control()
-    expect(value).to_be_focused()
-    assert saves == [] and downloads == []
-    if two_models:
-        builder.release_export_control()
-        expect(control).to_have_attribute("aria-expanded", "true")
-        with page.expect_download():
-            page.locator("#download-workspace").click()
+    page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+    if gesture == "abandoned":
+        builder.press_export_control()
     else:
-        with page.expect_download():
-            builder.release_export_control()
-    expect(field(workspace, "lifespan").locator("[data-simplified-save-status]")).to_have_text("Saved")
+        value.press("Tab")
+    expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
+    assert len(saves) == 1 and len(pending) == 1
+    if gesture == "abandoned":
+        builder.release_export_control(activate=False)
+    else:
+        builder.activate_export_with_keyboard("Space" if two_models else "Enter")
+    assert downloads == []
+    pending.pop().continue_()
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
+    wait_for_htmx_idle(page)
+    assert downloads == []
+    control = builder.export_control()
+    if two_models:
+        expect(control).not_to_have_attribute("aria-expanded", "true")
+        builder.activate_export_with_keyboard("Space")
+        expect(control).to_have_attribute("aria-expanded", "true")
+        with page.expect_download() as download:
+            page.locator("#download-workspace").press("Enter")
+    else:
+        with page.expect_download() as download:
+            builder.activate_export_with_keyboard()
+    filename = tmp_path / "native.e-f.json"
+    download.value.save_as(str(filename))
+    data = json.loads(filename.read_text())
+    active = data["models"][1] if two_models else data
+    owner_id = selected.get_attribute("data-owner-id")
+    assert active["Storage"][owner_id]["lifespan"]["value"] == 8
     assert len(saves) == 1 and len(downloads) == 1
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize("two_models", [False, True])
+@pytest.mark.parametrize("resolution", ["save", "discard"])
+def test_configure_export_blocks_dirty_controls_and_clean_export_stays_open(
+        minimal_complete_model_builder, tmp_path, two_models, resolution):
+    builder = minimal_complete_model_builder
+    page = builder.page
+    if two_models:
+        builder.add_model_by_duplication()
+    workspace = open_configure(page)
+    downloads, requests = [], []
+    page.on("download", lambda download: downloads.append(download))
+    page.on("request", lambda request: requests.append(request.url))
+    builder.download_active_model(str(tmp_path / "clean.e-f.json"))
+    clean_data = json.loads((tmp_path / "clean.e-f.json").read_text())
+    assert clean_data["interface_config"]["simplified_inputs"]["guidance"] == ""
+    if two_models:
+        builder.download_workspace(str(tmp_path / "clean-workspace.e-f.json"))
+        clean_workspace = json.loads((tmp_path / "clean-workspace.e-f.json").read_text())
+        assert len(clean_workspace["models"]) == 2
+        assert all(model["interface_config"]["simplified_inputs"]["guidance"] == ""
+                   for model in clean_workspace["models"])
+    expect(workspace).to_have_attribute("data-mode", "configure")
+    assert not any("simplified-input" in url for url in requests)
+    download_count = len(downloads)
+    requests.clear()
+    # Open a clean menu first so both links remain reachable when the draft becomes dirty.
+    if two_models:
+        builder.activate_export_with_keyboard("Space")
+    workspace.locator('textarea[name="guidance"]').fill("Accepted Configure guidance")
+    selectors = ["#download-model", "#download-workspace"] if two_models else ["#download-model"]
+    for selector in selectors:
+        builder.press_export_control(selector)
+        builder.release_export_control()
+        expect(workspace.locator("[data-simplified-notice]")).to_have_count(1)
+        expect(workspace.locator("[data-simplified-notice]")).to_have_text(
+            "Save or discard Configure changes before exporting.")
+        expect(page.locator("#simplified-exit-dialog")).not_to_be_visible()
+        expect(workspace).to_have_attribute("data-mode", "configure")
+        expect(workspace.locator('textarea[name="guidance"]')).to_have_value("Accepted Configure guidance")
+        assert requests == [] and len(downloads) == download_count
+    if two_models:
+        builder.export_control().press("Escape")
+    builder.activate_export_with_keyboard("Space" if two_models else "Enter")
+    if two_models:
+        expect(builder.export_control()).not_to_have_attribute("aria-expanded", "true")
+    assert requests == [] and len(downloads) == download_count
+    if resolution == "save":
+        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return", exact=True))
+    else:
+        workspace.get_by_role("button", name="Cancel", exact=True).click()
+        click_and_wait_for_htmx(page, page.get_by_role("button", name="Discard", exact=True))
+    expect(workspace).to_have_attribute("data-mode", "simplified")
+    expect(workspace.locator("[data-simplified-notice]")).to_have_count(0)
+    wait_for_htmx_idle(page)
+    assert len(downloads) == download_count
+    builder.download_active_model(str(tmp_path / "resolved.e-f.json"))
+    data = json.loads((tmp_path / "resolved.e-f.json").read_text())
+    guidance = data["interface_config"]["simplified_inputs"]["guidance"]
+    assert guidance == ("Accepted Configure guidance" if resolution == "save" else "")
 
 
 def reject_lifespan_edit(builder):

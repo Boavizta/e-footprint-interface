@@ -442,7 +442,7 @@ class ModelBuilderPage:
         return self
 
     def download_active_model(self, file_path: str):
-        """Download the active model JSON to ``file_path``."""
+        """Download already-accepted active state; callers settle ordinary saves first."""
         download_menu = self.page.locator("#download-menu-toggle")
         if download_menu.count():
             download_menu.click()
@@ -452,17 +452,25 @@ class ModelBuilderPage:
         return self
 
     def download_workspace(self, file_path: str):
-        """Download both models through the shared export menu."""
+        """Download already-accepted models; callers settle ordinary saves first."""
         self.page.locator("#download-menu-toggle").click()
         with self.page.expect_download() as download_info:
             self.page.locator("#download-workspace").click()
         download_info.value.save_as(file_path)
         return self
 
-    def press_export_control(self):
-        """Begin an export gesture without activating the link or menu yet."""
+    def export_control(self):
         toggle = self.page.locator("#download-menu-toggle")
-        control = toggle if toggle.count() else self.page.locator("#download-model")
+        return toggle if toggle.count() else self.page.locator("#download-model")
+
+    def activate_export_with_keyboard(self, key="Enter"):
+        """Send one native key activation without waiting for a disabled control."""
+        self.export_control().press(key)
+        return self
+
+    def press_export_control(self, selector=None):
+        """Begin an export gesture without activating the link or menu yet."""
+        control = self.page.locator(selector) if selector else self.export_control()
         control.hover()
         self.page.mouse.down()
         return control
