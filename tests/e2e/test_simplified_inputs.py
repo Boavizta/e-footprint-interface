@@ -891,8 +891,10 @@ def test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_s
             page.locator("#download-model").click()
         accepted_download.value.save_as(str(filename))
     else:
-        builder.export_control().focus()
-        builder.download_active_model(str(filename))
+        with page.expect_download() as accepted_download:
+            builder.press_export_control()
+            builder.release_export_control()
+        accepted_download.value.save_as(str(filename))
     assert json.loads(filename.read_text())["Storage"][owner_id]["lifespan"]["value"] == 8
     assert len(saves) == 3 and len(downloads) == 4
 
