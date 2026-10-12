@@ -1,13 +1,13 @@
 # Simplified-input export simplification — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: under review · Prepared 2026-10-12 from the current working-tree plan.
+Status: Run A delivered and reviewed; outstanding validation prerequisites below · Authorized by `/feature-implement` on 2026-10-12.
 
 ## Implementation runs
 
 | Run | Delivered milestone | Tasks in execution order | Prerequisites |
 |---|---|---|---|
-| A | Saved-state export with fresh activation after a blocked gesture, verified in the browser and documented | [1](#task-1--replace-export-continuation-with-saved-state-admission) → [2](#task-2--verify-native-activation-and-downloaded-state) → [3](#task-3--reconcile-export-documentation) | Approval of this breakdown; current shared mutation lock. Implement before `simple-workspace-mutation-gate`; its redesign is not a dependency. |
+| A | Saved-state export with fresh activation after a blocked gesture, verified in the browser and documented | [1](#task-1--replace-export-continuation-with-saved-state-admission) → [2](#task-2--verify-native-activation-and-downloaded-state) → [3](#task-3--reconcile-export-documentation) | Implementation authorized; current shared mutation lock. Implement before `simple-workspace-mutation-gate`; its redesign is not a dependency. |
 
 ## Overview
 
@@ -21,7 +21,7 @@ Status: under review · Prepared 2026-10-12 from the current working-tree plan.
 
 Goal: Remove focused-edit and Configure export continuations while preserving ordinary saves and other Configure exits.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-1.md](briefs/task-1.md)
 
@@ -48,7 +48,7 @@ Implementation: standard — the design and ownership are established; integrati
 
 Goal: Prove the Task 1 policy through real focus movement, Bootstrap menus, HTMX responses and downloaded JSON.
 
-Status: under review
+Status: complete; publishable-dependency gate remains outstanding below
 
 Brief: [briefs/task-2.md](briefs/task-2.md)
 
@@ -76,7 +76,7 @@ Implementation: standard — deterministic response holding, physical gestures a
 
 Goal: Replace superseded export promises with the verified saved-state policy and keep the original Simplified-input review guide coherent.
 
-Status: under review
+Status: implementation complete; rendered mockup verification unavailable below
 
 Brief: [briefs/task-3.md](briefs/task-3.md)
 
@@ -99,9 +99,10 @@ Implementation: easy — explicit replacement policy and verified predecessors l
 
 ## Gates and prerequisites
 
-- **Blocks implementation:** task-breakdown approval. Invoking `spec-tasks` authorizes this preparation stage; it does not authorize product implementation. Spec/plan headers still say under/ready for review; this invocation advances decomposition from their current contents without inventing additional persisted decisions.
-- **Blocks implementation verification/feature completion:** a local application using this interface checkout, its rebuilt bundles, configured local database/cache and Playwright browser. Run `npm run build:js:dev`; start `poetry run python manage.py runserver` under the repository's local setup; run focused E2E against `http://localhost:8000`. Prior scoped diagnostics are supporting evidence, not substitutes for these regressions.
-- **Blocks feature completion:** `poetry run pytest tests --ignore=tests/e2e`, `poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000`, and `npm run jest`. Retain file/persistence regression coverage. No library API or Django schema change is planned, so no new migration or library gate is triggered.
+- **Implementation authorized:** `/feature-implement simplified-input-export-simplification` authorizes Run A and its existing spec, plan and task breakdown.
+- **Local verification environment resolved:** this interface checkout runs at `http://localhost:8000` with rebuilt bundles, its configured local database/cache and Playwright browser.
+- **Outstanding full-Python gate:** `tests/test_no_dev_dependency.py::TestNoDevDependency::test_no_active_develop_true_in_pyproject` fails because the pre-existing dependency points to editable `../e-footprint`. Preserve the owner’s dependency edits; restore PyPI deliberately before merge and rerun this guard. Other full-Python checks have no outstanding failure. No full-E2E or Jest gate remains outstanding. No library API or Django schema change is planned, so no migration or library gate is triggered.
 - **Blocks merge to main:** restore a publishable PyPI dependency deliberately, preserving the pre-existing `pyproject.toml`/`poetry.lock` edits until their owner resolves them. Current checkout uses editable `../e-footprint`; do not reset those files as part of this feature. The middleware edit is also pre-existing and outside scope.
 - **Ordering:** complete this run against the current shared lock before implementing `simple-workspace-mutation-gate`. If that lock changes first, re-ground the guard-dependent briefs and checks before implementation.
-- No deployment-only prerequisite or deferred human behavior check is introduced. Preparation verified code pointers; it did not run application tests, build assets or modify shared application state. No plan changes proposed.
+- **Unavailable documentation verification:** browser security policy rejected the local `file://` mockup URL and explicitly prohibited alternate routes or workarounds. HTML/script syntax, links and static behavior review are complete; rendered clean/dirty Configure and save/export mockup interactions remain unverified. This limitation does not apply to the actual application’s completed E2E verification.
+- No deployment-only prerequisite is introduced. No material departure from the approved product plan was required.

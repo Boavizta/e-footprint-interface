@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Codex per-task and global reviews now use GPT-6.1 Sol/high; the paired Astra/Sol shadow-review experiment ended early after one feature by user decision.
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
 - Workspace mutations run one at a time, protecting edits, navigation and exports until the save settles while keeping reading and stateless previews available.
-- Modeling and workspace downloads finish a focused simplified edit and wait for its accepted save; rejected or invalid edits cancel that download activation, while a later export uses accepted values.
+- Modeling and workspace downloads export accepted saved state without completing or replaying edits. Ordinary autosave still blocks export while busy; use a fresh activation after saving. Dirty Configure blocks export with a save-or-discard notice, while clean Configure exports in place.
 - Feature implementation now proceeds through reviews autonomously, records consequential choices in the plan with `IMPL-DECISION` tags, and omits judgement journals, routine-fix inventories and successful-test reports.
 - Task decomposition runs autonomously in one session, writes briefs in dependency order, and presents any plan amendments together in `plan.html` using searchable `PLAN-UPDATE` tags. No plan amendments is a valid outcome.
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.

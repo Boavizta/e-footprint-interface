@@ -21,8 +21,8 @@
 <body>
 <header>
   <h1>Simplified-input export simplification</h1>
-  <p>Status: Spec — under review · 2026-10-12</p>
-  <p>Small follow-up to Simplified inputs · <a href="plan.html">Kickoff draft plan</a></p>
+  <p>Status: Implemented · 2026-10-12 · <a href="tasks.md#gates-and-prerequisites">Outstanding validation prerequisites</a></p>
+  <p>Small follow-up to Simplified inputs · <a href="plan.html">Implementation review guide</a></p>
 </header>
 
 <section id="problem">
@@ -166,10 +166,9 @@
 <section id="resume">
   <h2>7. Resuming from cold context</h2>
   <ol>
-    <li>Review this specification and its <a href="plan.html">draft plan</a>.</li>
-    <li>After spec approval, use spec-plan in a fresh session to refine this feature's draft.
-    Coordinate implementation order with the mutation-gate draft and reconcile the original
-    Simplified-input requirement with this agreed policy; do not generate tasks or implement yet.</li>
+    <li>Review this specification, its <a href="plan.html">implementation review guide</a> and <a href="tasks.md">delivered tasks</a>.</li>
+    <li>Resolve the <a href="tasks.md#gates-and-prerequisites">outstanding validation prerequisites</a> before shipping.
+    The mutation-gate redesign remains a separate feature; preserve this saved-state export policy when implementing it.</li>
     <li>Start code exploration at the <a href="../../architecture/index.html">architecture router</a>
     and follow <a href="../../conventions.md">conventions</a>.</li>
   </ol>
