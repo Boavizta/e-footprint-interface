@@ -170,7 +170,13 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 
 ### HTMX interactions
 
-Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. This handles waiting for the HTTP response — don't write raw Playwright clicks for HTMX flows.
+Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. It resolves submit buttons through their
+owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class,
+swap-settling classes and workspace unlocking. Read clicks retain their response-only wait; unrelated pending reads do not
+block save completion.
+Before clicking it waits only for swapped controls to be processed, so navigation can still cancel a pending read.
+Use `wait_for_htmx_idle()` when the next action requires a complete request cascade, such as Sources export after the initial
+Sankey load. Readiness comes from lifecycle state, not a fixed sleep.
 Side-panel form submissions use `SidePanelPage.submit_and_wait_for_close()`, which waits for newly swapped content to be
 processed before clicking, validates the form response, and waits for HTMX request/settling classes to clear before returning.
 Opening Results also starts descendant Sankey configuration requests; wait for that complete HTMX cascade before the next edit.

@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.
 
 ### Fixed
+- E2E HTMX clicks now wait for form submissions and settled workspace updates; Sources export waits for its restored link, and the dependent-selector flow expands the accepted view after Configure saves.
 - Rejected Simplified-input saves now return 422 for recognized validation or 500 for unexpected errors, show the error modal, and restore stored values and provenance, including affected dependents. A failed timeseries Save closes its panel; inline Retry/Discard and failed-edit navigation/export prompts are removed.
 - Side-panel simplified-input bookmarks label their checkbox “Include in simplified inputs”; Configure keeps “Include.”
 - Simplified inputs place confidence beside compact value controls and show the clickable source and comment directly below. Their Saved status appears only briefly after an accepted update.

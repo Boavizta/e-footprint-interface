@@ -2,9 +2,9 @@
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html) · Confirmed library issue: [SI-1](known-issues.md)
 
-Status: Runs A–C and the consolidated review adjustments complete, including their independent reviews. This is one interface-owned, cross-repository working set. The deployment/merge prerequisite and browser validation exceptions below remain outstanding.
+Status: Runs A–C and the consolidated review adjustments complete, including their independent reviews. This is one interface-owned, cross-repository working set. The deployment/merge prerequisite below remains outstanding.
 
-The client-module refactor is complete; the [plan's client file tree](plan.html#file-client) links to the entry point and each responsibility. Local browser validation on 12 October 2026 still fails [Sources download](../../../tests/e2e/test_results.py) (`test_sources_tab_display_and_export`) and [dependent-selector visibility](../../../tests/e2e/test_simplified_inputs.py) (`test_provider_save_keeps_accepted_model_and_job_choices_editable`). Both failures reproduce with the original script in the same environment; their causes remain undiagnosed.
+The client-module refactor is complete; the [plan's client file tree](plan.html#file-client) links to the entry point and each responsibility. The browser timing exceptions found during that review are resolved: form submissions wait for the accepted view to settle, and Sources export waits for the restored link after background Sankey requests. Application behavior is unchanged.
 
 Human review: the user prefers one consolidated review after implementation of Runs A–C. No intermediate human review is required before Runs B or C; independent task and global agent reviews still apply to each run.
 

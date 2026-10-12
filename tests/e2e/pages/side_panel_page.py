@@ -202,7 +202,7 @@ class SidePanelPage:
         """Remove a group membership from a device edit panel."""
         from tests.e2e.utils import click_and_wait_for_htmx
         row = self.panel.locator(f"[data-dict-membership-name='{group_name}']").first
-        # click_and_wait_for_htmx includes a 20 ms wait for HTMX settleDelay before clicking.
+        # The helper waits for swapped controls to be processed before clicking.
         click_and_wait_for_htmx(self.page, row.locator("button.unlink-btn").first)
         self.page.wait_for_function(
             "() => document.querySelector('.htmx-request') === null",

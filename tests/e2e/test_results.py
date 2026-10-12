@@ -6,6 +6,7 @@ import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.pages import ModelBuilderPage
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 @pytest.mark.e2e
@@ -94,15 +95,19 @@ class TestResultsPanel:
         model_builder.open_result_panel()
 
         # Click Sources button
-        page.locator(".header-btn-result-sources-desktop").click()
+        wait_for_htmx_idle(page)  # Opening Results also loads and saves the initial Sankey card.
+        click_and_wait_for_htmx(page, page.locator(".header-btn-result-sources-desktop"))
 
         # Verify source-block is visible and graph-block is hidden
         expect(page.locator("#source-block")).to_have_class(re.compile(r"d-block"))
         expect(page.locator("#graph-block")).to_have_class(re.compile(r"d-none"))
 
         # Test sources download
+        export = page.locator("#download-sources")
+        expect(export).to_have_attribute("href", re.compile(r"/download-sources/$"))
+        expect(export).to_be_enabled()
         with page.expect_download() as download_info:
-            page.locator("#download-sources").click()
+            export.click()
 
         download = download_info.value
         filename = download.suggested_filename

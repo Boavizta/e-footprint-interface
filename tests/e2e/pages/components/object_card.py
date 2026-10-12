@@ -57,7 +57,7 @@ class ObjectCard:
         """Click the unlink button for a grouped entry (triggers HTMX)."""
         button = self.locator.locator("button.unlink-btn").first
         button.scroll_into_view_if_needed()
-        # click_and_wait_for_htmx includes the 20 ms HTMX settleDelay wait.
+        # The helper waits for swapped controls to be processed before clicking.
         click_and_wait_for_htmx(self.locator.page, button)
         return self
 

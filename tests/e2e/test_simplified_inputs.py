@@ -108,6 +108,8 @@ class TestSimplifiedInputs:
         workspace.get_by_role("button", name="Expand all", exact=True).click()
         model_select = field(workspace, "model_name").locator("select[name]")
         resolution_select = field(workspace, "resolution").locator("select[name]")
+        expect(model_select).to_be_visible()
+        expect(resolution_select).to_be_visible()
         expect(model_select).to_have_value(api.model_name.value)
         expect(resolution_select).to_have_value(job.resolution.value)
         models = api.conditional_list_values["model_name"]["conditional_list_values"][SourceObject("bytedance")]

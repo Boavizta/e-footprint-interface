@@ -3,16 +3,38 @@ from playwright.sync_api import Page, Locator
 from collections.abc import Mapping
 
 
+def wait_for_htmx_idle(page: Page):
+    """Wait for response swaps, descendant requests and workspace unlocking."""
+    page.wait_for_function("""() => document.body.dataset.workspaceMutation !== 'updating'
+        && document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null""")
+
+
 def click_and_wait_for_htmx(page: Page, locator: Locator):
-    """Click an HTMX element and wait for its request to complete."""
-    # Get the HTMX URL from the element
-    page.wait_for_timeout(20)
-    hx_url = locator.get_attribute("hx-get") or locator.get_attribute("hx-post")
-    if hx_url:
-        with page.expect_response(lambda r: hx_url in r.url):
+    """Wait for an HTMX response; form saves also wait for accepted updates to settle."""
+    # Already-swapped controls must be processed; pending reads may still be cancelled by this click.
+    page.wait_for_function("() => document.querySelector('.htmx-settling, .htmx-added') === null")
+    source = locator.evaluate_handle("""element => {
+        if (element.hasAttribute('hx-get') || element.hasAttribute('hx-post')) return element;
+        if (element.matches('button, input') && ['submit', 'image'].includes(element.type)) {
+            return element.form || element;
+        }
+        return element;
+    }""")
+    try:
+        hx_url = source.evaluate("element => element.getAttribute('hx-get') || element.getAttribute('hx-post')")
+        if hx_url:
+            with page.expect_response(lambda r: hx_url in r.url) as response:
+                locator.click()
+            if source.evaluate("element => element.hasAttribute('hx-post')"):
+                response.value.finished()
+                # Keep the original node when a form is replaced; unrelated pending reads may remain.
+                page.wait_for_function("""source => !source.classList.contains('htmx-request')
+                    && document.querySelector('.htmx-settling, .htmx-added') === null
+                    && document.body.dataset.workspaceMutation !== 'updating'""", arg=source)
+        else:
             locator.click()
-    else:
-        locator.click()
+    finally:
+        source.dispose()
 
 
 def add_only_update(target: dict, source: Mapping) -> dict:
