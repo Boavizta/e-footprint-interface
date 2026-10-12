@@ -522,13 +522,15 @@
     indicate updating; after failure they identify the last saved result, not a result for unsaved
     edits. A non-computable modeling shows no numeric total and retains the existing disabled-results
     explanation. Opening the results panel is not required to refresh the total.</li>
-    <li><strong>Export follows completed saves:</strong> the ordinary export actions cannot run while
-    a relevant save is in flight, including a final field committed when focus leaves it. Exporting
-    both modelings waits for both. Every export entry point is protected, including menu links, with
-    no extra confirmation for this wait. A focused edit that fails or is invalid cancels that export
-    activation; later exports use the accepted saved values. Configure uses its Save / Discard / Stay exit guard.
-    Ordinary modeling panels retain their current export behavior, without a new unsaved-changes
-    warning: exports contain saved values, not unfinished panel edits, including timeseries drafts.</li>
+    <li><strong>Export reads accepted saved state:</strong> ordinary blur/Enter value and provenance autosaves
+    remain. While a workspace write is active, single-model and workspace exports are suppressed; no activation,
+    menu opening or download is retained for settlement. The user activates Export again after the write finishes,
+    unless it already settled before activation. An idle browser-invalid edit remains unsaved and may export the
+    previous accepted value. A rejected save restores accepted fields; after dismissing its error, a fresh activation
+    exports the accepted state. Dirty Configure blocks export in place with a notice to save or discard first; Save
+    or Discard through the existing controls never continues the export. Clean Configure exports directly and stays
+    open. Other Configure exits retain Save / Discard / Stay. Ordinary Modeling panels and timeseries drafts export
+    their last saved values.</li>
     <li><strong>Familiar configuration:</strong> configuration and Simplified inputs share Navigation,
     two disclosure levels, field order, and responsive grid of up to three columns per object.
     With the filter off, configuration reveals every object with eligible inputs in Navigation and the main pane, including
@@ -539,8 +541,9 @@
     Current values are shown for context; Simplified inputs shows only the saved selection. Saving applies
     membership and help changes together; Cancel leaves the saved configuration intact.
     Leaving with unsaved changes offers
-    Save / Discard / Stay, including model switching, Compare, Results/Sources, file opening and export.
-    Save continues only after success; a failed Configure save keeps its draft and exit guard available.
+    Save / Discard / Stay for model switching, Compare, Results/Sources and file opening. Dirty Configure blocks
+    export in place and tells the user to save or discard first; resolving its draft does not export. A failed
+    Configure save keeps its draft and export blocked. Clean Configure exports directly and stays open.
     Opening Sources therefore cannot make inline configuration changes alongside a Configure draft.</li>
     <li><strong>Depth remains available:</strong> switching to Modeling makes every assumption and
     structural action available. Mode labels and navigation communicate the current view without
@@ -719,7 +722,10 @@
   use Show results → Sources for the input inventory. Click a bookmark, change inclusion or help, then visit Simplified
   inputs to see the result. Existing-input simplified-input settings save independently of value edits;
   creation settings wait until the object is created. “Edge modeling” is available only in Modeling.
-  Export is always the standard toolbar affordance, including while configuring simplified inputs. Compare
+  Export is always the standard toolbar affordance, including while configuring simplified inputs. It reads
+  accepted saved values; a running save blocks it until a fresh activation, while an idle invalid draft leaves the
+  prior accepted value available. Clean Configure remains open after export; a dirty Configure export asks for Save
+  or Discard in place, without opening its exit dialog. Compare
   opens an illustrative assumptions comparison; selecting a modeling tab returns to its saved view.
   File and support actions are illustrative; the sample-file controls simulate opening JSON.
   Help → Open examples previews the ride-along rename of the existing catalog.</p>
@@ -732,7 +738,8 @@
   last input of an object removes it from the filtered view; turn the filter off to find it again.
   Include a field and save to make it available in Simplified inputs. Save and return previews your
   changes; Cancel restores the saved selection and guidance. Try switching models or opening Results
-  with configuration changes to see Save / Discard / Stay. Re-entering Configure resets the filter,
+  with configuration changes to see Save / Discard / Stay for those exits. In Configure, also try Export while clean
+  (it stays open) and after changing guidance (it stays in place with a Save or Discard notice). Re-entering Configure resets the filter,
   expansion and scroll position. An empty selection offers Choose
   inputs. Clear simplified inputs asks for confirmation before clearing the draft selection and
   all custom per-field help, including help on deselected fields; Save and return applies it and
@@ -1524,11 +1531,8 @@
               'Results unavailable: complete the modeling to compute its footprint.';
           });
           mockup.querySelectorAll('[data-demo-action^="Export"]').forEach(function (button) {
-            button.disabled = saving || invalidControls.size > 0 ||
-              (button.dataset.demoAction === 'Export both modelings' && Object.keys(workspace).some(function (key) {
-                return key !== activeModel && workspace[key].invalid.length > 0;
-              }));
-            button.title = button.disabled ? 'Wait for saves to finish and resolve unsaved inputs before exporting.' : '';
+            button.disabled = saving;
+            button.title = button.disabled ? 'Wait for the active save to finish before exporting.' : '';
           });
           mockup.querySelector('#reopen-current-json').disabled = saving || invalidControls.size > 0;
         }
@@ -1878,6 +1882,23 @@
         });
         mockup.querySelectorAll('[data-demo-action]').forEach(function (button) {
           button.addEventListener('click', function () {
+            if (button.dataset.demoAction.indexOf('Export ') === 0) {
+              var activeState = snapshot();
+              workspace[activeModel] = activeState;
+              var otherModel = activeModel === 'reference' ? 'comparison' : 'reference';
+              var states = button.dataset.demoAction === 'Export both modelings'
+                ? [activeState, workspace[otherModel]] : [activeState];
+              var descriptions = states.map(function (state, index) {
+                var model = button.dataset.demoAction === 'Export both modelings'
+                  ? (index === 0 ? activeModel : otherModel) : activeModel;
+                var role = model === 'reference' ? 'Reference' : 'Comparison';
+                return role + ' · Video origin lifetime ' + state.values['server-lifetime'] + ' years';
+              });
+              mockup.querySelector('#open-result').textContent = 'Mockup only: Exported accepted saved state — ' +
+                descriptions.join('; ') + '. No file is created.';
+              closeToolbarMenus();
+              return;
+            }
             mockup.querySelector('#open-result').textContent = 'Mockup only: ' + button.dataset.demoAction +
               '. This standard app action is illustrative; no file or modeling was changed.';
             closeToolbarMenus();
@@ -2057,6 +2078,15 @@
         // Resolve Configure before another surface can edit the same saved settings.
         mockup.addEventListener('click', function (event) {
           if (currentMode !== 'configuration') return;
+          var exportAction = event.target.closest('[data-demo-action^="Export"], [data-export-menu] > summary');
+          if (exportAction) {
+            if (!configurationDirty) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            mockup.querySelector('#open-result').textContent =
+              'Export blocked: save or discard Configure changes first. This screen stays open.';
+            return;
+          }
           var destination = event.target.closest('[data-workspace-model], [data-open-comparison], ' +
             '[data-mode], [data-show-results], [data-open-file], #open-regular-json, #open-simplified-json, ' +
             '#reopen-current-json, [data-demo-action^="Export"], [data-demo-action^="Remove"], ' +

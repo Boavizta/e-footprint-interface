@@ -51,14 +51,17 @@ retained help on removed owners; structural edits preserve membership when a req
 <p>Source hoisting into the top-level <code>Sources</code> block scans both <code>__dict__</code> inputs and peeked computed slots (computed values live in reactive slots, not <code>__dict__</code>).</p>
 <p><code>ModelWeb.to_json()</code> itself remains passive (<code>descriptor.peek</code>, not pull), but <code>persist_to_cache()</code> first pulls <code>System.total_footprint</code>; this materializes every impact source's aggregate footprint pair so the payload-size guard measures the footprint-bearing steady state immediately after each mutation, while leaving projections such as the Sankey matrix lazy. Creating a Sankey card or changing its settings persists the materialized matrix; rendering a saved card by GET leaves newly computed state request-local.</p>
 <p>Explicit user download is the complete-snapshot boundary: <code>ModelWeb.export_json()</code> first calls the library-owned <code>materialize_serialized_state()</code> helper, then serializes, so the downloaded snapshot contains every <code>serialize=True</code> value and the resulting topology regardless of which projections the user visited.</p>
-<p>Toolbar exports complete a focused Simplified-input edit before requesting the saved file. A primary mouse press
-keeps focus in the editor so blur cannot disable the export control before activation. Only the ensuing click starts
-the save and continuation; an abandoned press never exports. Keyboard activation uses the same settlement check.
-A rejected or natively invalid focused edit cancels that activation and never downloads. A later activation with no
-changed focused field exports the accepted saved values. Direct links and the two-model menu retain their normal
-single-model/workspace endpoints; workspace export includes the accepted state of parked models. Configure exits use
-Save/Discard/Stay. Unfinished timeseries and
-ordinary Modeling panels export their last saved values.</p>
+<p>Simplified-input values and provenance keep their ordinary blur/Enter autosaves. Exports read accepted repository
+state; they do not finish a focused edit or retain an export activation. If a write is active, the existing saving
+feedback suppresses single-model and workspace exports until it settles. The user activates Export again afterward;
+when the save has already settled, the first activation can work. An idle browser-invalid draft does not block export
+and remains unsaved, so the file contains the previous accepted value. A rejected server save restores accepted fields;
+after dismissing its error, a fresh activation exports the accepted state. Direct links and the two-model menu retain
+their normal single-model/workspace endpoints, and workspace export includes accepted state from parked models.
+Configure blocks export in place while dirty, with a notice to save or discard first. Resolving the draft through its
+existing Save or Discard control never exports; a clean Configure screen exports directly and stays open. Other
+Configure exits retain Save/Discard/Stay. Unfinished timeseries and ordinary Modeling panels export their last saved
+values.</p>
 <p>Requests replacing <code>#main-content-block</code> proceed after the in-flight mutation settles, because a rejected
 Simplified edit has already been replaced with its accepted repository field and does not leave a retained draft.
 Adding/removing comparison models, file uploads, reset and the Examples picker use their ordinary actions and destructive

@@ -183,9 +183,16 @@ Opening Results also starts descendant Sankey configuration requests; wait for t
 
 For rejected Simplified value/provenance saves, assert that the error modal and accepted-field replacement both process,
 the field shows `Not saved`, and its submitted value is gone. A rejected focused timeseries Save also closes the panel.
-Focused export tests cover a failed save cancelling that activation, native-invalid input issuing no request/download, and
-a later activation exporting accepted state. Configure failures retain their draft and Save/Discard/Stay guard; bookmark
-help and membership Undo retain their independent draft behavior. Workspace exports include accepted values from parked models.
+Exports use accepted saved state. Ordinary blur/Enter/provenance autosaves remain; an active workspace write suppresses
+export without retaining or replaying the activation. After settlement, a fresh activation exports the accepted state
+(the first activation can work if the write already finished). An idle native-invalid draft can export the previous
+saved value without a request; a server-rejected save restores accepted fields and requires dismissal of the error
+before a fresh export. Configure export while dirty is blocked in place with a notice; clean Configure export stays on
+that screen. Other Configure exits retain Save/Discard/Stay, and bookmark help and membership Undo retain their
+independent draft behavior. Workspace exports include accepted values from parked models. The focused export E2E
+coverage is in `test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_state` and
+`test_blocked_export_never_replays_and_fresh_native_activation_runs_once`; Configure coverage is in
+`test_configure_export_blocks_dirty_controls_and_clean_export_stays_open`.
 
 ### Edge-paradigm tests
 
