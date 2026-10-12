@@ -174,7 +174,7 @@ test("object-type switching preserves control state owned by a nested timeseries
 
 
 test("simplified optional quantity saves empty immediately and waits for numeric completion", () => {
-    require("../theme/static/scripts/simplified_inputs.js");
+    require("../theme/static/scripts/simplified_inputs/index.js");
     mount("simplified_optional_quantity");
     document.body.insertAdjacentHTML("beforeend", '<script id="dynamic-form-data" type="application/json">{}</script>');
     window.htmx = {trigger: jest.fn()};

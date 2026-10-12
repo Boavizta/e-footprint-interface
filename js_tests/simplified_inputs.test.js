@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const { refreshSelection, refreshFilter, initialize, deferExit, definitionFromForm } = require("../theme/static/scripts/simplified_inputs.js");
+const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
+const { workspace: { initialize, deferExit }, fieldEdits: { initializeEdits } } = require("../theme/static/scripts/simplified_inputs/index.js");
 
 function mount() {
     document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_configure.html"), "utf8");
@@ -221,7 +222,7 @@ test("bookmark success updates visible membership only, preserves independent he
 
 test("creation requirements follow candidates, release forced membership and retain help", () => {
     mount();
-    const {refreshCreationBookmarks, pendingCreationSettings} = require("../theme/static/scripts/simplified_inputs.js");
+    const {refreshCreationBookmarks, pendingCreationSettings} = require("../theme/static/scripts/simplified_inputs/bookmarks.js");
     const form = document.createElement("form");
     form.id = "sidePanelForm";
     form.innerHTML = '<select id="service_or_external_api"><option value="a">A</option><option value="b">B</option></select>';
@@ -261,7 +262,7 @@ function mountEditor(fixture = "simplified_editor") {
     group.appendChild(object);
     workspace.replaceChildren(group);
     window.htmx.trigger = jest.fn();
-    require('../theme/static/scripts/simplified_inputs.js').initializeEdits();
+    initializeEdits();
     return document.querySelector('[data-simplified-editor]');
 }
 

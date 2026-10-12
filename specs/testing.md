@@ -24,6 +24,9 @@ poetry run pytest tests/e2e --base-url http://localhost:8000   # requires runnin
 
 # Jest
 npm run jest
+
+# VS Code review-link extension (Node's own runner, separate from js_tests/)
+node --test tools/vscode-plan-review-links/extension.test.js
 ```
 
 ## Key shared fixtures — `tests/fixtures/system_builders.py`

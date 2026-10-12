@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point and updated implementation links in the feature plan.
 - Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
 - Interface-config normalization lives in the domain and is shared by repositories and version migrations.
 - Feature close-out now delegates a plan review guide to Luna/medium: preserve the approved plan, link implemented claims to actual code, and consolidate decisions under supervisor ownership.

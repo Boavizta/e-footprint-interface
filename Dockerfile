@@ -8,8 +8,9 @@ COPY package.json package-lock.json /app/
 RUN npm ci
 
 COPY theme/static/scripts/result_charts /app/theme/static/scripts/result_charts
+COPY theme/static/scripts/simplified_inputs /app/theme/static/scripts/simplified_inputs
 RUN mkdir -p /app/theme/static/bundles
-RUN npm run build:result-charts
+RUN npm run build:js
 
 # ----------------------------------------------------------------------------
 # Production runtime image
@@ -51,6 +52,8 @@ ADD . /app
 # Copy bundled JS from assets stage (avoids runtime npm install)
 COPY --from=assets /app/theme/static/bundles/result_charts.js /app/theme/static/bundles/result_charts.js
 COPY --from=assets /app/theme/static/bundles/result_charts.js.map /app/theme/static/bundles/result_charts.js.map
+COPY --from=assets /app/theme/static/bundles/simplified_inputs.js /app/theme/static/bundles/simplified_inputs.js
+COPY --from=assets /app/theme/static/bundles/simplified_inputs.js.map /app/theme/static/bundles/simplified_inputs.js.map
 
 # Install requirements
 ADD poetry.lock /app

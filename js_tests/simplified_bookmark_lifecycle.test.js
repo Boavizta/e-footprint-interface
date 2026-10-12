@@ -3,7 +3,7 @@ const path = require("path");
 
 // Match base.html: field initialization and bookmark handlers precede the workspace guard.
 require("../theme/static/scripts/dynamic_forms.js");
-require("../theme/static/scripts/simplified_inputs.js");
+require("../theme/static/scripts/simplified_inputs/index.js");
 require("../theme/static/scripts/model_builder_main.js");
 
 function mount(name) {

@@ -59,6 +59,9 @@ forms <code>data-workspace-editor</code>. The guard locks those forms' inputs an
 <li>Save button is centralized in <a class="source" href="../../model_builder/templates/model_builder/side_panels/side_panel_structure.html"><code>side_panel_structure.html</code></a> as a <code>{% block save_button %}</code> default.</li>
 <li><strong>Help drawer is an independent overlay layer.</strong> <code>#helpDrawer</code> is a sibling of <code>#sidePanel</code> with a higher z-index, driven by <a class="source" href="../../theme/static/scripts/help_drawer_utils.js"><code>help_drawer_utils.js</code></a> (IIFE + <code>data-action</code> dispatch — see <a href="../conventions.md#javascript">conventions → JavaScript</a>); it never touches the side panel. Every entry point — the canvas <code>?</code> button and <code>{class:X}</code> placeholders rendered by <code>handle_class</code> — is a <code>&lt;button data-action="open-help-drawer" data-help-class="X"&gt;</code>; the module's delegated listener swaps <code>#helpDrawer</code> via <code>htmx.ajax</code>, so the button works even when Bootstrap injects it into a popover subtree HTMX never processed.</li>
 <li><strong>Frontend assets.</strong></li>
+<li>Multi-file simplified-input sources under <code>scripts/simplified_inputs/</code> are bundled by esbuild. The shell loads
+<code>bundles/simplified_inputs.js</code> synchronously before <code>model_builder_main.js</code> to preserve mutation-settlement
+listener order; result charts retain their separate module bundle. Local and Docker builds generate both assets.</li>
 <li><a class="source" href="../../theme/static/scripts"><code>theme/static/scripts/</code></a> includes small utilities (loading bars, charts, leader lines).</li>
 <li>CSS/SCSS in <code>theme/static/scss</code> and compiled CSS in <code>theme/static/css</code>.</li>
 </ul>

@@ -11,6 +11,14 @@ class TestStaticAssetBundling(unittest.TestCase):
         self.assertIn("bundles/result_charts.js", base_html)
         self.assertNotIn("scripts/result_charts/", base_html)
 
+    def test_simplified_inputs_bundle_preserves_workspace_listener_order(self):
+        base_html = (test_rootdir / "../theme/templates/base.html").read_text(encoding="utf-8")
+        bundle_tag = '<script src="{% static \'bundles/simplified_inputs.js\' %}"></script>'
+        self.assertIn(bundle_tag, base_html)
+        self.assertNotIn("scripts/simplified_inputs", base_html)
+        self.assertLess(base_html.index("scripts/dynamic_forms.js"), base_html.index(bundle_tag))
+        self.assertLess(base_html.index(bundle_tag), base_html.index("scripts/model_builder_main.js"))
+
     def test_no_unbundled_module_scripts_in_templates(self):
         repo_rootdir = (test_rootdir / "..").resolve()
         template_paths = list((repo_rootdir / "theme/templates").rglob("*.html")) + list(

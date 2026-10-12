@@ -51,7 +51,7 @@ right-click for a diff against main. Select a reading step to highlight its file
 <div id="change-tree">
 <details open><summary>theme/static/scripts/</summary><ul>
   <li id="file-main" data-steps="gate cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span><small>Replace comprehensive locking with a central mutation gate. <a href="#gate">1</a> · <a href="#cancel">2</a></small></li>
-  <li id="file-simple" data-steps="cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js"><code>simplified_inputs.js</code></a> <span data-change="modified">Modified</span><small>Reset canceled saves, show Not saved and audit export continuation. <a href="#cancel">2</a> · <a href="#reads-export">3</a></small></li>
+  <li id="file-simple" data-steps="cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js"><code>simplified_inputs/index.js</code></a> <span data-change="modified">Modified</span><small>Reset canceled saves, show Not saved and audit export continuation. <a href="#cancel">2</a> · <a href="#reads-export">3</a></small></li>
   <li id="file-source" data-steps="cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js" data-review-source-href="../../../theme/static/scripts/source_metadata.js"><code>source_metadata.js</code></a> <span data-change="modified">Modified</span><small>Route provenance completion and confidence writes through visible cancellation feedback. <a href="#cancel">2</a></small></li>
   <li id="file-sankey" data-steps="gate cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js" data-review-source-href="../../../theme/static/scripts/sankey.js"><code>sankey.js</code></a> <span data-change="modified">Modified if needed</span><small>Reuse the existing fetch bridge; reject before optimistic removal. <a href="#gate">1</a></small></li>
   <li id="file-hammer" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js" data-review-source-href="../../../theme/static/scripts/hammer_utils.js"><code>hammer_utils.js</code></a> <span data-change="modified">Modified if needed</span><small>Retain response-target lifetime without reintroducing global locking. <a href="#reads-export">3</a></small></li>
@@ -125,7 +125,7 @@ flows; do not unlock indiscriminately whenever any request ends.</p>
 <p>Use one concise existing notice surface for “Another save was running. This change was not saved.
 Try again after it finishes.” The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:225:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L225:1">existing toast region</a>
 is a candidate, not a mandated new notification abstraction. Reuse the existing field status where available.</p>
-<p>The current <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:72:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L72:1">simple-field save entry</a>
+<p>The current <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:37:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L37:1">simple-field save entry</a>
 silently returns when the workspace is busy, and sets the form's saving flag before triggering HTMX.
 The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:9:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L9:1">provenance completion handler</a>
 also silently returns while busy. Replace these silent drops with the common cancellation outcome.
@@ -143,13 +143,13 @@ or add a navigation guard for canceled fields.</p>
     leave the active write unchanged
 else:
     admit the write and record its identity</code></pre>
-<p>The same cancellation outcome must cover <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:411:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L411:1">bookmark saves</a>,
+<p>The same cancellation outcome must cover <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:74:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L74:1">bookmark saves</a>,
 Configure saves, ordinary forms and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:138:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L138:1">confidence autosaves</a>.
 The latter currently calls HTMX without a widget source; supply minimal initiating context if required for
 honest feedback. Preserve existing explicit draft behavior, rather than redesigning it.</p>
 <p>Server rejection of an admitted save remains different from local busy cancellation. Retain the current
 422/500 modal and fresh accepted-field restoration for admitted failures. In particular, the
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:129:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L129:1">finished handler</a> should not accidentally
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:104:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L104:1">finished handler</a> should not accidentally
 mark a different canceled editor Saved or clear its Not saved status.</p>
 </section>
 
@@ -159,15 +159,15 @@ mark a different canceled editor Saved or clear its Not saved status.</p>
 remain workspace writes and receive cancellation feedback while busy. Existing Configure exit confirmation
 and ordinary side-panel dirty-form handling remain owned by their current flows.</p>
 <p>Allowing edits during a write changes the assumptions around
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:219:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L219:1">workspace reads</a>,
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:621:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L621:1">draft-read coordination</a> and
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:45:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L45:1">workspace reads</a>,
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:170:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L170:1">draft-read coordination</a> and
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:72:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L72:1">Results target cleanup</a>.
 Keep only coordination required by supported response targets. Demonstrate any concrete case in which an
 admitted response replaces a canceled editor before proposing additional protection; the spec does not
 promise draft durability across replacing that editor.</p>
-<p>Keep a narrow check for <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:55:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L55:1">export activation</a>.
+<p>Keep a narrow check for <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:31:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L31:1">export activation</a>.
 Ordinary download anchors bypass HTMX/fetch interception, so their busy behavior needs an explicit hook.
-Retain the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs.js:29:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs.js#L29:1">focused-field completion</a>
+Retain the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1">focused-field completion</a>
 and successful export continuation. A cancellation must neither download nor leave a pending continuation
 that fires when another save finishes. Recheck native new-tab/context-menu activation against the
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html">toolbar links</a>;

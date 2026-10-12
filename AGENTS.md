@@ -38,7 +38,7 @@ Composite forms expose owner–field pairs through their strategies; wrappers de
 
 ```bash
 poetry install --with dev
-npm install && npm run build:result-charts:dev
+npm install && npm run build:js:dev
 poetry run python manage.py migrate
 poetry run python manage.py runserver         # http://localhost:8000
 
@@ -48,7 +48,9 @@ poetry run pytest tests/e2e -n 4             # E2E (requires running server)
 npm run jest                                 # JS unit tests
 ```
 
-## Styles
+## Frontend assets
+
+Simplified-input client modules live in `theme/static/scripts/simplified_inputs/`; rebuild their bundle with `npm run build:js:dev` after editing. See `specs/conventions.md` for module ownership and listener ordering.
 
 Never edit `theme/static/css/bs_main.css` by hand — it is compiled from `theme/static/scss/`. Edit the SCSS source and recompile with `npm run watch` (or a one-shot `npx sass theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss`).
 

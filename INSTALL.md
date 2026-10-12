@@ -102,14 +102,15 @@ Install JavaScript dependencies:
 npm install
 ```
 
-Build the result charts bundle (required):
+Build the JavaScript bundles (required):
 ```bash
-npm run build:result-charts:dev
+npm run build:js:dev
 ```
 
-If you edit files under `theme/static/scripts/result_charts/`, rebuild the bundle (or run a watcher):
+If you edit files under `theme/static/scripts/result_charts/` or `theme/static/scripts/simplified_inputs/`, rebuild with `npm run build:js:dev`, or watch the affected bundle in its own terminal:
 ```bash
 npm run build:result-charts:dev -- --watch
+npm run build:simplified-inputs:dev -- --watch
 ```
 
 ### 4. Run Database Migrations
@@ -198,14 +199,15 @@ Install JavaScript dependencies:
 npm install
 ```
 
-Build the result charts bundle (required):
+Build the JavaScript bundles (required):
 ```bash
-npm run build:result-charts:dev
+npm run build:js:dev
 ```
 
-If you edit files under `theme/static/scripts/result_charts/`, rebuild the bundle (or run a watcher):
+If you edit files under `theme/static/scripts/result_charts/` or `theme/static/scripts/simplified_inputs/`, rebuild with `npm run build:js:dev`, or watch the affected bundle in its own terminal:
 ```bash
 npm run build:result-charts:dev -- --watch
+npm run build:simplified-inputs:dev -- --watch
 ```
 
 ### 4. Setup Docker Infrastructure
@@ -300,16 +302,16 @@ docker compose -f docker-compose.infra.yml logs -f
 
 For a complete production-like environment with all services running in Docker (Django, PostgreSQL, Traefik), see the **[Docker Setup Guide](docker/README.md)**.
 
-Note: the UI loads the result charts from a bundled file at `theme/static/bundles/result_charts.js`. When using the full Docker setup with the `/app` bind-mount, generate this bundle on your host before starting the stack:
+Note: the UI loads result charts and simplified inputs from `theme/static/bundles/`. When using the full Docker setup with the `/app` bind-mount, generate both bundles on your host before starting the stack:
 ```bash
 npm install
-npm run build:result-charts:dev
+npm run build:js:dev
 ```
 
 This approach is ideal for:
 - Testing in a production-like environment with HTTPS
 - Consistent environment across different machines
-- Quick setup without local Python (Node is still needed to build the result charts bundle when using the bind-mount)
+- Quick setup without local Python (Node is still needed to build the JavaScript bundles when using the bind-mount)
 - Integration testing with reverse proxy (Traefik)
 
 **Access after setup**: `https://efootprint.boavizta.dev`

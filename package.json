@@ -6,9 +6,13 @@
         "start": "poetry run python manage.py runserver",
         "test": "poetry run python manage.py test",
         "watch": "npx sass --watch theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss",
-        "build": "npm run build:result-charts && npm run vendor:driver",
+        "build": "npm run build:js && npm run vendor:driver",
+        "build:js": "npm run build:result-charts && npm run build:simplified-inputs",
+        "build:js:dev": "npm run build:result-charts:dev && npm run build:simplified-inputs:dev",
         "build:result-charts": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --minify --outfile=theme/static/bundles/result_charts.js",
         "build:result-charts:dev": "esbuild theme/static/scripts/result_charts/index.js --bundle --format=esm --sourcemap --outfile=theme/static/bundles/result_charts.js",
+        "build:simplified-inputs": "esbuild theme/static/scripts/simplified_inputs/index.js --bundle --format=iife --sourcemap --minify --outfile=theme/static/bundles/simplified_inputs.js",
+        "build:simplified-inputs:dev": "esbuild theme/static/scripts/simplified_inputs/index.js --bundle --format=iife --sourcemap --outfile=theme/static/bundles/simplified_inputs.js",
         "vendor:driver": "cp node_modules/driver.js/dist/driver.js.iife.js theme/static/scripts/external_librairies/driver.iife.js && cp node_modules/driver.js/dist/driver.css theme/static/css/driver.css",
         "build:js-test-fixtures": "poetry run python js_tests/build_fixtures.py",
         "jest": "npm run build:js-test-fixtures && jest"
@@ -31,6 +35,7 @@
         "shave": "^5.0.4"
     },
     "jest": {
+        "testMatch": ["<rootDir>/js_tests/**/*.test.js"],
         "testEnvironment": "jsdom"
     }
 }

@@ -45,7 +45,12 @@ too. Settings are validated when authored; file opening preserves them without a
 <p><strong>reset/example-load are deliberately exempt</strong> — they obviously discard the current model, so a separate unsaved warning would be noise. <strong>remove-model</strong> also discards the panel but keeps its <em>own</em> destructive <code>window.confirm</code> (<a class="source" href="../../theme/static/scripts/model_comparison.js"><code>model_comparison.js</code></a>) rather than going through the modal. To avoid stacking dialogs, it appends the ordinary side-panel unsaved-changes warning when <code>window.isSidePanelFormModified()</code> reports pending edits.</p>
 <h3 id="simplified-workspace">Simplified-input workspace and Configure exits</h3>
 <p>Each slot has a surviving <code>#simplified-slot-{slot}</code> target beside the resident canvases. Modeling → Simplified
-inputs always reads fresh state; <code>simplified_inputs.js</code> remembers only the last base view by System ID.
+inputs always reads fresh state; <code>simplified_inputs/workspace.js</code> remembers only the last base view by System ID.
+The client entry point <code>simplified_inputs/index.js</code> composes private workspace, configuration, field-edit and
+bookmark modules into the synchronous <code>bundles/simplified_inputs.js</code> asset. Workspace owns pending reads and
+Configure exit continuations; field edits own accepted snapshots and pending focused-field exports. Configuration keeps
+draft settings in DOM controls, and bookmarks own membership/help patches and creation-time locks. Explicit callbacks
+connect the modules without exposing widget functions on <code>window</code>.
 A successful JSON load supplies one-use session opening markers, consumed by the next builder render: selected inputs
 open Simplified inputs, an empty selection opens Modeling. Ordinary slot switches never reapply this rule.</p>
 <p>A rejected inline value or provenance autosave restores the affected field from the accepted repository state and
