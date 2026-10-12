@@ -18,7 +18,7 @@
 </head>
 <body>
 <h1>Simple workspace mutation gate</h1>
-<p><small>Spec — under review · 8 October 2026 · Interface-owned</small></p>
+<p><small>Spec — under review · 8 October 2026 · Export policy updated 12 October 2026 · Interface-owned</small></p>
 <p>This feature replaces comprehensive save-time interaction locking with a small cancellation policy.
 The user authorized this specification and a <a href="plan.html">draft plan</a>; application implementation
 and implementation tasks require later review. Refine the draft with <code>spec-plan</code> in a fresh session.</p>
@@ -46,8 +46,12 @@ The goal is a smaller, understandable implementation with predictable behavior w
   ordinary edit-completion action. Finishing the first save does not submit it.</li>
   <li>The workspace does not blanket-disable editing or harmless navigation during a save. Reads,
   previews, reading and scrolling remain available. Existing prerequisites and unsaved-form confirmations still apply.</li>
-  <li>An export attempted during an active write does not download an older snapshot. It receives busy
-  feedback and can be activated again afterward. Existing focused-field save-before-export behavior remains.</li>
+  <li>Single-model and whole-workspace exports are blocked during an active write, with busy feedback;
+  the user activates Export again afterward. In ordinary Simplified-input editing, Export uses the accepted
+  saved state without forcing a focused edit to save, retaining the export request or resuming it after a save.
+  Ordinary autosave on edit completion still applies. When no write is active, a browser-invalid edit remains
+  unsaved and Export may download the previous saved state without an export-specific validation warning.
+  Mouse and keyboard activation, including the two-model export menu, use this same policy.</li>
   <li>Success, rejection and transport failure all release the active-operation state. A later action works
   normally, and a concurrent read cannot release another operation's gate.</li>
 </ol>
@@ -60,6 +64,11 @@ configuration saves, object and relationship changes, model switching/replacemen
 settings/deletion. Read-only actions and stateless previews do not occupy the write gate.</p>
 <p>Keep feedback local where an existing field status is available, with one concise notice for the action.
 An overlap is a busy-workspace cancellation, not a server validation error.</p>
+<p>Exports use the saved-state policy in
+<a href="../simplified-input-export-simplification/spec.html">Simplified-input export simplification</a>.
+Server-rejected saves retain their error feedback and accepted-field restoration; settlement never triggers
+an ordinary export. Configure keeps Save / Discard / Stay, and unfinished Modeling or timeseries panels
+continue to export saved values.</p>
 <p>Queueing, automatic retries, background resubmission, a new draft store, generic request middleware,
 cross-tab coordination and backend persistence redesign are outside this feature. No durability is promised
 for a canceled value across leaving or replacing its editor. Existing explicit Configure and bookmark drafts
@@ -101,7 +110,11 @@ a narrow export check over coordinating every input and action. Preserve accepte
 validation, calculations, HTTP error handling and existing domain constraints.</p>
 <blockquote>This intentionally changes the original simplified-inputs requirement to disable further edits,
 structural actions and view/model navigation while saving. It retains one active write and removes automatic
-queueing from consideration. The older requirement must be reconciled when this feature is implemented.</blockquote>
+queueing from consideration. Together with
+<a href="../simplified-input-export-simplification/spec.html">export simplification</a>, it also replaces
+focused-field save-before-export, automatic export continuation and export-specific invalid-edit blocking
+with the agreed saved-state policy. The original Simplified-input requirements must be reconciled when
+these features are implemented.</blockquote>
 <p>The feature stays within the <a href="../../mission.md">mission</a> and
 <a href="../../constitution.md">constitution</a>, particularly HTMX-first interaction and minimal JavaScript.
 Current behavior is described in <a href="../../architecture/rendering.html">Rendering</a>,
@@ -124,7 +137,8 @@ resolve the behavior with the user before expanding scope.</p>
   not an approved patch or a complete implementation design.</li>
   <li>Start a fresh session: “Use spec-plan for simple-workspace-mutation-gate in e-footprint-interface.
   Read spec.html and refine its draft plan.html. Keep the cancellation policy small, audit current callers,
-  and surface material choices for review. Do not generate tasks or implement application changes.”</li>
+  coordinate the shared saved-state export policy with simplified-input-export-simplification, and surface
+  material choices for review. Do not generate tasks or implement application changes.”</li>
   <li>Follow the <a href="../../architecture/index.html">architecture router</a> and
   <a href="../../conventions.md">conventions</a>; recheck the current checkout and preserve unrelated edits.</li>
 </ol>

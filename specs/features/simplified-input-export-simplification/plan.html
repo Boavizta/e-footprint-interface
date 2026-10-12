@@ -55,7 +55,7 @@
       <details><summary>Documentation</summary><ul>
         <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/persistence.html" data-review-source-href="../../architecture/persistence.html">specs/architecture/persistence.html</a> <span data-change="modified">Modified</span><small>Document saved-state exports without automatic continuation.</small></li>
         <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/spec.html" data-review-source-href="../simplified-inputs/spec.html">simplified-inputs/spec.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/plan.html" data-review-source-href="../simplified-inputs/plan.html">plan.html</a> <span data-change="modified">Modified</span><small>Reconcile the older export contract and review guide.</small></li>
-        <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/spec.html" data-review-source-href="../simple-workspace-mutation-gate/spec.html">simple-workspace-mutation-gate/spec.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/plan.html" data-review-source-href="../simple-workspace-mutation-gate/plan.html">plan.html</a> <span data-change="modified">Modified</span><small>Reconcile its explicit retention of focused-export continuation.</small></li>
+        <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/spec.html" data-review-source-href="../simple-workspace-mutation-gate/spec.html">simple-workspace-mutation-gate/spec.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/plan.html" data-review-source-href="../simple-workspace-mutation-gate/plan.html">plan.html</a> <small>Already aligned on saved-state export; coordinate implementation order during planning.</small></li>
         <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md">CHANGELOG.md</a> <span data-change="modified">Modified</span><small>Record the behavior change at implementation close-out.</small></li>
       </ul></details>
     </details></div>
@@ -94,16 +94,20 @@
     keep their current destinations and mutation-guard markers.</p>
     <aside data-note="review">
       <p><strong>Scope boundary:</strong> the separate <a href="../simple-workspace-mutation-gate/plan.html#reads-export">mutation-gate draft</a>
-      proposes a different shared busy policy and explicitly retains focused-export continuation. This feature replaces that
-      continuation requirement only. Reconcile the wording during planning; if the guard changes first, ground this work
-      in its current export admission behavior rather than restoring the removed blanket lock.</p>
+      replaces blanket locking with write cancellation and uses the same saved-state export policy.
+      Focused-edit completion, pending export, successful-save continuation and export-specific invalid-edit
+      blocking are removed; one active write, busy-export blocking and Configure exit protection remain.
+      Coordinate the overlapping changes once: if the guard changes first, use its narrow export admission
+      check; if export simplification lands first, preserve that behavior when replacing the guard.</p>
     </aside>
   </section>
   <section id="delivery">
     <h2>Delivery and verification</h2>
     <ol>
-      <li>Refine the draft against the current shared guard and reconcile both older export requirements.
-      Confirm that actual browser focus completion starts the save before an export can download stale state.</li>
+      <li>Refine the draft against the current shared guard, coordinate implementation order with the
+      mutation-gate feature, and reconcile the original Simplified-input export requirement with the agreed policy.
+      Confirm that ordinary focus completion starts autosave before export admission and that an active
+      write blocks every export entry point.</li>
       <li>Remove the focused-export machinery and update the affected Jest and browser regressions together.
       Rebuild the bundle using the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/package.json" data-review-source-href="../../../package.json">existing build scripts</a>.</li>
       <li>Update the owning persistence documentation, older feature contracts and changelog when implementing.

@@ -106,13 +106,14 @@
   <h2>5. Constraints</h2>
   <p>Stay within the <a href="../../mission.md">mission</a> and
   <a href="../../constitution.md">constitution</a>, particularly minimal browser JavaScript.
-  Preserve the existing write guard and accepted-state ownership described in
+  Preserve one active workspace write, block exports during that write, and retain accepted-state ownership described in
   <a href="../../architecture/persistence.html">Persistence</a> and
   <a href="../../architecture/rendering.html">Rendering</a>.</p>
   <blockquote>This intentionally replaces the original Simplified-input requirement to finish
-  a focused edit before export and cancel export for a browser-invalid edit. The separate
-  <a href="../simple-workspace-mutation-gate/spec.html">workspace mutation-gate spec</a> currently
-  retains that behavior; its export requirement must be reconciled when this change is planned.</blockquote>
+  a focused edit before export, resume export after saving, and cancel export for a browser-invalid edit.
+  The <a href="../simple-workspace-mutation-gate/spec.html">workspace mutation-gate spec</a>
+  uses the same saved-state export policy defined here. Both features retain one active workspace
+  write and block exports during that write; Configure keeps its existing exit protection.</blockquote>
 </section>
 
 <section id="questions">
@@ -127,7 +128,8 @@
   <ol>
     <li>Review this specification and its <a href="plan.html">draft plan</a>.</li>
     <li>After spec approval, use spec-plan in a fresh session to refine this feature's draft.
-    Reconcile overlapping export requirements; do not generate tasks or implement yet.</li>
+    Coordinate implementation order with the mutation-gate draft and reconcile the original
+    Simplified-input requirement with this agreed policy; do not generate tasks or implement yet.</li>
     <li>Start code exploration at the <a href="../../architecture/index.html">architecture router</a>
     and follow <a href="../../conventions.md">conventions</a>.</li>
   </ol>
