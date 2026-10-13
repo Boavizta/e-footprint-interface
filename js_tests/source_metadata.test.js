@@ -635,6 +635,28 @@ test("successful custom source row POST makes the source available to loaded row
     delete global.htmx;
 });
 
+test("successful automatic source row POST keeps the source limited to fields already using it", () => {
+    mountSourceTableRowWithEditor("source_table_row_automatic", "row_editor_automatic");
+    document.body.insertAdjacentHTML("beforeend", `<form>${loadFixture("automatic_and_manual_fields")}</form>`);
+    initInFormSourceEditorsIn();
+    const editor = document.getElementById("editor-row1_row");
+    editor.querySelector(".source-editor-comment").value = "Reviewed replacement";
+    global.htmx = {trigger: jest.fn()};
+
+    applySourceEditor("row1_row");
+    const form = document.querySelector("form[data-action='source-table-row-edit']");
+    form.dispatchEvent(new CustomEvent("htmx:afterRequest", {bubbles: true, detail: {successful: true}}));
+
+    expect(document.querySelector('#comment-cell-row1 [data-source-table-role="comment-text"]').textContent)
+        .toBe("Reviewed replacement");
+    expect(document.querySelectorAll('#editor-FieldManual option[value="automatic_replacement"]')).toHaveLength(0);
+    const current = document.querySelector('#editor-FieldAutomatic .source-editor-select');
+    expect(current.value).toBe("automatic_replacement");
+    expect(current.querySelectorAll('option[value="automatic_replacement"]')).toHaveLength(1);
+    expect(current.selectedOptions[0].dataset.name).toBe("automatic replacement");
+    delete global.htmx;
+});
+
 test("autosaveConfidence on a 'none' selection sends an empty confidence string", async () => {
     document.body.innerHTML = `
         <div class="confidence-wrap" data-field-id="row2"

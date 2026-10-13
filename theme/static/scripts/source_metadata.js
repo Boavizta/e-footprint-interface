@@ -469,6 +469,7 @@
         if (!id || !name) return;
         editors.forEach(other => {
             if (other === originatingEditor) return;
+            if (id === "automatic_replacement" && _hiddenInput(other.dataset.fieldId, "source_id").value !== id) return;
             const select = other.querySelector(".source-editor-select");
             if (!select) return;
             const existing = Array.from(select.options).find(

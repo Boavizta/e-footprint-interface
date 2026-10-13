@@ -36,6 +36,7 @@ OUT_DIR = REPO_ROOT / "js_tests" / "fixtures"
 SRC1 = {"id": "src1", "name": "ADEME 2024", "link": "https://ademe.fr"}
 HYPOTHESIS = {"id": "hypothesis", "name": "e-footprint hypothesis", "link": ""}
 USER_DATA = {"id": "user_data", "name": "user data", "link": ""}
+AUTOMATIC_REPLACEMENT = {"id": "automatic_replacement", "name": "automatic replacement", "link": ""}
 SENTINELS = [USER_DATA, HYPOTHESIS]
 
 
@@ -66,6 +67,12 @@ SOURCE_METADATA_CASES = {
     "field_src_with_sentinels": metadata_field(source=SRC1, available_sources=[SRC1, *SENTINELS]),
     "field_high_hypothesis": metadata_field(confidence="high", source=HYPOTHESIS, available_sources=SENTINELS),
     "two_empty_fields": [metadata_field(web_id="FieldA"), metadata_field(web_id="FieldB")],
+    "automatic_and_manual_fields": [
+        metadata_field(web_id="FieldAutomatic", source=AUTOMATIC_REPLACEMENT,
+                       available_sources=[USER_DATA, AUTOMATIC_REPLACEMENT]),
+        metadata_field(web_id="FieldManual", source=USER_DATA,
+                       available_sources=[USER_DATA, AUTOMATIC_REPLACEMENT]),
+    ],
 }
 
 
@@ -111,6 +118,8 @@ ROW_EDITOR_CASES = {
     "row_editor_listed_user_data": row_editor(prior_source=USER_DATA),
     # priorId is in the available list (a known source) — init keeps the select on it.
     "row_editor_listed_src1": row_editor(prior_source=SRC1),
+    "row_editor_automatic": row_editor(
+        prior_source=AUTOMATIC_REPLACEMENT, available_sources=[USER_DATA, AUTOMATIC_REPLACEMENT]),
     # priorId isn't in the available list — init flips the select to __custom__ + prefills name/link.
     "row_editor_unlisted_custom": row_editor(prior_source={"id": "abc123", "name": "Internal", "link": ""}),
 }
@@ -144,6 +153,7 @@ def render_row_editor(case_ctx):
 SOURCE_TABLE_ROW_CASES = {
     "source_table_row_listed_user_data": row_editor(prior_source=USER_DATA),
     "source_table_row_listed_src1": row_editor(prior_source=SRC1, prior_comment="old note"),
+    "source_table_row_automatic": row_editor(prior_source=AUTOMATIC_REPLACEMENT),
 }
 
 
