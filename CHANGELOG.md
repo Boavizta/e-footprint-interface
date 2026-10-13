@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- Normal and Simplified editors repair implicit conditional choices after controller changes, keep explicit choices authoritative, and record automatic replacement provenance.
 - Regression coverage ensures visible form controllers have no skipped conditional dependents, including cross-object controller paths.
 - The simplified-inputs plan offers a right-click VS Code diff against local `main` for linked files, backed by an installable local VS Code extension; ordinary clicks still open the file.
 - Regression coverage for required simplified inputs across owner boundaries, including rejected exclusion patches and completed replacement saves.
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.
 - Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point and updated implementation links in the feature plan.
 - Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
 - Interface-config normalization lives in the domain and is shared by repositories and version migrations.
@@ -36,6 +38,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.
 
 ### Fixed
+- Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.
+- Both editors deliver large repair notice lists through the response body, keeping HTMX headers bounded and displaying authored text safely.
 - E2E HTMX clicks now wait for form submissions and settled workspace updates; Sources export waits for its restored link, and the dependent-selector flow expands the accepted view after Configure saves.
 - Rejected Simplified-input saves now return 422 for recognized validation or 500 for unexpected errors, show the error modal, and restore stored values and provenance, including affected dependents. A failed timeseries Save closes its panel; inline Retry/Discard and failed-edit navigation/export prompts are removed.
 - Side-panel simplified-input bookmarks label their checkbox “Include in simplified inputs”; Configure keeps “Include.”
