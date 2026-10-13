@@ -363,16 +363,23 @@ test("edit toast renders every repair notice and authored name as text", () => {
     loadModule();
     const toastTemplate = path.join(__dirname, "../model_builder/templates/model_builder/components/toast.html");
     document.body.insertAdjacentHTML("beforeend", fs.readFileSync(toastTemplate, "utf8"));
+    document.getElementById("input-repair-notices").outerHTML = fs.readFileSync(
+        path.join(__dirname, "fixtures", "input_repair_notices.html"), "utf8");
     const show = jest.fn();
     global.bootstrap = {Toast: {getOrCreateInstance: jest.fn(() => ({show}))}};
     document.body.dispatchEvent(new CustomEvent("displayToastAndHighlightObjects", {detail: {
         action_type: "edit_object", name: '<img src=x onerror="bad()">',
         constraint_messages: ["Existing constraint notice"],
-        notices: ["Job A: Resolution changed to 480p.", "Job B: <script>unsafe()</script> changed to 480p."]
+        notice_target: "input-repair-notices"
     }}));
     const body = document.getElementById("toast-content");
-    expect(body.textContent).toBe('<img src=x onerror="bad()"> has been updated! — Existing constraint notice — Job A: Resolution changed to 480p. — Job B: <script>unsafe()</script> changed to 480p.');
+    expect(body.textContent).toBe('<img src=x onerror="bad()"> has been updated! — Existing constraint notice — Job A: Resolution changed to 480p. — Job B: <script>unsafe()</script> & resolution changed to 480p.');
     expect(body.children).toHaveLength(0);
+    expect(document.getElementById("input-repair-notices").children).toHaveLength(0);
     expect(show).toHaveBeenCalled();
+    document.body.dispatchEvent(new CustomEvent("displayToastAndHighlightObjects", {detail: {
+        action_type: "add_new_object", name: "Another object"
+    }}));
+    expect(body.textContent).toBe("Another object has been saved!");
     delete global.bootstrap;
 });

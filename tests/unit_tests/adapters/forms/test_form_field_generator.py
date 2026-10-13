@@ -673,3 +673,29 @@ def test_referenced_cascade_uses_library_static_fallback_and_empty_branch(monkey
     _, _, cascades = generate_dynamic_form(_SyntheticCrossObjectJobClass.__name__,
         {"name": "Example", "resolution": SourceObject("720p")}, minimal_model_web)
     assert cascades[0]["list_value"] == {"limited": ["720p"], "absent": ["720p"], "empty": []}
+
+
+class _RestrictedChoiceChain(ModelingObject):
+    list_values = {"parent": [SourceObject("limited"), SourceObject("absent")],
+                   "controller": [SourceObject("a"), SourceObject("b")]}
+    conditional_list_values = {
+        "controller": {"depends_on": "parent", "conditional_list_values": {
+            SourceObject("limited"): [SourceObject("a")]}},
+        "choice": {"depends_on": "controller", "conditional_list_values": {
+            SourceObject("a"): [SourceObject("first")], SourceObject("b"): [SourceObject("second")]}}}
+
+    def __init__(self, name: str, parent: SourceObject, controller: SourceObject, choice: SourceObject):
+        super().__init__(name)
+        self.parent = parent
+        self.controller = controller
+        self.choice = choice
+
+
+def test_chained_cascade_includes_controller_choices_from_absent_parent_branch(monkeypatch, minimal_model_web):
+    _register_synthetic_class(monkeypatch, _RestrictedChoiceChain)
+    owner = _RestrictedChoiceChain("Example", SourceObject("absent"), SourceObject("b"), SourceObject("second"))
+    _, _, cascades = generate_dynamic_form(_RestrictedChoiceChain.__name__, owner.__dict__, minimal_model_web)
+    assert {cascade["input_id"]: cascade["list_value"] for cascade in cascades} == {
+        "_RestrictedChoiceChain_controller": {"limited": ["a"], "absent": ["a", "b"]},
+        "_RestrictedChoiceChain_choice": {"a": ["first"], "b": ["second"]},
+    }

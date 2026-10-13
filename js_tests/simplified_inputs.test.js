@@ -32,6 +32,19 @@ function include(attribute, checked = true) {
     return input;
 }
 
+test("Simplified save displays every body-carried repair notice as text", () => {
+    const workspace = mount("simplified_saved");
+    document.body.insertAdjacentHTML("beforeend", fs.readFileSync(
+        path.join(__dirname, "fixtures", "simplified_repair_notices.html"), "utf8"));
+    document.body.dispatchEvent(new CustomEvent("simplifiedInputSaved", {detail: {
+        notice_target: "input-repair-notices"
+    }}));
+    const notice = workspace.querySelector("[data-simplified-notice]");
+    expect(notice.textContent).toBe("Job A: Resolution changed to 480p. Job B: <script>unsafe()</script> & resolution changed to 480p.");
+    expect(notice.children).toHaveLength(0);
+    expect(document.getElementById("input-repair-notices").children).toHaveLength(0);
+});
+
 test("recursive companions lock across owners and unlock without removing saved help", () => {
     mount();
     include("provider");

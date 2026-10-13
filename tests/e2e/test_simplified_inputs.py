@@ -87,7 +87,10 @@ class TestSimplifiedInputs:
         expect(page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")).to_be_checked()
         expect(page.locator("#sidePanel #Server_fixed_nb_of_instances")).to_have_value("")
 
-    def test_provider_save_keeps_accepted_model_and_job_choices_editable(self, minimal_system, model_builder_page):
+    @pytest.mark.parametrize("repair_resolution", [False, True])
+    def test_provider_save_keeps_accepted_model_and_job_choices_editable(
+        self, minimal_system, model_builder_page, repair_resolution
+    ):
         from efootprint.api_utils.system_to_json import system_to_json
         from efootprint.abstract_modeling_classes.source_objects import SourceObject
         from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
@@ -97,7 +100,9 @@ class TestSimplifiedInputs:
         from tests.e2e.utils import add_only_update
 
         api = EcoLogitsVideoGenExternalAPI.from_defaults("Video API")
-        job = EcoLogitsVideoGenExternalAPIJob.from_defaults("Video job", external_api=api)
+        job = EcoLogitsVideoGenExternalAPIJob.from_defaults(
+            "Video <job> & data" if repair_resolution else "Video job", external_api=api,
+            resolution=SourceObject("1080p (1920 x 1080)" if repair_resolution else "720p (1280 x 720)"))
         data = system_to_json(minimal_system, save_computed_state=False)
         add_only_update(data, system_to_json(job, save_computed_state=False))
         page = load_system_dict_into_browser(model_builder_page, data).page
@@ -119,11 +124,17 @@ class TestSimplifiedInputs:
         expect(model_select).to_have_value(models[0].value)
         expect(model_select.locator("option")).to_have_text([str(model) for model in models])
         expect(resolution_select.locator("option")).to_have_text([str(value) for value in resolutions])
-        expect(resolution_select).to_have_value(job.resolution.value)
+        expect(resolution_select).to_have_value(resolutions[0].value if repair_resolution else job.resolution.value)
+        notices = [f"{api.name}: {api.model_name.label} changed to {models[0]}."]
+        if repair_resolution:
+            notices.append(f"{job.name}: {job.resolution.label} changed to {resolutions[0]}.")
+        expect(workspace.locator("[data-simplified-notice]")).to_have_text(" ".join(notices))
+        expect(workspace.locator("[data-simplified-notice] > *")).to_have_count(0)
         page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        manual_resolution = resolutions[-1] if repair_resolution else resolutions[0]
         with page.expect_response("**/edit-simplified-input/**"):
-            resolution_select.select_option(resolutions[0].value)
-        expect(resolution_select).to_have_value(resolutions[0].value)
+            resolution_select.select_option(manual_resolution.value)
+        expect(resolution_select).to_have_value(manual_resolution.value)
 
     def test_repeated_configure_entry_does_not_queue_a_draft_replacement(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page

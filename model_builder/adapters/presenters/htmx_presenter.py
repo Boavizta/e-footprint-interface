@@ -85,13 +85,12 @@ class HtmxPresenter:
         """
         canvas_oob, extra_settle, constraint_messages = self._oob_response_setup(output.oob_regions)
 
-        from django.utils.html import escape
         from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 
         for address in sorted(output.simplified_added, key=lambda value: (value.object_id, value.attribute)):
             owner = self.model_web.flat_efootprint_objs_dict[address.object_id]
             label = FieldUIConfigProvider.get_config(address.attribute, owner.efootprint_class.__name__)["label"]
-            constraint_messages.append(f"{escape(owner.name)} · {escape(label)} was included in Simplified inputs.")
+            constraint_messages.append(f"{owner.name} · {label} was included in Simplified inputs.")
 
         if output.parent_was_linked:
             toast_and_highlight_data = {
@@ -210,8 +209,7 @@ class HtmxPresenter:
             "name": output.edited_object_name,
             "action_type": "edit_object",
             "constraint_messages": constraint_messages,
-            "notices": [f"{change.input[0].name}: {change.accepted_value.label} changed to {change.accepted_value}."
-                        for change in output.input_edit_result.automatic_changes],
+            "notice_target": "input-repair-notices",
         }
 
         repaired_cards = []
@@ -236,6 +234,11 @@ class HtmxPresenter:
                     output.edited_object_type, edited_ids, target_count=0)
             html_updates = self._render_top_parent_cards(cards_to_refresh)
             html_updates += render_oob_regions(self.model_web, output.oob_regions)
+
+        notices = [f"{change.input[0].name}: {change.accepted_value.label} changed to {change.accepted_value}."
+                   for change in output.input_edit_result.automatic_changes]
+        html_updates += render_to_string("model_builder/components/input_repair_notices.html",
+                                        {"notice_text": " — ".join(notices)})
 
         if recompute:
             html_updates += self._recomputation_html()

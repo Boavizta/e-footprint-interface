@@ -27,7 +27,9 @@ def present_edited_input(request, model_web, output, catalog, *, recompute=False
 
     html = render_input_fields_oob(request, model_web, output.changed_fields, catalog=catalog)
     html += render_oob_regions(model_web, [OobRegion("results_buttons")])
-    triggers = {"simplifiedInputSaved": {"notices": output.notices}}
+    html += render_to_string("model_builder/components/input_repair_notices.html",
+                             {"notice_text": " ".join(output.notices)})
+    triggers = {"simplifiedInputSaved": {"notice_target": "input-repair-notices"}}
     if recompute:
         html += HtmxPresenter(request, model_web)._recomputation_html()
         triggers["triggerResultRendering"] = ""

@@ -430,7 +430,7 @@ def generate_dynamic_form(
                     else:
                         filter_by = f"{efootprint_class_str}_{depends_on}"
                         controller_values = list_values.get(depends_on, conditional_values)
-                        if depends_on in conditional_list_values:
+                        if depends_on not in list_values and depends_on in conditional_list_values:
                             controller_values = [value for values in
                                                  conditional_list_values[depends_on]["conditional_list_values"].values()
                                                  for value in values]

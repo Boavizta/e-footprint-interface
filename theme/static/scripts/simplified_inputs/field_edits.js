@@ -115,12 +115,12 @@ function createFieldEdits({ activeWorkspace }) {
             if (event.target.closest('[data-action="simplified-timeseries-cancel"]')) window.closeAndEmptySidePanel();
         });
         document.body.addEventListener("simplifiedInputSaved", event => {
-            const notices = event.detail.notices || [];
-            if (notices.length) {
+            const noticeText = document.getElementById(event.detail.notice_target).textContent;
+            if (noticeText) {
                 const notice = document.createElement("p");
                 notice.setAttribute("role", "status");
                 notice.dataset.simplifiedNotice = "";
-                notice.textContent = notices.join(" ");
+                notice.textContent = noticeText;
                 activeWorkspace()?.querySelector("[data-simplified-notice]")?.remove();
                 activeWorkspace()?.querySelector(".simplified-header")?.after(notice);
             }

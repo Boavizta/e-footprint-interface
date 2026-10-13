@@ -239,8 +239,9 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     }else if( actionType === "add_new_object"){
         baseMessage = `${modelObjectName} has been saved!`;
     }
-    const notices = event.detail["notices"] || [];
-    toastBody.textContent = [baseMessage, ...constraintMessages, ...notices].join(" — ");
+    const noticeTarget = event.detail["notice_target"];
+    const noticeText = noticeTarget ? document.getElementById(noticeTarget).textContent : "";
+    toastBody.textContent = [baseMessage, ...constraintMessages, ...(noticeText ? [noticeText] : [])].join(" — ");
 
     const highlightButtons = event.detail["id"] ? Array.from(cardButtonsForWebId(event.detail["id"])) : [];
     highlightButtons.forEach((element, index) => {

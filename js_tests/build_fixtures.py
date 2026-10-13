@@ -693,6 +693,11 @@ def render_optional_quantity(field):
 
 
 GROUPS = [
+    ({"input_repair_notices": {"notice_text": "Job A: Resolution changed to 480p. — "
+        "Job B: <script>unsafe()</script> & resolution changed to 480p."},
+      "simplified_repair_notices": {"notice_text": "Job A: Resolution changed to 480p. "
+        "Job B: <script>unsafe()</script> & resolution changed to 480p."}},
+     lambda context: render_to_string("model_builder/components/input_repair_notices.html", context)),
     (OPTIONAL_QUANTITY_CASES, render_optional_quantity),
     ({"simplified_optional_quantity": {"optional_quantity": True},
       "simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
