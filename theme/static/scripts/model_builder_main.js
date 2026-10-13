@@ -239,11 +239,8 @@ document.body.addEventListener("displayToastAndHighlightObjects", function (even
     }else if( actionType === "add_new_object"){
         baseMessage = `${modelObjectName} has been saved!`;
     }
-    if (constraintMessages.length > 0) {
-        toastBody.innerHTML = baseMessage + " — " + constraintMessages.join(" — ");
-    } else {
-        toastBody.innerHTML = baseMessage;
-    }
+    const notices = event.detail["notices"] || [];
+    toastBody.textContent = [baseMessage, ...constraintMessages, ...notices].join(" — ");
 
     const highlightButtons = event.detail["id"] ? Array.from(cardButtonsForWebId(event.detail["id"])) : [];
     highlightButtons.forEach((element, index) => {

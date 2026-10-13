@@ -30,12 +30,13 @@ from model_builder.domain.entities.web_abstract_modeling_classes.modeling_object
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
-class _StubReferencedAPI:
+class _StubReferencedAPI(ModelingObject):
     """Minimal stand-in for an external-API object exposing the dotted-path attribute."""
 
-    def __init__(self, obj_id: str, model_name: str):
+    def __init__(self, obj_id: str, model_name: SourceObject):
+        super().__init__(obj_id)
         self.id = obj_id
-        self.model_name = SourceObject(model_name)
+        self.model_name = model_name
 
 
 def _get_field_by_web_id(fields: list[dict], web_id: str) -> dict:
@@ -504,7 +505,7 @@ def test_generate_dynamic_form_rekeys_cross_object_conditional_by_referenced_obj
         EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobWeb
     )
 
-    api_objects = [_StubReferencedAPI("api_1", "model-a"), _StubReferencedAPI("api_2", "model-b")]
+    api_objects = [_StubReferencedAPI("api_1", SourceObject("model-a")), _StubReferencedAPI("api_2", SourceObject("model-b"))]
     monkeypatch.setattr(
         minimal_model_web,
         "get_efootprint_objects_from_efootprint_type",
@@ -543,8 +544,10 @@ def test_generate_dynamic_form_resolves_skipped_conditional_dependency_from_edit
     monkeypatch.setitem(
         EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING, _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobWeb
     )
-    external_api = _StubReferencedAPI("api_1", "model-a")
-    obj_to_edit = SimpleNamespace(modeling_obj=SimpleNamespace(external_api=external_api))
+    external_api = _StubReferencedAPI("api_1", SourceObject("model-a"))
+    job = object.__new__(_SyntheticCrossObjectJobClass)
+    job.__dict__.update(id="job-id", external_api=external_api)
+    obj_to_edit = SimpleNamespace(modeling_obj=job)
     default_values = {"name": "test", "resolution": SourceObject("720p")}
 
     fields, _, dynamic_lists = generate_dynamic_form(
@@ -625,3 +628,48 @@ def test_ordinary_quantity_renders_required_number_without_switch(minimal_model_
         html = render_to_string(f"model_builder/{template}/explainable_quantity.html", context)
         assert "required" in html
         assert "data-optional-quantity" not in html
+
+
+class _RestrictedChoices(ModelingObject):
+    list_values = {"controller": [SourceObject("limited"), SourceObject("absent"), SourceObject("empty")],
+                   "choice": [SourceObject("b"), SourceObject("a")]}
+    conditional_list_values = {"choice": {"depends_on": "controller", "conditional_list_values": {
+        SourceObject("limited"): [SourceObject("a"), SourceObject("excluded")], SourceObject("empty"): []}}}
+
+    def __init__(self, name: str, controller: SourceObject, choice: SourceObject):
+        super().__init__(name)
+        self.controller = controller
+        self.choice = choice
+
+
+def test_form_choices_use_static_intersection_and_distinguish_absent_and_empty_branches(monkeypatch, minimal_model_web):
+    _register_synthetic_class(monkeypatch, _RestrictedChoices)
+    defaults = {"name": "Example", "controller": SourceObject("limited"), "choice": SourceObject("a")}
+    _, _, cascades = generate_dynamic_form(_RestrictedChoices.__name__, defaults, minimal_model_web)
+    assert cascades[0]["list_value"] == {"limited": ["a"], "absent": ["b", "a"], "empty": []}
+
+    for controller, expected in [("limited", ["a"]), ("absent", ["b", "a"]), ("empty", [])]:
+        owner = object.__new__(_RestrictedChoices)
+        owner.__dict__.update(defaults, id="choice-owner", controller=SourceObject(controller))
+        fields, _, cascades = generate_dynamic_form(
+            _RestrictedChoices.__name__, owner.__dict__, minimal_model_web,
+            obj_to_edit=SimpleNamespace(modeling_obj=owner), resolve_conditional_options=True)
+        field = _get_field_by_web_id(fields, "_RestrictedChoices_choice")
+        assert [option["value"] for option in field["options"]] == expected
+        assert cascades == []
+
+
+def test_referenced_cascade_uses_library_static_fallback_and_empty_branch(monkeypatch, minimal_model_web):
+    _register_synthetic_class(monkeypatch, _SyntheticCrossObjectJobClass)
+    monkeypatch.setitem(EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING,
+                        _SyntheticCrossObjectJobClass.__name__, _SyntheticCrossObjectJobWeb)
+    monkeypatch.setattr(_SyntheticCrossObjectJobClass, "list_values", {"resolution": [SourceObject("720p")]})
+    monkeypatch.setattr(_SyntheticCrossObjectJobClass, "conditional_list_values", {
+        "resolution": {"depends_on": "external_api.model_name", "conditional_list_values": {
+            SourceObject("model-a"): [SourceObject("1080p"), SourceObject("720p")], SourceObject("empty"): []}}})
+    apis = [_StubReferencedAPI("limited", SourceObject("model-a")), _StubReferencedAPI("absent", SourceObject("unknown")),
+            _StubReferencedAPI("empty", SourceObject("empty"))]
+    monkeypatch.setattr(minimal_model_web, "get_efootprint_objects_from_efootprint_type", lambda _: apis)
+    _, _, cascades = generate_dynamic_form(_SyntheticCrossObjectJobClass.__name__,
+        {"name": "Example", "resolution": SourceObject("720p")}, minimal_model_web)
+    assert cascades[0]["list_value"] == {"limited": ["720p"], "absent": ["720p"], "empty": []}

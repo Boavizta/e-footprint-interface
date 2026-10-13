@@ -14,11 +14,11 @@ from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.core.country import Country
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
+from efootprint.abstract_modeling_classes.conditional_inputs import resolve_input_path
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.exceptions import InputValidationError
 
-from model_builder.domain.conditional_inputs import resolve_input_path
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 

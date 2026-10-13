@@ -210,18 +210,30 @@ class HtmxPresenter:
             "name": output.edited_object_name,
             "action_type": "edit_object",
             "constraint_messages": constraint_messages,
+            "notices": [f"{change.input[0].name}: {change.accepted_value.label} changed to {change.accepted_value}."
+                        for change in output.input_edit_result.automatic_changes],
         }
 
-        if canvas_oob or output.replaces_primary_render or not output.refresh_cards:
+        repaired_cards = []
+        if not canvas_oob:
+            affected_owner_ids = {owner.id for owner, _ in output.input_edit_result.affected_inputs}
+            for owner_id in affected_owner_ids - {output.edited_object_id}:
+                affected_owner = self.model_web.get_web_object_from_efootprint_id(owner_id)
+                repaired_cards.extend(affected_owner.mirrored_cards)
+
+        if canvas_oob or ((output.replaces_primary_render or not output.refresh_cards) and not repaired_cards):
             # OOB regions cover all relevant cards, or this edit has no card-visible changes.
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
         else:
-            cards_to_refresh = list(output.mirrored_cards)
+            cards_to_refresh = repaired_cards
+            if output.refresh_cards and not output.replaces_primary_render:
+                cards_to_refresh += list(output.mirrored_cards)
             # Include siblings whose "Link existing" button just disappeared
             # (cascade delete during edit reduced linkable_existing_count from 1 to 0)
-            edited_ids = {card.efootprint_id for card in output.mirrored_cards}
-            cards_to_refresh += self._link_flipped_sibling_cards(
-                output.edited_object_type, edited_ids, target_count=0)
+            if output.refresh_cards and not output.replaces_primary_render:
+                edited_ids = {card.efootprint_id for card in output.mirrored_cards}
+                cards_to_refresh += self._link_flipped_sibling_cards(
+                    output.edited_object_type, edited_ids, target_count=0)
             html_updates = self._render_top_parent_cards(cards_to_refresh)
             html_updates += render_oob_regions(self.model_web, output.oob_regions)
 

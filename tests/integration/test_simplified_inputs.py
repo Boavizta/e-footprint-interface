@@ -639,3 +639,30 @@ def test_normal_nested_edits_remain_local_until_final_save(minimal_model_web, ha
     restored = getattr(restored_storage, storage_attribute)
     assert restored.magnitude == current.magnitude + (1 if succeeds else 0)
     assert restored.comment == ("Nested edit" if succeeds else current.comment)
+
+
+def test_normal_api_save_reopens_saved_resolution_and_replacement_source(video_model):
+    from model_builder.adapters.forms.form_field_generator import generate_dynamic_form
+    from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
+    from efootprint.abstract_modeling_classes.conditional_inputs import allowed_values
+
+    model, api_id, job_ids = video_model
+    EditObjectUseCase(model, input_catalog).execute(EditObjectInput(api_id, {
+        "provider": {"value": "bytedance"}, "model_name": {"value": "seedance-1.0"}}))
+    restored = ModelWeb(model.repository)
+    for index, job_id in enumerate(job_ids):
+        job_web = restored.get_web_object_from_efootprint_id(job_id)
+        job = job_web.modeling_obj
+        fields, advanced, cascades = generate_dynamic_form(
+            "EcoLogitsVideoGenExternalAPIJob", job.__dict__, restored, obj_to_edit=job_web)
+        resolution = next(field for field in fields + advanced if field["attr_name"] == "resolution")
+        assert resolution["selected"] == job.resolution.value
+        assert [option["value"] for option in resolution["options"]] == [
+            str(value) for value in allowed_values(type(job), "resolution", job.external_api.model_name)]
+        assert cascades == []
+        metadata = resolution["metadata"]
+        assert (metadata["source"]["id"] == Sources.AUTOMATIC_REPLACEMENT.id) is (index > 0)
+        if index > 0:
+            assert metadata["confidence"] is None
+            assert metadata["comment"] == job.resolution.comment
+            assert metadata["comment"].endswith("\n\nAuthored resolution")

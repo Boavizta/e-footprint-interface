@@ -10,6 +10,7 @@ from efootprint.abstract_modeling_classes.explainable_hourly_quantities import E
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
 from efootprint.abstract_modeling_classes.explainable_quantity import ExplainableQuantity
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
+from efootprint.abstract_modeling_classes.conditional_inputs import resolve_input_path
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.source_objects import SourceObject
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
@@ -20,7 +21,6 @@ from efootprint.core.hardware.edge.edge_cpu_component import EdgeCPUComponent
 from model_builder.adapters.forms.timeseries_builder_registry import (
     EDITABLE_TIMESERIES_BUILDERS, can_edit_timeseries, find_editable_builder,
 )
-from model_builder.domain.conditional_inputs import resolve_input_path
 from model_builder.domain.services.simplified_inputs import (
     FieldAddress, build_catalog, complete_selection, normalize_definition, validate_definition,
 )
@@ -54,7 +54,7 @@ def test_catalog_distinguishes_reference_selectors_and_structural_inputs(minimal
                              (usage.devices[0], "power")]:
         assert not catalog.fields[FieldAddress(owner.id, attribute)].eligible
     owner, attribute = resolve_input_path(server, "storage.storage_capacity")
-    assert owner is storage
+    assert owner is ModelingObject._unwrap_contextual_input_value(storage)
     assert FieldAddress(owner.id, attribute) in catalog.fields
     assert FieldAddress(server.id, "storage_capacity") not in catalog.fields
 

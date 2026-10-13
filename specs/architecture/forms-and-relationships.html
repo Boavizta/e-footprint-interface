@@ -28,8 +28,10 @@ Numerical inputs remain eligible when empty; normal-form skip lists describe pan
 eligibility. <code>complete_selection()</code> follows model-wide dependent links recursively, and
 <code>validate_definition()</code> rejects unknown/ineligible settings or missing required companions. A controller with
 an ineligible required companion is itself ineligible; a dependent may be selected alone.</p>
-<p><code>domain/conditional_inputs.resolve_input_path()</code> returns a dotted path's final owner and attribute.
-Normal forms use the same traversal while retaining their existing exclusions, labels, ordering, provenance and
+<p><code>efootprint.abstract_modeling_classes.conditional_inputs.resolve_input_path()</code> returns a dotted path's final owner and attribute.
+Normal forms obtain current and cascade options through the library’s <code>allowed_values()</code>, including
+static-list intersections and the distinction between absent and empty conditional branches, while retaining their
+existing exclusions, labels, ordering, provenance and
 one-hop <code>dynamic_lists</code>.</p>
 <p>Normal and Simplified edits share <code>domain/object_factory.apply_input_edits()</code>. It stages parsed
 values and uses the library's <code>dependent_inputs()</code>, <code>resolve_input_path()</code> and
@@ -41,6 +43,9 @@ controller reason, prior source/link and confidence, followed by the previous co
 <p>One final <code>ModelingUpdate</code> accepts the batch. The helper returns automatic-change records, affected
 owner/attribute pairs (including retained dependents whose choices changed), and value-change status. Normal editing
 carries this through <code>EditResult.input_edit_result</code> and <code>EditObjectOutput.input_edit_result</code>.
+The presenter refreshes affected owners’ top-parent and mirror cards, deduplicating canvas OOB coverage, and appends
+every automatic-change notice as text in the save toast. Reopened fields read the accepted value and provenance;
+the automatic-replacement source is displayed only when already current.
 <code>EditSimplifiedInputUseCase(model_web, catalog)</code> checks selected membership, maps those pairs to
 <code>FieldAddress</code>, and retains one final <code>persist_to_cache()</code>; normal edits retain cascade cleanup
 and <code>persist_structural_change()</code>. Nested storage hooks, names and metadata patches remain request-local

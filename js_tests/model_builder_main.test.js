@@ -358,3 +358,21 @@ test("a successful modal action is not mistaken for a failed save", () => {
     completeMutation(xhr);
     expect(finished.mock.calls[0][0].detail.successful).toBe(true);
 });
+
+test("edit toast renders every repair notice and authored name as text", () => {
+    loadModule();
+    const toastTemplate = path.join(__dirname, "../model_builder/templates/model_builder/components/toast.html");
+    document.body.insertAdjacentHTML("beforeend", fs.readFileSync(toastTemplate, "utf8"));
+    const show = jest.fn();
+    global.bootstrap = {Toast: {getOrCreateInstance: jest.fn(() => ({show}))}};
+    document.body.dispatchEvent(new CustomEvent("displayToastAndHighlightObjects", {detail: {
+        action_type: "edit_object", name: '<img src=x onerror="bad()">',
+        constraint_messages: ["Existing constraint notice"],
+        notices: ["Job A: Resolution changed to 480p.", "Job B: <script>unsafe()</script> changed to 480p."]
+    }}));
+    const body = document.getElementById("toast-content");
+    expect(body.textContent).toBe('<img src=x onerror="bad()"> has been updated! — Existing constraint notice — Job A: Resolution changed to 480p. — Job B: <script>unsafe()</script> changed to 480p.');
+    expect(body.children).toHaveLength(0);
+    expect(show).toHaveBeenCalled();
+    delete global.bootstrap;
+});

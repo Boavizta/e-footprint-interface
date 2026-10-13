@@ -155,3 +155,64 @@ class TestVideoExternalAPIObjects:
         side_panel.confirm_delete()
         model_builder.object_should_not_exist("EcoLogitsVideoGenExternalAPIJob", job_name)
         expect(page.locator("#model-builder-modal")).not_to_be_visible()
+
+    def test_normal_api_save_refreshes_shared_jobs_and_reopens_accepted_sources(
+        self, minimal_system, model_builder_page: ModelBuilderPage
+    ):
+        from efootprint.abstract_modeling_classes.source_objects import SourceObject
+        from efootprint.abstract_modeling_classes.explainable_object_dict import to_weighted_explainable_object_dict
+        from efootprint.api_utils.system_to_json import system_to_json
+        from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
+            EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob)
+        from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+        from tests.e2e.conftest import load_system_dict_into_browser
+
+        api = EcoLogitsVideoGenExternalAPI.from_defaults("Shared video API")
+        jobs = [EcoLogitsVideoGenExternalAPIJob.from_defaults(name, external_api=api,
+            resolution=SourceObject(resolution, confidence="high", comment="Prior comment"))
+            for name, resolution in [("Retained video job", "720p (1280 x 720)"),
+                                     ("Repaired video job A", "1080p (1920 x 1080)"),
+                                     ("Repaired video job B", "1080p (1920 x 1080)")]]
+        journey = next(iter(minimal_system.usage_patterns[0].usage_journeys))
+        step = next(iter(journey.uj_steps))
+        step.jobs = to_weighted_explainable_object_dict(jobs)
+        mirror_step = UsageJourneyStep.from_defaults("Mirror step", jobs=jobs)
+        journey.uj_steps = to_weighted_explainable_object_dict([step, mirror_step])
+        model_builder = load_system_dict_into_browser(
+            model_builder_page, system_to_json(minimal_system, save_computed_state=False))
+        page = model_builder.page
+        side_panel = model_builder.side_panel
+        model_builder.get_object_card("UsageJourneyStep", step.name).open_accordion()
+        model_builder.get_object_card("UsageJourneyStep", mirror_step.name).open_accordion()
+        job_buttons = page.locator(f"button[hx-get*='/model_builder/open-edit-object-panel/{jobs[1].id}']")
+        expect(job_buttons).to_have_count(2)
+        job_buttons.evaluate_all("els => els.forEach(el => el.dataset.beforeRepair = 'true')")
+
+        model_builder.get_object_card("EcoLogitsVideoGenExternalAPI", api.name).click_edit_button()
+        side_panel.select_option("EcoLogitsVideoGenExternalAPI_provider", "bytedance")
+        side_panel.select_option("EcoLogitsVideoGenExternalAPI_model_name", "seedance-1.0")
+        side_panel.submit_and_wait_for_close()
+        toast = page.locator("#toast-content")
+        for job in jobs[1:]:
+            expect(toast).to_contain_text(f"{job.name}: {job.resolution.label} changed to 480p (854 x 480).")
+        expect(toast).not_to_contain_text("Retained video job:")
+        expect(page.locator("button[data-before-repair='true']")).to_have_count(0)
+        expect(job_buttons).to_have_count(2)
+        expect(page.locator("#model-builder-modal")).not_to_be_visible()
+
+        for index, job in enumerate(jobs):
+            button = page.locator(f"button[hx-get*='/model_builder/open-edit-object-panel/{job.id}']").first
+            click_and_wait_for_htmx(page, button)
+            expect(page.locator("#EcoLogitsVideoGenExternalAPIJob_resolution")).to_have_value(
+                "720p (1280 x 720)" if index == 0 else "480p (854 x 480)")
+            assert page.locator("#EcoLogitsVideoGenExternalAPIJob_resolution option").evaluate_all(
+                "els => els.map(el => el.value)") == ["480p (854 x 480)", "720p (1280 x 720)"]
+            source = page.locator("#source-EcoLogitsVideoGenExternalAPIJob_resolution")
+            source.locator(".source-line .bi-pencil-fill").click()
+            picker = source.locator(".source-editor-select")
+            if index == 0:
+                expect(picker.locator("option[value='automatic_replacement']")).to_have_count(0)
+            else:
+                expect(picker).to_have_value("automatic_replacement")
+                expect(source.locator(".source-editor-comment")).to_contain_text("Prior comment")
+            side_panel.close()

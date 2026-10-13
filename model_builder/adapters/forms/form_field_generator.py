@@ -4,6 +4,7 @@ from decimal import Decimal
 from inspect import _empty as empty_annotation
 from typing import get_origin, List, get_args, TYPE_CHECKING
 
+from efootprint.abstract_modeling_classes.conditional_inputs import allowed_values, resolve_input_path
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
@@ -20,7 +21,6 @@ from model_builder.adapters.ui_config.field_ui_config_provider import FieldUICon
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
-from model_builder.domain.conditional_inputs import resolve_input_path
 from model_builder.domain.services.simplified_inputs import FieldAddress, input_eligibility, normalize_definition
 from model_builder.adapters.forms.simplified_input_context import included_requirement
 from model_builder.adapters.forms.timeseries_builder_registry import build_timeseries_form_config, can_edit_timeseries
@@ -382,17 +382,6 @@ def generate_dynamic_form(
                 structure_field.update({"default": _format_form_input_value(default.value)})
                 if isinstance(default.value, bool):
                     structure_field.update({"input_type": "bool"})
-                elif attr_name in list_values.keys():
-                    structure_field.update(
-                        {
-                            "input_type": "select_str_input",
-                            "selected": default_values[attr_name].value,
-                            "options": [
-                                {"label": str(attr_value), "value": str(attr_value)}
-                                for attr_value in list_values[attr_name]
-                            ],
-                        }
-                    )
                 elif attr_name in conditional_list_values.keys():
                     structure_field.update(
                         {"input_type": "select_str_input", "selected": default_values[attr_name].value, "options": []}
@@ -401,10 +390,11 @@ def generate_dynamic_form(
                     dependency_path = depends_on.split(".")
                     first_segment = dependency_path[0]
                     conditional_values = conditional_list_values[attr_name]["conditional_list_values"]
-                    values_by_conditional_value = {
-                        str(conditional_value): [str(possible_value) for possible_value in possible_values]
-                        for conditional_value, possible_values in conditional_values.items()
-                    }
+
+                    def choices_for(controller):
+                        choices = allowed_values(efootprint_class, attr_name, controller)
+                        return [str(value) for value in choices] if choices is not None else []
+
                     resolve_current_dependency = (
                         obj_to_edit is not None
                         and (resolve_conditional_options
@@ -415,7 +405,7 @@ def generate_dynamic_form(
                         resolved = getattr(owner, attribute)
                         structure_field["options"] = [
                             {"label": value, "value": value}
-                            for value in values_by_conditional_value.get(str(resolved), [])
+                            for value in choices_for(resolved)
                         ]
                     elif "." in depends_on:
                         # Cross-object dependency (e.g. "external_api.model_name"): the dotted path is
@@ -436,14 +426,15 @@ def generate_dynamic_form(
                             resolved = getattr(owner, attribute)
                             simplified_required_by[referenced_obj.id] = included_requirement(
                                 model_web, FieldAddress(owner.id, attribute), definition=simplified_definition)
-                            # Persisted objects always resolve to a known key (submit-time
-                            # check_belonging_to_authorized_values rejects off-catalog values), so the [] fallback
-                            # only fires on a str()-keying bug — and then for every object at once. The
-                            # cross-object generator integration test guards that contract.
-                            list_value[referenced_obj.id] = values_by_conditional_value.get(str(resolved), [])
+                            list_value[referenced_obj.id] = choices_for(resolved)
                     else:
                         filter_by = f"{efootprint_class_str}_{depends_on}"
-                        list_value = values_by_conditional_value
+                        controller_values = list_values.get(depends_on, conditional_values)
+                        if depends_on in conditional_list_values:
+                            controller_values = [value for values in
+                                                 conditional_list_values[depends_on]["conditional_list_values"].values()
+                                                 for value in values]
+                        list_value = {str(controller): choices_for(controller) for controller in controller_values}
                     if not resolve_current_dependency:
                         dynamic_lists.append(
                             {
@@ -453,6 +444,17 @@ def generate_dynamic_form(
                                 **({"simplified_required_by": simplified_required_by} if "." in depends_on else {}),
                             }
                         )
+                elif attr_name in list_values:
+                    structure_field.update(
+                        {
+                            "input_type": "select_str_input",
+                            "selected": default_values[attr_name].value,
+                            "options": [
+                                {"label": str(attr_value), "value": str(attr_value)}
+                                for attr_value in allowed_values(efootprint_class, attr_name, None)
+                            ],
+                        }
+                    )
                 else:
                     structure_field.update({"input_type": "str"})
 
