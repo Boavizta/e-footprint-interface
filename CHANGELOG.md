@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Agent workflow guidance now reads each role's model and effort from its runtime agent definition instead of a duplicated role table.
 - Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.
 - Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point and updated implementation links in the feature plan.
 - Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
