@@ -18,12 +18,14 @@ Context variables:
     <select class="form-select form-select-sm source-editor-select"
             data-action="source-select-change">
         {% for available in source_meta_available %}
+            {% if available.id != 'automatic_replacement' or source_meta_current_id == available.id %}
             <option value="{{ available.id }}"
                     data-name="{{ available.name }}"
                     data-link="{{ available.link|default:'' }}"
                     {% if source_meta_current_id == available.id %}selected{% endif %}>
                 {{ available.name }}
             </option>
+            {% endif %}
         {% endfor %}
         <option value="__custom__">Custom source…</option>
     </select>
@@ -51,7 +53,6 @@ Context variables:
     <label class="editor-label mt-3">Comment</label>
     <textarea class="form-control source-editor-comment"
               rows="3"
-              maxlength="2000"
               placeholder="Add a note — why this source, any caveats, audit trail…">{{ source_meta_current_comment|default:'' }}</textarea>
 
     {% comment %}Hidden inputs ride whatever form wraps the editor (or just the side panel form).

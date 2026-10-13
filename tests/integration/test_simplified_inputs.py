@@ -6,7 +6,7 @@ import pytest
 
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
-from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue, Sources
 from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
     EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob,
 )
@@ -151,7 +151,7 @@ def test_provider_reconciles_chain_and_every_linked_job_in_one_batch(video_model
     expected_model = api.conditional_list_values["model_name"]["conditional_list_values"][new_provider][0]
     allowed = jobs[0].conditional_list_values["resolution"]["conditional_list_values"][expected_model]
     with (
-        patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update,
+        patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update,
         patch.object(model, "persist_to_cache", wraps=model.persist_to_cache) as persist,
         patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save,
     ):
@@ -168,14 +168,19 @@ def test_provider_reconciles_chain_and_every_linked_job_in_one_batch(video_model
     assert result.changed_fields == {provider, FieldAddress(api_id, "model_name"),
                                      *(FieldAddress(job.id, "resolution") for job in jobs)}
     assert len(result.notices) == 3
-    assert "Adjusted A" in result.notices[1] and str(allowed[0]) in result.notices[1]
+    assert any("Adjusted A" in notice and str(allowed[0]) in notice for notice in result.notices)
     assert_conditional_editors(result.changed_fields)
     restored = ModelWeb(model.repository)
     for job in jobs:
         value = restored.flat_efootprint_objs_dict[job.id].resolution
         assert value == job.resolution
-        assert value.confidence == "high" and value.comment == "Authored resolution"
-        assert value.source.id == old_resolution.source.id
+        if job.id == jobs[0].id:
+            assert value.confidence == "high" and value.comment == "Authored resolution"
+            assert value.source.id == old_resolution.source.id
+        else:
+            assert value.confidence is None
+            assert value.comment.endswith("\n\nAuthored resolution")
+            assert value.source is Sources.AUTOMATIC_REPLACEMENT
     assert restored.flat_efootprint_objs_dict[api_id].provider.confidence == "medium"
 
 
@@ -190,7 +195,7 @@ def test_empty_choice_rejects_before_any_value_or_provenance_is_published(video_
     monkeypatch.setitem(branches, new_model, [])
     before = deepcopy(model.repository.get_system_data())
     with (
-        patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update,
+        patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update,
         patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save,
     ):
         with pytest.raises(ValueError, match="No allowed value"):
@@ -211,7 +216,7 @@ def test_library_rejection_rolls_back_batch_without_publishing_metadata(video_mo
     api = model.flat_efootprint_objs_dict[api_id]
     original = api.provider
     with (
-        patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update,
+        patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update,
         patch.object(model, "persist_to_cache", wraps=model.persist_to_cache) as persist,
     ):
         with pytest.raises(ValueError, match="not in the list"):
@@ -243,7 +248,7 @@ def test_optional_server_count_and_unrestricted_branch_round_trip(minimal_model_
     assert isinstance(ModelWeb(model.repository).flat_efootprint_objs_dict[server.id].fixed_nb_of_instances,
                       EmptyExplainableObject)
     use_case.execute(EditSimplifiedInput(count, parsed["fixed_nb_of_instances"]))
-    with patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update:
+    with patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update:
         result = use_case.execute(EditSimplifiedInput(kind, {"value": ServerTypes.autoscaling().value}))
     update.assert_called_once()
     assert len(update.call_args.args[0]) == 2
@@ -251,7 +256,8 @@ def test_optional_server_count_and_unrestricted_branch_round_trip(minimal_model_
     assert len(result.notices) == 1 and "no value" in result.notices[0]
     restored = ModelWeb(model.repository).flat_efootprint_objs_dict[server.id]
     assert isinstance(restored.fixed_nb_of_instances, EmptyExplainableObject)
-    assert restored.fixed_nb_of_instances.comment == "Fleet count"
+    assert restored.fixed_nb_of_instances.comment.endswith("\n\nFleet count")
+    assert restored.fixed_nb_of_instances.source is Sources.AUTOMATIC_REPLACEMENT
 
 
 def test_empty_server_count_to_zero_reaches_capacity_validation(minimal_model_web):
@@ -261,7 +267,7 @@ def test_empty_server_count_to_zero_reaches_capacity_validation(minimal_model_we
     use_case = _select(model, kind)
     use_case.execute(EditSimplifiedInput(kind, {"value": ServerTypes.on_premise().value}))
     before = deepcopy(model.repository.get_system_data())
-    with patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update:
+    with patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update:
         with pytest.raises(InsufficientCapacityError, match="capacity"):
             use_case.execute(EditSimplifiedInput(FieldAddress(server.id, "fixed_nb_of_instances"), {
                 "value": 0, "unit": "concurrent", "comment": "Unpublished zero"}))
@@ -279,7 +285,7 @@ def test_zero_count_is_replaced_by_empty_when_switching_to_autoscaling(minimal_m
     model.persist_to_cache()
     address = FieldAddress(server.id, "server_type")
     use_case = _select(model, address)
-    with patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update:
+    with patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update:
         result = use_case.execute(EditSimplifiedInput(address, {"value": ServerTypes.autoscaling().value}))
     update.assert_called_once()
     assert len(update.call_args.args[0]) == 2
@@ -324,7 +330,7 @@ def test_same_value_provenance_save_does_not_reconcile_other_inputs(video_model,
     parsed = {"confidence": "low", "comment": "Reviewed"}
     parsed.update({"_metadata_only": True} if metadata_only else {"value": "openai"})
     with (
-        patch("model_builder.application.use_cases.simplified_inputs.ModelingUpdate", wraps=ModelingUpdate) as update,
+        patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update,
         patch.object(model, "persist_to_cache", wraps=model.persist_to_cache) as persist,
     ):
         result = use_case.execute(EditSimplifiedInput(address, parsed))
@@ -529,3 +535,107 @@ def test_structural_relink_completes_current_controller_dependencies(video_model
     EditObjectUseCase(model, input_catalog).execute(EditObjectInput(job_id, {"external_api": api_a_id}))
     setting = model.repository.interface_config["simplified_inputs"]["fields"][job_id]["resolution"]
     assert setting == {"included": True, "help": "Kept after reorienting"}
+
+
+@pytest.mark.parametrize("simplified", [False, True])
+def test_editors_repair_the_same_shared_api_dependents_and_save_once(video_model, simplified):
+    model, api_id, job_ids = video_model
+    address = FieldAddress(api_id, "provider")
+    use_case = _select(model, address)
+    parsed = {"value": "bytedance", "comment": "Chosen by author"}
+    retained = model.flat_efootprint_objs_dict[job_ids[0]].resolution
+    with (
+        patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update,
+        patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save,
+    ):
+        if simplified:
+            output = use_case.execute(EditSimplifiedInput(address, parsed))
+            assert len(output.notices) == 3
+        else:
+            output = EditObjectUseCase(model, input_catalog).execute(EditObjectInput(api_id, {"provider": parsed}))
+            repaired_ids = {change.input[0].id for change in output.input_edit_result.automatic_changes}
+            assert repaired_ids == {api_id, *job_ids[1:]}
+            assert output.input_edit_result.affected_inputs == {
+                (model.flat_efootprint_objs_dict[api_id], "provider"),
+                (model.flat_efootprint_objs_dict[api_id], "model_name"),
+                *((model.flat_efootprint_objs_dict[job_id], "resolution") for job_id in job_ids)}
+    update.assert_called_once()
+    save.assert_called_once()
+    assert model.flat_efootprint_objs_dict[job_ids[0]].resolution is retained
+    restored = ModelWeb(model.repository)
+    assert restored.flat_efootprint_objs_dict[api_id].provider.comment == "Chosen by author"
+    for job_id in job_ids[1:]:
+        value = restored.flat_efootprint_objs_dict[job_id].resolution
+        assert value.value == "480p (854 x 480)"
+        assert value.source is Sources.AUTOMATIC_REPLACEMENT
+        assert value.confidence is None
+        assert value.comment.endswith("\n\nAuthored resolution")
+
+
+@pytest.mark.parametrize("failure", ["explicit", "empty"])
+def test_normal_edit_rejection_publishes_no_values_metadata_or_results(video_model, monkeypatch, failure):
+    from model_builder.domain.exceptions import InputValidationError
+
+    model, api_id, job_ids = video_model
+    data = {"name": "Unpublished API", "provider": {"value": "bytedance", "comment": "Unpublished provider"},
+            "model_name": {"value": "sora-2-pro", "confidence": "low"}}
+    if failure == "empty":
+        data["model_name"]["value"] = "seedance-1.0"
+        branches = EcoLogitsVideoGenExternalAPIJob.conditional_list_values["resolution"]["conditional_list_values"]
+        monkeypatch.setitem(branches, SourceObject("seedance-1.0"), [])
+    before = deepcopy(model.repository.get_system_data())
+    config_before = deepcopy(model.repository.interface_config)
+    with patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save:
+        with pytest.raises(InputValidationError):
+            EditObjectUseCase(model, input_catalog).execute(EditObjectInput(api_id, data))
+    save.assert_not_called()
+    assert model.repository.get_system_data() == before
+    assert model.repository.interface_config == config_before
+    restored = ModelWeb(model.repository)
+    assert restored.flat_efootprint_objs_dict[api_id].name == "Video API"
+    assert restored.flat_efootprint_objs_dict[api_id].model_name.value == "sora-2-pro"
+    assert all(restored.flat_efootprint_objs_dict[job_id].external_api.id == api_id for job_id in job_ids)
+
+
+@pytest.mark.parametrize("succeeds", [False, True])
+@pytest.mark.parametrize("hardware", ["server", "edge"])
+def test_normal_nested_edits_remain_local_until_final_save(minimal_model_web, hardware, succeeds):
+    from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
+    from efootprint.core.hardware.edge.edge_storage import EdgeStorage
+    from model_builder.domain.exceptions import InputValidationError
+
+    model = minimal_model_web
+    if hardware == "server":
+        owner = model.servers[0]
+        nested_key = "_parsed_Storage"
+        validation_attribute = "server_type"
+        invalid_value = "unsupported"
+    else:
+        computer = EdgeComputer.from_defaults("Computer", storage=EdgeStorage.from_defaults("Edge storage"))
+        owner = model.add_new_efootprint_object_to_system(computer)
+        nested_key = "_parsed_EdgeStorage"
+        validation_attribute = "lifespan"
+        invalid_value = -1
+    model.persist_to_cache()
+    storage_attribute = "storage_capacity" if hardware == "server" else "storage_capacity_per_unit"
+    current = getattr(owner.storage.modeling_obj, storage_attribute)
+    before = deepcopy(model.repository.get_system_data())
+    data = {nested_key: {storage_attribute: {
+        "value": current.magnitude + 1, "unit": str(current.unit), "comment": "Nested edit"}}}
+    if not succeeds:
+        data[validation_attribute] = {"value": invalid_value}
+        if hardware == "edge":
+            data[validation_attribute]["unit"] = "year"
+    with patch.object(model.repository, "save_data", wraps=model.repository.save_data) as save:
+        if succeeds:
+            EditObjectUseCase(model, input_catalog).execute(EditObjectInput(owner.efootprint_id, data))
+            save.assert_called_once()
+        else:
+            with pytest.raises(InputValidationError):
+                EditObjectUseCase(model, input_catalog).execute(EditObjectInput(owner.efootprint_id, data))
+            save.assert_not_called()
+            assert model.repository.get_system_data() == before
+    restored_storage = ModelWeb(model.repository).flat_efootprint_objs_dict[owner.storage.efootprint_id]
+    restored = getattr(restored_storage, storage_attribute)
+    assert restored.magnitude == current.magnitude + (1 if succeeds else 0)
+    assert restored.comment == ("Nested edit" if succeeds else current.comment)

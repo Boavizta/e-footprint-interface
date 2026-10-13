@@ -367,3 +367,107 @@ class TestApplyMetadata:
         assert server_web.modeling_obj.compute is original_compute
         assert server_web.modeling_obj.compute.confidence == "high"
         assert server_web.modeling_obj.compute.comment == "from source table editor"
+
+
+class TestConditionalInputEdits:
+    @pytest.fixture
+    def video_inputs(self, minimal_model_web):
+        from efootprint.abstract_modeling_classes.source_objects import SourceObject
+        from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
+            EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob,
+        )
+        api = EcoLogitsVideoGenExternalAPI.from_defaults("Video API")
+        job = EcoLogitsVideoGenExternalAPIJob.from_defaults(
+            "Video job", external_api=api, resolution=SourceObject("1080p (1920 x 1080)"))
+        for owner in (api, job):
+            minimal_model_web.add_new_efootprint_object_to_system(owner)
+        return minimal_model_web, api, job
+
+    def test_controller_order_and_repeated_repairs_keep_exact_history(self, video_inputs):
+        from unittest.mock import patch
+        from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
+        from model_builder.domain.object_factory import apply_input_edits
+
+        model, api, job = video_inputs
+        web_api = model.get_web_object_from_efootprint_id(api.id)
+        original = job.resolution
+        original.source = Source("Measured output", "https://example.test/evidence")
+        original.confidence = "high"
+        original.comment = "  Original evidence\n" + "Audit detail. " * 200 + "\n  "
+        with patch("model_builder.domain.object_factory.ModelingUpdate", wraps=ModelingUpdate) as update:
+            first = apply_input_edits({"provider": {"value": "bytedance"}}, web_api)
+        update.assert_called_once()
+        assert api.model_name.value == "seedance-1.0"
+        assert job.resolution.value == "480p (854 x 480)"
+        assert [change.input for change in first.automatic_changes] == [(api, "model_name"), (job, "resolution")]
+        assert first.had_value_changes
+        expected = (
+            "Automatic replacement: 1080p (1920 x 1080) → 480p (854 x 480).\n"
+            "Reason: Video API.model_name now resolves to seedance-1.0 after the controlling input changed.\n"
+            "Previous source: Measured output (link: https://example.test/evidence).\n"
+            "Previous confidence: high.\n\n" + original.comment)
+        assert job.resolution.comment == expected
+        assert job.resolution.label == original.label
+        assert job.resolution.source is Sources.AUTOMATIC_REPLACEMENT
+        assert job.resolution.confidence is None
+
+        second = apply_input_edits({"provider": {"value": "openai"}}, web_api)
+        assert len(second.automatic_changes) == 2
+        assert job.resolution.value == "720p (1280 x 720)"
+        assert job.resolution.comment == (
+            "Automatic replacement: 480p (854 x 480) → 720p (1280 x 720).\n"
+            f"Reason: Video API.model_name now resolves to {api.model_name} after the controlling input changed.\n"
+            "Previous source: automatic replacement (link: none).\n"
+            "Previous confidence: none.\n\n" + expected)
+        model.persist_to_cache()
+        restored = ModelWeb(model.repository).flat_efootprint_objs_dict[job.id].resolution
+        assert restored.comment == job.resolution.comment
+        assert restored.source is Sources.AUTOMATIC_REPLACEMENT
+
+    @pytest.mark.parametrize("model_patch", [None, {"_metadata_only": True, "comment": "Reviewed old model"}])
+    def test_implicit_and_metadata_only_dependents_can_be_repaired(self, video_inputs, model_patch):
+        from model_builder.domain.object_factory import apply_input_edits
+
+        model, api, _ = video_inputs
+        data = {"provider": {"value": "bytedance"}}
+        if model_patch is not None:
+            data["model_name"] = model_patch
+        result = apply_input_edits(data, model.get_web_object_from_efootprint_id(api.id))
+        assert api.model_name.value == "seedance-1.0"
+        assert len(result.automatic_changes) == 2
+        if model_patch:
+            assert api.model_name.comment.endswith("\n\nReviewed old model")
+
+    @pytest.mark.parametrize("submitted_model", ["sora-2-pro", "sora-2"])
+    def test_incompatible_explicit_model_is_never_replaced(self, video_inputs, submitted_model):
+        from unittest.mock import patch
+        from model_builder.domain.exceptions import InputValidationError
+        from model_builder.domain.object_factory import apply_input_edits
+
+        model, api, job = video_inputs
+        previous = (api.provider, api.model_name, job.resolution)
+        with patch("model_builder.domain.object_factory.ModelingUpdate") as update:
+            with pytest.raises(InputValidationError, match="submitted value.*model_name"):
+                apply_input_edits({"provider": {"value": "bytedance"}, "model_name": {"value": submitted_model}},
+                                  model.get_web_object_from_efootprint_id(api.id))
+        update.assert_not_called()
+        assert (api.provider, api.model_name, job.resolution) == previous
+
+    def test_relationship_replacement_reads_proposed_controller(self, video_inputs):
+        from efootprint.abstract_modeling_classes.source_objects import SourceObject
+        from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
+            EcoLogitsVideoGenExternalAPI,
+        )
+        from model_builder.domain.object_factory import apply_input_edits
+
+        model, old_api, job = video_inputs
+        new_api = EcoLogitsVideoGenExternalAPI.from_defaults(
+            "New API", provider=SourceObject("bytedance"), model_name=SourceObject("seedance-1.0"))
+        model.add_new_efootprint_object_to_system(new_api)
+        result = apply_input_edits({"external_api": new_api.id}, model.get_web_object_from_efootprint_id(job.id))
+        assert job.external_api.id == new_api.id
+        assert job.resolution.value == "480p (854 x 480)"
+        assert "New API.model_name now resolves to seedance-1.0" in job.resolution.comment
+        assert result.affected_inputs == {(job, "external_api"), (job, "resolution")}
+        assert len(result.automatic_changes) == 1
+        assert old_api.model_name.value == "sora-2-pro"

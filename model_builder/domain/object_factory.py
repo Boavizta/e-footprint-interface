@@ -9,10 +9,13 @@ Use adapters/forms/form_data_parser.py to parse HTTP form data before calling th
 """
 
 from copy import copy, deepcopy
+from dataclasses import dataclass, field
+from graphlib import TopologicalSorter
 from typing import Any, Dict, List, get_origin, get_args, TYPE_CHECKING
 
 from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject, Source
 from efootprint.abstract_modeling_classes.explainable_object_dict import ExplainableObjectDict
+from efootprint.abstract_modeling_classes.conditional_inputs import allowed_values, dependent_inputs, resolve_input_path
 from efootprint.abstract_modeling_classes.input_values import input_values_match
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
@@ -21,6 +24,7 @@ from efootprint.logger import logger
 from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
+from model_builder.domain.exceptions import InputValidationError
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 if TYPE_CHECKING:
@@ -260,18 +264,110 @@ def prepare_input_changes(
     return changes_list
 
 
+@dataclass
+class AutomaticInputChange:
+    input: tuple[ModelingObject, str]
+    previous_value: ExplainableObject
+    accepted_value: ExplainableObject
+
+
+@dataclass
+class InputEditResult:
+    automatic_changes: list[AutomaticInputChange] = field(default_factory=list)
+    affected_inputs: set[tuple[ModelingObject, str]] = field(default_factory=set)
+    had_value_changes: bool = False
+
+
+def apply_input_edits(parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb") -> InputEditResult:
+    """Prepare explicit inputs and implicit repairs, then apply one accepted library batch.
+
+    Values and relationship choices are read from the proposed map until the final update.
+    Metadata patches remain request-local; the caller owns the final persistence boundary.
+    """
+    model_web = obj_to_edit.model_web
+    available_sources = model_web.available_sources
+    pending_sources = {}
+
+    def prepare(data, owner):
+        try:
+            return prepare_input_changes(
+                data, owner, available_sources=available_sources, pending_sources=pending_sources)
+        except ValueError as error:
+            raise InputValidationError(str(error)) from error
+
+    changes = prepare(parsed_data, obj_to_edit)
+    proposed = {(old.modeling_obj_container, old.attr_name_in_mod_obj_container): new for old, new in changes}
+    parameters = get_init_signature_params(obj_to_edit.efootprint_class)
+    submitted = {(obj_to_edit.modeling_obj, attribute) for attribute in parsed_data
+                 if attribute in parameters and attribute not in ("self", "name")}
+    explicit = {address for address in submitted
+                if not (isinstance(parsed_data[address[1]], dict) and parsed_data[address[1]].get("_metadata_only"))}
+    affected = set()
+    pending = set(proposed)
+    while pending:
+        reached = dependent_inputs(pending, proposed) - affected
+        affected.update(reached)
+        pending = reached
+
+    controllers = {
+        (owner, attribute): resolve_input_path(
+            owner, type(owner).conditional_list_values[attribute]["depends_on"], proposed)
+        for owner, attribute in affected
+    }
+    ordering = TopologicalSorter({address: {controller} & affected for address, controller in controllers.items()})
+    automatic_changes = []
+    for owner, attribute in ordering.static_order():
+        address = (owner, attribute)
+        controller_owner, controller_attribute = controllers[address]
+        controller = proposed.get(controllers[address], getattr(controller_owner, controller_attribute))
+        options = allowed_values(type(owner), attribute, controller)
+        if options is None:
+            continue
+        if not options:
+            raise InputValidationError(f"No allowed value for {owner.name}.{attribute}.")
+        current = proposed.get(address, getattr(owner, attribute))
+        if any(input_values_match(current, option) for option in options):
+            continue
+        if address in explicit:
+            raise InputValidationError(f"The submitted value for {owner.name}.{attribute} conflicts with its "
+                                       "conditional inputs.")
+        # Options are shared library constants. Prepare a fresh value for the actual owner,
+        # inheriting its label but replacing provenance with an explicit audit history.
+        value = {key: value for key, value in options[0].to_json().items()
+                 if key not in ("source", "confidence", "comment")}
+        web_owner = model_web.get_web_object_from_efootprint_id(owner.id)
+        replacement = prepare({attribute: value}, web_owner)[0][1]
+        source = current.source
+        prior_source = f"{source.name} (link: {source.link or 'none'})" if source else "none"
+        note = (f"Automatic replacement: {current} → {replacement}.\n"
+                f"Reason: {controller_owner.name}.{controller_attribute} now resolves to {controller} "
+                "after the controlling input changed.\n"
+                f"Previous source: {prior_source}.\n"
+                f"Previous confidence: {current.confidence or 'none'}.")
+        replacement.source = Sources.AUTOMATIC_REPLACEMENT
+        replacement.confidence = None
+        replacement.comment = note + (f"\n\n{current.comment}" if current.comment is not None else "")
+        proposed[address] = replacement
+        automatic_changes.append(AutomaticInputChange(address, current, replacement))
+
+    if proposed:
+        try:
+            ModelingUpdate([[getattr(owner, attribute), value] for (owner, attribute), value in proposed.items()])
+        except ValueError as error:
+            raise InputValidationError(str(error)) from error
+    return InputEditResult(automatic_changes, submitted | affected, bool(proposed))
+
+
 def edit_object_from_parsed_data(
     parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectWeb", update_system_data=False
 ):
-    """Edit parsed inputs, returning (object, had_non_name_changes, name_changed)."""
+    """Edit parsed inputs, returning (object, input_edit_result, name_changed)."""
     old_name = obj_to_edit.name
     if "name" in parsed_data:
         obj_to_edit.set_efootprint_value("name", parsed_data["name"])
-    changes_list = prepare_input_changes(parsed_data, obj_to_edit)
-    if changes_list:
-        ModelingUpdate(changes_list)
+    input_edit_result = apply_input_edits(parsed_data, obj_to_edit)
 
     if update_system_data:
         obj_to_edit.model_web.persist_to_cache()
 
-    return obj_to_edit, bool(changes_list), obj_to_edit.name != old_name
+    return obj_to_edit, input_edit_result, obj_to_edit.name != old_name

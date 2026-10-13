@@ -454,7 +454,7 @@ class _SyntheticReferencedAPIClass(ModelingObject):
     list_values = {}
     conditional_list_values = {}
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, model_name: SourceObject):
         pass
 
 

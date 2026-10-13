@@ -366,3 +366,52 @@ class TestSourceMetadataSourceTable:
         row = _source_row(page)
         expect(row.locator(".source-col-comment")).to_contain_text(EXISTING_SERVER_POWER_COMMENT)
         expect(row.locator(".source-col-comment")).not_to_contain_text("Discard")
+
+
+@pytest.mark.e2e
+def test_automatic_replacement_history_over_2000_characters_can_be_resubmitted(
+    minimal_system, model_builder_page: ModelBuilderPage,
+):
+    from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
+    from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
+    from efootprint.builders.external_apis.ecologits.ecologits_video_external_api import (
+        EcoLogitsVideoGenExternalAPI, EcoLogitsVideoGenExternalAPIJob,
+    )
+    from efootprint.constants.units import u
+    from model_builder.adapters.repositories import InMemorySystemRepository
+    from model_builder.domain.entities.web_core.model_web import ModelWeb
+    from model_builder.domain.object_factory import apply_input_edits
+
+    api = EcoLogitsVideoGenExternalAPI.from_defaults("Video API")
+    job = EcoLogitsVideoGenExternalAPIJob.from_defaults(
+        "Video job", external_api=api, resolution=SourceObject(
+            "1080p (1920 x 1080)", confidence="high", comment="Original audit evidence. " * 100))
+    journey = next(iter(minimal_system.usage_patterns[0].usage_journeys))
+    step = next(iter(journey.uj_steps))
+    ModelingUpdate([[step.jobs, {**step.jobs, job: SourceValue(1 * u.dimensionless)}]])
+    model = ModelWeb(InMemorySystemRepository(initial_data=system_to_json(minimal_system, save_computed_state=False)))
+    apply_input_edits({"provider": {"value": "bytedance"}}, model.get_web_object_from_efootprint_id(api.id))
+    generated_comment = model.flat_efootprint_objs_dict[job.id].resolution.comment
+    assert len(generated_comment) > 2000
+    model_builder = load_system_dict_into_browser(model_builder_page, model.to_json(save_computed_state=False))
+    page = model_builder.page
+    model_builder.get_object_card("UsageJourneyStep", step.name).open_accordion()
+    model_builder.get_object_card("EcoLogitsVideoGenExternalAPIJob", "Video job").click_edit_button()
+    field_id = "EcoLogitsVideoGenExternalAPIJob_resolution"
+    editor = _open_source_editor(page, field_id)
+    expect(editor.locator(".source-editor-select")).to_have_value("automatic_replacement")
+    other_field_option = page.locator(
+        '#editor-EcoLogitsVideoGenExternalAPIJob_duration option[value="automatic_replacement"]')
+    expect(other_field_option).to_have_count(0)
+    comment = editor.locator(".source-editor-comment")
+    expect(comment).to_have_value(generated_comment)
+    assert comment.get_attribute("maxlength") is None
+    resubmitted = generated_comment + "\nReviewed after automatic replacement."
+    comment.fill(resubmitted)
+    _apply_source_editor(editor)
+    model_builder.side_panel.submit_and_wait_for_close()
+
+    model_builder.get_object_card("EcoLogitsVideoGenExternalAPIJob", "Video job").click_edit_button()
+    editor = _open_source_editor(page, field_id)
+    expect(editor.locator(".source-editor-comment")).to_have_value(resubmitted)
+    expect(editor.locator(".source-editor-select")).to_have_value("automatic_replacement")

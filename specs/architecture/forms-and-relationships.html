@@ -31,14 +31,23 @@ an ineligible required companion is itself ineligible; a dependent may be select
 <p><code>domain/conditional_inputs.resolve_input_path()</code> returns a dotted path's final owner and attribute.
 Normal forms use the same traversal while retaining their existing exclusions, labels, ordering, provenance and
 one-hop <code>dynamic_lists</code>.</p>
-<p><code>EditSimplifiedInputUseCase(model_web, catalog)</code> accepts one selected <code>FieldAddress</code> and
-normalized value/provenance data. It reconciles conditional dependents against candidate controller values across all
-owners, retaining valid values or choosing the first metadata option with a notice. Missing branches are unrestricted;
-empty lists reject. One <code>ModelingUpdate</code> applies the collected changes before one
-<code>persist_to_cache()</code>. Its <code>changed_fields</code> also includes retained dependents whose options changed,
-but same-value/provenance-only saves affect only the submitted address. Conditional matching and input preparation use
-the library's <code>input_values_match()</code>: absence differs from zero, and authored timeseries builder/input changes
-remain edits even when their calculated values are equal. A rejected request discards its local model.</p>
+<p>Normal and Simplified edits share <code>domain/object_factory.apply_input_edits()</code>. It stages parsed
+values and uses the library's <code>dependent_inputs()</code>, <code>resolve_input_path()</code> and
+<code>allowed_values()</code> to evaluate affected dependents in controller order against proposed relationships.
+Compatible values remain attached; incompatible explicit submissions and empty choice sets reject. Implicit
+incompatible values receive a fresh copy of the first option, retaining the field label, with
+<code>Sources.AUTOMATIC_REPLACEMENT</code>, no confidence, and a prepended comment recording the old/new values,
+controller reason, prior source/link and confidence, followed by the previous comment verbatim.</p>
+<p>One final <code>ModelingUpdate</code> accepts the batch. The helper returns automatic-change records, affected
+owner/attribute pairs (including retained dependents whose choices changed), and value-change status. Normal editing
+carries this through <code>EditResult.input_edit_result</code> and <code>EditObjectOutput.input_edit_result</code>.
+<code>EditSimplifiedInputUseCase(model_web, catalog)</code> checks selected membership, maps those pairs to
+<code>FieldAddress</code>, and retains one final <code>persist_to_cache()</code>; normal edits retain cascade cleanup
+and <code>persist_structural_change()</code>. Nested storage hooks, names and metadata patches remain request-local
+until that successful save. Same-value/provenance-only saves affect only submitted addresses; unchanged explicit
+values still reject when another submitted controller makes them incompatible. Conditional matching uses the library's
+<code>input_values_match()</code>, preserving the distinction between absence and zero and between authored timeseries
+inputs even when calculated values are equal.</p>
 <p><code>FormContextBuilder.build_input_fields()</code> consumes eligible owner attributes through the shared
 <code>generate_dynamic_form(..., include_attributes=...)</code> generator and ordinary edition transforms. Quantity constructor unions admitting <code>EmptyExplainableObject</code> select the optional numeric partial
 in normal and simplified forms, with a generic “Leave unset” switch. Empty values get their unit from the library’s
@@ -74,7 +83,8 @@ path and never hydrate <code>ModelWeb</code>. Catalog and definition reads are s
 <li><code>prepare_input_changes()</code> — converts normal and simplified edits to library value pairs without applying
 them or persisting. Optional annotations admitting <code>EmptyExplainableObject</code> resolve to their editable type;
 empty and explicit zero remain distinct authored inputs.</li>
-<li><code>edit_object_from_parsed_data()</code> — handles object updates via the shared preparer and <code>ModelingUpdate</code>.</li>
+<li><code>apply_input_edits()</code> — stages explicit inputs and implicit conditional repairs for one library batch.
+<code>edit_object_from_parsed_data()</code> also handles names and returns the shared edit result.</li>
 <li><code>_apply_metadata(obj, parsed_value, available_sources, pending_sources)</code> — sets <code>source</code>, <code>confidence</code>, and <code>comment</code> on any <code>ExplainableObject</code> from the parsed form dict. Called per-attribute in both create and edit paths.</li>
 </ul>
 <p>Source resolution order: (1) <code>available_sources</code> matched by id (model's existing sources), (2) <code>pending_sources</code> matched by id (sources just minted earlier in the same submission), (3) mint a new <code>Source(name, link, id=submitted_id)</code> and stash it in <code>pending_sources</code>.</p>
@@ -82,6 +92,9 @@ empty and explicit zero remain distinct authored inputs.</li>
 <p>Replacement values inherit the current input's label and omitted provenance before <code>_apply_metadata()</code>
 patches submitted keys. Same-value edits patch the existing object directly because <code>ModelingUpdate</code> skips
 equal values. These metadata changes stay on the request-local graph until the entire edit succeeds and is persisted.</p>
+<p>The source editor displays the automatic-replacement source on inputs that already carry it, excluding it from
+other inputs' manual choices. Comments have no editor length cap so repeated replacement history can be viewed and
+resubmitted intact.</p>
 <h2 id="relationship-types">Relationship types</h2>
 <h3 id="list-based-children-standard-pattern">List-based children (standard pattern)</h3>
 <p>Most parent-child relationships use <code>List[ChildType]</code> constructor parameters. Managed via:</p>

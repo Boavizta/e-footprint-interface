@@ -4,8 +4,10 @@ This service handles object editing and cleanup of orphaned accordion children,
 keeping this business logic separate from HTTP/presentation concerns.
 """
 from copy import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, Any
+
+from model_builder.domain.object_factory import InputEditResult
 
 if TYPE_CHECKING:
     from model_builder.domain.efootprint_to_web_mapping import ModelingObjectWeb
@@ -15,6 +17,7 @@ if TYPE_CHECKING:
 class EditResult:
     """Result of editing an object with cascade cleanup."""
     edited_object: "ModelingObjectWeb"
+    input_edit_result: InputEditResult = field(default_factory=InputEditResult)
 
 
 class EditService:
@@ -44,7 +47,7 @@ class EditService:
             accordion_children_before[mirrored_card] = copy(mirrored_card.accordion_children)
 
         # Perform the edit (form_data is already parsed by adapter)
-        edited_obj, *_ = edit_object_from_parsed_data(form_data, obj_to_edit)
+        edited_obj, input_edit_result, _ = edit_object_from_parsed_data(form_data, obj_to_edit)
 
         # Capture accordion children after edit
         accordion_children_after = {}
@@ -65,4 +68,4 @@ class EditService:
                     and child.gets_deleted_if_unique_mod_obj_container_gets_deleted):
                 child.self_delete()
 
-        return EditResult(edited_object=edited_obj)
+        return EditResult(edited_object=edited_obj, input_edit_result=input_edit_result)

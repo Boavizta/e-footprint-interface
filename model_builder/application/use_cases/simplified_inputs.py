@@ -3,14 +3,11 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
-from efootprint.abstract_modeling_classes.input_values import input_values_match
-from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
-
 from model_builder.domain.exceptions import InputValidationError
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.interfaces import ISystemRepository
-from model_builder.domain.object_factory import prepare_input_changes
+from model_builder.domain.object_factory import apply_input_edits
 from model_builder.domain.services.simplified_inputs import (
     FieldAddress, FieldCatalog, complete_selection, normalize_definition, validate_definition,
 )
@@ -41,51 +38,12 @@ class EditSimplifiedInputUseCase:
         if not setting.get("included"):
             raise InputValidationError(f"Input {address.object_id}.{address.attribute} is not selected.")
 
-        available_sources = self.model_web.available_sources
-        pending_sources = {}
-
-        def prepare(field, value):
-            owner = self.model_web.get_web_object_from_efootprint_id(field.object_id)
-            try:
-                return prepare_input_changes(
-                    {field.attribute: value}, owner, available_sources=available_sources, pending_sources=pending_sources)
-            except ValueError as error:
-                raise InputValidationError(str(error)) from error
-
-        changes = prepare(address, command.parsed_value)
-        candidates = {address: changes[0][1]} if changes else {}
-        pending = list(candidates)
-        affected = {address}
-        notices = []
-        for controller in pending:
-            for dependent in self.catalog.dependents.get(controller, ()):
-                owner = self.model_web.flat_efootprint_objs_dict[dependent.object_id]
-                branches = owner.conditional_list_values[dependent.attribute]["conditional_list_values"]
-                allowed = branches.get(candidates[controller])
-                # Options may change even when the dependent's current value remains valid.
-                affected.add(dependent)
-                if allowed is None:
-                    continue
-                if not allowed:
-                    raise InputValidationError(f"No allowed value for {owner.name}.{dependent.attribute}.")
-                current = candidates.get(dependent, getattr(owner, dependent.attribute))
-                if any(input_values_match(current, option) for option in allowed):
-                    continue
-                if dependent == address:
-                    raise InputValidationError("The submitted value conflicts with its conditional inputs.")
-                # Metadata lists are shared library constants. Convert their first value through
-                # the usual factory, preserving this owner's provenance rather than the option's.
-                value = {key: value for key, value in allowed[0].to_json().items()
-                         if key not in ("source", "confidence", "comment")}
-                dependent_changes = prepare(dependent, value)
-                changes.extend(dependent_changes)
-                candidates[dependent] = dependent_changes[0][1]
-                pending.append(dependent)
-                notices.append(f"{owner.name}: {getattr(owner, dependent.attribute).label} changed to {allowed[0]}.")
-
-        if changes:
-            ModelingUpdate(changes)
+        owner = self.model_web.get_web_object_from_efootprint_id(address.object_id)
+        result = apply_input_edits({address.attribute: command.parsed_value}, owner)
         self.model_web.persist_to_cache()
+        notices = [f"{change.input[0].name}: {change.accepted_value.label} changed to {change.accepted_value}."
+                   for change in result.automatic_changes]
+        affected = {FieldAddress(owner.id, attribute) for owner, attribute in result.affected_inputs}
         return SimplifiedInputsOutput(notices=notices, changed_fields=affected)
 
 

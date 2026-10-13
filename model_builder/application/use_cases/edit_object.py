@@ -10,6 +10,7 @@ from efootprint.utils.tools import get_init_signature_params
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.oob_region import OobRegion
+from model_builder.domain.object_factory import InputEditResult
 
 
 def _is_metadata_only_edit(form_data: Dict[str, Any], obj_to_edit) -> bool:
@@ -56,6 +57,7 @@ class EditObjectOutput:
     replaces_primary_render: bool = False
     oob_regions: List[OobRegion] = field(default_factory=list)
     refresh_cards: bool = True
+    input_edit_result: InputEditResult = field(default_factory=InputEditResult)
 
 
 class EditObjectUseCase:
@@ -116,4 +118,5 @@ class EditObjectUseCase:
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
             refresh_cards=input_data.refresh_cards and not metadata_only_edit,
+            input_edit_result=edit_result.input_edit_result,
         )

@@ -234,3 +234,36 @@ def test_conditional_select_value_metadata_round_trips_through_edit():
     assert model_name.confidence == "high"
     assert model_name.comment == "catalog selection reviewed"
     assert model_name.source is Sources.HYPOTHESIS
+
+
+def test_normal_provider_and_model_edit_repairs_shared_jobs_and_reloads_results():
+    from model_builder.adapters.presenters.simplified_inputs import input_catalog
+    from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
+
+    api = _video_api("Shared API", "openai", "sora-2-pro")
+    jobs = [EcoLogitsVideoGenExternalAPIJob.from_defaults(
+        name, external_api=api, resolution=SourceObject(resolution, confidence="high", comment="Original resolution"))
+        for name, resolution in (("Retained job", "720p (1280 x 720)"), ("Repaired job", "1080p (1920 x 1080)"))]
+    repository = InMemorySystemRepository(initial_data=_system_data_from_jobs(jobs))
+    model = ModelWeb(repository)
+    api_web = model.external_apis[0]
+    retained = model.flat_efootprint_objs_dict[jobs[0].id].resolution
+    parsed = parse_form_data({
+        "EcoLogitsVideoGenExternalAPI_provider": "bytedance",
+        "EcoLogitsVideoGenExternalAPI_model_name": "seedance-1.0",
+        "EcoLogitsVideoGenExternalAPI_model_name__comment": "Explicit model selection",
+    }, "EcoLogitsVideoGenExternalAPI")
+    with patch.object(repository, "save_data", wraps=repository.save_data) as save:
+        result = EditObjectUseCase(model, input_catalog).execute(EditObjectInput(api_web.efootprint_id, parsed))
+    save.assert_called_once()
+    assert len(result.input_edit_result.automatic_changes) == 1
+    assert model.flat_efootprint_objs_dict[jobs[0].id].resolution is retained
+    restored = ModelWeb(repository)
+    assert restored.flat_efootprint_objs_dict[api_web.efootprint_id].model_name.comment == "Explicit model selection"
+    repaired = restored.flat_efootprint_objs_dict[jobs[1].id]
+    assert repaired.resolution.value == "480p (854 x 480)"
+    assert repaired.resolution.source is Sources.AUTOMATIC_REPLACEMENT
+    assert repaired.resolution.confidence is None
+    assert repaired.resolution.comment.endswith("\n\nOriginal resolution")
+    assert repaired.external_api.id == api_web.efootprint_id
+    assert restored.system_emissions["values"] == model.system_emissions["values"]
