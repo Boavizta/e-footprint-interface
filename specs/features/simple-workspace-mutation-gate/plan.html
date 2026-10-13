@@ -3,76 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simple workspace mutation gate — Draft plan</title>
+<title>Simplified-input save lock — Plan</title>
 <style>
   :root { --ink: #21312f; --muted: #5e706e; --line: #dbe4df; --paper: #fff; --soft: #eaf3ed; --accent: #176751; }
   * { box-sizing: border-box; } html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
   body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: var(--ink); background: #f5f7f3; }
   a { color: var(--accent); text-underline-offset: .18em; } :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 3px; }
-  #layout { display: grid; grid-template-columns: 20rem minmax(0, 60rem); gap: 2rem; max-width: 85rem; margin: auto; padding: 2rem 1.3rem; }
-  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 60rem); }
-  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow: auto; font-size: .85rem; }
+  #layout { display: grid; grid-template-columns: 18rem minmax(0, 58rem); gap: 2rem; max-width: 80rem; margin: auto; padding: 2rem 1.3rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 58rem); }
+  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow: auto; font-size: .83rem; }
   #sidebar > summary { position: sticky; top: 0; background: var(--paper); padding: .4rem; cursor: pointer; }
   #sidebar:not([open]) { width: 2.75rem; overflow: visible; } #sidebar:not([open]) > summary { height: 2.75rem; }
   #sidebar > summary::before { content: "☰ "; } #sidebar:not([open]) > summary span { display: none; }
   #navigation ol { padding-left: 1.4rem; } #navigation a { display: inline-block; padding: .15rem 0; }
   #change-tree { padding: .6rem; border: 1px solid var(--line); background: var(--paper); }
   #change-tree details { padding-left: .5rem; margin: .4rem 0; } #change-tree ul { list-style: none; padding-left: .8rem; border-left: 1px solid var(--line); }
-  #change-tree li { padding: .4rem; } small, [data-reading-note] { color: var(--muted); } #change-tree small { display: block; }
-  [data-change] { font-size: .7rem; color: var(--muted); } main { min-width: 0; } h1, h2, h3 { line-height: 1.3; }
-  main section { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1rem; } li { margin: .4rem 0; }
+  #change-tree li { padding: .25rem; } #change-tree small { display: block; } [data-change], small, [data-reading-note] { color: var(--muted); }
+  main { min-width: 0; } h1, h2 { line-height: 1.3; } main section { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1rem; }
   code { background: #eef2ef; padding: .1rem .25rem; font: .86em ui-monospace, monospace; overflow-wrap: anywhere; }
   pre { padding: 1rem; overflow: auto; background: var(--paper); border: 1px solid var(--line); } pre code { background: none; padding: 0; }
   [data-code-file] { font-size: .85rem; margin-bottom: -.8rem; } table { width: 100%; border-collapse: collapse; font-size: .9rem; }
   td, th { padding: .6rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
-  [data-table-scroll] { overflow-x: auto; } aside { border-left: 3px solid #c69b53; padding: .6rem 1rem; background: #fff5e5; }
-  body:has(#gate:target) [data-steps~="gate"], body:has(#cancel:target) [data-steps~="cancel"],
+  body:has(#save:target) [data-steps~="save"], body:has(#cleanup:target) [data-steps~="cleanup"],
   body:has(#reads-export:target) [data-steps~="reads-export"], body:has(#delivery:target) [data-steps~="delivery"] { background: var(--soft); outline: 1px solid var(--accent); }
   #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper); box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
   #review-link-menu[hidden] { display: none; } #review-link-menu a { display: block; padding: .35rem .55rem; text-decoration: none; }
   #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
-  @media (max-width: 850px) { #layout { display: flex; flex-direction: column; padding: 1rem; } #sidebar { position: static; max-height: 45vh; width: 100%; } }
+  @media (max-width: 850px) { #layout { display: flex; flex-direction: column; padding: 1rem; } #sidebar { position: static; max-height: 45vh; width: 100%; } #sidebar:not([open]) { width: 2.75rem; } }
   @media print { body { background: white; font-size: 10pt; } #layout { display: flex; flex-direction: column; padding: 0; } main { order: 0; } #sidebar { order: 1; position: static; max-height: none; } #navigation, #sidebar > summary, #review-link-menu { display: none; } details::details-content { content-visibility: visible; display: block; } pre { white-space: pre-wrap; } }
 </style>
 </head>
 <body>
 <div id="layout">
-<details id="sidebar" open aria-label="Reading order and candidate changed files">
+<details id="sidebar" open aria-label="Reading order and expected changed files">
 <summary><span>Navigation and changed files</span></summary>
 <nav id="navigation" aria-label="Reading order">
-  <p><strong>Reading order</strong></p>
-  <ol><li><a href="#gate">Admit one write</a></li><li><a href="#cancel">Cancel another write</a></li><li><a href="#reads-export">Read, navigate and export</a></li></ol>
-  <p><a href="#delivery">Delivery and verification</a> · <a href="#decisions">Choices for planning</a></p>
+<p><strong>Reading order</strong></p>
+<ol><li><a href="#save">One field save</a></li><li><a href="#cleanup">Remove the broad guard</a></li><li><a href="#reads-export">Reads and export</a></li><li><a href="#delivery">Verification</a></li></ol>
 </nav>
 <section id="modules">
-<h2>Candidate changed files</h2>
-<p>Paths are relative to e-footprint-interface/. Click a source link to open it in VS Code;
-right-click for a diff against main. Select a reading step to highlight its files. This is a draft scope.</p>
+<h2>Expected changed files</h2>
+<p>Paths are relative to e-footprint-interface/. Click to open source in VS Code; right-click for a diff against main.</p>
 <div id="change-tree">
-<details open><summary>theme/static/scripts/</summary><ul>
-  <li id="file-main" data-steps="gate cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span><small>Replace comprehensive locking with a central mutation gate. <a href="#gate">1</a> · <a href="#cancel">2</a></small></li>
-  <li id="file-simple" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js"><code>simplified_inputs/index.js</code></a> <span data-change="modified">Modified</span><small>Remove all export continuation if still present; block dirty Configure exports and busy exports. <a href="#reads-export">3</a></small></li>
-  <li id="file-simple-workspace" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js"><code>simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified if needed</span><small>Exclude exports from Configure exit interception; preserve other navigation continuations.</small></li>
-  <li id="file-fields" data-steps="cancel reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js"><code>simplified_inputs/field_edits.js</code></a> <span data-change="modified">Modified</span><small>Reset canceled saves and show Not saved; remove focused-export completion and pending continuation if still present. <a href="#cancel">2</a> · <a href="#reads-export">3</a></small></li>
-  <li id="file-source" data-steps="cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js" data-review-source-href="../../../theme/static/scripts/source_metadata.js"><code>source_metadata.js</code></a> <span data-change="modified">Modified</span><small>Route provenance completion and confidence writes through visible cancellation feedback. <a href="#cancel">2</a></small></li>
-  <li id="file-sankey" data-steps="gate cancel"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js" data-review-source-href="../../../theme/static/scripts/sankey.js"><code>sankey.js</code></a> <span data-change="modified">Modified if needed</span><small>Reuse the existing fetch bridge; reject before optimistic removal. <a href="#gate">1</a></small></li>
-  <li id="file-hammer" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js" data-review-source-href="../../../theme/static/scripts/hammer_utils.js"><code>hammer_utils.js</code></a> <span data-change="modified">Modified if needed</span><small>Retain response-target lifetime without reintroducing global locking. <a href="#reads-export">3</a></small></li>
+<details open><summary>Save lock</summary><ul>
+  <li data-steps="save cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js">model_builder_main.js</a> <span data-change="modified">Modified</span><small>Restore the small disabled-state helper.</small></li>
+  <li data-steps="save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html">simplified_inputs/editor.html</a> <span data-change="modified">Modified</span><small>Declare the HTMX control lock.</small></li>
+  <li data-steps="save cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js">simplified_inputs/field_edits.js</a> <span data-change="modified">Modified</span><small>Own field-save status and accepted snapshots.</small></li>
 </ul></details>
-<details open><summary>model_builder/templates/model_builder/</summary><ul>
-  <li id="file-toolbar" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified if needed</span><small>Keep a narrow native-link export gate. <a href="#reads-export">3</a></small></li>
-  <li id="file-results" data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/show_results_toolbar_button.html" data-review-source-href="../../../model_builder/templates/model_builder/components/show_results_toolbar_button.html"><code>components/show_results_toolbar_button.html</code></a> <span data-change="modified">Modified if needed</span><small>Audit broad button disabling on read requests; include only necessary template changes. <a href="#reads-export">3</a></small></li>
+<details open><summary>Remove shared-guard coupling</summary><ul>
+  <li data-steps="cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js">simplified_inputs/bookmarks.js</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js">simplified_inputs/workspace.js</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js" data-review-source-href="../../../theme/static/scripts/source_metadata.js">source_metadata.js</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js" data-review-source-href="../../../theme/static/scripts/sankey.js">sankey.js</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="cleanup"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js" data-review-source-href="../../../theme/static/scripts/hammer_utils.js">hammer_utils.js</a> <span data-change="modified">Modified</span></li>
 </ul></details>
-<details open><summary>js_tests/ and tests/e2e/</summary><ul>
-  <li id="file-js-main" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js"><code>js_tests/model_builder_main.test.js</code></a> <span data-change="modified">Modified</span><small>Replace obsolete blanket-lock assertions with request admission and cancellation behavior. <a href="#delivery">Checks</a></small></li>
-  <li id="file-js-simple" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js"><code>js_tests/simplified_inputs.test.js</code></a> <span data-change="modified">Modified</span><small>Exercise canceled autosave state and explicit resubmission. <a href="#delivery">Checks</a></small></li>
-  <li id="file-e2e" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py"><code>tests/e2e/test_simplified_inputs.py</code></a> <span data-change="modified">Modified</span><small>One critical delayed-save interaction using actual HTMX. <a href="#delivery">Checks</a></small></li>
-</ul></details>
-<details open><summary>specs/ and CHANGELOG.md</summary><ul>
-  <li id="file-rendering" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html" data-review-source-href="../../architecture/rendering.html">architecture/rendering.html</a> <span data-change="modified">Modified</span></li>
-  <li id="file-workspace" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html" data-review-source-href="../../architecture/workspace.html">architecture/workspace.html</a> <span data-change="modified">Modified</span></li>
-  <li id="file-persistence" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/persistence.html" data-review-source-href="../../architecture/persistence.html">architecture/persistence.html</a> <span data-change="modified">Modified</span></li>
-  <li id="file-original-spec" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/spec.html" data-review-source-href="../simplified-inputs/spec.html">features/simplified-inputs/spec.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/plan.html" data-review-source-href="../simplified-inputs/plan.html">plan.html</a> <span data-change="modified">Modified</span><small>Reconcile the original blanket-lock requirement when implementing this replacement.</small></li>
-  <li id="file-changelog" data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md">CHANGELOG.md</a> <span data-change="modified">Modified</span></li>
+<details open><summary>Export, checks and documentation</summary><ul>
+  <li data-steps="reads-export"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js">simplified_inputs/index.js</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js">js_tests/model_builder_main.test.js</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">js_tests/simplified_inputs.test.js</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">tests/e2e/test_simplified_inputs.py</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html" data-review-source-href="../../architecture/rendering.html">architecture/rendering.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html" data-review-source-href="../../architecture/workspace.html">architecture/workspace.html</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/spec.html" data-review-source-href="../simplified-inputs/spec.html">original spec</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/plan.html" data-review-source-href="../simplified-inputs/plan.html">review guide</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md">CHANGELOG.md</a> <span data-change="modified">Modified</span></li>
+  <li data-steps="delivery"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-input-export-simplification/spec.html:146:1" data-review-source-href="../simplified-input-export-simplification/spec.html#L146:1">export spec</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-input-export-simplification/plan.html:117:1" data-review-source-href="../simplified-input-export-simplification/plan.html#L117:1">export review guide</a> <span data-change="modified">Modified</span></li>
 </ul></details>
 </div>
 </section>
@@ -80,170 +69,70 @@ right-click for a diff against main. Select a reading step to highlight its file
 
 <main id="main">
 <header>
-<p><small>Draft for spec-plan refinement · 8 October 2026 · Export policy updated 12 October 2026 · Interface-owned</small></p>
-<h1>Simple workspace mutation gate</h1>
-<p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/spec.html" data-review-source-href="spec.html">Specification under review</a> · <a href="#modules">Candidate changed files</a></p>
-<aside><strong>Planning handoff only.</strong> This captures the conversation and verified entry points;
-it does not authorize implementation or freeze the proposed API. The user chose cancellation over queueing
-because low latency and sequential editing are expected. Recheck the current code and produce the smallest
-reviewable patch during the next spec-plan session.</aside>
-<p data-reading-note>Baseline: interface commit a9122dba, inspected 8 October 2026. The main script grew
-from 413 lines before simplified-inputs implementation to 552; the current mutation guard occupies lines
-365–520. Preserve unrelated latency middleware and local dependency edits. No library changes are proposed.</p>
+<p><small>Plan for review · 13 October 2026 · Interface-owned</small></p>
+<h1>Simplified-input save lock</h1>
+<p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/spec.html" data-review-source-href="spec.html">Specification</a> · Replaces the prior cancellation plan.</p>
+<p data-reading-note>The current checkout is the path base. No library or server change is proposed.</p>
 </header>
 
-<section id="gate" data-step>
-<h2>1. Admit one workspace write</h2>
-<p>Refactor the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:367:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L367:1">existing guard</a>,
-keeping one active operation identity and its initiating element. Remove the page-wide control snapshot,
-locking selectors and capture listeners whose only purpose is preventing every interaction. Relocating
-the existing block into another file alone does not achieve the requested simplification.</p>
-<p>The current <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:387:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L387:1">mutation classification</a>
-treats non-GET requests as writes except timeseries previews. Start from this small policy and verify its
-callers; explicit per-request declarations are an alternative only if they reduce the total patch.
-Reads do not occupy or release the gate. Avoid a request registry or global fetch monkey-patch.</p>
-<p>Reject an overlapping HTMX mutation before HTMX can queue it. The vendored
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/external_librairies/htmx.min.js" data-review-source-href="../../../theme/static/scripts/external_librairies/htmx.min.js">HTMX 2.0.6 implementation</a>
-handles same-element queueing before the before-request event. Evaluate a confirm-stage gate or shared
-HTMX synchronization with explicit cancellation feedback; a before-request listener alone is insufficient.</p>
-<p>Reuse the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:94:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L94:1">card-order save bridge</a>
-and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js:208:1" data-review-source-href="../../../theme/static/scripts/sankey.js#L208:1">diagram-deletion bridge</a> for fetch writes.
-Admission must occur before optimistic UI changes. Card order changes visually before its save callback,
-so planning must choose the smallest honest cancellation treatment for that existing interaction.</p>
-<p>Preserve the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:419:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L419:1">started notification</a>
-and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:434:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L434:1">finished notification</a> if that avoids
-rewiring consumers. A canceled operation is never admitted and must not emit a fake completion that clears
-the first operation's gate. Ordinary exports have no pending continuation to run on settlement.</p>
-<p>Keep busy state through the admitted operation's response updates, using only the necessary
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:486:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L486:1">request/settlement correlation</a>.
-HTTP error bodies can carry OOB fragments through the existing
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1">modal error handling</a>.
-The planning pass may simplify settlement bookkeeping after checking actual no-swap, error and removed-target
-flows; do not unlock indiscriminately whenever any request ends.</p>
+<section id="save" data-step>
+<h2>1. One Simplified-input field save</h2>
+<p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1">The existing save entry</a>
+validates an edit and triggers the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1">field form's HTMX request</a>.
+Add one attribute to that form. HTMX gathers its values before disabling the selected controls, so the
+initiating value is still sent. The selector reaches both resident Simplified-input workspaces.</p>
+<p data-code-file><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1">model_builder/templates/model_builder/simplified_inputs/editor.html</a> · Proposed attribute on the existing form</p>
+<pre><code>hx-disabled-elt="button:not([data-workspace-export]), [data-simplified-workspace] input, [data-simplified-workspace] select, [data-simplified-workspace] textarea"</code></pre>
+<p>HTMX removes those temporary disabled attributes when the request ends. Replace the
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:365:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L365:1">current workspace guard</a>
+with the small button-state helper from main, extending its original-disabled selector to the native
+Simplified-input controls. This restores genuine constraint-disabled fields without re-disabling
+server-rendered replacements. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:84:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L84:1">Field edits</a>
+then own Saving/Saved/Not saved and capture accepted snapshots after controls recover, using their own
+HTMX completion events. Keep the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1">server-rejection restoration</a>.</p>
 </section>
 
-<section id="cancel" data-step>
-<h2>2. Cancel another write and explain what happened</h2>
-<p>Use one concise existing notice surface for “Another save was running. This change was not saved.
-Try again after it finishes.” The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:225:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L225:1">existing toast region</a>
-is a candidate, not a mandated new notification abstraction. Reuse the existing field status where available.</p>
-<p>The current <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:37:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L37:1">simple-field save entry</a>
-silently returns when the workspace is busy, and sets the form's saving flag before triggering HTMX.
-The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:9:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L9:1">provenance completion handler</a>
-also silently returns while busy. Replace these silent drops with the common cancellation outcome.
-A rejected request may never receive the normal after-request or finished event; reset only the canceled
-caller's saving state and mark its still-visible editor Not saved.</p>
-<p>Retain the attempted value in the existing DOM only. Keep the accepted-value baseline unchanged so
-ordinary completion can resubmit it after the gate is free, even if its value has not changed again.
-Do not allocate a pending payload, add Retry/Discard controls, resubmit on the first request's completion,
-or add a navigation guard for canceled fields.</p>
-<p data-code-file><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js">theme/static/scripts/model_builder_main.js</a> · Illustrative outcome, not a prescribed API</p>
-<pre><code>if a workspace write is active:
-    do not send the new write
-    notify the user
-    notify the initiating editor that its save was canceled
-    leave the active write unchanged
-else:
-    admit the write and record its identity</code></pre>
-<p>The same cancellation outcome must cover <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:74:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L74:1">bookmark saves</a>,
-Configure saves, ordinary forms and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:138:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L138:1">confidence autosaves</a>.
-The latter currently calls HTMX without a widget source; supply minimal initiating context if required for
-honest feedback. Preserve existing explicit draft behavior, rather than redesigning it.</p>
-<p>Server rejection of an admitted save remains different from local busy cancellation. Retain the current
-422/500 modal and fresh accepted-field restoration for admitted failures. In particular, the
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:104:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L104:1">finished handler</a> should not accidentally
-mark a different canceled editor Saved or clear its Not saved status.</p>
+<section id="cleanup" data-step>
+<h2>2. Remove the broad guard</h2>
+<p>Delete the control map, selector inventory, seven interaction-capture listeners and global
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:414:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L414:1">workspace mutation lifecycle</a>.
+Return <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:94:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L94:1">card-order saving</a> and
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js:208:1" data-review-source-href="../../../theme/static/scripts/sankey.js#L208:1">diagram deletion</a> to their local fetch lifecycles.
+The browser no longer promises global write serialization or a canceled-edit retry path.</p>
+<p>Keep completion behavior with its owner:
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:130:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L130:1">bookmarks</a> already handle their response;
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:175:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L175:1">Configure exits</a> follow their own form's HTMX outcome;
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:9:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L9:1">provenance</a> no longer skips focusout for a global busy flag; and
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:72:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L72:1">Results cleanup</a> keeps a local wait for any response that can still update its target.
+Remove these modules' now-unused shared-event or busy-flag branches rather than moving the global bus.</p>
 </section>
 
 <section id="reads-export" data-step>
-<h2>3. Read, navigate and export</h2>
-<p>Keep harmless reads and previews available. Model switching, imports, reset and destructive actions
-remain workspace writes and receive cancellation feedback while busy. Existing non-export Configure exit confirmation
-and ordinary side-panel dirty-form handling remain owned by their current flows.</p>
-<p>Allowing edits during a write changes the assumptions around
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:45:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L45:1">workspace reads</a>,
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:170:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L170:1">draft-read coordination</a> and
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:72:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L72:1">Results target cleanup</a>.
-Keep only coordination required by supported response targets. Demonstrate any concrete case in which an
-admitted response replaces a canceled editor before proposing additional protection; the spec does not
-promise draft durability across replacing that editor.</p>
-<p>Keep a narrow check for <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:31:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L31:1">export activation</a>.
-Ordinary download anchors bypass HTMX/fetch interception, so their busy behavior needs an explicit hook.
-While a write is active, single-model and whole-workspace exports receive busy feedback and do not download.
-Once the write settles, only a fresh activation exports the accepted saved state. Opening
-the two-model menu must not retain an activation or schedule a later menu opening or download.</p>
-<p>Apply the agreed <a href="../simplified-input-export-simplification/plan.html#activation">export-simplification approach</a>:
-remove the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:17:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L17:1">focused-field completion</a>,
-pending export and successful-save continuation, together with the export-specific mouse-press interception
-and invalid-edit blocking. Ordinary focusout autosave remains; validate its ordering against the narrow export
-check in the real browser. If no write is active, a browser-invalid draft can coexist with export of the
-previous saved state without an export-specific validation warning. Inline server rejection retains error feedback
-and accepted-field restoration, with no download on settlement.</p>
-<p>Apply the <a href="../simplified-input-export-simplification/plan.html#configure">Configure export extension</a>
-as well: remove <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:13:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L13:1"><code>continueExport()</code></a>
-entirely and exclude exports from the generic Configure exit interception. Dirty Configure blocks export
-with feedback to save or discard through existing controls, without opening the exit dialog or retaining
-the export request. Saving or discarding never downloads or opens the menu; a fresh activation is required.
-A rejected Configure save retains its draft and keeps export blocked while dirty. Clean Configure with no
-active write exports directly without leaving the screen. Preserve Configure's exit guard and navigation
-continuations for other actions, plus saved-value exports from unfinished Modeling and timeseries panels.</p>
-<p>Recheck native new-tab/context-menu activation against the
-<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html">toolbar links</a>;
-scope any destination suppression to export controls only.</p>
-<aside><strong>Shared export policy:</strong> this draft and
-<a href="../simplified-input-export-simplification/plan.html">export simplification</a> now agree on the behavior.
-Planning must coordinate the overlapping changes once against the current checkout. If export simplification
-lands first, retain its saved-state behavior when replacing the shared guard. If the mutation gate lands first,
-apply the agreed removal with its narrow export check; do not preserve or reintroduce inline-edit or
-Configure export continuation.</aside>
-<p>The remaining <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/show_results_toolbar_button.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/components/show_results_toolbar_button.html#L10:1">global button disabling on Results reads</a>
-can still conflict with a request-only policy. Planning must compare retaining the small pre-existing
-disabled-button restoration helper with narrowing the broad disabling attributes in affected templates.
-Do not retain the current multi-map control lock merely to accommodate that convention, or migrate every
-template without evidence that the migration reduces complexity.</p>
+<h2>3. Reads and export</h2>
+<p>The existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/show_results_toolbar_button.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/components/show_results_toolbar_button.html#L10:1">HTMX button disabling</a>
+may briefly make reads unavailable; no read-specific re-enable code remains. The selector above
+exempts the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:136:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L136:1">two-model Export toggle</a>;
+the native download links remain usable. Remove the obsolete global-busy short-circuit from the
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:14:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L14:1">existing export listener</a>
+but keep its dirty-Configure check. Export reads the saved repository state at request time, which
+may be the old value or the just-persisted edit; it never resumes a deferred action.</p>
 </section>
 
 <section id="delivery" data-step>
 <h2>Delivery and verification</h2>
-<p>First refine the request-admission and cancellation contracts against actual callers. Then replace the
-shared lock and adapt caller feedback together, so no intermediate change silently loses edits. Audit
-export and response-target lifetime next, and finish with documentation. This is sequencing guidance,
-not an implementation task list.</p>
-<div data-table-scroll><table><thead><tr><th>Behavior</th><th>Required observation</th><th>Existing test owner</th></tr></thead><tbody>
-  <tr><td>Overlapping writes</td><td>The second write never reaches the server and never runs after the first completes; both same-element HTMX and fetch entry points are covered.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js">model_builder_main.test.js</a></td></tr>
-  <tr><td>Canceled autosave</td><td>The attempted value remains in its surviving editor, is marked Not saved, and can be manually resubmitted without changing it again; unrelated success does not mark it saved.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">simplified_inputs.test.js</a>; extend relevant source/bookmark tests only where changed.</td></tr>
-  <tr><td>Lifecycle and reads</td><td>Success, 422/500, abort and transport failure release the matching write; concurrent reads and previews neither block nor release it. Existing disabled prerequisites survive.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js">model_builder_main.test.js</a></td></tr>
-  <tr><td>Saved-state export</td><td>Mouse and keyboard activation block single-model and workspace downloads during a write or dirty Configure, with no download or deferred menu opening after saving or discarding; a fresh activation exports saved values. A browser-invalid inline edit does not block export when idle. Clean Configure exports stay on that screen; other Configure exits retain protection.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js">simplified_inputs.test.js</a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py">test_simplified_inputs.py</a>; coordinate with export simplification.</td></tr>
-  <tr><td>Actual browser interaction</td><td>Delay A's save, complete B, observe one cancellation and no B request; finish A and manually save B. Include export-busy behavior and existing error restoration without page reload.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:627:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L627:1">simplified-input autosave E2E</a>; retain existing export and model-switch regressions.</td></tr>
-</tbody></table></div>
-<p>Replace tests whose blanket-lock and focused-export continuation expectations are intentionally obsolete.
-Adapt focused-edit export regressions to ordinary autosave, saved-state downloads and fresh activation after
-a blocked click. Adapt Configure export regressions to dirty blocking, clean export without leaving the screen,
-and no continuation after saving or discarding. Keep tests of accepted-field restoration, other Configure exits,
-bookmarks and genuine domain constraints. Application tests
-above are planned, not executed in this specification pass.</p>
-<p>When implementing, update the candidate architecture pages, the original simplified-inputs requirement
-and review guide, and the changelog together. Existing AGENTS.md routes to those pages; suggest a one-line
-update if the gate ownership moves. Run the repository's required Jest and Python/E2E gates for the approved patch.</p>
-</section>
-
-<section id="decisions">
-<h2>Choices for the next planning session</h2>
-<ul>
-  <li><strong>Gate entry and feedback:</strong> select the smallest pre-queue interception mechanism and
-  source-aware cancellation signal. Decide the notice surface and exact copy.</li>
-  <li><strong>Response lifetime:</strong> validate the existing response-settlement boundary before reducing
-  its bookkeeping. Keep only the state needed by demonstrated flows.</li>
-  <li><strong>Broad disabling attributes:</strong> choose a bounded template cleanup or the small original
-  restoration helper; compare the total changed code, not only the main script's line count.</li>
-  <li><strong>Optimistic and replacement UI:</strong> inspect canceled card order, diagram setup and dependent
-  field replacements. If a small feedback fix cannot satisfy the spec, show the supported interaction and
-  request a product decision rather than add a general recovery system.</li>
-</ul>
-<p>Start a fresh session with: “Use spec-plan for simple-workspace-mutation-gate in e-footprint-interface.
-Read spec.html and refine this draft plan against the current implementation. Favor cancellation, no queue
-and minimal coordination. Coordinate the agreed saved-state export policy with simplified-input-export-simplification.
-Keep consequential choices reviewable; do not generate tasks or implement.”</p>
+<p>First replace the broad guard and connect the field form's native lock; adapt local lifecycle listeners
+in the same patch so no save status is stranded. Then remove unused cross-module hooks and reconcile
+the <a href="../../architecture/rendering.html#main">rendering</a>,
+<a href="../../architecture/workspace.html#simplified-workspace">workspace</a> and
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-inputs/spec.html" data-review-source-href="../simplified-inputs/spec.html">original Simplified-input documents</a> and the
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simplified-input-export-simplification/spec.html:146:1" data-review-source-href="../simplified-input-export-simplification/spec.html#L146:1">export spec's busy and global-lock wording</a> at implementation time.</p>
+<table><thead><tr><th>Check</th><th>Evidence to require during implementation</th></tr></thead><tbody>
+<tr><td>Field lock</td><td>Delay one save: all Simplified-input controls and non-Export buttons are unavailable, the submitted value is intact, and no second field request is sent. Restore both ordinary and prerequisite-disabled controls. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:281:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L281:1">Jest owner</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:639:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L639:1">browser owner</a>.</td></tr>
+<tr><td>Save outcomes</td><td>Success, 422/500 restoration and transport failure all settle field status and re-enable controls; Configure, bookmarks and closing Results during a save still complete. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:189:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L189:1">Guard regressions</a> and existing Simplified-input tests.</td></tr>
+<tr><td>Export</td><td>During a delayed field save, the single-model link and two-model menu remain usable and download a valid saved snapshot without forcing, waiting for or replaying the edit. Dirty Configure still blocks. Adapt the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:815:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L815:1">saved-state export regressions</a>.</td></tr>
+</tbody></table>
+<p>These are planned application checks; no implementation tests were run while writing this plan.
+The eventual patch also needs the frontend bundle build and the repository's required Jest, Python and E2E gates.</p>
 </section>
 </main>
 </div>
