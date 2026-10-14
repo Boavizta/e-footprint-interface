@@ -56,8 +56,10 @@ A successful JSON load supplies one-use session opening markers, consumed by the
 open Simplified inputs, an empty selection opens Modeling. Ordinary slot switches never reapply this rule.</p>
 <p>A rejected inline value or provenance autosave restores the affected field from the accepted repository state and
 marks it Not saved. The submitted draft is not retained, so Modeling, Configure, model switching and other workspace
-navigation can proceed after the mutation settles. The shared in-flight mutation lock still prevents overlapping edits,
-structural actions and exports until the response settles.</p>
+navigation can proceed after the save. During a value/provenance request, native HTMX disabling covers buttons and
+inputs/selects/textareas in both resident Simplified-input workspaces. Existing prerequisite-disabled states survive
+release. Independent actions retain their own request behavior; there is no shared workspace write guard. The
+two-model Export toggle cannot newly open during the save, while native download links remain usable and read saved state.</p>
 <p>Adding or removing models, opening Examples, uploading files and resetting the workspace use their ordinary actions
 and destructive confirmations. Model removal retains its separate confirmation, including the ordinary side-panel
 unsaved-changes warning when that panel has a draft; there is no additional failed-inline-edit prompt.</p>
@@ -67,7 +69,7 @@ form-level dirty flag. Filtering hides objects and matching navigation entries w
 recursive dependency locks use catalog links. Save serializes the complete definition directly from the controls into
 one JSON form parameter, including checked locked inputs, so model size does not exhaust Django's parameter limit.
 Other exits (including Results/Sources, Compare, switching and import) use Save/Discard/Stay. Discard fetches saved
-state before continuing; Save continues only after the matching successful mutation settlement. Cancelled or failed
+state before continuing; Save continues only after its matching successful HTMX request and any replacement have settled. Cancelled or failed
 saves leave the draft visible. Export is separate: while Configure is dirty, it is blocked in place with a notice;
 explicit Save or Discard does not continue the export. A clean Configure screen can export directly without leaving.
 The ordinary side-panel discard-confirmation helper runs before focused-view reads, whose continuation is tied to their

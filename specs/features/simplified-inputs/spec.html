@@ -80,9 +80,9 @@
   [data-menu-items] { position: absolute; z-index: 12; right: 0; top: calc(100% + .35rem); min-width: 12rem;
     padding: .35rem; border: 1px solid #d1d5db; border-radius: 6px; background: white;
     box-shadow: 0 .3rem .8rem #11192818; }
-  [data-menu-items] button { display: block; width: 100%; padding: .4rem .6rem; border: 0; background: white;
-    text-align: left; white-space: nowrap; font-size: .82rem; }
-  [data-menu-items] button:hover { background: #f3f4f6; }
+  [data-menu-items] :is(button, a) { display: block; width: 100%; padding: .4rem .6rem; border: 0; background: white;
+    text-align: left; white-space: nowrap; font-size: .82rem; color: inherit; text-decoration: none; }
+  [data-menu-items] :is(button, a):hover { background: #f3f4f6; }
   [data-show-results] { background: linear-gradient(120deg, #1b9891, #2d4675); color: white;
     border: 0; border-radius: 2rem; padding: .45rem .9rem; font-size: .82rem; white-space: nowrap; }
   [data-show-results]:disabled { background: #e5e7eb; color: #6b7280; cursor: not-allowed; }
@@ -475,11 +475,11 @@
     saved, and failed changes. A rejected save shows the existing error modal and replaces the attempted
     field with its accepted repository value, marked Not saved; the rejected value is not retained.
     Native browser validation remains available; invalid fields open their object.</li>
-    <li><strong>One save at a time:</strong> while a save is running, temporarily disable further edits,
-    structural actions, view/model switching and export across the workspace. Re-enable them when the
-    request finishes; a rejected edit leaves the accepted field visible and does not block navigation.
-    Users can still read and
-    scroll. Do not collect further edits for later submission. There is no form-wide commit button or
+    <li><strong>Scoped field-save lock:</strong> while a value/provenance save is running, HTMX temporarily
+    disables buttons and native fields in both resident Simplified-input workspaces. Restore controls on completion,
+    preserving real prerequisite-disabled states. The two-model Export toggle cannot newly open, while the one-model
+    link and already-open menu links can download saved repository state. Independent actions retain their own request
+    behavior. A rejected edit restores the accepted field and does not retain an inline draft. Do not collect further edits for later submission. There is no form-wide commit button or
     automatic/manual saving preference in this iteration.</li>
     <li><strong>Focused timeseries editing:</strong> an exposed timeseries uses the same field layout
     as an ordinary input within its owning-object container. In place of a standard value control it
@@ -523,9 +523,9 @@
     edits. A non-computable modeling shows no numeric total and retains the existing disabled-results
     explanation. Opening the results panel is not required to refresh the total.</li>
     <li><strong>Export reads accepted saved state:</strong> ordinary blur/Enter value and provenance autosaves
-    remain. While a workspace write is active, single-model and workspace exports are suppressed; no activation,
-    menu opening or download is retained for settlement. The user activates Export again after the write finishes,
-    unless it already settled before activation. An idle browser-invalid edit remains unsaved and may export the
+    remain. During a field save the two-model menu toggle is disabled; the single-model link and pre-opened menu
+    links remain native and download repository state available at request time. The file includes an edit only if
+    persistence wins the race. Settlement never schedules a download or menu opening. An idle browser-invalid edit remains unsaved and may export the
     previous accepted value. A rejected save restores accepted fields; after dismissing its error, a fresh activation
     exports the accepted state. Dirty Configure blocks export in place with a notice to save or discard first; Save
     or Discard through the existing controls never continues the export. Clean Configure exports directly and stays
@@ -752,7 +752,7 @@
   “Watch a video” share columns only with one another. In Modeling, open a bookmark in the edit panel,
   then try its Delete object action to see how the existing confirmation is extended.</p>
   <p>Simple values and Source and comment edits now autosave on leaving a field or pressing Enter;
-  selects save immediately. During the simulated save, further edits, view/model switching and export
+  selects save immediately. During the simulated save, further edits, buttons and the two-model menu toggle
   are temporarily disabled; there is no queue of pending edits. Both Results affordances update together.
   In External APIs → Assistant,
   change Provider to see Model retain a valid choice or fall back to the first available one; a
@@ -829,8 +829,8 @@
         <details data-toolbar-menu data-export-menu>
           <summary title="Export" aria-label="Export"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMiIgaGVpZ2h0PSIyMiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktZmxvcHB5IiB2aWV3Qm94PSIwIDAgMTYgMTYiPgogIDxwYXRoIGQ9Ik0xMSAySDl2M2gyeiIvPgogIDxwYXRoIGQ9Ik0xLjUgMGgxMS41ODZhMS41IDEuNSAwIDAgMSAxLjA2LjQ0bDEuNDE1IDEuNDE0QTEuNSAxLjUgMCAwIDEgMTYgMi45MTRWMTQuNWExLjUgMS41IDAgMCAxLTEuNSAxLjVoLTEzQTEuNSAxLjUgMCAwIDEgMCAxNC41di0xM0ExLjUgMS41IDAgMCAxIDEuNSAwTTEgMS41djEzYS41LjUgMCAwIDAgLjUuNUgydi00LjVBMS41IDEuNSAwIDAgMSAzLjUgOWg5YTEuNSAxLjUgMCAwIDEgMS41IDEuNVYxNWguNWEuNS41IDAgMCAwIC41LS41VjIuOTE0YS41LjUgMCAwIDAtLjE0Ni0uMzUzbC0xLjQxNS0xLjQxNUEuNS41IDAgMCAwIDEzLjA4NiAxSDEzdjQuNUExLjUgMS41IDAgMCAxIDExLjUgN2gtN0ExLjUgMS41IDAgMCAxIDMgNS41VjFIMS41YS41LjUgMCAwIDAtLjUuNW0zIDRhLjUuNSAwIDAgMCAuNS41aDdhLjUuNSAwIDAgMCAuNS0uNVYxSDR6TTMgMTVoMTB2LTQuNWEuNS41IDAgMCAwLS41LS41aC05YS41LjUgMCAwIDAtLjUuNXoiLz4KPC9zdmc+Cg==" alt=""><span data-mobile-only>Export</span></summary>
           <div data-menu-items>
-            <button type="button" data-demo-action="Export this modeling">⬇ This modeling</button>
-            <button type="button" data-demo-action="Export both modelings">⬇ Both modelings</button>
+            <a href="#" data-demo-action="Export this modeling">⬇ This modeling</a>
+            <a href="#" data-demo-action="Export both modelings">⬇ Both modelings</a>
           </div>
         </details>
         <button type="button" data-toolbar-action data-demo-action="Reset to default modeling" title="Reset to default modeling" aria-label="Reset to default modeling">
@@ -1530,10 +1530,6 @@
             button.title = computable ? 'Manufacturing + use over the entire modeling period · active modeling' :
               'Results unavailable: complete the modeling to compute its footprint.';
           });
-          mockup.querySelectorAll('[data-demo-action^="Export"]').forEach(function (button) {
-            button.disabled = saving;
-            button.title = button.disabled ? 'Wait for the active save to finish before exporting.' : '';
-          });
           mockup.querySelectorAll('[data-export-menu] > summary').forEach(function (summary) {
             summary.setAttribute('aria-disabled', String(saving));
           });
@@ -1884,8 +1880,9 @@
           button.addEventListener('click', function () { resultTab = button.dataset.resultTab; refreshChrome(); });
         });
         mockup.querySelectorAll('[data-demo-action]').forEach(function (button) {
-          button.addEventListener('click', function () {
+          button.addEventListener('click', function (event) {
             if (button.dataset.demoAction.indexOf('Export ') === 0) {
+              event.preventDefault();
               var otherModel = activeModel === 'reference' ? 'comparison' : 'reference';
               var states = button.dataset.demoAction === 'Export both modelings'
                 ? [modelingValues, workspace[otherModel].values] : [modelingValues];
@@ -2078,11 +2075,11 @@
           });
         });
 
-        // Block busy exports; resolve Configure before another surface can edit the same saved settings.
+        // Block the menu toggle while saving; native links retain saved-state access.
         mockup.addEventListener('click', function (event) {
           var exportAction = event.target.closest('[data-demo-action^="Export"], [data-export-menu] > summary');
           if (exportAction) {
-            if (saving) {
+            if (saving && exportAction.matches('[data-export-menu] > summary')) {
               event.preventDefault();
               event.stopImmediatePropagation();
               return;

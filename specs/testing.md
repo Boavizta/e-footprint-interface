@@ -172,7 +172,7 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 
 Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. It resolves submit buttons through their
 owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class,
-swap-settling classes and workspace unlocking. Read clicks retain their response-only wait; unrelated pending reads do not
+swap-settling classes and temporary native control release. Read clicks retain their response-only wait; unrelated pending reads do not
 block save completion.
 Before clicking it waits only for swapped controls to be processed, so navigation can still cancel a pending read.
 Use `wait_for_htmx_idle()` when the next action requires a complete request cascade, such as Sources export after the initial
@@ -183,15 +183,17 @@ Opening Results also starts descendant Sankey configuration requests; wait for t
 
 For rejected Simplified value/provenance saves, assert that the error modal and accepted-field replacement both process,
 the field shows `Not saved`, and its submitted value is gone. A rejected focused timeseries Save also closes the panel.
-Exports use accepted saved state. Ordinary blur/Enter/provenance autosaves remain; an active workspace write suppresses
-export without retaining or replaying the activation. After settlement, a fresh activation exports the accepted state
-(the first activation can work if the write already finished). An idle native-invalid draft can export the previous
+Exports use accepted saved state. Ordinary blur/Enter/provenance autosaves temporarily disable buttons and native
+fields in both resident Simplified-input workspaces. The two-model Export toggle cannot newly open while disabled;
+the one-model direct link and already-open menu links retain native destinations. Hold a save before persistence to
+assert those links download the old accepted state, then check a fresh export after settlement. Without that hold,
+the file can contain the edit if persistence wins the race. Settlement never replays an activation. An idle native-invalid draft can export the previous
 saved value without a request; a server-rejected save restores accepted fields and requires dismissal of the error
 before a fresh export. Configure export while dirty is blocked in place with a notice; clean Configure export stays on
 that screen. Other Configure exits retain Save/Discard/Stay, and bookmark help and membership Undo retain their
 independent draft behavior. Workspace exports include accepted values from parked models. The focused export E2E
-coverage is in `test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_state` and
-`test_blocked_export_never_replays_and_fresh_native_activation_runs_once`; Configure coverage is in
+coverage is in `test_native_export_during_field_save_uses_repository_state` and
+`test_disabled_export_toggle_never_replays_after_field_save`; Configure coverage is in
 `test_configure_export_blocks_dirty_controls_and_clean_export_stays_open`.
 
 ### Edge-paradigm tests

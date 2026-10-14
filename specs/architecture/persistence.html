@@ -52,9 +52,10 @@ retained help on removed owners; structural edits preserve membership when a req
 <p><code>ModelWeb.to_json()</code> itself remains passive (<code>descriptor.peek</code>, not pull), but <code>persist_to_cache()</code> first pulls <code>System.total_footprint</code>; this materializes every impact source's aggregate footprint pair so the payload-size guard measures the footprint-bearing steady state immediately after each mutation, while leaving projections such as the Sankey matrix lazy. Creating a Sankey card or changing its settings persists the materialized matrix; rendering a saved card by GET leaves newly computed state request-local.</p>
 <p>Explicit user download is the complete-snapshot boundary: <code>ModelWeb.export_json()</code> first calls the library-owned <code>materialize_serialized_state()</code> helper, then serializes, so the downloaded snapshot contains every <code>serialize=True</code> value and the resulting topology regardless of which projections the user visited.</p>
 <p>Simplified-input values and provenance keep their ordinary blur/Enter autosaves. Exports read accepted repository
-state; they do not finish a focused edit or retain an export activation. If a write is active, the existing saving
-feedback suppresses single-model and workspace exports until it settles. The user activates Export again afterward;
-when the save has already settled, the first activation can work. An idle browser-invalid draft does not block export
+state; they do not finish a focused edit or retain an export activation. During a field save, the two-model Export
+toggle is disabled, so its menu cannot newly open. The one-model direct link and already-open menu links retain
+native destinations and can download the repository state available at request time. That state can include the edit
+if persistence finishes first; browser drafts never enter the file. Settlement schedules no menu opening or download. An idle browser-invalid draft does not block export
 and remains unsaved, so the file contains the previous accepted value. A rejected server save restores accepted fields;
 after dismissing its error, a fresh activation exports the accepted state. Direct links and the two-model menu retain
 their normal single-model/workspace endpoints, and workspace export includes accepted state from parked models.
@@ -62,8 +63,8 @@ Configure blocks export in place while dirty, with a notice to save or discard f
 existing Save or Discard control never exports; a clean Configure screen exports directly and stays open. Other
 Configure exits retain Save/Discard/Stay. Unfinished timeseries and ordinary Modeling panels export their last saved
 values.</p>
-<p>Requests replacing <code>#main-content-block</code> proceed after the in-flight mutation settles, because a rejected
-Simplified edit has already been replaced with its accepted repository field and does not leave a retained draft.
+<p>Rejected Simplified edits restore accepted repository fields and leave no retained inline draft. A field save
+temporarily disables buttons through its own HTMX form; independent requests have no global workspace guard.
 Adding/removing comparison models, file uploads, reset and the Examples picker use their ordinary actions and destructive
 confirmations. Model removal keeps its existing confirmation and ordinary side-panel unsaved-changes warning.</p>
 <p>The <code>interface_config</code> is included in JSON exports (download) and restored on imports (upload), enabling Sankey settings to survive export/import cycles.

@@ -508,51 +508,46 @@ test.each(EXPORT_FIXTURES)("%s %s leaves a press untouched and never saves on di
 });
 
 test.each(EXPORT_FIXTURES.flatMap(([fixture, id]) => [true, false].map(successful => [fixture, id, successful])))
-("%s %s requires fresh activation after ordinary save settles (successful=%s)", async (fixture, id, successful) => {
+("%s %s keeps native destinations during a field save (successful=%s)", async (fixture, id, successful) => {
     const form = mountEditor(fixture);
     const input = form.querySelector('input[type="number"]');
     const control = document.getElementById(id);
     const href = control.getAttribute("href");
     const activated = jest.fn();
     control.addEventListener("click", activated);
-    const download = jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     input.value = "8";
     input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
     const xhr = startMutation(form);
-    expect(document.body.dataset.workspaceMutation).toBe("updating");
-    if (control.matches("a")) expect(control.hasAttribute("href")).toBe(false);
-    else expect(control.disabled).toBe(true);
-    expect(activate(control).defaultPrevented).toBe(true);
-    expect(activated).not.toHaveBeenCalled();
+    // jsdom has no HTMX runtime; apply the form's declared native disabling selector.
+    const disabled = [...document.querySelectorAll(form.getAttribute("hx-disabled-elt"))];
+    disabled.forEach(element => { element.disabled = true; });
+    expect(control.getAttribute("href")).toBe(href);
+    control.click();
+    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
+    if (control.matches("button")) expect(control.disabled).toBe(true);
+    disabled.forEach(element => { element.disabled = false; });
     finishMutation(xhr, successful);
     await Promise.resolve();
-    expect(download).not.toHaveBeenCalled();
-    expect(activated).not.toHaveBeenCalled();
-    expect(control.getAttribute("href")).toBe(href);
-    expect(activate(control).defaultPrevented).toBe(false);
-    expect(activated).toHaveBeenCalledTimes(1);
+    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
+    control.click();
+    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 2 : 1);
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    download.mockRestore();
 });
 
-test("ordinary provenance changes save once and never replay a blocked export", async () => {
+test("ordinary provenance changes save once and do not replay native exports", async () => {
     const form = mountEditor();
     const comment = form.querySelector('[name$="__comment"]');
     comment.value = "Updated comment";
     mutationEvent("simplified-provenance:changed", {}, comment);
-    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
     mutationEvent("simplified-provenance:changed", {}, comment);
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
     const link = document.getElementById("download-model");
     const activated = jest.fn();
     link.addEventListener("click", activated);
     const xhr = startMutation(form);
-    expect(activate(link).defaultPrevented).toBe(true);
+    expect(activate(link).defaultPrevented).toBe(false);
     finishMutation(xhr);
     await Promise.resolve();
-    expect(activated).not.toHaveBeenCalled();
-    expect(activate(link).defaultPrevented).toBe(false);
     expect(activated).toHaveBeenCalledTimes(1);
 });
 

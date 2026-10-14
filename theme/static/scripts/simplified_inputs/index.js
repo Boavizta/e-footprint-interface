@@ -13,7 +13,7 @@ const fieldEdits = createFieldEdits({ activeWorkspace: workspace.activeWorkspace
 // at window capture before a dirty Configure draft can open the menu.
 window.addEventListener("click", event => {
     const element = event.target.closest("[data-workspace-export]");
-    if (!element || document.body.dataset.workspaceMutation === "updating") return;
+    if (!element) return;
     if (workspace.configureForm()?.dataset.dirty !== "true") return;
     event.preventDefault();
     event.stopImmediatePropagation();

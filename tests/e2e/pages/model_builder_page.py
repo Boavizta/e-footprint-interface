@@ -474,9 +474,9 @@ class ModelBuilderPage:
         return self
 
     def download_active_model(self, file_path: str):
-        """Download already-accepted active state; callers settle ordinary saves first."""
+        """Download saved active state from a direct link or available menu."""
         download_menu = self.page.locator("#download-menu-toggle")
-        if download_menu.count():
+        if download_menu.count() and download_menu.get_attribute("aria-expanded") != "true":
             download_menu.click()
         with self.page.expect_download() as download_info:
             self.page.locator('a[href="download-json/"]').click()

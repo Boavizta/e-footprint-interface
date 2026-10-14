@@ -918,8 +918,7 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
 
 @pytest.mark.e2e
 @pytest.mark.parametrize("two_models", [False, True])
-def test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_state(
-        minimal_complete_model_builder, tmp_path, two_models):
+def test_native_export_during_field_save_uses_repository_state(minimal_complete_model_builder, tmp_path, two_models):
     builder = minimal_complete_model_builder
     page = builder.page
     if two_models:
@@ -937,72 +936,62 @@ def test_focused_export_requires_fresh_activation_after_save_and_uses_accepted_s
     page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
 
     for metadata in (False, True):
+        accepted_value = float(value.input_value())
         if metadata:
             selected.locator('[data-action="open-source-editor"]').click()
             editor = selected.locator(".source-editor-comment")
-            editor.fill("Export the final metadata too")
         else:
             editor = value
-            editor.fill("8")
-        save_count, download_count = len(saves), len(downloads)
-        control = builder.press_export_control()
-        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
-        assert len(pending) == 1 and len(saves) == save_count + 1
-        builder.release_export_control()
-        assert len(downloads) == download_count
+        # Open the menu before editing so its native links are already available.
         if two_models:
-            expect(control).not_to_have_attribute("aria-expanded", "true")
+            builder.export_control().click()
+        editor.fill("Export the final metadata too" if metadata else "8")
+        editor.press("Tab")
+        expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saving…")
+        if two_models:
+            expect(builder.export_control()).to_be_disabled()
+            expect(builder.export_control()).to_have_attribute("aria-expanded", "true")
+        assert len(pending) == 1
+        workspace_export = two_models and metadata
+        with page.expect_download() as download:
+            page.locator("#download-workspace" if workspace_export else "#download-model").click()
+        download.value.save_as(str(filename))
+        document = json.loads(filename.read_text())
+        data = document["models"][1] if workspace_export else document
+        assert data["Storage"][owner_id]["lifespan"]["value"] == accepted_value
+        if metadata:
+            assert data["Storage"][owner_id]["lifespan"].get("comment") != "Export the final metadata too"
+        count = len(downloads)
         pending.pop().continue_()
         expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
         wait_for_htmx_idle(page)
-        assert len(downloads) == download_count
-        if two_models:
-            expect(control).not_to_have_attribute("aria-expanded", "true")
+        assert len(downloads) == count
         builder.download_active_model(str(filename))
         data = json.loads(filename.read_text())
         assert data["Storage"][owner_id]["lifespan"]["value"] == 8
         if metadata:
             assert data["Storage"][owner_id]["lifespan"]["comment"] == "Export the final metadata too"
-        assert len(saves) == save_count + 1 and len(downloads) == download_count + 1
+    assert len(saves) == 2 and len(downloads) == 4
 
-    page.unroute("**/edit-simplified-input/**")
-    page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
     value.fill("9")
-    builder.press_export_control()
-    expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
-    builder.release_export_control()
+    value.press("Enter")
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saving…")
     with page.expect_response("**/edit-simplified-input/**") as response_info:
         reject_simplified_edit(pending.pop())
     assert response_info.value.status == 422
     expect(selected.locator("[data-simplified-save-status]")).to_have_text("Not saved")
     expect(value).to_have_value("8")
-    expect(page.locator("#model-builder-modal")).to_be_visible()
-    wait_for_htmx_idle(page)
-    assert len(saves) == 3 and len(downloads) == 2
     page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
     builder.download_active_model(str(filename))
     assert json.loads(filename.read_text())["Storage"][owner_id]["lifespan"]["value"] == 8
 
     value.fill("")
-    builder.press_export_control()
-    builder.release_export_control()
-    expect(value).to_be_focused()
+    value.press("Tab")
     assert not value.evaluate("el => el.checkValidity()")
-    assert len(saves) == 3 and len(downloads) == 3
-    # Native validity can consume the first gesture by restoring focus.
-    if two_models:
-        expect(builder.export_control()).to_have_attribute("aria-expanded", "true")
-        with page.expect_download() as accepted_download:
-            page.locator("#download-model").click()
-        accepted_download.value.save_as(str(filename))
-    else:
-        with page.expect_download() as accepted_download:
-            builder.press_export_control()
-            builder.release_export_control()
-        accepted_download.value.save_as(str(filename))
+    builder.download_active_model(str(filename))
     assert json.loads(filename.read_text())["Storage"][owner_id]["lifespan"]["value"] == 8
-    assert len(saves) == 3 and len(downloads) == 4
+    assert len(saves) == 3 and len(downloads) == 6
 
 
 @pytest.mark.e2e
@@ -1053,55 +1042,41 @@ def test_workspace_export_uses_accepted_state_after_other_model_rejection(
 
 
 @pytest.mark.e2e
-@pytest.mark.parametrize("two_models", [False, True])
 @pytest.mark.parametrize("gesture", ["abandoned", "keyboard"])
-def test_blocked_export_never_replays_and_fresh_native_activation_runs_once(
-        minimal_complete_model_builder, tmp_path, two_models, gesture):
+def test_disabled_export_toggle_never_replays_after_field_save(minimal_complete_model_builder, tmp_path, gesture):
     builder = minimal_complete_model_builder
     page = builder.page
-    if two_models:
-        builder.add_model_by_duplication()
+    builder.add_model_by_duplication()
     workspace = open_configure(page)
     field(workspace, "lifespan").locator("[data-include-input]").check()
     click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
     selected = field(workspace, "lifespan")
     value = selected.locator('input[type="number"]')
-    value.fill("8")
     saves, downloads, pending = [], [], []
     page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
     page.on("download", lambda download: downloads.append(download))
     page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+    value.fill("8")
     if gesture == "abandoned":
         builder.press_export_control()
-    else:
-        value.press("Tab")
-    expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
-    assert len(saves) == 1 and len(pending) == 1
-    if gesture == "abandoned":
         builder.release_export_control(activate=False)
     else:
-        builder.activate_export_with_keyboard("Space" if two_models else "Enter")
-    assert downloads == []
+        value.press("Tab")
+        builder.activate_export_with_keyboard("Space")
+    expect(builder.export_control()).to_be_disabled()
+    expect(builder.export_control()).not_to_have_attribute("aria-expanded", "true")
+    assert len(saves) == 1 and len(pending) == 1 and downloads == []
     pending.pop().continue_()
     expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
     wait_for_htmx_idle(page)
+    expect(builder.export_control()).to_be_enabled()
+    expect(builder.export_control()).not_to_have_attribute("aria-expanded", "true")
     assert downloads == []
-    control = builder.export_control()
-    if two_models:
-        expect(control).not_to_have_attribute("aria-expanded", "true")
-        builder.activate_export_with_keyboard("Space")
-        expect(control).to_have_attribute("aria-expanded", "true")
-        with page.expect_download() as download:
-            page.locator("#download-workspace").press("Enter")
-    else:
-        with page.expect_download() as download:
-            builder.activate_export_with_keyboard()
     filename = tmp_path / "native.e-f.json"
-    download.value.save_as(str(filename))
+    builder.download_workspace(str(filename))
     data = json.loads(filename.read_text())
-    active = data["models"][1] if two_models else data
     owner_id = selected.get_attribute("data-owner-id")
-    assert active["Storage"][owner_id]["lifespan"]["value"] == 8
+    assert data["models"][1]["Storage"][owner_id]["lifespan"]["value"] == 8
     assert len(saves) == 1 and len(downloads) == 1
 
 
