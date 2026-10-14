@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simplified-input save lock — Implementation review</title>
 <style>
-  :root { --ink: #21312f; --muted: #5e706e; --line: #dbe4df; --paper: #fff; --soft: #eaf3ed; --accent: #176751; }
+  :root { --ink: #21312f; --muted: #5e706e; --line: #dbe4df; --paper: #fff; --soft: #eaf3ed; --accent: #176751; --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
   * { box-sizing: border-box; } html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
   body { margin: 0; font: 16px/1.6 system-ui, sans-serif; color: var(--ink); background: #f5f7f3; }
   a { color: var(--accent); text-underline-offset: .18em; } :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 3px; }
@@ -29,6 +29,9 @@
   #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper); box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
   #review-link-menu[hidden] { display: none; } #review-link-menu a { display: block; padding: .35rem .55rem; text-decoration: none; }
   #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg); padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
   @media (max-width: 850px) { #layout { display: flex; flex-direction: column; padding: 1rem; } #sidebar { position: static; max-height: 45vh; width: 100%; } #sidebar:not([open]) { width: 2.75rem; } }
   @media print { body { background: white; font-size: 10pt; } #layout { display: flex; flex-direction: column; padding: 0; } main { order: 0; } #sidebar { order: 1; position: static; max-height: none; } #navigation, #sidebar > summary, #review-link-menu { display: none; } details::details-content { content-visibility: visible; display: block; } pre { white-space: pre-wrap; } }
 </style>
@@ -36,7 +39,7 @@
 <body>
 <div id="layout">
 <details id="sidebar" open aria-label="Reading order and implementation map">
-<summary><span>Navigation and changed files</span></summary>
+<summary><span>Navigation and implementation map</span></summary>
 <nav id="navigation" aria-label="Reading order">
 <p><strong>Reading order</strong></p>
 <ol><li><a href="#save">One field save</a></li><li><a href="#cleanup">Remove the broad guard</a></li><li><a href="#reads-export">Reads and export</a></li><li><a href="#delivery">Verification</a></li></ol>
@@ -70,8 +73,13 @@
 <p><small>Implementation review · 14 October 2026 · Interface-owned</small></p>
 <h1>Simplified-input save lock</h1>
 <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/simple-workspace-mutation-gate/spec.html" data-review-source-href="spec.html">Specification</a> · Run A implementation guide.</p>
-<p data-reading-note>Implementation and review found no material departure from the approved plan. No library or server change was needed.</p>
+<p data-reading-note>The scoped save and export changes followed the approved plan. Run A also fixed a pre-existing accordion-state defect found during E2E close-out; see the implementation decision below. No library or server change was needed.</p>
 </header>
+
+<aside id="impl-decisions" data-note="review">
+  <p><strong>Implementation decisions</strong></p>
+  <p><a href="#impl-decision-01">[IMPL-DECISION-01] Preserve accordion transition state in OOB refreshes — APPLIED</a></p>
+</aside>
 
 <section id="save" data-step>
 <h2>1. One Simplified-input field save</h2>
@@ -107,6 +115,20 @@ retain their local fetch lifecycles. The browser no longer promises global write
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:48:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L48:1">Results cleanup</a>
 tracks recomputation-bearing HTMX requests that can refresh Results from outside its panel. On close,
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:85:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L85:1">the local wait</a> keeps response targets attached until requests and swaps finish, then reapplies the closed layout.</p>
+<aside id="impl-decision-01" data-note="review">
+  <p><strong>[IMPL-DECISION-01] — APPLIED</strong></p>
+  <p>After the user supplied a full E2E failure during close-out, Run A fixed a pre-existing defect in
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:314:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L314:1">restoreAccordionStateInFragment()</a>. The linked
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_source_metadata.py:372:1" data-review-source-href="../../../tests/e2e/test_source_metadata.py#L372:1">source-metadata resubmission scenario</a>
+  timed out because an OOB card refresh closed the accordion and hid its edit button. The original snapshot treated only the Bootstrap
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:321:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L321:1">show class</a> as open. During an opening transition Bootstrap temporarily removes it; the accordion's
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:319:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L319:1">collapsing state</a> and its toggle's
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:320:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L320:1">aria-expanded destination</a> already reveal that the intended state is open. The helper now preserves that destination when the
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:353:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L353:1">OOB beforeSwap handler</a> replaces the card; a closing transition remains closed.</p>
+  <p>This small DOM-state read preserves the existing OOB refresh and fast side-panel save path without adding a wait, reload, global guard or persisted state. The deterministic
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:174:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L174:1">opening/closing Jest regression</a> and the existing
+  <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_source_metadata.py:372:1" data-review-source-href="../../../tests/e2e/test_source_metadata.py#L372:1">source-metadata resubmission E2E case</a> cover the correction.</p>
+</aside>
 </section>
 
 <section id="reads-export" data-step>

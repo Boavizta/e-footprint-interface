@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Modeling and workspace downloads read accepted saved state without completing or replaying edits. Native links remain usable during a field save, while the two-model Export toggle is disabled until settlement. Dirty Configure blocks export with a save-or-discard notice; clean Configure exports in place.
 
 ### Fixed
+- Card refreshes during an accordion transition now preserve its intended open or closed state, keeping edit controls available after fast saves.
 - Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.
 - Both editors deliver large repair notice lists through the response body, keeping HTMX headers bounded and displaying authored text safely.
 - Rejected Simplified-input saves now return 422 for recognized validation or 500 for unexpected errors, show the error modal, and restore stored values and provenance, including affected dependents. A failed timeseries Save closes its panel; inline Retry/Discard and failed-edit navigation/export prompts are removed.
