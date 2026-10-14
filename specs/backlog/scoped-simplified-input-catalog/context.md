@@ -2,6 +2,14 @@
 
 Captured on 8 October 2026 from an audit of simplified-inputs implementation and local performance measurements.
 
+**Status:** Parked on 14 October 2026; no implementation scheduled. The spec and plan in this folder
+record a proposal, not an approved delivery. Local benchmarks show potential savings on large synthetic
+models, but do not establish a production latency or resource problem. Scoping the catalog adds
+dependency-closure and validation complexity, so retain the current implementation while observing
+production behavior. `build_catalog()` now has a `time_it` decorator for timing logs. Revisit when
+production request latency, catalog duration, model size, and interaction frequency show a meaningful
+user impact; then recheck the current callers and contracts before choosing a scope.
+
 ## User intent and status
 
 Prepare a focused refactor that avoids building the complete simplified-input catalog where a caller needs only a subset, if the measured savings justify the complexity. The user requested this context dump so they can run `spec-plan` in a fresh session.
