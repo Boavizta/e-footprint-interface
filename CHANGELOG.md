@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Simplified inputs opens every selected object on entry; Configure still opens the first object.
 - Upgrade efootprint to 26.0.0 for conditional input handling and import upgrades of older EcoLogits video resolutions; automatic replacement comments now use a shorter reason.
 - Field source and comment editors in Modeling side panels now use a single Close button to stage changes for the panel's Save action.
 - Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.

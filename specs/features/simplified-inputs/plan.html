@@ -640,7 +640,8 @@ fixed_nb_of_instances: InstanceCountQuantity | EmptyExplainableObject = None
                             "dependents": dependent_dom_ids,
                         }
                     ],
-                    "open": first_object,
+                    "open": not configure or first_object,
+                    "current": first_object,
                     "selected_count": selected_count,
                 }
             ],

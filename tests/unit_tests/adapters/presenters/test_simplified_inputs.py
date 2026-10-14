@@ -41,6 +41,24 @@ def test_selected_view_contains_only_saved_fields_and_authored_help(minimal_mode
     assert "1 input" in html
 
 
+def test_selected_view_opens_all_objects_but_marks_only_first_navigation_item_current(minimal_model_web):
+    eligible_objects = [obj for group in build_workspace_context(minimal_model_web, configure=True)["groups"]
+                        for obj in group["objects"] if obj["fields"]][:2]
+    assert len(eligible_objects) == 2
+    minimal_model_web.repository.interface_config = {"simplified_inputs": {
+        "title": "", "guidance": "", "fields": {
+            obj["object_id"]: {obj["fields"][0]["address"].attribute: {"included": True, "help": ""}}
+            for obj in eligible_objects}}}
+
+    context = build_workspace_context(minimal_model_web)
+    objects = [obj for group in context["groups"] for obj in group["objects"]]
+    assert len(objects) == 2
+    assert all(obj["open"] for obj in objects)
+    assert [obj["current"] for obj in objects] == [True, False]
+    html = render_to_string("model_builder/simplified_inputs/workspace.html", context)
+    assert html.count('aria-current="true"') == 1
+
+
 def test_normal_forms_include_optional_instance_count(minimal_model_web):
     server = minimal_model_web.servers[0]
     normal, advanced, _ = generate_dynamic_form(server.class_as_simple_str, server.modeling_obj.__dict__,

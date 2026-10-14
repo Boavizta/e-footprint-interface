@@ -98,7 +98,8 @@ def build_workspace_context(model_web, *, configure=False, catalog=None, address
                            "dependents": [f"si-{system_id}-{dep.object_id}-{dep.attribute}"
                                           for dep in catalog.dependents.get(address, ())]})
         group["objects"].append({"object_id": owner_id, "dom_id": f"si-{system_id}-object-{owner_id}",
-                                 "name": web_obj.name, "fields": fields, "open": first,
+                                 "name": web_obj.name, "fields": fields,
+                                 "open": not configure or first, "current": first,
                                  "selected_count": sum(field["setting"]["included"] for field in fields)})
         first = False
     selected_input_count = sum(obj["selected_count"] for group in groups.values() for obj in group["objects"])
