@@ -9,9 +9,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Normal and Simplified editors repair implicit conditional choices after controller changes, keep explicit choices authoritative, and record automatic replacement provenance.
-- Regression coverage ensures visible form controllers have no skipped conditional dependents, including cross-object controller paths.
-- The simplified-inputs plan offers a right-click VS Code diff against local `main` for linked files, backed by an installable local VS Code extension; ordinary clicks still open the file.
-- Regression coverage for required simplified inputs across owner boundaries, including rejected exclusion patches and completed replacement saves.
 - Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.
 - A grouped Configure view lets authors choose simplified inputs and guidance, with required selections, filtering, navigation, and Save/Discard/Stay protection for drafts. Each modeling remembers its base view.
 - Inline bookmarks in Modeling panels and Sources let authors select inputs without saving surrounding value drafts; new-object selections are saved on creation, and deletion warns about and removes affected selections.
@@ -19,35 +16,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Agent workflow guidance now reads each role's model and effort from its runtime agent definition instead of a duplicated role table.
 - Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.
-- Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point and updated implementation links in the feature plan.
+- Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point.
 - Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
 - Interface-config normalization lives in the domain and is shared by repositories and version migrations.
-- Feature close-out now delegates a plan review guide to Luna/medium: preserve the approved plan, link implemented claims to actual code, and consolidate decisions under supervisor ownership.
-- Implementation-decision callouts now deep-link every cited code artifact to a verified source line; shared plan skills require the same audit for future decisions and amendments.
-- Plan skills now use one shared amber index and visible callout format for plan amendments and implementation decisions.
-- Shared plan skills now preserve VS Code file links and right-click diffs when drafting plans, proposing plan updates and recording implementation decisions.
 - Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
 - Optional quantities in Modeling and Simplified inputs now use a generic “Leave unset” switch and model-declared units; fixed counts remain editable when allowed, and autoscaling or serverless selections clear them.
-- Codex per-task and global reviews now use GPT-6.1 Sol/high; the paired Astra/Sol shadow-review experiment ended early after one feature by user decision.
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
 - Workspace mutations run one at a time, protecting edits, navigation and exports until the save settles while keeping reading and stateless previews available.
 - Modeling and workspace downloads export accepted saved state without completing or replaying edits. Ordinary autosave still blocks export while busy; use a fresh activation after saving. Dirty Configure blocks export with a save-or-discard notice, while clean Configure exports in place.
-- Feature implementation now proceeds through reviews autonomously, records consequential choices in the plan with `IMPL-DECISION` tags, and omits judgement journals, routine-fix inventories and successful-test reports.
-- Task decomposition runs autonomously in one session, writes briefs in dependency order, and presents any plan amendments together in `plan.html` using searchable `PLAN-UPDATE` tags. No plan amendments is a valid outcome.
-- Development workflow: verified task briefs, durable review handoffs, scoped agent roles, synchronized shared tooling, and local Claude/Codex usage accounting.
 
 ### Fixed
 - Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.
 - Both editors deliver large repair notice lists through the response body, keeping HTMX headers bounded and displaying authored text safely.
-- E2E HTMX clicks now wait for form submissions and settled workspace updates; Sources export waits for its restored link, and the dependent-selector flow expands the accepted view after Configure saves.
 - Rejected Simplified-input saves now return 422 for recognized validation or 500 for unexpected errors, show the error modal, and restore stored values and provenance, including affected dependents. A failed timeseries Save closes its panel; inline Retry/Discard and failed-edit navigation/export prompts are removed.
 - Side-panel simplified-input bookmarks label their checkbox “Include in simplified inputs”; Configure keeps “Include.”
 - Simplified inputs place confidence beside compact value controls and show the clickable source and comment directly below. Their Saved status appears only briefly after an accepted update.
-- Simplified inputs now uses the feature mockup's navigation card, grouped sections, field and provenance styling, with its selected-input count and a right-aligned Results total. Configure actions sit in the header, the object filter sits with expand controls, and the Results bar retains the Modeling style.
+- Simplified inputs now uses a navigation card, grouped sections, field and provenance styling, with its selected-input count and a right-aligned Results total. Configure actions sit in the header, the object filter sits with expand controls, and the Results bar retains the Modeling style.
 - Disabled Results controls keep the validation explanation in a tooltip without expanding the Show results button.
-- Local usage accounting now prices `gpt-5.6-luna` requests, including automatic approval reviews, on both API-equivalent and Codex-credit surfaces.
 - Workspace imports validate all incoming modelings and the combined payload budget before replacing saved models; rejected single imports cannot overwrite recovered configuration.
 - Copies and System-ID remapping preserve disconnected modeling objects and independent per-model configuration, including selected System-owned fields. Recovery settings are scoped to the slot and System.
 - Example deep links preserve distinct System IDs in two-model workspaces, and value changes preserve omitted source, confidence and comment metadata while honoring explicit clears.
