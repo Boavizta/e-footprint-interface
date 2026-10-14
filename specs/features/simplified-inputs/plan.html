@@ -920,8 +920,8 @@ repository.save_interface_config()
     <p>The existing modal stays out of band with <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/exception_handling.py:131:1" data-review-source-href="../../../model_builder/adapters/views/exception_handling.py#L131:1"><code>HX-Reswap: none</code></a>.
     Simplified saves request panel/workspace preservation so Configure and failed bookmark saves keep their explicit drafts.
     The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1"><code>htmx:beforeSwap</code></a> listener permits HTTP error bodies carrying that header,
-    while retaining the error status, so HTMX processes OOB fragments without replacing the main target. It runs before the guard's swap listener.
-    The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:502:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L502:1">mutation guard</a> and
+    while retaining the error status, so HTMX processes OOB fragments without replacing the main target. It runs before the field-save swap listener.
+    The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:119:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L119:1">field-save handler</a> and
     <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:133:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L133:1">bookmark handler</a> use HTTP success to settle saves;
     <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:2:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L2:1"><code>openModalDialog</code></a> only opens the modal.</p>
     <aside id="impl-decision-10" data-note="review">
@@ -1144,8 +1144,8 @@ persist once</code></pre></div></div>
     Compare already hides the resident builder without destroying its panel, so a same-model return
     needs no restoration code. A clean Configure form can export without leaving; a dirty form blocks export in place
     until the user explicitly saves or discards it.</p>
-    <p>Model switches and structural edits use the <a href="#saves">same in-flight guard as saves</a>;
-    they are unavailable while a mutation is running, not queued for later.
+    <p>During a Simplified-input field save, <a href="#saves">native HTMX disabling</a> makes model-switch
+    and structural-action buttons unavailable. Independent actions keep their own request behavior; no shared write guard or queue remains.
     Remember only the last base view by System ID; do not add scroll, expansion or filter restoration.
     Apply simplified-versus-modeling opening defaults only when importing JSON, not on every tab switch.</p>
     <h4 id="exports">2 · Download through the normal toolbar</h4>
@@ -1175,8 +1175,8 @@ persist once</code></pre></div></div>
     <a href="../simplified-input-export-simplification/spec.html#success">Simplified-input export follow-up</a>
     for the scoped decision and accepted tradeoffs.</p>
     <p>A failed simple-input edit restores the selected field from the active repository. Modeling and
-    Configure entry, model switching and workspace-shell actions can then proceed normally. The shared
-    in-flight mutation lock still prevents those actions while a save request is running. Ordinary model
+    Configure entry, model switching and workspace-shell actions can then proceed normally. Native field-save
+    disabling temporarily covers buttons and Simplified-input controls; independent requests have no shared guard. Ordinary model
     removal confirmation and side-panel draft protection remain.</p>
     <aside id="impl-decision-08" data-note="review">
       <p><strong>[IMPL-DECISION-08] — SUPERSEDED by <a href="#save-errors">accepted-field restoration</a></strong></p>

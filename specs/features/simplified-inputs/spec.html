@@ -1526,7 +1526,7 @@
           });
           mockup.querySelectorAll('[data-footprint-state]').forEach(function (output) { output.textContent = state; });
           mockup.querySelectorAll('[data-show-results]').forEach(function (button) {
-            button.disabled = !computable;
+            button.disabled = saving || !computable;
             button.title = computable ? 'Manufacturing + use over the entire modeling period · active modeling' :
               'Results unavailable: complete the modeling to compute its footprint.';
           });
