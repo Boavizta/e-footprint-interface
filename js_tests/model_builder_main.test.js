@@ -231,6 +231,7 @@ test.each([422, 500])("HTTP %s modal still processes rejected OOB content", stat
 
 test("closing Results waits for its pending response and swap before detaching targets", () => {
     document.body.innerHTML = `
+        <div id="toolbar-nav"></div><div id="model-canva-scrollable-area" class="overflow-x-auto"></div>
         <div id="sidePanel" class="d-none"></div>
         <div id="panel-result-btn"></div><button id="btn-open-panel-result"></button>
         <div id="result-block"><form class="sankey-settings htmx-request"></form></div>
@@ -245,8 +246,7 @@ test("closing Results waits for its pending response and swap before detaching t
     results.classList.add("htmx-settling");
     requestEvent("htmx:afterRequest", {xhr: {}}, form);
     expect(form.isConnected).toBe(true);
-    document.getElementById("panel-result-btn").style.height = "100%";
-    results.style.height = "100%";
+    window.displayPanelResult();
     document.getElementById("btn-open-panel-result").outerHTML = '<button id="btn-open-panel-result" style="display:none"></button>';
     results.classList.remove("htmx-settling");
     requestEvent("htmx:afterSettle", {xhr: {}}, results);
@@ -255,6 +255,8 @@ test("closing Results waits for its pending response and swap before detaching t
     expect(results.style.height).toBe("");
     expect(document.getElementById("panel-result-btn").style.height).toBe("");
     expect(document.getElementById("btn-open-panel-result").style.display).toBe("block");
+    expect(document.getElementById("toolbar-nav").style.display).toBe("");
+    expect(document.getElementById("model-canva-scrollable-area").className).toBe("overflow-x-auto");
 });
 
 test("edit toast renders every repair notice and authored name as text", () => {

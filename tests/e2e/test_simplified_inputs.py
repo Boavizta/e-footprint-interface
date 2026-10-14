@@ -660,6 +660,30 @@ class TestInlineBookmarks:
         expect(page.locator("#result-block .sankey-card")).to_have_count(1)
         builder.close_result_panel()
 
+    def test_closing_results_waits_for_a_delayed_field_refresh(self, minimal_complete_model_builder):
+        from urllib.parse import parse_qs
+
+        builder = minimal_complete_model_builder
+        page = builder.page
+        builder.configure_simplified_fields("lifespan")
+        builder.open_result_panel()
+        wait_for_htmx_idle(page)
+        pending = []
+        page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+        with page.expect_request("**/edit-simplified-input/**"):
+            builder.save_simplified_number("lifespan", "8")
+        assert parse_qs(pending[0].request.post_data)["recomputation"] == ["true"]
+        builder.close_result_panel()
+        expect(page.locator("#result-block")).to_have_css("display", "none")
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
+        wait_for_htmx_idle(page)
+        expect(page.locator("#result-block")).to_be_empty()
+        assert page.locator("#panel-result-btn").evaluate("panel => panel.style.height") == ""
+        expect(page.locator("#btn-open-panel-result")).to_be_visible()
+        assert page.locator("#model-canva-scrollable-area").evaluate(
+            "area => area.classList.contains('overflow-x-auto') && !area.classList.contains('overflow-x-hidden')")
+
     @pytest.mark.parametrize("outcome", ["success", "rejected", "transport"])
     def test_field_save_disables_both_resident_workspaces_and_restores_controls(
             self, minimal_system_data, model_builder_page, outcome):

@@ -43,29 +43,40 @@ document.body.addEventListener("htmx:afterSettle", () => {
     }
 });
 
+// Value and object edits can refresh Results through an OOB response from outside the panel.
+const pendingResultRefreshes = new Set();
+document.addEventListener("htmx:beforeRequest", event => {
+    if (!event.defaultPrevented && event.detail.requestConfig.parameters.recomputation) {
+        pendingResultRefreshes.add(event.detail.xhr);
+    }
+});
+document.addEventListener("htmx:afterRequest", event => pendingResultRefreshes.delete(event.detail.xhr));
+
 function hidePanelResult() {
-    exitResultFullscreen();
     var panel = document.getElementById("panel-result-btn");
     var resultDiv = document.getElementById("result-block");
 
-    panel.style.height = "";
-    resultDiv.style.height = "";
+    function resetClosedLayout() {
+        exitResultFullscreen();
+        panel.style.height = "";
+        resultDiv.style.height = "";
 
-    if (document.getElementById("sidePanel").classList.contains("d-none")) {
-        resultDiv.classList.remove("w-100");
-    } else {
-        resultDiv.classList.remove("result-width");
+        if (document.getElementById("sidePanel").classList.contains("d-none")) {
+            resultDiv.classList.remove("w-100");
+        } else {
+            resultDiv.classList.remove("result-width");
+        }
+        var scrollableArea = document.getElementById("model-canva-scrollable-area");
+        if (scrollableArea) {
+            scrollableArea.classList.remove("overflow-x-hidden");
+            scrollableArea.classList.add("overflow-x-auto");
+        }
     }
-    var scrollableArea = document.getElementById("model-canva-scrollable-area");
-    if (scrollableArea) {
-        scrollableArea.classList.remove("overflow-x-hidden");
-        scrollableArea.classList.add("overflow-x-auto");
-    }
+    resetClosedLayout();
 
     function emptyResultPanel() {
         // A refresh arriving while we close can initialize the open-panel layout again.
-        panel.style.height = "";
-        resultDiv.style.height = "";
+        resetClosedLayout();
         resultDiv.innerHTML = "";
         resultDiv.style.display = "";
         document.getElementById("btn-open-panel-result").style.display = "block";
@@ -73,19 +84,19 @@ function hidePanelResult() {
 
     function hasPendingResponse() {
         var pending = ".htmx-request, .htmx-settling, .htmx-added";
-        return resultDiv.matches(pending) || resultDiv.querySelector(pending);
+        return pendingResultRefreshes.size || resultDiv.matches(pending) || resultDiv.querySelector(pending);
     }
     if (hasPendingResponse()) {
         resultDiv.style.display = "none";
         // Keep response targets attached until their own requests and swaps finish.
         function finishClosing() {
             if (hasPendingResponse()) return;
-            resultDiv.removeEventListener("htmx:afterRequest", finishClosing);
-            resultDiv.removeEventListener("htmx:afterSettle", finishClosing);
+            document.removeEventListener("htmx:afterRequest", finishClosing);
+            document.removeEventListener("htmx:afterSettle", finishClosing);
             emptyResultPanel();
         }
-        resultDiv.addEventListener("htmx:afterRequest", finishClosing);
-        resultDiv.addEventListener("htmx:afterSettle", finishClosing);
+        document.addEventListener("htmx:afterRequest", finishClosing);
+        document.addEventListener("htmx:afterSettle", finishClosing);
         return;
     }
 
