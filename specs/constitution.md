@@ -18,7 +18,7 @@ These are the project's immutable rules. They must be respected by every code ch
 3. Jest passes (`npm run jest`).
 4. `pyproject.toml` and `poetry.lock` reference `efootprint` from PyPI (not a local editable path) before any commit reaches `main`. Enforced by a pyproject.toml-parsing test.
 5. If Django models change, a migration file is committed.
-6. `CHANGELOG.md` entry added under `## [Unreleased]`. For a task run standalone via `task-implement`, add it on the spot. For a task run inside a `feature-implement` loop, this is deferred: the supervisor writes one consolidated entry once every task in the feature is done, so individual tasks skip this gate.
+6. Delivered production-code changes are covered by a consolidated `CHANGELOG.md` entry under `## [Unreleased]` in each affected repository. Entries describe production changes only; omit specs, plans, tasks, development process and tooling, and tests, even when delivered alongside production changes.
 
 ## 3. Agent-facing rules
 
@@ -44,4 +44,4 @@ A change to this file requires:
 1. A short justification ("why now") proposed alongside.
 2. An explicit acknowledgment of which downstream artifacts (`architecture.md`, `conventions.md`, CI tests) need to follow.
 
-Use the `update-constitution` skill, or just edit deliberately with a separate commit — never blend constitutional changes into a feature commit.
+Amend the constitution deliberately in a separate commit — never blend constitutional changes into a feature commit.
