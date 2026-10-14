@@ -73,8 +73,8 @@ state before continuing; Save continues only after its matching successful HTMX 
 saves leave the draft visible. Export is separate: while Configure is dirty, it is blocked in place with a notice;
 explicit Save or Discard does not continue the export. A clean Configure screen can export directly without leaving.
 The ordinary side-panel discard-confirmation helper runs before focused-view reads, whose continuation is tied to their
-actually issued XHR. Duplicate reads are suppressed; leaving or starting a mutation aborts pending reads before they
-can replace a draft or park Configure in another model's resident target. Configure is never parked and each entry
+actually issued XHR. Duplicate reads are suppressed; leaving or starting a request that replaces the pending read's
+target aborts that read before it can replace a draft or park Configure in another model's resident target. Configure is never parked and each entry
 starts fresh.</p>
 <h3 id="tab-roles-and-ordering">Tab roles and ordering</h3>
 <p>Tabs are fixed role labels; the model name lives in the toolbar. Each model tab shows a fixed label by <em>list position</em> — first slot "Reference model", second "Comparison model" (matching how <code>compare()</code> pairs <code>workspace_slots[0]→A</code>, <code>[1]→B</code>) — not the model's own name, so a long name can never stretch a tab (the tab width is pinned in <a class="source" href="../../theme/static/scss/custom.scss"><code>custom.scss</code></a>).</p>
