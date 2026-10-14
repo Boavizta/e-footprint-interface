@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
 - Optional quantities in Modeling and Simplified inputs now use a generic “Leave unset” switch and model-declared units; fixed counts remain editable when allowed, and autoscaling or serverless selections clear them.
 - Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
-- Workspace mutations run one at a time, protecting edits, navigation and exports until the save settles while keeping reading and stateless previews available.
-- Modeling and workspace downloads export accepted saved state without completing or replaying edits. Ordinary autosave still blocks export while busy; use a fresh activation after saving. Dirty Configure blocks export with a save-or-discard notice, while clean Configure exports in place.
+- Simplified-input field saves temporarily disable buttons and fields in both resident workspaces, then restore controls when the request settles. Modeling, Configure, bookmarks, card ordering and diagram actions keep their own request behavior.
+- Modeling and workspace downloads read accepted saved state without completing or replaying edits. Native links remain usable during a field save, while the two-model Export toggle is disabled until settlement. Dirty Configure blocks export with a save-or-discard notice; clean Configure exports in place.
 
 ### Fixed
 - Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.

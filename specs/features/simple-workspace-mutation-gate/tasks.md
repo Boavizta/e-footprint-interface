@@ -1,6 +1,6 @@
 # Simplified-input save lock — tasks
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: under review
+Status: complete
 
 ## Implementation runs
 
@@ -20,7 +20,7 @@ Status: under review
 
 Goal: A valid Simplified-input value or provenance save submits the full value, disables buttons and both resident Simplified-input workspaces for its own request, then restores real prerequisite-disabled states and local save feedback on success or failure. Other actions keep their own completion behavior without a global workspace mutation bus.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-1.md](briefs/task-1.md)
 
@@ -40,7 +40,7 @@ Implementation: hard — the shared guard currently coordinates `htmx:afterReque
 
 Goal: Export follows the approved field-save rule: the two-model toggle is disabled during a field save, while native links already available can download the repository's current saved state; dirty Configure still blocks export in place. Published guidance no longer promises a broad workspace lock.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-2.md](briefs/task-2.md)
 
@@ -59,4 +59,3 @@ Implementation: standard — the controls, saved-state endpoint and dirty-Config
 
 - Implementation requires a rebuilt Simplified-input bundle before browser checks: `npm run build:js:dev` in e-footprint-interface. Generated assets must follow repository conventions.
 - Browser checks require the local Django server and the Playwright environment described in [testing.md](../../testing.md); use no production services. The full Jest, Python unit/integration and E2E gates apply to the completed run.
-- The checkout already contains unrelated edits, including `e_footprint_interface/latency_middleware.py`, `model_builder/domain/services/simplified_inputs.py`, `pyproject.toml` and `poetry.lock`; preserve them. Before any commit intended for `main`, verify the PyPI `efootprint` dependency rule without discarding those existing changes.
