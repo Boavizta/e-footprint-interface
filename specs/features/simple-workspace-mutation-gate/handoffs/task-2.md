@@ -1,6 +1,6 @@
 # Task 2 — Native export and saved-state guidance
 
-Repository and implementation range: e-footprint-interface, `209e75c4b4c1d0253af9808763b33cf575baf9cb..f2fb7c21847b30a20437f116ac938a8210035917`.
+Repository and reviewed implementation range: e-footprint-interface, `209e75c4b4c1d0253af9808763b33cf575baf9cb..77a19112c2643a003cd83d8e32998260a4549be6`.
 
 ## Review pointers
 
