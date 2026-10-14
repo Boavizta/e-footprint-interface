@@ -99,7 +99,8 @@ patches submitted keys. Same-value edits patch the existing object directly beca
 equal values. These metadata changes stay on the request-local graph until the entire edit succeeds and is persisted.</p>
 <p>The source editor displays the automatic-replacement source on inputs that already carry it, excluding it from
 other inputs' manual choices. Comments have no editor length cap so repeated replacement history can be viewed and
-resubmitted intact.</p>
+resubmitted intact. When a user changes an input value in a normal or Simplified editor, a hypothesis or automatic-replacement
+source becomes user data; existing comments remain as history.</p>
 <h2 id="relationship-types">Relationship types</h2>
 <h3 id="list-based-children-standard-pattern">List-based children (standard pattern)</h3>
 <p>Most parent-child relationships use <code>List[ChildType]</code> constructor parameters. Managed via:</p>

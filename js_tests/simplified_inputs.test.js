@@ -1,7 +1,11 @@
 const fs = require("fs");
 const path = require("path");
+if (typeof global.CSS === "undefined") {
+    global.CSS = {escape: value => String(value).replace(/[^a-zA-Z0-9_-]/g, char => "\\" + char)};
+}
 const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
 const { workspace: { initialize, deferExit }, fieldEdits: { initializeEdits } } = require("../theme/static/scripts/simplified_inputs/index.js");
+require("../theme/static/scripts/source_metadata.js");
 // Match base.html listener ordering for native disabled-state restoration.
 require("../theme/static/scripts/model_builder_main.js");
 
@@ -293,7 +297,7 @@ test('simplified provenance follows the side-panel field layout', () => {
     expect(form.querySelector('details.simplified-provenance')).toBeNull();
 });
 
-test('save status starts empty, appears after an accepted replacement, and clears', () => {
+test('save status stays visible through a preserved replacement, then clears after acceptance', () => {
     jest.useFakeTimers();
     try {
         const form = mountEditor();
@@ -301,17 +305,20 @@ test('save status starts empty, appears after an accepted replacement, and clear
         const input = form.querySelector('input[type="number"]');
         input.value = '8';
         input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-        expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Saving…');
+        const status = form.querySelector('[data-simplified-save-status]');
+        expect(status.id).toBe('si-test-server-lifespan-save-status');
+        expect(status.hasAttribute('hx-preserve')).toBe(true);
+        expect(status.textContent).toBe('Saving…');
         const xhr = startMutation(form);
         mutationEvent('htmx:beforeSwap', {xhr, shouldSwap: true});
         const replacement = form.cloneNode(true);
         delete replacement.dataset.saving;
-        replacement.querySelector('[data-simplified-save-status]').textContent = '';
+        replacement.querySelector('[data-simplified-save-status]').replaceWith(status);
         form.replaceWith(replacement);
         mutationEvent('htmx:afterRequest', {xhr, successful: true});
-        expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('');
+        expect(replacement.querySelector('[data-simplified-save-status]')).toBe(status);
+        expect(status.textContent).toBe('Saving…');
         mutationEvent('htmx:afterSettle', {xhr});
-        const status = replacement.querySelector('[data-simplified-save-status]');
         expect(status.textContent).toBe('Saved');
         jest.advanceTimersByTime(2999);
         expect(status.textContent).toBe('Saved');
@@ -370,6 +377,32 @@ test("value saves omit unchanged provenance and confidence saves preserve omitte
     expect(parameters[prefix + "__source_id"]).toBeUndefined();
     expect(parameters[prefix + "__source_name"]).toBeUndefined();
     expect(parameters[prefix + "__source_link"]).toBeUndefined();
+});
+
+test("changing an automatically replaced simplified value submits user data and keeps replacement history", () => {
+    const form = mountEditor("simplified_editor_automatic");
+    const input = form.querySelector('input[type="number"]');
+    input.value = "8";
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+
+    const prefix = form.dataset.valuePrefix;
+    const submitted = Object.fromEntries(new FormData(form));
+    expect(submitted[prefix + "__source_id"]).toBe("user_data");
+    expect(submitted[prefix + "__source_name"]).toBe("user data");
+    expect(submitted[prefix + "__confidence"]).toBe("");
+    expect(submitted[prefix + "__comment"]).toBe("Replacement history");
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+});
+
+test("editing only an automatic replacement comment keeps the automatic source", () => {
+    const form = mountEditor("simplified_editor_automatic");
+    const prefix = form.dataset.valuePrefix;
+    form.querySelector(`input[name="${prefix}__comment"]`).value = "Reviewed replacement";
+    form.dispatchEvent(new CustomEvent("simplified-provenance:changed", {bubbles: true}));
+
+    const submitted = Object.fromEntries(new FormData(form));
+    expect(submitted[prefix + "__source_id"]).toBe("automatic_replacement");
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 
 test.each([false, true])("accepted replacement baselines follow native release and settlement (settles first=%s)", settlesFirst => {

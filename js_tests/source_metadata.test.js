@@ -10,7 +10,7 @@ const {
     handleSourceSelect,
     checkCollision,
     resetConfidenceForField,
-    swapHypothesisToUserDataForField,
+    swapImplicitSourceToUserDataForField,
     autosaveConfidence,
     initInFormSourceEditorsIn,
     updateSourceTableRowDisplay,
@@ -214,10 +214,10 @@ test("handleSourceSelect opens the custom-fields panel only when __custom__ is p
     expect(customFields.classList.contains("open")).toBe(false);
 });
 
-test("swapHypothesisToUserDataForField swaps when source was the hypothesis sentinel", () => {
+test("swapImplicitSourceToUserDataForField swaps when source was the hypothesis sentinel", () => {
     mount("field_hypothesis_with_comment");
 
-    swapHypothesisToUserDataForField("Compute_cpu_cores");
+    swapImplicitSourceToUserDataForField("Compute_cpu_cores");
 
     expect(document.getElementById("Compute_cpu_cores__source_id").value).toBe("user_data");
     expect(document.getElementById("Compute_cpu_cores__source_name").value).toBe("user data");
@@ -230,10 +230,10 @@ test("swapHypothesisToUserDataForField swaps when source was the hypothesis sent
     expect(document.querySelector(".source-editor-select").value).toBe("user_data");
 });
 
-test("swapHypothesisToUserDataForField is a no-op when source is anything other than hypothesis", () => {
+test("swapImplicitSourceToUserDataForField leaves manually chosen sources alone", () => {
     mount("field_src_with_sentinels");
 
-    swapHypothesisToUserDataForField("Compute_cpu_cores");
+    swapImplicitSourceToUserDataForField("Compute_cpu_cores");
 
     expect(document.getElementById("Compute_cpu_cores__source_id").value).toBe("src1");
     expect(document.getElementById("Compute_cpu_cores__source_name").value).toBe("ADEME 2024");
@@ -249,6 +249,21 @@ test("value-changed event resets confidence and swaps hypothesis → user_data i
 
     expect(document.getElementById("Compute_cpu_cores__confidence").value).toBe("");
     expect(document.getElementById("Compute_cpu_cores__source_id").value).toBe("user_data");
+});
+
+test("value-changed event changes automatic replacement to user data and keeps its history", () => {
+    mount("field_high_automatic");
+    const input = document.createElement("input");
+    input.id = "Compute_cpu_cores";
+    document.querySelector("form").appendChild(input);
+
+    input.dispatchEvent(new CustomEvent("source-metadata:value-changed", {bubbles: true}));
+
+    expect(document.getElementById("Compute_cpu_cores__confidence").value).toBe("");
+    expect(document.getElementById("Compute_cpu_cores__source_id").value).toBe("user_data");
+    expect(document.getElementById("Compute_cpu_cores__source_name").value).toBe("user data");
+    expect(document.getElementById("Compute_cpu_cores__comment").value).toBe("Replacement history");
+    expect(document.querySelector(".source-editor-select").value).toBe("user_data");
 });
 
 test("toggleConfidenceMenu adds .menu-up when the badge sits near the bottom of #source-block", () => {

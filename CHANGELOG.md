@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Upgrade efootprint to 26.0.0 for conditional input handling and import upgrades of older EcoLogits video resolutions; automatic replacement comments now use a shorter reason.
 - Field source and comment editors in Modeling side panels now use a single Close button to stage changes for the panel's Save action.
 - Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.
 - Simplified-input JavaScript is split into workspace, configuration, field-edit and bookmark modules, with one bundled entry point.
@@ -28,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Modeling and workspace downloads read accepted saved state without completing or replaying edits. Native links remain usable during a field save, while the two-model Export toggle is disabled until settlement. Dirty Configure blocks export with a save-or-discard notice; clean Configure exports in place.
 
 ### Fixed
+- Simplified-input save feedback stays visible while HTMX replaces the edited field, avoiding a brief layout jump before Saved appears.
+- Editing an automatically replaced value now marks its source as user data in Modeling and Simplified inputs while preserving the replacement history comment.
 - Card refreshes during an accordion transition now preserve its intended open or closed state, keeping edit controls available after fast saves.
 - Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.
 - Both editors deliver large repair notice lists through the response body, keeping HTMX headers bounded and displaying authored text safely.

@@ -340,8 +340,7 @@ def apply_input_edits(parsed_data: Dict[str, Any], obj_to_edit: "ModelingObjectW
         source = current.source
         prior_source = f"{source.name} (link: {source.link or 'none'})" if source else "none"
         note = (f"Automatic replacement: {current} → {replacement}.\n"
-                f"Reason: {controller_owner.name}.{controller_attribute} now resolves to {controller} "
-                "after the controlling input changed.\n"
+                f"Reason: {controller_owner.name}.{controller_attribute} now resolves to {controller}.\n"
                 f"Previous source: {prior_source}.\n"
                 f"Previous confidence: {current.confidence or 'none'}.")
         replacement.source = Sources.AUTOMATIC_REPLACEMENT

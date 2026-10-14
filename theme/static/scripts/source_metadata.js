@@ -162,14 +162,11 @@
         setTimeout(() => badge.classList.remove("confidence-just-reset"), 1400);
     }
 
-    /* When the user edits an input whose source is the e-footprint hypothesis
-       sentinel, flip the source to the user-data sentinel: the value is no
-       longer the canonical guess, it's the user's. Only triggers on the
-       hypothesis sentinel — once the user has picked any other source, we
-       don't second-guess them. */
-    function swapHypothesisToUserDataForField(inputId) {
+    /* An edited value no longer comes from a generated hypothesis or replacement.
+       Preserve its comment so the earlier replacement remains auditable. */
+    function swapImplicitSourceToUserDataForField(inputId) {
         const sourceIdInput = _hiddenInput(inputId, "source_id");
-        if (!sourceIdInput || sourceIdInput.value !== "hypothesis") return;
+        if (!sourceIdInput || !["hypothesis", "automatic_replacement"].includes(sourceIdInput.value)) return;
         const editor = _editor(inputId);
         if (!editor) return;
         const userDataOpt = editor.querySelector('.source-editor-select option[value="user_data"]');
@@ -586,14 +583,11 @@
         updateSourceTableRowDisplay(form);
     });
 
-    /* Cross-module hook: dynamic_forms.js fires this when an input value changes,
-       so we can react without sharing globals. Two reactions today: clear the
-       confidence badge (per-value judgement) and swap the source from the
-       hypothesis sentinel to user-data (so the value is owned by the user). */
+    /* Cross-module value-change hook for normal and simplified inputs. */
     document.addEventListener("source-metadata:value-changed", e => {
         if (!e.target || !e.target.id) return;
         resetConfidenceForField(e.target.id);
-        swapHypothesisToUserDataForField(e.target.id);
+        swapImplicitSourceToUserDataForField(e.target.id);
     });
 
     if (typeof module !== "undefined" && module.exports) {
@@ -601,7 +595,7 @@
             applyConfidenceToBadge, toggleConfidenceMenu, setConfidence,
             openSourceEditor, applySourceEditor,
             handleSourceSelect, checkCollision,
-            resetConfidenceForField, swapHypothesisToUserDataForField,
+            resetConfidenceForField, swapImplicitSourceToUserDataForField,
             autosaveConfidence,
             initInFormSourceEditorsIn,
             updateSourceTableRowDisplay,

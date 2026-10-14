@@ -36,6 +36,6 @@
     {% include 'model_builder/side_panels/dynamic_form_fields/source.html' with source_dom_id=editor.web_id source_name_prefix=editor.web_id source_meta_source=editor.metadata.source source_meta_comment=editor.metadata.comment source_meta_available=editor.metadata.available_sources simplified_completion=True %}
     {% endif %}
     {% endwith %}
-    <span class="small" data-simplified-save-status role="status"></span>
+    <span id="{{ field.dom_id }}-save-status" hx-preserve class="small" data-simplified-save-status role="status"></span>
 </form>
 {% else %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>{% endif %}

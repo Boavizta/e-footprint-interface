@@ -22,6 +22,13 @@ function createFieldEdits({ activeWorkspace }) {
             setSaveStatus(form, "Not saved");
             return;
         }
+        const valueKey = form.dataset.valuePrefix;
+        const savedValues = JSON.parse(savedEdits.get(form) || "[]").filter(([key]) => key === valueKey);
+        const currentValues = [...new FormData(form)].filter(([key]) => key === valueKey);
+        if (JSON.stringify(currentValues) !== JSON.stringify(savedValues)) {
+            [...form.elements].find(element => element.name === valueKey)?.dispatchEvent(
+                new CustomEvent("source-metadata:value-changed", {bubbles: true}));
+        }
         form.dataset.saving = "true";
         setSaveStatus(form, "Saving…");
         window.htmx.trigger(form, "simplified-save");

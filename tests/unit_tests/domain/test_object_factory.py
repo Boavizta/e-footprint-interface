@@ -403,7 +403,7 @@ class TestConditionalInputEdits:
         assert first.had_value_changes
         expected = (
             "Automatic replacement: 1080p (1920 x 1080) → 480p (854 x 480).\n"
-            "Reason: Video API.model_name now resolves to seedance-1.0 after the controlling input changed.\n"
+            "Reason: Video API.model_name now resolves to seedance-1.0.\n"
             "Previous source: Measured output (link: https://example.test/evidence).\n"
             "Previous confidence: high.\n\n" + original.comment)
         assert job.resolution.comment == expected
@@ -416,7 +416,7 @@ class TestConditionalInputEdits:
         assert job.resolution.value == "720p (1280 x 720)"
         assert job.resolution.comment == (
             "Automatic replacement: 480p (854 x 480) → 720p (1280 x 720).\n"
-            f"Reason: Video API.model_name now resolves to {api.model_name} after the controlling input changed.\n"
+            f"Reason: Video API.model_name now resolves to {api.model_name}.\n"
             "Previous source: automatic replacement (link: none).\n"
             "Previous confidence: none.\n\n" + expected)
         model.persist_to_cache()
