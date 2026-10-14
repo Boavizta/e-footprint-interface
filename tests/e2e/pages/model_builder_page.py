@@ -44,10 +44,42 @@ class ModelBuilderPage:
         count.press("Tab")
         return count
 
-    def attempt_locked_workspace_actions(self):
-        """Probe capture guards as well as native disabled buttons, without waiting for enablement."""
-        for selector in ("#model-tab-0", "#compare-tab", "#download-model", "#download-workspace"):
-            self.page.locator(selector).dispatch_event("click")
+    @property
+    def simplified_workspace(self):
+        return self.page.locator("[data-simplified-workspace]:visible")
+
+    def open_simplified_inputs(self):
+        click_and_wait_for_htmx(self.page, self.page.locator('[data-action="simplified-mode"]'))
+        expect(self.simplified_workspace).to_have_attribute("data-mode", "simplified")
+        return self
+
+    def configure_simplified_fields(self, *attributes):
+        self.open_simplified_inputs()
+        configure = self.simplified_workspace.get_by_role("button", name="Configure", exact=True)
+        click_and_wait_for_htmx(self.page, configure)
+        self.simplified_workspace.get_by_role("button", name="Expand all", exact=True).click()
+        for attribute in attributes:
+            field = self.simplified_field(attribute)
+            object_id = field.locator("xpath=ancestor::details[@data-simplified-object]").get_attribute("id")
+            self.simplified_workspace.locator(f'[data-navigation-object="{object_id}"]').click()
+            field.locator("[data-include-input]").check()
+        click_and_wait_for_htmx(
+            self.page, self.simplified_workspace.get_by_role("button", name="Save and return", exact=True))
+        return self
+
+    def simplified_field(self, attribute):
+        return self.simplified_workspace.locator(f'[data-field-address][data-attribute="{attribute}"]').first
+
+    def save_simplified_number(self, attribute, value):
+        number = self.simplified_field(attribute).locator('input[type="number"]')
+        number.fill(str(value))
+        number.press("Enter")
+        return number
+
+    def attempt_disabled_simplified_edit(self, attribute):
+        number = self.simplified_field(attribute).locator('input[type="number"]')
+        number.click(force=True)
+        self.page.keyboard.press("Enter")
 
     def goto(self):
         """Navigate to the model builder page."""

@@ -72,15 +72,12 @@ test("every completed sortable drag persists the current order of every initiali
 test("one drag end saves once, refreshes only storage metadata, clears grab state, and updates leader lines", async () => {
     const {initSortableObjectCards} = loadModule();
     initSortableObjectCards();
-    const started = jest.fn();
-    document.body.addEventListener("workspace-mutation:started", started, {once: true});
     const grabbed = document.querySelector("#server-list > div");
     grabbed.classList.add("grabbing");
 
     global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    expect(started.mock.calls[0][0].detail.elt).toBe(global.Sortable.mock.instances[0].el);
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.htmx.ajax).toHaveBeenCalledWith(
         "GET",
@@ -174,189 +171,90 @@ function requestEvent(type, detail, target = document.body) {
     return event;
 }
 
-function startMutation(elt = document.body) {
-    const xhr = {getResponseHeader: jest.fn(() => null)};
-    requestEvent("htmx:beforeRequest", {xhr, elt, requestConfig: {verb: "post", path: "/edit/"}});
-    return xhr;
-}
-
-function completeMutation(xhr, {successful = true, swap = true} = {}) {
-    requestEvent("htmx:beforeSwap", {xhr, shouldSwap: swap});
-    requestEvent("htmx:afterRequest", {xhr, successful});
-    if (swap) requestEvent("htmx:afterSettle", {xhr});
-}
-
-test("a mutation captures its payload before locking and blocks further edits, switches and exports until settlement", () => {
+test("native disabling restores prerequisite controls in both resident workspaces and leaves replacements alone", () => {
     document.body.innerHTML = `
-        <div id="sidePanel"><input id="value" value="12"><select disabled></select><button>Save</button></div>
-        <button data-model-tab="1" hx-post="/switch/">Switch</button>
-        <a data-workspace-control href="/download/">Export</a>
-        <button id="read">Read</button>
+        <button id="unavailable" disabled>Unavailable</button>
+        <div data-simplified-workspace><input disabled><select disabled></select></div>
+        <div data-simplified-workspace hidden><textarea disabled></textarea></div>
+        <input id="outside" disabled>
     `;
     loadModule();
-    const field = document.getElementById("value");
-    const xhr = startMutation(field);
-    expect(field.disabled).toBe(true);
-    expect(document.body.dataset.workspaceMutation).toBe("updating");
-    expect(requestEvent("htmx:confirm", {elt: field, verb: "post"}).defaultPrevented).toBe(true);
-    expect(requestEvent("htmx:beforeRequest", {xhr: {}, requestConfig: {verb: "post"}}).defaultPrevented).toBe(true);
-    for (const selector of ["[data-model-tab]", "[data-workspace-control]"]) {
-        const click = new MouseEvent("click", {bubbles: true, cancelable: true});
-        document.querySelector(selector).dispatchEvent(click);
-        expect(click.defaultPrevented).toBe(true);
-    }
-    expect(document.getElementById("read").disabled).toBe(false);
-    requestEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
-    requestEvent("htmx:afterRequest", {xhr, successful: true});
-    expect(field.disabled).toBe(true);
-    requestEvent("htmx:afterSettle", {xhr});
-    expect(field.disabled).toBe(false);
-    expect(document.querySelector("select").disabled).toBe(true);
-    expect(document.body.dataset.workspaceMutation).toBeUndefined();
-    expect(document.querySelector("a").hasAttribute("aria-disabled")).toBe(false);
-});
-
-test("swapped controls keep server constraints and are locked until the initiating response settles", () => {
-    document.body.innerHTML = '<div id="sidePanel"><input></div>';
-    loadModule();
-    const xhr = startMutation();
-    document.getElementById("sidePanel").innerHTML = '<input id="replacement"><button disabled>Unavailable</button>';
-    requestEvent("htmx:afterSwap", {xhr});
-    expect(document.getElementById("replacement").disabled).toBe(true);
-    completeMutation(xhr);
-    expect(document.getElementById("replacement").disabled).toBe(false);
+    const xhr = {};
+    requestEvent("htmx:beforeRequest", {xhr});
+    document.querySelectorAll("[disabled]").forEach(element => element.disabled = false);
+    const replaced = document.querySelector("select");
+    replaced.outerHTML = "<select></select>";
+    requestEvent("htmx:afterRequest", {xhr});
     expect(document.querySelector("button").disabled).toBe(true);
+    expect(document.querySelector("[data-simplified-workspace] input").disabled).toBe(true);
+    expect(document.querySelector("textarea").disabled).toBe(true);
+    expect(document.querySelector("select").disabled).toBe(false);
+    expect(document.querySelector("#outside").disabled).toBe(false);
 });
 
-test.each([true, false])("exports have no native link destination until completion (successful=%s)", successful => {
-    document.body.innerHTML = `
-        <a id="model" data-workspace-control href="download-json/" target="_blank">Model</a>
-        <a id="workspace" data-workspace-control href="download-workspace/">Workspace</a>
-        <a id="empty" data-workspace-control href="">Empty</a>
-        <a id="absent" data-workspace-control>Absent</a>
-        <a id="documentation" href="/docs/">Read</a>
-    `;
+test("overlapping HTMX requests distinguish temporary disabling from prerequisites", () => {
+    document.body.innerHTML = '<button id="read">Read</button><button id="constraint" disabled>No</button>';
     loadModule();
-    const destinations = () => Object.fromEntries(Array.from(document.querySelectorAll("a"),
-        link => [link.id, link.getAttribute("href")]));
-    const before = destinations();
-    const xhr = startMutation();
-    expect(destinations()).toEqual({model: null, workspace: null, empty: null, absent: null, documentation: "/docs/"});
-    completeMutation(xhr, {successful, swap: successful});
-    expect(destinations()).toEqual(before);
-});
-
-test.each(["HTTP error", "abort", "HTTP error modal"])("%s unlocks and reports an unsuccessful mutation", failure => {
-    document.body.innerHTML = '<div id="sidePanel"><input value="unsaved"></div>';
-    loadModule();
-    const finished = jest.fn();
-    document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
-    const xhr = startMutation();
-    if (failure === "HTTP error modal") xhr.getResponseHeader.mockReturnValue('{"openModalDialog": {}}');
-    completeMutation(xhr, {successful: false, swap: failure === "HTTP error modal"});
-    expect(finished.mock.calls[0][0].detail.successful).toBe(false);
-    expect(document.querySelector("input").disabled).toBe(false);
-    expect(document.querySelector("input").value).toBe("unsaved");
-});
-
-test("stateless previews remain available and their completion cannot release the mutation lock", () => {
-    loadModule();
-    const xhr = startMutation();
-    const preview = {xhr: {}, elt: document.body, requestConfig: {verb: "post", path: "/model_builder/timeseries-preview/"}};
-    expect(requestEvent("htmx:confirm", {verb: "post", path: preview.requestConfig.path}).defaultPrevented).toBe(false);
-    expect(requestEvent("htmx:beforeRequest", preview).defaultPrevented).toBe(false);
-    requestEvent("htmx:afterRequest", preview);
-    expect(document.body.dataset.workspaceMutation).toBe("updating");
-    completeMutation(xhr);
-    expect(document.body.dataset.workspaceMutation).toBeUndefined();
-});
-
-test("HTMX's global button disabling leaves reading controls available while constraint buttons stay disabled", () => {
-    document.body.innerHTML = '<button id="read">Read</button><button id="unavailable" disabled>No</button><button hx-post="/save/">Save</button>';
-    loadModule();
-    const xhr = startMutation();
-    document.querySelectorAll("button").forEach(button => button.disabled = true);
-    requestEvent("htmx:beforeSend", {xhr});
-    expect(document.getElementById("read").disabled).toBe(false);
-    expect(document.getElementById("unavailable").disabled).toBe(true);
-    document.querySelectorAll("button").forEach(button => button.disabled = false);
-    completeMutation(xhr);
-    expect(document.getElementById("unavailable").disabled).toBe(true);
-});
-
-test("a swap-processing error releases the workspace lock as a failed mutation", () => {
-    document.body.innerHTML = '<div id="sidePanel"><input></div>';
-    loadModule();
-    const xhr = startMutation();
-    requestEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
-    requestEvent("htmx:onLoadError", {xhr});
-    expect(document.body.dataset.workspaceMutation).toBeUndefined();
-    expect(document.querySelector("input").disabled).toBe(false);
-});
-
-test("an already-busy workspace rejects fetch mutations without queueing a later write", async () => {
-    const {initSortableObjectCards} = loadModule();
-    initSortableObjectCards();
-    const xhr = startMutation();
-    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
-    expect(global.fetch).not.toHaveBeenCalled();
-    completeMutation(xhr);
-    await new Promise(resolve => setTimeout(resolve, 0));
-    expect(global.fetch).not.toHaveBeenCalled();
-});
-
-test("a nested mutation distinguishes temporary HTMX disabling from constraint disabling", () => {
-    document.body.innerHTML = '<button id="read">Read</button><button id="constraint" disabled>No</button><button hx-post="/save/">Save</button>';
-    loadModule();
-    const readXhr = {};
-    requestEvent("htmx:beforeRequest", {xhr: readXhr, requestConfig: {verb: "get"}});
+    const first = {};
+    const second = {};
+    requestEvent("htmx:beforeRequest", {xhr: first});
     document.querySelectorAll("button").forEach(button => {
         button.disabled = true;
         button.setAttribute("data-disabled-by-htmx", "");
     });
-    const xhr = startMutation();
-    requestEvent("htmx:beforeSend", {xhr});
-    expect(document.getElementById("read").disabled).toBe(false);
-    completeMutation(xhr);
+    requestEvent("htmx:beforeRequest", {xhr: second});
+    requestEvent("htmx:afterRequest", {xhr: first});
     document.querySelectorAll("button").forEach(button => {
         button.disabled = false;
         button.removeAttribute("data-disabled-by-htmx");
     });
-    requestEvent("htmx:afterRequest", {xhr: readXhr});
+    requestEvent("htmx:afterRequest", {xhr: second});
     expect(document.getElementById("read").disabled).toBe(false);
-    expect(document.querySelector("[hx-post]").disabled).toBe(false);
     expect(document.getElementById("constraint").disabled).toBe(true);
 });
 
+test("card ordering keeps its own fetch while an unrelated request is pending", () => {
+    const {initSortableObjectCards} = loadModule();
+    initSortableObjectCards();
+    requestEvent("htmx:beforeRequest", {xhr: {}});
+    global.Sortable.mock.instances[0].options.onEnd({from: global.Sortable.mock.instances[0].el});
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+});
 
-test.each([422, 500])("HTTP %s modal processes OOB content and stays locked until settlement", status => {
-    require("../theme/static/scripts/modal_utils.js");
+test.each([422, 500])("HTTP %s modal still processes rejected OOB content", status => {
     loadModule();
-    const finished = jest.fn();
-    document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
-    const xhr = startMutation();
-    xhr.status = status;
-    xhr.getResponseHeader.mockImplementation(name => name === "HX-Reswap" ? "none" : null);
+    const xhr = {status, getResponseHeader: name => name === "HX-Reswap" ? "none" : null};
     const event = requestEvent("htmx:beforeSwap", {xhr, shouldSwap: false, isError: true});
     expect(event.detail.shouldSwap).toBe(true);
     expect(event.detail.isError).toBe(true);
-    expect(xhr.getResponseHeader("HX-Reswap")).toBe("none");
-    requestEvent("htmx:afterRequest", {xhr, successful: false});
-    expect(finished).not.toHaveBeenCalled();
-    expect(document.body.dataset.workspaceMutation).toBe("updating");
-    requestEvent("htmx:afterSettle", {xhr});
-    expect(finished.mock.calls[0][0].detail.successful).toBe(false);
-    expect(document.body.dataset.workspaceMutation).toBeUndefined();
 });
 
-test("a successful modal action is not mistaken for a failed save", () => {
-    loadModule();
-    const finished = jest.fn();
-    document.body.addEventListener("workspace-mutation:finished", finished, {once: true});
-    const xhr = startMutation();
-    xhr.getResponseHeader.mockReturnValue('{"openModalDialog": {}}');
-    completeMutation(xhr);
-    expect(finished.mock.calls[0][0].detail.successful).toBe(true);
+test("closing Results waits for its pending response and swap before detaching targets", () => {
+    document.body.innerHTML = `
+        <div id="sidePanel" class="d-none"></div>
+        <div id="panel-result-btn"></div><button id="btn-open-panel-result"></button>
+        <div id="result-block"><form class="sankey-settings htmx-request"></form></div>
+    `;
+    window.eval(fs.readFileSync(path.join(__dirname, "../theme/static/scripts/hammer_utils.js"), "utf8"));
+    const results = document.getElementById("result-block");
+    const form = results.querySelector("form");
+    window.hidePanelResult();
+    expect(results.style.display).toBe("none");
+    expect(form.isConnected).toBe(true);
+    form.classList.remove("htmx-request");
+    results.classList.add("htmx-settling");
+    requestEvent("htmx:afterRequest", {xhr: {}}, form);
+    expect(form.isConnected).toBe(true);
+    document.getElementById("panel-result-btn").style.height = "100%";
+    results.style.height = "100%";
+    document.getElementById("btn-open-panel-result").outerHTML = '<button id="btn-open-panel-result" style="display:none"></button>';
+    results.classList.remove("htmx-settling");
+    requestEvent("htmx:afterSettle", {xhr: {}}, results);
+    expect(results.innerHTML).toBe("");
+    expect(results.style.display).toBe("");
+    expect(results.style.height).toBe("");
+    expect(document.getElementById("panel-result-btn").style.height).toBe("");
+    expect(document.getElementById("btn-open-panel-result").style.display).toBe("block");
 });
 
 test("edit toast renders every repair notice and authored name as text", () => {

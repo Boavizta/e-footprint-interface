@@ -46,7 +46,6 @@ document.body.addEventListener("htmx:afterSettle", () => {
 function hidePanelResult() {
     exitResultFullscreen();
     var panel = document.getElementById("panel-result-btn");
-    var btn = document.getElementById("btn-open-panel-result");
     var resultDiv = document.getElementById("result-block");
 
     panel.style.height = "";
@@ -64,22 +63,29 @@ function hidePanelResult() {
     }
 
     function emptyResultPanel() {
+        // A refresh arriving while we close can initialize the open-panel layout again.
+        panel.style.height = "";
+        resultDiv.style.height = "";
         resultDiv.innerHTML = "";
         resultDiv.style.display = "";
-        btn.style.display = "block";
+        document.getElementById("btn-open-panel-result").style.display = "block";
     }
 
-    if (document.body.dataset.workspaceMutation) {
-        resultDiv.style.display = "none";
-        // HTMX removes its request class before settlement. Keep response targets attached
-        // through that final interval so the guard receives afterSettle before we clear them.
-        document.body.addEventListener("workspace-mutation:finished", emptyResultPanel, { once: true });
-        return;
+    function hasPendingResponse() {
+        var pending = ".htmx-request, .htmx-settling, .htmx-added";
+        return resultDiv.matches(pending) || resultDiv.querySelector(pending);
     }
-    var pendingSankeyRequest = resultDiv.querySelector(".sankey-settings.htmx-request");
-    if (pendingSankeyRequest) {
+    if (hasPendingResponse()) {
         resultDiv.style.display = "none";
-        pendingSankeyRequest.addEventListener("htmx:afterRequest", emptyResultPanel, { once: true });
+        // Keep response targets attached until their own requests and swaps finish.
+        function finishClosing() {
+            if (hasPendingResponse()) return;
+            resultDiv.removeEventListener("htmx:afterRequest", finishClosing);
+            resultDiv.removeEventListener("htmx:afterSettle", finishClosing);
+            emptyResultPanel();
+        }
+        resultDiv.addEventListener("htmx:afterRequest", finishClosing);
+        resultDiv.addEventListener("htmx:afterSettle", finishClosing);
         return;
     }
 

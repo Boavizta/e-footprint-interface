@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
 const { workspace: { initialize, deferExit }, fieldEdits: { initializeEdits } } = require("../theme/static/scripts/simplified_inputs/index.js");
-// Match base.html listener ordering and register the shared guard only once.
+// Match base.html listener ordering for native disabled-state restoration.
 require("../theme/static/scripts/model_builder_main.js");
 
 function mount(fixture = "simplified_configure") {
@@ -21,7 +21,6 @@ function mount(fixture = "simplified_configure") {
     window.closeAndEmptySidePanel = jest.fn();
     window.htmx = { ajax: jest.fn(() => Promise.resolve()) };
     window.confirm = jest.fn(() => true);
-    delete document.body.dataset.workspaceMutation;
     initialize();
     return workspace;
 }
@@ -131,7 +130,7 @@ test("duplicate pending reads are suppressed and failed reads can be retried", (
     expect(window.htmx.ajax).toHaveBeenCalledTimes(2);
 });
 
-test("Stay keeps the draft and Save resumes an exit only after successful mutation settlement", () => {
+test("Stay keeps the draft and Save resumes an exit only after its successful response settles", () => {
     mount();
     include("lifespan");
     const action = jest.fn();
@@ -144,13 +143,16 @@ test("Stay keeps the draft and Save resumes an exit only after successful mutati
     deferExit(action);
     document.querySelector('[data-action="simplified-exit-save"]').click();
     expect(form.requestSubmit).toHaveBeenCalled();
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:started", { detail: { elt: form } }));
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", { detail: { elt: form, successful: false } }));
+    finishMutation(startMutation(form), false);
     expect(action).not.toHaveBeenCalled();
     expect(form.dataset.dirty).toBe("true");
     deferExit(action);
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:started", { detail: { elt: form } }));
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", { detail: { elt: form, successful: true } }));
+    const xhr = startMutation(form);
+    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
+    mutationEvent("htmx:afterRequest", {xhr, successful: true});
+    mutationEvent("htmx:afterSettle", {xhr: {}});
+    expect(action).not.toHaveBeenCalled();
+    mutationEvent("htmx:afterSettle", {xhr});
     expect(action).toHaveBeenCalledTimes(1);
 });
 
@@ -300,12 +302,15 @@ test('save status starts empty, appears after an accepted replacement, and clear
         input.value = '8';
         input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
         expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('Saving…');
+        const xhr = startMutation(form);
+        mutationEvent('htmx:beforeSwap', {xhr, shouldSwap: true});
         const replacement = form.cloneNode(true);
+        delete replacement.dataset.saving;
         replacement.querySelector('[data-simplified-save-status]').textContent = '';
         form.replaceWith(replacement);
-        document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
-            detail: {elt: form, successful: true},
-        }));
+        mutationEvent('htmx:afterRequest', {xhr, successful: true});
+        expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('');
+        mutationEvent('htmx:afterSettle', {xhr});
         const status = replacement.querySelector('[data-simplified-save-status]');
         expect(status.textContent).toBe('Saved');
         jest.advanceTimersByTime(2999);
@@ -325,14 +330,15 @@ test('Enter followed by blur saves once and rejection marks the accepted replace
     input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
     input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
+    const xhr = startMutation(form);
+    mutationEvent('htmx:beforeSwap', {xhr, shouldSwap: true});
     const replacement = form.cloneNode(true);
     replacement.querySelector('input[type="number"]').value = acceptedValue;
     replacement.querySelector('[data-simplified-save-status]').textContent = '';
     delete replacement.dataset.saving;
     form.replaceWith(replacement);
-    document.body.dispatchEvent(new CustomEvent('workspace-mutation:finished', {
-        detail: {elt: form, successful: false},
-    }));
+    mutationEvent('htmx:afterRequest', {xhr, successful: false});
+    mutationEvent('htmx:afterSettle', {xhr});
     expect(replacement.querySelector('input[type="number"]').value).toBe(acceptedValue);
     expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
     expect([...document.querySelectorAll('[data-quick-total]')].map(item => item.textContent)).toEqual(['20 kg', '20 kg']);
@@ -340,12 +346,13 @@ test('Enter followed by blur saves once and rejection marks the accepted replace
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
 });
 
-test('unchanged blur does not save and an in-flight workspace mutation rejects new saves', () => {
+test('unchanged blur does not save and temporarily disabled inputs do not start saves', () => {
     const form = mountEditor();
     const input = form.querySelector('input');
     input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
     expect(window.htmx.trigger).not.toHaveBeenCalled();
-    document.body.dataset.workspaceMutation = 'updating';
+    input.disabled = true;
+    input.setAttribute('data-disabled-by-htmx', '');
     input.value = '9';
     input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
     expect(window.htmx.trigger).not.toHaveBeenCalled();
@@ -365,39 +372,60 @@ test("value saves omit unchanged provenance and confidence saves preserve omitte
     expect(parameters[prefix + "__source_link"]).toBeUndefined();
 });
 
-test("accepted replacement baselines wait for the workspace guard to restore form controls", () => {
+test.each([false, true])("accepted replacement baselines follow native release and settlement (settles first=%s)", settlesFirst => {
     const form = mountEditor();
-    const xhr = {getResponseHeader: () => ""};
-    const emit = (name, detail) => document.body.dispatchEvent(new CustomEvent(name, {detail}));
-    form.querySelector("input").value = "8";
-    form.querySelector("input").dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    emit("htmx:beforeRequest", {xhr, elt: form, requestConfig: {verb: "post"}});
-    expect(form.querySelector("input").disabled).toBe(true);
-    emit("htmx:beforeSwap", {xhr, shouldSwap: true});
+    const input = form.querySelector("input");
+    input.value = "8";
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    const payload = Object.fromEntries(new FormData(form));
+    expect(payload[form.dataset.valuePrefix]).toBe("8");
+    const selector = "button, [data-simplified-workspace] input, [data-simplified-workspace] select, [data-simplified-workspace] textarea";
+    expect(form.getAttribute("hx-disabled-elt")).toBe(selector);
+    const xhr = startMutation(form);
+    document.querySelectorAll(selector).forEach(control => {
+        control.disabled = true;
+        control.setAttribute("data-disabled-by-htmx", "");
+    });
+    initializeEdits();
+    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
     const fragment = document.createElement("template");
     fragment.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_editor.html"), "utf8");
     const replacement = fragment.content.querySelector("form");
     replacement.querySelector("input").value = "8";
     form.replaceWith(replacement);
-    emit("htmx:afterSwap", {xhr, elt: replacement});
-    expect(replacement.querySelector("input").disabled).toBe(true);
-    emit("htmx:afterRequest", {xhr, successful: true});
-    emit("htmx:afterSettle", {xhr, elt: replacement});
+    if (settlesFirst) mutationEvent("htmx:afterSettle", {xhr, elt: replacement});
+    document.querySelectorAll("[data-disabled-by-htmx]").forEach(control => {
+        control.disabled = false;
+        control.removeAttribute("data-disabled-by-htmx");
+    });
+    mutationEvent("htmx:afterRequest", {xhr, successful: true});
+    if (!settlesFirst) mutationEvent("htmx:afterSettle", {xhr, elt: replacement});
     expect(replacement.querySelector("input").disabled).toBe(false);
-
-    const input = replacement.querySelector("input");
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    replacement.querySelector("input").dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
     expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
     const parameters = Object.fromEntries(new FormData(replacement));
-    emit("htmx:configRequest", {elt: replacement, parameters});
+    mutationEvent("htmx:configRequest", {elt: replacement, parameters});
     expect(parameters).toEqual({[replacement.dataset.valuePrefix]: "8",
         [replacement.dataset.valuePrefix + "__unit"]: "year"});
-    input.value = "9";
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    replacement.querySelector("input").value = "9";
+    replacement.querySelector("input").dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
     expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
 });
 
+test("a failed request without a swap releases feedback and retains the accepted baseline", () => {
+    const form = mountEditor();
+    const input = form.querySelector("input");
+    input.value = "8";
+    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
+    const xhr = startMutation(form);
+    expect(document.querySelector("[data-quick-total]").getAttribute("aria-busy")).toBe("true");
+    mutationEvent("htmx:afterRequest", {xhr});
+    expect(form.dataset.saving).toBeUndefined();
+    expect(form.querySelector("[data-simplified-save-status]").textContent).toBe("Not saved");
+    expect(document.querySelector("[data-quick-total]").hasAttribute("aria-busy")).toBe(false);
+    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
+});
 
 test.each(["8", "-1"])("idle export neither saves nor validates a focused draft %s", value => {
     const form = mountEditor();
@@ -436,7 +464,7 @@ test.each([true, false])("timeseries Save closes its panel on successful=%s and 
     form.dataset.ownerId = "owner";
     form.dataset.attribute = "timeseries";
     document.body.appendChild(form);
-    document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {detail: {elt: form, successful}}));
+    finishMutation(startMutation(form), successful);
     expect(window.closeAndEmptySidePanel).toHaveBeenCalledTimes(1);
     expect(acceptedForm.querySelector("[data-simplified-save-status]").textContent).toBe(successful ? "Saved" : "Not saved");
 });

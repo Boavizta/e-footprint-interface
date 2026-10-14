@@ -4,9 +4,8 @@ from collections.abc import Mapping
 
 
 def wait_for_htmx_idle(page: Page):
-    """Wait for response swaps, descendant requests and workspace unlocking."""
-    page.wait_for_function("""() => document.body.dataset.workspaceMutation !== 'updating'
-        && document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null""")
+    """Wait for response swaps and descendant requests."""
+    page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
 
 
 def click_and_wait_for_htmx(page: Page, locator: Locator):
@@ -29,8 +28,7 @@ def click_and_wait_for_htmx(page: Page, locator: Locator):
                 response.value.finished()
                 # Keep the original node when a form is replaced; unrelated pending reads may remain.
                 page.wait_for_function("""source => !source.classList.contains('htmx-request')
-                    && document.querySelector('.htmx-settling, .htmx-added') === null
-                    && document.body.dataset.workspaceMutation !== 'updating'""", arg=source)
+                    && document.querySelector('.htmx-settling, .htmx-added') === null""", arg=source)
         else:
             locator.click()
     finally:

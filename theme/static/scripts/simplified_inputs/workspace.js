@@ -7,7 +7,7 @@ const { refreshSelection } = require("./configuration.js");
 function createWorkspace() {
     const viewBySystemId = new Map();
     let pendingExit = null;
-    let savingForm = null;
+    let savingRequest = null;
     let replaying = false;
     let pendingRead = null;
     function targetForActiveModel() {
@@ -119,11 +119,19 @@ function createWorkspace() {
         replaying = true;
         try { element.click(); } finally { replaying = false; }
     }
+    function finishConfigureSave() {
+        if (!savingRequest?.complete || (savingRequest.waitingForSettle && !savingRequest.settled)) return;
+        const successful = savingRequest.successful;
+        savingRequest = null;
+        const action = pendingExit;
+        pendingExit = null;
+        if (successful && action) action();
+    }
 
     function registerWorkspace() {
         // Capture before HTMX or other delegated navigation can alter the visible workspace.
         document.addEventListener("click", event => {
-            if (replaying || document.body.dataset.workspaceMutation === "updating") return;
+            if (replaying) return;
             const element = event.target.closest("a, button, [hx-get], [hx-post], [data-action]");
             if (!element || element.closest("[data-workspace-export], [data-simplified-workspace], "
                 + "#simplified-exit-dialog, #modal-container")) return;
@@ -168,16 +176,24 @@ function createWorkspace() {
             case "simplified-exit-save": dialog().close(); configureForm().requestSubmit(); break;
             }
         });
-        document.body.addEventListener("workspace-mutation:started", event => {
-            cancelPendingRead();
-            if (event.detail.elt.matches("[data-configure-form]")) savingForm = event.detail.elt;
+        document.addEventListener("htmx:beforeRequest", event => {
+            const {elt, xhr, target} = event.detail;
+            if (pendingRead && elt !== pendingRead.target && target?.contains(pendingRead.target)) cancelPendingRead();
+            if (elt.matches("[data-configure-form]")) savingRequest = {xhr};
         });
-        document.body.addEventListener("workspace-mutation:finished", event => {
-            if (!savingForm || event.detail.elt !== savingForm) return;
-            savingForm = null;
-            const action = pendingExit;
-            pendingExit = null;
-            if (event.detail.successful && action) action();
+        document.addEventListener("htmx:beforeSwap", event => {
+            if (savingRequest?.xhr === event.detail.xhr) savingRequest.waitingForSettle = event.detail.shouldSwap;
+        });
+        document.addEventListener("htmx:afterRequest", event => {
+            if (savingRequest?.xhr !== event.detail.xhr) return;
+            savingRequest.complete = true;
+            savingRequest.successful = event.detail.successful === true;
+            finishConfigureSave();
+        });
+        document.addEventListener("htmx:afterSettle", event => {
+            if (savingRequest?.xhr !== event.detail.xhr) return;
+            savingRequest.settled = true;
+            finishConfigureSave();
         });
         document.addEventListener("cancel", event => {
             if (event.target.id === "simplified-exit-dialog") pendingExit = null;

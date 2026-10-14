@@ -4,6 +4,7 @@
 function createFieldEdits({ activeWorkspace }) {
     const savedEdits = new WeakMap();
     const saveStatusTimers = new WeakMap();
+    const saves = new WeakMap();
 
     function setSaveStatus(form, message, duration = 0) {
         const status = form.querySelector("[data-simplified-save-status]");
@@ -15,7 +16,7 @@ function createFieldEdits({ activeWorkspace }) {
         return JSON.stringify([...new FormData(form)].filter(([key]) => key !== "csrfmiddlewaretoken"));
     }
     function saveEdit(form) {
-        if (!form || form.dataset.saving === "true" || document.body.dataset.workspaceMutation === "updating") return;
+        if (!form || form.dataset.saving === "true" || form.querySelector("[data-disabled-by-htmx]")) return;
         if (savedEdits.get(form) === editSnapshot(form)) return;
         if (!form.reportValidity()) {
             setSaveStatus(form, "Not saved");
@@ -26,12 +27,40 @@ function createFieldEdits({ activeWorkspace }) {
         window.htmx.trigger(form, "simplified-save");
     }
     function initializeEdits() {
-        // Replacement controls stay disabled until the shared guard finishes settling.
-        // FormData omits disabled inputs, so record their accepted values only after unlock.
-        if (document.body.dataset.workspaceMutation === "updating") return;
         document.querySelectorAll("[data-simplified-editor]").forEach(form => {
-            if (!savedEdits.has(form)) savedEdits.set(form, editSnapshot(form));
+            // FormData omits temporarily disabled controls during an active request.
+            if (!savedEdits.has(form) && !form.querySelector("[data-disabled-by-htmx]")) {
+                savedEdits.set(form, editSnapshot(form));
+            }
         });
+    }
+    function setTotalsBusy(busy) {
+        document.querySelectorAll("[data-quick-total]").forEach(total => {
+            if (busy) total.setAttribute("aria-busy", "true");
+            else total.removeAttribute("aria-busy");
+        });
+        document.querySelectorAll("[data-quick-total-status]").forEach(status => {
+            status.textContent = busy ? "Updating…" : "";
+        });
+    }
+    function finishSave(xhr) {
+        const save = saves.get(xhr);
+        if (!save || !save.complete || (save.waitingForSettle && !save.settled)) return;
+        saves.delete(xhr);
+        const form = save.form;
+        delete form.dataset.saving;
+        initializeEdits();
+        setTotalsBusy(false);
+        const acceptedForm = form.matches("[data-simplified-editor]")
+            ? [...document.querySelectorAll("[data-simplified-editor]")]
+                .find(candidate => candidate.dataset.valuePrefix === form.dataset.valuePrefix)
+            : activeWorkspace()?.querySelector(
+                `[data-owner-id="${form.dataset.ownerId}"][data-attribute="${form.dataset.attribute}"] [data-simplified-editor]`);
+        if (acceptedForm) {
+            if (save.successful) savedEdits.set(acceptedForm, editSnapshot(acceptedForm));
+            setSaveStatus(acceptedForm, save.successful ? "Saved" : "Not saved", save.successful ? 3000 : 0);
+        }
+        if (form.matches("[data-simplified-timeseries]")) window.closeAndEmptySidePanel();
     }
 
     function registerFieldEdits() {
@@ -77,33 +106,27 @@ function createFieldEdits({ activeWorkspace }) {
             });
             if (window.recomputationVals?.().recomputation) event.detail.parameters.recomputation = "true";
         });
-        document.body.addEventListener("workspace-mutation:started", () => {
-            document.querySelectorAll("[data-quick-total]").forEach(total => total.setAttribute("aria-busy", "true"));
-            document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = "Updating…"; });
-        });
-        document.body.addEventListener("workspace-mutation:finished", event => {
-            initializeEdits();
-            document.querySelectorAll("[data-quick-total]").forEach(total => total.removeAttribute("aria-busy"));
-            document.querySelectorAll("[data-quick-total-status]").forEach(status => { status.textContent = ""; });
+        document.addEventListener("htmx:beforeRequest", event => {
             const form = event.detail.elt;
-            let acceptedForm;
-            if (form.matches("[data-simplified-editor]")) {
-                delete form.dataset.saving;
-                acceptedForm = [...document.querySelectorAll("[data-simplified-editor]")]
-                    .find(candidate => candidate.dataset.valuePrefix === form.dataset.valuePrefix);
-            } else if (form.matches("[data-simplified-timeseries]")) {
-                acceptedForm = activeWorkspace()?.querySelector(
-                    `[data-owner-id="${form.dataset.ownerId}"][data-attribute="${form.dataset.attribute}"] [data-simplified-editor]`);
-            }
-            if (acceptedForm) {
-                setSaveStatus(acceptedForm, event.detail.successful ? "Saved" : "Not saved", event.detail.successful ? 3000 : 0);
-            }
+            if (!form.matches("[data-simplified-editor], [data-simplified-timeseries]")) return;
+            saves.set(event.detail.xhr, {form});
+            setTotalsBusy(true);
         });
-        document.body.addEventListener("workspace-mutation:finished", event => {
-            const form = event.detail.elt;
-            if (form.matches("[data-simplified-timeseries]")) {
-                window.closeAndEmptySidePanel();
-            }
+        document.addEventListener("htmx:beforeSwap", event => {
+            const save = saves.get(event.detail.xhr);
+            if (save) save.waitingForSettle = event.detail.shouldSwap;
+        });
+        document.addEventListener("htmx:afterRequest", event => {
+            const save = saves.get(event.detail.xhr);
+            if (!save) return;
+            save.complete = true;
+            save.successful = event.detail.successful === true;
+            finishSave(event.detail.xhr);
+        });
+        document.addEventListener("htmx:afterSettle", event => {
+            const save = saves.get(event.detail.xhr);
+            if (save) save.settled = true;
+            finishSave(event.detail.xhr);
         });
         document.addEventListener("input", event => {
             if (event.target.closest("[data-simplified-timeseries]")) window.tagFormAsModified();

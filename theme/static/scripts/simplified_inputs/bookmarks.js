@@ -77,7 +77,6 @@ function saveBookmark(bookmark, patch, undo = false) {
     window.htmx.trigger(bookmark, "bookmark-save");
 }
 function refreshBookmarkLocks() {
-    if (document.body.dataset.workspaceMutation === "updating") return;
     document.querySelectorAll("[data-bookmark]:not([data-provisional-owner])").forEach(bookmark => {
         const checkbox = bookmark.querySelector("[data-include-input]");
         if (checkbox) checkbox.disabled = !!bookmark.dataset.requiredLabel;
@@ -162,14 +161,13 @@ function registerBookmarks() {
         if (bookmark?.open) bookmark.querySelector("[data-bookmark-content]").scrollIntoView({block: "nearest"});
     });
     document.addEventListener("initDynamicForm", refreshCreationBookmarks);
-    document.body.addEventListener("workspace-mutation:finished", refreshBookmarkLocks);
     document.body.addEventListener("htmx:afterSettle", refreshBookmarkLocks);
     document.body.addEventListener("switchModelCanvas", refreshBookmarkLocks);
     document.addEventListener("DOMContentLoaded", refreshBookmarkLocks);
     document.addEventListener("input", event => {
         if (event.target.closest("[data-provisional-owner]")) window.tagFormAsModified();
     });
-    document.body.addEventListener("workspace-mutation:started", event => {
+    document.body.addEventListener("htmx:beforeRequest", event => {
         if (event.detail.elt.matches("[data-bookmark]")) {
             event.detail.elt.querySelector("[data-bookmark-status]").textContent = "Saving…";
         }

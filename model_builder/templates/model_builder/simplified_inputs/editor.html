@@ -2,7 +2,8 @@
 {% if field.editor.input_type == 'optional_explainable_quantity' or field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' or field.editor.input_type == 'recurrent_timeseries_builder' or field.editor.input_type == 'hourly_quantities_from_growth' %}
 <form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
       hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
-      hx-trigger="simplified-save" hx-swap="none">
+      hx-trigger="simplified-save" hx-swap="none"
+      hx-disabled-elt="button, [data-simplified-workspace] input, [data-simplified-workspace] select, [data-simplified-workspace] textarea">
     {% csrf_token %}
     {% with editor=field.editor %}
     <div class="simplified-input-row">

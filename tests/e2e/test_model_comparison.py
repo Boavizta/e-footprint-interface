@@ -21,55 +21,41 @@ from tests.e2e.utils import click_and_wait_for_htmx
 @pytest.mark.e2e
 class TestModelComparisonWorkspace:
 
-    def test_delayed_count_save_blocks_workspace_actions_and_failure_unlocks(self, minimal_complete_model_builder):
+    def test_delayed_count_save_leaves_reading_available(self, minimal_complete_model_builder):
         model_builder = minimal_complete_model_builder
         page = model_builder.page
         model_builder.add_model_by_duplication()
         pending = []
         page.route("**/update-dict-count/**", lambda route: pending.append(route))
-        requests = []
-        page.on("request", lambda request: requests.append(request.url))
 
         count = model_builder.edit_first_relationship_count(3)
-        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
-        expect(count).to_be_disabled()
-        expect(page.locator("#model-tab-0")).to_be_disabled()
-        expect(page.locator("#compare-tab")).to_be_disabled()
-        expect(page.locator("#download-model")).to_have_attribute("aria-disabled", "true")
-        assert page.locator("#download-model").get_attribute("href") is None
-        assert page.locator("#download-workspace").get_attribute("href") is None
-        model_builder.attempt_locked_workspace_actions()
+        expect(count).to_be_enabled()
+        expect(page.locator("#model-tab-0")).to_be_enabled()
+        expect(page.locator("#compare-tab")).to_be_enabled()
         assert len(pending) == 1
-        assert model_builder.active_slot() == "1"
-        assert not any("switch-model" in url or "download-" in url or "/compare/" in url for url in requests)
         assert parse_qs(pending[0].request.post_data)["count"] == ["3"]
-
+        click_and_wait_for_htmx(page, model_builder.canvas.locator("button[hx-get*='open-edit-object-panel']").first)
+        model_builder.side_panel.should_be_visible()
+        model_builder.side_panel.close()
         with page.expect_response(lambda response: "update-dict-count" in response.url):
             pending.pop().continue_()
+        expect(count).to_have_value("3")
         expect(count).to_be_enabled()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
-        expect(page.locator("#model-tab-0")).to_be_enabled()
-        expect(page.locator("a[href='download-json/']")).not_to_have_attribute("aria-disabled", "true")
-        assert len(pending) == 0
 
         model_builder.edit_first_relationship_count(4)
-        expect(count).to_be_disabled()
         with page.expect_response(lambda response: "update-dict-count" in response.url):
             pending.pop().fulfill(status=500, body="Save failed")
         expect(count).to_be_enabled()
-        expect(page.locator("#model-tab-0")).to_be_enabled()
         page.unroute("**/update-dict-count/**")
         model_builder.switch_to_model(0)
         assert model_builder.active_slot() == "0"
 
     @pytest.mark.parametrize("unused_journey", [False, True])
-    def test_delayed_object_deletion_locks_count_edits_and_export(
+    def test_delayed_object_deletion_keeps_native_buttons_and_count_controls_independent(
             self, minimal_complete_model_builder, unused_journey):
         model_builder = minimal_complete_model_builder
         page = model_builder.page
         if unused_journey:
-            # An unused journey needs no constraint OOB swaps: the modal's stable target
-            # must deliver afterSettle even after the confirmation button is removed.
             model_builder.click_add_usage_journey()
             model_builder.side_panel.fill_field("UsageJourney_name", "Unused journey")
             model_builder.side_panel.submit_and_wait_for_close()
@@ -79,25 +65,14 @@ class TestModelComparisonWorkspace:
         SidePanelPage(page).click_delete_button()
         pending = []
         page.route("**/delete-object/**", lambda route: pending.append(route))
-
         with page.expect_request(lambda request: "/delete-object/" in request.url):
             page.get_by_role("button", name="Yes, delete").click()
-        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
         assert pending[0].request.method == "POST"
-        expect(model_builder.canvas.locator("input.count-inline-edit").first).to_be_disabled()
-        export = page.locator("#download-model")
-        assert export.get_attribute("href") is None
-        pages_before = len(page.context.pages)
-        export.click(button="middle")
-        export.press("Enter")
-        export.dispatch_event("contextmenu")
-        assert export.get_attribute("href") is None
-        assert len(page.context.pages) == pages_before
-
+        expect(page.get_by_role("button", name="Yes, delete")).to_be_disabled()
+        expect(model_builder.canvas.locator("input.count-inline-edit").first).to_be_enabled()
         with page.expect_response(lambda response: "/delete-object/" in response.url):
             pending.pop().continue_()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
-        expect(export).to_have_attribute("href", "download-json/")
+        expect(page.locator("#model-builder-modal")).not_to_be_visible()
         if unused_journey:
             model_builder.object_should_not_exist("UsageJourney", "Unused journey")
             expect(model_builder.canvas.locator("input.count-inline-edit").first).to_be_enabled()

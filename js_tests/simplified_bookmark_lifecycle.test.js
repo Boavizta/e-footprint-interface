@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-// Match base.html: field initialization and bookmark handlers precede the workspace guard.
+// Match base.html: field initialization and bookmark handlers precede native-state restoration.
 require("../theme/static/scripts/dynamic_forms.js");
 require("../theme/static/scripts/simplified_inputs/index.js");
 require("../theme/static/scripts/model_builder_main.js");
@@ -76,14 +76,13 @@ function finishBookmarkRequest(bookmark, fields, inverse = {}, successful = true
     dispatch("htmx:beforeSwap", {xhr, shouldSwap: true});
     dispatch("htmx:afterRequest", {xhr, elt: bookmark, successful});
     dispatch("htmx:afterSettle", {xhr, elt: document.body});
-    expect(document.body.dataset.workspaceMutation).toBeUndefined();
 }
 
 function field(attribute, included, requiredBy = null, help = "Old saved help") {
     return {object_id: "api", attribute, setting: {included, help}, required_by: requiredBy};
 }
 
-test("saved companion locks remain authoritative after the workspace guard restores controls", () => {
+test("saved companion locks remain authoritative after bookmark responses", () => {
     mount("simplified_bookmarks");
     const provider = document.querySelector('[data-attribute="provider"]');
     const model = document.querySelector('[data-attribute="model_name"] [data-include-input]');

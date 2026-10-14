@@ -91,14 +91,10 @@ function requestWorkspaceStorageStatus() {
     });
 }
 
-function saveCardOrder(sortables, elt) {
+function saveCardOrder(sortables) {
     const cardOrder = Object.fromEntries(
         sortables.map(({listId, sortable}) => [listId, sortable.toArray()])
     );
-    const xhr = {};
-    const begin = new CustomEvent("workspace-mutation:begin", {cancelable: true, detail: {xhr, elt}});
-    if (!document.body.dispatchEvent(begin)) return Promise.resolve();
-    let successful = false;
     return fetch("/model_builder/save-card-order/", {
         method: "POST",
         headers: {
@@ -107,11 +103,8 @@ function saveCardOrder(sortables, elt) {
         },
         body: JSON.stringify(cardOrder),
     }).then(response => {
-        successful = response.ok;
         if (response.ok) requestWorkspaceStorageStatus();
-    }).catch(() => {}).finally(() => {
-        document.body.dispatchEvent(new CustomEvent("workspace-mutation:end", {detail: {xhr, successful}}));
-    });
+    }).catch(() => {});
 }
 
 function initSortableObjectCards() {
@@ -124,12 +117,12 @@ function initSortableObjectCards() {
                 el.classList.remove('grabbing');
             });
         },
-        onEnd: event =>{
+        onEnd: () => {
             document.querySelectorAll('.grabbing').forEach(el => {
                 el.classList.remove('grabbing');
             });
             updateLines();
-            saveCardOrder(sortables, event.from);
+            saveCardOrder(sortables);
         }
     };
 
@@ -360,160 +353,29 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     evt.detail.serverResponse = restoreAccordionStateInFragment(response);
 });
 
-// HTMX removes hx-disabled-elt states unconditionally. Keep the original constraint state
-// per XHR, and hold workspace controls until all response swaps have settled.
+// HTMX releases hx-disabled-elt unconditionally; preserve genuine disabled states
+// on surviving nodes and leave replacements with their server-rendered constraints.
 (function () {
-    "use strict";
     const disabledBeforeHtmxRequest = new WeakMap();
     const constraintDisabled = new WeakMap();
-    const actionSelector = "[hx-post], [hx-put], [hx-patch], [hx-delete], [data-workspace-control], "
-        + "[hx-target='#sidePanel'], [hx-target='#comparison-view'], [data-model-tab], "
-        + "[data-action='open-add-model-import'], [data-action='edge-modeling-toggle'], "
-        + "[data-autosave-url], [data-action='source-table-row-edit'], "
-        + "[data-action='toggle-source-table-row-editor'], .grab";
-    const editorSelector = "#sidePanel input, #sidePanel select, #sidePanel textarea, #sidePanel button, "
-        + "[data-model-canvas] input, [data-model-canvas] select, [data-model-canvas] textarea, "
-        + "#result-block input, #result-block select, #result-block textarea, "
-        + "[data-workspace-editor] input, [data-workspace-editor] select, [data-workspace-editor] textarea";
-    let active = null;
-
-    function isPreview(detail) {
-        const path = detail.path || detail.requestConfig?.path || "";
-        return path.split("?")[0].endsWith("/timeseries-preview/");
-    }
-
-    function isMutation(detail) {
-        const verb = detail.verb || detail.requestConfig?.verb;
-        return verb && verb.toLowerCase() !== "get" && !isPreview(detail);
-    }
-
-    function lockControls() {
-        if (!active) return;
-        document.querySelectorAll(`${actionSelector}, ${editorSelector}`).forEach(element => {
-            // Editor forms contain stateless reading controls; lock their inputs and save actions,
-            // rather than declaring the whole form (and its reading controls) aria-disabled.
-            if (element.matches("form[data-workspace-editor], [data-workspace-read]")) return;
-            if (!active.controls.has(element)) {
-                active.controls.set(element, {
-                    disabled: "disabled" in element
-                        ? (element.hasAttribute("data-disabled-by-htmx")
-                            ? constraintDisabled.get(element) ?? element.disabled : element.disabled)
-                        : null,
-                    ariaDisabled: element.getAttribute("aria-disabled"),
-                    href: element.matches("a[data-workspace-control]") ? element.getAttribute("href") : null,
-                });
-            }
-            if ("disabled" in element) element.disabled = true;
-            else element.setAttribute("aria-disabled", "true");
-            if (element.matches("a[data-workspace-control]")) element.removeAttribute("href");
-        });
-    }
-
-    function begin(xhr, elt) {
-        if (active) return false;
-        active = {xhr, elt, controls: new Map(), waitingForSettle: false, settled: false};
-        document.body.dataset.workspaceMutation = "updating";
-        lockControls();
-        document.body.dispatchEvent(new CustomEvent("workspace-mutation:started", {detail: {xhr, elt}}));
-        return true;
-    }
-
-    function finish(successful) {
-        const completed = active;
-        completed.controls.forEach((state, element) => {
-            if (!element.isConnected) return; // Replacements keep their server-rendered constraints.
-            if (state.disabled !== null) element.disabled = state.disabled;
-            if (state.ariaDisabled === null) element.removeAttribute("aria-disabled");
-            else element.setAttribute("aria-disabled", state.ariaDisabled);
-            if (state.href !== null) element.setAttribute("href", state.href);
-        });
-        active = null;
-        delete document.body.dataset.workspaceMutation;
-        document.body.dispatchEvent(new CustomEvent("workspace-mutation:finished", {
-            detail: {xhr: completed.xhr, elt: completed.elt, successful},
-        }));
-    }
-
-    function suppress(event) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-    }
-
-    // HTMX queues same-element requests before beforeRequest. Reject at confirm and at the
-    // original interaction; window capture also precedes Compare's document-capture navigation.
-    ["click", "change", "input", "submit", "keydown", "mousedown", "touchstart"].forEach(type => {
-        window.addEventListener(type, event => {
-            if (!active || !(event.target instanceof Element)) return;
-            if (event.target.closest("[data-workspace-read]")) return;
-            if (event.target.closest(`${actionSelector}, ${editorSelector}`)) suppress(event);
-        }, true);
-    });
-    window.addEventListener("htmx:confirm", event => {
-        if (active && (isMutation(event.detail)
-            || event.detail.elt?.matches(actionSelector))) suppress(event);
-    }, true);
-    window.addEventListener("htmx:configRequest", event => {
-        if (active && isMutation(event.detail)) suppress(event);
-    }, true);
+    const controls = "button, [data-simplified-workspace] input, "
+        + "[data-simplified-workspace] select, [data-simplified-workspace] textarea";
 
     document.body.addEventListener("htmx:beforeRequest", event => {
-        if (event.defaultPrevented) return;
-        const {xhr, elt} = event.detail;
-        const snapshot = new Map();
-        document.querySelectorAll("button").forEach(element => {
-            const disabled = active?.controls.get(element)?.disabled
-                ?? (element.hasAttribute("data-disabled-by-htmx")
-                    ? constraintDisabled.get(element) ?? element.disabled : element.disabled);
+        const snapshot = new Set();
+        document.querySelectorAll(controls).forEach(element => {
+            const disabled = element.hasAttribute("data-disabled-by-htmx")
+                ? constraintDisabled.get(element) : element.disabled;
             constraintDisabled.set(element, disabled);
-            snapshot.set(element, disabled);
+            if (disabled) snapshot.add(element);
         });
-        if (isMutation(event.detail) && !begin(xhr, elt)) {
-            suppress(event);
-            return;
-        }
-        disabledBeforeHtmxRequest.set(xhr, snapshot);
-    });
-
-    document.body.addEventListener("htmx:beforeSend", event => {
-        if (active?.xhr !== event.detail.xhr) return;
-        // hx-disabled-elt="button" must not also prevent reading/scrolling during a save.
-        disabledBeforeHtmxRequest.get(event.detail.xhr)?.forEach((disabled, element) => {
-            if (!active.controls.has(element)) element.disabled = disabled;
-        });
-    });
-    document.body.addEventListener("htmx:beforeSwap", event => {
-        if (active?.xhr === event.detail.xhr) active.waitingForSettle = event.detail.shouldSwap;
-    });
-    document.body.addEventListener("htmx:afterSwap", lockControls);
-    document.body.addEventListener("htmx:afterSettle", event => {
-        if (active?.xhr !== event.detail.xhr) return;
-        active.settled = true;
-        if (active.requestComplete) finish(active.successful);
+        disabledBeforeHtmxRequest.set(event.detail.xhr, snapshot);
     });
     document.body.addEventListener("htmx:afterRequest", event => {
-        const {xhr} = event.detail;
-        disabledBeforeHtmxRequest.get(xhr)?.forEach((disabled, element) => {
-            if (disabled && element.isConnected) element.disabled = true;
+        disabledBeforeHtmxRequest.get(event.detail.xhr)?.forEach(element => {
+            if (element.isConnected) element.disabled = true;
         });
-        disabledBeforeHtmxRequest.delete(xhr);
-        if (active?.xhr === xhr) {
-            active.successful = event.detail.successful === true;
-            active.requestComplete = true;
-            if (!active.waitingForSettle || active.settled) finish(active.successful);
-            else lockControls();
-        } else lockControls();
-    });
-
-    document.body.addEventListener("htmx:onLoadError", event => {
-        if (active?.xhr === event.detail.xhr) finish(false);
-    });
-
-    // Card ordering and diagram deletion use fetch, but still write the same workspace.
-    document.body.addEventListener("workspace-mutation:begin", event => {
-        if (!begin(event.detail.xhr, event.detail.elt)) event.preventDefault();
-    });
-    document.body.addEventListener("workspace-mutation:end", event => {
-        if (active?.xhr === event.detail.xhr) finish(event.detail.successful);
+        disabledBeforeHtmxRequest.delete(event.detail.xhr);
     });
 })();
 

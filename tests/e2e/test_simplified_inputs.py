@@ -235,7 +235,6 @@ class TestSimplifiedInputs:
             page.get_by_role("button", name="Save", exact=True).click()
         assert response_info.value.status == 422
         expect(page.locator("#model-builder-modal")).to_be_visible()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(workspace).to_have_attribute("data-mode", "configure")
         expect(workspace.locator("[data-configure-form]")).to_have_attribute("data-dirty", "true")
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
@@ -347,7 +346,7 @@ class TestSimplifiedInputs:
         expect(page.locator("#sidePanel")).not_to_be_visible()
 
     @pytest.mark.parametrize("compact", [False, True])
-    def test_configuration_save_locks_exits_but_allows_reading_sections(self, minimal_complete_model_builder, compact):
+    def test_configuration_save_keeps_its_draft_and_reading_controls(self, minimal_complete_model_builder, compact):
         page = minimal_complete_model_builder.page
         if compact:
             page.set_viewport_size({"width": 700, "height": 1000})
@@ -362,10 +361,9 @@ class TestSimplifiedInputs:
         pending = []
         page.route("**/save-simplified-inputs/", lambda route: pending.append(route))
         workspace.get_by_role("button", name="Save and return").click()
-        expect(page.locator("body")).to_have_attribute("data-workspace-mutation", "updating")
-        expect(page.locator('[data-action="simplified-mode"]')).to_be_disabled()
-        expect(page.locator("#show-results-toolbar-btn")).to_have_attribute("aria-disabled", "true")
-        expect(workspace.locator("[data-field-help]").first).to_be_disabled()
+        page.wait_for_function("() => document.querySelector('[data-configure-form].htmx-request') !== null")
+        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
+        expect(workspace.locator("[data-field-help]").first).to_be_enabled()
         workspace.get_by_role("button", name="Collapse all").click()
         expect(workspace.locator("[data-simplified-group]").first).not_to_have_attribute("open", "")
         if compact:
@@ -376,7 +374,6 @@ class TestSimplifiedInputs:
         expect(workspace.locator("[data-simplified-object]").first).to_have_attribute("open", "")
         assert len(pending) == 1
         pending.pop().continue_()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(workspace).to_have_attribute("data-mode", "simplified")
 
     @pytest.mark.parametrize("destination", ["results", "file", "compare", "model"])
@@ -463,7 +460,6 @@ class TestInlineBookmarks:
         expect(storage_bookmark.locator("[data-include-input]")).not_to_be_checked()
         expect(draft).to_have_value("1234")
         # Close the value draft through the existing discard flow.
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         page.locator("#btn-close-side-panel").click()
         expect(page.locator("#unsavedModal")).to_be_visible()
         page.locator("#continue-unsaved-modal").click()
@@ -501,11 +497,9 @@ class TestInlineBookmarks:
         provider.locator("summary").click()
         with page.expect_response("**/patch-simplified-inputs/"):
             provider.locator("[data-include-input]").check()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(controller.locator("[data-include-input]")).to_be_disabled()
         with page.expect_response("**/patch-simplified-inputs/"):
             provider.locator("[data-include-input]").uncheck()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(controller.locator("[data-include-input]")).to_be_enabled()
         for width in [1280, 700]:
             page.set_viewport_size({"width": width, "height": 800})
@@ -584,11 +578,9 @@ class TestInlineBookmarks:
         help_field.fill("Failed help draft")
         help_field.press("Tab")
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         page.unroute("**/patch-simplified-inputs/")
         with page.expect_response("**/patch-simplified-inputs/"):
             bookmark.locator("[data-include-input]").uncheck()
-        expect(page.locator("body")).not_to_have_attribute("data-workspace-mutation", "updating")
         expect(help_field).to_have_value("Failed help draft")
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
         click_and_wait_for_htmx(page, bookmark.locator('[data-action="bookmark-undo"]'))
@@ -646,6 +638,85 @@ class TestInlineBookmarks:
             bookmark.locator("[data-include-input]").uncheck()
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
         expect(draft).to_have_value("9876")
+
+    def test_closing_results_waits_for_its_delayed_sankey_response(self, minimal_complete_model_builder):
+        builder = minimal_complete_model_builder
+        page = builder.page
+        pending = []
+        page.route("**/sankey-diagram/*", lambda route: pending.append(route))
+        builder.open_result_panel()
+        expect(page.locator(".sankey-settings.htmx-request, .sankey-diagram-area.htmx-request")).to_have_count(1)
+        assert len(pending) == 1
+        builder.close_result_panel()
+        expect(page.locator("#result-block")).to_have_css("display", "none")
+        expect(page.locator("#result-block .sankey-card")).to_have_count(1)
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
+        expect(page.locator("#result-block")).to_be_empty()
+        assert page.locator("#panel-result-btn").evaluate("panel => panel.style.height") == ""
+        page.unroute("**/sankey-diagram/*")
+        builder.open_result_panel()
+        wait_for_htmx_idle(page)
+        expect(page.locator("#result-block .sankey-card")).to_have_count(1)
+        builder.close_result_panel()
+
+    @pytest.mark.parametrize("outcome", ["success", "rejected", "transport"])
+    def test_field_save_disables_both_resident_workspaces_and_restores_controls(
+            self, minimal_system_data, model_builder_page, outcome):
+        from copy import deepcopy
+        from urllib.parse import parse_qs
+        from tests.e2e.conftest import load_system_dict_into_browser
+
+        data = deepcopy(minimal_system_data)
+        next(iter(data["System"].values()))["usage_patterns"] = []
+        builder = load_system_dict_into_browser(model_builder_page, data)
+        page = builder.page
+        page.set_viewport_size({"width": 1440, "height": 900})
+        builder.configure_simplified_fields("lifespan", "power")
+        builder.add_model_by_duplication()
+        builder.open_simplified_inputs()
+        builder.switch_to_model(0)
+        expect(builder.simplified_workspace).to_have_attribute("data-slot", "0")
+        builder.switch_to_model(1)
+        expect(builder.simplified_workspace).to_have_attribute("data-slot", "1")
+        builder.simplified_workspace.get_by_role("button", name="Expand all", exact=True).click()
+        expect(page.locator("[data-simplified-workspace]")).to_have_count(2)
+        expect(page.locator("#compare-tab")).to_be_disabled()
+        original_value = builder.simplified_field("lifespan").locator('input[type="number"]').input_value()
+        pending, requests = [], []
+        page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
+        page.on("request", lambda req: requests.append(req) if "/edit-simplified-input/" in req.url else None)
+        with page.expect_request("**/edit-simplified-input/**"):
+            value = builder.save_simplified_number("lifespan", "8")
+        prefix = value.get_attribute("name")
+        assert parse_qs(pending[0].request.post_data)[prefix] == ["8"]
+        controls = page.locator("button, [data-simplified-workspace] input, "
+                                "[data-simplified-workspace] select, [data-simplified-workspace] textarea")
+        assert controls.evaluate_all("controls => controls.every(control => control.disabled)")
+        expect(builder.simplified_field("lifespan").locator("[data-simplified-save-status]")).to_have_text("Saving…")
+        expect(page.locator("[data-quick-total]").first).to_have_attribute("aria-busy", "true")
+        builder.attempt_disabled_simplified_edit("power")
+        assert len(pending) == 1 and len(requests) == 1
+        route = pending.pop()
+        if outcome == "transport":
+            route.abort("failed")
+        elif outcome == "rejected":
+            reject_simplified_edit(route)
+        else:
+            route.fulfill(response=route.fetch())
+        expected_status = "Saved" if outcome == "success" else "Not saved"
+        status = builder.simplified_field("lifespan").locator("[data-simplified-save-status]")
+        expect(status).to_have_text(expected_status)
+        expect(value).to_be_enabled()
+        expect(builder.simplified_field("power").locator('input[type="number"]')).to_be_enabled()
+        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
+        expect(page.locator("#compare-tab")).to_be_disabled()
+        expect(page.locator("[data-quick-total]").first).not_to_have_attribute("aria-busy", "true")
+        expect(value).to_have_value(original_value if outcome == "rejected" else "8")
+        if outcome == "rejected":
+            builder.close_error_modal()
+        page.unroute("**/edit-simplified-input/**")
+        assert len(requests) == 1
 
     def test_simple_autosave_deduplicates_restores_rejected_field_and_refreshes_results(self, minimal_complete_model_builder):
         from urllib.parse import parse_qsl, urlencode
