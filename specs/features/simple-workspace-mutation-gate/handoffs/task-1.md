@@ -2,13 +2,16 @@
 
 Repository and implementation range: `e-footprint-interface` —
 `1e8a8a28103da01d85efb6fc866b18a9e751580c..425ee74917c384553bf114d3db9e95d9827e2f6a`.
+Review correction: `197bf0098a3cc30308d242b24ea4994d96ba47c3..0301ca9140d7efe1d6cbfc6f4f70794fe05d8b02`.
+The intervening catalog and changelog-policy commits belong to concurrent work.
 
 ## Review pointers
 
 - Field and Configure completion match their own XHR through request completion and any pending
   settlement. Document listeners run after body handlers restore native prerequisites and permit rejected OOB swaps.
-- Results closure waits for requests and swaps within its own target. A refresh can initialize open-panel
-  layout while closure is pending, so final cleanup clears the heights again and resolves the current Results button.
+- Results closure waits for requests and swaps within its own target, plus requests carrying
+  `recomputation` that can refresh the panel from outside. Final cleanup reapplies the closed layout
+  after late OOB initialization and resolves the current Results button.
 
 ## Open concerns
 
