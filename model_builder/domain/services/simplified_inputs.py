@@ -15,7 +15,7 @@ from efootprint.core.country import Country
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.network import Network
 from efootprint.abstract_modeling_classes.conditional_inputs import resolve_input_path
-from efootprint.utils.tools import get_init_signature_params
+from efootprint.utils.tools import get_init_signature_params, time_it
 
 from model_builder.domain.exceptions import InputValidationError
 
@@ -101,6 +101,7 @@ def input_eligibility(owner_class, attribute, annotation, value, can_edit_timese
     return False, "This input is neither a number, an eligible select, nor an editable timeseries."
 
 
+@time_it
 def build_catalog(model_web, *, can_edit_timeseries) -> FieldCatalog:
     """Index constructor fields and model-wide conditional links in O(fields + links)."""
     fields = {}
