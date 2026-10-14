@@ -315,7 +315,10 @@ function restoreAccordionStateInFragment(serverResponse) {
     // Snapshot all currently-known accordion states (open = true, closed = false)
     const accordionStates = new Map();
     document.querySelectorAll('.accordion-collapse').forEach(el => {
-        accordionStates.set(el.id, el.classList.contains('show'));
+        // Bootstrap removes `show` while opening; the toggle already records its destination.
+        const opening = el.classList.contains('collapsing')
+            && document.querySelector(`[data-bs-target="#${el.id}"][aria-expanded="true"]`) !== null;
+        accordionStates.set(el.id, el.classList.contains('show') || opening);
     });
     if (accordionStates.size === 0) return serverResponse;
 

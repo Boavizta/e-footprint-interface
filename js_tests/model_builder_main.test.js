@@ -171,6 +171,27 @@ function requestEvent(type, detail, target = document.body) {
     return event;
 }
 
+test.each([true, false])("OOB replacements preserve the accordion transition destination (open=%s)", open => {
+    loadModule();
+    const card = document.getElementById("uj-first");
+    const collapse = card.querySelector(".accordion-collapse");
+    const toggle = card.querySelector("[data-bs-toggle='collapse']");
+    const responseCard = card.cloneNode(true);
+    responseCard.setAttribute("hx-swap-oob", "outerHTML");
+    collapse.classList.remove("show", "collapse");
+    collapse.classList.add("collapsing");
+    toggle.setAttribute("aria-expanded", String(open));
+
+    const detail = {xhr: {status: 200}, serverResponse: "<div hx-swap-oob='true'>" + responseCard.outerHTML + "</div>"};
+    requestEvent("htmx:beforeSwap", detail);
+    const fragment = new DOMParser().parseFromString(detail.serverResponse, "text/html");
+    const replacement = fragment.getElementById(card.id);
+
+    expect(replacement.querySelector(".accordion-collapse").classList.contains("show")).toBe(open);
+    expect(replacement.querySelector("[data-bs-toggle='collapse']").getAttribute("aria-expanded")).toBe(String(open));
+    expect(replacement.querySelector("[id^='icon_accordion_']").classList.contains("chevron-rotate")).toBe(open);
+});
+
 test("native disabling restores prerequisite controls in both resident workspaces and leaves replacements alone", () => {
     document.body.innerHTML = `
         <button id="unavailable" disabled>Unavailable</button>
