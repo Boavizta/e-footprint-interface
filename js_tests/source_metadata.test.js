@@ -6,7 +6,6 @@ const {
     toggleConfidenceMenu,
     setConfidence,
     openSourceEditor,
-    cancelSourceEditor,
     applySourceEditor,
     handleSourceSelect,
     checkCollision,
@@ -199,19 +198,6 @@ test("openSourceEditor with a non-listed source falls into the custom branch", (
     expect(editor.querySelector(".source-editor-select").value).toBe("__custom__");
     expect(document.getElementById("custom-fields-Compute_cpu_cores").classList.contains("open")).toBe(true);
     expect(editor.querySelector(".source-editor-custom-name").value).toBe("Internal");
-});
-
-test("cancelSourceEditor restores from hidden inputs and does not leak typed text", () => {
-    mount("field_src_selected_with_comment");
-    const original = document.getElementById("Compute_cpu_cores__comment").value;
-    const editor = document.getElementById("editor-Compute_cpu_cores");
-    editor.querySelector(".source-editor-comment").value = "Tampered";
-
-    cancelSourceEditor("Compute_cpu_cores");
-
-    expect(editor.classList.contains("open")).toBe(false);
-    expect(editor.querySelector(".source-editor-comment").value).toBe(original);
-    expect(document.getElementById("Compute_cpu_cores__comment").value).toBe(original);
 });
 
 test("handleSourceSelect opens the custom-fields panel only when __custom__ is picked", () => {

@@ -9,7 +9,7 @@ Context variables:
   source_meta_current_comment — current comment (string or None)
   source_editor_open        — if truthy, adds the 'open' class so the editor renders visible (optional)
   source_editor_cancel_target — id (no '#') of a Bootstrap collapse to hide on Cancel. When set,
-                                Cancel uses the source-table row JS handler instead of the side-panel handler.
+                                the editor is in the source table and Apply submits its row form.
 {% endcomment %}
 <div class="source-editor{% if source_editor_open %} open{% endif %}"
      id="editor-{{ source_editor_id }}"
@@ -67,17 +67,13 @@ Context variables:
            id="{{ source_editor_id }}__comment" value="{{ source_meta_current_comment|default:'' }}">
 
     <div class="editor-actions">
-        {% if not simplified_completion %}
+        {% if source_editor_cancel_target %}
         <button type="button"
                 class="btn btn-outline-secondary btn-sm"
-                {% if source_editor_cancel_target %}
-                data-action="cancel-source-table-row-editor" data-bs-target="#{{ source_editor_cancel_target }}"
-                {% else %}
-                data-action="cancel-source-editor"
-                {% endif %}>Cancel</button>
+                data-action="cancel-source-table-row-editor" data-bs-target="#{{ source_editor_cancel_target }}">Cancel</button>
         {% endif %}
         <button type="button"
                 class="btn btn-primary btn-sm"
-                data-action="apply-source-editor">Apply</button>
+                data-action="apply-source-editor">{% if source_editor_cancel_target or simplified_completion %}Apply{% else %}Close{% endif %}</button>
     </div>
 </div>

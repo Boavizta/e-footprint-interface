@@ -74,8 +74,8 @@ def _set_custom_source(editor, name: str, link: str) -> None:
     editor.locator(".source-editor-custom-link").fill(link)
 
 
-def _apply_source_editor(editor) -> None:
-    editor.locator('[data-action="apply-source-editor"]').click()
+def _close_source_editor(editor) -> None:
+    editor.get_by_role("button", name="Close", exact=True).click()
 
 
 def _save_reopen_server_form(model_builder: ModelBuilderPage) -> None:
@@ -164,7 +164,7 @@ class TestSourceMetadataSidePanel:
         _open_server_form(model_builder)
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         editor.locator(".source-editor-comment").fill(SERVER_POWER_COMMENT)
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         _save_reopen_server_form(model_builder)
 
         comment_line = page.locator(f"{SERVER_POWER_SOURCE} .comment-line")
@@ -183,7 +183,7 @@ class TestSourceMetadataSidePanel:
         _open_server_form(model_builder)
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         editor.locator(".source-editor-select").select_option("hypothesis")
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         model_builder.side_panel.submit_and_wait_for_close()
 
         _open_sources_tab(model_builder)
@@ -194,7 +194,7 @@ class TestSourceMetadataSidePanel:
         _open_server_form(model_builder)
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         _set_custom_source(editor, CUSTOM_SOURCE_NAME, CUSTOM_SOURCE_LINK)
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         model_builder.side_panel.submit_and_wait_for_close()
 
         _open_sources_tab(model_builder)
@@ -213,7 +213,7 @@ class TestSourceMetadataSidePanel:
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         _set_custom_source(editor, Sources.USER_DATA.name, "https://example.com/colliding-user-data")
         expect(editor.locator(".collision-notice")).to_be_visible()
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         model_builder.side_panel.submit_and_wait_for_close()
 
         data = _download_model_json(page, tmp_path / "collision.e-f.json")
@@ -236,7 +236,7 @@ class TestSourceMetadataSidePanel:
         _set_confidence(page, SERVER_POWER_FIELD, "high")
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         editor.locator(".source-editor-comment").fill(SERVER_POWER_COMMENT)
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         model_builder.side_panel.submit_and_wait_for_close()
 
         _open_server_form(model_builder)
@@ -248,7 +248,7 @@ class TestSourceMetadataSidePanel:
         expect(_confidence_badge(page, SERVER_POWER_FIELD)).to_have_attribute("data-level", "none")
         expect(page.locator(f"{SERVER_POWER_SOURCE} .comment-text")).to_contain_text(SERVER_POWER_COMMENT)
 
-    def test_source_editor_cancel_does_not_save_comment(
+    def test_source_editor_close_stages_comment_until_panel_save(
         self,
         source_metadata_model_builder: ModelBuilderPage,
     ):
@@ -257,9 +257,15 @@ class TestSourceMetadataSidePanel:
 
         _open_server_form(model_builder)
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
+        expect(editor.locator(".editor-actions button")).to_have_count(1)
         editor.locator(".source-editor-comment").fill("This draft should be discarded")
-        editor.locator('[data-action="cancel-source-editor"]').click()
-        model_builder.side_panel.submit_and_wait_for_close()
+        _close_source_editor(editor)
+        expect(page.locator(f"{SERVER_POWER_SOURCE} .comment-text")).to_contain_text("This draft should be discarded")
+        expect(page.locator(f"#{SERVER_POWER_FIELD}__comment")).to_have_value("This draft should be discarded")
+        model_builder.side_panel.close_button.click()
+        expect(page.locator("#unsavedModal")).to_be_visible()
+        page.locator("#continue-unsaved-modal").click()
+        model_builder.side_panel.should_be_closed()
 
         _open_server_form(model_builder)
         expect(page.locator(f"{SERVER_POWER_SOURCE} .comment-text")).to_contain_text(EXISTING_SERVER_POWER_COMMENT)
@@ -277,7 +283,7 @@ class TestSourceMetadataSidePanel:
         _set_confidence(page, SERVER_POWER_FIELD, "high")
         editor = _open_source_editor(page, SERVER_POWER_FIELD)
         editor.locator(".source-editor-comment").fill(SERVER_POWER_COMMENT)
-        _apply_source_editor(editor)
+        _close_source_editor(editor)
         model_builder.side_panel.submit_and_wait_for_close()
 
         download_path = tmp_path / "source-metadata.e-f.json"
@@ -408,7 +414,7 @@ def test_automatic_replacement_history_over_2000_characters_can_be_resubmitted(
     assert comment.get_attribute("maxlength") is None
     resubmitted = generated_comment + "\nReviewed after automatic replacement."
     comment.fill(resubmitted)
-    _apply_source_editor(editor)
+    _close_source_editor(editor)
     model_builder.side_panel.submit_and_wait_for_close()
 
     model_builder.get_object_card("EcoLogitsVideoGenExternalAPIJob", "Video job").click_edit_button()

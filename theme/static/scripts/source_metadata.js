@@ -196,13 +196,6 @@
         editor.classList.add("open");
     }
 
-    function cancelSourceEditor(fieldId) {
-        const editor = _editor(fieldId);
-        if (!editor) return;
-        _populateEditorFromHidden(fieldId);
-        editor.classList.remove("open");
-    }
-
     function applySourceEditor(fieldId) {
         const editor = _editor(fieldId);
         if (!editor) return;
@@ -523,9 +516,6 @@
             case "open-source-editor":
                 openSourceEditor(fieldId);
                 break;
-            case "cancel-source-editor":
-                cancelSourceEditor(fieldId);
-                break;
             case "toggle-source-table-row-editor":
                 _toggleSourceTableRowEditor(target);
                 break;
@@ -609,7 +599,7 @@
     if (typeof module !== "undefined" && module.exports) {
         module.exports = {
             applyConfidenceToBadge, toggleConfidenceMenu, setConfidence,
-            openSourceEditor, cancelSourceEditor, applySourceEditor,
+            openSourceEditor, applySourceEditor,
             handleSourceSelect, checkCollision,
             resetConfidenceForField, swapHypothesisToUserDataForField,
             autosaveConfidence,
