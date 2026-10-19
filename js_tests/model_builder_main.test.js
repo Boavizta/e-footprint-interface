@@ -189,7 +189,7 @@ test.each([422, 500])("HTTP %s modal still processes rejected OOB content", stat
     expect(event.detail.isError).toBe(true);
 });
 
-test("closing Results waits for its pending response and swap before detaching targets", () => {
+test("closing Results while its requests are pending empties the panel at once", () => {
     document.body.innerHTML = `
         <div id="toolbar-nav"></div><div id="model-canva-scrollable-area" class="overflow-x-auto"></div>
         <div id="sidePanel" class="d-none"></div>
@@ -197,21 +197,10 @@ test("closing Results waits for its pending response and swap before detaching t
         <div id="result-block"><form class="sankey-settings htmx-request"></form></div>
     `;
     window.eval(fs.readFileSync(path.join(__dirname, "../theme/static/scripts/hammer_utils.js"), "utf8"));
-    const results = document.getElementById("result-block");
-    const form = results.querySelector("form");
-    window.hidePanelResult();
-    expect(results.style.display).toBe("none");
-    expect(form.isConnected).toBe(true);
-    form.classList.remove("htmx-request");
-    results.classList.add("htmx-settling");
-    requestEvent("htmx:afterRequest", {xhr: {}}, form);
-    expect(form.isConnected).toBe(true);
     window.displayPanelResult();
-    document.getElementById("btn-open-panel-result").outerHTML = '<button id="btn-open-panel-result" style="display:none"></button>';
-    results.classList.remove("htmx-settling");
-    requestEvent("htmx:afterSettle", {xhr: {}}, results);
+    window.hidePanelResult();
+    const results = document.getElementById("result-block");
     expect(results.innerHTML).toBe("");
-    expect(results.style.display).toBe("");
     expect(results.style.height).toBe("");
     expect(document.getElementById("panel-result-btn").style.height).toBe("");
     expect(document.getElementById("btn-open-panel-result").style.display).toBe("block");

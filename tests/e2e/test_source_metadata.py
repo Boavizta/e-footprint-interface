@@ -10,7 +10,7 @@ from playwright.sync_api import Page, expect
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
-from tests.e2e.utils import click_and_wait_for_htmx
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 SERVER_POWER_FIELD = "Server_power"
@@ -42,9 +42,7 @@ def _open_server_form(model_builder: ModelBuilderPage) -> None:
     power_input = model_builder.page.locator(SERVER_POWER_INPUT)
     expect(power_input).to_be_attached()
     if not power_input.is_visible():
-        model_builder.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(model_builder.page)
         advanced_toggle = model_builder.page.locator("#display-advanced-Server")
         advanced_toggle.click()
         expect(model_builder.page.locator("#advanced-Server")).to_be_visible()

@@ -45,15 +45,18 @@ too. Settings are validated when authored; file opening preserves them without a
 <p><strong>reset/example-load are deliberately exempt</strong> — they obviously discard the current model, so a separate unsaved warning would be noise. <strong>remove-model</strong> also discards the panel but keeps its <em>own</em> destructive <code>window.confirm</code> (<a class="source" href="../../theme/static/scripts/model_comparison.js"><code>model_comparison.js</code></a>) rather than going through the modal. To avoid stacking dialogs, it appends the ordinary side-panel unsaved-changes warning when <code>window.isSidePanelFormModified()</code> reports pending edits.</p>
 <h3 id="simplified-workspace">Simplified-input workspace and Configure exits</h3>
 <p>Each slot has a surviving <code>#simplified-slot-{slot}</code> target beside the resident canvases. Modeling → Simplified
-inputs always reads fresh state; <code>simplified_inputs/workspace.js</code> remembers only the last base view by System ID.
+inputs always reads fresh state. Each slot carries its model's last base view as <code>data-view</code>: the server
+renders the opening default and <code>simplified_inputs/workspace.js</code> writes the user's choice, so a model switch
+restores each model's view.
 The client entry point <code>simplified_inputs/index.js</code> composes private workspace, configuration and
-bookmark modules into the synchronous <code>bundles/simplified_inputs.js</code> asset. Workspace owns pending reads and
-non-export Configure exit continuations; inline field saves are declarative HTMX on the editor form. Exports use accepted repository state and
+bookmark modules into the synchronous <code>bundles/simplified_inputs.js</code> asset. Workspace owns view memory, saved-view
+reads and the dirty-Configure gate; inline field saves are declarative HTMX on the editor form. Exports use accepted repository state and
 keep no focused-field continuation. Configuration keeps draft settings in DOM controls, and bookmarks own
 membership/help patches and creation-time locks. Explicit callbacks connect the modules without exposing widget
 functions on <code>window</code>.
 A successful JSON load supplies one-use session opening markers, consumed by the next builder render: selected inputs
-open Simplified inputs, an empty selection opens Modeling. Ordinary slot switches never reapply this rule.</p>
+open Simplified inputs, an empty selection opens Modeling. Ordinary slot switches never reapply this rule. A full
+builder re-render (Duplicate, Start blank, Import, Remove) brings fresh slots, so each model then opens in its default view.</p>
 <p>A rejected inline value or provenance autosave restores the affected field from the accepted repository state and
 marks it Not saved. The submitted draft is not retained, so Modeling, Configure, model switching and other workspace
 navigation can proceed after the save. During a value/provenance request, native HTMX disabling covers buttons and
@@ -68,14 +71,19 @@ container-responsive field columns and compact object selector. Draft settings l
 form-level dirty flag. Filtering hides objects and matching navigation entries without dropping controls or help;
 recursive dependency locks use catalog links. Save serializes the complete definition directly from the controls into
 one JSON form parameter, including checked locked inputs, so model size does not exhaust Django's parameter limit.
-Other exits (including Results/Sources, Compare, switching and import) use Save/Discard/Stay. Discard fetches saved
-state before continuing; Save continues only after its matching successful HTMX request and any replacement have settled. Cancelled or failed
-saves leave the draft visible. Export is separate: while Configure is dirty, it is blocked in place with a notice;
+While the draft is dirty, every other exit (including Results/Sources, Compare, switching and import) is blocked, by click
+capture or <code>htmx:confirm</code>, behind Save/Discard/Stay and issues no request. Save submits the form and shows the saved
+view, Discard reads the saved view, and Stay keeps the draft. No exit resumes the interrupted navigation: the user repeats
+it. A rejected save leaves the draft and the gate. A clean Configure screen is not intercepted; a model switch leaves it
+in its slot and shows it again on return. Export is separate: while Configure is dirty, it is blocked in place with a notice;
 explicit Save or Discard does not continue the export. A clean Configure screen can export directly without leaving.
-The ordinary side-panel discard-confirmation helper runs before focused-view reads, whose continuation is tied to their
-actually issued XHR. Duplicate reads are suppressed; leaving or starting a request that replaces the pending read's
-target aborts that read before it can replace a draft or park Configure in another model's resident target. Configure is never parked and each entry
-starts fresh.</p>
+Entering Simplified inputs, Configure or Discard runs the ordinary side-panel discard-confirmation helper, closes the
+side panel, switches the view at once and sends one read into the slot. The slot shows its previous content, or nothing on
+first entry, until the response replaces it. The slot declares <code>hx-sync="this:replace"</code>, so a repeated entry
+aborts the earlier read and the last one wins. The Configure form inherits that rule, so its Save shares the slot's
+request queue with reads. A read that lands after the user moved on lands in its own slot and is
+shown on the next visit to that model, Configure included. A read answered by an error leaves its slot empty or stale,
+visibly; nothing retries it.</p>
 <h3 id="tab-roles-and-ordering">Tab roles and ordering</h3>
 <p>Tabs are fixed role labels; the model name lives in the toolbar. Each model tab shows a fixed label by <em>list position</em> — first slot "Reference model", second "Comparison model" (matching how <code>compare()</code> pairs <code>workspace_slots[0]→A</code>, <code>[1]→B</code>) — not the model's own name, so a long name can never stretch a tab (the tab width is pinned in <a class="source" href="../../theme/static/scss/custom.scss"><code>custom.scss</code></a>).</p>
 <p><strong>The slot list is role-ordered, not numeric-ordered:</strong> <code>WorkspaceIndex</code> (and the in-memory mirror) <em>append</em> new slots and never <code>sorted()</code> the list, so removing the Reference (slot 0) leaves the survivor role-first in slot 1, and a model added afterwards reuses the freed slot number 0 yet appends as the Comparison — sorting would re-promote it to Reference (the model-comparison re-add bug). The active model's editable name lives in the toolbar (<code>#btn-change-system-name</code> / <code>#system-name</code>, left of the edge toggle); renaming swaps <code>#system-name</code> in place and switching OOB-rebinds it (above).</p>

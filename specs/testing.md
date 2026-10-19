@@ -174,13 +174,14 @@ Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered cli
 owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class to
 clear, and its temporary native control release. Read clicks retain their response-only wait; unrelated pending reads do not
 block save completion.
-Before clicking it does not wait for pending reads, so navigation can still cancel one.
+Before clicking it does not wait for pending reads. Controls without HTMX attributes, such as the Simplified-inputs
+toggle, are only clicked; assert their rendered outcome.
 Use `wait_for_htmx_idle()` when the next action requires a complete request cascade, such as Sources export after the initial
 Sankey load. Readiness comes from lifecycle state, not a fixed sleep.
 Both helpers wait on the request class alone. Settling classes never persist: HTMX settles synchronously, so they are gone once a
 request's swap completes.
 Side-panel form submissions use `SidePanelPage.submit_and_wait_for_close()`, which waits for newly swapped content to be
-processed before clicking, validates the form response, and waits for HTMX request/settling classes to clear before returning.
+processed before clicking, validates the form response, and waits for HTMX's request class to clear before returning.
 Test HTMX behaviour through rendered outcomes (text, attributes, enabled state, request count). Do not dispatch synthetic HTMX
 lifecycle events to reproduce a sequence; drive the real request, or assert the rendered result.
 Opening Results also starts descendant Sankey configuration requests; wait for that complete HTMX cascade before the next edit.

@@ -1,7 +1,7 @@
 """Side panel page object for form interactions."""
 from playwright.sync_api import Page, expect
 
-from tests.e2e.utils import click_and_wait_for_htmx
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 class SidePanelPage:
@@ -69,11 +69,8 @@ class SidePanelPage:
     def submit_and_wait_for_close(self):
         """Submit the form, wait for its HTMX request, then wait for the panel to close."""
         hx_url = self.form.get_attribute("hx-post")
-        # The panel form exists before HTMX's settle phase processes newly swapped content.
-        # Clicking during that window performs a native submit instead of an HTMX request.
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        # Clicking before HTMX processes the swapped form performs a native submit instead of an HTMX request.
+        wait_for_htmx_idle(self.page)
         if hx_url:
             with self.page.expect_response(lambda response: hx_url in response.url) as response_info:
                 self.submit_button.click()
@@ -82,11 +79,7 @@ class SidePanelPage:
         else:
             self.submit_button.click()
         self.form.wait_for(state="hidden")
-        # afterRequest closes the panel before HTMX's settle phase applies final OOB attributes.
-        # Waiting on HTMX's own state classes avoids relying on a bubbled event from replaced elements.
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(self.page)
         return self
 
     def close(self):
@@ -200,7 +193,7 @@ class SidePanelPage:
 
     def remove_dict_membership(self, group_name: str):
         """Remove a group membership from a device edit panel."""
-        from tests.e2e.utils import click_and_wait_for_htmx
+        from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
         row = self.panel.locator(f"[data-dict-membership-name='{group_name}']").first
         # The helper waits for swapped controls to be processed before clicking.
         click_and_wait_for_htmx(self.page, row.locator("button.unlink-btn").first)

@@ -3,7 +3,7 @@ from playwright.sync_api import Page, expect
 
 from tests.e2e.pages.side_panel_page import SidePanelPage
 from tests.e2e.pages.components.object_card import ObjectCard
-from tests.e2e.utils import click_and_wait_for_htmx
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 def card_id_selector(object_type: str) -> str:
@@ -121,25 +121,19 @@ class ModelBuilderPage:
         self.page.locator("#help-menu-toggle").click()
         click_and_wait_for_htmx(self.page, self.page.locator("a[href='/model_builder/data-privacy/']"))
         self.page.locator("#sidePanelTitle", has_text="Data & privacy").wait_for(state="visible")
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(self.page)
         return self
 
     def set_recovery_retention(self, seconds: int):
         """Save one offered recovery-retention choice in the open privacy panel."""
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(self.page)
         self.page.locator("#retention-seconds").select_option(str(seconds))
         click_and_wait_for_htmx(
             self.page,
             self.page.locator("form[action$='/recovery-retention/'] button[type='submit']"),
         )
         self.page.locator("#retention-update-result").wait_for(state="visible")
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(self.page)
         return self
 
     @property
@@ -154,9 +148,7 @@ class ModelBuilderPage:
         """Open Data & privacy through the contextual shared-budget warning."""
         click_and_wait_for_htmx(self.page, self.workspace_storage_warning.locator("a"))
         self.page.locator("#sidePanelTitle", has_text="Data & privacy").wait_for(state="visible")
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null",
-        )
+        wait_for_htmx_idle(self.page)
         return self
 
     def close_side_panel(self):
@@ -421,7 +413,7 @@ class ModelBuilderPage:
 
     def close_result_panel(self):
         """Close the result panel."""
-        self.page.locator("#result-block div[onclick='hidePanelResult()']").click()
+        self.page.get_by_role("button", name="Close results").click()
         return self
 
     def result_chart_should_be_visible(self):

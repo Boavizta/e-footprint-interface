@@ -4,7 +4,7 @@ if (typeof global.CSS === "undefined") {
     global.CSS = {escape: value => String(value).replace(/[^a-zA-Z0-9_-]/g, char => "\\" + char)};
 }
 const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
-const { workspace: { initialize, deferExit } } = require("../theme/static/scripts/simplified_inputs/index.js");
+const { workspace: { initialize } } = require("../theme/static/scripts/simplified_inputs/index.js");
 require("../theme/static/scripts/source_metadata.js");
 require("../theme/static/scripts/model_builder_main.js");
 
@@ -107,65 +107,118 @@ test("configuration transport is one snapshot taken when HTMX sends the form", (
     expect(form.getAttribute("hx-params")).toBe("csrfmiddlewaretoken");
 });
 
-test("duplicate pending reads are suppressed and failed reads can be retried", () => {
-    mount();
-    deferExit(() => {});
-    deferExit(() => {});
-    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+function toolbarControl(html = '<button type="button" data-action="simplified-mode" data-workspace-control>Simplified inputs</button>') {
+    const holder = document.createElement("div");
+    holder.innerHTML = html;
+    const control = holder.firstElementChild;
+    document.body.prepend(control);
+    return control;
+}
+function confirmRequest(elt) {
+    const issueRequest = jest.fn();
+    const event = new CustomEvent("htmx:confirm", {bubbles: true, cancelable: true, detail: {elt, issueRequest}});
+    elt.dispatchEvent(event);
+    return {event, issueRequest};
+}
+
+test("entering Simplified inputs switches the view before any response and sends one replaceable read", () => {
+    mount().remove();
     const target = document.querySelector("[data-simplified-target]");
-    const xhr = { abort: jest.fn() };
-    target.dispatchEvent(new CustomEvent("htmx:beforeRequest", { detail: { elt: target, xhr } }));
-    target.dispatchEvent(new CustomEvent("htmx:afterRequest", { detail: { xhr, successful: false } }));
-    deferExit(() => {});
-    expect(window.htmx.ajax).toHaveBeenCalledTimes(2);
+    expect(document.body.dataset.baseView).toBe("modeling");
+    toolbarControl().click();
+    expect(document.body.dataset.baseView).toBe("simplified");
+    expect(target.dataset.view).toBe("simplified");
+    expect(target.classList.contains("d-none")).toBe(false);
+    expect(window.closeAndEmptySidePanel).toHaveBeenCalledTimes(1);
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+    expect(window.htmx.ajax).toHaveBeenCalledWith("GET", "/model_builder/simplified-inputs/",
+        {source: target, target, swap: "innerHTML"});
 });
 
-test("Stay keeps the draft and Save resumes an exit only after its successful response settles", () => {
+test("a dirty Configure blocks toolbar clicks and HTMX requests behind the dialog without issuing them", () => {
     mount();
     include("lifespan");
-    const action = jest.fn();
-    deferExit(action);
-    expect(document.querySelector("dialog").showModal).toHaveBeenCalled();
-    document.querySelector('[data-action="simplified-exit-stay"]').click();
-    expect(action).not.toHaveBeenCalled();
-    const form = document.querySelector("form");
-    form.requestSubmit = jest.fn();
-    deferExit(action);
-    document.querySelector('[data-action="simplified-exit-save"]').click();
-    expect(form.requestSubmit).toHaveBeenCalled();
-    finishMutation(startMutation(form), false);
-    expect(action).not.toHaveBeenCalled();
-    expect(form.dataset.dirty).toBe("true");
-    deferExit(action);
-    const xhr = startMutation(form);
-    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
-    mutationEvent("htmx:afterRequest", {xhr, successful: true});
-    mutationEvent("htmx:afterSettle", {xhr: {}});
-    expect(action).not.toHaveBeenCalled();
-    mutationEvent("htmx:afterSettle", {xhr});
-    expect(action).toHaveBeenCalledTimes(1);
+    const control = toolbarControl();
+    const reached = jest.fn();
+    control.addEventListener("click", reached);
+    expect(activate(control).defaultPrevented).toBe(true);
+    expect(reached).not.toHaveBeenCalled();
+    const link = toolbarControl('<a href="#" hx-get="/model_builder/compare/">Compare</a>');
+    const {event, issueRequest} = confirmRequest(link);
+    expect(event.defaultPrevented).toBe(true);
+    expect(issueRequest).not.toHaveBeenCalled();
+    expect(document.querySelector("dialog").showModal).toHaveBeenCalledTimes(2);
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
 });
 
-test("internal saved-view reads bypass exit interception, using the resident settlement source", async () => {
+test("Save submits, Discard reads the saved view once, Stay issues nothing, and none replays the exit", () => {
     mount();
+    include("lifespan");
+    const form = document.querySelector("[data-configure-form]");
+    form.requestSubmit = jest.fn();
+    const control = toolbarControl();
+    const reached = jest.fn();
+    control.addEventListener("click", reached);
     const target = document.querySelector("[data-simplified-target]");
-    const issueRequest = jest.fn();
-    const event = new CustomEvent("htmx:confirm", { bubbles: true, cancelable: true,
-        detail: { elt: target, issueRequest } });
-    target.dispatchEvent(event);
-    expect(event.defaultPrevented).toBe(false);
-    const action = jest.fn();
-    deferExit(action);
-    await Promise.resolve();
-    expect(action).not.toHaveBeenCalled();
-    const xhr = {};
-    target.dispatchEvent(new CustomEvent("htmx:beforeRequest", { detail: { elt: target, xhr } }));
-    target.dispatchEvent(new CustomEvent("htmx:afterSettle", { detail: { xhr: {} } }));
-    expect(action).not.toHaveBeenCalled();
-    target.dispatchEvent(new CustomEvent("htmx:afterSettle", { detail: { xhr } }));
+    activate(control);
+    document.querySelector('[data-action="simplified-exit-stay"]').click();
+    expect(form.requestSubmit).not.toHaveBeenCalled();
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
+    activate(control);
+    document.querySelector('[data-action="simplified-exit-save"]').click();
+    expect(form.requestSubmit).toHaveBeenCalledTimes(1);
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
+    activate(control);
+    document.querySelector('[data-action="simplified-exit-discard"]').click();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
     expect(window.htmx.ajax).toHaveBeenCalledWith("GET", "/model_builder/simplified-inputs/",
-        expect.objectContaining({ source: target, target }));
-    expect(action).toHaveBeenCalled();
+        expect.objectContaining({source: target, target}));
+    expect(document.querySelector("dialog").close).toHaveBeenCalledTimes(3);
+    expect(reached).not.toHaveBeenCalled();
+    expect(form.requestSubmit).toHaveBeenCalledTimes(1);
+});
+
+test("a clean Configure exit is not intercepted", () => {
+    mount();
+    const link = toolbarControl('<a href="#" hx-get="/model_builder/compare/">Compare</a>');
+    const reached = jest.fn(event => event.preventDefault());
+    link.addEventListener("click", reached);
+    activate(link);
+    expect(reached).toHaveBeenCalledTimes(1);
+    expect(confirmRequest(link).event.defaultPrevented).toBe(false);
+    expect(document.querySelector("dialog").showModal).not.toHaveBeenCalled();
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
+});
+
+test("each slot restores its own view and an empty Simplified slot is never re-read", () => {
+    const workspace = mount();
+    const first = document.querySelector("[data-simplified-target]");
+    const second = document.createElement("div");
+    second.dataset.simplifiedTarget = "1";
+    second.dataset.view = "simplified";
+    first.after(second);
+    const strip = document.createElement("div");
+    strip.id = "model-tab-strip";
+    strip.dataset.activeSlot = "0";
+    document.body.prepend(strip);
+    const toggle = toolbarControl();
+    first.dataset.view = "simplified";
+    initialize();
+    expect(document.body.dataset.baseView).toBe("simplified");
+    expect(first.classList.contains("d-none")).toBe(false);
+    toggle.click();
+    expect(first.dataset.view).toBe("modeling");
+    strip.dataset.activeSlot = "1";
+    document.body.dispatchEvent(new CustomEvent("switchModelCanvas"));
+    expect(document.body.dataset.baseView).toBe("simplified");
+    expect(second.classList.contains("d-none")).toBe(false);
+    expect(first.classList.contains("d-none")).toBe(true);
+    strip.dataset.activeSlot = "0";
+    document.body.dispatchEvent(new CustomEvent("switchModelCanvas"));
+    expect(document.body.dataset.baseView).toBe("modeling");
+    expect(first.classList.contains("d-none")).toBe(true);
+    expect(workspace.isConnected).toBe(true);
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
 });
 
 function bookmark(owner, attribute, provisional = false) {
@@ -268,18 +321,6 @@ test('a saved field fragment carries its server-rendered outcome', () => {
     expect(status.hasAttribute('hx-preserve')).toBe(false);
 });
 
-function mutationEvent(name, detail, target = document.body) {
-    target.dispatchEvent(new CustomEvent(name, {bubbles: true, detail}));
-}
-function startMutation(form) {
-    const xhr = {getResponseHeader: () => null};
-    mutationEvent("htmx:beforeRequest", {xhr, elt: form, requestConfig: {verb: "post"}});
-    return xhr;
-}
-function finishMutation(xhr, successful = true) {
-    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: false});
-    mutationEvent("htmx:afterRequest", {xhr, successful});
-}
 function activate(control) {
     const event = new MouseEvent("click", {bubbles: true, cancelable: true});
     control.dispatchEvent(event);
@@ -332,60 +373,4 @@ test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before docume
     } finally {
         document.removeEventListener("click", captured, true);
     }
-});
-
-test.each(["save", "discard", "failed save"])("%s resolves Configure explicitly without continuing an export", async resolution => {
-    const workspace = mount("simplified_configure_workspace");
-    include("lifespan");
-    const form = workspace.querySelector("form");
-    const control = document.getElementById("download-menu-toggle");
-    const activated = jest.fn();
-    control.addEventListener("click", activated);
-    const replaceWorkspace = () => {
-        const template = document.createElement("template");
-        template.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_saved.html"), "utf8");
-        workspace.replaceWith(template.content.querySelector("[data-simplified-workspace]"));
-    };
-    expect(activate(control).defaultPrevented).toBe(true);
-    if (resolution === "discard") {
-        document.querySelector('[data-action="simplified-cancel"]').click();
-        expect(document.querySelector("dialog").showModal).toHaveBeenCalledTimes(1);
-        document.querySelector('[data-action="simplified-exit-discard"]').click();
-        const target = document.querySelector("[data-simplified-target]");
-        const xhr = {};
-        mutationEvent("htmx:beforeRequest", {elt: target, xhr}, target);
-        replaceWorkspace();
-        mutationEvent("htmx:afterSettle", {xhr}, target);
-    } else {
-        const save = form.querySelector('button[type="submit"]');
-        form.requestSubmit = jest.fn();
-        expect(activate(save).defaultPrevented).toBe(false);
-        const xhr = startMutation(form);
-        if (resolution === "save") replaceWorkspace();
-        finishMutation(xhr, resolution === "save");
-    }
-    await Promise.resolve();
-    expect(activated).not.toHaveBeenCalled();
-    if (resolution === "failed save") {
-        expect(form.dataset.dirty).toBe("true");
-        expect(workspace.querySelector("[data-simplified-notice]").textContent).toBe(
-            "Save or discard Configure changes before exporting.");
-        expect(activate(control).defaultPrevented).toBe(true);
-    } else {
-        expect(workspace.isConnected).toBe(false);
-        expect(document.querySelector("[data-simplified-notice]").textContent).toBe("");
-        expect(activate(control).defaultPrevented).toBe(false);
-        expect(activated).toHaveBeenCalledTimes(1);
-    }
-});
-
-test("clean Configure export does not cancel a pending saved-view read", () => {
-    mount("simplified_configure_export");
-    deferExit(() => {});
-    const target = document.querySelector("[data-simplified-target]");
-    const xhr = {abort: jest.fn()};
-    mutationEvent("htmx:beforeRequest", {elt: target, xhr}, target);
-    expect(activate(document.getElementById("download-model")).defaultPrevented).toBe(false);
-    expect(xhr.abort).not.toHaveBeenCalled();
-    mutationEvent("htmx:afterRequest", {xhr, successful: false}, target);
 });

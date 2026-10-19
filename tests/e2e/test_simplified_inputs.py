@@ -139,7 +139,7 @@ class TestSimplifiedInputs:
             notices.append(f"{job.name}: {job.resolution.label} changed to {resolutions[0]}.")
         expect(workspace.locator("[data-simplified-notice]")).to_have_text(" ".join(notices))
         expect(workspace.locator("[data-simplified-notice] > *")).to_have_count(0)
-        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        wait_for_htmx_idle(page)
         resolution = field(workspace, "resolution")
         if repair_resolution:
             expect(resolution.locator('input[name$="__source_id"]')).to_have_value("automatic_replacement")
@@ -153,52 +153,66 @@ class TestSimplifiedInputs:
         expect(resolution.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(workspace.locator("[data-simplified-notice]")).to_have_text("")
 
-    def test_repeated_configure_entry_does_not_queue_a_draft_replacement(self, minimal_complete_model_builder):
+    def test_repeated_configure_entry_renders_one_form_that_keeps_its_draft(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
         open_simplified(page)
-        pending = []
+        pending, seen = [], []
         page.route("**/simplified-inputs/?configure=1", lambda route: pending.append(route))
-        with page.expect_request("**/simplified-inputs/?configure=1"):
+
+        def second_read(request):
+            if "configure=1" in request.url:
+                seen.append(request)
+            return len(seen) == 2
+
+        with page.expect_request(second_read):
             page.get_by_role("button", name="Configure", exact=True).dblclick()
-        assert len(pending) == 1
-        route = pending.pop()
-        route.fulfill(response=route.fetch())
+        first, second = pending
+        second.fulfill(response=second.fetch())
         workspace = page.locator('[data-simplified-workspace]:visible')
         expect(workspace).to_have_attribute("data-mode", "configure")
         workspace.locator('[name="title"]').fill("Preserve this draft")
         expect(workspace.locator("form")).to_have_attribute("data-dirty", "true")
-        assert pending == []
+        first.fulfill(response=first.fetch())
         page.unroute("**/simplified-inputs/?configure=1")
+        wait_for_htmx_idle(page)
+        expect(page.locator("[data-configure-form]")).to_have_count(1)
+        expect(workspace.locator('[name="title"]')).to_have_value("Preserve this draft")
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
         expect(workspace.get_by_text("Preserve this draft", exact=True)).to_be_visible()
 
+    @pytest.mark.parametrize("configure", [False, True])
     @pytest.mark.parametrize("return_before_response", [False, True])
-    def test_abandoned_configure_read_cannot_follow_a_model_switch(
-            self, minimal_complete_model_builder, return_before_response):
+    def test_late_read_lands_in_its_slot_and_is_shown_on_return(
+            self, minimal_complete_model_builder, configure, return_before_response):
         builder = minimal_complete_model_builder
         page = builder.page
         builder.add_model_by_duplication()
-        open_simplified(page)
+        if configure:
+            open_simplified(page)
         system_id = page.locator('[data-simplified-target="1"]').get_attribute("data-system-id")
+        url = "**/simplified-inputs/?configure=1" if configure else "**/simplified-inputs/"
         pending = []
-        page.route("**/simplified-inputs/?configure=1", lambda route: pending.append(route))
-        with page.expect_request("**/simplified-inputs/?configure=1"):
-            page.get_by_role("button", name="Configure", exact=True).click()
-        assert len(pending) == 1
+        page.route(url, lambda route: pending.append(route))
+        control = (page.get_by_role("button", name="Configure", exact=True) if configure
+                   else page.locator('[data-action="simplified-mode"]'))
+        with page.expect_request(url):
+            control.click()
+        expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
         route = pending.pop()
         response = route.fetch()
         builder.switch_to_model(0)
+        expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         if return_before_response:
             builder.switch_to_model(1)
         route.fulfill(response=response)
-        expect(page.locator("[data-configure-form]")).to_have_count(0)
+        page.unroute(url)
         if not return_before_response:
             builder.switch_to_model(1)
-        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "simplified")
-        page.unroute("**/simplified-inputs/?configure=1")
-        click_and_wait_for_htmx(page, page.get_by_role("button", name="Configure", exact=True))
-        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-slot", "1")
-        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-system-id", system_id)
+        workspace = page.locator('[data-simplified-workspace]:visible')
+        expect(workspace).to_have_attribute("data-mode", "configure" if configure else "simplified")
+        expect(workspace).to_have_attribute("data-slot", "1")
+        expect(workspace).to_have_attribute("data-system-id", system_id)
+        expect(page.locator("[data-simplified-workspace]")).to_have_count(1)
 
     def test_save_clear_cancel_and_fresh_configuration(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
@@ -268,7 +282,11 @@ class TestSimplifiedInputs:
         assert downloads == [] and requests == []
         page.unroute("**/save-simplified-inputs/")
         page.locator('[data-action="simplified-mode"]').click()
-        click_and_wait_for_htmx(page, page.get_by_role("button", name="Save", exact=True))
+        with page.expect_response("**/save-simplified-inputs/"):
+            page.get_by_role("button", name="Save", exact=True).click()
+        expect(workspace).to_have_attribute("data-mode", "simplified")
+        expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
+        page.locator('[data-action="simplified-mode"]').click()
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         expect(page.locator("[data-simplified-target]:visible")).to_have_count(0)
 
@@ -299,7 +317,12 @@ class TestSimplifiedInputs:
     def test_model_base_views_survive_switch_and_compare(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
         page = builder.page
+        open_simplified(page)
         builder.add_model_by_duplication()
+        expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+        builder.switch_to_model(0)
+        expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
+        builder.switch_to_model(1)
         workspace = open_configure(page)
         field(workspace, "lifespan").locator("[data-include-input]").check()
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
@@ -411,7 +434,14 @@ class TestSimplifiedInputs:
         page.get_by_role("button", name="Stay", exact=True).click()
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
         page.locator(triggers[destination]).click()
-        click_and_wait_for_htmx(page, page.get_by_role("button", name="Discard", exact=True))
+        page.get_by_role("button", name="Discard", exact=True).click()
+        expect(page.locator("[data-simplified-workspace]:visible")).to_have_attribute("data-mode", "simplified")
+        expect(page.locator("#result-block")).to_be_empty()
+        expect(page.locator("#sidePanel")).not_to_be_visible()
+        expect(page.locator("#comparison-view")).not_to_be_visible()
+        if destination in ("compare", "model"):
+            expect(page.locator("#model-tab-strip")).to_have_attribute("data-active-slot", "1")
+        click_and_wait_for_htmx(page, page.locator(triggers[destination]))
         if destination == "results":
             expect(page.locator("#result-block")).not_to_be_empty()
             click_and_wait_for_htmx(page, page.locator("button[hx-get*='source-table']:visible"))
@@ -666,7 +696,7 @@ class TestInlineBookmarks:
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Saved")
         expect(draft).to_have_value("9876")
 
-    def test_closing_results_waits_for_its_delayed_sankey_response(self, minimal_complete_model_builder):
+    def test_closing_results_during_a_delayed_sankey_load_empties_the_panel(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
         page = builder.page
         pending = []
@@ -675,19 +705,22 @@ class TestInlineBookmarks:
         expect(page.locator(".sankey-settings.htmx-request, .sankey-diagram-area.htmx-request")).to_have_count(1)
         assert len(pending) == 1
         builder.close_result_panel()
-        expect(page.locator("#result-block")).to_have_css("display", "none")
-        expect(page.locator("#result-block .sankey-card")).to_have_count(1)
+        expect(page.locator("#result-block")).to_be_empty()
         route = pending.pop()
-        route.fulfill(response=route.fetch())
+        with page.expect_response("**/sankey-diagram/*") as response_info:
+            route.fulfill(response=route.fetch())
+        response_info.value.finished()
+        wait_for_htmx_idle(page)
         expect(page.locator("#result-block")).to_be_empty()
         assert page.locator("#panel-result-btn").evaluate("panel => panel.style.height") == ""
+        expect(page.locator("#btn-open-panel-result")).to_be_visible()
         page.unroute("**/sankey-diagram/*")
         builder.open_result_panel()
         wait_for_htmx_idle(page)
         expect(page.locator("#result-block .sankey-card")).to_have_count(1)
         builder.close_result_panel()
 
-    def test_closing_results_waits_for_a_delayed_field_refresh(self, minimal_complete_model_builder):
+    def test_results_close_controls_are_locked_during_a_delayed_field_save(self, minimal_complete_model_builder):
         from urllib.parse import parse_qs
 
         builder = minimal_complete_model_builder
@@ -695,16 +728,21 @@ class TestInlineBookmarks:
         builder.configure_simplified_fields("lifespan")
         builder.open_result_panel()
         wait_for_htmx_idle(page)
+        close_controls = page.locator("#result-block button[onclick='hidePanelResult()']")
+        expect(close_controls).to_have_count(2)
         pending = []
         page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
         with page.expect_request("**/edit-simplified-input/**"):
             builder.save_simplified_number("lifespan", "8")
         assert parse_qs(pending[0].request.post_data)["recomputation"] == ["true"]
-        builder.close_result_panel()
-        expect(page.locator("#result-block")).to_have_css("display", "none")
+        for index in range(2):
+            expect(close_controls.nth(index)).to_be_disabled()
         route = pending.pop()
         route.fulfill(response=route.fetch())
+        page.unroute("**/edit-simplified-input/**")
         wait_for_htmx_idle(page)
+        expect(page.get_by_role("button", name="Close results")).to_be_enabled()
+        builder.close_result_panel()
         expect(page.locator("#result-block")).to_be_empty()
         assert page.locator("#panel-result-btn").evaluate("panel => panel.style.height") == ""
         expect(page.locator("#btn-open-panel-result")).to_be_visible()
@@ -727,6 +765,7 @@ class TestInlineBookmarks:
         builder.add_model_by_duplication()
         builder.open_simplified_inputs()
         builder.switch_to_model(0)
+        builder.open_simplified_inputs()
         expect(builder.simplified_workspace).to_have_attribute("data-slot", "0")
         builder.switch_to_model(1)
         expect(builder.simplified_workspace).to_have_attribute("data-slot", "1")
@@ -847,7 +886,7 @@ class TestInlineBookmarks:
         page.unroute("**/edit-simplified-input/**")
         click_and_wait_for_htmx(page, page.locator("#show-results-toolbar-btn"))
         expect(page.locator("#result-block")).not_to_be_empty()
-        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        wait_for_htmx_idle(page)
         panel_height = page.locator("#panel-result-btn").evaluate("el => el.getBoundingClientRect().height")
         canvas_height = page.locator("#model-builder-page").evaluate("el => el.getBoundingClientRect().height")
         assert abs(panel_height - canvas_height) < 1

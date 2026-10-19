@@ -113,11 +113,12 @@ class TestSimplifiedViews:
         session["simplified_inputs_opening_ids"] = [model.system.efootprint_id]
         session.save()
         first = client.get("/model_builder/", HTTP_HX_REQUEST="true").content.decode()
-        assert 'data-opening-default="simplified"' in first
+        assert 'data-view="simplified"' in first
         assert "Opening help" in first
         assert "simplified_inputs_opening_ids" not in client.session
         again = client.get("/model_builder/", HTTP_HX_REQUEST="true").content.decode()
-        assert "data-opening-default" not in again
+        assert 'data-view="modeling"' in again
+        assert 'data-view="simplified"' not in again
 
     def patch_bookmarks(self, client, patch, mounted, trigger=None):
         headers = {"HTTP_HX_TRIGGER": trigger} if trigger else {}
