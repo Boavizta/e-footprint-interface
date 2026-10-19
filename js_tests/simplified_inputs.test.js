@@ -13,7 +13,7 @@ function mount(fixture = "simplified_configure") {
     const workspace = document.querySelector("[data-simplified-workspace]");
     const target = document.createElement("div");
     target.dataset.simplifiedTarget = "0";
-    target.dataset.systemId = "test";
+    target.dataset.view = "modeling";
     workspace.replaceWith(target);
     target.appendChild(workspace);
     const dialog = document.querySelector("dialog");

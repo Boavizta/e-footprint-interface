@@ -52,7 +52,7 @@ function createWorkspace() {
             }
         });
         const target = targetForActiveModel();
-        if (target) setBaseView(target.dataset.view || "modeling");
+        if (target) setBaseView(target.dataset.view);
     }
     function blockWhileDirty(event) {
         if (configureForm()?.dataset.dirty !== "true") return;

@@ -189,7 +189,7 @@ class TestSimplifiedInputs:
         builder.add_model_by_duplication()
         if configure:
             open_simplified(page)
-        system_id = page.locator('[data-simplified-target="1"]').get_attribute("data-system-id")
+        system_id = page.locator('[data-model-canvas="1"]').get_attribute("data-system-id")
         url = "**/simplified-inputs/?configure=1" if configure else "**/simplified-inputs/"
         pending = []
         page.route(url, lambda route: pending.append(route))

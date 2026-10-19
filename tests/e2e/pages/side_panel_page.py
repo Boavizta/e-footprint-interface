@@ -193,14 +193,10 @@ class SidePanelPage:
 
     def remove_dict_membership(self, group_name: str):
         """Remove a group membership from a device edit panel."""
-        from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
         row = self.panel.locator(f"[data-dict-membership-name='{group_name}']").first
         # The helper waits for swapped controls to be processed before clicking.
         click_and_wait_for_htmx(self.page, row.locator("button.unlink-btn").first)
-        self.page.wait_for_function(
-            "() => document.querySelector('.htmx-request') === null",
-            timeout=2000,
-        )
+        wait_for_htmx_idle(self.page)
         return self
 
     def add_list_membership(self, parent_name: str):
