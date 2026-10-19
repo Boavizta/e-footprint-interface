@@ -80,9 +80,10 @@ explicit Save or Discard does not continue the export. A clean Configure screen 
 Entering Simplified inputs, Configure or Discard runs the ordinary side-panel discard-confirmation helper, closes the
 side panel, switches the view at once and sends one read into the slot. The slot shows its previous content, or nothing on
 first entry, until the response replaces it. The slot declares <code>hx-sync="this:replace"</code>, so a repeated entry
-aborts the earlier read and the last one wins. The Configure form declares no <code>hx-sync</code> and inherits that
-rule, so a Save and a read replace each other: a Discard read sent while a Save runs aborts the Save in the browser,
-although the server may still commit it. A read that lands after the user moved on lands in its own slot and is
+aborts the earlier read and the last one wins. The Configure form inherits that rule, so a Save and a read would
+replace each other. Its Save therefore locks every enabled button except the <code>data-workspace-read</code> reading
+controls, like other saves: exits, Cancel and the dialog's Save/Discard/Stay stay disabled until the response lands. The
+dialog can still open from a link or the non-button Show results control, but no Discard can be sent during the Save. A read that lands after the user moved on lands in its own slot and is
 shown on the next visit to that model, Configure included. A read answered by an error leaves its slot empty or stale,
 visibly; nothing retries it.</p>
 <h3 id="tab-roles-and-ordering">Tab roles and ordering</h3>

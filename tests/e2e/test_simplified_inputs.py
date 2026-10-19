@@ -270,6 +270,8 @@ class TestSimplifiedInputs:
         expect(workspace.locator("[data-configure-form]")).to_have_attribute("data-dirty", "true")
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
         page.get_by_role("button", name="Go back", exact=True).click()
+        expect(workspace.get_by_role("button", name="Cancel", exact=True)).to_be_enabled()
+        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
         downloads, requests = [], []
         page.on("download", lambda download: downloads.append(download))
         page.on("request", lambda request: requests.append(request.url))
@@ -402,7 +404,10 @@ class TestSimplifiedInputs:
         page.route("**/save-simplified-inputs/", lambda route: pending.append(route))
         workspace.get_by_role("button", name="Save and return").click()
         page.wait_for_function("() => document.querySelector('[data-configure-form].htmx-request') !== null")
-        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
+        toggle = page.locator('[data-action="simplified-mode"]')
+        expect(toggle).to_be_disabled()
+        expect(workspace.get_by_role("button", name="Cancel", exact=True)).to_be_disabled()
+        expect(page.locator('[data-action="simplified-exit-discard"]')).to_be_disabled()
         expect(workspace.locator("[data-field-help]").first).to_be_enabled()
         workspace.get_by_role("button", name="Collapse all").click()
         expect(workspace.locator("[data-simplified-group]").first).not_to_have_attribute("open", "")
@@ -415,6 +420,8 @@ class TestSimplifiedInputs:
         assert len(pending) == 1
         pending.pop().continue_()
         expect(workspace).to_have_attribute("data-mode", "simplified")
+        expect(toggle).to_be_enabled()
+        expect(workspace.get_by_role("button", name="Configure", exact=True)).to_be_enabled()
 
     @pytest.mark.parametrize("destination", ["results", "file", "compare", "model"])
     def test_dirty_configure_protects_every_shared_exit(self, minimal_complete_model_builder, destination):
