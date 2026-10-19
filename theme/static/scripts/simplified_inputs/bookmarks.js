@@ -116,6 +116,8 @@ function registerBookmarks() {
         }
     });
     document.body.addEventListener("htmx:afterSettle", event => {
+        // Only a request's own target scrolls: out-of-band summaries of other open bookmarks settle too.
+        if (event.target !== event.detail.target) return;
         const bookmark = event.target.closest("[data-bookmark]");
         if (bookmark?.open) bookmark.querySelector("[data-bookmark-content]").scrollIntoView({block: "nearest"});
     });

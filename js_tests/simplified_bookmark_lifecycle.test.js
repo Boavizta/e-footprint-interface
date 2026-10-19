@@ -68,3 +68,16 @@ test.each([
         expect(settings()).toEqual(expected);
     }
 });
+
+test("only the lazily loaded controls scroll their open bookmark into view", () => {
+    mount("simplified_bookmarks");
+    const [trigger, other] = document.querySelectorAll("[data-bookmark]");
+    trigger.open = other.open = true;
+    const settle = (element, target) => element.dispatchEvent(
+        new CustomEvent("htmx:afterSettle", {bubbles: true, detail: {xhr: {}, target}}));
+    settle(other.querySelector("summary"), document.body);
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+    const controls = trigger.querySelector(`#${trigger.id}-controls`);
+    settle(controls, controls);
+    expect(Element.prototype.scrollIntoView.mock.contexts).toEqual([trigger.querySelector("[data-bookmark-content]")]);
+});
