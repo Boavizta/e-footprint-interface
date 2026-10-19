@@ -866,9 +866,11 @@ class TestInlineBookmarks:
         value.focus()
         power.focus()
         expect(power).to_be_enabled()
+        # Retyping the committed value fires no change event, so neither blur sends a save.
         value.fill("7")
         value.fill("8")
         value.press("Tab")
+        assert pending == [] and len(saves) == 1
         page.evaluate("""() => {
             window.reportedValidity = 0;
             const report = HTMLFormElement.prototype.reportValidity;
