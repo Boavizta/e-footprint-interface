@@ -757,6 +757,13 @@ class TestInlineBookmarks:
             with page.expect_response("**/edit-simplified-input/**"):
                 builder.save_simplified_number("lifespan", "9")
             expect(status).to_have_text("Saved")
+            # An unanswered request after a saved outcome must not replay that outcome.
+            page.route("**/edit-simplified-input/**", lambda route: route.abort("failed"))
+            with page.expect_event("requestfailed"):
+                builder.save_simplified_number("lifespan", "10")
+            expect(status).not_to_have_class(re.compile(r"\bhtmx-request\b"))
+            expect(status).to_have_text("")
+            page.unroute("**/edit-simplified-input/**")
 
     def test_simple_autosave_deduplicates_restores_rejected_field_and_refreshes_results(self, minimal_complete_model_builder):
         from urllib.parse import parse_qsl, urlencode

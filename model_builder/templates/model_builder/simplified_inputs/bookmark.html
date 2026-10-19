@@ -1,4 +1,4 @@
-<details class="simplified-bookmark" id="{{ field.dom_id }}" name="simplified-bookmarks-{% if field.lazy %}sources{% else %}panel{% endif %}" data-bookmark data-workspace-editor
+<details class="simplified-bookmark" id="{{ field.dom_id }}" name="simplified-bookmarks-{% if field.lazy %}sources{% else %}panel{% endif %}" data-bookmark
          data-owner-id="{{ field.address.object_id }}" data-attribute="{{ field.address.attribute|default:field.attribute }}"
          {% if field.provisional_owner %}data-provisional-owner="{{ field.provisional_owner }}" data-input-id="{{ field.input_id }}"{% else %}
          hx-post="{% url 'patch-simplified-inputs' %}" hx-trigger="bookmark-save" hx-target="#modal-container" hx-swap="none" hx-params="none"{% endif %}

@@ -1,6 +1,6 @@
 <section class="simplified-workspace" data-simplified-workspace data-system-id="{{ system_id }}" data-slot="{{ slot }}" data-mode="{% if configure %}configure{% else %}simplified{% endif %}">
     {% if configure %}
-    <form data-configure-form data-workspace-editor hx-post="{% url 'save-simplified-inputs' %}" hx-target="#simplified-slot-{{ slot }}" hx-swap="innerHTML" hx-params="csrfmiddlewaretoken">
+    <form data-configure-form hx-post="{% url 'save-simplified-inputs' %}" hx-target="#simplified-slot-{{ slot }}" hx-swap="innerHTML" hx-params="csrfmiddlewaretoken">
         {% csrf_token %}
     {% endif %}
     <header class="simplified-header">

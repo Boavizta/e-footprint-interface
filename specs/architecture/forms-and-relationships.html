@@ -93,14 +93,15 @@ empty and explicit zero remain distinct authored inputs.</li>
 <li><code>_apply_metadata(obj, parsed_value, available_sources, pending_sources)</code> — sets <code>source</code>, <code>confidence</code>, and <code>comment</code> on any <code>ExplainableObject</code> from the parsed form dict. Called per-attribute in both create and edit paths.</li>
 </ul>
 <p>Source resolution order: (1) <code>available_sources</code> matched by id (model's existing sources), (2) <code>pending_sources</code> matched by id (sources just minted earlier in the same submission), (3) mint a new <code>Source(name, link, id=submitted_id)</code> and stash it in <code>pending_sources</code>.</p>
-<p><code>pending_sources</code> is a per-submission dict shared across all calls within one create/edit invocation — this lets two fields submitting the same client-generated id resolve to the same <code>Source</code> instance (same-form cross-field source sharing). Metadata is patched only when its key is present: an omitted source, confidence, or comment preserves the existing value. Submitted confidence accepts <code>low</code>, <code>medium</code>, or <code>high</code>; other submitted values clear it to <code>None</code>. The client clears <code>__confidence</code> on value change, and the server honors that explicit clear. <code>available_sources</code> is pre-computed once per request and passed in to avoid O(n×m) recomputation inside the per-attribute loop.</p>
+<p><code>pending_sources</code> is a per-submission dict shared across all calls within one create/edit invocation — this lets two fields submitting the same client-generated id resolve to the same <code>Source</code> instance (same-form cross-field source sharing). Metadata is patched only when its key is present: an omitted source, confidence, or comment preserves the existing value. Submitted confidence accepts <code>low</code>, <code>medium</code>, or <code>high</code>; other submitted values clear it to <code>None</code>. Side-panel forms clear <code>__confidence</code> on value change, and the server honors that explicit clear; Simplified edits keep the confidence. <code>available_sources</code> is pre-computed once per request and passed in to avoid O(n×m) recomputation inside the per-attribute loop.</p>
 <p>Replacement values inherit the current input's label and omitted provenance before <code>_apply_metadata()</code>
 patches submitted keys. Same-value edits patch the existing object directly because <code>ModelingUpdate</code> skips
 equal values. These metadata changes stay on the request-local graph until the entire edit succeeds and is persisted.</p>
 <p>The source editor displays the automatic-replacement source on inputs that already carry it, excluding it from
 other inputs' manual choices. Comments have no editor length cap so repeated replacement history can be viewed and
 resubmitted intact. When a user changes an input value in a normal or Simplified editor, a hypothesis or automatic-replacement
-source becomes user data; existing comments remain as history.</p>
+source becomes user data; existing comments remain as history. Side panels rewrite the hidden source inputs in the
+browser; Simplified saves, including the focused timeseries panel, apply the rule in <code>EditSimplifiedInputUseCase</code>.</p>
 <h2 id="relationship-types">Relationship types</h2>
 <h3 id="list-based-children-standard-pattern">List-based children (standard pattern)</h3>
 <p>Most parent-child relationships use <code>List[ChildType]</code> constructor parameters. Managed via:</p>

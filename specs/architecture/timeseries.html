@@ -72,7 +72,8 @@ surface and hides sibling previews, so forms with several recurrent quantities n
 <p>Selected timeseries fields render their string preview and ordinary source/confidence/comment disclosure;
 metadata autosaves through the same selected-input endpoint. Edit timeseries loads only the selected field into
 <code>simplified_inputs/timeseries_panel.html</code>, using ordinary singleton panel field IDs and the existing
-builder parser. The panel edits value only, so omitted provenance retains the latest accepted metadata.
+builder parser. The panel edits value only, so omitted provenance retains the latest accepted metadata, except that a changed
+value's hypothesis or automatic-replacement source becomes user data.
 A rejected value or provenance autosave in the selected field restores that field from accepted repository state and
 marks it Not saved. A rejected Save from this panel also closes the panel after its accepted field is restored, so its
 timeseries draft is discarded. Cancel discards a normal panel draft, and model switching uses the shared side-panel

@@ -1,8 +1,9 @@
 {% extends "model_builder/side_panels/side_panel_structure.html" %}
 {% block panel_body %}
-<form id="sidePanelForm" data-simplified-timeseries data-workspace-editor autocomplete="off"
+<form id="sidePanelForm" data-simplified-timeseries autocomplete="off"
       hx-post="{% url 'edit-simplified-input' address.object_id address.attribute %}" hx-swap="none"
       hx-vals='js:{...recomputationVals()}' hx-indicator="#{{ status_id }}, [data-quick-total-status]"
+      hx-on::before-request="document.getElementById('{{ status_id }}').replaceChildren()"
       hx-on::after-request="if (event.detail.elt === this) closeAndEmptySidePanel()">
     {% csrf_token %}
     <input type="hidden" name="timeseries" value="true">

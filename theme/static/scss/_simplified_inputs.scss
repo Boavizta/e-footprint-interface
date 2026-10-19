@@ -19,6 +19,7 @@
   .simplified-header h1 { margin: 0; font-weight: 650; }
   .simplified-input-count { margin: .2rem 0 0; color: #526177; font-size: .9rem; }
   .simplified-guidance { margin: .2rem 0 1.25rem; line-height: 1.5; }
+  [data-simplified-notice]:empty { margin: 0; }
   .simplified-header-actions { justify-content: flex-end; }
   .simplified-description { max-width: 52rem; margin-bottom: 1rem; }
   .simplified-description label { margin-top: .5rem; }
@@ -55,9 +56,9 @@
   [data-simplified-save-status] { display: block; margin-top: .3rem; color: #69768a; font-size: .72rem; }
   [data-simplified-save-status]:empty:not(.htmx-request) { display: none; }
   [data-simplified-save-status][data-outcome="saved"] { animation: simplified-save-status-fade .3s ease-in 3s forwards; }
-  // A previous outcome stays in the DOM while the next request runs; show only the request text.
-  [data-simplified-save-status].htmx-request { font-size: 0; animation: none; }
-  [data-simplified-save-status].htmx-request::after { content: "Saving…"; font-size: .72rem; }
+  // Each request clears the previous outcome; drop its finished fade so "Saving…" shows.
+  [data-simplified-save-status].htmx-request { animation: none; }
+  [data-simplified-save-status].htmx-request::after { content: "Saving…"; }
   .simplified-selection { display: grid; gap: .3rem; }
   .simplified-selection textarea { min-height: 4rem; }
   &[data-mode="configure"] .simplified-field { padding: .65rem; border: 1px solid #d8dfe8; border-radius: .4rem; }
@@ -80,7 +81,7 @@
 @container (max-width: 500px) {
   .simplified-workspace .simplified-fields { grid-template-columns: minmax(0, 1fr); }
 }
-@keyframes simplified-save-status-fade { to { opacity: 0; } }
+@keyframes simplified-save-status-fade { to { opacity: 0; font-size: 0; margin-top: 0; } }
 [data-quick-total-status].htmx-request::after { content: "Updating…"; }
 #simplified-exit-dialog {
   border: 1px solid #dae4df;

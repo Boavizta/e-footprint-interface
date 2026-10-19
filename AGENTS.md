@@ -51,7 +51,7 @@ npm run jest                                 # JS unit tests
 
 ## Frontend assets
 
-Simplified-input client modules live in `theme/static/scripts/simplified_inputs/`; rebuild their bundle with `npm run build:js:dev` after editing. See `specs/conventions.md` for module ownership and listener ordering.
+Simplified-input client modules live in `theme/static/scripts/simplified_inputs/`; rebuild their bundle with `npm run build:js:dev` after editing. See `specs/conventions.md` for module ownership.
 
 Never edit `theme/static/css/bs_main.css` by hand — it is compiled from `theme/static/scss/`. Edit the SCSS source and recompile with `npm run watch` (or a one-shot `npx sass theme/static/scss/main.scss:theme/static/css/bs_main.css --load-path=node_modules/bootstrap/scss`).
 

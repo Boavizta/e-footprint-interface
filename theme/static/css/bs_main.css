@@ -23906,6 +23906,9 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   margin: 0.2rem 0 1.25rem;
   line-height: 1.5;
 }
+.simplified-workspace [data-simplified-notice]:empty {
+  margin: 0;
+}
 .simplified-workspace .simplified-header-actions {
   justify-content: flex-end;
 }
@@ -24090,12 +24093,10 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   animation: simplified-save-status-fade 0.3s ease-in 3s forwards;
 }
 .simplified-workspace [data-simplified-save-status].htmx-request {
-  font-size: 0;
   animation: none;
 }
 .simplified-workspace [data-simplified-save-status].htmx-request::after {
   content: "Saving…";
-  font-size: 0.72rem;
 }
 .simplified-workspace .simplified-selection {
   display: grid;
@@ -24153,6 +24154,8 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 @keyframes simplified-save-status-fade {
   to {
     opacity: 0;
+    font-size: 0;
+    margin-top: 0;
   }
 }
 [data-quick-total-status].htmx-request::after {

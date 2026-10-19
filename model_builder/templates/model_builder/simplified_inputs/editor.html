@@ -1,11 +1,12 @@
 {% load l10n %}
 {% if field.editor.input_type == 'optional_explainable_quantity' or field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' or field.editor.input_type == 'recurrent_timeseries_builder' or field.editor.input_type == 'hourly_quantities_from_growth' %}
-<form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
+<form data-simplified-editor data-value-prefix="{{ field.editor.web_id }}"
       hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
       hx-trigger="change[!!target.name], submit, simplified-provenance:changed, optional-quantity:changed[detail.empty]"
       hx-sync="this:drop" hx-swap="none" hx-vals='js:{...recomputationVals()}'
       hx-indicator="#{{ field.dom_id }}-save-status, [data-quick-total-status]"
       hx-on::validation:halted="this.reportValidity()"
+      hx-on::before-request="document.getElementById('{{ field.dom_id }}-save-status').replaceChildren()"
       hx-disabled-elt="button:not(:disabled), [data-simplified-workspace] input:not(:disabled), [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)">
     {% csrf_token %}
     {% with editor=field.editor %}
