@@ -23,6 +23,10 @@ Prefer existing controls or explicit user actions when the extra effort is negli
 additional coordination. State unverified usage assumptions; rare but consequential correctness needs
 still deserve protection.
 
+Guards block; they do not suspend and replay. When an unsaved draft or a confirmation stops an action,
+the user resolves it and repeats the action. Do not store the interrupted intent to resume it afterwards:
+that convenience is rarely used and costs state, listeners and ordering rules.
+
 Code simplicity supports maintenance but does not establish environmental savings. Consider runtime
 work, computation, storage and transfers separately when relevant, and ground resource-impact claims
 in evidence.

@@ -61,29 +61,43 @@
   <ul>
     <li>A Simplified-input value or provenance edit shows <em>Saving…</em>, sends one request, and then
     shows <em>Saved</em> with the accepted value, or <em>Not saved</em> with the accepted value restored
-    when the server rejects it. A transport failure also shows <em>Not saved</em>. In every case the
+    when the server rejects it. In every case the
     locked controls become usable again and prerequisite-disabled controls stay disabled.</li>
     <li>Changing a bookmark's membership or help updates every visible bookmark for the affected field
-    and its companions, shows <em>Saved</em> or <em>Not saved</em>, and offers Undo after a membership
-    change.</li>
-    <li>Leaving a dirty Configure screen offers Save, Discard and Stay. Save continues to the chosen
-    destination only after the save succeeds; a rejected save leaves the draft visible and does not
-    navigate. Discard loads the saved view before continuing. Stay keeps the draft.</li>
+    and its companions, and shows <em>Saved</em> or <em>Not saved</em>.</li>
+    <li>Leaving a dirty Configure screen offers Save, Discard and Stay. Save and Discard show the saved
+    view; a rejected save leaves the draft visible. Stay keeps the draft. The navigation that opened the
+    dialog is not resumed in any case: the user repeats it.</li>
     <li>Switching models, Results, Compare, exports and the Results panel keep their current rules,
     including the save-aware export boundary.</li>
     <li>Jest, Python and E2E suites pass.</li>
   </ul>
   <h3>Accepted changes</h3>
   <ul>
-    <li>A saved-view read that finishes after the user switched models renders into the hidden slot.
-    Nothing is visible; the next visit to that model shows its remembered view. If the pending read was
-    a Configure screen, it is discarded on arrival instead of being parked, and the user clicks
-    Configure again on return. No edits exist at that point, since the form had not rendered. A dirty
-    Configure draft keeps today's Save, Discard and Stay gating on every exit, including model switches.</li>
+    <li>Entering Simplified inputs, Configure or Discard switches the view at once; the slot shows its
+    previous content, or nothing on first entry, until the fresh read replaces it. A read that finishes after
+    the user moved on (model switch or another destination) lands in its slot; the next visit to that model
+    shows what landed, including a Configure screen. A dirty Configure draft keeps Save, Discard and Stay
+    gating on every exit, including model switches.</li>
     <li>A help text whose save failed is replaced by the next successful bookmark response for that
     field instead of being preserved as a draft.</li>
-    <li>Retyping a value back to its original sends a harmless save instead of being suppressed.</li>
     <li>The <em>Saved</em> text fades after a few seconds through a style rule rather than a timer.</li>
+    <li>An invalid draft (empty required value, out-of-range number) is refused before any request with the
+    browser's own validation message instead of a scripted <em>Not saved</em>.</li>
+    <li>Rare edges are accepted rather than scripted around: a control already locked by another request is
+    released when that request ends, a moment before a field save finishes; closing Results during a Sankey
+    load may log one chart warning; a read answered by a server error leaves its slot empty or stale, visibly,
+    so the error gets reported and fixed.</li>
+    <li>A request that gets no response (connection lost, timeout) leaves the field or bookmark status empty
+    once the request ends, instead of showing <em>Not saved</em>. The server renders every outcome it knows;
+    reporting an unanswered request is the shared concern parked in
+    <a href="../../backlog/network-interruption-message/problem.md">network-interruption-message</a>.</li>
+    <li>No exit resumes the navigation it interrupted. Today Save and Discard continue to the destination
+    the user had clicked once the saved view is in place; after this feature they only show the saved view,
+    and the user clicks the destination again. A clean Configure screen is no longer replaced by the saved
+    view before an exit, so a model switch leaves it in its slot and shows it again on return.</li>
+    <li>The bookmark Undo button is removed. It sat beside the membership toggle it reverted, so re-clicking
+    the toggle does the same job without an inverse patch travelling with every response.</li>
     <li>Both Results close controls are unavailable while a save runs. On touch devices, a swipe-down
     during a save still closes the panel, and a late refresh may re-fill it; the user closes it again.</li>
   </ul>
@@ -95,7 +109,8 @@
     <li>The conventions document states this rule as an explicit prohibition, not a preference: feature
     code must not coordinate swap or settle ordering, must not keep client copies of server-owned state,
     and follows the HTMX philosophy that the server is the source of truth and the rendered fragment is
-    the state. The architecture and testing pages say the same where they describe request handling,
+    the state. It also states that server failures are shown, not softened: no client state, listener or
+    fallback exists only to hide a hypothetical failure or to order concurrent requests. The architecture and testing pages say the same where they describe request handling,
     and no longer present settle ordering as something feature code coordinates.</li>
     <li>Jest tests for Simplified inputs assert visible outcomes, not event sequences.</li>
   </ul>
@@ -113,7 +128,7 @@
       <li>Simplified-input field saves: the server renders the post-save field, including its status
       text; the browser keeps no copy of saved values and no request bookkeeping.</li>
       <li>Bookmark membership and help saves: the server answers with rendered bookmark fragments for
-      every affected field instead of data the browser reconciles by hand; Undo is rendered the same way.</li>
+      every affected field instead of data the browser reconciles by hand.</li>
       <li>Saved-view reads and Configure exits use HTMX's own request replacement and completion
       signal; the accepted parking and dropping behaviour above replaces manual cancellation.</li>
       <li>Locked controls during a field save exclude controls that were already disabled, removing
@@ -204,13 +219,22 @@
 
 <section>
   <h2>6. Open questions</h2>
-  <p>None remaining. Two questions were resolved on 2026-10-19 and are recorded above as accepted changes:</p>
+  <p>None remaining. Eight questions were resolved on 2026-10-19 and are recorded above as accepted changes:</p>
   <ul>
     <li>The Results panel close keeps no wait. The chevron becomes a button so the existing save lock
     covers it; the touch swipe remains an accepted edge case.</li>
     <li>A help draft whose save failed is overwritten by the next successful bookmark response. The
     failure was already reported, and preserving the draft would reintroduce client-side reconciliation
     inside a swap.</li>
+    <li>Bookmark Undo is removed during plan review (PLAN-UPDATE-01): the toggle next to it already reverts the
+    change, and dropping it removes the inverse-patch computation and its request flag.</li>
+    <li>No client-side "Not saved" fallback for unanswered requests (PLAN-UPDATE-04): it would duplicate the
+    parked shared network message for one feature, and the server already answers every other failure.</li>
+    <li>Exits do not resume the interrupted navigation (PLAN-UPDATE-05). Guards block and the user repeats
+    the action; the rule is recorded in the mission's eco-design section so later features follow it.</li>
+    <li>Server failures are visible, not softened (PLAN-UPDATE-06): a conventions rule; the field editor is
+    declarative and <code>field_edits.js</code> is removed (PLAN-UPDATE-07); entering a view switches on
+    click, not on arrival (PLAN-UPDATE-08).</li>
   </ul>
 </section>
 

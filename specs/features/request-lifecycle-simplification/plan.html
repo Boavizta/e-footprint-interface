@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Request lifecycle simplification — Implementation plan (draft)</title>
+<title>Request lifecycle simplification — Implementation plan</title>
 <style>
   :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
     --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
@@ -126,7 +126,7 @@
       <li><a href="#exits">1.4 · Saved-view reads and Configure exits</a></li>
       <li><a href="#results">1.5 · Results panel close</a></li>
     </ol>
-    <p><a href="#delivery">Delivery &amp; verification</a> · <a href="#decisions">Decisions for review</a></p>
+    <p><a href="#delivery">Delivery &amp; verification</a> · <a href="#decisions">Decisions</a></p>
   </nav>
   <section id="modules">
     <h2>Changed files</h2>
@@ -139,59 +139,84 @@
           <ul>
             <li id="file-base" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/templates/base.html:14:1" data-review-source-href="../../../theme/templates/base.html#L14:1"><code>templates/base.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#platform">1.1</a></span><small>Declare the HTMX configuration meta tag beside the library script.</small></li>
-            <li id="file-field-edits" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L1:1"><code>scripts/simplified_inputs/field_edits.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a></span><small>Drop saved snapshots, request maps and status timers; keep edit triggers, dirty flags and one transport-failure handler.</small></li>
+            <li id="file-index-js" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L1:1"><code>scripts/simplified_inputs/index.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Compose workspace, configuration and bookmarks only; the export notice writes into the rendered holder.</small></li>
+            <li id="file-field-edits" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L1:1"><code>scripts/simplified_inputs/field_edits.js</code></a> <span data-change="removed">Removed</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Every job it did is an HTMX attribute, a server render or a browser default.</small></li>
             <li id="file-bookmarks" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L1:1"><code>scripts/simplified_inputs/bookmarks.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Remove the JSON reconciler; keep creation-time locks and patch assembly.</small></li>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Remove the JSON reconciler, lock refresh and Undo handler; send the mounted-instance list; keep creation-time authoring.</small></li>
             <li id="file-workspace" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L1:1"><code>scripts/simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#exits">1.4</a></span><small>Promise-based reads, one completion listener for Configure Save, hidden-slot cleanup on switch.</small></li>
-            <li id="file-main-js" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>scripts/model_builder_main.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a></span><small>Remove the disabled-state snapshot and restore block.</small></li>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Reads switch the view and send; the dirty gate only blocks; no pending-read, pending-exit or replay state.</small></li>
+            <li id="file-main-js" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>scripts/model_builder_main.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Remove the disabled-state snapshot and restore block.</small></li>
             <li id="file-hammer" data-steps="results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:47:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L47:1"><code>scripts/hammer_utils.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#results">1.5</a></span><small>Remove the close wait and its request tracking; closing empties the panel immediately.</small></li>
-            <li id="file-scss" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/custom.scss:1:1" data-review-source-href="../../../theme/static/scss/custom.scss#L1:1"><code>scss/custom.scss</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a></span><small>Fade rule for the server-rendered Saved status and the totals indicator text.</small></li>
+              <span data-reading-links><a href="#results">1.5</a></span><small>Remove the close wait and its request tracking; closing empties the panel at once.</small></li>
+            <li id="file-scss" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/_simplified_inputs.scss:55:1" data-review-source-href="../../../theme/static/scss/_simplified_inputs.scss#L55:1"><code>scss/_simplified_inputs.scss</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>"Saving…" and "Updating…" through HTMX's request class; fade rule for the server-rendered Saved status.</small></li>
           </ul>
         </details>
         <details open>
           <summary>model_builder/templates/model_builder/</summary>
           <ul>
-            <li id="file-editor" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1"><code>simplified_inputs/editor.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a></span><small>Exclude disabled controls from the lock, render status text, add the totals indicator.</small></li>
+            <li id="file-editor" data-steps="platform field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1"><code>simplified_inputs/editor.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a> · <a href="#field-save">1.2</a></span><small>Declarative triggers, sync, values, validation message and indicator; lock selector skips disabled controls; status rendered with its outcome.</small></li>
             <li id="file-field" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/field.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/field.html#L1:1"><code>simplified_inputs/field.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a></span><small>Carry the save outcome into the replacement fragment.</small></li>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Passes the <code>outcome</code> through to the editor include.</small></li>
+            <li id="file-workspace-tpl" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/workspace.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/workspace.html#L6:1"><code>simplified_inputs/workspace.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Rendered notice holder in the saved-view header.</small></li>
+            <li id="file-timeseries-panel" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html#L3:1"><code>simplified_inputs/timeseries_panel.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Closes itself after its request; Cancel is a plain <code>onclick</code>; indicator names the field status.</small></li>
+            <li id="file-bookmark" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark.html#L1:1"><code>simplified_inputs/bookmark.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Stable ids on the summary and on a controls container in both branches; status indicator.</small></li>
             <li id="file-bookmark-controls" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L1:1"><code>simplified_inputs/bookmark_controls.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Out-of-band variant with status and rendered Undo patch.</small></li>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Status extracted into <code>bookmark_status.html</code> with id and rendered outcome; Undo button removed.</small></li>
+            <li id="file-bookmark-update" data-steps="bookmarks"><a href="#file-bookmark-update"><code>simplified_inputs/bookmark_update.html</code></a> <span data-change="new">New</span>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Out-of-band summary and controls for one mounted bookmark instance.</small></li>
             <li id="file-main-html" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L19:1"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#exits">1.4</a></span><small>Request replacement on the slot targets.</small></li>
             <li id="file-result-panel" data-steps="results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L8:1"><code>result/result_panel.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#results">1.5</a></span><small>The close chevron becomes a button so the existing save lock covers it.</small></li>
+              <span data-reading-links><a href="#results">1.5</a></span><small>The close chevron becomes a labelled button so the existing save lock covers it.</small></li>
           </ul>
         </details>
         <details open>
-          <summary>model_builder/adapters/</summary>
+          <summary>model_builder/adapters/ · application/</summary>
           <ul>
-            <li id="file-presenter" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>presenters/simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a> · <a href="#bookmarks">1.3</a></span><small>Pass the save outcome to field fragments; render bookmark fragments.</small></li>
-            <li id="file-views" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>views/views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#field-save">1.2</a> · <a href="#bookmarks">1.3</a></span><small>Bookmark patch answers with HTML fragments; rejected saves carry the outcome.</small></li>
+            <li id="file-presenter" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>presenters/simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Render the submitted field's outcome and the repair notice as fragments; drop the <code>simplifiedInputSaved</code> trigger.</small></li>
+            <li id="file-views" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:75:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L75:1"><code>views/views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a> · <a href="#bookmarks">1.3</a></span><small>Edit paths pass the submitted address with its outcome; the bookmark patch answers with HTML fragments for mounted instances and a status fragment on rejection; the timeseries panel receives its status id.</small></li>
+            <li id="file-usecase" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:33:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L33:1"><code>application/use_cases/simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>A changed value whose source is a generated sentinel becomes user data.</small></li>
           </ul>
         </details>
         <details open>
-          <summary>specs/ · tests</summary>
+          <summary>specs/ · CHANGELOG.md</summary>
           <ul>
-            <li id="file-conventions" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:24:1" data-review-source-href="../../../specs/conventions.md#L24:1"><code>specs/conventions.md</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#platform">1.1</a></span><small>Request-handling rule; drop "listener order is part of mutation settlement".</small></li>
-            <li id="file-rendering" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:60:1" data-review-source-href="../../../specs/architecture/rendering.html#L60:1"><code>specs/architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#platform">1.1</a></span><small>Settlement is synchronous; remove ordering caveats.</small></li>
+            <li id="file-mission" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/mission.md:26:1" data-review-source-href="../../../specs/mission.md#L26:1"><code>specs/mission.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Guards block; they do not suspend and replay.</small></li>
+            <li id="file-conventions" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:26:1" data-review-source-href="../../../specs/conventions.md#L26:1"><code>specs/conventions.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>One request-handling rule: server is the source of truth, its failures are visible; module list without <code>field_edits.js</code>.</small></li>
+            <li id="file-rendering" data-steps="platform results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:32:1" data-review-source-href="../../../specs/architecture/rendering.html#L32:1"><code>specs/architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a> · <a href="#results">1.5</a></span><small>Results close, field-save disabling, independent actions, repair-notice and bundle-order paragraphs rewritten.</small></li>
             <li id="file-workspace-doc" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>specs/architecture/workspace.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#exits">1.4</a></span><small>Pending-read and continuation paragraphs replaced by the accepted parking rule.</small></li>
-            <li id="file-testing" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:189:1" data-review-source-href="../../../specs/testing.md#L189:1"><code>specs/testing.md</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#platform">1.1</a></span><small>Export-timing guidance reworded for one completion signal.</small></li>
-            <li id="file-jest" data-steps="field-save bookmarks exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:1:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L1:1"><code>js_tests/simplified_inputs.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_bookmark_lifecycle.test.js:1:1" data-review-source-href="../../../js_tests/simplified_bookmark_lifecycle.test.js#L1:1"><code>simplified_bookmark_lifecycle.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:1:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L1:1"><code>model_builder_main.test.js</code></a> <span data-change="modified">Modified</span>
-              <small>Outcome-based rewrite; remove event-sequence fixtures.</small></li>
-            <li id="file-e2e" data-steps="field-save bookmarks exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:1:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L1:1"><code>tests/e2e/test_simplified_inputs.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/utils.py:1:1" data-review-source-href="../../../tests/e2e/utils.py#L1:1"><code>utils.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:1:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L1:1"><code>pages/model_builder_page.py</code></a> <span data-change="modified">Modified</span>
-              <small>Probe status text and disabled state instead of lock markers.</small></li>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Pending-read, continuation and parking paragraphs replaced by the accepted rules.</small></li>
+            <li id="file-forms-doc" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:71:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L71:1"><code>specs/architecture/forms-and-relationships.html</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/runtime-and-recovery.html:51:1" data-review-source-href="../../../specs/architecture/runtime-and-recovery.html#L51:1"><code>runtime-and-recovery.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Drop the bookmark Undo sentences.</small></li>
+            <li id="file-testing" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:173:1" data-review-source-href="../../../specs/testing.md#L173:1"><code>specs/testing.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Settling classes never persist; assert rendered outcomes, not lifecycle sequences; no membership Undo.</small></li>
+            <li id="file-changelog" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
+              <small>One Changed entry for the production behaviour trades, including the Undo removal.</small></li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests</summary>
+          <ul>
+            <li id="file-jest" data-steps="field-save bookmarks exits results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:1:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L1:1"><code>js_tests/simplified_inputs.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_bookmark_lifecycle.test.js:1:1" data-review-source-href="../../../js_tests/simplified_bookmark_lifecycle.test.js#L1:1"><code>simplified_bookmark_lifecycle.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:195:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L195:1"><code>model_builder_main.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py:637:1" data-review-source-href="../../../js_tests/build_fixtures.py#L637:1"><code>build_fixtures.py</code></a> <span data-change="modified">Modified</span>
+              <small>Field-save cases removed with their module; bookmark and workspace cases rewritten around payloads and the gate; editor fixture gains an outcome case.</small></li>
+            <li id="file-view-tests" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py:121:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L121:1"><code>tests/unit_tests/adapters/views/test_views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <small>Bookmark patch assertions move from JSON to fragments; outcome, notice fragment, resent provenance and the user-data rule covered.</small></li>
+            <li id="file-e2e" data-steps="field-save bookmarks exits results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:139:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L139:1"><code>tests/e2e/test_simplified_inputs.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/utils.py:6:1" data-review-source-href="../../../tests/e2e/utils.py#L6:1"><code>utils.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:422:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L422:1"><code>pages/model_builder_page.py</code></a> <span data-change="modified">Modified</span>
+              <small>Probe status text, disabled state and the request class instead of lock markers and settling classes; exits do not resume.</small></li>
           </ul>
         </details>
       </details>
@@ -201,232 +226,492 @@
 
 <main id="main">
   <header>
-    <p>Plan · draft from kickoff · 2026-10-19</p>
+    <p>Plan · reviewed 2026-10-19 · ready for spec-tasks</p>
     <h1>Request lifecycle simplification — implementation plan</h1>
-    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/request-lifecycle-simplification/spec.html" data-review-source-href="spec.html">Spec under review</a> · <a href="#modules">Changed files</a></p>
-    <aside data-note>
-      <p><strong>Draft.</strong> This plan captures design decisions reached while analysing the current code during
-      the kickoff conversation, including facts verified against the vendored HTMX 2.0.6. It is refined, not rewritten,
-      in the <code>spec-plan</code> stage after the spec is approved.</p>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/request-lifecycle-simplification/spec.html" data-review-source-href="spec.html">Approved spec</a> · <a href="#modules">Changed files</a></p>
+    <aside id="plan-updates" data-note="review">
+      <p><strong>Plan updates</strong></p>
+      <p><a href="#plan-update-01">[PLAN-UPDATE-01] Bookmark Undo removed — ACCEPTED</a></p>
+      <p><a href="#plan-update-02">[PLAN-UPDATE-02] Retyping the original value stays suppressed — ACCEPTED</a></p>
+      <p><a href="#plan-update-03">[PLAN-UPDATE-03] Late reads also land after same-model destinations — ACCEPTED</a></p>
+      <p><a href="#plan-update-04">[PLAN-UPDATE-04] No client "Not saved" fallback for unanswered requests — ACCEPTED</a></p>
+      <p><a href="#plan-update-05">[PLAN-UPDATE-05] Exits do not resume the interrupted navigation — ACCEPTED</a></p>
+      <p><a href="#plan-update-06">[PLAN-UPDATE-06] Server failures are visible, not softened — ACCEPTED</a></p>
+      <p><a href="#plan-update-07">[PLAN-UPDATE-07] The field editor is declarative; field_edits.js goes — ACCEPTED</a></p>
+      <p><a href="#plan-update-08">[PLAN-UPDATE-08] Entering a view switches on click, not on arrival — ACCEPTED</a></p>
     </aside>
   </header>
 
   <section id="walkthrough">
     <h2>1. Follow the interactions through the code</h2>
-    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code>.</p>
+    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code>. Snippets are sketches of the contract, not final code.</p>
 
     <article id="platform" data-step>
       <h3><a href="#platform">1.1 · Platform: one completion signal</a></h3>
-      <p data-files><span>Files</span> <a href="#file-base"><code>theme/templates/base.html</code></a> · <a href="#file-conventions"><code>specs/conventions.md</code></a> · <a href="#file-rendering"><code>specs/architecture/rendering.html</code></a> · <a href="#file-testing"><code>specs/testing.md</code></a></p>
-      <p>Today HTMX fires <code>htmx:afterRequest</code> as soon as the response handler returns, but defers
-      <code>htmx:afterSettle</code> by its default <code>defaultSettleDelay</code> of 20 ms. Verified in the vendored
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/external_librairies/htmx.min.js:1:1" data-review-source-href="../../../theme/static/scripts/external_librairies/htmx.min.js#L1:1"><code>htmx.min.js</code></a> (2.0.6): when
-      the settle delay is zero, the settle step runs synchronously inside the swap, so the order becomes beforeSwap, afterSwap,
-      afterSettle, afterRequest, then resolution of the <code>htmx.ajax</code> promise. That promise resolves after the
-      response is handled for any HTTP status and rejects only on network error, abort or timeout. No project SCSS or template uses
-      the <code>htmx-settling</code> or <code>htmx-added</code> classes that the delay exists to animate.</p>
+      <p data-files><span>Files</span> <a href="#file-base"><code>theme/templates/base.html</code></a> · <a href="#file-editor"><code>simplified_inputs/editor.html</code></a> · <a href="#file-main-js"><code>model_builder_main.js</code></a> · <a href="#file-conventions"><code>specs/conventions.md</code></a> · <a href="#file-rendering"><code>specs/architecture/rendering.html</code></a> · <a href="#file-testing"><code>specs/testing.md</code></a></p>
+      <p><strong>Settle timing.</strong> Verified in the vendored
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/external_librairies/htmx.min.js:1:1" data-review-source-href="../../../theme/static/scripts/external_librairies/htmx.min.js#L1:1"><code>htmx.min.js</code></a> (2.0.6):
+      <code>defaultSettleDelay</code> is 20 ms, and the swap routine runs its settle step inline when the delay is zero. The
+      response handler then releases <code>hx-disabled-elt</code> and indicator classes, fires <code>htmx:afterRequest</code> on the issuing
+      element, and resolves the <code>htmx.ajax</code> promise last. So with the delay at zero the order inside one response is
+      beforeSwap, afterSwap, afterSettle (including <code>HX-Trigger-After-Settle</code> events and out-of-band fragments), lock release,
+      afterRequest, promise. No project SCSS uses the <code>htmx-settling</code> or <code>htmx-added</code> classes the delay exists to
+      animate. HTMX reads the meta tag once at ready time.</p>
       <div data-code>
-        <p data-code-file><a href="#file-base"><code>theme/templates/base.html</code></a> <small>Proposed, next to the HTMX script tag on line 14</small></p>
+        <p data-code-file><a href="#file-base"><code>theme/templates/base.html</code></a> <small>Proposed, in <code>&lt;head&gt;</code> next to the HTMX script tag on line 14</small></p>
         <pre><code>&lt;meta name="htmx-config" content='{"defaultSettleDelay": 0}'&gt;</code></pre>
       </div>
-      <p>Every later section relies on this: <code>htmx:afterRequest</code> on an element now means its DOM result is final,
-      including out-of-band fragments carried by the same response, and the <code>HX-Trigger-After-Settle</code> header fires
-      before it.</p>
-      <p>The rule promoted to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:24:1" data-review-source-href="../../../specs/conventions.md#L24:1"><code>conventions.md</code></a> under JavaScript,
-      replacing the "listener order is part of mutation settlement" clause on
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:26:1" data-review-source-href="../../../specs/conventions.md#L26:1">line 26</a>:</p>
-      <blockquote><strong>The server is the source of truth; the rendered fragment is the state.</strong> Feature JavaScript
-      must not coordinate swap or settle ordering, must not store request objects, and must not keep client copies of
-      server-owned state such as saved values, membership, locks or undo history. HTMX settles synchronously in this project,
-      so <code>htmx:afterRequest</code> on an element means its DOM result is final. Observe completion through that event with
-      <code>event.detail.successful</code>, or through the <code>htmx.ajax</code> promise, and nothing else. Status text, locks
-      and undo affordances are rendered by the server. Client state is limited to drafts not yet submitted, ephemeral view
-      state the server cannot know, and per-browser preferences. Global re-initialisation hooks on <code>htmx:afterSettle</code>
-      for third-party widgets remain allowed; sequencing a feature's own request is not.</blockquote>
-      <p>The architecture pages carry the same statement where they describe request handling, not only the removal of the old
-      caveats: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:60:1" data-review-source-href="../../../specs/architecture/rendering.html#L60:1"><code>rendering.html</code></a>
-      replaces the bundle-order caveat with a short paragraph naming the synchronous settle configuration and the rule above,
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>workspace.html</code></a>
-      states that Simplified-input state after any request is the server fragment, and
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:189:1" data-review-source-href="../../../specs/testing.md#L189:1"><code>testing.md</code></a>
-      rewords the export-timing hold around the single signal and tells test authors to assert rendered outcomes rather than
-      dispatch synthetic lifecycle sequences. Unchanged consumers: the loading bar, the modal
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1"><code>htmx:beforeSwap</code></a> handler that lets error
-      responses swap their out-of-band modal, and the accordion-state preservation in
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:353:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L353:1"><code>model_builder_main.js</code></a>.</p>
-    </article>
-
-    <article id="field-save" data-step>
-      <h3><a href="#field-save">1.2 · Field value or provenance save</a></h3>
-      <p data-files><span>Files</span> <a href="#file-editor"><code>simplified_inputs/editor.html</code></a> · <a href="#file-field"><code>simplified_inputs/field.html</code></a> · <a href="#file-field-edits"><code>field_edits.js</code></a> · <a href="#file-presenter"><code>presenters/simplified_inputs.py</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a> · <a href="#file-main-js"><code>model_builder_main.js</code></a> · <a href="#file-scss"><code>scss/custom.scss</code></a></p>
-      <p><strong>Trigger and lock.</strong> Blur, Enter, select change and provenance events still call
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:18:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L18:1"><code>saveEdit()</code></a>, which triggers the
-      form's <code>simplified-save</code> event. Its unchanged-blur guard no longer compares against the
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L5:1"><code>savedEdits</code></a> snapshot: an
-      <code>input</code> or <code>change</code> listener sets <code>data-dirty</code> on the control and on the form, and
-      <code>saveEdit()</code> returns when the form is not dirty. The lock selector on
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L6:1"><code>editor.html</code></a>
-      excludes controls that are already disabled, so HTMX never has to be corrected afterwards:</p>
+      <p><strong>Lock selector.</strong> HTMX resolves <code>hx-disabled-elt</code> with <code>querySelectorAll</code>, splits the value only on
+      top-level commas, disables each match and reference-counts overlapping requests before releasing. The selector on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L6:1"><code>editor.html</code> line 6</a>
+      skips controls that are already disabled, so HTMX never re-enables a prerequisite-disabled control such as the Compare tab, and the
+      snapshot-and-restore block at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>model_builder_main.js</code> line 361</a>
+      is removed with its two listeners.</p>
       <div data-code>
         <p data-code-file><a href="#file-editor"><code>simplified_inputs/editor.html</code></a> <small>Proposed lock selector</small></p>
         <pre><code>hx-disabled-elt="button:not(:disabled), [data-simplified-workspace] input:not(:disabled),
                 [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)"</code></pre>
       </div>
-      <p>HTMX resolves this attribute with a standard <code>querySelectorAll</code> and reference-counts overlapping requests before
-      releasing, so the snapshot-and-restore block at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>model_builder_main.js</code> line 361</a> is removed, together
-      with the <code>[data-disabled-by-htmx]</code> checks inside
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:18:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L18:1"><code>saveEdit()</code></a> and
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:36:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L36:1"><code>initializeEdits()</code></a>.</p>
-      <p><strong>Payload.</strong> The <code>htmx:configRequest</code> listener at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:96:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L96:1">line 96</a> keeps its two jobs, trimming
-      untouched provenance parameters and preserving multiple-select lists, but decides "untouched" from the control's
-      <code>data-dirty</code> flag rather than from the snapshot. The <code>source-metadata:value-changed</code> event is dispatched
-      when the value control is dirty.</p>
-      <p><strong>Response.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>present_edited_input()</code></a>
-      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code></a> both
-      already answer with out-of-band field fragments through
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:42:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L42:1"><code>render_input_fields_oob()</code></a>. They pass an
-      extra <code>outcome</code> of <code>saved</code> or <code>rejected</code>, and
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/field.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/field.html#L1:1"><code>field.html</code></a> renders the status
-      text into the fragment; the <code>hx-preserve</code> on the status span at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:39:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L39:1">line 39</a> is dropped because the
-      span now arrives with its content.</p>
+      <p>Accepted edge (<a href="#decisions">decision 4</a>): a control already locked by another request, for example the timeseries
+      preview in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/timeseries_input.html:12:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/timeseries_input.html#L12:1"><code>timeseries_input.html</code></a>,
+      is skipped and therefore released when that request ends, a moment before the field save finishes. A selector that distinguishes
+      HTMX's own disabling from prerequisites exists but nobody can read it; the edge is rare and harmless.</p>
+      <p><strong>Convention.</strong> The JavaScript bullet at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:26:1" data-review-source-href="../../../specs/conventions.md#L26:1"><code>conventions.md</code> line 26</a> loses "listener order is part of mutation
+      settlement" and the <code>field_edits.js</code> module, and a new bullet follows it:</p>
+      <aside id="plan-update-06" data-note="review">
+        <p><strong>[PLAN-UPDATE-06] — ACCEPTED · convention (decided 2026-10-19)</strong></p>
+        <blockquote><strong>The server is the source of truth; its failures are visible, not softened.</strong> Feature JavaScript
+        does not anticipate server errors, slow responses or request races, and does not keep client copies of server-owned state such
+        as saved values, membership or locks. The rendered fragment is the state. A 4xx/5xx response is presented the way the server
+        renders it (today the error modal); a 500 that renders nothing is left visible as an empty or stale target so it gets reported
+        and fixed. HTMX settles synchronously in this project, so <code>htmx:afterRequest</code> on an element means its DOM result is
+        final; nothing observes swap or settle events to sequence its own request. Do not add client state, listeners or fallbacks whose
+        only purpose is to hide a hypothetical failure or to order concurrent requests. When one HTMX attribute expresses the need
+        (<code>hx-trigger</code>, <code>hx-sync</code>, <code>hx-disabled-elt</code>, <code>hx-indicator</code>, <code>hx-vals</code>,
+        <code>hx-on</code>), use it; otherwise accept the edge. Shaping a payload in <code>htmx:configRequest</code> is allowed only where
+        markup cannot express it (nameless controls inside another form). Global re-initialisation hooks on <code>htmx:afterSettle</code>
+        that make any swapped fragment work (tooltips, charts, leader lines, layout) remain allowed; they hold no request state. The
+        exceptions are data-loss cases the mission names as worth protecting, decided in the spec, never added defensively in code.</blockquote>
+        <p><strong>Why:</strong> every mechanism this feature removes, and several the kickoff draft would have kept, exists to soften a
+        failure or a race rather than to deliver a behaviour. The rule is the consequence of constitution §1.4 and of the server being the
+        source of truth; writing it down stops the pattern from returning. A one-sentence amendment to §1.4 making it immutable is listed as a
+        follow-up under <a href="#decisions">decision 10</a>, through <code>update-constitution</code> in its own commit, once this
+        implementation has exercised the text.</p>
+      </aside>
+      <p>The architecture pages reference that bullet rather than restate it:
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:32:1" data-review-source-href="../../../specs/architecture/rendering.html#L32:1">"Results close safely"</a>,
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:34:1" data-review-source-href="../../../specs/architecture/rendering.html#L34:1">"Scoped field-save disabling"</a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:35:1" data-review-source-href="../../../specs/architecture/rendering.html#L35:1">"Independent actions"</a>
+      are rewritten around synchronous settle and server-rendered status, the
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:27:1" data-review-source-href="../../../specs/architecture/rendering.html#L27:1">repair-notice paragraph</a> names the fragment instead of the settle event, and the
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:60:1" data-review-source-href="../../../specs/architecture/rendering.html#L60:1">bundle-order sentence</a>
+      stops claiming that order is part of settlement.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:173:1" data-review-source-href="../../../specs/testing.md#L173:1"><code>testing.md</code></a>
+      notes that settling classes never persist, so <code>click_and_wait_for_htmx()</code> and <code>wait_for_htmx_idle()</code> wait on the
+      request class alone, and tells test authors to assert rendered outcomes rather than dispatch synthetic lifecycle sequences.
+      Unchanged consumers: the loading bar, the modal
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1"><code>htmx:beforeSwap</code></a> handler that lets 4xx/5xx responses swap their out-of-band content, the accordion-state preservation at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:353:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L353:1"><code>model_builder_main.js</code> line 353</a>,
+      and every widget re-initialisation hook on <code>htmx:afterSettle</code>, which now runs inside the swap call before the lock is released.</p>
+    </article>
+
+    <article id="field-save" data-step>
+      <h3><a href="#field-save">1.2 · Field value or provenance save</a></h3>
+      <p data-files><span>Files</span> <a href="#file-editor"><code>simplified_inputs/editor.html</code></a> · <a href="#file-field"><code>simplified_inputs/field.html</code></a> · <a href="#file-workspace-tpl"><code>simplified_inputs/workspace.html</code></a> · <a href="#file-timeseries-panel"><code>simplified_inputs/timeseries_panel.html</code></a> · <a href="#file-field-edits"><code>field_edits.js</code></a> · <a href="#file-index-js"><code>index.js</code></a> · <a href="#file-presenter"><code>presenters/simplified_inputs.py</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a> · <a href="#file-usecase"><code>use_cases/simplified_inputs.py</code></a> · <a href="#file-scss"><code>scss/_simplified_inputs.scss</code></a></p>
+      <p><strong>Current state, all of it replaced below.</strong>
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L1:1"><code>field_edits.js</code></a> listens to
+      focusout, keydown, change, submit and two custom events to decide when to save, compares the form against a
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L5:1"><code>savedEdits</code></a> snapshot to skip
+      unchanged blurs, trims untouched provenance in <code>htmx:configRequest</code>, rewrites a hypothesis source to user data before
+      sending, writes "Saving…", tracks each request through four lifecycle listeners to write "Saved" or "Not saved" on the replaced
+      form, toggles the totals indicators, closes the timeseries panel, and copies the repair notice into the workspace header on a
+      server-sent event. After this section the module does not exist.</p>
+      <p><strong>Trigger.</strong> The browser's own <code>change</code> event already means "this control's value differs from when it
+      got focus": it fires on blur for a changed number input, on Enter for a changed input (followed by the form's implicit
+      <code>submit</code>), and on selection for selects. The form on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1"><code>editor.html</code> line 3</a>
+      therefore declares its triggers instead of scripting them, and <code>hx-sync="this:drop"</code> ignores a second trigger while a
+      request runs, which covers Enter followed by the blur it causes. The two custom events keep their producers: the source editor dispatches
+      <code>simplified-provenance:changed</code> at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:241:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L241:1"><code>source_metadata.js</code> line 241</a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:125:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L125:1">line 125</a>, and the optional-quantity switch dispatches
+      <code>optional-quantity:changed</code> with <code>detail.empty</code>, which an HTMX trigger filter reads directly.</p>
       <div data-code>
-        <p data-code-file><a href="#file-editor"><code>simplified_inputs/editor.html</code></a> <small>Proposed status span; UI copy, not existing code</small></p>
-        <pre><code>&lt;span class="small" data-simplified-save-status data-outcome="{{ outcome }}" role="status"&gt;
-  {% if outcome == "saved" %}Saved{% elif outcome == "rejected" %}Not saved{% endif %}
-&lt;/span&gt;</code></pre>
+        <p data-code-file><a href="#file-editor"><code>simplified_inputs/editor.html</code></a> <small>Proposed form attributes; UI copy, not existing code</small></p>
+        <pre><code>&lt;form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
+      hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
+      hx-trigger="change, submit, simplified-provenance:changed, optional-quantity:changed[detail.empty]"
+      hx-sync="this:drop" hx-swap="none"
+      hx-vals='js:{...recomputationVals()}'
+      hx-indicator="#{{ field.dom_id }}-save-status, [data-quick-total-status]"
+      hx-on::validation:halted="this.reportValidity()"
+      hx-disabled-elt="…see 1.1…"&gt;
+  …
+  &lt;span id="{{ field.dom_id }}-save-status" class="small" data-simplified-save-status role="status"
+        {% if outcome %}data-outcome="{{ outcome }}"{% endif %}&gt;{% if outcome == "saved" %}Saved{% elif outcome == "rejected" %}Not saved{% endif %}&lt;/span&gt;
+&lt;/form&gt;</code></pre>
       </div>
-      <p>A rule in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/custom.scss:1:1" data-review-source-href="../../../theme/static/scss/custom.scss#L1:1"><code>custom.scss</code></a> fades
-      <code>[data-outcome="saved"]</code> after three seconds; the <code>saveStatusTimers</code> map disappears with it. The
-      "Saving…" text is set by the existing <code>saveEdit()</code> at trigger time, and the fragment replacement clears it.</p>
-      <p><strong>Completion.</strong> The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:7:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L7:1"><code>saves</code></a>
-      map, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:53:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L53:1"><code>finishSave()</code></a>, and the four
-      listeners from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:116:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L116:1">line 116</a> to
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:133:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L133:1">line 133</a> are removed. Two listeners
-      remain: <code>htmx:sendError</code> on a <code>[data-simplified-editor]</code> element writes "Not saved" and clears its
-      <code>data-saving</code> flag, and the existing <code>simplifiedInputSaved</code> notice handler. Timeseries panel closure moves to an
-      <code>htmx:afterRequest</code> check of <code>event.detail.successful</code> on <code>[data-simplified-timeseries]</code>.</p>
-      <p><strong>Totals.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:44:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L44:1"><code>setTotalsBusy()</code></a>
-      is replaced by <code>hx-indicator="[data-quick-total]"</code> on the editor form and a style rule that renders
-      "Updating…" into <code>[data-quick-total-status]</code> while its total carries the <code>htmx-request</code> class.</p>
+      <aside id="plan-update-07" data-note="review">
+        <p><strong>[PLAN-UPDATE-07] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clauses:</strong> preserved behaviour "shows <em>Saving…</em>, sends one request, and then shows <em>Saved</em>…"
+        stays; the invalid-draft feedback changes from a scripted "Not saved" to the browser's own validation message (accepted change added).</p>
+        <p><strong>Decision:</strong> the field editor is fully declarative. Native <code>change</code> and <code>submit</code> replace the
+        focusout, keydown, change and submit listeners in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:73:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L73:1"><code>registerFieldEdits()</code></a> and the
+        unchanged-blur comparison at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:20:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L20:1">line 20</a>;
+        <code>hx-sync</code> replaces the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:32:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L32:1"><code>data-saving</code></a> and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:19:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L19:1"><code>[data-disabled-by-htmx]</code></a> guards;
+        <code>hx-vals</code> replaces the recomputation branch of the <code>htmx:configRequest</code> listener at
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:96:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L96:1">line 96</a>, the pattern
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/list_membership_section.html:16:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/list_membership_section.html#L16:1"><code>list_membership_section.html</code></a>
+        and four other templates already use; HTMX's own form validation replaces
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:21:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L21:1"><code>reportValidity()</code> on line 21</a>, since an
+        invalid form halts the request before it is sent and <code>hx-on::validation:halted</code> shows the native message.
+        The hypothesis-to-user-data rewrite moves to the server (below), the totals and status text are CSS on HTMX's request class
+        (PLAN-UPDATE-04), and the notice and panel closure are a fragment and an <code>hx-on</code> attribute. The module, its Jest cases in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:300:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L300:1"><code>simplified_inputs.test.js</code></a> and its export from
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:10:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L10:1"><code>index.js</code></a> are removed.</p>
+        <p><strong>Verify at implementation:</strong> HTMX 2 encodes a multiple select as repeated keys through <code>FormData</code>, and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:91:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L91:1"><code>edit_simplified_input()</code> line 91</a>
+        already joins <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:91:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L91:1"><code>getlist()</code></a>, so the join on
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:111:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L111:1">line 111</a> is expected to be dead; confirm with the
+        existing multiple-select E2E flow before deleting it. The change-and-submit pair on Enter sends one request and drops one; an Enter
+        without a change sends one harmless save.</p>
+      </aside>
+      <p><strong>Payload.</strong> The provenance trimming on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:101:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L101:1">lines 101 to 110</a> goes with the listener.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/object_factory.py:49:1" data-review-source-href="../../../model_builder/domain/object_factory.py#L49:1"><code>_apply_metadata()</code></a>
+      patches only submitted keys and resolves a resubmitted source id to the same model source, so resending the current provenance is a
+      no-op on the server; the value input is already resent on every provenance-only save today (<a href="#decisions">decision 9</a>).</p>
+      <p><strong>User data rule.</strong> Today
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:28:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L28:1"><code>saveEdit()</code> lines 28 to 31</a> dispatch
+      <code>source-metadata:value-changed</code> when the value changed, and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/source_metadata.js:167:1" data-review-source-href="../../../theme/static/scripts/source_metadata.js#L167:1"><code>swapImplicitSourceToUserDataForField()</code></a> rewrites
+      the hidden source inputs to user data before the request. "A user-entered value is user data" is a domain rule, so
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:33:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L33:1"><code>EditSimplifiedInputUseCase.execute()</code></a>
+      applies it: when the submitted value differs from the current one and the current source is
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/constants/sources.py:23:1" data-review-source-href="../../../../e-footprint/efootprint/constants/sources.py#L23:1"><code>Sources.HYPOTHESIS</code></a> or
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/constants/sources.py:6:1" data-review-source-href="../../../../e-footprint/efootprint/constants/sources.py#L6:1"><code>Sources.AUTOMATIC_REPLACEMENT</code></a>, the parsed
+      metadata's source becomes <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/constants/sources.py:5:1" data-review-source-href="../../../../e-footprint/efootprint/constants/sources.py#L5:1"><code>Sources.USER_DATA</code></a>
+      with the comment kept. A provenance-only edit resends the same value and keeps the sentinel, as today. The replaced fragment shows the new
+      source; side-panel forms keep their own hook in <code>source_metadata.js</code>, which is out of scope.</p>
+      <p><strong>Indicator.</strong> <code>hx-indicator</code> names the form's own status span and both totals indicators in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/results_bar_button.html:32:1" data-review-source-href="../../../model_builder/templates/model_builder/components/results_bar_button.html#L32:1"><code>results_bar_button.html</code></a>
+      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/show_results_toolbar_button.html:14:1" data-review-source-href="../../../model_builder/templates/model_builder/components/show_results_toolbar_button.html#L14:1"><code>show_results_toolbar_button.html</code></a>;
+      rules in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/_simplified_inputs.scss:55:1" data-review-source-href="../../../theme/static/scss/_simplified_inputs.scss#L55:1"><code>_simplified_inputs.scss</code></a> render "Saving…" and
+      "Updating…" through <code>::after</code> while HTMX's request class is present, so no script writes in-flight text and nothing can stay
+      stuck when a request ends without a response.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:44:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L44:1"><code>setTotalsBusy()</code></a> and its
+      <code>aria-busy</code> toggling disappear. Playwright assertions on "Saving…" switch from text to the class, since generated content is not text.</p>
+      <p><strong>Response.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>present_edited_input()</code></a>
+      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code></a>
+      already answer with out-of-band field fragments through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:42:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L42:1"><code>render_input_fields_oob()</code></a>.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:103:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L103:1"><code>edit_simplified_input()</code></a>
+      passes the submitted <code>address</code> with <code>outcome="saved"</code>, and <code>_rejected_simplified_input()</code> passes it with
+      <code>outcome="rejected"</code>; the renderer sets the per-field <code>outcome</code> only when the field's address matches, so companion
+      fields repaired in the same response carry no status, as today's
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:61:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L61:1"><code>acceptedForm</code></a> lookup ensured. The status span on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:39:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L39:1"><code>editor.html</code> line 39</a>
+      loses <code>hx-preserve</code>, keeps its id, and arrives with its content. A rule in <code>_simplified_inputs.scss</code> fades
+      <code>[data-outcome="saved"]</code> out after three seconds with a forwards-filling animation; the
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:6:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L6:1"><code>saveStatusTimers</code></a> map disappears. The text
+      stays in the DOM, so text assertions are unaffected.</p>
+      <p><strong>Repair notice.</strong> Today <code>present_edited_input()</code> writes the notice text into the hidden
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/input_repair_notices.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/components/input_repair_notices.html#L1:1"><code>#input-repair-notices</code></a>
+      holder and fires <code>simplifiedInputSaved</code> on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:32:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L32:1">line 32</a>, and the handler at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:147:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L147:1"><code>field_edits.js</code> line 147</a> copies the
+      text into a paragraph it creates under the workspace header. Instead,
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/workspace.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/workspace.html#L6:1"><code>workspace.html</code></a> renders
+      an empty <code>&lt;p id="si-{{ system_id }}-notice" data-simplified-notice role="status"&gt;</code> in the saved-view header, and the
+      presenter renders that paragraph with the notice text as an out-of-band fragment (empty text clears it, as the hidden holder does
+      today). The trigger and the handler go; the Modeling toast keeps its own holder in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/toast.html:2:1" data-review-source-href="../../../model_builder/templates/model_builder/components/toast.html#L2:1"><code>toast.html</code></a>. The export notice in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:20:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L20:1"><code>index.js</code> line 20</a> writes into the same
+      rendered paragraph instead of creating one.</p>
+      <p><strong>No response.</strong> A request that ends without a response has nothing to render. HTMX removes the request class, so the
+      CSS "Saving…" disappears and the status is simply empty; the server never answered, so nothing claims the save failed. Reporting that
+      case is the shared message parked in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/backlog/network-interruption-message/problem.md:1:1" data-review-source-href="../../backlog/network-interruption-message/problem.md#L1:1">network-interruption-message</a> (PLAN-UPDATE-04).</p>
+      <aside id="plan-update-04" data-note="review">
+        <p><strong>[PLAN-UPDATE-04] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> preserved behaviour "A transport failure also shows <em>Not saved</em>", now an accepted change: the status is left empty.</p>
+        <p><strong>Why:</strong> the earlier plan kept one shared afterRequest listener solely to satisfy that sentence, and
+        then routed 422 and 500 through it too. The server already answers every failure it knows (field fragment, bookmark modal), and the
+        unanswered-request message is the shared concern parked in the backlog item above, which must not claim a save failed. A per-feature
+        "Not saved" would duplicate that handler for one widget while asserting more than the browser knows.</p>
+        <p><strong>Consequence:</strong> "Saving…" comes from the request class, "Saved" and "Not saved" from the server. The E2E transport case of
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:688:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L688:1"><code>test_field_save_disables_both_resident_workspaces_and_restores_controls</code></a>
+        expects an empty status and enabled controls.</p>
+      </aside>
+      <aside id="plan-update-02" data-note="review">
+        <p><strong>[PLAN-UPDATE-02] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> accepted change "Retyping a value back to its original sends a harmless save instead of being suppressed".</p>
+        <p><strong>Observation:</strong> the kickoff draft assumed dirty flags set by DOM input events, which cannot tell a retyped
+        original from an edit. The browser's <code>change</code> event can: it fires only when the committed value differs from the value at
+        focus, so the current suppression in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:20:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L20:1"><code>saveEdit()</code> line 20</a>
+        is preserved with no listener and no stored copy.</p>
+        <p><strong>Decision:</strong> the accepted-change bullet is removed from the spec; behaviour stays as today.</p>
+      </aside>
+      <p><strong>Timeseries panel.</strong> Today
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:70:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L70:1"><code>finishSave()</code> line 70</a>
+      closes the side panel after every outcome, success or not. The form in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html#L3:1"><code>timeseries_panel.html</code></a>
+      takes that over with <code>hx-on::after-request="closeAndEmptySidePanel()"</code>, the pattern
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:11:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L11:1"><code>delete_card_modal.html</code></a>
+      already uses, and its <code>hx-indicator</code> names the workspace field's status span by id, which
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:41:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L41:1"><code>simplified_timeseries_panel()</code></a>
+      computes from the system, object and attribute ids the same way
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:91:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L91:1"><code>build_workspace_context()</code></a> does.
+      The Cancel button on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html:14:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html#L14:1">line 14</a>
+      becomes <code>onclick="closeAndEmptySidePanel()"</code>, the synchronous dismiss handler the conventions prescribe for swapped content,
+      replacing the click listener at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:144:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L144:1"><code>field_edits.js</code> line 144</a>.
+      The modified-tagging listeners on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:138:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L138:1">lines 138 to 143</a>
+      duplicate the inline <code>oninput</code> handlers the dynamic form fields already carry, for example
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/explainable_quantity.html#L13:1"><code>explainable_quantity.html</code> line 13</a>,
+      and the builders' own calls in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/weekly_pattern_builder.js:440:1" data-review-source-href="../../../theme/static/scripts/weekly_pattern_builder.js#L440:1"><code>weekly_pattern_builder.js</code></a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/usage_pattern_timeseries.js:110:1" data-review-source-href="../../../theme/static/scripts/usage_pattern_timeseries.js#L110:1"><code>usage_pattern_timeseries.js</code></a>; verify with the
+      focused-panel E2E flow, then drop them. Both rejection paths already return the field fragment, so a successful timeseries save shows "Saved"
+      and a rejected one "Not saved" through the replaced field; an unanswered one leaves the status empty.</p>
     </article>
 
     <article id="bookmarks" data-step>
       <h3><a href="#bookmarks">1.3 · Bookmark membership and help</a></h3>
-      <p data-files><span>Files</span> <a href="#file-bookmarks"><code>bookmarks.js</code></a> · <a href="#file-bookmark-controls"><code>simplified_inputs/bookmark_controls.html</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a> · <a href="#file-presenter"><code>presenters/simplified_inputs.py</code></a></p>
-      <p>Today <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>patch_simplified_inputs()</code></a>
-      returns JSON listing every affected address with its setting, required-by label and an inverse patch, and the
+      <p data-files><span>Files</span> <a href="#file-bookmarks"><code>bookmarks.js</code></a> · <a href="#file-bookmark"><code>simplified_inputs/bookmark.html</code></a> · <a href="#file-bookmark-controls"><code>simplified_inputs/bookmark_controls.html</code></a> · <a href="#file-bookmark-update"><code>simplified_inputs/bookmark_update.html</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a></p>
+      <p><strong>Current state, all of it replaced below.</strong> Today
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>patch_simplified_inputs()</code></a>
+      returns JSON listing every affected address with its setting and required-by label plus an inverse patch, and the
       <code>htmx:afterRequest</code> handler at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:129:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L129:1">line 129</a>
-      walks all visible bookmarks to apply it through
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L5:1"><code>updateBookmark()</code></a>, while protecting a
-      dirty help draft and toggling Undo. The server already computes the affected set with the same catalog it would use to
-      render HTML.</p>
-      <p><strong>Proposed.</strong> The view renders one out-of-band
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L1:1"><code>bookmark_controls.html</code></a>
-      fragment per affected address, targeting the existing <code>{{ field.dom_id }}-controls</code> container, plus an out-of-band
-      update of the bookmark's summary icon and labels. The fragment carries the status text ("Saved") and, for the bookmark that
-      issued the request, the Undo button with its inverse patch in <code>data-inverse-patch</code> and <code>hidden</code> removed only
-      when the inverse is non-empty. Bookmarks whose controls are still lazy, that is not yet fetched, receive only the summary update.
-      The 422 path keeps its modal and the response still swaps nothing else, so the status shows "Not saved" through the same
-      <code>htmx:sendError</code>-style fallback as fields: an <code>htmx:afterRequest</code> listener on <code>[data-bookmark]</code>
-      writing "Not saved" when <code>event.detail.successful</code> is false.</p>
-      <p>Removed from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L1:1"><code>bookmarks.js</code></a>: the
-      afterRequest reconciler, <code>updateBookmark()</code> for saved bookmarks, the "Saving…" <code>htmx:beforeRequest</code> at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:170:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L170:1">line 170</a> (replaced by <code>hx-indicator</code> on the
-      status element), and the <code>refreshBookmarkLocks</code> settle hooks at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:164:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L164:1">line 164</a>, since fragments arrive with the
-      correct disabled state. Kept: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:74:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L74:1"><code>saveBookmark()</code></a>
-      stashing the patch, the <code>htmx:configRequest</code> at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:121:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L121:1">line 121</a>,
-      and the creation-time provisional logic, which is purely client-side authoring and has no request lifecycle.</p>
-      <p>Accepted trade (<a href="#decisions">decision 2</a>, decided 2026-10-19): a help text whose save failed is overwritten
-      by the next successful fragment for the same field. The textarea is part of the replaced fragment; no draft check runs
-      inside the swap.</p>
+      walks all mounted bookmarks to apply it through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L5:1"><code>updateBookmark()</code></a>, protecting a
+      dirty help draft and toggling Undo. The endpoint becomes HTML-only: out-of-band fragments that HTMX applies with no feature
+      listener. A bookmark for one address can be mounted twice, in a side panel (suffix <code>panel</code>) and in a
+      Sources row (suffix <code>sources</code>, lazily fetched), and companions can live in another owner's panel that is not open.</p>
+      <p><strong>Request.</strong> The <code>htmx:configRequest</code> listener at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:121:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L121:1">line 121</a>
+      keeps sending <code>patch</code> and adds <code>mounted</code>: the ids of every non-provisional <code>[data-bookmark]</code> element in
+      the document. This listener stays because the bookmark's controls are nameless by rule (they sit inside the side-panel edit form, whose
+      Save must not submit them), so markup cannot express the payload. HTMX already sends the issuing element's id in the <code>HX-Trigger</code>
+      header. The server cannot otherwise know which instances exist, and an out-of-band fragment without a target makes HTMX log
+      <code>htmx:oobErrorNoTarget</code> to the console (<a href="#decisions">decision 6</a>). The <code>htmx:beforeRequest</code> listener
+      writing "Saving…" at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:170:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L170:1">line 170</a> goes: the details
+      element declares <code>hx-indicator="find [data-bookmark-status]"</code> and the same CSS rule as fields shows "Saving…" while the request runs.</p>
+      <p><strong>Templates.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark.html#L1:1"><code>bookmark.html</code></a>
+      gives the summary <code>id="{{ field.dom_id }}-summary"</code> and wraps the controls in <code>id="{{ field.dom_id }}-controls"</code> in
+      both branches (the lazy branch already has that container on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark.html:12:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark.html#L12:1">line 12</a>).
+      The <code>&lt;details&gt;</code> itself is never replaced, so its open state and lazy trigger survive.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L3:1"><code>bookmark_controls.html</code></a>
+      moves the status into a one-line <code>bookmark_status.html</code> include with that id, rendering "Saved" or "Not saved" from
+      <code>outcome</code>; the Undo button on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:4:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L4:1">line 4</a>
+      is removed (PLAN-UPDATE-01). The new <a href="#file-bookmark-update"><code>bookmark_update.html</code></a> wraps those two pieces for one instance:</p>
+      <div data-code>
+        <p data-code-file><a href="#file-bookmark-update"><code>simplified_inputs/bookmark_update.html</code></a> <small>Proposed; consumed by <code>patch_simplified_inputs()</code>, one include per mounted instance</small></p>
+        <pre><code>&lt;summary id="{{ field.dom_id }}-summary" hx-swap-oob="outerHTML" …same content as bookmark.html…&gt;&lt;/summary&gt;
+&lt;div id="{{ field.dom_id }}-controls" hx-swap-oob="innerHTML"&gt;
+    {% include 'model_builder/simplified_inputs/bookmark_controls.html' %}
+&lt;/div&gt;</code></pre>
+      </div>
+      <p>HTMX uses an <code>innerHTML</code> out-of-band element's children as the new content, so the controls container keeps its id and
+      lazy attributes. The summary markup is extracted into a small include shared with <code>bookmark.html</code> so the two never drift.</p>
+      <p><strong>Response.</strong> <code>patch_simplified_inputs()</code> keeps its affected-set computation on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L153:1">lines 153 to 161</a>, drops the
+      inverse computation on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:167:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L167:1">lines 167 to 170</a>
+      with the <code>previous</code> definition read on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:143:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L143:1">line 143</a>,
+      and replaces the <code>JsonResponse</code> with concatenated fragments: for each affected address and each suffix, when
+      <code>bookmark-{owner}-{attribute}-{suffix}</code> is in <code>mounted</code>, render <code>bookmark_update.html</code> with
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/simplified_input_context.py:16:1" data-review-source-href="../../../model_builder/adapters/forms/simplified_input_context.py#L16:1"><code>bookmark_context()</code></a>
+      for that suffix and <code>saved=True</code> only for the instance named by <code>HX-Trigger</code>.
+      Bookmarks whose controls are still lazy are not in <code>mounted</code> with their controls fetched, yet their summary must still update:
+      the lazy container exists from the first render, so swapping its <code>innerHTML</code> simply pre-fills the controls, and the once-trigger
+      does nothing harmful later. The 422 and 500 paths keep their modal and <code>HX-Reswap: none</code> and append one out-of-band
+      <code>bookmark_status.html</code> with <code>outcome="rejected"</code> for the <code>HX-Trigger</code> instance, the same way
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code></a> appends the
+      field fragment after the modal; controls keep the user's draft as they do today. An unanswered request leaves the status empty (PLAN-UPDATE-04).</p>
+      <aside id="plan-update-01" data-note="review">
+        <p><strong>[PLAN-UPDATE-01] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> preserved behaviour "…offers Undo after a membership change", now removed; recorded in the spec as an accepted change.</p>
+        <p><strong>Decision:</strong> the bookmark Undo button goes entirely. It sits beside the membership toggle it reverts, so
+        re-clicking the toggle does the same job. The plan's first proposal (keep Undo and also offer it after an Undo) is superseded.</p>
+        <p><strong>Removed with it:</strong> the inverse computation and its <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:143:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L143:1"><code>previous</code></a> definition read in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>patch_simplified_inputs()</code></a>,
+        the hidden button on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:4:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L4:1"><code>bookmark_controls.html</code> line 4</a>,
+        the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:76:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L76:1"><code>pendingUndo</code></a> flag in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:74:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L74:1"><code>saveBookmark()</code></a>, the Undo click handler at
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:114:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L114:1"><code>bookmarks.js</code> line 114</a>, the inverse
+        assertions in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py:121:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L121:1"><code>test_bookmark_patch_and_inverse_preserve_values_and_retained_help</code></a>,
+        and the Undo steps of <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:561:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L561:1"><code>test_nested_creation_settings_and_failed_help_survive_membership_undo</code></a>
+        and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_bookmark_lifecycle.test.js:100:1" data-review-source-href="../../../js_tests/simplified_bookmark_lifecycle.test.js#L100:1">the failed-help Jest case</a>. The Undo sentences in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:71:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L71:1"><code>forms-and-relationships.html</code></a>,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/runtime-and-recovery.html:51:1" data-review-source-href="../../../specs/architecture/runtime-and-recovery.html#L51:1"><code>runtime-and-recovery.html</code></a> and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:193:1" data-review-source-href="../../../specs/testing.md#L193:1"><code>testing.md</code></a> are dropped, and the changelog entry names the removal.</p>
+      </aside>
+      <p><strong>Removed from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L1:1"><code>bookmarks.js</code></a>:</strong>
+      the afterRequest reconciler, <code>updateBookmark()</code> for saved bookmarks (the creation-time path on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:60:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L60:1">line 60</a>
+      keeps a reduced local version that only touches provisional bookmarks), the "Saving…" beforeRequest listener, and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:79:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L79:1"><code>refreshBookmarkLocks()</code></a>
+      with its three hooks on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:164:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L164:1">lines 164 to 166</a>:
+      no lock selector matches a bookmark checkbox, and fragments arrive with their server-rendered <code>disabled</code> state. The Undo click handler at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:114:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L114:1">line 114</a>
+      goes with the button. Kept: <code>saveBookmark()</code> stashing the patch, the scroll-into-view
+      settle hook on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:159:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L159:1">line 159</a>
+      (a view hook, not request tracking), and the creation-time provisional logic, which is client-side authoring with no request lifecycle.</p>
+      <p>Accepted trade (<a href="#decisions">decision 2</a>): a help text whose save failed is overwritten by the next successful fragment for the
+      same field. The textarea is part of the replaced controls; no draft check runs inside the swap.</p>
     </article>
 
     <article id="exits" data-step>
       <h3><a href="#exits">1.4 · Saved-view reads and Configure exits</a></h3>
-      <p data-files><span>Files</span> <a href="#file-workspace"><code>workspace.js</code></a> · <a href="#file-main-html"><code>model_builder_main.html</code></a> · <a href="#file-workspace-doc"><code>specs/architecture/workspace.html</code></a></p>
+      <p data-files><span>Files</span> <a href="#file-workspace"><code>workspace.js</code></a> · <a href="#file-main-html"><code>model_builder_main.html</code></a> · <a href="#file-mission"><code>specs/mission.md</code></a> · <a href="#file-workspace-doc"><code>specs/architecture/workspace.html</code></a></p>
       <p><strong>Reads.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:45:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L45:1"><code>loadView()</code></a>
-      registers five listeners per call to tie the continuation to its own XHR, abort on competing navigation and refuse a
-      swap when the active slot changed. It becomes a promise chain, and the slot target in
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L19:1"><code>model_builder_main.html</code></a>
-      declares <code>hx-sync="this:replace"</code> so a repeated read aborts the pending one natively (the <code>source</code> option
-      makes the target the issuing element, where HTMX reads <code>hx-sync</code>).</p>
+      registers five listeners per call to tie the continuation to its own XHR, abort on competing navigation and refuse a swap when the
+      active slot changed, and switches to the Simplified view only once the response has settled. It becomes three statements: close the
+      side panel, switch the view, send the read. The view switches when the user asks for it, not when the server answers (PLAN-UPDATE-08),
+      so there is no completion callback at all; HTMX swaps the response into the slot whenever it arrives.</p>
       <div data-code>
-        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed replacement for loadView</small></p>
-        <pre><code>function loadView(configure, then) {
+        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed replacement for <code>loadView</code></small></p>
+        <pre><code>function loadView(configure) {
     const target = targetForActiveModel();
     if (!target) return;
-    window.runAfterSidePanelDiscardConfirmation(() => {
+    window.runAfterSidePanelDiscardConfirmation(() =&gt; {
+        window.closeAndEmptySidePanel();
+        setBaseView("simplified");
         window.htmx.ajax("GET", `/model_builder/simplified-inputs/${configure ? "?configure=1" : ""}`,
-            { source: target, target, swap: "innerHTML" }).then(() => {
-            if (target !== targetForActiveModel()) {
-                // Configure is never parked: a read that lands after a model switch is discarded.
-                if (configure) target.innerHTML = "";
-                return;
-            }
-            window.closeAndEmptySidePanel();
-            setBaseView("simplified");
-            if (then) then();
-        });
+            { source: target, target, swap: "innerHTML" });
     });
 }</code></pre>
       </div>
-      <p>The rejection path (network error or abort) does nothing. A late saved-view response renders into its own hidden slot and
-      is simply the correct content when the user returns. A late Configure response is discarded in the same branch, so Configure
-      is never resumed in a hidden slot and the remembered "simplified" mode reloads the saved view on the next visit through
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:91:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L91:1"><code>initialize()</code></a>,
-      which is unchanged. No draft can exist at that point because the form had not rendered; a dirty Configure draft still gates
-      every exit, including model switches, through the unchanged capture click interception and <code>htmx:confirm</code> handler
-      described below. <code>pendingRead</code>,
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:39:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L39:1"><code>cancelPendingRead()</code></a> and the
-      cancellation branches inside the capture click handler and the <code>htmx:beforeRequest</code> listener at
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">line 179</a> are removed.</p>
-      <p><strong>Configure Save then continue.</strong> <code>savingRequest</code> and
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:122:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L122:1"><code>finishConfigureSave()</code></a> with their four
-      listeners (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">lines 179 to 193</a>) collapse to one:</p>
+      <p>The slot target in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L19:1"><code>model_builder_main.html</code></a>
+      declares <code>hx-sync="this:replace"</code>. <code>hx-sync</code> is HTMX's rule for a request issued while an earlier one from the
+      same element is still running; <code>replace</code> aborts the earlier one and sends the new one, so the last read wins. The
+      <code>source</code> option makes the slot the issuing element and HTMX reads <code>hx-sync</code> there at request time. This attribute
+      stays because the slot now shows its previous content while a read runs: without it, a user who enters Simplified inputs and clicks
+      Configure before the entry read lands would see the entry response wipe the Configure screen they just opened.</p>
+      <aside id="plan-update-08" data-note="review">
+        <p><strong>[PLAN-UPDATE-08] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> the late-read accepted change (as amended by PLAN-UPDATE-03) and the implicit current behaviour that the
+        Modeling canvas stays visible until the Simplified read has landed.</p>
+        <p><strong>Decision:</strong> entering Simplified inputs, Configure or Discard switches the view at once. The slot shows its previous
+        content, or nothing on first entry, with the loading bar, until the fresh workspace replaces it. No dimming or click-blocking rule is
+        added; the window is one read and the content is replaced by the response. A read that lands after the user moved on changes nothing
+        they see, because the view was already switched when they clicked, so the late-landing bullet simplifies to "lands in its slot". A
+        Configure read landing in a slot the user has left is no longer discarded: it is the same case as a clean Configure screen left by a
+        model switch, accepted in PLAN-UPDATE-05. An error response leaves the switched-to slot empty or stale, visibly (PLAN-UPDATE-06).</p>
+        <p><strong>Removed:</strong> the promise callback with its "did it swap" comparison and rejection handler, the Configure-discard branch,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:12:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L12:1"><code>pendingRead</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:39:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L39:1"><code>cancelPendingRead()</code></a>,
+        the cancellation at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:92:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L92:1"><code>initialize()</code> line 92</a>,
+        the branch inside the capture click handler at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:139:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L139:1">lines 139 to 143</a>,
+        and the <code>htmx:beforeRequest</code> listener at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">line 179</a>.
+        E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:159:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L159:1"><code>test_abandoned_configure_read_cannot_follow_a_model_switch</code></a>
+        inverts: the late Configure response stays in the hidden slot and is shown on return.</p>
+      </aside>
+      <p>The side panel closes at issue time: the discard confirmation has just run, so the panel is clean. The side-panel confirmation helper
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:106:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L106:1"><code>runAfterSidePanelDiscardConfirmation()</code></a>
+      still resumes the read after its own modal; it belongs to the out-of-scope side-panel guards, and the follow-up note lists it under the same
+      rule as PLAN-UPDATE-05.</p>
+      <aside id="plan-update-03" data-note="review">
+        <p><strong>[PLAN-UPDATE-03] — ACCEPTED · spec clarification (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> accepted change "A saved-view read that finishes after the user switched models renders into the hidden slot…".</p>
+        <p><strong>Observation:</strong> the cancellation the spec retires also covered same-model destinations chosen during the read
+        (Results, Compare, a side panel, the Modeling toggle). The spec bullet was first widened to say the read still lands and switches
+        the view on arrival. With PLAN-UPDATE-08 the view is switched on click, so the arrival changes nothing visible, and the bullet simplifies
+        to: a read that finishes after the user moved on lands in its slot; the next visit to that model shows what landed.</p>
+        <p><strong>Decision:</strong> accepted in that simplified form; the spec bullet carries it.</p>
+      </aside>
+      <p><strong>Dirty Configure gate.</strong> Today a dirty Configure form intercepts navigation in two places, the capture click handler at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:133:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L133:1">line 133</a> and the <code>htmx:confirm</code> handler at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:150:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L150:1">line 150</a>, and both hand the interrupted action to
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:110:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L110:1"><code>deferExit()</code></a>, which stores it in <code>pendingExit</code>, shows the dialog, and after Save or Discard
+      resumes it through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:118:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L118:1"><code>replayClick()</code></a> or the stored <code>issueRequest</code>. Resuming after Save is
+      what <code>savingRequest</code>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:122:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L122:1"><code>finishConfigureSave()</code></a> and the four listeners on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">lines 179 to 197</a> exist for; resuming after Discard is the <code>then</code> parameter of
+      <code>loadView()</code>; a clean Configure screen is replaced by the saved view before any exit for the same reason. All of that goes
+      (PLAN-UPDATE-05). Both interceptions keep their matching rules and only block: prevent the event, stop its propagation, open the dialog.</p>
       <div data-code>
-        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed single completion listener</small></p>
-        <pre><code>document.addEventListener("htmx:afterRequest", event => {
-    if (!event.detail.elt.matches("[data-configure-form]")) return;
-    const action = pendingExit;
-    pendingExit = null;
-    if (event.detail.successful && action) action();
-});</code></pre>
+        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed gate and dialog actions; the two interception listeners keep their current element matching</small></p>
+        <pre><code>function blockWhileDirty(event) {
+    if (configureForm()?.dataset.dirty !== "true") return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    dialog().showModal();
+}
+// capture click handler and htmx:confirm handler: …matching unchanged…; blockWhileDirty(event);
+
+case "simplified-exit-save":    dialog().close(); configureForm().requestSubmit(); break;
+case "simplified-exit-discard": dialog().close(); loadView(false); break;
+case "simplified-exit-stay":    dialog().close(); break;
+case "simplified-cancel":       if (configureForm()?.dataset.dirty === "true") dialog().showModal(); else loadView(false); break;</code></pre>
       </div>
-      <p>With synchronous settle the replacement workspace is already in place when this fires, so a continuation such as
-      a replayed click or <code>issueRequest(true)</code> runs against final DOM. A rejected save (422 modal) leaves the draft and
-      clears the pending exit, matching today's behaviour. The dialog, <code>deferExit()</code>, the capture click interception and the
-      <code>htmx:confirm</code> interception stay as they are; they are navigation gating, not request tracking.</p>
-      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>workspace.html</code></a> replaces the paragraphs on pending
-      reads, actually issued XHRs and parked Configure with the accepted rule from the spec.</p>
+      <p>Save submits the form; its response is the saved view, swapped by HTMX, and a rejected save shows the modal and leaves the draft.
+      Discard reads the saved view. Stay closes the dialog. In every case the user then repeats the navigation they wanted. Removed with the
+      resume: <code>pendingExit</code>, <code>replaying</code>, <code>replayClick()</code>, <code>deferExit()</code>, <code>savingRequest</code>,
+      <code>finishConfigureSave()</code>, the four listeners, the dialog <code>cancel</code> listener on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:198:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L198:1">line 198</a>, and the "load the saved view first" branch for a clean Configure. The
+      <code>beforeunload</code> guard on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:201:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L201:1">line 201</a> and the export interception in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/index.js:14:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/index.js#L14:1"><code>index.js</code></a> stay.</p>
+      <aside id="plan-update-05" data-note="review">
+        <p><strong>[PLAN-UPDATE-05] — ACCEPTED · spec change (decided 2026-10-19)</strong></p>
+        <p><strong>Spec clause:</strong> preserved behaviour "Save continues to the chosen destination only after the save succeeds… Discard loads
+        the saved view before continuing", now an accepted change: no exit resumes the interrupted navigation.</p>
+        <p><strong>Why:</strong> suspending an action, having the user resolve a dialog, then resuming the action is the pattern that produced
+        most of the client logic in this section: the stored intent, the replay flag and helper, the listener that waits for the save, and the
+        pre-exit saved-view read for a clean form. The convenience saves one click on a rare path. The rule now lives in the mission's
+        eco-design section ("Guards block; they do not suspend and replay") so later features apply it without re-deciding.</p>
+        <p><strong>Consequences:</strong> a clean Configure screen left by a model switch is shown again on return; its content is still
+        accurate because edits only touch the active model. E2E
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:380:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L380:1"><code>test_dirty_configure_protects_every_shared_exit</code></a> asserts
+        that Discard shows the saved view without reaching the destination and that a second click reaches it; the Jest cases at
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:137:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L137:1"><code>simplified_inputs.test.js</code> line 137</a> and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:163:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L163:1">line 163</a> are replaced by gate-only cases.</p>
+      </aside>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:50:1" data-review-source-href="../../../specs/architecture/workspace.html#L50:1"><code>workspace.html</code> lines 50 to 51</a>
+      ("Workspace owns pending reads…field edits own accepted snapshots"),
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:72:1" data-review-source-href="../../../specs/architecture/workspace.html#L72:1">line 72</a>
+      ("Save continues only after…have settled") and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:76:1" data-review-source-href="../../../specs/architecture/workspace.html#L76:1">lines 76 to 77</a>
+      (actually issued XHR, duplicate suppression, abort before parking, "Configure is never parked") are replaced by the accepted rules from the
+      spec, as amended by PLAN-UPDATE-03, -05 and -08.</p>
     </article>
 
     <article id="results" data-step>
       <h3><a href="#results">1.5 · Results panel close</a></h3>
-      <p data-files><span>Files</span> <a href="#file-hammer"><code>hammer_utils.js</code></a></p>
+      <p data-files><span>Files</span> <a href="#file-hammer"><code>hammer_utils.js</code></a> · <a href="#file-result-panel"><code>result/result_panel.html</code></a> · <a href="#file-rendering"><code>specs/architecture/rendering.html</code></a></p>
       <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:55:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L55:1"><code>hidePanelResult()</code></a> keeps the panel attached while a
       recomputation-bearing request is in flight so a late out-of-band Results refresh has a target. It tracks those XHRs in
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:47:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L47:1"><code>pendingResultRefreshes</code></a> and waits on both
       <code>htmx:afterRequest</code> and <code>htmx:afterSettle</code> in
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:92:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L92:1"><code>finishClosing()</code></a>, also matching
       <code>.htmx-settling</code> and <code>.htmx-added</code> in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:85:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L85:1"><code>hasPendingResponse()</code></a>.</p>
-      <p>The wait is only reachable mid-request through controls that the save locks do not cover. The close button at
+      <p>The wait is reachable mid-save only through controls the save locks do not cover. The close button at
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:87:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L87:1"><code>result_panel.html</code> line 87</a>
       is a real button and is already disabled by every form declaring <code>hx-disabled-elt="button"</code>, which includes field
       saves and side-panel object saves. The chevron at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L8:1">line 8</a>
-      is a <code>div</code> with an <code>onclick</code>, so it stays clickable during a save. The programmatic closes from the
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:22:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L22:1"><code>delete_card_modal.html</code></a>
-      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/modal_template.html:32:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/modal_template.html#L32:1"><code>modal_template.html</code></a>
-      scripts run when a modal opens, at a request boundary rather than mid-request.</p>
-      <p><strong>Proposed (<a href="#decisions">decision 1</a>, decided 2026-10-19).</strong> The chevron becomes a
-      <code>&lt;button type="button"&gt;</code> with the same <code>onclick</code> and icon, so the existing lock disables it during
-      every recomputation-bearing save. <code>hidePanelResult()</code> then drops <code>pendingResultRefreshes</code>, its two listeners,
-      <code>hasPendingResponse()</code> and <code>finishClosing()</code>, and always resets the layout and empties the panel at once.
-      The only remaining mid-request close is the touch swipe-down gesture in <code>initHammer()</code>; a late refresh after a swipe
-      re-fills the Results block, and the user closes it again. Mobile is best-effort by mission, so this is accepted. The
+      is a <code>div</code> with an <code>onclick</code>, so it stays clickable during a save. The programmatic closes from
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/modal_template.html:32:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/modal_template.html#L32:1"><code>modal_template.html</code></a>,
+      the import panels and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_comparison.js:198:1" data-review-source-href="../../../theme/static/scripts/model_comparison.js#L198:1"><code>switchToSlot()</code></a>
+      run at request boundaries.</p>
+      <p><strong>Proposed (<a href="#decisions">decision 1</a>).</strong> The chevron becomes
+      <code>&lt;button type="button" class="btn btn-link …" aria-label="Close results" onclick="hidePanelResult()"&gt;</code> with the same
+      icon, so the existing lock disables it during every recomputation-bearing save; the page object's
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:422:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L422:1"><code>close_result_panel()</code></a>
+      selects it by that label. <code>hidePanelResult()</code> then drops <code>pendingResultRefreshes</code>, its two listeners,
+      <code>hasPendingResponse()</code> and <code>finishClosing()</code>, and always resets the layout and empties the panel at once. Nothing
+      is aborted (<a href="#decisions">decision 7</a>): a Sankey load still in flight when the panel closes swaps into a detached node and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/sankey.js:278:1" data-review-source-href="../../../theme/static/scripts/sankey.js#L278:1"><code>sankey.js</code></a> may log one ECharts size warning, which is
+      a symptom to see, not a case to hide. The only remaining mid-save close is the touch swipe-down gesture in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:112:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L112:1"><code>initHammer()</code></a>; the late out-of-band refresh from
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:69:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L69:1"><code>_recomputation_html()</code></a>
+      then re-fills the collapsed block, and the user closes it again. Mobile is best-effort by mission, so this is accepted. The
       <code>htmx:afterSettle</code> listener at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:38:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L38:1">line 38</a>, which re-applies
       the open-panel layout after any swap, stays: it is a global re-initialisation hook, not request tracking.</p>
     </article>
@@ -436,33 +721,46 @@
     <h2>2. Delivery and verification</h2>
     <h3>Implementation sequence</h3>
     <ol id="phases">
-      <li><strong>A · Platform signal and lock selector</strong>Meta tag, lock selector exclusion, removal of the disabled restore block,
-        conventions rule. Independently shippable; every suite must stay green with no feature code change yet.
+      <li><strong>A · Platform signal and lock selector</strong>Meta tag, lock selector, removal of the disabled restore block and its two Jest
+        cases, conventions bullets, E2E helper waits on the request class only. Independently shippable; every suite must stay green with no other feature code change.
         <small>Proves the synchronous-settle assumption against the full E2E suite before the refactors depend on it.</small></li>
-      <li><strong>B · Field saves</strong>Server-rendered outcome, dirty flags, indicator-based totals, single failure handler, Jest rewrite for field cases.
-        <small>Depends on A.</small></li>
-      <li><strong>C · Bookmarks</strong>Fragment response for the patch endpoint, reconciler removal, bookmark Jest rewrite.
-        <small>Depends on A; independent of B.</small></li>
-      <li><strong>D · Reads, exits, Results close and documentation</strong>Promise-based reads with request replacement, single Configure listener,
-        hidden-slot cleanup, Results chevron button and close-wait removal, architecture and testing page reconciliation, changelog.
-        <small>Depends on A.</small></li>
+      <li><strong>B · Field saves</strong>Declarative editor form, server-rendered <code>outcome</code> and fade, CSS "Saving…" and "Updating…",
+        user-data rule in the use case, notice fragment and holder, timeseries panel attributes, removal of <code>field_edits.js</code> and its
+        Jest cases, view tests for outcome, notice, resent provenance and the user-data rule, E2E probe updates.
+        <small>Depends on A. Carries the two verification steps (multi-select encoding, redundant modified-tagging).</small></li>
+      <li><strong>C · Bookmarks</strong>Template ids and update fragment, fragment response with <code>mounted</code>, rejection status fragment,
+        reconciler, lock-refresh and Undo removal, bookmark Jest and view-test rewrite.
+        <small>Depends on B for the shared "Saving…" style rule and the <code>outcome</code> status pattern.</small></li>
+      <li><strong>D · Reads, exits, Results close and documentation</strong>Three-statement reads with request replacement, blocking-only dirty gate,
+        mission rule, Results chevron button and close-wait removal, architecture and testing page reconciliation, changelog.
+        <small>Depends on A; independent of B and C.</small></li>
     </ol>
     <h3>Verification map</h3>
     <table>
       <thead><tr><th scope="col">Behavior / risk</th><th scope="col">Critical assertion</th><th scope="col">Test layer</th></tr></thead>
       <tbody>
-        <tr><td>Synchronous settle breaks nothing</td><td>Full E2E and Jest pass after step A alone.</td><td>Existing suites</td></tr>
-        <tr><td>Field save outcomes</td><td>After one request: value, "Saved" or "Not saved" text present in the replaced fragment; controls enabled; prerequisite-disabled control still disabled.</td><td>Jest field cases rewritten; E2E delayed-save scenario in <code>test_simplified_inputs.py</code></td></tr>
-        <tr><td>Transport failure</td><td>Network error shows "Not saved", form editable again, next edit saves.</td><td>Jest</td></tr>
-        <tr><td>Untouched provenance omitted</td><td>Value-only edit sends no provenance parameters; provenance-only edit sends them.</td><td>Jest configRequest case</td></tr>
-        <tr><td>Bookmark companions</td><td>Toggling a field updates its companions' checkboxes, locks and labels in all visible bookmarks; Undo visible only after a membership change.</td><td>Jest bookmark lifecycle; existing E2E bookmark flow</td></tr>
-        <tr><td>Configure Save continuation</td><td>Successful save runs the destination once; 422 leaves the draft and runs nothing.</td><td>Jest; E2E Configure failure case</td></tr>
-        <tr><td>Model switch during read</td><td>Switching mid-read shows no error; the destination model shows its remembered view; no Configure form remains in a hidden slot.</td><td>E2E comparison test</td></tr>
-        <tr><td>Results close during recomputation</td><td>During a delayed save both close controls are disabled; once the save completes, closing empties the panel and nothing re-opens it.</td><td>Existing E2E late-refresh case, adapted</td></tr>
+        <tr><td>Synchronous settle breaks nothing</td><td>Full E2E, Python and Jest pass after step A alone.</td><td>Existing suites</td></tr>
+        <tr><td>Prerequisite-disabled controls survive a save</td><td>During a delayed save every workspace control is disabled; after it, editors are enabled and <code>#compare-tab</code> is still disabled, with no restore script.</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:688:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L688:1"><code>test_field_save_disables_both_resident_workspaces_and_restores_controls</code></a>, <code>aria-busy</code> probe replaced by the request class on the totals indicator</td></tr>
+        <tr><td>Field save outcomes</td><td>Success fragment carries "Saved" and <code>data-outcome</code> on the submitted field only; a rejected fragment carries "Not saved" on the submitted field; an unanswered request ends with an empty status, enabled controls, and the next edit saves (PLAN-UPDATE-04).</td><td>View test on <code>outcome</code>; E2E delayed-save parametrisation</td></tr>
+        <tr><td>Declarative triggers</td><td>Blur without edits sends nothing; a changed blur, Enter, select change, provenance change and the empty switch each send one request; Enter then blur sends once; retyping the original sends nothing (PLAN-UPDATE-02); an invalid draft sends nothing and shows the browser message (PLAN-UPDATE-07).</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:745:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L745:1"><code>test_simple_autosave_deduplicates_restores_rejected_field_and_refreshes_results</code></a> and the request-count assertions already in the delayed-save test; no Jest, since there is no module</td></tr>
+        <tr><td>Resent provenance is a no-op</td><td>A value edit that resends the current confidence, comment and source id keeps all three; a comment-only edit keeps an automatic source.</td><td>View test extending <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py:167:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L167:1"><code>test_value_save_targets_one_field_and_both_totals_and_preserves_provenance</code></a></td></tr>
+        <tr><td>User data rule</td><td>A changed value whose source is a hypothesis or automatic replacement is saved with the user-data source and its comment kept; an unchanged value with a new comment keeps the sentinel.</td><td>View test on <code>edit_simplified_input()</code>; E2E "changing an automatically replaced value" flow adapted from the former Jest case</td></tr>
+        <tr><td>Repair notice</td><td>A save with repairs renders the notice paragraph in the workspace header; a save without repairs renders it empty; no <code>simplifiedInputSaved</code> trigger.</td><td>View test on <code>present_edited_input()</code>; existing E2E repair flow</td></tr>
+        <tr><td>Timeseries panel closes after any outcome</td><td>Success and rejection both close the panel; the workspace field shows the matching status; Cancel closes without a request.</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:861:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L861:1"><code>test_focused_hourly_panel_save_cancel_failure_and_mobile_preview</code></a></td></tr>
+        <tr><td>Bookmark fragments</td><td>The patch response renders summary and controls only for mounted instances of affected addresses; "Saved" only on the <code>HX-Trigger</code> instance; no Undo button or inverse anywhere (PLAN-UPDATE-01); 422 renders the modal and one "Not saved" status fragment.</td><td>View tests replacing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_simplified_inputs.py:121:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_simplified_inputs.py#L121:1"><code>test_bookmark_patch_and_inverse_preserve_values_and_retained_help</code></a>; existing E2E bookmark flows</td></tr>
+        <tr><td>Bookmark request</td><td>Payload is <code>patch</code> plus <code>mounted</code> ids and nothing from the surrounding form; creation panels still send <code>simplified_settings</code>.</td><td>Jest bookmark lifecycle, fixtures without JSON responses</td></tr>
+        <tr><td>Failed help then membership change</td><td>After a failed help save, a successful membership save replaces the help with the saved text (accepted change).</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:561:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L561:1"><code>test_nested_creation_settings_and_failed_help_survive_membership_undo</code></a>, Undo steps removed and help assertions inverted for the new rule</td></tr>
+        <tr><td>Dirty Configure gate</td><td>Every shared exit opens the dialog and issues no request; Save shows the saved view, Discard shows the saved view, Stay keeps the draft, and none reaches the destination until the user clicks it again; a rejected save leaves the draft and the gate.</td><td>Jest gate cases; E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:380:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L380:1"><code>test_dirty_configure_protects_every_shared_exit</code></a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:220:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L220:1"><code>test_configure_save_failure_retains_the_draft_and_exit_guard</code></a>, both adjusted</td></tr>
+        <tr><td>View switches on click; replacing reads</td><td>Clicking Simplified inputs shows the slot before the response; a double click on Configure yields one rendered form whose draft is not replaced afterwards.</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:139:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L139:1"><code>test_repeated_configure_entry_does_not_queue_a_draft_replacement</code></a> rewritten to continue both routes; Jest read case asserting the view switch and the single <code>htmx.ajax</code> call</td></tr>
+        <tr><td>Late reads</td><td>A Configure response landing after a model switch stays in the hidden slot and is shown on return (PLAN-UPDATE-08); a saved-view response landing after a switch is shown on return.</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:159:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L159:1"><code>test_abandoned_configure_read_cannot_follow_a_model_switch</code></a>, inverted, plus the saved-view variant</td></tr>
+        <tr><td>Results close</td><td>During a delayed field save both close controls are disabled; after it, closing empties the panel. Closing during a delayed Sankey load empties the panel at once and nothing re-opens it.</td><td>E2E <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:642:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L642:1">two close tests</a> rewritten; Jest case at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:253:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L253:1"><code>model_builder_main.test.js</code> line 253</a> replaced</td></tr>
       </tbody>
     </table>
-    <p>Coverage above is planned, not executed. The Jest rewrite replaces fixtures that dispatch synthetic
-    <code>htmx:beforeSwap</code> and <code>htmx:afterSettle</code> sequences with assertions on rendered fragments.</p>
+    <p>Coverage above is planned, not executed. Field-save behaviour moves from Jest to the Python view tests and E2E, because there is no
+    client module left to unit-test; the remaining Jest files cover bookmark payloads, the dirty gate and the read entry. Fixtures that dispatch
+    synthetic <code>htmx:beforeSwap</code> and <code>htmx:afterSettle</code> sequences are deleted, and
+    <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py:637:1" data-review-source-href="../../../js_tests/build_fixtures.py#L637:1"><code>render_simplified_editor()</code></a> gains an <code>outcome</code> case for the
+    one remaining editor-markup assertion.</p>
   </section>
 
   <section id="decisions">
@@ -474,9 +772,25 @@
       <li><strong>Failed help draft — decided 2026-10-19: accept the overwrite.</strong> Preserving the draft would need a dirty check
       inside the swap, which is the kind of coordination this feature removes, and the exception modal has already reported the
       failure. See <a href="#bookmarks">1.3</a>.</li>
-      <li><strong>Scope of the convention — for review.</strong> Older modules listed as out of scope in the spec keep their patterns
-      until touched. Recommendation: no boy-scout migration inside this feature, to keep the diff reviewable.</li>
+      <li><strong>Scope of the convention — decided 2026-10-19: left to the follow-up.</strong> Older modules listed as out of scope in the spec keep their patterns
+      until touched; the server-rendered-state follow-up note carries the survey and applies the convention to them.</li>
+      <li><strong>Lock selector — decided 2026-10-19: plain <code>:not(:disabled)</code>.</strong> The variant that distinguishes HTMX's own
+      disabling from prerequisites is unreadable; the overlap edge is accepted. See <a href="#platform">1.1</a>.</li>
+      <li><strong>Bookmark Undo — decided 2026-10-19: removed.</strong> Re-clicking the toggle reverts the change; see PLAN-UPDATE-01 in <a href="#bookmarks">1.3</a>.</li>
+      <li><strong>Bookmark fragments need the mounted-instance list — decided 2026-10-19: the browser sends the ids.</strong> Rejected:
+      emitting fragments blindly for both suffixes (HTMX logs a console error for each missing target) and making every open bookmark re-fetch
+      its controls on a body trigger (one request per visible bookmark per save). The ids are view state the server cannot know, the controls
+      are nameless by rule, and the response stays pure HTML. See <a href="#bookmarks">1.3</a>.</li>
+      <li><strong>Results close aborts nothing — decided 2026-10-19.</strong> A late Sankey response into a detached node may log one warning;
+      that is a symptom to see, not a case to hide. See <a href="#results">1.5</a>.</li>
+      <li><strong>Exit resume — decided 2026-10-19: removed.</strong> Guards block and the user repeats the action; see PLAN-UPDATE-05 in <a href="#exits">1.4</a> and the mission rule.</li>
+      <li><strong>Provenance trimming removed — decided 2026-10-19: accepted.</strong> Relies on the documented patch semantics of
+      <code>_apply_metadata()</code>, with the view test row above as the regression guard. See <a href="#field-save">1.2</a>.</li>
+      <li><strong>Constitution §1.4 amendment — follow-up, not part of this feature.</strong> One sentence making "server failures are
+      visible, not softened" immutable, through <code>update-constitution</code> in its own commit after this implementation has exercised the
+      convention text of PLAN-UPDATE-06.</li>
     </ol>
+    <p><strong>Parked, not a prerequisite:</strong> an uncaught exception on an HTMX request is invisible in the browser today; the <code>simplified_inputs()</code> read view is one such case. Visibility must come from the server, so the fix is the backlog item <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/backlog/htmx-aware-server-error-handler/problem.md:1:1" data-review-source-href="../../backlog/htmx-aware-server-error-handler/problem.md#L1:1">htmx-aware-server-error-handler</a>: an HTMX-aware <code>handler500</code> returning the exception modal, after which the bare exception-modal decorator can be retired.</p>
   </section>
 </main>
 </div>
