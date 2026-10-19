@@ -84,6 +84,11 @@
     <li>The <em>Saved</em> text fades after a few seconds through a style rule rather than a timer.</li>
     <li>An invalid draft (empty required value, out-of-range number) is refused before any request with the
     browser's own validation message instead of a scripted <em>Not saved</em>.</li>
+    <li>A changed Simplified value keeps the confidence the user set; today it is reset to none. The saved
+    confidence is the one the user sees, and they can lower it themselves.</li>
+    <li>Switching models still restores each model's last view. After an action that rebuilds the whole builder
+    (duplicate, start blank, import or remove a model), each model opens in its default view: Simplified inputs
+    for a just-opened file with selected inputs, otherwise Modeling.</li>
     <li>Rare edges are accepted rather than scripted around: a control already locked by another request is
     released when that request ends, a moment before a field save finishes; closing Results during a Sankey
     load may log one chart warning; a read answered by a server error leaves its slot empty or stale, visibly,
@@ -219,7 +224,7 @@
 
 <section>
   <h2>6. Open questions</h2>
-  <p>None remaining. Eight questions were resolved on 2026-10-19 and are recorded above as accepted changes:</p>
+  <p>None remaining. Ten questions were resolved on 2026-10-19 and are recorded above as accepted changes:</p>
   <ul>
     <li>The Results panel close keeps no wait. The chevron becomes a button so the existing save lock
     covers it; the touch swipe remains an accepted edge case.</li>
@@ -235,6 +240,10 @@
     <li>Server failures are visible, not softened (PLAN-UPDATE-06): a conventions rule; the field editor is
     declarative and <code>field_edits.js</code> is removed (PLAN-UPDATE-07); entering a view switches on
     click, not on arrival (PLAN-UPDATE-08).</li>
+    <li>A changed value keeps its confidence (PLAN-UPDATE-10 rejected): the server does not reset what the
+    user set.</li>
+    <li>The remembered view lives on each model's slot (PLAN-UPDATE-12), so a builder rebuild resets it
+    instead of a hook re-fetching emptied slots.</li>
   </ul>
 </section>
 
