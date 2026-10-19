@@ -194,8 +194,7 @@ assert those links download the old accepted state, then check a fresh export af
 the file can contain the edit if persistence wins the race. Settlement never replays an activation. An idle native-invalid draft can export the previous
 saved value without a request; a server-rejected save restores accepted fields and requires dismissal of the error
 before a fresh export. Configure export while dirty is blocked in place with a notice; clean Configure export stays on
-that screen. Other Configure exits retain Save/Discard/Stay, and bookmark help and membership Undo retain their
-independent draft behavior. Workspace exports include accepted values from parked models. The focused export E2E
+that screen. Other Configure exits retain Save/Discard/Stay. Workspace exports include accepted values from parked models. The focused export E2E
 coverage is in `test_native_export_during_field_save_uses_repository_state` and
 `test_disabled_export_toggle_never_replays_after_field_save`; Configure coverage is in
 `test_configure_export_blocks_dirty_controls_and_clean_export_stays_open`.

@@ -24080,24 +24080,6 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
 .simplified-workspace .simplified-input-row .confidence-wrap {
   flex: none;
 }
-.simplified-workspace [data-simplified-save-status] {
-  display: block;
-  margin-top: 0.3rem;
-  color: #69768a;
-  font-size: 0.72rem;
-}
-.simplified-workspace [data-simplified-save-status]:empty:not(.htmx-request) {
-  display: none;
-}
-.simplified-workspace [data-simplified-save-status][data-outcome=saved] {
-  animation: simplified-save-status-fade 0.3s ease-in 3s forwards;
-}
-.simplified-workspace [data-simplified-save-status].htmx-request {
-  animation: none;
-}
-.simplified-workspace [data-simplified-save-status].htmx-request::after {
-  content: "Saving…";
-}
 .simplified-workspace .simplified-selection {
   display: grid;
   gap: 0.3rem;
@@ -24151,6 +24133,29 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+:is([data-simplified-save-status], [data-bookmark-status]) {
+  display: block;
+  margin-top: 0.3rem;
+  color: #69768a;
+  font-size: 0.72rem;
+}
+
+:is([data-simplified-save-status], [data-bookmark-status]):empty:not(.htmx-request) {
+  display: none;
+}
+
+:is([data-simplified-save-status], [data-bookmark-status])[data-outcome=saved] {
+  animation: simplified-save-status-fade 0.3s ease-in 3s forwards;
+}
+
+:is([data-simplified-save-status], [data-bookmark-status]).htmx-request {
+  animation: none;
+}
+
+:is([data-simplified-save-status], [data-bookmark-status]).htmx-request::after {
+  content: "Saving…";
+}
+
 @keyframes simplified-save-status-fade {
   to {
     opacity: 0;

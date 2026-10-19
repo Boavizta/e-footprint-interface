@@ -181,50 +181,28 @@ function bookmark(owner, attribute, provisional = false) {
     }
     return element;
 }
-function bookmarkResponse(element, result, failed = false) {
-    document.body.dispatchEvent(new CustomEvent("htmx:afterRequest", {bubbles: true, detail: {
-        elt: element, successful: !failed, xhr: {responseText: JSON.stringify(result),
-            status: failed ? 422 : 200}
-    }}));
-}
 
-test("inline settings payload excludes the surrounding value draft and failed saves preserve controls", () => {
+test("inline settings payload carries only the patch and mounted saved bookmark ids", () => {
     mount().remove();
     window.htmx.trigger = jest.fn();
     const form = document.createElement("form");
     form.innerHTML = '<input name="Storage_storage_capacity" value="9999">';
     const element = bookmark("storage", "storage_capacity");
-    form.appendChild(element);
-    document.body.appendChild(form);
+    element.id = "bookmark-storage-storage_capacity-panel";
+    const companion = bookmark("storage", "storage_capacity");
+    companion.id = "bookmark-storage-storage_capacity-sources";
+    const provisional = bookmark("object", "resolution", true);
+    provisional.id = "bookmark-object-resolution-panel";
+    form.append(element, provisional);
+    document.body.append(form, companion);
     element.querySelector("[data-include-input]").checked = true;
     element.querySelector("[data-include-input]").dispatchEvent(new Event("change", {bubbles: true}));
+    expect(window.htmx.trigger).toHaveBeenCalledWith(element, "bookmark-save");
     const parameters = {};
     document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: element, parameters}}));
+    expect(Object.keys(parameters)).toEqual(["patch", "mounted"]);
     expect(JSON.parse(parameters.patch)).toEqual({fields: {storage: {storage_capacity: {included: true}}}});
-    expect(Object.keys(parameters)).toEqual(["patch"]);
-    bookmarkResponse(element, {}, true);
-    expect(form.querySelector("[name]").value).toBe("9999");
-    expect(element.querySelector("[data-include-input]").checked).toBe(true);
-    expect(element.querySelector("[data-bookmark-status]").textContent).toBe("Not saved");
-});
-
-test("bookmark success updates visible membership only, preserves independent help draft and offers inverse Undo", () => {
-    mount().remove();
-    window.htmx.trigger = jest.fn();
-    const first = bookmark("storage", "storage_capacity");
-    const second = bookmark("storage", "storage_capacity");
-    second.querySelector("textarea").value = "Unsaved help";
-    document.body.append(first, second);
-    const inverse = {fields: {storage: {storage_capacity: {included: false}}}};
-    bookmarkResponse(first, {fields: [{object_id: "storage", attribute: "storage_capacity",
-        setting: {included: true, help: ""}, required_by: null}], inverse});
-    expect(first.querySelector("[data-include-input]").checked).toBe(true);
-    expect(second.querySelector("[data-include-input]").checked).toBe(true);
-    expect(second.querySelector("textarea").value).toBe("Unsaved help");
-    expect(first.querySelector("button").hidden).toBe(false);
-    first.querySelector("button").click();
-    expect(JSON.parse(first.dataset.pendingPatch)).toEqual(inverse);
-    expect(window.htmx.trigger).toHaveBeenCalledWith(first, "bookmark-save");
+    expect(JSON.parse(parameters.mounted)).toEqual([element.id, companion.id]);
 });
 
 test("creation requirements follow candidates, release forced membership and retain help", () => {

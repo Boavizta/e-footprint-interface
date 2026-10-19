@@ -119,19 +119,52 @@ class TestSimplifiedViews:
         again = client.get("/model_builder/", HTTP_HX_REQUEST="true").content.decode()
         assert "data-opening-default" not in again
 
-    def test_bookmark_patch_and_inverse_preserve_values_and_retained_help(self, client, minimal_system_data):
+    def patch_bookmarks(self, client, patch, mounted, trigger=None):
+        headers = {"HTTP_HX_TRIGGER": trigger} if trigger else {}
+        return client.post("/model_builder/patch-simplified-inputs/", {
+            "patch": json.dumps(patch), "mounted": json.dumps(mounted), "Storage_storage_capacity": "999999"},
+            **headers)
+
+    @staticmethod
+    def bookmark_fragments(html):
+        """Map each out-of-band bookmark fragment, which starts at its summary, to its bookmark id."""
+        return {chunk.split("-summary", 1)[0]: chunk for chunk in html.split('<summary id="')[1:]}
+
+    def test_bookmark_patch_renders_mounted_instances_and_saved_only_on_the_trigger(self, client, minimal_system_data):
+        model = self.save_model(client, minimal_system_data)
+        server_id = model.servers[0].efootprint_id
+        trigger = f"bookmark-{server_id}-server_type-panel"
+        companion = f"bookmark-{server_id}-fixed_nb_of_instances-sources"
+        mounted = [trigger, f"bookmark-{server_id}-server_type-sources", companion,
+                   f"bookmark-{server_id}-lifespan-panel"]
+        response = self.patch_bookmarks(client, {"fields": {server_id: {"server_type": {"included": True}}}},
+                                        mounted, trigger)
+        assert response.status_code == 200
+        html = response.content.decode()
+        fragments = self.bookmark_fragments(html)
+        assert set(fragments) == set(mounted[:3])
+        for dom_id, fragment in fragments.items():
+            assert 'hx-swap-oob="outerHTML"' in fragment.split("</summary>")[0]
+            assert f'<div id="{dom_id}-controls" hx-swap-oob="innerHTML">' in fragment
+            assert "Included in Simplified inputs" in fragment
+        assert html.count(">Saved</small>") == 1
+        assert f'id="{trigger}-status" data-bookmark-status role="status" data-outcome="saved">Saved</small>' in html
+        assert "Required by" in fragments[companion].split("</summary>")[0]
+        assert re.search(r'data-include-input checked\s+disabled', fragments[companion])
+        assert "inverse" not in html and "Undo" not in html
+
+    def test_bookmark_patch_preserves_values_and_retained_help(self, client, minimal_system_data):
         model = self.save_model(client, minimal_system_data)
         owner = model.servers[0].storage.efootprint_id
+        bookmark_id = f"bookmark-{owner}-storage_capacity-panel"
         original = deepcopy(SessionSystemRepository(client.session).get_system_data())
-        response = client.post("/model_builder/patch-simplified-inputs/", {
-            "patch": json.dumps({"fields": {owner: {"storage_capacity": {"included": True, "help": "Capacity help"}}}}),
-            "Storage_storage_capacity": "999999"})
-        assert response.status_code == 200
-        payload = response.json()
-        assert payload["fields"][0]["object_id"] == owner
-        assert payload["inverse"] == {"fields": {owner: {"storage_capacity": {"included": False}}}}
-        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps(payload["inverse"])})
-        assert response.json()["fields"][0]["setting"] == {"included": False, "help": "Capacity help"}
+        self.patch_bookmarks(client, {"fields": {owner: {"storage_capacity": {"included": True, "help": "Capacity help"}}}},
+                             [bookmark_id], bookmark_id)
+        response = self.patch_bookmarks(client, {"fields": {owner: {"storage_capacity": {"included": False}}}},
+                                        [bookmark_id], bookmark_id)
+        fragment = self.bookmark_fragments(response.content.decode())[bookmark_id]
+        assert "Not included in Simplified inputs" in fragment
+        assert ">Capacity help</textarea>" in fragment
         current = SessionSystemRepository(client.session).get_system_data()
         assert current["Storage"][owner] == original["Storage"][owner]
 
@@ -139,21 +172,35 @@ class TestSimplifiedViews:
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         model = self.save_model(client, minimal_system_data)
         server_id = model.servers[0].efootprint_id
-        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
-            server_id: {"server_type": {"included": True}}}})})
-        fields = response.json()["fields"]
-        required = next(field for field in fields if field["attribute"] == "fixed_nb_of_instances")
-        assert required["setting"]["included"]
-        assert required["required_by"]["attribute"] == "server_type"
+        trigger = f"bookmark-{server_id}-fixed_nb_of_instances-panel"
+        self.patch_bookmarks(client, {"fields": {server_id: {"server_type": {"included": True}}}}, [])
         original = deepcopy(SessionSystemRepository(client.session).get_system_data())
-        response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
-            server_id: {"fixed_nb_of_instances": {"included": False}}}})})
+        response = self.patch_bookmarks(client, {"fields": {server_id: {"fixed_nb_of_instances": {"included": False}}}},
+                                        [trigger], trigger)
         assert response.status_code == 422
         assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
         html = response.content.decode()
         assert "closeAndEmptySidePanel()" not in html and "hidePanelResult()" not in html
+        assert html.count("data-bookmark-status") == 1
+        assert (f'<small id="{trigger}-status" hx-swap-oob="outerHTML" data-bookmark-status role="status" '
+                f'data-outcome="rejected">Not saved</small>') in html
+        assert "<summary" not in html
         assert SessionSystemRepository(client.session).get_system_data() == original
+
+    @pytest.mark.parametrize("mounted", [None, "not-json"])
+    def test_bookmark_patch_without_valid_mounted_ids_is_rejected(
+            self, client, minimal_system_data, monkeypatch, mounted):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        before = deepcopy(SessionSystemRepository(client.session).interface_config)
+        data = {"patch": json.dumps({"fields": {model.servers[0].efootprint_id: {"lifespan": {"included": True}}}})}
+        if mounted is not None:
+            data["mounted"] = mounted
+        response = client.post("/model_builder/patch-simplified-inputs/", data)
+        assert response.status_code == 422
+        assert "data-bookmark-status" not in response.content.decode()
+        assert SessionSystemRepository(client.session).interface_config == before
 
     def test_bookmark_controls_are_lazy_for_sources(self, client, minimal_system_data):
         model = self.save_model(client, minimal_system_data)
@@ -425,7 +472,10 @@ class TestSimplifiedViews:
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         self.save_model(client, minimal_system_data)
         before = deepcopy(SessionSystemRepository(client.session).get_system_data())
-        response = client.post(f"/model_builder/{endpoint}/", {} if payload is None else {parameter: payload})
+        data = {} if payload is None else {parameter: payload}
+        if endpoint == "patch-simplified-inputs" and payload is not None:
+            data["mounted"] = "[]"
+        response = client.post(f"/model_builder/{endpoint}/", data)
         assert response.status_code == 422
         assert response["HX-Reswap"] == "none"
         assert 'id="modal-container" hx-swap-oob="true"' in response.content.decode()
@@ -514,10 +564,14 @@ class TestSimplifiedViews:
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
         model = self.save_model(client, minimal_system_data)
         before = deepcopy(SessionSystemRepository(client.session).interface_config)
+        trigger = f"bookmark-{model.servers[0].efootprint_id}-lifespan-panel"
         with patch.object(SessionSystemRepository, "save_interface_config", side_effect=ValueError("Save rejected")):
-            response = client.post("/model_builder/patch-simplified-inputs/", {"patch": json.dumps({"fields": {
-                model.servers[0].efootprint_id: {"lifespan": {"included": True}}}})})
+            response = self.patch_bookmarks(client, {"fields": {
+                model.servers[0].efootprint_id: {"lifespan": {"included": True}}}}, [trigger], trigger)
         assert response.status_code == 500
         assert response["HX-Reswap"] == "none"
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
+        html = response.content.decode()
+        assert html.count("data-bookmark-status") == 1
+        assert f'id="{trigger}-status" hx-swap-oob="outerHTML"' in html and ">Not saved</small>" in html
         assert SessionSystemRepository(client.session).interface_config == before

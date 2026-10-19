@@ -53,12 +53,6 @@
   .simplified-input-row { display: flex; align-items: center; gap: .5rem; width: 100%; max-width: 28rem; }
   .simplified-input-control { flex: 1; min-width: 0; }
   .simplified-input-row .confidence-wrap { flex: none; }
-  [data-simplified-save-status] { display: block; margin-top: .3rem; color: #69768a; font-size: .72rem; }
-  [data-simplified-save-status]:empty:not(.htmx-request) { display: none; }
-  [data-simplified-save-status][data-outcome="saved"] { animation: simplified-save-status-fade .3s ease-in 3s forwards; }
-  // Each request clears the previous outcome; drop its finished fade so "Saving…" shows.
-  [data-simplified-save-status].htmx-request { animation: none; }
-  [data-simplified-save-status].htmx-request::after { content: "Saving…"; }
   .simplified-selection { display: grid; gap: .3rem; }
   .simplified-selection textarea { min-height: 4rem; }
   &[data-mode="configure"] .simplified-field { padding: .65rem; border: 1px solid #d8dfe8; border-radius: .4rem; }
@@ -81,6 +75,13 @@
 @container (max-width: 500px) {
   .simplified-workspace .simplified-fields { grid-template-columns: minmax(0, 1fr); }
 }
+// Field editors and bookmarks share one server-rendered save outcome.
+:is([data-simplified-save-status], [data-bookmark-status]) { display: block; margin-top: .3rem; color: #69768a; font-size: .72rem; }
+:is([data-simplified-save-status], [data-bookmark-status]):empty:not(.htmx-request) { display: none; }
+:is([data-simplified-save-status], [data-bookmark-status])[data-outcome="saved"] { animation: simplified-save-status-fade .3s ease-in 3s forwards; }
+// Each request clears the previous outcome; drop its finished fade so "Saving…" shows.
+:is([data-simplified-save-status], [data-bookmark-status]).htmx-request { animation: none; }
+:is([data-simplified-save-status], [data-bookmark-status]).htmx-request::after { content: "Saving…"; }
 @keyframes simplified-save-status-fade { to { opacity: 0; font-size: 0; margin-top: 0; } }
 [data-quick-total-status].htmx-request::after { content: "Updating…"; }
 #simplified-exit-dialog {

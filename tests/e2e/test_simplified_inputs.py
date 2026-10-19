@@ -35,6 +35,14 @@ def reject_simplified_edit(route):
     route.fulfill(response=route.fetch(post_data=urlencode(data)))
 
 
+def reject_bookmark_patch(route):
+    from urllib.parse import parse_qsl, urlencode
+
+    data = dict(parse_qsl(route.request.post_data))
+    data["patch"] = json.dumps({"fields": {"missing-owner": {"storage_capacity": {"included": True}}}})
+    route.continue_(post_data=urlencode(data))
+
+
 @pytest.mark.e2e
 class TestSimplifiedInputs:
     def test_optional_count_switch_in_modeling_and_simplified_inputs(self, minimal_complete_model_builder):
@@ -465,7 +473,10 @@ class TestInlineBookmarks:
         expect(storage_bookmark.locator("summary")).to_have_attribute("title", "Included in Simplified inputs. Open settings.")
         expect(draft).to_have_value("1234")
         expect(page.locator("#sidePanel")).to_be_visible()
-        click_and_wait_for_htmx(page, storage_bookmark.locator('[data-action="bookmark-undo"]'))
+        with page.expect_response("**/patch-simplified-inputs/"):
+            storage_bookmark.locator("[data-include-input]").uncheck()
+        expect(storage_bookmark.locator("summary")).to_have_attribute(
+            "title", "Not included in Simplified inputs. Open settings.")
         expect(storage_bookmark.locator("[data-include-input]")).not_to_be_checked()
         expect(draft).to_have_value("1234")
         # Close the value draft through the existing discard flow.
@@ -567,7 +578,7 @@ class TestInlineBookmarks:
         assert not any(setting.get("help") == "Resolution help retained" for attributes in fields.values()
                        for setting in attributes.values())
 
-    def test_nested_creation_settings_and_failed_help_survive_membership_undo(self, minimal_complete_model_builder):
+    def test_nested_creation_settings_and_failed_help_replaced_by_membership_save(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
         page = builder.page
         builder.click_add_server()
@@ -583,19 +594,28 @@ class TestInlineBookmarks:
         expect(bookmark.locator("[data-include-input]")).to_be_checked()
         help_field = bookmark.locator("textarea")
         expect(help_field).to_have_value("Nested storage help")
-        page.route("**/patch-simplified-inputs/", lambda route: route.abort("failed"))
+        page.route("**/patch-simplified-inputs/", reject_bookmark_patch)
         help_field.fill("Failed help draft")
-        help_field.press("Tab")
-        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
-        page.unroute("**/patch-simplified-inputs/")
         with page.expect_response("**/patch-simplified-inputs/"):
-            bookmark.locator("[data-include-input]").uncheck()
-        expect(help_field).to_have_value("Failed help draft")
+            help_field.press("Tab")
+        expect(page.locator("#model-builder-modal")).to_be_visible()
         expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
-        click_and_wait_for_htmx(page, bookmark.locator('[data-action="bookmark-undo"]'))
-        expect(bookmark.locator("[data-include-input]")).to_be_checked()
         expect(help_field).to_have_value("Failed help draft")
-        expect(bookmark.locator("[data-bookmark-status]")).to_have_text("Not saved")
+        page.locator("#model-builder-modal .btn-close").click()
+        page.unroute("**/patch-simplified-inputs/")
+        held = []
+        page.route("**/patch-simplified-inputs/", lambda route: held.append(route))
+        bookmark.locator("[data-include-input]").uncheck()
+        status = bookmark.locator("[data-bookmark-status]")
+        expect(status).to_have_class(re.compile("htmx-request"))
+        expect(status).to_have_text("")
+        assert status.evaluate("el => getComputedStyle(el, '::after').content") == '"Saving…"'
+        with page.expect_response("**/patch-simplified-inputs/"):
+            held[0].continue_()
+        page.unroute("**/patch-simplified-inputs/")
+        expect(status).to_have_text("Saved")
+        expect(bookmark.locator("[data-include-input]")).not_to_be_checked()
+        expect(help_field).to_have_value("Nested storage help")
         help_field.fill("Retried storage help")
         with page.expect_response("**/patch-simplified-inputs/"):
             help_field.press("Enter")
@@ -625,7 +645,6 @@ class TestInlineBookmarks:
         assert not exported.get("interface_config", {}).get("simplified_inputs", {}).get("fields", {})
 
     def test_failed_bookmark_preserves_the_panel_and_unsaved_value(self, minimal_complete_model_builder):
-        from urllib.parse import urlencode
         builder = minimal_complete_model_builder
         page = builder.page
         builder.get_object_card("Server", "Test Server").click_edit_button()
@@ -633,8 +652,7 @@ class TestInlineBookmarks:
         draft.fill("9876")
         bookmark = page.locator('#field-group-Storage_storage_capacity [data-bookmark]')
         bookmark.locator("summary").click()
-        page.route("**/patch-simplified-inputs/", lambda route: route.continue_(post_data=urlencode({
-            "patch": json.dumps({"fields": {"missing-owner": {"storage_capacity": {"included": True}}}})})))
+        page.route("**/patch-simplified-inputs/", reject_bookmark_patch)
         with page.expect_response("**/patch-simplified-inputs/"):
             bookmark.locator("[data-include-input]").check()
         expect(page.locator("#model-builder-modal")).to_be_visible()

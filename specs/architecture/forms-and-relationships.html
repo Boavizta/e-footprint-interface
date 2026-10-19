@@ -67,9 +67,12 @@ guard restores controls. Simplified value controls are capped in width; confiden
 <h3 id="inline-bookmarks">Inline simplified-input bookmarks</h3>
 <p><code>simplified_input_context.py</code> joins the authoritative catalog and saved definition with normal form
 fields; nested Storage fields carry Storage’s owner ID. <code>bookmark.html</code> discloses the shared
-<code>selection_controls.html</code> without changing membership on opening. Existing bookmarks send settings-only
-patches, update visible bookmark state, and keep surrounding value and independent help drafts in place. Undo sends an
-inverse membership patch checked against current dependencies. Edit forms close only for their own completed request,
+<code>selection_controls.html</code> without changing membership on opening. Existing bookmarks send a settings-only
+patch plus the ids of every mounted saved bookmark, never the surrounding form's values. The patch answers with
+out-of-band summary and controls fragments for each mounted instance of the affected addresses, companions included,
+and marks Saved only on the issuing instance; the <code>&lt;details&gt;</code> itself is never replaced. A rejected patch
+adds one Not saved status to the issuing bookmark. The next accepted fragment replaces a help draft whose save failed.
+Re-clicking the membership toggle reverts a change. Edit forms close only for their own completed request,
 so a bookmark’s bubbling HTMX response cannot clear the panel. Native <code>details[name]</code> groups keep one
 disclosure open per surface (panel or Sources); membership and required-controller labels follow accepted settings.
 Panel disclosures expand in the label row’s normal flow so they cannot cover the next field’s controls.</p>

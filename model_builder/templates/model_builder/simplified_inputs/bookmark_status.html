@@ -1,0 +1,1 @@
+<small id="{{ field.dom_id }}-status"{% if oob %} hx-swap-oob="outerHTML"{% endif %} data-bookmark-status role="status"{% if outcome %} data-outcome="{{ outcome }}"{% endif %}>{% if outcome == "saved" %}Saved{% elif outcome == "rejected" %}Not saved{% endif %}</small>

@@ -1,13 +1,11 @@
 "use strict";
 
 // Membership/help patches and provisional selection during object creation.
-// Bookmark saves update settings without submitting surrounding value drafts.
-function updateBookmark(bookmark, setting, requiredBy) {
+// Bookmark saves send only their patch and the mounted bookmark ids; the server answers with fragments.
+function updateProvisionalBookmark(bookmark, setting, requiredBy) {
     const checkbox = bookmark.querySelector("[data-include-input]");
     const help = bookmark.querySelector("[data-field-help]");
     const explanation = bookmark.querySelector("[data-required-explanation]");
-    bookmark.dataset.savedIncluded = String(setting.included);
-    bookmark.dataset.requiredLabel = requiredBy?.label || "";
     bookmark.querySelector("[data-bookmark-icon]").className = `bi bi-bookmark${setting.included ? "-fill" : ""}`;
     const summary = bookmark.querySelector("summary");
     const state = `${setting.included ? "Included" : "Not included"} in Simplified inputs.`;
@@ -59,7 +57,7 @@ function refreshCreationBookmarks() {
     }
     bookmarks.forEach(bookmark => {
         const checkbox = bookmark.querySelector("[data-include-input]");
-        updateBookmark(bookmark, {included: checkbox.checked, help: bookmark.querySelector("[data-field-help]").value},
+        updateProvisionalBookmark(bookmark, {included: checkbox.checked, help: bookmark.querySelector("[data-field-help]").value},
             bookmark.dataset.requiredLabel ? {label: bookmark.dataset.requiredLabel} : null);
     });
 }
@@ -71,16 +69,9 @@ function pendingCreationSettings(panel) {
             help: bookmark.querySelector("[data-field-help]").value}))
         .filter(setting => setting.included || setting.help);
 }
-function saveBookmark(bookmark, patch, undo = false) {
+function saveBookmark(bookmark, patch) {
     bookmark.dataset.pendingPatch = JSON.stringify(patch);
-    bookmark.dataset.pendingUndo = String(undo);
     window.htmx.trigger(bookmark, "bookmark-save");
-}
-function refreshBookmarkLocks() {
-    document.querySelectorAll("[data-bookmark]:not([data-provisional-owner])").forEach(bookmark => {
-        const checkbox = bookmark.querySelector("[data-include-input]");
-        if (checkbox) checkbox.disabled = !!bookmark.dataset.requiredLabel;
-    });
 }
 
 function registerBookmarks() {
@@ -111,49 +102,17 @@ function registerBookmarks() {
             event.target.blur();
         }
     });
-    document.addEventListener("click", event => {
-        const button = event.target.closest('[data-action="bookmark-undo"]');
-        if (button) {
-            const bookmark = button.closest("[data-bookmark]");
-            saveBookmark(bookmark, JSON.parse(bookmark.dataset.inversePatch), true);
-        }
-    });
     document.body.addEventListener("htmx:configRequest", event => {
         const element = event.detail.elt;
-        if (element.matches("[data-bookmark]")) event.detail.parameters.patch = element.dataset.pendingPatch;
+        // Controls are nameless so the surrounding form never submits them; the payload is built here.
+        if (element.matches("[data-bookmark]")) {
+            event.detail.parameters.patch = element.dataset.pendingPatch;
+            event.detail.parameters.mounted = JSON.stringify([...document.querySelectorAll(
+                "[data-bookmark]:not([data-provisional-owner])")].map(bookmark => bookmark.id));
+        }
         const panel = element.matches("#sidePanelForm") ? element.closest("#sidePanelContent") : null;
         if (panel?.querySelector("[data-provisional-owner]")) {
             event.detail.parameters.simplified_settings = JSON.stringify(pendingCreationSettings(panel));
-        }
-    });
-    document.body.addEventListener("htmx:afterRequest", event => {
-        const bookmark = event.detail.elt;
-        if (!bookmark?.matches("[data-bookmark]")) return;
-        const failed = event.detail.successful !== true;
-        bookmark.querySelector("[data-bookmark-status]").textContent = failed ? "Not saved" : "Saved";
-        if (failed) return;
-        const result = JSON.parse(event.detail.xhr.responseText);
-        const submitted = JSON.parse(bookmark.dataset.pendingPatch).fields;
-        result.fields.forEach(field => {
-            document.querySelectorAll("[data-bookmark]").forEach(visible => {
-                if (visible.dataset.ownerId !== field.object_id || visible.dataset.attribute !== field.attribute) return;
-                // A membership/Undo response must not replace help whose own save failed.
-                const help = visible.querySelector("[data-field-help]");
-                const draft = help?.value;
-                const dirtyHelp = help && draft !== help.defaultValue;
-                updateBookmark(visible, field.setting, field.required_by);
-                const savedHelp = visible === bookmark
-                    && Object.hasOwn(submitted[field.object_id]?.[field.attribute] || {}, "help");
-                if (dirtyHelp && !savedHelp) help.value = draft;
-            });
-        });
-        const help = bookmark.querySelector("[data-field-help]");
-        if (help.value !== help.defaultValue) bookmark.querySelector("[data-bookmark-status]").textContent = "Not saved";
-        if (Object.keys(result.inverse.fields).length && bookmark.dataset.pendingUndo !== "true") {
-            bookmark.dataset.inversePatch = JSON.stringify(result.inverse);
-            bookmark.querySelector('[data-action="bookmark-undo"]').hidden = false;
-        } else if (bookmark.dataset.pendingUndo === "true") {
-            bookmark.querySelector('[data-action="bookmark-undo"]').hidden = true;
         }
     });
     document.body.addEventListener("htmx:afterSettle", event => {
@@ -161,17 +120,9 @@ function registerBookmarks() {
         if (bookmark?.open) bookmark.querySelector("[data-bookmark-content]").scrollIntoView({block: "nearest"});
     });
     document.addEventListener("initDynamicForm", refreshCreationBookmarks);
-    document.body.addEventListener("htmx:afterSettle", refreshBookmarkLocks);
-    document.body.addEventListener("switchModelCanvas", refreshBookmarkLocks);
-    document.addEventListener("DOMContentLoaded", refreshBookmarkLocks);
     document.addEventListener("input", event => {
         if (event.target.closest("[data-provisional-owner]")) window.tagFormAsModified();
     });
-    document.body.addEventListener("htmx:beforeRequest", event => {
-        if (event.detail.elt.matches("[data-bookmark]")) {
-            event.detail.elt.querySelector("[data-bookmark-status]").textContent = "Saving…";
-        }
-    });
 }
 
-module.exports = { updateBookmark, refreshCreationBookmarks, pendingCreationSettings, registerBookmarks };
+module.exports = { refreshCreationBookmarks, pendingCreationSettings, registerBookmarks };

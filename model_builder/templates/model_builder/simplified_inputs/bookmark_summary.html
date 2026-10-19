@@ -1,0 +1,4 @@
+<summary id="{{ field.dom_id }}-summary"{% if oob %} hx-swap-oob="outerHTML"{% endif %} aria-label="{{ field.setting.included|yesno:'Included in Simplified inputs,Not included in Simplified inputs' }}. Open settings."
+         title="{{ field.setting.included|yesno:'Included in Simplified inputs,Not included in Simplified inputs' }}.{% if field.required_by %} Required by {{ field.required_by.label }}.{% endif %} Open settings." data-workspace-control>
+    <i class="bi {% if field.setting.included %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}" data-bookmark-icon aria-hidden="true"></i>
+</summary>
