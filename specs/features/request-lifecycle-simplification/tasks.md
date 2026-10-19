@@ -1,7 +1,7 @@
 # Request lifecycle simplification — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: under review. All plan amendments are decided.
+Status: run A tasks implemented and reviewed; global review and plan-review-guide pass pending. Decisions: [implementation decisions index](plan.html#impl-decisions).
 
 ## Implementation runs
 
@@ -31,7 +31,7 @@ Status: under review. All plan amendments are decided.
 
 Goal: Make `htmx:afterRequest` mean "DOM final" everywhere and stop HTMX re-enabling prerequisite-disabled controls, with no client restore step.
 
-Status: under review
+Status: done — `a12771fe..f0a0b38e`
 
 Brief: [briefs/task-1.md](briefs/task-1.md)
 
@@ -58,7 +58,7 @@ Implementation: easy — one config flag, a mechanical selector replacement with
 
 Goal: Replace `field_edits.js` with HTMX attributes, a server-rendered outcome and CSS, keeping the field-save behavior the spec preserves.
 
-Status: under review
+Status: done — `f0a0b38e..63a5284b`
 
 Brief: [briefs/task-2.md](briefs/task-2.md)
 
@@ -86,7 +86,7 @@ Implementation: standard — combines established HTMX attributes, an existing o
 
 Goal: Make the bookmark patch endpoint return rendered fragments for every mounted instance, and drop the client reconciler and Undo.
 
-Status: under review
+Status: done — `63a5284b..0c683307`
 
 Brief: [briefs/task-3.md](briefs/task-3.md)
 
@@ -106,13 +106,15 @@ Acceptance:
 
 Depends on: Task 2 (shared "Saving…" rule and outcome-status pattern).
 
+Leads from Task 2 review: `bookmark.html` lost its `data-workspace-editor` attribute in `63a5284b`. The field editor clears its previous outcome with `hx-on::before-request` so a stale Saved cannot replay on an unanswered request; apply the same clear to the bookmark status.
+
 Implementation: standard — a new fragment template and view response built from an existing context builder, with a defined instance-matching rule
 
 ## Task 4 — Reads, exits, Results close and close-out docs
 
 Goal: Make saved-view reads and Configure exits use HTMX's request replacement and a gate that only blocks, close Results at once, and reconcile the remaining docs and the changelog.
 
-Status: under review
+Status: done — `0c683307..ae1e625b` (Configure Save lock recorded as [IMPL-DECISION-03](plan.html#impl-decision-03))
 
 Brief: [briefs/task-4.md](briefs/task-4.md)
 
@@ -134,6 +136,8 @@ Acceptance:
 
 Depends on: Task 1. The changelog and the rest of the reconciliation also depend on Tasks 2 and 3.
 
+Leads from Task 1 review: `hammer_utils.js` (around line 86) and the Jest case near `model_builder_main.test.js` line 206 still treat the settle classes as pending; both belong to the Results-close rewrite. The `testing.md` sentence saying side-panel submissions wait for "request/settling classes" describes dead page-object waits and should be reconciled.
+
 Implementation: standard — mostly removal toward sketched code. Gate and E2E rewrites need ordinary care with focus and request timing.
 
 ## Gates and prerequisites
@@ -142,3 +146,6 @@ Implementation: standard — mostly removal toward sketched code. Gate and E2E r
 - **Blocks later tasks:** Task 1's full green E2E run against rebuilt assets is the evidence for synchronous settle. Tasks 2 to 4 rely on it. Run against a local `runserver` from this checkout with `npm run build:js:dev` and the compiled SCSS.
 - **No other gate:** no migration, library change or serialization change. `pyproject.toml` already pins PyPI `efootprint`.
 - **Follow-up, not part of this run:** the constitution §1.4 sentence through `update-constitution` (decision 10), and the parked `htmx-aware-server-error-handler` backlog item.
+- **Pre-existing defects surfaced during run A (confirmed by the Task 3 reviewer to predate `a12771fe`; parked, not fixed here):**
+  - `htmx:oobErrorNoTarget` is logged by canvas inline count edits, model-comparison count saves (`views_dict_mutation.py` always emits the side-panel membership-section region, even with no edit panel open) and edge device-group linking (same unconditional-region mechanism in `oob_regions.py`). Proposed fix: emit membership-section regions only when the client reports the panel open, or tolerate the missing target.
+  - `delete_card_modal.html` runs a hyperscript `remove #<card id>` on `afterRequest` after the response has already removed that card, logging an "is null" error. Proposed fix: have the server emit an out-of-band delete and drop the hyperscript.
