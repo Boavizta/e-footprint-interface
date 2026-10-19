@@ -1,7 +1,7 @@
 # Request lifecycle simplification — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: run A tasks implemented and reviewed; global review and plan-review-guide pass pending. Decisions: [implementation decisions index](plan.html#impl-decisions).
+Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`, including the plan review-guide commit `5304aa55`). Decisions: [implementation decisions index](plan.html#impl-decisions). Next: `feature-archive` after shipping.
 
 ## Implementation runs
 
