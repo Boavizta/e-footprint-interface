@@ -22,7 +22,7 @@
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
-                hx-disabled-elt="button"
+                hx-disabled-elt="button:not(:disabled)"
                 _="
                     on mouseover remove .d-none from #edit-icon-system-name
                     on mouseout add .d-none to #edit-icon-system-name
@@ -117,7 +117,7 @@
                     <button hx-get="{% url 'open-import-json-panel' %}"
                             hx-target="#sidePanel"
                             hx-swap="innerHTML"
-                            hx-disabled-elt="button"
+                            hx-disabled-elt="button:not(:disabled)"
                             class="nav-link d-flex flex-row gap-2 mx-2"
                             data-bs-toggle="tooltip"
                             data-bs-title="Open a file"

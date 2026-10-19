@@ -13,7 +13,7 @@
         {% if htmx_config.hx_swap %}
           hx-swap="{{ htmx_config.hx_swap }}"
         {% endif %}
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()">
     {% include "model_builder/side_panels/add/add_form_content.html" %}
     </form>

@@ -4,7 +4,7 @@
     <form id="sidePanelForm"
           hx-post="/model_builder/edit-object/{{ parent_id }}/"
           hx-swap="none"
-          hx-disabled-elt="button"
+          hx-disabled-elt="button:not(:disabled)"
           hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
     >
         {% csrf_token %}

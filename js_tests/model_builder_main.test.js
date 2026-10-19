@@ -129,25 +129,6 @@ test("a rejected card-order response does not refresh storage metadata", async (
     expect(global.htmx.ajax).not.toHaveBeenCalled();
 });
 
-test("HTMX button restoration does not overwrite control state changed during a request", () => {
-    document.body.innerHTML = `
-        <button id="persistently-disabled" disabled>Unavailable</button>
-        <input id="builder-payload" disabled>
-    `;
-    loadModule();
-    const xhr = {};
-    const button = document.getElementById("persistently-disabled");
-    const payload = document.getElementById("builder-payload");
-
-    document.body.dispatchEvent(new CustomEvent("htmx:beforeRequest", {detail: {xhr}}));
-    button.disabled = false;
-    payload.disabled = false;
-    document.body.dispatchEvent(new CustomEvent("htmx:afterRequest", {detail: {xhr}}));
-
-    expect(button.disabled).toBe(true);
-    expect(payload.disabled).toBe(false);
-});
-
 test("model replacement keeps its ordinary destructive confirmation", () => {
     document.body.innerHTML = `
         <div class="model-builder-card">Current modeling</div>
@@ -190,48 +171,6 @@ test.each([true, false])("OOB replacements preserve the accordion transition des
     expect(replacement.querySelector(".accordion-collapse").classList.contains("show")).toBe(open);
     expect(replacement.querySelector("[data-bs-toggle='collapse']").getAttribute("aria-expanded")).toBe(String(open));
     expect(replacement.querySelector("[id^='icon_accordion_']").classList.contains("chevron-rotate")).toBe(open);
-});
-
-test("native disabling restores prerequisite controls in both resident workspaces and leaves replacements alone", () => {
-    document.body.innerHTML = `
-        <button id="unavailable" disabled>Unavailable</button>
-        <div data-simplified-workspace><input disabled><select disabled></select></div>
-        <div data-simplified-workspace hidden><textarea disabled></textarea></div>
-        <input id="outside" disabled>
-    `;
-    loadModule();
-    const xhr = {};
-    requestEvent("htmx:beforeRequest", {xhr});
-    document.querySelectorAll("[disabled]").forEach(element => element.disabled = false);
-    const replaced = document.querySelector("select");
-    replaced.outerHTML = "<select></select>";
-    requestEvent("htmx:afterRequest", {xhr});
-    expect(document.querySelector("button").disabled).toBe(true);
-    expect(document.querySelector("[data-simplified-workspace] input").disabled).toBe(true);
-    expect(document.querySelector("textarea").disabled).toBe(true);
-    expect(document.querySelector("select").disabled).toBe(false);
-    expect(document.querySelector("#outside").disabled).toBe(false);
-});
-
-test("overlapping HTMX requests distinguish temporary disabling from prerequisites", () => {
-    document.body.innerHTML = '<button id="read">Read</button><button id="constraint" disabled>No</button>';
-    loadModule();
-    const first = {};
-    const second = {};
-    requestEvent("htmx:beforeRequest", {xhr: first});
-    document.querySelectorAll("button").forEach(button => {
-        button.disabled = true;
-        button.setAttribute("data-disabled-by-htmx", "");
-    });
-    requestEvent("htmx:beforeRequest", {xhr: second});
-    requestEvent("htmx:afterRequest", {xhr: first});
-    document.querySelectorAll("button").forEach(button => {
-        button.disabled = false;
-        button.removeAttribute("data-disabled-by-htmx");
-    });
-    requestEvent("htmx:afterRequest", {xhr: second});
-    expect(document.getElementById("read").disabled).toBe(false);
-    expect(document.getElementById("constraint").disabled).toBe(true);
 });
 
 test("card ordering keeps its own fetch while an unrelated request is pending", () => {

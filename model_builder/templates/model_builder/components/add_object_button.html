@@ -23,7 +23,7 @@
         hx-target="#sidePanel"
         hx-trigger="click"
         hx-swap="innerHTML"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         _="on click removeAllOpenedObjectsHighlights()"
 >
     <img src="{% static 'icons/add_icon.svg' %}" class="border-2 border-white mx-3 my-auto" width="16px" height="16px" alt="add icon" />

@@ -11,7 +11,7 @@ system id + shared-budget guard) and re-renders the builder with both canvases.
 {% block panel_body %}
 <form id="sidePanelForm" class="my-3"
         hx-post="{% url 'add-model' %}"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         enctype="multipart/form-data"
         hx-swap="innerHTML"
         hx-target="#main-content-block">

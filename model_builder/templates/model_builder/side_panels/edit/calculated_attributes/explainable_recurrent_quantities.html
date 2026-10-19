@@ -9,7 +9,7 @@
              hx-target="#chart-calculated-attribute"
              hx-trigger="click"
              hx-swap="innerHTML"
-             hx-disabled-elt="button"
+             hx-disabled-elt="button:not(:disabled)"
              _="on click openCalculatedAttributesChart()"
         >
             <img src="{% static 'icons/timeseries-chart.svg' %}" width="16" height="16" alt="calculus-graph-icon">

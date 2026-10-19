@@ -9,7 +9,7 @@
             script="on htmx:afterRequest
                     {% if remove_card_with_hyperscript %}remove #{{ obj.web_id }}{% endif %}"
             hx-on::after-request="dropModal('{{ modal_id }}');closeAndEmptySidePanel();"
-            hx-disabled-elt="button">
+            hx-disabled-elt="button:not(:disabled)">
         Yes, delete
     </button>
     <button type="button" class="btn btn-white border border-1 border-body-tertiary rounded-2 px-4 py-3 mb-3" data-bs-dismiss="modal" onclick="dropModal('{{ modal_id }}')">

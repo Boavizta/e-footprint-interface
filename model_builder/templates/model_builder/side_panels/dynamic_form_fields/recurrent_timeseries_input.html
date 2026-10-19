@@ -9,7 +9,7 @@
          hx-target="#chart-calculated-attribute"
          hx-trigger="click"
          hx-swap="innerHTML"
-         hx-disabled-elt="button"
+         hx-disabled-elt="button:not(:disabled)"
          hx-on::after-request="event.stopPropagation()"
          _="on click openCalculatedAttributesChart()"
     >

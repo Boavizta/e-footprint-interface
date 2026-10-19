@@ -412,7 +412,7 @@ test.each([false, true])("accepted replacement baselines follow native release a
     input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
     const payload = Object.fromEntries(new FormData(form));
     expect(payload[form.dataset.valuePrefix]).toBe("8");
-    const selector = "button, [data-simplified-workspace] input, [data-simplified-workspace] select, [data-simplified-workspace] textarea";
+    const selector = "button:not(:disabled), [data-simplified-workspace] input:not(:disabled), [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)";
     expect(form.getAttribute("hx-disabled-elt")).toBe(selector);
     const xhr = startMutation(form);
     document.querySelectorAll(selector).forEach(control => {

@@ -5,7 +5,7 @@
         hx-post="/model_builder/add-object/{{ object_type }}/"
         hx-target="#edge-device-groups-list"
         hx-swap="beforeend"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
     >
         {% if parent_group_membership_field %}

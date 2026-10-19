@@ -6,7 +6,7 @@
         hx-post="/model_builder/add-object/{{ object_type }}/"
         hx-target="#server-list"
         hx-swap="beforeend"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"
         hx-vals="js:{
             {{ storage_type }}_form_data: Object.fromEntries(new FormData(document.getElementById('formStorage')))

@@ -356,32 +356,6 @@ document.body.addEventListener('htmx:beforeSwap', function (evt) {
     evt.detail.serverResponse = restoreAccordionStateInFragment(response);
 });
 
-// HTMX releases hx-disabled-elt unconditionally; preserve genuine disabled states
-// on surviving nodes and leave replacements with their server-rendered constraints.
-(function () {
-    const disabledBeforeHtmxRequest = new WeakMap();
-    const constraintDisabled = new WeakMap();
-    const controls = "button, [data-simplified-workspace] input, "
-        + "[data-simplified-workspace] select, [data-simplified-workspace] textarea";
-
-    document.body.addEventListener("htmx:beforeRequest", event => {
-        const snapshot = new Set();
-        document.querySelectorAll(controls).forEach(element => {
-            const disabled = element.hasAttribute("data-disabled-by-htmx")
-                ? constraintDisabled.get(element) : element.disabled;
-            constraintDisabled.set(element, disabled);
-            if (disabled) snapshot.add(element);
-        });
-        disabledBeforeHtmxRequest.set(event.detail.xhr, snapshot);
-    });
-    document.body.addEventListener("htmx:afterRequest", event => {
-        disabledBeforeHtmxRequest.get(event.detail.xhr)?.forEach(element => {
-            if (element.isConnected) element.disabled = true;
-        });
-        disabledBeforeHtmxRequest.delete(event.detail.xhr);
-    });
-})();
-
 document.body.addEventListener("htmx:afterSettle", function (event) {
     initTruncatedTextTooltips(event.detail.elt);
 });

@@ -171,14 +171,18 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 ### HTMX interactions
 
 Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. It resolves submit buttons through their
-owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class,
-swap-settling classes and temporary native control release. Read clicks retain their response-only wait; unrelated pending reads do not
+owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class to
+clear, and its temporary native control release. Read clicks retain their response-only wait; unrelated pending reads do not
 block save completion.
-Before clicking it waits only for swapped controls to be processed, so navigation can still cancel a pending read.
+Before clicking it does not wait for pending reads, so navigation can still cancel one.
 Use `wait_for_htmx_idle()` when the next action requires a complete request cascade, such as Sources export after the initial
 Sankey load. Readiness comes from lifecycle state, not a fixed sleep.
+Both helpers wait on the request class alone. Settling classes never persist: HTMX settles synchronously, so they are gone once a
+request's swap completes.
 Side-panel form submissions use `SidePanelPage.submit_and_wait_for_close()`, which waits for newly swapped content to be
 processed before clicking, validates the form response, and waits for HTMX request/settling classes to clear before returning.
+Test HTMX behaviour through rendered outcomes (text, attributes, enabled state, request count). Do not dispatch synthetic HTMX
+lifecycle events to reproduce a sequence; drive the real request, or assert the rendered result.
 Opening Results also starts descendant Sankey configuration requests; wait for that complete HTMX cascade before the next edit.
 
 For rejected Simplified value/provenance saves, assert that the error modal and accepted-field replacement both process,

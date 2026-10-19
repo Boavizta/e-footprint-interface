@@ -8,7 +8,7 @@
             hx-target="#sidePanel"
             hx-trigger="click"
             hx-swap="innerHTML"
-            hx-disabled-elt="button"
+            hx-disabled-elt="button:not(:disabled)"
         >{{ elt.modeling_obj_container.name }}</a>
     {% else %}
         {{ elt.modeling_obj_container.name }}
@@ -25,7 +25,7 @@
         hx-target="#chart-calculated-attribute"
         hx-trigger="click"
         hx-swap="innerHTML"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         _="on click openCalculatedAttributesChart()"
       >(see graph)</a>
     {% elif elt.class_as_snake_str == "explainable_recurrent_quantities" %}
@@ -36,7 +36,7 @@
         hx-target="#chart-calculated-attribute"
         hx-trigger="click"
         hx-swap="innerHTML"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         _="on click openCalculatedAttributesChart()"
       >(see graph)</a>
     {% elif elt.class_as_snake_str == "explainable_quantity" %}

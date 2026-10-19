@@ -4,7 +4,7 @@
 {% block panel_body %}
 <form id="sidePanelForm" class="my-3"
         hx-post="{% url 'save-system-name' %}"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         hx-swap="innerHTML"
         hx-target="#system-name"
         hx-on::after-request="if (event.detail.successful) closeAndEmptySidePanel()"

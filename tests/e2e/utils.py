@@ -5,13 +5,11 @@ from collections.abc import Mapping
 
 def wait_for_htmx_idle(page: Page):
     """Wait for response swaps and descendant requests."""
-    page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+    page.wait_for_function("() => document.querySelector('.htmx-request') === null")
 
 
 def click_and_wait_for_htmx(page: Page, locator: Locator):
-    """Wait for an HTMX response; form saves also wait for accepted updates to settle."""
-    # Already-swapped controls must be processed; pending reads may still be cancelled by this click.
-    page.wait_for_function("() => document.querySelector('.htmx-settling, .htmx-added') === null")
+    """Wait for an HTMX response; form saves also wait for their request to clear."""
     source = locator.evaluate_handle("""element => {
         if (element.hasAttribute('hx-get') || element.hasAttribute('hx-post')) return element;
         if (element.matches('button, input') && ['submit', 'image'].includes(element.type)) {
@@ -27,8 +25,7 @@ def click_and_wait_for_htmx(page: Page, locator: Locator):
             if source.evaluate("element => element.hasAttribute('hx-post')"):
                 response.value.finished()
                 # Keep the original node when a form is replaced; unrelated pending reads may remain.
-                page.wait_for_function("""source => !source.classList.contains('htmx-request')
-                    && document.querySelector('.htmx-settling, .htmx-added') === null""", arg=source)
+                page.wait_for_function("source => !source.classList.contains('htmx-request')", arg=source)
         else:
             locator.click()
     finally:

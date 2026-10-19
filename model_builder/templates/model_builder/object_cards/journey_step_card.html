@@ -34,7 +34,7 @@
                             hx-target="#sidePanel"
                             hx-trigger="click"
                             hx-swap="innerHTML"
-                            hx-disabled-elt="button"
+                            hx-disabled-elt="button:not(:disabled)"
                             _="
                                 on click removeAllOpenedObjectsHighlights() add .model-builder-card-opened on me
                                 on mouseover remove .d-none from #edit-icon-{{ object.web_id }}

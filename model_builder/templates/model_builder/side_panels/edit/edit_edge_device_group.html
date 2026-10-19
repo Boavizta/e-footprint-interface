@@ -6,7 +6,7 @@
           autocomplete="off"
           hx-post="/model_builder/edit-object/{{ object_to_edit.efootprint_id }}/"
           hx-swap="none"
-          hx-disabled-elt="button"
+          hx-disabled-elt="button:not(:disabled)"
           hx-on::after-request="if (event.detail.elt === this && event.detail.successful) closeAndEmptySidePanel()"
           id="sidePanelForm">
         {% include "model_builder/side_panels/object_form_content.html" with object_type=object_to_edit.class_as_simple_str %}

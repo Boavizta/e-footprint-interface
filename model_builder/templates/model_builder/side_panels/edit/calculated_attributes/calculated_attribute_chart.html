@@ -10,7 +10,7 @@
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
-                hx-disabled-elt="button"
+                hx-disabled-elt="button:not(:disabled)"
             >{{ web_ehq.modeling_obj_container.name }}</a> ({{ aggregation_strategy }} {{ aggregation_value }})</h5>
     <button type="button" class="btn btn-white" aria-label="Close" onclick="closeCalculatedAttributesChart()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
@@ -26,7 +26,7 @@
                 hx-target="#sidePanel"
                 hx-trigger="click"
                 hx-swap="innerHTML"
-                hx-disabled-elt="button"
+                hx-disabled-elt="button:not(:disabled)"
             >{{ web_ehq.key_in_dict.name }}</a>{% else %}{{ web_ehq.key_in_dict.name }}{% endif %}
     </h6>
 {% endif %}

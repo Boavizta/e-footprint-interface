@@ -9,7 +9,7 @@ restores both slots. Both share the .e-f.json extension, so detection is on cont
 {% block panel_body %}
 <form id="sidePanelForm" class="my-3"
         hx-post="{% url 'upload-json' %}"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         enctype="multipart/form-data"
         hx-swap="innerHTML"
         hx-target="#main-content-block">

@@ -7,7 +7,7 @@
         hx-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
         hx-trigger="click once"
         hx-swap="innerHTML"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         class="btn btn-light p-1"
         data-bs-toggle="collapse"
         data-bs-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"

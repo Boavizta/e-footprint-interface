@@ -25,7 +25,7 @@
         hx-trigger="click"
         hx-swap="innerHTML"
         hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ parent_efootprint_id }}"}'
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         _="on click removeAllOpenedObjectsHighlights()"
 >
     {% if compact %}
@@ -43,7 +43,7 @@
         hx-target="#sidePanel"
         hx-trigger="click"
         hx-swap="innerHTML"
-        hx-disabled-elt="button"
+        hx-disabled-elt="button:not(:disabled)"
         _="on click removeAllOpenedObjectsHighlights()"
 >
     {% if compact %}
@@ -61,7 +61,7 @@
          hx-trigger="click"
          hx-swap="innerHTML"
          hx-vals='{"efootprint_id_of_parent_to_link_to": "{{ parent_efootprint_id }}"}'
-         hx-disabled-elt="button"
+         hx-disabled-elt="button:not(:disabled)"
          _="on click removeAllOpenedObjectsHighlights()"
     >
     <span class="visually-hidden">{{ add_label }}</span>
