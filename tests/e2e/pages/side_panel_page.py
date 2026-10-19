@@ -184,11 +184,9 @@ class SidePanelPage:
             field.click()
             field.fill(count)
             field.press("Tab")
-        # Wait for the OOB-swapped input to reflect the new value, then let HTMX
-        # finish its settleDelay (20 ms) so new elements are fully htmx.process()'d.
+        # Wait for the OOB-swapped input to reflect the new value.
         from playwright.sync_api import expect as pw_expect
         pw_expect(self.panel.locator(f"[data-dict-membership-name='{group_name}'] input[type='number']").first).to_have_value(count)
-        self.page.wait_for_timeout(20)
         return self
 
     def remove_dict_membership(self, group_name: str):

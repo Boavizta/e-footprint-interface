@@ -63,8 +63,6 @@ class ObjectCard:
 
     def set_inline_count(self, value: str):
         """Update the inline count control for a grouped entry."""
-        # Wait for HTMX settleDelay so event listeners are registered on OOB-swapped inputs.
-        self.locator.page.wait_for_timeout(20)
         field = self.locator.locator("input[name='count']").first
         expect(field).to_be_enabled()
         hx_url = field.get_attribute("hx-post")

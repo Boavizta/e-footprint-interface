@@ -171,8 +171,8 @@ Use page objects from `tests/e2e/pages/` for all interactions. Add new methods t
 ### HTMX interactions
 
 Use `click_and_wait_for_htmx()` from `tests/e2e/utils.py` for HTMX-triggered clicks. It resolves submit buttons through their
-owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body, that source's request class to
-clear, and its temporary native control release. Read clicks retain their response-only wait; unrelated pending reads do not
+owning HTMX form and waits for the HTTP response. POSTs also wait for the complete response body and for that source's request class
+to clear; HTMX releases its temporary control locks at the same moment. Read clicks retain their response-only wait; unrelated pending reads do not
 block save completion.
 Before clicking it does not wait for pending reads. Controls without HTMX attributes, such as the Simplified-inputs
 toggle, are only clicked; assert their rendered outcome.
@@ -191,8 +191,8 @@ the field shows `Not saved`, and its submitted value is gone. A rejected focused
 Exports use accepted saved state. Ordinary blur/Enter/provenance autosaves temporarily disable buttons and native
 fields in both resident Simplified-input workspaces. The two-model Export toggle cannot newly open while disabled;
 the one-model direct link and already-open menu links retain native destinations. Hold a save before persistence to
-assert those links download the old accepted state, then check a fresh export after settlement. Without that hold,
-the file can contain the edit if persistence wins the race. Settlement never replays an activation. An idle native-invalid draft can export the previous
+assert those links download the old accepted state, then check a fresh export after the save ends. Without that hold,
+the file can contain the edit if persistence wins the race. A finished save never replays a click made while the toggle was disabled. An idle native-invalid draft can export the previous
 saved value without a request; a server-rejected save restores accepted fields and requires dismissal of the error
 before a fresh export. Configure export while dirty is blocked in place with a notice; clean Configure export stays on
 that screen. Other Configure exits retain Save/Discard/Stay. Workspace exports include accepted values from parked models. The focused export E2E
