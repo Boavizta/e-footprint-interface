@@ -24083,8 +24083,19 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   color: #69768a;
   font-size: 0.72rem;
 }
-.simplified-workspace [data-simplified-save-status]:empty {
+.simplified-workspace [data-simplified-save-status]:empty:not(.htmx-request) {
   display: none;
+}
+.simplified-workspace [data-simplified-save-status][data-outcome=saved] {
+  animation: simplified-save-status-fade 0.3s ease-in 3s forwards;
+}
+.simplified-workspace [data-simplified-save-status].htmx-request {
+  font-size: 0;
+  animation: none;
+}
+.simplified-workspace [data-simplified-save-status].htmx-request::after {
+  content: "Saving…";
+  font-size: 0.72rem;
 }
 .simplified-workspace .simplified-selection {
   display: grid;
@@ -24139,6 +24150,15 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+@keyframes simplified-save-status-fade {
+  to {
+    opacity: 0;
+  }
+}
+[data-quick-total-status].htmx-request::after {
+  content: "Updating…";
+}
+
 #simplified-exit-dialog {
   border: 1px solid #dae4df;
   border-radius: 0.8rem;

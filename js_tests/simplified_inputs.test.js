@@ -4,9 +4,8 @@ if (typeof global.CSS === "undefined") {
     global.CSS = {escape: value => String(value).replace(/[^a-zA-Z0-9_-]/g, char => "\\" + char)};
 }
 const { refreshSelection, refreshFilter, definitionFromForm } = require("../theme/static/scripts/simplified_inputs/configuration.js");
-const { workspace: { initialize, deferExit }, fieldEdits: { initializeEdits } } = require("../theme/static/scripts/simplified_inputs/index.js");
+const { workspace: { initialize, deferExit } } = require("../theme/static/scripts/simplified_inputs/index.js");
 require("../theme/static/scripts/source_metadata.js");
-// Match base.html listener ordering for native disabled-state restoration.
 require("../theme/static/scripts/model_builder_main.js");
 
 function mount(fixture = "simplified_configure") {
@@ -34,19 +33,6 @@ function include(attribute, checked = true) {
     input.dispatchEvent(new Event("change", { bubbles: true }));
     return input;
 }
-
-test("Simplified save displays every body-carried repair notice as text", () => {
-    const workspace = mount("simplified_saved");
-    document.body.insertAdjacentHTML("beforeend", fs.readFileSync(
-        path.join(__dirname, "fixtures", "simplified_repair_notices.html"), "utf8"));
-    document.body.dispatchEvent(new CustomEvent("simplifiedInputSaved", {detail: {
-        notice_target: "input-repair-notices"
-    }}));
-    const notice = workspace.querySelector("[data-simplified-notice]");
-    expect(notice.textContent).toBe("Job A: Resolution changed to 480p. Job B: <script>unsafe()</script> & resolution changed to 480p.");
-    expect(notice.children).toHaveLength(0);
-    expect(document.getElementById("input-repair-notices").children).toHaveLength(0);
-});
 
 test("recursive companions lock across owners and unlock without removing saved help", () => {
     mount();
@@ -282,8 +268,6 @@ function mountEditor(fixture = "simplified_editor") {
     object.innerHTML = fs.readFileSync(path.join(__dirname, `fixtures/${fixture}.html`), 'utf8');
     group.appendChild(object);
     workspace.replaceChildren(group);
-    window.htmx.trigger = jest.fn();
-    initializeEdits();
     return document.querySelector('[data-simplified-editor]');
 }
 
@@ -295,211 +279,15 @@ test('simplified provenance follows the side-panel field layout', () => {
     expect(form.querySelector('.source-comment')).toBe(row.nextElementSibling);
     expect(form.querySelector('.source-line[data-action="open-source-editor"]')).not.toBeNull();
     expect(form.querySelector('details.simplified-provenance')).toBeNull();
+    expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('');
 });
 
-test('save status stays visible through a preserved replacement, then clears after acceptance', () => {
-    jest.useFakeTimers();
-    try {
-        const form = mountEditor();
-        expect(form.querySelector('[data-simplified-save-status]').textContent).toBe('');
-        const input = form.querySelector('input[type="number"]');
-        input.value = '8';
-        input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-        const status = form.querySelector('[data-simplified-save-status]');
-        expect(status.id).toBe('si-test-server-lifespan-save-status');
-        expect(status.hasAttribute('hx-preserve')).toBe(true);
-        expect(status.textContent).toBe('Saving…');
-        const xhr = startMutation(form);
-        mutationEvent('htmx:beforeSwap', {xhr, shouldSwap: true});
-        const replacement = form.cloneNode(true);
-        delete replacement.dataset.saving;
-        replacement.querySelector('[data-simplified-save-status]').replaceWith(status);
-        form.replaceWith(replacement);
-        mutationEvent('htmx:afterRequest', {xhr, successful: true});
-        expect(replacement.querySelector('[data-simplified-save-status]')).toBe(status);
-        expect(status.textContent).toBe('Saving…');
-        mutationEvent('htmx:afterSettle', {xhr});
-        expect(status.textContent).toBe('Saved');
-        jest.advanceTimersByTime(2999);
-        expect(status.textContent).toBe('Saved');
-        jest.advanceTimersByTime(1);
-        expect(status.textContent).toBe('');
-    } finally {
-        jest.useRealTimers();
-    }
-});
-
-test('Enter followed by blur saves once and rejection marks the accepted replacement', () => {
-    const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    const acceptedValue = input.value;
-    input.value = '8';
-    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-    input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    const xhr = startMutation(form);
-    mutationEvent('htmx:beforeSwap', {xhr, shouldSwap: true});
-    const replacement = form.cloneNode(true);
-    replacement.querySelector('input[type="number"]').value = acceptedValue;
-    replacement.querySelector('[data-simplified-save-status]').textContent = '';
-    delete replacement.dataset.saving;
-    form.replaceWith(replacement);
-    mutationEvent('htmx:afterRequest', {xhr, successful: false});
-    mutationEvent('htmx:afterSettle', {xhr});
-    expect(replacement.querySelector('input[type="number"]').value).toBe(acceptedValue);
-    expect(replacement.querySelector('[data-simplified-save-status]').textContent).toBe('Not saved');
-    expect([...document.querySelectorAll('[data-quick-total]')].map(item => item.textContent)).toEqual(['20 kg', '20 kg']);
-    replacement.querySelector('input[type="number"]').dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-});
-
-test('unchanged blur does not save and temporarily disabled inputs do not start saves', () => {
-    const form = mountEditor();
-    const input = form.querySelector('input');
-    input.dispatchEvent(new FocusEvent('focusout', {bubbles: true}));
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-    input.disabled = true;
-    input.setAttribute('data-disabled-by-htmx', '');
-    input.value = '9';
-    input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-});
-
-test("value saves omit unchanged provenance and confidence saves preserve omitted source and comment", () => {
-    const form = mountEditor();
-    const parameters = Object.fromEntries(new FormData(form));
-    const prefix = form.dataset.valuePrefix;
-    parameters[prefix] = "8";
-    parameters[prefix + "__confidence"] = "high";
-    document.body.dispatchEvent(new CustomEvent("htmx:configRequest", {detail: {elt: form, parameters}}));
-    expect(parameters[prefix + "__confidence"]).toBe("high");
-    expect(parameters[prefix + "__comment"]).toBeUndefined();
-    expect(parameters[prefix + "__source_id"]).toBeUndefined();
-    expect(parameters[prefix + "__source_name"]).toBeUndefined();
-    expect(parameters[prefix + "__source_link"]).toBeUndefined();
-});
-
-test("changing an automatically replaced simplified value submits user data and keeps replacement history", () => {
-    const form = mountEditor("simplified_editor_automatic");
-    const input = form.querySelector('input[type="number"]');
-    input.value = "8";
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-
-    const prefix = form.dataset.valuePrefix;
-    const submitted = Object.fromEntries(new FormData(form));
-    expect(submitted[prefix + "__source_id"]).toBe("user_data");
-    expect(submitted[prefix + "__source_name"]).toBe("user data");
-    expect(submitted[prefix + "__confidence"]).toBe("");
-    expect(submitted[prefix + "__comment"]).toBe("Replacement history");
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-});
-
-test("editing only an automatic replacement comment keeps the automatic source", () => {
-    const form = mountEditor("simplified_editor_automatic");
-    const prefix = form.dataset.valuePrefix;
-    form.querySelector(`input[name="${prefix}__comment"]`).value = "Reviewed replacement";
-    form.dispatchEvent(new CustomEvent("simplified-provenance:changed", {bubbles: true}));
-
-    const submitted = Object.fromEntries(new FormData(form));
-    expect(submitted[prefix + "__source_id"]).toBe("automatic_replacement");
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-});
-
-test.each([false, true])("accepted replacement baselines follow native release and settlement (settles first=%s)", settlesFirst => {
-    const form = mountEditor();
-    const input = form.querySelector("input");
-    input.value = "8";
-    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    const payload = Object.fromEntries(new FormData(form));
-    expect(payload[form.dataset.valuePrefix]).toBe("8");
-    const selector = "button:not(:disabled), [data-simplified-workspace] input:not(:disabled), [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)";
-    expect(form.getAttribute("hx-disabled-elt")).toBe(selector);
-    const xhr = startMutation(form);
-    document.querySelectorAll(selector).forEach(control => {
-        control.disabled = true;
-        control.setAttribute("data-disabled-by-htmx", "");
-    });
-    initializeEdits();
-    mutationEvent("htmx:beforeSwap", {xhr, shouldSwap: true});
-    const fragment = document.createElement("template");
-    fragment.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/simplified_editor.html"), "utf8");
-    const replacement = fragment.content.querySelector("form");
-    replacement.querySelector("input").value = "8";
-    form.replaceWith(replacement);
-    if (settlesFirst) mutationEvent("htmx:afterSettle", {xhr, elt: replacement});
-    document.querySelectorAll("[data-disabled-by-htmx]").forEach(control => {
-        control.disabled = false;
-        control.removeAttribute("data-disabled-by-htmx");
-    });
-    mutationEvent("htmx:afterRequest", {xhr, successful: true});
-    if (!settlesFirst) mutationEvent("htmx:afterSettle", {xhr, elt: replacement});
-    expect(replacement.querySelector("input").disabled).toBe(false);
-    replacement.querySelector("input").dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    const parameters = Object.fromEntries(new FormData(replacement));
-    mutationEvent("htmx:configRequest", {elt: replacement, parameters});
-    expect(parameters).toEqual({[replacement.dataset.valuePrefix]: "8",
-        [replacement.dataset.valuePrefix + "__unit"]: "year"});
-    replacement.querySelector("input").value = "9";
-    replacement.querySelector("input").dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
-});
-
-test("a failed request without a swap releases feedback and retains the accepted baseline", () => {
-    const form = mountEditor();
-    const input = form.querySelector("input");
-    input.value = "8";
-    input.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    const xhr = startMutation(form);
-    expect(document.querySelector("[data-quick-total]").getAttribute("aria-busy")).toBe("true");
-    mutationEvent("htmx:afterRequest", {xhr});
-    expect(form.dataset.saving).toBeUndefined();
-    expect(form.querySelector("[data-simplified-save-status]").textContent).toBe("Not saved");
-    expect(document.querySelector("[data-quick-total]").hasAttribute("aria-busy")).toBe(false);
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(2);
-});
-
-test.each(["8", "-1"])("idle export neither saves nor validates a focused draft %s", value => {
-    const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    input.focus();
-    input.value = value;
-    const validity = jest.spyOn(form, "reportValidity");
-    const activation = new MouseEvent("click", {bubbles: true, cancelable: true});
-    document.getElementById("download-model").dispatchEvent(activation);
-    expect(activation.defaultPrevented).toBe(false);
-    expect(document.activeElement).toBe(input);
-    expect(validity).not.toHaveBeenCalled();
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-});
-
-test("invalid ordinary blur marks the draft unsaved without changing export admission", () => {
-    const form = mountEditor();
-    const input = form.querySelector('input[type="number"]');
-    input.value = "-1";
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-    expect(form.querySelector("[data-simplified-save-status]").textContent).toBe("Not saved");
-    const activation = new MouseEvent("click", {bubbles: true, cancelable: true});
-    document.getElementById("download-model").dispatchEvent(activation);
-    expect(activation.defaultPrevented).toBe(false);
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-});
-
-test.each([true, false])("timeseries Save closes its panel on successful=%s and marks the accepted field", successful => {
-    const acceptedForm = mountEditor();
-    const field = acceptedForm.closest("[data-simplified-object]");
-    field.dataset.ownerId = "owner";
-    field.dataset.attribute = "timeseries";
-    const form = document.createElement("form");
-    form.dataset.simplifiedTimeseries = "";
-    form.dataset.ownerId = "owner";
-    form.dataset.attribute = "timeseries";
-    document.body.appendChild(form);
-    finishMutation(startMutation(form), successful);
-    expect(window.closeAndEmptySidePanel).toHaveBeenCalledTimes(1);
-    expect(acceptedForm.querySelector("[data-simplified-save-status]").textContent).toBe(successful ? "Saved" : "Not saved");
+test('a saved field fragment carries its server-rendered outcome', () => {
+    const status = mountEditor('simplified_editor_saved').querySelector('[data-simplified-save-status]');
+    expect(status.id).toBe('si-test-server-lifespan-save-status');
+    expect(status.dataset.outcome).toBe('saved');
+    expect(status.textContent).toBe('Saved');
+    expect(status.hasAttribute('hx-preserve')).toBe(false);
 });
 
 function mutationEvent(name, detail, target = document.body) {
@@ -519,74 +307,12 @@ function activate(control) {
     control.dispatchEvent(event);
     return event;
 }
-const EXPORT_FIXTURES = [
-    ["simplified_editor", "download-model"],
-    ["simplified_editor_workspace", "download-menu-toggle"],
-    ["simplified_editor_workspace", "download-model"],
-    ["simplified_editor_workspace", "download-workspace"],
+const CONFIGURE_EXPORT_FIXTURES = [
+    ["simplified_configure_export", "download-model"],
+    ["simplified_configure_workspace", "download-menu-toggle"],
+    ["simplified_configure_workspace", "download-model"],
+    ["simplified_configure_workspace", "download-workspace"],
 ];
-
-test.each(EXPORT_FIXTURES)("%s %s leaves a press untouched and never saves on direct activation", (fixture, id) => {
-    const form = mountEditor(fixture);
-    const input = form.querySelector('input[type="number"]');
-    const control = document.getElementById(id);
-    input.focus();
-    input.value = "8";
-    const press = new MouseEvent("mousedown", {button: 0, bubbles: true, cancelable: true});
-    control.dispatchEvent(press);
-    expect(press.defaultPrevented).toBe(false);
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-    expect(activate(control).defaultPrevented).toBe(false);
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-});
-
-test.each(EXPORT_FIXTURES.flatMap(([fixture, id]) => [true, false].map(successful => [fixture, id, successful])))
-("%s %s keeps native destinations during a field save (successful=%s)", async (fixture, id, successful) => {
-    const form = mountEditor(fixture);
-    const input = form.querySelector('input[type="number"]');
-    const control = document.getElementById(id);
-    const href = control.getAttribute("href");
-    const activated = jest.fn();
-    control.addEventListener("click", activated);
-    input.value = "8";
-    input.dispatchEvent(new FocusEvent("focusout", {bubbles: true}));
-    const xhr = startMutation(form);
-    // jsdom has no HTMX runtime; apply the form's declared native disabling selector.
-    const disabled = [...document.querySelectorAll(form.getAttribute("hx-disabled-elt"))];
-    disabled.forEach(element => { element.disabled = true; });
-    expect(control.getAttribute("href")).toBe(href);
-    control.click();
-    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
-    if (control.matches("button")) expect(control.disabled).toBe(true);
-    disabled.forEach(element => { element.disabled = false; });
-    finishMutation(xhr, successful);
-    await Promise.resolve();
-    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 1 : 0);
-    control.click();
-    expect(activated).toHaveBeenCalledTimes(control.matches("a") ? 2 : 1);
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-});
-
-test("ordinary provenance changes save once and do not replay native exports", async () => {
-    const form = mountEditor();
-    const comment = form.querySelector('[name$="__comment"]');
-    comment.value = "Updated comment";
-    mutationEvent("simplified-provenance:changed", {}, comment);
-    mutationEvent("simplified-provenance:changed", {}, comment);
-    expect(window.htmx.trigger).toHaveBeenCalledTimes(1);
-    const link = document.getElementById("download-model");
-    const activated = jest.fn();
-    link.addEventListener("click", activated);
-    const xhr = startMutation(form);
-    expect(activate(link).defaultPrevented).toBe(false);
-    finishMutation(xhr);
-    await Promise.resolve();
-    expect(activated).toHaveBeenCalledTimes(1);
-});
-
-const CONFIGURE_EXPORT_FIXTURES = EXPORT_FIXTURES.map(([fixture, id]) => [
-    fixture === "simplified_editor" ? "simplified_configure_export" : "simplified_configure_workspace", id,
-]);
 test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s exports from clean Configure without reads or exits", (fixture, id) => {
     const workspace = mount(fixture);
     const form = workspace.querySelector("[data-configure-form]");
@@ -602,7 +328,7 @@ test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s exports from clean Configure without
     expect(document.querySelector("dialog").showModal).not.toHaveBeenCalled();
 });
 
-test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before document capture and replaces its notice", (fixture, id) => {
+test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before document capture and writes its notice", (fixture, id) => {
     const workspace = mount(fixture);
     include("lifespan");
     const form = workspace.querySelector("form");
@@ -612,9 +338,9 @@ test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before docume
     document.addEventListener("click", captured, true);
     try {
         expect(activate(control.querySelector("i") || control).defaultPrevented).toBe(true);
-        const previousNotice = workspace.querySelector("[data-simplified-notice]");
+        const notice = workspace.querySelector("[data-simplified-notice]");
         expect(activate(control).defaultPrevented).toBe(true);
-        expect(previousNotice.isConnected).toBe(false);
+        expect(workspace.querySelector("[data-simplified-notice]")).toBe(notice);
         const notices = workspace.querySelectorAll("[data-simplified-notice]");
         expect(notices).toHaveLength(1);
         expect(notices[0].getAttribute("role")).toBe("status");
@@ -664,11 +390,12 @@ test.each(["save", "discard", "failed save"])("%s resolves Configure explicitly 
     expect(activated).not.toHaveBeenCalled();
     if (resolution === "failed save") {
         expect(form.dataset.dirty).toBe("true");
-        expect(workspace.querySelector("[data-simplified-notice]")).not.toBeNull();
+        expect(workspace.querySelector("[data-simplified-notice]").textContent).toBe(
+            "Save or discard Configure changes before exporting.");
         expect(activate(control).defaultPrevented).toBe(true);
     } else {
         expect(workspace.isConnected).toBe(false);
-        expect(document.querySelector("[data-simplified-notice]")).toBeNull();
+        expect(document.querySelector("[data-simplified-notice]").textContent).toBe("");
         expect(activate(control).defaultPrevented).toBe(false);
         expect(activated).toHaveBeenCalledTimes(1);
     }

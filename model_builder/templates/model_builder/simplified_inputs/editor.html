@@ -2,7 +2,10 @@
 {% if field.editor.input_type == 'optional_explainable_quantity' or field.editor.input_type == 'explainable_quantity' or field.editor.input_type == 'select_str_input' or field.editor.input_type == 'select_object' or field.editor.input_type == 'select_multiple' or field.editor.input_type == 'recurrent_timeseries_builder' or field.editor.input_type == 'hourly_quantities_from_growth' %}
 <form data-simplified-editor data-workspace-editor data-value-prefix="{{ field.editor.web_id }}"
       hx-post="{% url 'edit-simplified-input' field.address.object_id field.address.attribute %}"
-      hx-trigger="simplified-save" hx-swap="none"
+      hx-trigger="change[!!target.name], submit, simplified-provenance:changed, optional-quantity:changed[detail.empty]"
+      hx-sync="this:drop" hx-swap="none" hx-vals='js:{...recomputationVals()}'
+      hx-indicator="#{{ field.dom_id }}-save-status, [data-quick-total-status]"
+      hx-on::validation:halted="this.reportValidity()"
       hx-disabled-elt="button:not(:disabled), [data-simplified-workspace] input:not(:disabled), [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)">
     {% csrf_token %}
     {% with editor=field.editor %}
@@ -36,6 +39,6 @@
     {% include 'model_builder/side_panels/dynamic_form_fields/source.html' with source_dom_id=editor.web_id source_name_prefix=editor.web_id source_meta_source=editor.metadata.source source_meta_comment=editor.metadata.comment source_meta_available=editor.metadata.available_sources simplified_completion=True %}
     {% endif %}
     {% endwith %}
-    <span id="{{ field.dom_id }}-save-status" hx-preserve class="small" data-simplified-save-status role="status"></span>
+    <span id="{{ field.dom_id }}-save-status" class="small" data-simplified-save-status role="status"{% if outcome %} data-outcome="{{ outcome }}"{% endif %}>{% if outcome == "saved" %}Saved{% elif outcome == "rejected" %}Not saved{% endif %}</span>
 </form>
 {% else %}<p class="simplified-preview" data-current-value>{{ field.preview }}</p>{% endif %}

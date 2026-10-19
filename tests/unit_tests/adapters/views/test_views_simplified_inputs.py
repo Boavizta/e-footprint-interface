@@ -1,4 +1,5 @@
 import json
+import re
 from copy import deepcopy
 from html.parser import HTMLParser
 from unittest.mock import patch
@@ -164,26 +165,120 @@ class TestSimplifiedViews:
         assert "data-selection-controls" in response.content.decode()
         assert "bookmark-" + owner in response.content.decode()
 
-    def test_value_save_targets_one_field_and_both_totals_and_preserves_provenance(self, client, minimal_system_data):
+    def test_value_save_targets_one_field_and_both_totals_and_resent_provenance_is_a_no_op(
+            self, client, minimal_system_data):
         model = self.save_model(client, minimal_system_data)
         server = model.servers[0]
         original = server.modeling_obj.lifespan
+        original.confidence, original.comment = "high", "Reviewed lifespan"
+        model.persist_to_cache()
         client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
             server.efootprint_id: {"lifespan": {"included": True, "help": ""}, "power": {"included": True, "help": ""}}}})})
         prefix = f"si-{model.system.efootprint_id}-{server.efootprint_id}-lifespan-value"
-        response = client.post(f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/", {
-            prefix: "10", prefix + "__unit": "year", "recomputation": "true"})
+        endpoint = f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/"
+        rendered = self.rendered_inputs(client, server.efootprint_id, "lifespan", prefix)
+        assert rendered[prefix + "__source_id"] == "hypothesis"
+        response = client.post(endpoint, {**rendered, prefix: "10", "recomputation": "true"})
         content = response.content.decode()
         assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert "simplifiedInputSaved" not in response["HX-Trigger-After-Settle"]
         assert content.count("data-field-address") == 1
         assert 'data-attribute="power"' not in content
         assert content.count("data-quick-total>") == 2
         assert 'id=\'result-block\'' in content
         saved = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan
         assert saved.value.magnitude == 10
-        assert saved.source.id == original.source.id
-        assert saved.confidence == original.confidence
-        assert saved.comment == original.comment
+        assert saved.source.id == "user_data"
+        assert (saved.confidence, saved.comment) == ("high", "Reviewed lifespan")
+        before = saved.to_json()
+        response = client.post(endpoint, self.rendered_inputs(client, server.efootprint_id, "lifespan", prefix))
+        assert self.status(response, prefix) == ("saved", "Saved")
+        assert ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan.to_json() == before
+
+    @staticmethod
+    def rendered_inputs(client, owner_id, attribute, prefix):
+        html = client.get(f"/model_builder/simplified-input-field/{owner_id}/{attribute}/").content.decode()
+        return InputValues(html, prefix).values
+
+    @staticmethod
+    def status(response, prefix):
+        match = re.search(rf'id="{prefix.removesuffix("-value")}-save-status"[^>]*?'
+                          r'(?: data-outcome="(\w+)")?>([^<]*)</span>', response.content.decode())
+        return match.groups() if match else None
+
+    def test_outcome_is_rendered_on_the_submitted_field_only(self, client, minimal_system_data, monkeypatch):
+        monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+        model = self.save_model(client, minimal_system_data)
+        owner_id = model.servers[0].efootprint_id
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            owner_id: {"server_type": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{owner_id}"
+        endpoint = f"/model_builder/edit-simplified-input/{owner_id}"
+        notice = f'<p id="si-{model.system.efootprint_id}-notice" data-simplified-notice role="status" hx-swap-oob="true">'
+        response = client.post(endpoint + "/server_type/", {prefix + "-server_type-value": "on-premise"})
+        assert notice + "</p>" in response.content.decode()
+        count_prefix = prefix + "-fixed_nb_of_instances-value"
+        client.post(endpoint + "/fixed_nb_of_instances/", {count_prefix: "1000000", count_prefix + "__unit": "concurrent"})
+        response = client.post(endpoint + "/server_type/", {prefix + "-server_type-value": "autoscaling"})
+        content = response.content.decode()
+        assert content.count("data-field-address") == 2
+        assert self.status(response, prefix + "-server_type-value") == ("saved", "Saved")
+        assert self.status(response, count_prefix) == (None, "")
+        assert re.search(re.escape(notice) + r"[^<]*changed to[^<]*</p>", content)
+        assert "simplifiedInputSaved" not in response.get("HX-Trigger-After-Settle", "")
+        with patch("model_builder.adapters.views.views_simplified_inputs.present_edited_input",
+                   side_effect=ValueError("Presentation failed")):
+            response = client.post(endpoint + "/server_type/", {prefix + "-server_type-value": "on-premise"})
+        assert response.status_code == 500
+        assert self.status(response, prefix + "-server_type-value") == ("rejected", "Not saved")
+        assert self.status(response, count_prefix) == (None, "")
+        response = client.post(endpoint + "/fixed_nb_of_instances/", {count_prefix: "invalid", count_prefix + "__unit": "concurrent"})
+        assert response.status_code == 422
+        assert self.status(response, count_prefix) == ("rejected", "Not saved")
+
+    @pytest.mark.parametrize("source_id", ["hypothesis", "automatic_replacement"])
+    def test_changed_value_becomes_user_data_and_provenance_only_edit_keeps_its_source(
+            self, client, minimal_system_data, source_id):
+        from efootprint.abstract_modeling_classes.source_objects import Sources
+
+        model = self.save_model(client, minimal_system_data)
+        server = model.servers[0]
+        lifespan = server.modeling_obj.lifespan
+        lifespan.source = Sources.HYPOTHESIS if source_id == "hypothesis" else Sources.AUTOMATIC_REPLACEMENT
+        lifespan.confidence, lifespan.comment = "high", "Replacement history"
+        model.persist_to_cache()
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            server.efootprint_id: {"lifespan": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{server.efootprint_id}-lifespan-value"
+        endpoint = f"/model_builder/edit-simplified-input/{server.efootprint_id}/lifespan/"
+
+        def saved():
+            return ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.lifespan
+
+        rendered = self.rendered_inputs(client, server.efootprint_id, "lifespan", prefix)
+        client.post(endpoint, {**rendered, prefix + "__comment": "Reviewed history"})
+        assert (saved().source.id, saved().confidence, saved().comment) == (source_id, "high", "Reviewed history")
+        rendered = self.rendered_inputs(client, server.efootprint_id, "lifespan", prefix)
+        client.post(endpoint, {**rendered, prefix: str(saved().value.magnitude + 1)})
+        assert (saved().source.id, saved().confidence, saved().comment) == ("user_data", "high", "Reviewed history")
+
+    def test_multiple_select_repeated_keys_save_every_selected_reference(self, client, minimal_system_data):
+        from efootprint.core.hardware.device import Device
+
+        fragment = system_to_json(Device.from_defaults("Second device"), save_computed_state=False)
+        for key, value in fragment.items():
+            if isinstance(value, dict):
+                minimal_system_data.setdefault(key, {}).update(value)
+        model = self.save_model(client, minimal_system_data)
+        pattern = model.system.modeling_obj.usage_patterns[0]
+        device_ids = [pattern.devices[0].id, *fragment["Device"]]
+        client.post("/model_builder/save-simplified-inputs/", {"definition": json.dumps({"fields": {
+            pattern.id: {"devices": {"included": True, "help": ""}}}})})
+        prefix = f"si-{model.system.efootprint_id}-{pattern.id}-devices-value"
+        response = client.post(f"/model_builder/edit-simplified-input/{pattern.id}/devices/", {prefix: device_ids})
+        assert "openModalDialog" not in response.get("HX-Trigger-After-Settle", "")
+        saved = ModelWeb(SessionSystemRepository(client.session)).system.modeling_obj.usage_patterns[0]
+        assert [device.id for device in saved.devices] == device_ids
 
     def test_invalid_value_error_restores_editor_and_preserves_panels_and_saved_total(self, client, minimal_system_data, monkeypatch):
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
@@ -200,7 +295,7 @@ class TestSimplifiedViews:
         assert "openModalDialog" in response["HX-Trigger-After-Settle"]
         content = response.content.decode()
         assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
-        assert "data-quick-total" not in content
+        assert "data-quick-total>" not in content
         assert "result-block" not in content
         assert content.count("data-field-address") == 1
         assert f'hx-swap-oob="outerHTML:#{prefix.removesuffix("-value")}"' in content
@@ -255,7 +350,7 @@ class TestSimplifiedViews:
         with patch.object(FormContextBuilder, "build_input_fields", build_fields):
             response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/lifespan/", {
                 prefix: "10", prefix + "__unit": "year"})
-        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert "openModalDialog" not in response.get("HX-Trigger-After-Settle", "")
         assert calls == [(owner_id, {"lifespan"})]
         assert response.content.decode().count("data-field-address") == 1
 
@@ -269,7 +364,7 @@ class TestSimplifiedViews:
         prefix = f"si-{model.system.efootprint_id}-{owner_id}-fixed_nb_of_instances-value"
         response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/fixed_nb_of_instances/", {
             prefix: "", prefix + "__unit": "dimensionless", prefix + "__comment": "Automatic fleet size"})
-        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert "openModalDialog" not in response.get("HX-Trigger-After-Settle", "")
         count = ModelWeb(SessionSystemRepository(client.session)).servers[0].modeling_obj.fixed_nb_of_instances
         assert isinstance(count, EmptyExplainableObject)
         assert count.comment == "Automatic fleet size"
@@ -287,9 +382,13 @@ class TestSimplifiedViews:
         assert "data-bookmark" not in html
         assert "__source_id" not in html
         prefix = f"si-{model.system.efootprint_id}-{owner_id}-hourly_occurrences-value"
+        status_id = prefix.removesuffix("-value") + "-save-status"
+        assert f'hx-indicator="#{status_id}, [data-quick-total-status]"' in html
+        field = client.get(f"/model_builder/simplified-input-field/{owner_id}/hourly_occurrences/").content.decode()
+        assert f'id="{status_id}"' in field
         response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/hourly_occurrences/", {
             prefix + "__comment": "Reviewed projection"})
-        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert "openModalDialog" not in response.get("HX-Trigger-After-Settle", "")
         html = response.content.decode()
         assert "Edit timeseries" in html and 'data-action="open-source-editor"' in html
         assert "Reviewed projection" in html
@@ -298,7 +397,7 @@ class TestSimplifiedViews:
         data = {"UsagePattern_hourly_occurrences__" + key: value for key, value in inputs.items()}
         data["timeseries"] = "true"
         response = client.post(f"/model_builder/edit-simplified-input/{owner_id}/hourly_occurrences/", data)
-        assert "openModalDialog" not in response["HX-Trigger-After-Settle"]
+        assert "openModalDialog" not in response.get("HX-Trigger-After-Settle", "")
         current = ModelWeb(SessionSystemRepository(client.session)).system.modeling_obj.usage_patterns[0]
         assert current.hourly_occurrences.form_inputs["initial_volume"] == "45"
         assert current.hourly_occurrences.comment == "Reviewed projection"
@@ -374,7 +473,7 @@ class TestSimplifiedViews:
         assert "closeAndEmptySidePanel" not in content and "hidePanelResult" not in content
         assert content.count("data-field-address") == 1
         assert f'hx-swap-oob="outerHTML:#{prefix.removesuffix("-value")}"' in content
-        assert "data-quick-total" not in content and "result-block" not in content
+        assert "data-quick-total>" not in content and "result-block" not in content
         assert 'data-attribute="power"' not in content
         accepted = client.get(f"/model_builder/simplified-input-field/{owner_id}/lifespan/")
         values = InputValues(content, prefix).values
@@ -407,7 +506,7 @@ class TestSimplifiedViews:
         content = response.content.decode()
         assert content.count("data-field-address") == 2
         assert f'hx-swap-oob="outerHTML:#{prefix}-fixed_nb_of_instances"' in content
-        assert "data-quick-total" not in content and "result-block" not in content
+        assert "data-quick-total>" not in content and "result-block" not in content
         accepted = client.get(f"/model_builder/simplified-input-field/{owner_id}/fixed_nb_of_instances/")
         assert InputValues(content, count_prefix).values == InputValues(accepted.content.decode(), count_prefix).values
 

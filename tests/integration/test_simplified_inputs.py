@@ -353,7 +353,7 @@ def test_nested_storage_owner_and_omitted_metadata_are_preserved(minimal_model_w
         "value": current.magnitude + 1, "unit": str(current.unit), "label": "no label"}))
     restored = ModelWeb(model.repository).flat_efootprint_objs_dict[storage.id].storage_capacity
     assert restored.magnitude == current.magnitude + 1
-    assert restored.source.id == current.source.id
+    assert current.source.id == Sources.HYPOTHESIS.id and restored.source.id == Sources.USER_DATA.id
     assert restored.confidence == "high" and restored.comment == "Original source"
     assert result.changed_fields == {address}
 

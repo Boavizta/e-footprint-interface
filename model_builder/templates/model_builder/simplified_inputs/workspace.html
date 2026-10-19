@@ -18,6 +18,7 @@
         <button type="button" class="btn btn-outline-secondary" data-action="simplified-configure" data-workspace-control>Configure</button>
         {% endif %}
     </header>
+    {% include 'model_builder/simplified_inputs/notice.html' with oob=False notice_text="" %}
     {% if configure %}
         <div class="simplified-description">
             <label for="si-{{ system_id }}-title">Title</label>

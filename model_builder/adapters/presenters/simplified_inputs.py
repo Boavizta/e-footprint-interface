@@ -19,31 +19,31 @@ def input_catalog(model_web):
     return build_catalog(model_web, can_edit_timeseries=can_edit_timeseries)
 
 
-def present_edited_input(request, model_web, output, catalog, *, recompute=False):
+def present_edited_input(request, model_web, address, output, catalog, *, recompute=False):
     from model_builder.adapters.presenters import HtmxPresenter
     from model_builder.adapters.presenters.oob_regions import render_oob_regions
     from model_builder.adapters.views.data_status import append_workspace_storage_status
     from model_builder.domain.oob_region import OobRegion
 
-    html = render_input_fields_oob(request, model_web, output.changed_fields, catalog=catalog)
+    html = render_input_fields_oob(request, model_web, output.changed_fields, catalog=catalog,
+                                   submitted=address, outcome="saved")
     html += render_oob_regions(model_web, [OobRegion("results_buttons")])
-    html += render_to_string("model_builder/components/input_repair_notices.html",
-                             {"notice_text": " ".join(output.notices)})
-    triggers = {"simplifiedInputSaved": {"notice_target": "input-repair-notices"}}
-    if recompute:
-        html += HtmxPresenter(request, model_web)._recomputation_html()
-        triggers["triggerResultRendering"] = ""
+    html += render_to_string("model_builder/simplified_inputs/notice.html", {
+        "system_id": model_web.system.efootprint_id, "notice_text": " ".join(output.notices), "oob": True})
     response = HttpResponse(html)
-    response["HX-Trigger-After-Settle"] = json.dumps(triggers)
+    if recompute:
+        response.write(HtmxPresenter(request, model_web)._recomputation_html())
+        response["HX-Trigger-After-Settle"] = json.dumps({"triggerResultRendering": ""})
     append_workspace_storage_status(response, request.session)
     return response
 
 
-def render_input_fields_oob(request, model_web, addresses, *, catalog=None):
+def render_input_fields_oob(request, model_web, addresses, *, catalog=None, submitted=None, outcome=None):
+    """Render field fragments; only the submitted field carries the save outcome."""
     context = build_workspace_context(model_web, catalog=catalog, addresses=addresses)
-    return "".join(render_to_string("model_builder/simplified_inputs/field.html", {"field": field, "oob": True},
-                                  request=request)
-                   for group in context["groups"] for obj in group["objects"] for field in obj["fields"])
+    return "".join(render_to_string("model_builder/simplified_inputs/field.html", {
+        "field": field, "oob": True, "outcome": outcome if field["address"] == submitted else None},
+        request=request) for group in context["groups"] for obj in group["objects"] for field in obj["fields"])
 
 
 def _preview(value):

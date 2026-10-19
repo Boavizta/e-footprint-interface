@@ -56,6 +56,7 @@ def simplified_timeseries_panel(request, object_id, attribute):
             raise ValueError("This input is not an editable timeseries.")
         return render(request, "model_builder/simplified_inputs/timeseries_panel.html", {
             "field": field, "address": address, "header_name": f"{owner.name}: {field['label']}",
+            "status_id": f"si-{model_web.system.efootprint_id}-{object_id}-{attribute}-save-status",
             "dynamic_form_data": {},
             "simplified_timeseries": True, "focused_canvas_id": field["web_id"] + "__focused_chart",
         })
@@ -63,11 +64,11 @@ def simplified_timeseries_panel(request, object_id, attribute):
         return render_exception_modal(request, error, preserve_panels=True)
 
 
-def _rejected_simplified_input(request, error, addresses, *, status=500):
+def _rejected_simplified_input(request, error, address, addresses, *, status=500):
     response = render_exception_modal(request, error, status=status, preserve_panels=True)
     # Persistence and presentation can fail after the request-local model has changed.
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
-    response.write(render_input_fields_oob(request, model_web, addresses))
+    response.write(render_input_fields_oob(request, model_web, addresses, submitted=address, outcome="rejected"))
     return response
 
 
@@ -93,17 +94,17 @@ def edit_simplified_input(request, object_id, attribute):
         try:
             parsed = parse_form_data(form_data, owner.class_as_simple_str)
         except ValueError as error:
-            return _rejected_simplified_input(request, error, recovery_addresses, status=422)
+            return _rejected_simplified_input(request, error, address, recovery_addresses, status=422)
         try:
             output = EditSimplifiedInputUseCase(model_web, catalog).execute(
                 EditSimplifiedInput(address, parsed[attribute]))
         except (InputValidationError, WeeklyPatternValidationError) as error:
-            return _rejected_simplified_input(request, error, recovery_addresses, status=422)
+            return _rejected_simplified_input(request, error, address, recovery_addresses, status=422)
         recovery_addresses = output.changed_fields
-        return present_edited_input(request, model_web, output, catalog,
+        return present_edited_input(request, model_web, address, output, catalog,
                                     recompute=request.POST.get("recomputation") == "true")
     except Exception as error:
-        return _rejected_simplified_input(request, error, recovery_addresses)
+        return _rejected_simplified_input(request, error, address, recovery_addresses)
 
 
 @require_POST

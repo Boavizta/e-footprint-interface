@@ -639,15 +639,10 @@ def render_simplified_editor(case):
              "editor": {"web_id": "si-test-server-lifespan-value", "input_type": "explainable_quantity",
                         "label": "Lifespan", "default": 5, "step": 1, "unit": "year",
                         "metadata": metadata_field(source=HYPOTHESIS, comment="Preserve comment")["metadata"]}}
-    if case.get("automatic_source"):
-        field["editor"]["metadata"] = metadata_field(confidence="high", source=AUTOMATIC_REPLACEMENT,
-            comment="Replacement history", available_sources=[*SENTINELS, AUTOMATIC_REPLACEMENT])["metadata"]
-    if case.get("optional_quantity"):
-        field["editor"].update(input_type="optional_explainable_quantity")
     context = {"quick_total": "20 kg", "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}}
     context.update(case)
     return (
-        render_to_string("model_builder/simplified_inputs/editor.html", {"field": field})
+        render_to_string("model_builder/simplified_inputs/editor.html", {"field": field, "outcome": case.get("outcome")})
         + render_to_string("model_builder/components/results_bar_button.html", context)
         + render_to_string("model_builder/upload_download_reboot_model_tooltips.html", context)
     )
@@ -699,14 +694,10 @@ def render_optional_quantity(field):
 
 GROUPS = [
     ({"input_repair_notices": {"notice_text": "Job A: Resolution changed to 480p. — "
-        "Job B: <script>unsafe()</script> & resolution changed to 480p."},
-      "simplified_repair_notices": {"notice_text": "Job A: Resolution changed to 480p. "
         "Job B: <script>unsafe()</script> & resolution changed to 480p."}},
      lambda context: render_to_string("model_builder/components/input_repair_notices.html", context)),
     (OPTIONAL_QUANTITY_CASES, render_optional_quantity),
-    ({"simplified_optional_quantity": {"optional_quantity": True},
-      "simplified_editor_automatic": {"automatic_source": True},
-      "simplified_editor": {}, "simplified_editor_workspace": {"workspace_slots": [{}, {}]}}, render_simplified_editor),
+    ({"simplified_editor": {}, "simplified_editor_saved": {"outcome": "saved"}}, render_simplified_editor),
     ({"simplified_configure": {}, "simplified_saved": {"configure": False},
       "simplified_configure_export": {"toolbar": True},
       "simplified_configure_workspace": {"toolbar": True, "workspace_slots": [{}, {}]}},

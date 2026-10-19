@@ -171,31 +171,3 @@ test("object-type switching preserves control state owned by a nested timeseries
 
     expect(namedControlStates()).toEqual(expectedStates);
 });
-
-
-test("simplified optional quantity saves empty immediately and waits for numeric completion", () => {
-    require("../theme/static/scripts/simplified_inputs/index.js");
-    mount("simplified_optional_quantity");
-    document.body.insertAdjacentHTML("beforeend", '<script id="dynamic-form-data" type="application/json">{}</script>');
-    window.htmx = {trigger: jest.fn()};
-    delete document.body.dataset.workspaceMutation;
-    document.dispatchEvent(new Event("initDynamicForm"));
-    document.dispatchEvent(new Event("DOMContentLoaded"));
-    const form = document.querySelector("[data-simplified-editor]");
-    const toggle = form.querySelector('[data-action="optional-quantity-empty"]');
-    expect(toggle.disabled).toBe(false);
-    expect(form.querySelector('input[type="number"]').value).toBe("5");
-    toggle.checked = true;
-    toggle.dispatchEvent(new Event("change", {bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
-    expect(form.querySelector('input[type="number"]').value).toBe("");
-    form.dataset.saving = "false";
-    window.htmx.trigger.mockClear();
-    toggle.checked = false;
-    toggle.dispatchEvent(new Event("change", {bubbles: true}));
-    expect(window.htmx.trigger).not.toHaveBeenCalled();
-    const number = form.querySelector('input[type="number"]');
-    number.value = "7";
-    number.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
-    expect(window.htmx.trigger).toHaveBeenCalledWith(form, "simplified-save");
-});

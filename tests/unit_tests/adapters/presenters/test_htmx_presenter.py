@@ -172,11 +172,13 @@ def test_large_accepted_repair_batch_carries_every_notice_in_body_with_bounded_h
             EditSimplifiedInput(FieldAddress(api.id, "provider"), {"value": "bytedance"}))
         expected_notices.append(f"{api.name}: {api.model_name.label} changed to seedance-1.0.")
         assert sorted(output.notices) == sorted(expected_notices)
-        response = present_edited_input(request, model, output, catalog)
+        response = present_edited_input(request, model, FieldAddress(api.id, "provider"), output, catalog)
     assert len(json.dumps(expected_notices).encode()) > 8 * 1024
 
     assert len(response.serialize_headers()) < 1024
-    holder = re.search(r'<div id="input-repair-notices"[^>]*>(.*?)</div>', response.content.decode(), re.DOTALL)
+    holder_pattern = (r'<div id="input-repair-notices"[^>]*>(.*?)</div>' if editor == "normal"
+                      else r'<p id="si-[^"]+-notice"[^>]*hx-swap-oob="true">(.*?)</p>')
+    holder = re.search(holder_pattern, response.content.decode(), re.DOTALL)
     assert holder is not None
     if editor == "normal":
         assert sorted(unescape(holder[1]).split(" — ")) == sorted(expected_notices)

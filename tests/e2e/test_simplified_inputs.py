@@ -1,5 +1,6 @@
 """Critical configuration, navigation and resident-model flows for focused inputs."""
 import json
+import re
 
 import pytest
 from playwright.sync_api import expect
@@ -131,10 +132,18 @@ class TestSimplifiedInputs:
         expect(workspace.locator("[data-simplified-notice]")).to_have_text(" ".join(notices))
         expect(workspace.locator("[data-simplified-notice] > *")).to_have_count(0)
         page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        resolution = field(workspace, "resolution")
+        if repair_resolution:
+            expect(resolution.locator('input[name$="__source_id"]')).to_have_value("automatic_replacement")
+        replacement_comment = resolution.locator('input[name$="__comment"]').input_value()
         manual_resolution = resolutions[-1] if repair_resolution else resolutions[0]
         with page.expect_response("**/edit-simplified-input/**"):
             resolution_select.select_option(manual_resolution.value)
         expect(resolution_select).to_have_value(manual_resolution.value)
+        expect(resolution.locator('input[name$="__source_id"]')).to_have_value("user_data")
+        expect(resolution.locator('input[name$="__comment"]')).to_have_value(replacement_comment)
+        expect(resolution.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        expect(workspace.locator("[data-simplified-notice]")).to_have_text("")
 
     def test_repeated_configure_entry_does_not_queue_a_draft_replacement(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
@@ -717,8 +726,10 @@ class TestInlineBookmarks:
         controls = page.locator("button, [data-simplified-workspace] input, "
                                 "[data-simplified-workspace] select, [data-simplified-workspace] textarea")
         assert controls.evaluate_all("controls => controls.every(control => control.disabled)")
-        expect(builder.simplified_field("lifespan").locator("[data-simplified-save-status]")).to_have_text("Saving…")
-        expect(page.locator("[data-quick-total]").first).to_have_attribute("aria-busy", "true")
+        status = builder.simplified_field("lifespan").locator("[data-simplified-save-status]")
+        expect(status).to_have_class(re.compile(r"\bhtmx-request\b"))
+        expect(status).to_be_visible()
+        expect(page.locator("[data-quick-total-status].htmx-request")).to_have_count(2)
         builder.attempt_disabled_simplified_edit("power")
         assert len(pending) == 1 and len(requests) == 1
         route = pending.pop()
@@ -728,19 +739,24 @@ class TestInlineBookmarks:
             reject_simplified_edit(route)
         else:
             route.fulfill(response=route.fetch())
-        expected_status = "Saved" if outcome == "success" else "Not saved"
+        expected_status = {"success": "Saved", "rejected": "Not saved", "transport": ""}[outcome]
         status = builder.simplified_field("lifespan").locator("[data-simplified-save-status]")
         expect(status).to_have_text(expected_status)
+        expect(status).not_to_have_class(re.compile(r"\bhtmx-request\b"))
         expect(value).to_be_enabled()
         expect(builder.simplified_field("power").locator('input[type="number"]')).to_be_enabled()
         expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
         expect(page.locator("#compare-tab")).to_be_disabled()
-        expect(page.locator("[data-quick-total]").first).not_to_have_attribute("aria-busy", "true")
+        expect(page.locator(".htmx-request")).to_have_count(0)
         expect(value).to_have_value(original_value if outcome == "rejected" else "8")
         if outcome == "rejected":
             builder.close_error_modal()
         page.unroute("**/edit-simplified-input/**")
         assert len(requests) == 1
+        if outcome == "transport":
+            with page.expect_response("**/edit-simplified-input/**"):
+                builder.save_simplified_number("lifespan", "9")
+            expect(status).to_have_text("Saved")
 
     def test_simple_autosave_deduplicates_restores_rejected_field_and_refreshes_results(self, minimal_complete_model_builder):
         from urllib.parse import parse_qsl, urlencode
@@ -762,7 +778,8 @@ class TestInlineBookmarks:
         expect(lifespan.locator(".simplified-provenance")).to_have_count(0)
         power = field(workspace, "power").locator('input[type="number"]')
         power_value = power.input_value()
-        pending = []
+        pending, saves = [], []
+        page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
         page.route("**/edit-simplified-input/**", lambda route: pending.append(route))
         value.fill("8")
         with page.expect_request("**/edit-simplified-input/**"):
@@ -778,7 +795,27 @@ class TestInlineBookmarks:
         value.focus()
         power.focus()
         expect(power).to_be_enabled()
-        assert pending == []
+        value.fill("7")
+        value.fill("8")
+        value.press("Tab")
+        page.evaluate("""() => {
+            window.reportedValidity = 0;
+            const report = HTMLFormElement.prototype.reportValidity;
+            HTMLFormElement.prototype.reportValidity = function () { window.reportedValidity++; return report.call(this); };
+        }""")
+        value.fill("-1")
+        value.press("Enter")
+        page.wait_for_function("() => window.reportedValidity === 1")
+        value.press("Tab")
+        assert not value.evaluate("input => input.validity.valid")
+        assert pending == [] and len(saves) == 1
+        value.fill("8")
+        with page.expect_request("**/edit-simplified-input/**"):
+            value.press("Tab")
+        pending.pop().continue_()
+        expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
+        wait_for_htmx_idle(page)
+        assert pending == [] and len(saves) == 2
         totals = page.locator("[data-quick-total]")
         assert totals.count() == 2
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
@@ -821,11 +858,13 @@ class TestInlineBookmarks:
         assert totals.nth(0).text_content() == totals.nth(1).text_content()
         assert totals.nth(0).text_content() != saved_total
         minimal_complete_model_builder.close_result_panel()
+        saves.clear()
         lifespan.locator(".confidence-badge").click()
         with page.expect_response("**/edit-simplified-input/**"):
             lifespan.locator('.confidence-menu [data-level="high"]').click()
-        page.wait_for_function("() => document.querySelector('.htmx-request, .htmx-settling, .htmx-added') === null")
+        wait_for_htmx_idle(page)
         expect(lifespan.locator(".confidence-badge")).to_have_attribute("data-level", "high")
+        assert len(saves) == 1
         lifespan.locator('[data-action="open-source-editor"]').click()
         comment = lifespan.locator(".source-editor-comment")
         comment.fill("Reviewed modeling assumption")
@@ -833,6 +872,9 @@ class TestInlineBookmarks:
             comment.press("Tab")
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.locator('.source-editor input[name$="__comment"]')).to_have_value("Reviewed modeling assumption")
+        expect(lifespan.locator('input[name$="__confidence"]')).to_have_value("high")
+        wait_for_htmx_idle(page)
+        assert len(saves) == 2
         lifespan.locator('[data-action="open-source-editor"]').click()
         source_editor = lifespan.locator(".source-editor")
         source_editor.locator(".source-editor-select").select_option("__custom__")
@@ -873,7 +915,9 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     expect(panel.locator('[data-hourly-preview-input][name$="__initial_volume"]')).to_be_visible()
     volume = panel.locator('[name$="__initial_volume"]')
     accepted_volume = volume.input_value()
+    assert not page.evaluate("() => isSidePanelFormModified()")
     volume.fill("25")
+    assert page.evaluate("() => isSidePanelFormModified()")
     builder.download_active_model(str(tmp_path / "saved-timeseries.e-f.json"))
     data = json.loads((tmp_path / "saved-timeseries.e-f.json").read_text())
     owner_id = selected.get_attribute("data-owner-id")
@@ -881,8 +925,11 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     assert float(exported_volume) == float(accepted_volume)
     expect(panel).to_be_visible()
     expect(volume).to_have_value("25")
-    page.locator('[data-action="simplified-timeseries-cancel"]').click()
+    saves = []
+    page.on("request", lambda request: saves.append(request) if "/edit-simplified-input/" in request.url else None)
+    page.locator("#sidePanel").get_by_role("button", name="Cancel", exact=True).click()
     expect(page.locator("#sidePanel")).not_to_be_visible()
+    assert saves == []
     expect(selected.locator("[data-current-value]")).to_have_text(before)
     click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
     page.set_viewport_size({"width": 500, "height": 900})
@@ -904,8 +951,14 @@ def test_focused_hourly_panel_save_cancel_failure_and_mobile_preview(minimal_com
     click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))
     expect(volume).to_have_value(accepted_volume)
     volume.fill("40")
-    builder.side_panel.submit_and_wait_for_close()
+    builder.open_result_panel()
+    wait_for_htmx_idle(page)
+    with page.expect_request("**/edit-simplified-input/**") as request_info:
+        builder.side_panel.submit_and_wait_for_close()
+    assert "recomputation=true" in request_info.value.post_data
+    builder.close_result_panel()
     expect(selected.locator("[data-current-value]")).not_to_have_text(before)
+    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saved")
     selected.locator('[data-action="open-source-editor"]').click()
     comment = selected.locator(".source-editor-comment")
     comment.fill("Forecast assumption")
@@ -947,7 +1000,7 @@ def test_native_export_during_field_save_uses_repository_state(minimal_complete_
             builder.export_control().click()
         editor.fill("Export the final metadata too" if metadata else "8")
         editor.press("Tab")
-        expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saving…")
+        expect(selected.locator("[data-simplified-save-status]")).to_have_class(re.compile(r"\bhtmx-request\b"))
         if two_models:
             expect(builder.export_control()).to_be_disabled()
             expect(builder.export_control()).to_have_attribute("aria-expanded", "true")
@@ -975,7 +1028,7 @@ def test_native_export_during_field_save_uses_repository_state(minimal_complete_
 
     value.fill("9")
     value.press("Enter")
-    expect(selected.locator("[data-simplified-save-status]")).to_have_text("Saving…")
+    expect(selected.locator("[data-simplified-save-status]")).to_have_class(re.compile(r"\bhtmx-request\b"))
     with page.expect_response("**/edit-simplified-input/**") as response_info:
         reject_simplified_edit(pending.pop())
     assert response_info.value.status == 422
@@ -1133,7 +1186,7 @@ def test_configure_export_blocks_dirty_controls_and_clean_export_stays_open(
         workspace.get_by_role("button", name="Cancel", exact=True).click()
         click_and_wait_for_htmx(page, page.get_by_role("button", name="Discard", exact=True))
     expect(workspace).to_have_attribute("data-mode", "simplified")
-    expect(workspace.locator("[data-simplified-notice]")).to_have_count(0)
+    expect(workspace.locator("[data-simplified-notice]")).to_have_text("")
     wait_for_htmx_idle(page)
     assert len(downloads) == download_count
     builder.download_active_model(str(tmp_path / "resolved.e-f.json"))

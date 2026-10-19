@@ -3,6 +3,9 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any
 
+from efootprint.abstract_modeling_classes.explainable_object_base_class import ExplainableObject
+from efootprint.abstract_modeling_classes.source_objects import Sources
+
 from model_builder.domain.exceptions import InputValidationError
 
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -11,6 +14,9 @@ from model_builder.domain.object_factory import apply_input_edits
 from model_builder.domain.services.simplified_inputs import (
     FieldAddress, FieldCatalog, complete_selection, normalize_definition, validate_definition,
 )
+
+
+IMPLICIT_SOURCE_IDS = {Sources.HYPOTHESIS.id, Sources.AUTOMATIC_REPLACEMENT.id}
 
 
 @dataclass
@@ -39,7 +45,14 @@ class EditSimplifiedInputUseCase:
             raise InputValidationError(f"Input {address.object_id}.{address.attribute} is not selected.")
 
         owner = self.model_web.get_web_object_from_efootprint_id(address.object_id)
+        previous_value = getattr(owner.modeling_obj, address.attribute)
         result = apply_input_edits({address.attribute: command.parsed_value}, owner)
+        value = getattr(owner.modeling_obj, address.attribute)
+        # A value the user typed is user data; a provenance-only edit patches the same object in place
+        # and keeps its source. Metadata does not affect calculations, so it is safe after the update.
+        if (value is not previous_value and isinstance(value, ExplainableObject) and value.source is not None
+                and value.source.id in IMPLICIT_SOURCE_IDS):
+            value.source = Sources.USER_DATA
         self.model_web.persist_to_cache()
         notices = [f"{change.input[0].name}: {change.accepted_value.label} changed to {change.accepted_value}."
                    for change in result.automatic_changes]
