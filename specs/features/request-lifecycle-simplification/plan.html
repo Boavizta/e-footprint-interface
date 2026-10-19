@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request lifecycle simplification — Implementation plan (draft)</title>
+<style>
+  :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
+    --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
+    --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+  body { margin: 0; font: 16px/1.6 system-ui, -apple-system, sans-serif; color: var(--ink); background: var(--bg); }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 4px; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem; border: 1px solid var(--line);
+    border-radius: .5rem; background: var(--paper); box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  body > a { position: absolute; left: 1rem; top: -5rem; z-index: 5; background: var(--paper); padding: .7rem; }
+  body > a:focus { top: 1rem; }
+  #layout { display: grid; grid-template-columns: 22rem minmax(0, 64rem); gap: 2rem; max-width: 92rem; margin: auto; padding: 2rem 1.5rem 5rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 64rem); }
+  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow: auto;
+    overscroll-behavior: contain; padding: 0 .5rem 0 0; border: 0; border-radius: 0; background: transparent; margin: 0; }
+  #sidebar:not([open]) { overflow: visible; padding-right: 0; }
+  #sidebar > summary { position: sticky; top: 0; z-index: 2; list-style: none; display: flex; align-items: center; gap: .4rem;
+    width: max-content; max-width: 100%; margin: 0 0 .7rem; padding: .3rem .55rem; border: 1px solid var(--line);
+    border-radius: .4rem; background: var(--paper); color: var(--accent); font-size: .8rem; }
+  #sidebar > summary::-webkit-details-marker { display: none; }
+  #sidebar > summary::before { content: "☰"; font-size: 1.1rem; line-height: 1; }
+  #sidebar:not([open]) > summary { width: 2.75rem; height: 2.75rem; justify-content: center; margin-bottom: 0; padding: 0; }
+  #sidebar:not([open]) > summary span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #navigation { font-size: .85rem; padding-bottom: .6rem; }
+  #navigation > p:first-child { text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; font-weight: 700; color: var(--accent); }
+  #navigation ol { list-style: none; padding: 0; }
+  #navigation li a { display: block; padding: .35rem .5rem; border-radius: .3rem; }
+  #navigation li a:hover { background: var(--soft); }
+  main { min-width: 0; }
+  header > p:first-child, small, figcaption, [data-reading-note] { color: var(--muted); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.2; letter-spacing: -.03em; }
+  h2 { font-size: 1.4rem; line-height: 1.3; }
+  h3 { font-size: 1.08rem; margin: 1.5rem 0 .4rem; }
+  p, ul, ol { margin: .6rem 0 1rem; }
+  li { margin: .3rem 0; }
+  main > section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  main p { max-width: 76ch; }
+  [data-reading-note], [data-files] { font-size: .83rem; }
+  [data-files] > span { color: var(--muted); }
+  [data-step] > h3 > a { color: inherit; text-decoration: none; }
+  [data-step]:is(:target, :has(:target)) { border-left: 3px solid var(--accent); padding-left: .8rem; }
+  code { background: #eef2ef; padding: .08rem .25rem; border-radius: 3px; font: .86em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  pre { overflow: auto; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem; background: #f8faf7; font: .86rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  pre code { background: none; padding: 0; font: inherit; overflow-wrap: normal; }
+  [data-code] { margin: 1rem 0; }
+  [data-code-file] { display: flex; flex-wrap: wrap; gap: .2rem .8rem; align-items: baseline; margin: 0; max-width: none; padding: .45rem .8rem;
+    border: 1px solid var(--line); border-bottom: 0; border-radius: .5rem .5rem 0 0; background: #eef2ef; font-size: .8rem; }
+  [data-code-file] code { background: none; padding: 0; font-size: 1em; }
+  [data-code] pre { margin: 0; border-radius: 0 0 .5rem .5rem; }
+  details { border: 1px solid var(--line); border-radius: .5rem; padding: .7rem 1rem; background: var(--paper); margin: .7rem 0; }
+  summary { cursor: pointer; font-weight: 650; }
+  #modules h2 { font-size: 1.05rem; }
+  #modules > p { font-size: .76rem; color: var(--muted); }
+  #change-tree { padding: .7rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--paper); font-size: .8rem; }
+  #change-tree details { border: 0; background: none; padding: .2rem 0 .2rem .6rem; margin: .25rem 0; }
+  #change-tree > details { padding-left: 0; }
+  #change-tree ul { list-style: none; border-left: 1px solid var(--line); margin: .25rem 0 .25rem .35rem; padding: 0 0 0 .7rem; }
+  #change-tree li { padding: .3rem; border-radius: .3rem; }
+  #change-tree li:target { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #change-tree li > small { display: block; margin-top: .2rem; }
+  [data-change] { font-size: .65rem; font-weight: 700; text-transform: uppercase; border-radius: .25rem; padding: .1rem .3rem; background: #eef2ef; color: var(--muted); }
+  [data-change="new"] { color: var(--accent); background: var(--soft); }
+  [data-change="removed"] { color: #963939; background: #fff0ed; }
+  [data-reading-links] { margin-left: .3rem; font-size: .7rem; }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg); padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .65rem; }
+  th { background: var(--soft); }
+  #phases { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  #phases li { margin: 0; padding: .9rem; background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; }
+  #phases strong, #phases small { display: block; }
+  body:has(#platform:target, #platform :target, #change-tree :target[data-steps~="platform"]) #change-tree li[data-steps~="platform"],
+  body:has(#field-save:target, #field-save :target, #change-tree :target[data-steps~="field-save"]) #change-tree li[data-steps~="field-save"],
+  body:has(#bookmarks:target, #bookmarks :target, #change-tree :target[data-steps~="bookmarks"]) #change-tree li[data-steps~="bookmarks"],
+  body:has(#exits:target, #exits :target, #change-tree :target[data-steps~="exits"]) #change-tree li[data-steps~="exits"],
+  body:has(#results:target, #results :target, #change-tree :target[data-steps~="results"]) #change-tree li[data-steps~="results"] { background: var(--soft); }
+  body:has(#platform:target, #platform :target) #navigation a[href="#platform"],
+  body:has(#field-save:target, #field-save :target) #navigation a[href="#field-save"],
+  body:has(#bookmarks:target, #bookmarks :target) #navigation a[href="#bookmarks"],
+  body:has(#exits:target, #exits :target) #navigation a[href="#exits"],
+  body:has(#results:target, #results :target) #navigation a[href="#results"] { background: var(--soft); font-weight: 700; }
+  @media (max-width: 1100px) { #layout { grid-template-columns: 18rem minmax(0, 1fr); gap: 1.2rem; } }
+  @media (max-width: 850px) {
+    #layout { display: flex; flex-direction: column; padding: 1rem; }
+    #sidebar { position: static; max-height: min(45vh, 24rem); padding: 0; width: 100%; }
+    #sidebar:not([open]) { width: 2.75rem; }
+    #navigation ol { display: flex; flex-wrap: wrap; gap: .25rem; }
+    #phases { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print {
+    #review-link-menu { display: none; } body { background: white; font-size: 10pt; }
+    #layout { display: flex; flex-direction: column; padding: 0; }
+    #sidebar, #sidebar:not([open]) { order: 1; position: static; width: 100%; max-height: none; overflow: visible; }
+    #navigation, body > a, #sidebar > summary { display: none; } main { order: 0; } #modules { break-before: page; }
+    details::details-content { content-visibility: visible; display: block; }
+    [data-code], figure, tr { break-inside: avoid; } pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  }
+</style>
+</head>
+<body>
+<a href="#main">Skip to plan</a>
+<div id="layout">
+<details id="sidebar" aria-label="Reading order and changed files" open>
+  <summary title="Show or hide navigation and changed files"><span>Navigation and changed files</span></summary>
+  <nav id="navigation" aria-label="Reading order">
+    <p>Reading order</p>
+    <ol>
+      <li><a href="#platform">1.1 · Platform: one completion signal</a></li>
+      <li><a href="#field-save">1.2 · Field value or provenance save</a></li>
+      <li><a href="#bookmarks">1.3 · Bookmark membership and help</a></li>
+      <li><a href="#exits">1.4 · Saved-view reads and Configure exits</a></li>
+      <li><a href="#results">1.5 · Results panel close</a></li>
+    </ol>
+    <p><a href="#delivery">Delivery &amp; verification</a> · <a href="#decisions">Decisions for review</a></p>
+  </nav>
+  <section id="modules">
+    <h2>Changed files</h2>
+    <p>Select a reading step to highlight its files. Click a linked file to open it in VS Code, or right-click it for a diff against <code>main</code>.</p>
+    <div id="change-tree">
+      <details open>
+        <summary>e-footprint-interface /</summary>
+        <details open>
+          <summary>theme/templates/ · theme/static/</summary>
+          <ul>
+            <li id="file-base" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/templates/base.html:14:1" data-review-source-href="../../../theme/templates/base.html#L14:1"><code>templates/base.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Declare the HTMX configuration meta tag beside the library script.</small></li>
+            <li id="file-field-edits" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L1:1"><code>scripts/simplified_inputs/field_edits.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Drop saved snapshots, request maps and status timers; keep edit triggers, dirty flags and one transport-failure handler.</small></li>
+            <li id="file-bookmarks" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L1:1"><code>scripts/simplified_inputs/bookmarks.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Remove the JSON reconciler; keep creation-time locks and patch assembly.</small></li>
+            <li id="file-workspace" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L1:1"><code>scripts/simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Promise-based reads, one completion listener for Configure Save, hidden-slot cleanup on switch.</small></li>
+            <li id="file-main-js" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>scripts/model_builder_main.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Remove the disabled-state snapshot and restore block.</small></li>
+            <li id="file-hammer" data-steps="results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:47:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L47:1"><code>scripts/hammer_utils.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#results">1.5</a></span><small>Remove the close wait and its request tracking; closing empties the panel immediately.</small></li>
+            <li id="file-scss" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/custom.scss:1:1" data-review-source-href="../../../theme/static/scss/custom.scss#L1:1"><code>scss/custom.scss</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Fade rule for the server-rendered Saved status and the totals indicator text.</small></li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/templates/model_builder/</summary>
+          <ul>
+            <li id="file-editor" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L3:1"><code>simplified_inputs/editor.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Exclude disabled controls from the lock, render status text, add the totals indicator.</small></li>
+            <li id="file-field" data-steps="field-save"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/field.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/field.html#L1:1"><code>simplified_inputs/field.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a></span><small>Carry the save outcome into the replacement fragment.</small></li>
+            <li id="file-bookmark-controls" data-steps="bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L1:1"><code>simplified_inputs/bookmark_controls.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#bookmarks">1.3</a></span><small>Out-of-band variant with status and rendered Undo patch.</small></li>
+            <li id="file-main-html" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L19:1"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Request replacement on the slot targets.</small></li>
+            <li id="file-result-panel" data-steps="results"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L8:1"><code>result/result_panel.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#results">1.5</a></span><small>The close chevron becomes a button so the existing save lock covers it.</small></li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/adapters/</summary>
+          <ul>
+            <li id="file-presenter" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>presenters/simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a> · <a href="#bookmarks">1.3</a></span><small>Pass the save outcome to field fragments; render bookmark fragments.</small></li>
+            <li id="file-views" data-steps="field-save bookmarks"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>views/views_simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#field-save">1.2</a> · <a href="#bookmarks">1.3</a></span><small>Bookmark patch answers with HTML fragments; rejected saves carry the outcome.</small></li>
+          </ul>
+        </details>
+        <details open>
+          <summary>specs/ · tests</summary>
+          <ul>
+            <li id="file-conventions" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:24:1" data-review-source-href="../../../specs/conventions.md#L24:1"><code>specs/conventions.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Request-handling rule; drop "listener order is part of mutation settlement".</small></li>
+            <li id="file-rendering" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:60:1" data-review-source-href="../../../specs/architecture/rendering.html#L60:1"><code>specs/architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Settlement is synchronous; remove ordering caveats.</small></li>
+            <li id="file-workspace-doc" data-steps="exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>specs/architecture/workspace.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#exits">1.4</a></span><small>Pending-read and continuation paragraphs replaced by the accepted parking rule.</small></li>
+            <li id="file-testing" data-steps="platform"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:189:1" data-review-source-href="../../../specs/testing.md#L189:1"><code>specs/testing.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#platform">1.1</a></span><small>Export-timing guidance reworded for one completion signal.</small></li>
+            <li id="file-jest" data-steps="field-save bookmarks exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js:1:1" data-review-source-href="../../../js_tests/simplified_inputs.test.js#L1:1"><code>js_tests/simplified_inputs.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_bookmark_lifecycle.test.js:1:1" data-review-source-href="../../../js_tests/simplified_bookmark_lifecycle.test.js#L1:1"><code>simplified_bookmark_lifecycle.test.js</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:1:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L1:1"><code>model_builder_main.test.js</code></a> <span data-change="modified">Modified</span>
+              <small>Outcome-based rewrite; remove event-sequence fixtures.</small></li>
+            <li id="file-e2e" data-steps="field-save bookmarks exits"><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py:1:1" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py#L1:1"><code>tests/e2e/test_simplified_inputs.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/utils.py:1:1" data-review-source-href="../../../tests/e2e/utils.py#L1:1"><code>utils.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:1:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L1:1"><code>pages/model_builder_page.py</code></a> <span data-change="modified">Modified</span>
+              <small>Probe status text and disabled state instead of lock markers.</small></li>
+          </ul>
+        </details>
+      </details>
+    </div>
+  </section>
+</details>
+
+<main id="main">
+  <header>
+    <p>Plan · draft from kickoff · 2026-10-19</p>
+    <h1>Request lifecycle simplification — implementation plan</h1>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/request-lifecycle-simplification/spec.html" data-review-source-href="spec.html">Spec under review</a> · <a href="#modules">Changed files</a></p>
+    <aside data-note>
+      <p><strong>Draft.</strong> This plan captures design decisions reached while analysing the current code during
+      the kickoff conversation, including facts verified against the vendored HTMX 2.0.6. It is refined, not rewritten,
+      in the <code>spec-plan</code> stage after the spec is approved.</p>
+    </aside>
+  </header>
+
+  <section id="walkthrough">
+    <h2>1. Follow the interactions through the code</h2>
+    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code>.</p>
+
+    <article id="platform" data-step>
+      <h3><a href="#platform">1.1 · Platform: one completion signal</a></h3>
+      <p data-files><span>Files</span> <a href="#file-base"><code>theme/templates/base.html</code></a> · <a href="#file-conventions"><code>specs/conventions.md</code></a> · <a href="#file-rendering"><code>specs/architecture/rendering.html</code></a> · <a href="#file-testing"><code>specs/testing.md</code></a></p>
+      <p>Today HTMX fires <code>htmx:afterRequest</code> as soon as the response handler returns, but defers
+      <code>htmx:afterSettle</code> by its default <code>defaultSettleDelay</code> of 20 ms. Verified in the vendored
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/external_librairies/htmx.min.js:1:1" data-review-source-href="../../../theme/static/scripts/external_librairies/htmx.min.js#L1:1"><code>htmx.min.js</code></a> (2.0.6): when
+      the settle delay is zero, the settle step runs synchronously inside the swap, so the order becomes beforeSwap, afterSwap,
+      afterSettle, afterRequest, then resolution of the <code>htmx.ajax</code> promise. That promise resolves after the
+      response is handled for any HTTP status and rejects only on network error, abort or timeout. No project SCSS or template uses
+      the <code>htmx-settling</code> or <code>htmx-added</code> classes that the delay exists to animate.</p>
+      <div data-code>
+        <p data-code-file><a href="#file-base"><code>theme/templates/base.html</code></a> <small>Proposed, next to the HTMX script tag on line 14</small></p>
+        <pre><code>&lt;meta name="htmx-config" content='{"defaultSettleDelay": 0}'&gt;</code></pre>
+      </div>
+      <p>Every later section relies on this: <code>htmx:afterRequest</code> on an element now means its DOM result is final,
+      including out-of-band fragments carried by the same response, and the <code>HX-Trigger-After-Settle</code> header fires
+      before it.</p>
+      <p>The rule promoted to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:24:1" data-review-source-href="../../../specs/conventions.md#L24:1"><code>conventions.md</code></a> under JavaScript,
+      replacing the "listener order is part of mutation settlement" clause on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/conventions.md:26:1" data-review-source-href="../../../specs/conventions.md#L26:1">line 26</a>:</p>
+      <blockquote><strong>The server is the source of truth; the rendered fragment is the state.</strong> Feature JavaScript
+      must not coordinate swap or settle ordering, must not store request objects, and must not keep client copies of
+      server-owned state such as saved values, membership, locks or undo history. HTMX settles synchronously in this project,
+      so <code>htmx:afterRequest</code> on an element means its DOM result is final. Observe completion through that event with
+      <code>event.detail.successful</code>, or through the <code>htmx.ajax</code> promise, and nothing else. Status text, locks
+      and undo affordances are rendered by the server. Client state is limited to drafts not yet submitted, ephemeral view
+      state the server cannot know, and per-browser preferences. Global re-initialisation hooks on <code>htmx:afterSettle</code>
+      for third-party widgets remain allowed; sequencing a feature's own request is not.</blockquote>
+      <p>The architecture pages carry the same statement where they describe request handling, not only the removal of the old
+      caveats: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:60:1" data-review-source-href="../../../specs/architecture/rendering.html#L60:1"><code>rendering.html</code></a>
+      replaces the bundle-order caveat with a short paragraph naming the synchronous settle configuration and the rule above,
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>workspace.html</code></a>
+      states that Simplified-input state after any request is the server fragment, and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:189:1" data-review-source-href="../../../specs/testing.md#L189:1"><code>testing.md</code></a>
+      rewords the export-timing hold around the single signal and tells test authors to assert rendered outcomes rather than
+      dispatch synthetic lifecycle sequences. Unchanged consumers: the loading bar, the modal
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/modal_utils.js:27:1" data-review-source-href="../../../theme/static/scripts/modal_utils.js#L27:1"><code>htmx:beforeSwap</code></a> handler that lets error
+      responses swap their out-of-band modal, and the accordion-state preservation in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:353:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L353:1"><code>model_builder_main.js</code></a>.</p>
+    </article>
+
+    <article id="field-save" data-step>
+      <h3><a href="#field-save">1.2 · Field value or provenance save</a></h3>
+      <p data-files><span>Files</span> <a href="#file-editor"><code>simplified_inputs/editor.html</code></a> · <a href="#file-field"><code>simplified_inputs/field.html</code></a> · <a href="#file-field-edits"><code>field_edits.js</code></a> · <a href="#file-presenter"><code>presenters/simplified_inputs.py</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a> · <a href="#file-main-js"><code>model_builder_main.js</code></a> · <a href="#file-scss"><code>scss/custom.scss</code></a></p>
+      <p><strong>Trigger and lock.</strong> Blur, Enter, select change and provenance events still call
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:18:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L18:1"><code>saveEdit()</code></a>, which triggers the
+      form's <code>simplified-save</code> event. Its unchanged-blur guard no longer compares against the
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L5:1"><code>savedEdits</code></a> snapshot: an
+      <code>input</code> or <code>change</code> listener sets <code>data-dirty</code> on the control and on the form, and
+      <code>saveEdit()</code> returns when the form is not dirty. The lock selector on
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L6:1"><code>editor.html</code></a>
+      excludes controls that are already disabled, so HTMX never has to be corrected afterwards:</p>
+      <div data-code>
+        <p data-code-file><a href="#file-editor"><code>simplified_inputs/editor.html</code></a> <small>Proposed lock selector</small></p>
+        <pre><code>hx-disabled-elt="button:not(:disabled), [data-simplified-workspace] input:not(:disabled),
+                [data-simplified-workspace] select:not(:disabled), [data-simplified-workspace] textarea:not(:disabled)"</code></pre>
+      </div>
+      <p>HTMX resolves this attribute with a standard <code>querySelectorAll</code> and reference-counts overlapping requests before
+      releasing, so the snapshot-and-restore block at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:361:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L361:1"><code>model_builder_main.js</code> line 361</a> is removed, together
+      with the <code>[data-disabled-by-htmx]</code> checks inside
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:18:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L18:1"><code>saveEdit()</code></a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:36:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L36:1"><code>initializeEdits()</code></a>.</p>
+      <p><strong>Payload.</strong> The <code>htmx:configRequest</code> listener at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:96:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L96:1">line 96</a> keeps its two jobs, trimming
+      untouched provenance parameters and preserving multiple-select lists, but decides "untouched" from the control's
+      <code>data-dirty</code> flag rather than from the snapshot. The <code>source-metadata:value-changed</code> event is dispatched
+      when the value control is dirty.</p>
+      <p><strong>Response.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:22:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L22:1"><code>present_edited_input()</code></a>
+      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:66:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L66:1"><code>_rejected_simplified_input()</code></a> both
+      already answer with out-of-band field fragments through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/simplified_inputs.py:42:1" data-review-source-href="../../../model_builder/adapters/presenters/simplified_inputs.py#L42:1"><code>render_input_fields_oob()</code></a>. They pass an
+      extra <code>outcome</code> of <code>saved</code> or <code>rejected</code>, and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/field.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/field.html#L1:1"><code>field.html</code></a> renders the status
+      text into the fragment; the <code>hx-preserve</code> on the status span at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/editor.html:39:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/editor.html#L39:1">line 39</a> is dropped because the
+      span now arrives with its content.</p>
+      <div data-code>
+        <p data-code-file><a href="#file-editor"><code>simplified_inputs/editor.html</code></a> <small>Proposed status span; UI copy, not existing code</small></p>
+        <pre><code>&lt;span class="small" data-simplified-save-status data-outcome="{{ outcome }}" role="status"&gt;
+  {% if outcome == "saved" %}Saved{% elif outcome == "rejected" %}Not saved{% endif %}
+&lt;/span&gt;</code></pre>
+      </div>
+      <p>A rule in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/custom.scss:1:1" data-review-source-href="../../../theme/static/scss/custom.scss#L1:1"><code>custom.scss</code></a> fades
+      <code>[data-outcome="saved"]</code> after three seconds; the <code>saveStatusTimers</code> map disappears with it. The
+      "Saving…" text is set by the existing <code>saveEdit()</code> at trigger time, and the fragment replacement clears it.</p>
+      <p><strong>Completion.</strong> The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:7:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L7:1"><code>saves</code></a>
+      map, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:53:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L53:1"><code>finishSave()</code></a>, and the four
+      listeners from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:116:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L116:1">line 116</a> to
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:133:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L133:1">line 133</a> are removed. Two listeners
+      remain: <code>htmx:sendError</code> on a <code>[data-simplified-editor]</code> element writes "Not saved" and clears its
+      <code>data-saving</code> flag, and the existing <code>simplifiedInputSaved</code> notice handler. Timeseries panel closure moves to an
+      <code>htmx:afterRequest</code> check of <code>event.detail.successful</code> on <code>[data-simplified-timeseries]</code>.</p>
+      <p><strong>Totals.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/field_edits.js:44:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/field_edits.js#L44:1"><code>setTotalsBusy()</code></a>
+      is replaced by <code>hx-indicator="[data-quick-total]"</code> on the editor form and a style rule that renders
+      "Updating…" into <code>[data-quick-total-status]</code> while its total carries the <code>htmx-request</code> class.</p>
+    </article>
+
+    <article id="bookmarks" data-step>
+      <h3><a href="#bookmarks">1.3 · Bookmark membership and help</a></h3>
+      <p data-files><span>Files</span> <a href="#file-bookmarks"><code>bookmarks.js</code></a> · <a href="#file-bookmark-controls"><code>simplified_inputs/bookmark_controls.html</code></a> · <a href="#file-views"><code>views_simplified_inputs.py</code></a> · <a href="#file-presenter"><code>presenters/simplified_inputs.py</code></a></p>
+      <p>Today <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_simplified_inputs.py:138:1" data-review-source-href="../../../model_builder/adapters/views/views_simplified_inputs.py#L138:1"><code>patch_simplified_inputs()</code></a>
+      returns JSON listing every affected address with its setting, required-by label and an inverse patch, and the
+      <code>htmx:afterRequest</code> handler at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:129:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L129:1">line 129</a>
+      walks all visible bookmarks to apply it through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:5:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L5:1"><code>updateBookmark()</code></a>, while protecting a
+      dirty help draft and toggling Undo. The server already computes the affected set with the same catalog it would use to
+      render HTML.</p>
+      <p><strong>Proposed.</strong> The view renders one out-of-band
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/bookmark_controls.html#L1:1"><code>bookmark_controls.html</code></a>
+      fragment per affected address, targeting the existing <code>{{ field.dom_id }}-controls</code> container, plus an out-of-band
+      update of the bookmark's summary icon and labels. The fragment carries the status text ("Saved") and, for the bookmark that
+      issued the request, the Undo button with its inverse patch in <code>data-inverse-patch</code> and <code>hidden</code> removed only
+      when the inverse is non-empty. Bookmarks whose controls are still lazy, that is not yet fetched, receive only the summary update.
+      The 422 path keeps its modal and the response still swaps nothing else, so the status shows "Not saved" through the same
+      <code>htmx:sendError</code>-style fallback as fields: an <code>htmx:afterRequest</code> listener on <code>[data-bookmark]</code>
+      writing "Not saved" when <code>event.detail.successful</code> is false.</p>
+      <p>Removed from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L1:1"><code>bookmarks.js</code></a>: the
+      afterRequest reconciler, <code>updateBookmark()</code> for saved bookmarks, the "Saving…" <code>htmx:beforeRequest</code> at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:170:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L170:1">line 170</a> (replaced by <code>hx-indicator</code> on the
+      status element), and the <code>refreshBookmarkLocks</code> settle hooks at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:164:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L164:1">line 164</a>, since fragments arrive with the
+      correct disabled state. Kept: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:74:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L74:1"><code>saveBookmark()</code></a>
+      stashing the patch, the <code>htmx:configRequest</code> at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:121:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L121:1">line 121</a>,
+      and the creation-time provisional logic, which is purely client-side authoring and has no request lifecycle.</p>
+      <p>Accepted trade (<a href="#decisions">decision 2</a>, decided 2026-10-19): a help text whose save failed is overwritten
+      by the next successful fragment for the same field. The textarea is part of the replaced fragment; no draft check runs
+      inside the swap.</p>
+    </article>
+
+    <article id="exits" data-step>
+      <h3><a href="#exits">1.4 · Saved-view reads and Configure exits</a></h3>
+      <p data-files><span>Files</span> <a href="#file-workspace"><code>workspace.js</code></a> · <a href="#file-main-html"><code>model_builder_main.html</code></a> · <a href="#file-workspace-doc"><code>specs/architecture/workspace.html</code></a></p>
+      <p><strong>Reads.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:45:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L45:1"><code>loadView()</code></a>
+      registers five listeners per call to tie the continuation to its own XHR, abort on competing navigation and refuse a
+      swap when the active slot changed. It becomes a promise chain, and the slot target in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L19:1"><code>model_builder_main.html</code></a>
+      declares <code>hx-sync="this:replace"</code> so a repeated read aborts the pending one natively (the <code>source</code> option
+      makes the target the issuing element, where HTMX reads <code>hx-sync</code>).</p>
+      <div data-code>
+        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed replacement for loadView</small></p>
+        <pre><code>function loadView(configure, then) {
+    const target = targetForActiveModel();
+    if (!target) return;
+    window.runAfterSidePanelDiscardConfirmation(() => {
+        window.htmx.ajax("GET", `/model_builder/simplified-inputs/${configure ? "?configure=1" : ""}`,
+            { source: target, target, swap: "innerHTML" }).then(() => {
+            if (target !== targetForActiveModel()) {
+                // Configure is never parked: a read that lands after a model switch is discarded.
+                if (configure) target.innerHTML = "";
+                return;
+            }
+            window.closeAndEmptySidePanel();
+            setBaseView("simplified");
+            if (then) then();
+        });
+    });
+}</code></pre>
+      </div>
+      <p>The rejection path (network error or abort) does nothing. A late saved-view response renders into its own hidden slot and
+      is simply the correct content when the user returns. A late Configure response is discarded in the same branch, so Configure
+      is never resumed in a hidden slot and the remembered "simplified" mode reloads the saved view on the next visit through
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:91:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L91:1"><code>initialize()</code></a>,
+      which is unchanged. No draft can exist at that point because the form had not rendered; a dirty Configure draft still gates
+      every exit, including model switches, through the unchanged capture click interception and <code>htmx:confirm</code> handler
+      described below. <code>pendingRead</code>,
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:39:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L39:1"><code>cancelPendingRead()</code></a> and the
+      cancellation branches inside the capture click handler and the <code>htmx:beforeRequest</code> listener at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">line 179</a> are removed.</p>
+      <p><strong>Configure Save then continue.</strong> <code>savingRequest</code> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:122:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L122:1"><code>finishConfigureSave()</code></a> with their four
+      listeners (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:179:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L179:1">lines 179 to 193</a>) collapse to one:</p>
+      <div data-code>
+        <p data-code-file><a href="#file-workspace"><code>scripts/simplified_inputs/workspace.js</code></a> <small>Proposed single completion listener</small></p>
+        <pre><code>document.addEventListener("htmx:afterRequest", event => {
+    if (!event.detail.elt.matches("[data-configure-form]")) return;
+    const action = pendingExit;
+    pendingExit = null;
+    if (event.detail.successful && action) action();
+});</code></pre>
+      </div>
+      <p>With synchronous settle the replacement workspace is already in place when this fires, so a continuation such as
+      a replayed click or <code>issueRequest(true)</code> runs against final DOM. A rejected save (422 modal) leaves the draft and
+      clears the pending exit, matching today's behaviour. The dialog, <code>deferExit()</code>, the capture click interception and the
+      <code>htmx:confirm</code> interception stay as they are; they are navigation gating, not request tracking.</p>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:46:1" data-review-source-href="../../../specs/architecture/workspace.html#L46:1"><code>workspace.html</code></a> replaces the paragraphs on pending
+      reads, actually issued XHRs and parked Configure with the accepted rule from the spec.</p>
+    </article>
+
+    <article id="results" data-step>
+      <h3><a href="#results">1.5 · Results panel close</a></h3>
+      <p data-files><span>Files</span> <a href="#file-hammer"><code>hammer_utils.js</code></a></p>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:55:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L55:1"><code>hidePanelResult()</code></a> keeps the panel attached while a
+      recomputation-bearing request is in flight so a late out-of-band Results refresh has a target. It tracks those XHRs in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:47:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L47:1"><code>pendingResultRefreshes</code></a> and waits on both
+      <code>htmx:afterRequest</code> and <code>htmx:afterSettle</code> in
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:92:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L92:1"><code>finishClosing()</code></a>, also matching
+      <code>.htmx-settling</code> and <code>.htmx-added</code> in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:85:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L85:1"><code>hasPendingResponse()</code></a>.</p>
+      <p>The wait is only reachable mid-request through controls that the save locks do not cover. The close button at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:87:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L87:1"><code>result_panel.html</code> line 87</a>
+      is a real button and is already disabled by every form declaring <code>hx-disabled-elt="button"</code>, which includes field
+      saves and side-panel object saves. The chevron at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/result/result_panel.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/result/result_panel.html#L8:1">line 8</a>
+      is a <code>div</code> with an <code>onclick</code>, so it stays clickable during a save. The programmatic closes from the
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:22:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L22:1"><code>delete_card_modal.html</code></a>
+      and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/modal_template.html:32:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/modal_template.html#L32:1"><code>modal_template.html</code></a>
+      scripts run when a modal opens, at a request boundary rather than mid-request.</p>
+      <p><strong>Proposed (<a href="#decisions">decision 1</a>, decided 2026-10-19).</strong> The chevron becomes a
+      <code>&lt;button type="button"&gt;</code> with the same <code>onclick</code> and icon, so the existing lock disables it during
+      every recomputation-bearing save. <code>hidePanelResult()</code> then drops <code>pendingResultRefreshes</code>, its two listeners,
+      <code>hasPendingResponse()</code> and <code>finishClosing()</code>, and always resets the layout and empties the panel at once.
+      The only remaining mid-request close is the touch swipe-down gesture in <code>initHammer()</code>; a late refresh after a swipe
+      re-fills the Results block, and the user closes it again. Mobile is best-effort by mission, so this is accepted. The
+      <code>htmx:afterSettle</code> listener at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:38:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L38:1">line 38</a>, which re-applies
+      the open-panel layout after any swap, stays: it is a global re-initialisation hook, not request tracking.</p>
+    </article>
+  </section>
+
+  <section id="delivery">
+    <h2>2. Delivery and verification</h2>
+    <h3>Implementation sequence</h3>
+    <ol id="phases">
+      <li><strong>A · Platform signal and lock selector</strong>Meta tag, lock selector exclusion, removal of the disabled restore block,
+        conventions rule. Independently shippable; every suite must stay green with no feature code change yet.
+        <small>Proves the synchronous-settle assumption against the full E2E suite before the refactors depend on it.</small></li>
+      <li><strong>B · Field saves</strong>Server-rendered outcome, dirty flags, indicator-based totals, single failure handler, Jest rewrite for field cases.
+        <small>Depends on A.</small></li>
+      <li><strong>C · Bookmarks</strong>Fragment response for the patch endpoint, reconciler removal, bookmark Jest rewrite.
+        <small>Depends on A; independent of B.</small></li>
+      <li><strong>D · Reads, exits, Results close and documentation</strong>Promise-based reads with request replacement, single Configure listener,
+        hidden-slot cleanup, Results chevron button and close-wait removal, architecture and testing page reconciliation, changelog.
+        <small>Depends on A.</small></li>
+    </ol>
+    <h3>Verification map</h3>
+    <table>
+      <thead><tr><th scope="col">Behavior / risk</th><th scope="col">Critical assertion</th><th scope="col">Test layer</th></tr></thead>
+      <tbody>
+        <tr><td>Synchronous settle breaks nothing</td><td>Full E2E and Jest pass after step A alone.</td><td>Existing suites</td></tr>
+        <tr><td>Field save outcomes</td><td>After one request: value, "Saved" or "Not saved" text present in the replaced fragment; controls enabled; prerequisite-disabled control still disabled.</td><td>Jest field cases rewritten; E2E delayed-save scenario in <code>test_simplified_inputs.py</code></td></tr>
+        <tr><td>Transport failure</td><td>Network error shows "Not saved", form editable again, next edit saves.</td><td>Jest</td></tr>
+        <tr><td>Untouched provenance omitted</td><td>Value-only edit sends no provenance parameters; provenance-only edit sends them.</td><td>Jest configRequest case</td></tr>
+        <tr><td>Bookmark companions</td><td>Toggling a field updates its companions' checkboxes, locks and labels in all visible bookmarks; Undo visible only after a membership change.</td><td>Jest bookmark lifecycle; existing E2E bookmark flow</td></tr>
+        <tr><td>Configure Save continuation</td><td>Successful save runs the destination once; 422 leaves the draft and runs nothing.</td><td>Jest; E2E Configure failure case</td></tr>
+        <tr><td>Model switch during read</td><td>Switching mid-read shows no error; the destination model shows its remembered view; no Configure form remains in a hidden slot.</td><td>E2E comparison test</td></tr>
+        <tr><td>Results close during recomputation</td><td>During a delayed save both close controls are disabled; once the save completes, closing empties the panel and nothing re-opens it.</td><td>Existing E2E late-refresh case, adapted</td></tr>
+      </tbody>
+    </table>
+    <p>Coverage above is planned, not executed. The Jest rewrite replaces fixtures that dispatch synthetic
+    <code>htmx:beforeSwap</code> and <code>htmx:afterSettle</code> sequences with assertions on rendered fragments.</p>
+  </section>
+
+  <section id="decisions">
+    <h2>3. Decisions</h2>
+    <ol>
+      <li><strong>Results close wait — decided 2026-10-19: remove the wait, make the chevron a button.</strong> Field and side-panel
+      saves already disable every button; converting the chevron puts the last clickable close path under that lock. The swipe gesture
+      remains as an accepted mobile edge case. See <a href="#results">1.5</a>.</li>
+      <li><strong>Failed help draft — decided 2026-10-19: accept the overwrite.</strong> Preserving the draft would need a dirty check
+      inside the swap, which is the kind of coordination this feature removes, and the exception modal has already reported the
+      failure. See <a href="#bookmarks">1.3</a>.</li>
+      <li><strong>Scope of the convention — for review.</strong> Older modules listed as out of scope in the spec keep their patterns
+      until touched. Recommendation: no boy-scout migration inside this feature, to keep the diff reviewable.</li>
+    </ol>
+  </section>
+</main>
+</div>
+<script src="../../review-links.js" defer></script>
+</body>
+</html>
