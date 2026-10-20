@@ -8,7 +8,7 @@ Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`,
 | Run | Delivered milestone | Tasks in execution order | Prerequisites |
 |---|---|---|---|
 | A | One completion signal across the interface. Field and bookmark saves are rendered by the server. Reads and exits only block. Results close at once. Docs and changelog match. | [1](#task-1--platform-signal-and-button-locks) → [2](#task-2--declarative-field-saves) → [3](#task-3--bookmark-fragments) → [4](#task-4--reads-exits-results-close-and-close-out-docs) | Approval of this breakdown |
-| B | Reads lock the interface like saves behind a loader; the slot drops `hx-sync`; the sequential-requests convention is written. | [5](#task-5--reads-lock-like-saves) | PLAN-UPDATE-13 accepted 2026-10-20 |
+| B | Reads lock the interface like saves behind a loader; the slot drops `hx-sync`; the sequential-requests convention is written and applied to every user-initiated request. | [5](#task-5--reads-lock-like-saves) → [6](#task-6--apply-the-lock-everywhere) | PLAN-UPDATE-13 accepted 2026-10-20 |
 
 ## Overview
 
@@ -167,6 +167,31 @@ Acceptance:
 Depends on: Task 4.
 
 Implementation: standard — two declarative changes and CSS, but the E2E rewrites around held reads need ordinary care with request timing.
+
+## Task 6 — Apply the lock everywhere
+
+Goal: Make the sequential-requests convention true across the interface by giving every user-initiated request-issuing element the standard lock, leaving background requests exempt.
+
+Status: under review
+
+Brief: [briefs/task-6.md](briefs/task-6.md)
+
+Repository: `e-footprint-interface` only.
+
+Files touched: the templates holding unlocked user-initiated request elements (about 20, listed by the brief's scan: model tab strip and active-model role, add-model and compare controls, help menu, home start button, membership link/unlink and dict-count controls, delete prompts, data-privacy form, source-table row editor, Sankey form button, bookmark `details`, the Edit timeseries button and the timeseries panel); script-issued user requests in `side_panel_utils.js`, `support.js`, `help_drawer_utils.js`, `model_comparison.js`; `specs/conventions.md` (drop the "separate follow-up" note); `specs/architecture/rendering.html` if it lists locked flows; `CHANGELOG.md`.
+
+Tests: E2E spot checks per category with a held request (one membership save, one model-tab switch, one bookmark save): buttons disabled during the request and enabled after. Full suites.
+
+Acceptance:
+
+- A tag-level scan of all templates finds no user-initiated `hx-get`/`hx-post`/`hx-patch`/`hx-delete` element without `hx-disabled-elt="button:not(:disabled)"` on itself or an ancestor it inherits from, except the documented background set.
+- Script-issued user requests pass the lock (via a `source` element carrying it or the request options).
+- Background requests (timeseries previews, metadata autosaves, workspace-storage polls, Sankey and lazy loads, source-table lazy rows) stay unlocked and are listed as such in `conventions.md`.
+- No existing E2E flow regresses; full Jest, Python and E2E suites pass.
+
+Depends on: Task 5 (convention text and the slot lock).
+
+Implementation: standard — mechanical additions, but the script-issued requests and the model tab strip need care so that a locked tab does not break the compare and switch flows.
 
 ## Gates and prerequisites
 
