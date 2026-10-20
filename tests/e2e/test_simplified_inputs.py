@@ -153,66 +153,52 @@ class TestSimplifiedInputs:
         expect(resolution.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(workspace.locator("[data-simplified-notice]")).to_have_text("")
 
-    def test_repeated_configure_entry_renders_one_form_that_keeps_its_draft(self, minimal_complete_model_builder):
+    def test_repeated_configure_entry_sends_one_read(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page
         open_simplified(page)
-        pending, seen = [], []
+        reads, pending = [], []
+        page.on("request", lambda request: reads.append(request) if "configure=1" in request.url else None)
         page.route("**/simplified-inputs/?configure=1", lambda route: pending.append(route))
-
-        def second_read(request):
-            if "configure=1" in request.url:
-                seen.append(request)
-            return len(seen) == 2
-
-        with page.expect_request(second_read):
-            page.get_by_role("button", name="Configure", exact=True).dblclick()
-        first, second = pending
-        second.fulfill(response=second.fetch())
-        workspace = page.locator('[data-simplified-workspace]:visible')
-        expect(workspace).to_have_attribute("data-mode", "configure")
-        workspace.locator('[name="title"]').fill("Preserve this draft")
-        expect(workspace.locator("form")).to_have_attribute("data-dirty", "true")
-        first.fulfill(response=first.fetch())
+        configure = page.get_by_role("button", name="Configure", exact=True)
+        with page.expect_request("**/simplified-inputs/?configure=1"):
+            configure.dblclick()
+        expect(configure).to_be_disabled()
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
         page.unroute("**/simplified-inputs/?configure=1")
         wait_for_htmx_idle(page)
+        expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "configure")
         expect(page.locator("[data-configure-form]")).to_have_count(1)
-        expect(workspace.locator('[name="title"]')).to_have_value("Preserve this draft")
-        click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
-        expect(workspace.get_by_text("Preserve this draft", exact=True)).to_be_visible()
+        assert len(reads) == 1
 
-    @pytest.mark.parametrize("configure", [False, True])
-    @pytest.mark.parametrize("return_before_response", [False, True])
-    def test_late_read_lands_in_its_slot_and_is_shown_on_return(
-            self, minimal_complete_model_builder, configure, return_before_response):
+    def test_held_read_locks_the_interface_behind_a_loader(self, minimal_complete_model_builder):
         builder = minimal_complete_model_builder
         page = builder.page
         builder.add_model_by_duplication()
-        if configure:
-            open_simplified(page)
-        system_id = page.locator('[data-model-canvas="1"]').get_attribute("data-system-id")
-        url = "**/simplified-inputs/?configure=1" if configure else "**/simplified-inputs/"
-        pending = []
-        page.route(url, lambda route: pending.append(route))
-        control = (page.get_by_role("button", name="Configure", exact=True) if configure
-                   else page.locator('[data-action="simplified-mode"]'))
-        with page.expect_request(url):
-            control.click()
-        expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
-        route = pending.pop()
-        response = route.fetch()
-        builder.switch_to_model(0)
+        open_simplified(page)
+        toggle = page.locator('[data-action="simplified-mode"]')
+        toggle.click()
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
-        if return_before_response:
-            builder.switch_to_model(1)
-        route.fulfill(response=response)
-        page.unroute(url)
-        if not return_before_response:
-            builder.switch_to_model(1)
+        pending = []
+        page.route("**/simplified-inputs/", lambda route: pending.append(route))
+        with page.expect_request("**/simplified-inputs/"):
+            toggle.click()
+        slot = page.locator('[data-simplified-target="1"]')
+        expect(slot).to_have_class(re.compile(r"\bhtmx-request\b"))
+        assert slot.evaluate("element => getComputedStyle(element, '::after').animationName") == "spinner-border"
+        locked = [page.get_by_role("button", name="Configure", exact=True), toggle,
+                  page.locator("#model-tab-0"), page.locator("#model-tab-1")]
+        for control in locked:
+            expect(control).to_be_disabled()
+        route = pending.pop()
+        route.fulfill(response=route.fetch())
+        page.unroute("**/simplified-inputs/")
+        wait_for_htmx_idle(page)
+        for control in locked:
+            expect(control).to_be_enabled()
         workspace = page.locator('[data-simplified-workspace]:visible')
-        expect(workspace).to_have_attribute("data-mode", "configure" if configure else "simplified")
+        expect(workspace).to_have_attribute("data-mode", "simplified")
         expect(workspace).to_have_attribute("data-slot", "1")
-        expect(workspace).to_have_attribute("data-system-id", system_id)
-        expect(page.locator("[data-simplified-workspace]")).to_have_count(1)
 
     def test_save_clear_cancel_and_fresh_configuration(self, minimal_complete_model_builder):
         page = minimal_complete_model_builder.page

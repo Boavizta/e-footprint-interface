@@ -24167,6 +24167,28 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   content: "Updating…";
 }
 
+[data-simplified-target].htmx-request {
+  position: relative;
+  min-height: 8rem;
+}
+[data-simplified-target].htmx-request > * {
+  opacity: 0.5;
+  pointer-events: none;
+}
+[data-simplified-target].htmx-request::after {
+  content: "";
+  position: absolute;
+  top: min(50%, 10rem);
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border: 0.25em solid var(--bs-secondary);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: 0.75s linear infinite spinner-border;
+}
+
 #simplified-exit-dialog {
   border: 1px solid #dae4df;
   border-radius: 0.8rem;

@@ -79,13 +79,14 @@ in its slot and shows it again on return. Export is separate: while Configure is
 explicit Save or Discard does not continue the export. A clean Configure screen can export directly without leaving.
 Entering Simplified inputs, Configure or Discard runs the ordinary side-panel discard-confirmation helper, closes the
 side panel, switches the view at once and sends one read into the slot. The slot shows its previous content, or nothing on
-first entry, until the response replaces it. The slot declares <code>hx-sync="this:replace"</code>, so a repeated entry
-aborts the earlier read and the last one wins. The Configure form inherits that rule, so a Save and a read would
-replace each other. Its Save therefore locks every enabled button except the <code>data-workspace-read</code> reading
-controls, like other saves: exits, Cancel and the dialog's Save/Discard/Stay stay disabled until the response lands. The
-dialog can still open from a link or the non-button Show results control, but no Discard can be sent during the Save. A read that lands after the user moved on lands in its own slot and is
-shown on the next visit to that model, Configure included. A read answered by an error leaves its slot empty or stale,
-visibly; nothing retries it.</p>
+first entry, until the response replaces it. The slot declares the field editor's lock as <code>hx-disabled-elt</code>
+(every enabled button plus the workspace inputs, selects and textareas) with <code>hx-disinherit</code>, so only its own
+reads use it. While a read runs, every button and workspace control is disabled and the slot dims its content behind a
+CSS spinner on its request class. A second read, a model switch or a field save cannot start until the read lands, so
+reads never overlap. The Configure form declares the standard save lock, narrowed to leave the
+<code>data-workspace-read</code> reading controls usable: exits, Cancel and the dialog's Save/Discard/Stay stay disabled
+until the response lands. The dialog can still open from a link or the non-button Show results control, but no Discard
+can be sent during the Save. A read answered by an error leaves its slot empty or stale, visibly; nothing retries it.</p>
 <h3 id="tab-roles-and-ordering">Tab roles and ordering</h3>
 <p>Tabs are fixed role labels; the model name lives in the toolbar. Each model tab shows a fixed label by <em>list position</em> — first slot "Reference model", second "Comparison model" (matching how <code>compare()</code> pairs <code>workspace_slots[0]→A</code>, <code>[1]→B</code>) — not the model's own name, so a long name can never stretch a tab (the tab width is pinned in <a class="source" href="../../theme/static/scss/custom.scss"><code>custom.scss</code></a>).</p>
 <p><strong>The slot list is role-ordered, not numeric-ordered:</strong> <code>WorkspaceIndex</code> (and the in-memory mirror) <em>append</em> new slots and never <code>sorted()</code> the list, so removing the Reference (slot 0) leaves the survivor role-first in slot 1, and a model added afterwards reuses the freed slot number 0 yet appends as the Comparison — sorting would re-promote it to Reference (the model-comparison re-add bug). The active model's editable name lives in the toolbar (<code>#btn-change-system-name</code> / <code>#system-name</code>, left of the edge toggle); renaming swaps <code>#system-name</code> in place and switching OOB-rebinds it (above).</p>

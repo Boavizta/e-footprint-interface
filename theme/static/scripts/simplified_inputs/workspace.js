@@ -4,8 +4,9 @@ const { refreshSelection } = require("./configuration.js");
 
 // Each Simplified-input slot carries its model's last base view as data-view, so switching
 // models restores each view and a builder re-render brings the server's defaults. Reads switch
-// the view on click and let HTMX replace them (hx-sync on the slot). A dirty Configure draft
-// blocks every shared exit behind Save/Discard/Stay; the user then repeats the navigation.
+// the view on click; the slot's hx-disabled-elt locks every button and workspace control until the
+// read lands, so reads never overlap. A dirty Configure draft blocks every shared exit behind
+// Save/Discard/Stay; the user then repeats the navigation.
 function createWorkspace() {
     function targetForActiveModel() {
         const slot = document.getElementById("model-tab-strip")?.dataset.activeSlot || "0";

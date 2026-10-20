@@ -84,6 +84,26 @@
 :is([data-simplified-save-status], [data-bookmark-status]).htmx-request::after { content: "Saving…"; }
 @keyframes simplified-save-status-fade { to { opacity: 0; font-size: 0; margin-top: 0; } }
 [data-quick-total-status].htmx-request::after { content: "Updating…"; }
+// Saved-view and Configure reads lock the interface through the slot's hx-disabled-elt; the slot
+// dims its previous content and shows a spinner until the read lands.
+[data-simplified-target].htmx-request {
+  position: relative;
+  min-height: 8rem;
+  > * { opacity: .5; pointer-events: none; }
+  &::after {
+    content: "";
+    position: absolute;
+    top: min(50%, 10rem);
+    left: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: -1rem 0 0 -1rem;
+    border: .25em solid var(--bs-secondary);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: .75s linear infinite spinner-border;
+  }
+}
 #simplified-exit-dialog {
   border: 1px solid #dae4df;
   border-radius: .8rem;
