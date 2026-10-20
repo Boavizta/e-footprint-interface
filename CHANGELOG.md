@@ -4,46 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.14.0] - 2026-10-20
 
 ### Added
-
-- Normal and Simplified editors repair implicit conditional choices after controller changes, keep explicit choices authoritative, and record automatic replacement provenance.
-- Backend support for per-model simplified-input definitions: eligible-field discovery, required dependent selections, retained help, configuration replacements and patches, and atomic selected-value/provenance edits across owners.
-- A grouped Configure view lets authors choose simplified inputs and guidance, with required selections, filtering, navigation, and Save/Discard/Stay protection for drafts. Each modeling remembers its base view.
-- Inline bookmarks in Modeling panels and Sources let authors select inputs without saving surrounding value drafts; new-object selections are saved on creation, and deletion warns about and removes affected selections.
-- Simplified inputs now edits selected values, sources, confidence and comments directly, including focused timeseries builders with live previews. Accepted edits refresh both Results totals and open detailed results.
+- Simplified inputs: a per-model view gathering a curated set of inputs for quick editing. Authors choose inputs and guidance text in a grouped Configure view, or bookmark them inline from Modeling panels and Sources. Values, sources, confidence and comments are edited in place, timeseries through a focused builder with live preview, and accepted edits refresh Results. Each modeling remembers its view.
+- Conditional choices are repaired automatically when a controlling field changes, following the library rules: explicit choices are kept, implicit ones replaced with recorded provenance, and repairs are listed in the save feedback.
 
 ### Changed
-
-- Simplified inputs opens every selected object on entry; Configure still opens the first object.
-- Upgrade efootprint to 26.0.0 for conditional input handling and import upgrades of older EcoLogits video resolutions; automatic replacement comments now use a shorter reason.
-- Field source and comment editors in Modeling side panels now use a single Close button to stage changes for the panel's Save action.
-- Conditional form choices now follow the library rules; accepted repairs refresh affected cards and results and appear in save feedback.
-- Simplified-input JavaScript is split into workspace, configuration and bookmark modules, with one bundled entry point.
-- Form strategies identify field owners for creation and edition bookmarks; provisional nested input settings use wrapper declarations instead of Storage-specific branches.
-- Interface-config normalization lives in the domain and is shared by repositories and version migrations.
-- Model duplication now starts from the complete cached document, avoiding a redundant `ModelWeb` serialization while retaining disconnected objects and saved interface settings.
-- Optional quantities in Modeling and Simplified inputs now use a generic “Leave unset” switch and model-declared units; fixed counts remain editable when allowed, and autoscaling or serverless selections clear them.
-- Ready-made modelings are now Examples throughout the picker, catalog APIs, authoring tools and live documentation; deep links use `/example/<id>/`.
-- Simplified-input field saves temporarily disable buttons and fields in both resident workspaces until the save ends.
-- Modeling and workspace downloads read accepted saved state without completing or replaying edits. Native links remain usable during a field save, while the two-model Export toggle is disabled until the save ends. Dirty Configure blocks export with a save-or-discard notice; clean Configure exports in place.
-- Simplified-input and bookmark saves show “Saving…”, and the Results totals “Updating…”, while a request runs. “Saved” or “Not saved” comes with the server response for the edited field only, and “Saved” fades after a few seconds. A request that gets no response leaves the status empty. Invalid drafts show the browser's own validation message and send nothing. A changed value keeps the confidence the user set, and a hypothesis or automatic source becomes user data, including for values saved from the focused timeseries panel. The bookmark Undo button is removed; re-clicking the toggle reverts the change, and a help text whose save failed is replaced by the next successful response for that field. Entering Simplified inputs, Configure or Discard switches the view at once and locks the interface behind a loader until the fresh content arrives. Save and Discard on a dirty Configure no longer continue to the interrupted destination; the user clicks it again, and a clean Configure screen left by a model switch is shown again on return. A Configure Save locks every button except its expand, collapse and navigation controls. After Duplicate, Start blank, Import or Remove, each model opens in its default view. Both Results close controls are disabled while a save runs, and closing Results empties the panel at once. Controls that were already disabled before a save stay disabled after it. Every other user action that sends a request, such as switching or adding a modeling, opening a panel or saving a membership, now also disables buttons until it completes. Previews, autosaves, lazy loads, card reordering and Sankey card deletion do not.
+- Upgrade efootprint to 26.0.1 (conditional input handling, import upgrade of older EcoLogits video resolutions).
+- Ready-made modelings are now called Examples; deep links use `/example/<id>/`.
+- Optional quantities use a generic “Leave unset” switch with model-declared units; autoscaling and serverless selections clear fixed counts.
+- Source and comment editors in Modeling side panels use a single Close button that stages changes for the panel's Save.
+- Changing a value whose source is a hypothesis or automatic replacement marks it as user data, keeping the replacement history in the comment.
+- Actions that send a request disable buttons until the response arrives, and view switches show a loader until the new content is ready. Saves show “Saving…”, then “Saved” or “Not saved”.
+- Downloads export the saved state directly, without replaying edits; model duplication reuses the cached document.
 
 ### Fixed
-- Editing an automatically replaced value now marks its source as user data in Modeling and Simplified inputs while preserving the replacement history comment.
-- Card refreshes during an accordion transition now preserve its intended open or closed state, keeping edit controls available after fast saves.
-- Long automatic replacement histories remain editable, and the automatic source stays visible when current without appearing as a new manual choice.
-- Both editors deliver large repair notice lists through the response body, keeping HTMX headers bounded and displaying authored text safely.
-- Rejected Simplified-input saves now return 422 for recognized validation or 500 for unexpected errors, show the error modal, and restore stored values and provenance, including affected dependents. A failed timeseries Save closes its panel; inline Retry/Discard and failed-edit navigation/export prompts are removed.
-- Side-panel simplified-input bookmarks label their checkbox “Include in simplified inputs”; Configure keeps “Include.”
-- Simplified inputs place confidence beside compact value controls and show the clickable source and comment directly below. Their Saved status appears only briefly after an accepted update.
-- Simplified inputs now uses a navigation card, grouped sections, field and provenance styling, with its selected-input count and a right-aligned Results total. Configure actions sit in the header, the object filter sits with expand controls, and the Results bar retains the Modeling style.
-- Disabled Results controls keep the validation explanation in a tooltip without expanding the Show results button.
-- Workspace imports validate all incoming modelings and the combined payload budget before replacing saved models; rejected single imports cannot overwrite recovered configuration.
-- Copies and System-ID remapping preserve disconnected modeling objects and independent per-model configuration, including selected System-owned fields. Recovery settings are scoped to the slot and System.
-- Example deep links preserve distinct System IDs in two-model workspaces, and value changes preserve omitted source, confidence and comment metadata while honoring explicit clears.
-- Comparison KPI cards now use readable display units for each value without floating-point noise.
+- Card refreshes during an accordion transition keep its open or closed state.
+- Workspace imports validate every incoming modeling and the combined payload size before replacing saved models.
+- Copies and System-ID remapping preserve disconnected objects and per-model settings; example deep links keep distinct System IDs in two-model workspaces.
+- Value changes no longer drop source, confidence or comment metadata that the request omitted.
+- Comparison KPI cards use readable units without floating-point noise.
 
 ## [V1.13.0] - 2026-09-15
 
