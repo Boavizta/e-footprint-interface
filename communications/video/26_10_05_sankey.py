@@ -11,7 +11,7 @@ from communications.video.recorder import Demo, ROOT, import_model_quiet, run_vi
 
 
 LIBRARY_DIR = Path(os.environ.get("EF_LIBRARY_DIR", ROOT.parent / "e-footprint")).resolve()
-MODEL = LIBRARY_DIR / "efootprint/modeling_templates/introductory/ecommerce.json"
+MODEL = LIBRARY_DIR / "efootprint/modeling_examples/introductory/ecommerce.json"
 NAME = "26_10_05_sankey_impact_repartition"
 
 

@@ -152,7 +152,7 @@ def import_model_quiet(context, model_path: Path, configure=None):
         page.goto(BASE_URL + "/model_builder/")
         builder = ModelBuilderPage(page)
         builder.canvas.wait_for(state="visible")
-        builder.dismiss_template_picker_if_present()
+        builder.dismiss_example_picker_if_present()
         builder.import_json_file(str(model_path))
         if configure:
             configure(builder)
