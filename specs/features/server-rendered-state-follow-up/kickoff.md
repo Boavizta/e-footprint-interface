@@ -18,6 +18,8 @@ worth a second, separate pass. Everything else surveyed is client-owned by natur
 state, ephemeral UI state, per-browser preferences) and should stay as it is.
 
 Apply the convention from `specs/conventions.md` (JavaScript section).
+Constitution §1.4 now requires server failures to stay visible, so the confidence autosave below, which ignores a
+failed save, is a known violation for this feature to remove.
 
 ## Group 1 — the client reconstructs state the server already owns
 

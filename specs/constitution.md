@@ -9,7 +9,7 @@ These are the project's immutable rules. They must be respected by every code ch
 1. **Clean Architecture: dependency direction is sacred.** Inner layers (`domain/`, `application/`) never import outer layers (`adapters/`, Django, HTMX, templates). Zero Django imports in `domain/` and `application/`. Tests under `tests/integration/` enforce this by running adapters → use cases → domain without any Django scaffolding.
 2. **Repository pattern.** The domain depends on `ISystemRepository`, never on a concrete implementation. `SessionSystemRepository` and `InMemorySystemRepository` are interchangeable adapters.
 3. **The library is the domain truth.** `efootprint` (the package) owns modeling logic. `ModelWeb` wraps and exposes; it never re-implements modeling. When a question is "what does this calculation mean?", the answer lives in the library, not here.
-4. **HTMX-first; minimize JS.** Prefer partial HTTP updates over client-side state. Vanilla JS where unavoidable; no SPA framework, no client-side routing, no client-side data layer.
+4. **HTMX-first; minimize JS.** Prefer partial HTTP updates over client-side state. Vanilla JS where unavoidable; no SPA framework, no client-side routing, no client-side data layer. Server failures stay visible: a failed response is shown as the server renders it, never softened, retried or hidden by client code.
 
 ## 2. Quality gates (a change is not ready until)
 
