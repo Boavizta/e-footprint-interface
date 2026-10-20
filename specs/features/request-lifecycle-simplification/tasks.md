@@ -1,13 +1,14 @@
 # Request lifecycle simplification — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`, including the plan review-guide commit `5304aa55`). Decisions: [implementation decisions index](plan.html#impl-decisions). Next: `feature-archive` after shipping.
+Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`, including the plan review-guide commit `5304aa55`). Run B (Task 5, PLAN-UPDATE-13) in progress. Decisions: [implementation decisions index](plan.html#impl-decisions). Next: `feature-archive` after shipping.
 
 ## Implementation runs
 
 | Run | Delivered milestone | Tasks in execution order | Prerequisites |
 |---|---|---|---|
 | A | One completion signal across the interface. Field and bookmark saves are rendered by the server. Reads and exits only block. Results close at once. Docs and changelog match. | [1](#task-1--platform-signal-and-button-locks) → [2](#task-2--declarative-field-saves) → [3](#task-3--bookmark-fragments) → [4](#task-4--reads-exits-results-close-and-close-out-docs) | Approval of this breakdown |
+| B | Reads lock the interface like saves behind a loader; the slot drops `hx-sync`; the sequential-requests convention is written. | [5](#task-5--reads-lock-like-saves) | PLAN-UPDATE-13 accepted 2026-10-20 |
 
 ## Overview
 
@@ -26,6 +27,7 @@ Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`,
 - [PLAN-UPDATE-10](plan.html#plan-update-10): REJECTED; a changed value keeps its confidence (spec accepted change). Affects Task 2.
 - [PLAN-UPDATE-11](plan.html#plan-update-11): SUPERSEDED by PLAN-UPDATE-12.
 - [PLAN-UPDATE-12](plan.html#plan-update-12): ACCEPTED; the view is remembered on the slot element (spec accepted change). Affects Task 4.
+- [PLAN-UPDATE-13](plan.html#plan-update-13): ACCEPTED 2026-10-20; reads lock the interface like saves and the slot drops `hx-sync` (spec accepted change). Affects Task 5.
 
 ## Task 1 — Platform signal and button locks
 
@@ -139,6 +141,32 @@ Depends on: Task 1. The changelog and the rest of the reconciliation also depend
 Leads from Task 1 review: `hammer_utils.js` (around line 86) and the Jest case near `model_builder_main.test.js` line 206 still treat the settle classes as pending; both belong to the Results-close rewrite. The `testing.md` sentence saying side-panel submissions wait for "request/settling classes" describes dead page-object waits and should be reconciled.
 
 Implementation: standard — mostly removal toward sketched code. Gate and E2E rewrites need ordinary care with focus and request timing.
+
+## Task 5 — Reads lock like saves
+
+Goal: Replace the slot's request-replacement rule with the standard lock and a loader during saved-view and Configure reads, and record the sequential-requests convention.
+
+Status: under review
+
+Brief: [briefs/task-5.md](briefs/task-5.md)
+
+Repository: `e-footprint-interface` only.
+
+Files touched: `model_builder/templates/model_builder/model_builder_main.html`; `theme/static/scss/_simplified_inputs.scss` with recompiled `theme/static/css/bs_main.css`; `theme/static/scripts/simplified_inputs/workspace.js` (header comment only); `js_tests/simplified_inputs.test.js` if a case names `hx-sync`; `tests/e2e/test_simplified_inputs.py`; `specs/conventions.md`; `specs/architecture/{workspace,rendering}.html`; `CHANGELOG.md`.
+
+Tests: E2E: hold the entry read and assert the slot carries the request class, the Configure button, the workspace toggle and the model tabs are disabled, then enabled after release; the repeated-Configure test asserts one request for a double click; remove the late-read test if no non-button path can switch models during a read.
+
+Acceptance:
+
+- The slot declares no `hx-sync` and declares the field editor's lock selector as `hx-disabled-elt`.
+- During a read the slot is dimmed with a visible loader rendered by CSS from the request class, and no user-initiated request can be issued by button or workspace control.
+- A double click on Configure sends one request.
+- `conventions.md` states the sequential-requests principle with its background-request exemption. `workspace.html` and `rendering.html` no longer describe request replacement or late reads landing after a model switch. The changelog feature entry says reads lock the interface behind a loader.
+- Full Jest, Python and E2E suites pass.
+
+Depends on: Task 4.
+
+Implementation: standard — two declarative changes and CSS, but the E2E rewrites around held reads need ordinary care with request timing.
 
 ## Gates and prerequisites
 

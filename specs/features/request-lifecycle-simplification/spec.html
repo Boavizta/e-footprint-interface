@@ -75,10 +75,11 @@
   <h3>Accepted changes</h3>
   <ul>
     <li>Entering Simplified inputs, Configure or Discard switches the view at once; the slot shows its
-    previous content, or nothing on first entry, until the fresh read replaces it. A read that finishes after
-    the user moved on (model switch or another destination) lands in its slot; the next visit to that model
-    shows what landed, including a Configure screen. A dirty Configure draft keeps Save, Discard and Stay
-    gating on every exit, including model switches.</li>
+    previous content, or nothing on first entry, dimmed behind a loader with every button and workspace
+    control locked until the fresh read lands, exactly as during a save. A second read cannot start while one
+    is in flight, and a model switch waits for it (amended 2026-10-20, PLAN-UPDATE-13; it previously let the
+    user act on the stale content and let a late read land after a model switch). A dirty Configure draft
+    keeps Save, Discard and Stay gating on every exit, including model switches.</li>
     <li>A help text whose save failed is replaced by the next successful bookmark response for that
     field instead of being preserved as a draft.</li>
     <li>The <em>Saved</em> text fades after a few seconds through a style rule rather than a timer.</li>
@@ -134,8 +135,8 @@
       text; the browser keeps no copy of saved values and no request bookkeeping.</li>
       <li>Bookmark membership and help saves: the server answers with rendered bookmark fragments for
       every affected field instead of data the browser reconciles by hand.</li>
-      <li>Saved-view reads and Configure exits use HTMX's own request replacement and completion
-      signal; the accepted parking and dropping behaviour above replaces manual cancellation.</li>
+      <li>Saved-view reads and Configure exits lock the interface like every save and use HTMX's completion
+      signal; no request replacement, queue or cancellation rule exists (PLAN-UPDATE-13).</li>
       <li>Locked controls during a field save exclude controls that were already disabled, removing
       the restore step after HTMX releases the lock.</li>
       <li>The Results panel close no longer waits for in-flight recomputations. Its chevron becomes a
