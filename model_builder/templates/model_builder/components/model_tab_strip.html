@@ -48,7 +48,8 @@ fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both 
                 {% if slot_entry.is_active %}aria-current="true"{% endif %}
                 hx-post="{% url 'switch-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"}'
-                hx-swap="none">
+                hx-swap="none"
+                hx-disabled-elt="button:not(:disabled)">
             {% if forloop.first %}Reference modeling{% else %}Comparison modeling{% endif %}
         </button>
         {% if workspace_slots|length > 1 %}
@@ -59,6 +60,7 @@ fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both 
                 hx-post="{% url 'remove-model' %}"
                 hx-vals='{"slot": "{{ slot_entry.slot }}"}'
                 hx-target="#main-content-block" hx-swap="innerHTML"
+                hx-disabled-elt="button:not(:disabled)"
                 data-confirm-remove-model="Remove this modeling and return to a single-modeling session?">✕</button>
         {% endif %}
     </span>
@@ -74,16 +76,19 @@ fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both 
             <li>
                 <button class="dropdown-item" type="button"
                         hx-post="{% url 'add-model' %}" hx-vals='{"source": "duplicate"}'
-                        hx-target="#main-content-block" hx-swap="innerHTML">⧉ Duplicate current modeling</button>
+                        hx-target="#main-content-block" hx-swap="innerHTML"
+                        hx-disabled-elt="button:not(:disabled)">⧉ Duplicate current modeling</button>
             </li>
             <li>
-                <button class="dropdown-item" type="button" data-action="open-add-model-import">
+                <button class="dropdown-item" type="button" data-action="open-add-model-import"
+                        hx-disabled-elt="button:not(:disabled)">
                     ⬆ Import from file…</button>
             </li>
             <li>
                 <button class="dropdown-item" type="button"
                         hx-post="{% url 'add-model' %}" hx-vals='{"source": "blank"}'
-                        hx-target="#main-content-block" hx-swap="innerHTML">✚ Start blank / from example</button>
+                        hx-target="#main-content-block" hx-swap="innerHTML"
+                        hx-disabled-elt="button:not(:disabled)">✚ Start blank / from example</button>
             </li>
         </ul>
     </div>
@@ -117,7 +122,8 @@ fixed-width tabs then (⇄Compare is hidden on mobile while comparing), so both 
         <button type="button" class="btn btn-sm model-tab__label px-3 bg-transparent border-0"
                 id="compare-tab"
                 hx-get="{% url 'compare-models' %}"
-                hx-target="#comparison-view" hx-swap="innerHTML">
+                hx-target="#comparison-view" hx-swap="innerHTML"
+                hx-disabled-elt="button:not(:disabled)">
             ⇄ Compare</button>
         {% endif %}
     </span>

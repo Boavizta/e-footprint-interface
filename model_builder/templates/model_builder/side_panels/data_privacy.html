@@ -80,7 +80,8 @@
             extend the Redis hot cache.
         </p>
         <form method="post" action="{% url 'update-recovery-retention' %}"
-              hx-post="{% url 'update-recovery-retention' %}" hx-target="#sidePanel" hx-swap="innerHTML">
+              hx-post="{% url 'update-recovery-retention' %}" hx-target="#sidePanel" hx-swap="innerHTML"
+              hx-disabled-elt="button:not(:disabled)">
             {% csrf_token %}
             <label class="form-label fw-semibold" for="retention-seconds">Keep the recovery copy for</label>
             <select class="form-select mb-3" id="retention-seconds" name="retention_seconds">

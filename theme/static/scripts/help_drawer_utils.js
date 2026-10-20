@@ -43,11 +43,13 @@
         if (inst) inst.hide();
     }
 
+    /* The drawer is the request source so the request takes the drawer's hx-disabled-elt lock. The
+       clicked trigger cannot be the source: tour.js clicks a detached, immediately removed button. */
     function openHelpForClass(className) {
         htmx.ajax(
             "GET",
             `/model_builder/open-help-drawer/${className}/`,
-            { target: "#helpDrawer", swap: "innerHTML" }
+            { source: "#helpDrawer", target: "#helpDrawer", swap: "innerHTML" }
         );
     }
 

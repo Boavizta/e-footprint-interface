@@ -26,6 +26,7 @@ re-renders the builder with the picker overlaid, preserving the current session 
                     hx-get="{% url 'open-example-picker' %}"
                     hx-target="#main-content-block"
                     hx-swap="innerHTML"
+                    hx-disabled-elt="button:not(:disabled)"
                     _="on click call collapseNavbarIfShown()">▦ Open examples</button>
         </li>
         <li><hr class="dropdown-divider"></li>
@@ -34,6 +35,7 @@ re-renders the builder with the picker overlaid, preserving the current session 
                hx-boost="true"
                hx-target="#sidePanel"
                hx-swap="innerHTML"
+               hx-disabled-elt="button:not(:disabled)"
                _="on click call collapseNavbarIfShown()">▣ Data &amp; privacy</a>
         </li>
     </ul>

@@ -70,6 +70,7 @@
                         <button type="button" class="nav-link d-flex flex-row gap-2 mx-2"
                                 hx-get="{% url 'compare-models' %}"
                                 hx-target="#comparison-view" hx-swap="innerHTML"
+                                hx-disabled-elt="button:not(:disabled)"
                                 _="on click call collapseNavbarIfShown()">
                             <span>⇄</span><span>Compare</span>
                         </button>
@@ -85,12 +86,14 @@
                         <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
                                 hx-post="{% url 'add-model' %}" hx-vals='{"source": "duplicate"}'
                                 hx-target="#main-content-block" hx-swap="innerHTML"
+                                hx-disabled-elt="button:not(:disabled)"
                                 _="on click call collapseNavbarIfShown()">
                             <span>⧉</span><span>Duplicate current modeling</span></button>
                     </li>
                     <li class="nav-item d-lg-none">
                         <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
                                 data-action="open-add-model-import"
+                                hx-disabled-elt="button:not(:disabled)"
                                 _="on click call collapseNavbarIfShown()">
                             <span>⬆</span><span>Import a modeling to compare…</span></button>
                     </li>
@@ -98,6 +101,7 @@
                         <button class="nav-link d-flex flex-row gap-2 mx-2" type="button"
                                 hx-post="{% url 'add-model' %}" hx-vals='{"source": "blank"}'
                                 hx-target="#main-content-block" hx-swap="innerHTML"
+                                hx-disabled-elt="button:not(:disabled)"
                                 _="on click call collapseNavbarIfShown()">
                             <span>✚</span><span>Add a blank modeling to compare</span></button>
                     </li>
@@ -168,7 +172,7 @@
                            hx-post="{% url 'reset-model' %}"
                            hx-target="#main-content-block"
                            hx-swap="innerHTML"
-                           hx-disabled-elt="this"
+                           hx-disabled-elt="button:not(:disabled)"
                            data-confirm-when-model-not-empty="This will discard your current modeling and reset to an empty one. Continue?"
                            class="nav-link d-flex flex-row gap-2 mx-2"
                            data-bs-title="Reset to default modeling"
@@ -198,6 +202,7 @@
                 <li class="nav-item d-lg-none">
                     <a href="{% url 'support' %}" data-panel-url="{% url 'model-builder-support' %}"
                        data-action="open-feedback"
+                       hx-disabled-elt="button:not(:disabled)"
                        class="nav-link d-flex flex-row gap-2 mx-2"
                        _="on click call collapseNavbarIfShown()"
                     >

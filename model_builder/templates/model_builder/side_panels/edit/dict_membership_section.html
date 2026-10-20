@@ -24,6 +24,7 @@
                         hx-post="/model_builder/link-dict-entry/{{ panel_id }}/"
                         hx-include="#add-to-select-{{ panel_id }}-{{ section.section_id }}"
                         hx-swap="none"
+                        hx-disabled-elt="button:not(:disabled)"
                         hx-vals='js:{...recomputationVals()}'>
                     {{ section.add_to_label }}
                 </button>

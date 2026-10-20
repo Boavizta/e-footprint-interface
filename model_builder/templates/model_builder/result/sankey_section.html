@@ -34,7 +34,8 @@
     <button class="btn-add-sankey mt-2" data-workspace-control
             hx-get="/model_builder/sankey-form/"
             hx-target="#sankey-cards-container"
-            hx-swap="beforeend">
+            hx-swap="beforeend"
+            hx-disabled-elt="button:not(:disabled)">
         <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
         Add another analysis view
     </button>

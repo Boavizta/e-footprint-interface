@@ -14,7 +14,7 @@ from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage, card_id_selector
 from tests.e2e.pages.components import ObjectCard
-from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update, click_and_wait_for_htmx
+from tests.e2e.utils import EMPTY_SYSTEM_DICT, add_only_update, click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 @pytest.fixture
@@ -224,7 +224,20 @@ class TestEdgeObjects:
 
         model_builder.get_object_card("EdgeUsageJourney", "Edge Journey 1").click_edit_button()
         expect(page.get_by_text("Used in usage patterns", exact=True)).to_be_visible()
-        side_panel.add_list_membership("Shared deployment")
+        section = page.locator(".list-membership-section").first
+        section.locator("select[name='parent_id']").select_option(label="Shared deployment")
+        add_button = section.get_by_role("button", name="Add to pattern")
+        pending = []
+        page.route("**/link-list-entry/**", lambda route: pending.append(route))
+        with page.expect_request("**/link-list-entry/**"):
+            add_button.click()
+        expect(add_button).to_be_disabled()
+        expect(side_panel.submit_button).to_be_disabled()
+        with page.expect_response("**/link-list-entry/**"):
+            pending.pop().continue_()
+        page.unroute("**/link-list-entry/**")
+        wait_for_htmx_idle(page)
+        expect(side_panel.submit_button).to_be_enabled()
         membership = page.locator("[data-list-membership-name='Shared deployment']")
         expect(membership).to_be_visible()
         expect(membership.locator("button.unlink-btn")).to_be_enabled()

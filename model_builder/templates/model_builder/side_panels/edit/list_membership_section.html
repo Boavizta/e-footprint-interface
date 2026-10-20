@@ -13,6 +13,7 @@
                         {% if membership.unlink_disabled %}disabled{% endif %}
                         hx-post="/model_builder/unlink-list-entry/{{ membership.parent_id }}/{{ panel_id }}/"
                         hx-swap="none"
+                        hx-disabled-elt="button:not(:disabled)"
                         hx-vals='js:{...recomputationVals()}'>
                     &times;
                 </button>
@@ -31,6 +32,7 @@
                         hx-post="/model_builder/link-list-entry/{{ panel_id }}/"
                         hx-include="#add-to-list-select-{{ panel_id }}-{{ section.section_id }}"
                         hx-swap="none"
+                        hx-disabled-elt="button:not(:disabled)"
                         hx-vals='js:{...recomputationVals()}'>
                     {{ section.add_to_label }}
                 </button>

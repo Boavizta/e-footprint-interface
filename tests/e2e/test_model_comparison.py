@@ -15,40 +15,62 @@ import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.pages.side_panel_page import SidePanelPage
-from tests.e2e.utils import click_and_wait_for_htmx
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 @pytest.mark.e2e
 class TestModelComparisonWorkspace:
 
-    def test_delayed_count_save_leaves_reading_available(self, minimal_complete_model_builder):
+    def test_delayed_count_save_locks_buttons_until_it_ends(self, minimal_complete_model_builder):
         model_builder = minimal_complete_model_builder
         page = model_builder.page
         model_builder.add_model_by_duplication()
         pending = []
         page.route("**/update-dict-count/**", lambda route: pending.append(route))
+        buttons = [page.locator("#model-tab-0"), page.locator("#compare-tab"),
+                   model_builder.canvas.locator("button[hx-get*='open-edit-object-panel']").first]
 
         count = model_builder.edit_first_relationship_count(3)
         expect(count).to_be_enabled()
-        expect(page.locator("#model-tab-0")).to_be_enabled()
-        expect(page.locator("#compare-tab")).to_be_enabled()
+        for button in buttons:
+            expect(button).to_be_disabled()
         assert len(pending) == 1
         assert parse_qs(pending[0].request.post_data)["count"] == ["3"]
-        click_and_wait_for_htmx(page, model_builder.canvas.locator("button[hx-get*='open-edit-object-panel']").first)
-        model_builder.side_panel.should_be_visible()
-        model_builder.side_panel.close()
         with page.expect_response(lambda response: "update-dict-count" in response.url):
             pending.pop().continue_()
         expect(count).to_have_value("3")
-        expect(count).to_be_enabled()
+        for button in buttons:
+            expect(button).to_be_enabled()
 
         model_builder.edit_first_relationship_count(4)
         with page.expect_response(lambda response: "update-dict-count" in response.url):
             pending.pop().fulfill(status=500, body="Save failed")
         expect(count).to_be_enabled()
+        for button in buttons:
+            expect(button).to_be_enabled()
         page.unroute("**/update-dict-count/**")
         model_builder.switch_to_model(0)
         assert model_builder.active_slot() == "0"
+
+    def test_held_model_switch_locks_buttons_until_it_ends(self, minimal_complete_model_builder):
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+        model_builder.add_model_by_duplication()
+        pending = []
+        page.route("**/switch-model/", lambda route: pending.append(route))
+        with page.expect_request("**/switch-model/"):
+            page.locator("#model-tab-0").click()
+        tabs = [page.locator("#model-tab-0"), page.locator("#model-tab-1"), page.locator("#compare-tab")]
+        for tab in tabs:
+            expect(tab).to_be_disabled()
+        with page.expect_response("**/switch-model/"):
+            pending.pop().continue_()
+        page.unroute("**/switch-model/")
+        wait_for_htmx_idle(page)
+        assert model_builder.active_slot() == "0"
+        expect(page.locator("[data-model-canvas='0']")).to_be_visible()
+        for tab in tabs:
+            expect(tab).to_be_enabled()
 
     @pytest.mark.parametrize("unused_journey", [False, True])
     def test_delayed_object_deletion_keeps_native_buttons_and_count_controls_independent(

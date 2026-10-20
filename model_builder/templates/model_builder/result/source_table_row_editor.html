@@ -5,6 +5,7 @@ Variables expected: eq (ExplainableQuantityWeb), field_name_prefix (str), availa
       hx-post="{{ edit_object_url }}"
       hx-trigger="source-table-row-edit-submit"
       hx-swap="none"
+      hx-disabled-elt="button:not(:disabled)"
       data-action="source-table-row-edit"
       data-source-row-id="{{ eq.web_id }}">
     {% include "model_builder/side_panels/dynamic_form_fields/source_editor.html" with source_editor_id=eq.web_id|add:"_row" source_editor_name_prefix=field_name_prefix source_meta_available=available_sources source_meta_current_id=eq.source.id source_meta_current_name=eq.source.name source_meta_current_link=eq.source.link source_meta_current_comment=eq.comment source_editor_open=True source_editor_cancel_target="row-editor-"|add:eq.web_id %}

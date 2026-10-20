@@ -21,7 +21,8 @@ so renaming — which changes the name, not the slot — leaves it correct by co
             <button type="button" class="dropdown-item"
                     hx-post="{% url 'switch-model' %}"
                     hx-vals='{"slot": "{{ slot_entry.slot }}"}'
-                    hx-swap="none">
+                    hx-swap="none"
+                    hx-disabled-elt="button:not(:disabled)">
                 Switch to {% if forloop.first %}Reference{% else %}Comparison{% endif %} modeling
             </button>
         </li>

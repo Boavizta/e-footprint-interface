@@ -13,7 +13,8 @@
                         hx-get="{% url 'model-builder' %}"
                         hx-target="#main-content-block"
                         hx-swap="innerHTML"
-                        hx-push-url="{% url 'model-builder' %}">
+                        hx-push-url="{% url 'model-builder' %}"
+                        hx-disabled-elt="button:not(:disabled)">
                     Start modeling →
                 </button>
                 <a id="link-home-documentation"

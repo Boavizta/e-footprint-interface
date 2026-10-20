@@ -14,7 +14,8 @@
            href="{% url 'data-privacy' %}"
            hx-boost="true"
            hx-target="#sidePanel"
-           hx-swap="innerHTML">View Data &amp; privacy</a>
+           hx-swap="innerHTML"
+           hx-disabled-elt="button:not(:disabled)">View Data &amp; privacy</a>
     </div>
     {% endif %}
 </div>

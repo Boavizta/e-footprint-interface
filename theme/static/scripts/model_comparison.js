@@ -272,14 +272,16 @@
         }
     });
 
-    // Open the "+Add → Import from file" side panel from its data-action (the dropdown item can't carry
-    // hx-* and lives inside a Bootstrap menu that closes on click, so a delegated handler opens it).
+    // Open the "+Add → Import from file" side panel from its data-action (the dropdown item lives inside a
+    // Bootstrap menu that closes on click, so a delegated handler opens it). The item carries the
+    // hx-disabled-elt lock and is passed as the request source so the request takes it.
     document.body.addEventListener("click", function (evt) {
         const trigger = evt.target.closest('[data-action="open-add-model-import"]');
         if (!trigger) return;
         evt.preventDefault();
         if (window.htmx) {
-            window.htmx.ajax("GET", "/model_builder/open-add-model-import-panel/", { target: "#sidePanel", swap: "innerHTML" });
+            window.htmx.ajax("GET", "/model_builder/open-add-model-import-panel/",
+                { source: trigger, target: "#sidePanel", swap: "innerHTML" });
         }
     });
 

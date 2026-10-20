@@ -633,10 +633,12 @@ class TestInlineBookmarks:
         expect(status).to_have_class(re.compile("htmx-request"))
         expect(status).to_have_text("")
         assert status.evaluate("el => getComputedStyle(el, '::after').content") == '"Saving…"'
+        expect(builder.side_panel.submit_button).to_be_disabled()
         with page.expect_response("**/patch-simplified-inputs/"):
             held[0].continue_()
         page.unroute("**/patch-simplified-inputs/")
         expect(status).to_have_text("Saved")
+        expect(builder.side_panel.submit_button).to_be_enabled()
         expect(bookmark.locator("[data-include-input]")).not_to_be_checked()
         expect(help_field).to_have_value("Nested storage help")
         help_field.fill("Retried storage help")

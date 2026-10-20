@@ -16,7 +16,7 @@ from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage
-from tests.e2e.utils import EMPTY_SYSTEM_DICT
+from tests.e2e.utils import EMPTY_SYSTEM_DICT, wait_for_htmx_idle
 
 
 @pytest.mark.e2e
@@ -96,8 +96,19 @@ class TestUnsavedChangesWarning:
             params = parse_qs(urlparse(request.url).query)
             return params.get("efootprint_id_of_parent_to_link_to", [None])[0] == expected_parent_id
 
+        def is_service_panel_url(url):
+            return "open-create-object-panel/Service" in url
+
+        pending = []
+        page.route(is_service_panel_url, lambda route: pending.append(route))
         with page.expect_request(is_expected_request):
             page.locator("#continue-unsaved-modal").click()
+        expect(add_service_button).to_be_disabled()
+        with page.expect_response(lambda response: is_service_panel_url(response.url)):
+            pending.pop().continue_()
+        page.unroute(is_service_panel_url)
+        wait_for_htmx_idle(page)
+        expect(add_service_button).to_be_enabled()
 
 
 @pytest.mark.e2e

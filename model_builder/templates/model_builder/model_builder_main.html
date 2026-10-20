@@ -28,7 +28,8 @@ pattern — tab strip, then the active tab's toolbar beneath it).
     the mobile/tablet media queries re-raise #sidePanel to a fixed-overlay z-index regardless.
     {% endcomment %}
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel"></div>
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"></div>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"
+         hx-disabled-elt="button:not(:disabled)"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn" data-tour-target="results">
         {% include 'model_builder/components/results_bar_button.html' %}
         <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>

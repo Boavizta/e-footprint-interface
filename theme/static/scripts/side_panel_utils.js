@@ -213,7 +213,7 @@ function proceedWithPendingRequest() {
         const url = pendingRequest.getAttribute("hx-get");
         const target = pendingRequest.getAttribute("hx-target") || "#sidePanel";
         const swap = pendingRequest.getAttribute("hx-swap") || "innerHTML";
-        htmx.ajax("GET", url, {target: target, swap: swap, values: vals});
+        htmx.ajax("GET", url, {source: pendingRequest, target: target, swap: swap, values: vals});
         pendingRequest = null;
     }
     closeWarningModal();

@@ -7,6 +7,7 @@
        hx-post="/model_builder/update-dict-count/{{ parent_efootprint_id }}/{{ entry_efootprint_id }}/"
        hx-trigger="change"
        hx-swap="none"
+       hx-disabled-elt="button:not(:disabled)"
        {# A count edit posts with hx-swap="none" so the card is never swapped back. Dimming at 0 is a #}
        {# pure function of the value the user typed, so toggle .dict-entry-zero client-side to stay in #}
        {# sync with the server's render of the class (resource_need_card.html / journey_step_card.html). #}
@@ -19,6 +20,7 @@
         {% if unlink_disabled %}disabled{% endif %}
         hx-post="/model_builder/unlink-dict-entry/{{ parent_efootprint_id }}/{{ entry_efootprint_id }}/"
         hx-swap="none"
+        hx-disabled-elt="button:not(:disabled)"
         hx-vals='js:{...recomputationVals()}'>
     &times;
 </button>
