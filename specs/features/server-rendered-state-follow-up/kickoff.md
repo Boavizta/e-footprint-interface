@@ -9,7 +9,7 @@ still to be shaped.
 
 ## Why
 
-[request-lifecycle-simplification](../request-lifecycle-simplification/spec.html) establishes the
+The shipped request-lifecycle simplification established the
 convention that feature JavaScript observes request completion through one signal and treats the
 server-rendered fragment as the state after a request. It applies that rule to Simplified inputs
 and the Results panel, and explicitly leaves older modules out of scope so its diff stays
@@ -17,9 +17,7 @@ reviewable. A survey of the remaining modules found two groups that break the sa
 worth a second, separate pass. Everything else surveyed is client-owned by nature (drafts, widget
 state, ephemeral UI state, per-browser preferences) and should stay as it is.
 
-Apply the convention from `specs/conventions.md` (JavaScript section) once that feature ships;
-if this feature starts before it, read the convention text in the request-lifecycle plan,
-section 1.1.
+Apply the convention from `specs/conventions.md` (JavaScript section).
 
 ## Group 1 — the client reconstructs state the server already owns
 
