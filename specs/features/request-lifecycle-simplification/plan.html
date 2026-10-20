@@ -239,7 +239,7 @@
       <p><strong>Plan updates</strong></p>
       <p><a href="#plan-update-01">[PLAN-UPDATE-01] Bookmark Undo removed — ACCEPTED</a></p>
       <p><a href="#plan-update-02">[PLAN-UPDATE-02] Retyping the original value stays suppressed — ACCEPTED</a></p>
-      <p><a href="#plan-update-03">[PLAN-UPDATE-03] Late reads also land after same-model destinations — ACCEPTED</a></p>
+      <p><a href="#plan-update-03">[PLAN-UPDATE-03] Late reads also land after same-model destinations — SUPERSEDED by PLAN-UPDATE-13</a></p>
       <p><a href="#plan-update-04">[PLAN-UPDATE-04] No client "Not saved" fallback for unanswered requests — ACCEPTED</a></p>
       <p><a href="#plan-update-05">[PLAN-UPDATE-05] Exits do not resume the interrupted navigation — ACCEPTED</a></p>
       <p><a href="#plan-update-06">[PLAN-UPDATE-06] Server failures are visible, not softened — ACCEPTED</a></p>
@@ -520,8 +520,8 @@
         <p><strong>[PLAN-UPDATE-13] — ACCEPTED · spec change (decided 2026-10-20)</strong></p>
         <p><strong>Decision:</strong> while a saved-view or Configure read runs, the slot locks every enabled button and every workspace input, select and textarea (the same selector the field editor uses for a save) and shows a loader through its request class. The slot drops <code>hx-sync</code>. A second read cannot start, and a model switch waits for the read, so a late read can no longer land after the user moved on.</p>
         <p><strong>Why:</strong> run A kept the previous content interactive during a read and added a request-replacement rule to arbitrate the resulting concurrent reads. That rule was inherited by the Configure form (IMPL-DECISION-03) and needed a second mechanism to stay safe. Locking during a read is what every save already does, so it adds no new concept, removes the replacement rule and its inheritance, and makes the "late read after a model switch" case (PLAN-UPDATE-03) unreachable by any button. The user cost is a dimmed slot for the duration of a read, which the interface already imposes for saves.</p>
-        <p><strong>Principle recorded in conventions:</strong> user-initiated requests are sequential. Every element that issues a navigation or mutation request locks the interface with <code>hx-disabled-elt</code>; client sync, queue or replacement rules are not used to arbitrate between user actions. Background requests (previews, autosaves, storage polls, Sankey and lazy loads) stay unlocked and must target only their own region. Applying the lock to the remaining unlocked user-initiated elements outside Simplified inputs is a separate follow-up, not part of this feature.</p>
-        <p><strong>Affects:</strong> Task 5 (run B). Supersedes PLAN-UPDATE-03's late-read landing and the hx-sync half of IMPL-DECISION-03.</p>
+        <p><strong>Principle recorded in conventions:</strong> user-initiated requests are sequential. Every element that issues a navigation or mutation request locks the interface with <code>hx-disabled-elt</code>; client sync, queue or replacement rules are not used to arbitrate between user actions. Background requests (previews, autosaves, storage polls, Sankey and lazy loads) stay unlocked and must target only their own region. Task 6 applied the lock to the remaining user-initiated elements across the interface; the two plain <code>fetch</code> requests (Sankey card deletion, card-order save) are documented exceptions in <code>conventions.md</code>.</p>
+        <p><strong>Affects:</strong> Tasks 5 and 6 (run B). Supersedes PLAN-UPDATE-03's late-read landing and the hx-sync half of IMPL-DECISION-03.</p>
       </aside>
 <aside id="impl-decision-03" data-note="review">
         <p><strong>[IMPL-DECISION-03] — APPLIED</strong> · the hx-sync inheritance described below ended with <a href="#plan-update-13">PLAN-UPDATE-13</a>; the Configure Save lock stays.</p>
@@ -569,7 +569,8 @@
       still resumes the read after its own modal; it belongs to the out-of-scope side-panel guards, and the follow-up note lists it under the same
       rule as PLAN-UPDATE-05.</p>
       <aside id="plan-update-03" data-note="review">
-        <p><strong>[PLAN-UPDATE-03] — ACCEPTED · spec clarification (decided 2026-10-19)</strong></p>
+        <p><strong>[PLAN-UPDATE-03] — SUPERSEDED · by <a href="#plan-update-13">PLAN-UPDATE-13</a> on 2026-10-20 (was ACCEPTED, spec clarification decided 2026-10-19)</strong></p>
+        <p>Reads now lock the interface, so no destination can be reached while a read is in flight and no late read can land after one. The clarification below is kept for history.</p>
         <p><strong>Spec clause:</strong> accepted change "A saved-view read that finishes after the user switched models renders into the hidden slot…".</p>
         <p><strong>Observation:</strong> the cancellation the spec retires also covered same-model destinations chosen during the read
         (Results, Compare, a side panel, the Modeling toggle). The spec bullet was first widened to say the read still lands and switches

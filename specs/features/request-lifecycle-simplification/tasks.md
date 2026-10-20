@@ -1,7 +1,7 @@
 # Request lifecycle simplification — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`, including the plan review-guide commit `5304aa55`). Run B (Task 5, PLAN-UPDATE-13) in progress. Decisions: [implementation decisions index](plan.html#impl-decisions). Next: `feature-archive` after shipping.
+Status: runs A and B delivered and globally reviewed (run A `a12771fe..b739aca6` with plan guide `5304aa55`; run B `0da76e82..43b61afc`). Decisions: [implementation decisions index](plan.html#impl-decisions). Next: `feature-archive` after shipping.
 
 ## Implementation runs
 
@@ -23,6 +23,7 @@ Status: run A delivered and globally reviewed (final range `a12771fe..b739aca6`,
 
 [Amendment index in the plan](plan.html#plan-updates)
 
+- [PLAN-UPDATE-03](plan.html#plan-update-03): SUPERSEDED by PLAN-UPDATE-13 (no late read can land once reads lock the interface).
 - [PLAN-UPDATE-09](plan.html#plan-update-09): ACCEPTED, integrated into Task 1.
 - [PLAN-UPDATE-10](plan.html#plan-update-10): REJECTED; a changed value keeps its confidence (spec accepted change). Affects Task 2.
 - [PLAN-UPDATE-11](plan.html#plan-update-11): SUPERSEDED by PLAN-UPDATE-12.
@@ -146,7 +147,7 @@ Implementation: standard — mostly removal toward sketched code. Gate and E2E r
 
 Goal: Replace the slot's request-replacement rule with the standard lock and a loader during saved-view and Configure reads, and record the sequential-requests convention.
 
-Status: under review
+Status: done — `0da76e82..ed6d119b` plus review fix `08580a91`
 
 Brief: [briefs/task-5.md](briefs/task-5.md)
 
@@ -172,7 +173,7 @@ Implementation: standard — two declarative changes and CSS, but the E2E rewrit
 
 Goal: Make the sequential-requests convention true across the interface by giving every user-initiated request-issuing element the standard lock, leaving background requests exempt.
 
-Status: under review
+Status: done — `08580a91..b7809af3`
 
 Brief: [briefs/task-6.md](briefs/task-6.md)
 
@@ -199,6 +200,7 @@ Implementation: standard — mechanical additions, but the script-issued request
 - **Blocks later tasks:** Task 1's full green E2E run against rebuilt assets is the evidence for synchronous settle. Tasks 2 to 4 rely on it. Run against a local `runserver` from this checkout with `npm run build:js:dev` and the compiled SCSS.
 - **No other gate:** no migration, library change or serialization change. `pyproject.toml` already pins PyPI `efootprint`.
 - **Follow-up, not part of this run:** the constitution §1.4 sentence through `update-constitution` (decision 10), and the parked `htmx-aware-server-error-handler` backlog item.
+- **Follow-up proposed for the parked side-panel replay item:** the unsaved-changes replay in `side_panel_utils.js` still hand-parses `hx-vals`, `hx-target` and `hx-swap`; since Task 6 passes the deferred element as `source`, it could shrink to a single `htmx.ajax` call with that source.
 - **Pre-existing defects surfaced during run A (confirmed by the Task 3 reviewer to predate `a12771fe`; parked, not fixed here):**
   - `htmx:oobErrorNoTarget` is logged by canvas inline count edits, model-comparison count saves (`views_dict_mutation.py` always emits the side-panel membership-section region, even with no edit panel open) and edge device-group linking (same unconditional-region mechanism in `oob_regions.py`). Proposed fix: emit membership-section regions only when the client reports the panel open, or tolerate the missing target.
   - `delete_card_modal.html` runs a hyperscript `remove #<card id>` on `afterRequest` after the response has already removed that card, logging an "is null" error. Proposed fix: have the server emit an out-of-band delete and drop the hyperscript.
