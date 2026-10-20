@@ -61,7 +61,8 @@ builder re-render (Duplicate, Start blank, Import, Remove) brings fresh slots, s
 marks it Not saved. The submitted draft is not retained, so Modeling, Configure, model switching and other workspace
 navigation can proceed after the save. During a value/provenance request, native HTMX disabling covers buttons and
 inputs/selects/textareas in both resident Simplified-input workspaces. Existing prerequisite-disabled states survive
-release. Independent actions retain their own request behavior; there is no shared workspace write guard. The
+release. Every other user action locks buttons through its own <code>hx-disabled-elt</code>, so requests do not overlap and
+there is no shared workspace write guard. The
 two-model Export toggle cannot newly open during the save, while native download links remain usable and read saved state.</p>
 <p>Adding or removing models, opening Examples, uploading files and resetting the workspace use their ordinary actions
 and destructive confirmations. Model removal retains its separate confirmation, including the ordinary side-panel
