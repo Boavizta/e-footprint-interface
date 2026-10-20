@@ -80,8 +80,8 @@ explicit Save or Discard does not continue the export. A clean Configure screen 
 Entering Simplified inputs, Configure or Discard runs the ordinary side-panel discard-confirmation helper, closes the
 side panel, switches the view at once and sends one read into the slot. The slot shows its previous content, or nothing on
 first entry, until the response replaces it. The slot declares the field editor's lock as <code>hx-disabled-elt</code>
-(every enabled button plus the workspace inputs, selects and textareas) with <code>hx-disinherit</code>, so only its own
-reads use it. While a read runs, every button and workspace control is disabled and the slot dims its content behind a
+(every enabled button plus the workspace inputs, selects and textareas). A request issued from inside the slot
+inherits it unless it declares a closer lock, as the field editor and the Configure form do. While a read runs, every button and workspace control is disabled and the slot dims its content behind a
 CSS spinner on its request class. A second read, a model switch or a field save cannot start until the read lands, so
 reads never overlap. The Configure form declares the standard save lock, narrowed to leave the
 <code>data-workspace-read</code> reading controls usable: exits, Cancel and the dialog's Save/Discard/Stay stay disabled
