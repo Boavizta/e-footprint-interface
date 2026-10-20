@@ -121,7 +121,7 @@ function confirmRequest(elt) {
     return {event, issueRequest};
 }
 
-test("entering Simplified inputs switches the view before any response and sends one replaceable read", () => {
+test("entering Simplified inputs switches the view before any response and sends one read", () => {
     mount().remove();
     const target = document.querySelector("[data-simplified-target]");
     expect(document.body.dataset.baseView).toBe("modeling");
