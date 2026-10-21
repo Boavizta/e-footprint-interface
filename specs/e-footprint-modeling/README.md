@@ -222,7 +222,7 @@ the concurrency convolution extends its result beyond the input series and intro
 Keep the synthetic demand negligible and identical in the historical and current systems. Report it as a modeling
 workaround: it slightly reduces available capacity and contributes a small dynamic-load footprint. The future
 first-class requirement is parked in
-`../e-footprint/specs/features/improved-autoscaling-modeling/README.md`.
+`../e-footprint/specs/backlog/improved-autoscaling-modeling/README.md`.
 
 Peak RAM is not automatically the `ram_needed` of an average request. Use the isolated incremental working set when it
 is defensible, and use a separate capacity scenario for cold peaks that determine whether the deployment can serve the
