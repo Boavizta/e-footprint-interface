@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open a file: confirm before replacing — Implementation plan</title>
+<style>
+  :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
+    --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
+    --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+  body { margin: 0; font: 16px/1.6 system-ui, -apple-system, sans-serif;
+    color: var(--ink); background: var(--bg); }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 4px; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem;
+    border: 1px solid var(--line); border-radius: .5rem; background: var(--paper);
+    box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  body > a { position: absolute; left: 1rem; top: -5rem; z-index: 5;
+    background: var(--paper); padding: .7rem; }
+  body > a:focus { top: 1rem; }
+  #layout { display: grid; grid-template-columns: 22rem minmax(0, 64rem); gap: 2rem;
+    max-width: 92rem; margin: auto; padding: 2rem 1.5rem 5rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 64rem); }
+  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem);
+    overflow: auto; overscroll-behavior: contain; padding: 0 .5rem 0 0;
+    border: 0; border-radius: 0; background: transparent; margin: 0; }
+  #sidebar:not([open]) { overflow: visible; padding-right: 0; }
+  #sidebar > summary { position: sticky; top: 0; z-index: 2; list-style: none; display: flex;
+    align-items: center; gap: .4rem; width: max-content; max-width: 100%; margin: 0 0 .7rem;
+    padding: .3rem .55rem; border: 1px solid var(--line); border-radius: .4rem;
+    background: var(--paper); color: var(--accent); font-size: .8rem; }
+  #sidebar > summary::-webkit-details-marker { display: none; }
+  #sidebar > summary::before { content: "☰"; font-size: 1.1rem; line-height: 1; }
+  #sidebar:not([open]) > summary { width: 2.75rem; height: 2.75rem; justify-content: center;
+    margin-bottom: 0; padding: 0; }
+  #sidebar:not([open]) > summary span { position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #navigation { font-size: .85rem; padding-bottom: .6rem; }
+  #navigation > p:first-child { text-transform: uppercase; letter-spacing: .1em;
+    font-size: .72rem; font-weight: 700; color: var(--accent); }
+  #navigation ol { list-style: none; padding: 0; }
+  #navigation li a { display: block; padding: .35rem .5rem; border-radius: .3rem; }
+  #navigation li a:hover { background: var(--soft); }
+  main { min-width: 0; }
+  header > p:first-child, small, figcaption, [data-reading-note] { color: var(--muted); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.2; letter-spacing: -.03em; }
+  h2 { font-size: 1.4rem; line-height: 1.3; }
+  h3 { font-size: 1.08rem; margin: 1.5rem 0 .4rem; }
+  p, ul, ol { margin: .6rem 0 1rem; }
+  li { margin: .3rem 0; }
+  main > section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  main p { max-width: 76ch; }
+  [data-reading-note], [data-files] { font-size: .83rem; }
+  [data-files] > span { color: var(--muted); }
+  [data-step] > h3 > a { color: inherit; text-decoration: none; }
+  [data-step]:is(:target, :has(:target)) { border-left: 3px solid var(--accent); padding-left: .8rem; }
+  code { background: #eef2ef; padding: .08rem .25rem; border-radius: 3px;
+    font: .86em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  pre { overflow: auto; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem;
+    background: #f8faf7; font: .86rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  pre code { background: none; padding: 0; font: inherit; overflow-wrap: normal; }
+  [data-code] { margin: 1rem 0; }
+  [data-code-file] { display: flex; flex-wrap: wrap; gap: .2rem .8rem; align-items: baseline;
+    margin: 0; max-width: none; padding: .45rem .8rem; border: 1px solid var(--line); border-bottom: 0;
+    border-radius: .5rem .5rem 0 0; background: #eef2ef; font-size: .8rem; }
+  [data-code-file] code { background: none; padding: 0; font-size: 1em; }
+  [data-code] pre { margin: 0; border-radius: 0 0 .5rem .5rem; }
+  [data-comparison] { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  [data-comparison] > * { min-width: 0; }
+  details { border: 1px solid var(--line); border-radius: .5rem; padding: .7rem 1rem;
+    background: var(--paper); margin: .7rem 0; }
+  summary { cursor: pointer; font-weight: 650; }
+  #modules h2 { font-size: 1.05rem; }
+  #modules > p { font-size: .76rem; color: var(--muted); }
+  #change-tree { padding: .7rem; border: 1px solid var(--line); border-radius: .6rem;
+    background: var(--paper); font-size: .8rem; }
+  #change-tree details { border: 0; background: none; padding: .2rem 0 .2rem .6rem; margin: .25rem 0; }
+  #change-tree > details { padding-left: 0; }
+  #change-tree ul { list-style: none; border-left: 1px solid var(--line); margin: .25rem 0 .25rem .35rem;
+    padding: 0 0 0 .7rem; }
+  #change-tree li { padding: .3rem; border-radius: .3rem; }
+  #change-tree li:target { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #change-tree li > small { display: block; margin-top: .2rem; }
+  [data-change] { font-size: .65rem; font-weight: 700; text-transform: uppercase;
+    border-radius: .25rem; padding: .1rem .3rem; background: #eef2ef; color: var(--muted); }
+  [data-change="new"] { color: var(--accent); background: var(--soft); }
+  [data-change="renamed"] { color: #285e91; background: #edf4fb; }
+  [data-change="removed"] { color: #963939; background: #fff0ed; }
+  [data-reading-links] { margin-left: .3rem; font-size: .7rem; }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg);
+    padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
+  figure { margin: 1rem 0; padding: 1rem; background: var(--paper); border: 1px solid var(--line); }
+  figure > div, [data-table-scroll] { overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; }
+  figcaption { font-size: .82rem; margin-top: .6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .65rem; }
+  th { background: var(--soft); }
+  #phases { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  #phases li { margin: 0; padding: .9rem; background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; }
+  #phases strong, #phases small { display: block; }
+
+  body:has(#press-open:target, #press-open :target, #change-tree :target[data-steps~="press-open"])
+    #change-tree li[data-steps~="press-open"] { background: var(--soft); }
+  body:has(#press-open:target, #press-open :target, #change-tree :target[data-steps~="press-open"])
+    #navigation a[href="#press-open"] { background: var(--soft); font-weight: 700; }
+  body:has(#tests:target, #tests :target, #change-tree :target[data-steps~="tests"])
+    #change-tree li[data-steps~="tests"] { background: var(--soft); }
+  body:has(#tests:target, #tests :target, #change-tree :target[data-steps~="tests"])
+    #navigation a[href="#tests"] { background: var(--soft); font-weight: 700; }
+
+  @media (max-width: 1100px) {
+    #layout { grid-template-columns: 18rem minmax(0, 1fr); gap: 1.2rem; }
+    [data-comparison] { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 850px) {
+    #layout { display: flex; flex-direction: column; padding: 1rem; }
+    #sidebar { position: static; max-height: min(45vh, 24rem); padding: 0; width: 100%; }
+    #sidebar:not([open]) { width: 2.75rem; }
+    #navigation ol { display: flex; flex-wrap: wrap; gap: .25rem; }
+    #phases { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print {
+    #review-link-menu { display: none; }
+    body { background: white; font-size: 10pt; }
+    #layout { display: flex; flex-direction: column; padding: 0; }
+    #sidebar, #sidebar:not([open]) { order: 1; position: static; width: 100%; max-height: none; overflow: visible; }
+    #navigation, body > a, #sidebar > summary { display: none; }
+    main { order: 0; }
+    #modules { break-before: page; }
+    details::details-content { content-visibility: visible; display: block; }
+    [data-code], figure, tr { break-inside: avoid; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    figure > div, [data-table-scroll] { overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<a href="#main">Skip to plan</a>
+<div id="layout">
+<details id="sidebar" aria-label="Reading order and changed files" open>
+  <summary title="Show or hide navigation and changed files"><span>Navigation and changed files</span></summary>
+  <nav id="navigation" aria-label="Reading order">
+    <p>Reading order</p>
+    <ol>
+      <li><a href="#press-open">1.1 · Press Open in "Open a file"</a></li>
+      <li><a href="#tests">1.2 · Existing E2E callers of the import helper</a></li>
+    </ol>
+    <p><a href="#delivery">Delivery &amp; verification</a> · <a href="#decisions">Review decisions</a></p>
+  </nav>
+  <section id="modules">
+    <h2>Changed files</h2>
+    <p>Select a reading step to highlight its files. Click a linked file to open it in VS Code, or right-click it for a diff against <code>main</code>. Numbered links return to the walkthrough.</p>
+    <div id="change-tree">
+      <details open>
+        <summary>e-footprint-interface /</summary>
+        <details open>
+          <summary>model_builder/adapters/views/</summary>
+          <ul>
+            <li id="file-views" data-steps="press-open">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:274:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L274:1"><code>views.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#press-open">1.1</a></span>
+              <small><code>open_import_json_panel()</code> passes the session-dependent confirmation text.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/templates/model_builder/side_panels/</summary>
+          <ul>
+            <li id="file-import-panel" data-steps="press-open">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/import_model.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/import_model.html#L10:1"><code>import_model.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#press-open">1.1</a></span>
+              <small>The form carries <code>data-confirm-when-model-not-empty</code>.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>theme/static/scripts/</summary>
+          <ul>
+            <li id="file-main-js" data-steps="press-open">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:363:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L363:1"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#press-open">1.1</a></span>
+              <small>Comment only: list "Open a file" among the guarded actions. No logic change.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests/</summary>
+          <ul>
+            <li id="file-e2e-page" data-steps="tests">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:450:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L450:1"><code>e2e/pages/model_builder_page.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#tests">1.2</a></span>
+              <small><code>import_json_file()</code> accepts the confirmation and returns the dialog messages.</small>
+            </li>
+            <li id="file-e2e-toolbar" data-steps="tests">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:95:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L95:1"><code>e2e/test_toolbar.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#tests">1.2</a></span>
+              <small>Assert prompt over content, none on empty, cancel keeps the modeling.</small>
+            </li>
+            <li id="file-integration" data-steps="tests">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:277:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L277:1"><code>integration/test_workspace_file.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#tests">1.2</a></span>
+              <small>Panel renders the single vs comparison message.</small>
+            </li>
+          </ul>
+        </details>
+        <ul>
+          <li id="file-changelog" data-steps="press-open">
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
+            <small>One <code>### Fixed</code> line under <code>## [Unreleased]</code>.</small>
+          </li>
+        </ul>
+      </details>
+    </div>
+  </section>
+</details>
+
+<main id="main">
+  <header>
+    <p>Plan · approved · 2026-10-21</p>
+    <h1>Open a file: confirm before replacing — implementation plan</h1>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/open-file-replace-confirmation/spec.html" data-review-source-href="spec.html">Spec</a> · <a href="#modules">Changed files</a></p>
+    <aside data-note="review"><p><strong>Draft.</strong> Written during <code>spec-specify</code> because
+      the issue already names the template and the attribute to reuse. Refine it in the
+      <code>spec-plan</code> stage.</p></aside>
+  </header>
+
+  <section id="walkthrough">
+    <h2>1. Follow the interactions through the code</h2>
+    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to
+      <code>e-footprint-interface/</code>. Library untouched.</p>
+
+    <article id="press-open" data-step>
+      <h3><a href="#press-open">1.1 · Press Open in "Open a file"</a></h3>
+      <p data-files><span>Files</span>
+        <a href="#file-views"><code>views.py</code></a> ·
+        <a href="#file-import-panel"><code>import_model.html</code></a> ·
+        <a href="#file-main-js"><code>model_builder_main.js</code></a></p>
+
+      <p><strong>Today.</strong> The toolbar button
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:121:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L121:1"><code>upload_download_reboot_model_tooltips.html</code></a>)
+        and the picker's upload card
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/onboarding/template_picker.html:33:1" data-review-source-href="../../../model_builder/templates/model_builder/onboarding/template_picker.html#L33:1"><code>template_picker.html</code></a>)
+        both GET <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:274:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L274:1"><code>open_import_json_panel()</code></a>.
+        The panel's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/import_model.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/import_model.html#L10:1"><code>#sidePanelForm</code></a>
+        POSTs straight to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:346:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L346:1"><code>upload_json()</code></a>,
+        which replaces the active slot or restores both. No confirmation step exists.</p>
+
+      <p><strong>Guard reused as is.</strong> The body-level <code>htmx:confirm</code> listener in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:370:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L370:1"><code>model_builder_main.js</code></a>
+        already serves Reset
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:176:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L176:1">toolbar</a>)
+        and example loading
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/onboarding/template_picker.html:44:1" data-review-source-href="../../../model_builder/templates/model_builder/onboarding/template_picker.html#L44:1">picker</a>).
+        It finds the closest <code>[data-confirm-when-model-not-empty]</code>, does nothing when no
+        <code>.model-builder-card</code> exists, and otherwise prompts with the attribute's text before
+        calling <code>issueRequest(true)</code>. The form is the requesting element, so
+        <code>evt.target.closest()</code> matches it. In a comparison, both slot canvases are in the DOM
+        (the inactive one is hidden with <code>d-none</code>, see
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:12:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L12:1"><code>model_builder_main.html</code></a>),
+        so the existing card check already means "any modeling holds content". No JS logic changes.
+        Only the comment above the listener gains "Open a file" in its list of guarded actions.</p>
+
+      <div data-code>
+        <p data-code-file><a href="#file-import-panel"><code>model_builder/templates/model_builder/side_panels/import_model.html</code></a>
+          <small>Proposed: one attribute on the existing form</small></p>
+        <pre><code>&lt;form id="sidePanelForm" class="my-3"
+        hx-post="{% url 'upload-json' %}"
+        hx-disabled-elt="button:not(:disabled)"
+        <ins>data-confirm-when-model-not-empty="{{ replace_confirmation }}"</ins>
+        enctype="multipart/form-data"
+        hx-swap="innerHTML"
+        hx-target="#main-content-block"&gt;</code></pre>
+      </div>
+
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:274:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L274:1"><code>open_import_json_panel()</code></a>
+        chooses the text from the slot count, read with
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/repositories/session_workspace_repository.py:29:1" data-review-source-href="../../../model_builder/adapters/repositories/session_workspace_repository.py#L29:1"><code>SessionWorkspaceRepository.list_slots()</code></a>:</p>
+      <div data-code>
+        <p data-code-file><a href="#file-views"><code>model_builder/adapters/views/views.py</code></a>
+          <small>Proposed change to <code>open_import_json_panel()</code></small></p>
+        <pre><code>def open_import_json_panel(request):
+    is_comparison = len(SessionWorkspaceRepository(request.session).list_slots()) &gt; 1
+    replace_confirmation = (
+        "This will replace the active modeling, or both modelings if the file holds a comparison. Continue?"
+        if is_comparison else "This will replace your current modeling. Continue?")
+    return render(request, "model_builder/side_panels/import_model.html", context={
+        "header_name": "Open a file", "save_button_label": "Open",
+        "replace_confirmation": replace_confirmation})</code></pre>
+      </div>
+
+      <p><strong>No interaction with the side-panel guards.</strong> The unsaved-changes
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:127:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L127:1"><code>htmx:beforeRequest</code> guard</a>
+        only applies to <code>#sidePanel</code>-targeted requests, and the form targets
+        <code>#main-content-block</code>. The
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:162:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L162:1">navigation guard</a>'s
+        <code>PANEL_DISCARDING_PATHS</code> does not list <code>upload-json</code>. So one click shows at most one
+        dialog. On Cancel, <code>htmx:confirm</code> fires before htmx applies <code>hx-disabled-elt</code>, so the
+        Open button stays enabled and the chosen file stays in the input.
+        "Import a modeling to compare" uses a separate panel
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/add_model_import.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/add_model_import.html#L1:1"><code>add_model_import.html</code></a>)
+        and is not affected.</p>
+    </article>
+
+    <article id="tests" data-step>
+      <h3><a href="#tests">1.2 · Existing E2E callers of the import helper</a></h3>
+      <p data-files><span>Files</span>
+        <a href="#file-e2e-page"><code>model_builder_page.py</code></a> ·
+        <a href="#file-e2e-toolbar"><code>test_toolbar.py</code></a> ·
+        <a href="#file-integration"><code>test_workspace_file.py</code></a></p>
+      <p>Playwright dismisses dialogs by default. Over a non-empty modeling, the submit in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:450:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L450:1"><code>import_json_file()</code></a>
+        would be cancelled and its <code>expect_response("upload-json")</code> would time out. The helper is
+        used by seven test files, including the download/upload round trips in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_card_order_persistence.py:42:1" data-review-source-href="../../../tests/e2e/test_card_order_persistence.py#L42:1"><code>test_card_order_persistence.py</code></a>,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_source_metadata.py:272:1" data-review-source-href="../../../tests/e2e/test_source_metadata.py#L272:1"><code>test_source_metadata.py</code></a> and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_weekly_pattern_builder.py:68:1" data-review-source-href="../../../tests/e2e/test_weekly_pattern_builder.py#L68:1"><code>test_weekly_pattern_builder.py</code></a>.
+        Change the helper once: register a dialog handler that records each message and accepts it,
+        remove it after the response, and return the messages. Callers stay unchanged, and no
+        handler is left behind to accept an unrelated dialog later in the test.</p>
+      <div data-code>
+        <p data-code-file><a href="#file-e2e-page"><code>tests/e2e/pages/model_builder_page.py</code></a>
+          <small>Proposed shape</small></p>
+        <pre><code>def import_json_file(self, file_path: str) -&gt; list[str]:
+    """Import a JSON model file, accepting the replace confirmation; returns the dialog messages."""
+    ...
+    messages = []
+    def accept(dialog):
+        messages.append(dialog.message)
+        dialog.accept()
+    self.page.on("dialog", accept)
+    try:
+        with self.page.expect_response(lambda r: "upload-json" in r.url):
+            self.page.locator("button[type='submit']").click()
+    finally:
+        self.page.remove_listener("dialog", accept)
+    self.side_panel.should_be_closed()
+    return messages</code></pre>
+      </div>
+    </article>
+  </section>
+
+  <section id="delivery">
+    <h2>2. Delivery and verification</h2>
+    <h3>Implementation sequence</h3>
+    <ol id="phases">
+      <li><strong>A · Guard and tests</strong>Attribute, view context, helper change, new assertions,
+        changelog line, all in one task.
+        <small>Small enough for a single easy-difficulty task with LIGHT review.</small></li>
+    </ol>
+    <h3>Verification map</h3>
+    <div data-table-scroll>
+      <table>
+        <thead><tr><th scope="col">Behavior / risk</th><th scope="col">Critical assertion</th><th scope="col">Existing test layer</th></tr></thead>
+        <tbody>
+          <tr><td>Prompt over a modeling with content</td><td><code>import_json_file()</code> returns exactly one message, equal to the single-session text; the imported objects appear.</td><td>E2E, extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:95:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L95:1"><code>test_import_json_replaces_existing_model</code></a></td></tr>
+          <tr><td>No prompt on an empty modeling</td><td>Returned messages are empty.</td><td>E2E, extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:126:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L126:1"><code>test_import_json_into_empty_model_adds_objects</code></a></td></tr>
+          <tr><td>Cancel keeps everything</td><td>Dismiss the dialog: no <code>upload-json</code> request; the original cards and the open panel remain.</td><td>E2E, new test in <code>test_toolbar.py</code></td></tr>
+          <tr><td>Session-dependent wording</td><td>The panel HTML carries the single text in a one-slot session and the comparison text in a two-slot session.</td><td>Integration, beside <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:277:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L277:1"><code>test_workspace_file.py</code></a> two-slot setup</td></tr>
+          <tr><td>Other import callers keep working</td><td>Existing round-trip tests pass unchanged.</td><td>Full E2E run</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Coverage above is planned, not executed. The JS listener is unchanged, so no Jest change.</p>
+  </section>
+
+  <section id="decisions">
+    <h2>3. Decisions for review</h2>
+    <ul>
+      <li><strong>Confirm on Open, not on opening the panel.</strong> Opening the panel discards nothing,
+        and guarding the submit covers both entry points (toolbar and picker) with one attribute.</li>
+      <li><strong>Wording chosen server-side from the slot count.</strong> Alternative: one generic string
+        for both sessions. Rejected because "both modelings" confuses a single-modeling session, where a
+        comparison file replaces the current modeling and adds a second one. Cost: one conditional in the view.</li>
+    </ul>
+  </section>
+</main>
+</div>
+<script src="../../review-links.js" defer></script>
+</body>
+</html>
