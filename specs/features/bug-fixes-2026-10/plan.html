@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bug-fixes-2026-10 — Implementation plan</title>
+<style>
+  :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
+    --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
+    --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+  body { margin: 0; font: 16px/1.6 system-ui, -apple-system, sans-serif;
+    color: var(--ink); background: var(--bg); }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 4px; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem;
+    border: 1px solid var(--line); border-radius: .5rem; background: var(--paper);
+    box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  body > a { position: absolute; left: 1rem; top: -5rem; z-index: 5;
+    background: var(--paper); padding: .7rem; }
+  body > a:focus { top: 1rem; }
+  #layout { display: grid; grid-template-columns: 22rem minmax(0, 64rem); gap: 2rem;
+    max-width: 92rem; margin: auto; padding: 2rem 1.5rem 5rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 64rem); }
+  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem);
+    overflow: auto; overscroll-behavior: contain; padding: 0 .5rem 0 0;
+    border: 0; border-radius: 0; background: transparent; margin: 0; }
+  #sidebar:not([open]) { overflow: visible; padding-right: 0; }
+  #sidebar > summary { position: sticky; top: 0; z-index: 2; list-style: none; display: flex;
+    align-items: center; gap: .4rem; width: max-content; max-width: 100%; margin: 0 0 .7rem;
+    padding: .3rem .55rem; border: 1px solid var(--line); border-radius: .4rem;
+    background: var(--paper); color: var(--accent); font-size: .8rem; }
+  #sidebar > summary::-webkit-details-marker { display: none; }
+  #sidebar > summary::before { content: "☰"; font-size: 1.1rem; line-height: 1; }
+  #sidebar:not([open]) > summary { width: 2.75rem; height: 2.75rem; justify-content: center;
+    margin-bottom: 0; padding: 0; }
+  #sidebar:not([open]) > summary span { position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #navigation { font-size: .85rem; padding-bottom: .6rem; }
+  #navigation > p:first-child { text-transform: uppercase; letter-spacing: .1em;
+    font-size: .72rem; font-weight: 700; color: var(--accent); }
+  #navigation ol { list-style: none; padding: 0; margin: .2rem 0 .6rem; }
+  #navigation li a { display: block; padding: .3rem .5rem; border-radius: .3rem; }
+  #navigation li a:hover { background: var(--soft); }
+  #navigation .cluster { font-weight: 650; color: var(--muted); font-size: .76rem; margin: .7rem 0 .1rem .5rem; }
+  main { min-width: 0; }
+  header > p:first-child, small, figcaption, [data-reading-note] { color: var(--muted); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.2; letter-spacing: -.03em; }
+  h2 { font-size: 1.4rem; line-height: 1.3; }
+  h3 { font-size: 1.08rem; margin: 1.5rem 0 .4rem; }
+  p, ul, ol { margin: .6rem 0 1rem; }
+  li { margin: .3rem 0; }
+  main > section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  main p { max-width: 76ch; }
+  [data-reading-note], [data-files] { font-size: .83rem; }
+  [data-files] > span { color: var(--muted); }
+  [data-step] { margin: 1.4rem 0 2rem; }
+  [data-step] > h3 > a { color: inherit; text-decoration: none; }
+  [data-step]:is(:target, :has(:target)) { border-left: 3px solid var(--accent); padding-left: .8rem; }
+  [data-step] dl { margin: .4rem 0; }
+  [data-step] dt { font-weight: 650; margin-top: .7rem; }
+  [data-step] dd { margin: .15rem 0 0 0; max-width: 76ch; }
+  .cluster-intro { background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; padding: .3rem 1rem; }
+  code { background: #eef2ef; padding: .08rem .25rem; border-radius: 3px;
+    font: .86em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  pre { overflow: auto; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem;
+    background: #f8faf7; font: .86rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  pre code { background: none; padding: 0; font: inherit; overflow-wrap: normal; }
+  [data-code] { margin: 1rem 0; }
+  [data-code-file] { display: flex; flex-wrap: wrap; gap: .2rem .8rem; align-items: baseline;
+    margin: 0; max-width: none; padding: .45rem .8rem; border: 1px solid var(--line); border-bottom: 0;
+    border-radius: .5rem .5rem 0 0; background: #eef2ef; font-size: .8rem; }
+  [data-code-file] code { background: none; padding: 0; font-size: 1em; }
+  [data-code] pre { margin: 0; border-radius: 0 0 .5rem .5rem; }
+  details { border: 1px solid var(--line); border-radius: .5rem; padding: .7rem 1rem;
+    background: var(--paper); margin: .7rem 0; }
+  summary { cursor: pointer; font-weight: 650; }
+  #modules h2 { font-size: 1.05rem; }
+  #modules > p { font-size: .76rem; color: var(--muted); }
+  #change-tree { padding: .7rem; border: 1px solid var(--line); border-radius: .6rem;
+    background: var(--paper); font-size: .8rem; }
+  #change-tree details { border: 0; background: none; padding: .2rem 0 .2rem .6rem; margin: .25rem 0; }
+  #change-tree > details { padding-left: 0; }
+  #change-tree ul { list-style: none; border-left: 1px solid var(--line); margin: .25rem 0 .25rem .35rem;
+    padding: 0 0 0 .7rem; }
+  #change-tree li { padding: .3rem; border-radius: .3rem; }
+  #change-tree li:target { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #change-tree li > small { display: block; margin-top: .2rem; }
+  [data-change] { font-size: .65rem; font-weight: 700; text-transform: uppercase;
+    border-radius: .25rem; padding: .1rem .3rem; background: #eef2ef; color: var(--muted); }
+  [data-change="new"] { color: var(--accent); background: var(--soft); }
+  [data-change="removed"] { color: #963939; background: #fff0ed; }
+  [data-reading-links] { margin-left: .3rem; font-size: .7rem; }
+  [data-chip] { display: inline-block; font-size: .7rem; font-weight: 600; border-radius: .25rem;
+    padding: .05rem .4rem; margin-right: .3rem; background: #eef2ef; color: var(--muted); vertical-align: middle; }
+  [data-chip="review"] { color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg);
+    padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
+  figure { margin: 1rem 0; padding: 1rem; background: var(--paper); border: 1px solid var(--line); }
+  figure > div, [data-table-scroll] { overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; }
+  svg a text { fill: var(--accent); text-decoration: underline; }
+  figcaption { font-size: .82rem; margin-top: .6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .65rem; }
+  th { background: var(--soft); }
+  #runs { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr; gap: .9rem; }
+  #runs > li { margin: 0; padding: .9rem 1.1rem; background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; }
+  #runs > li > strong { display: block; font-size: 1.02rem; }
+
+  /* One mapping per task step. */
+  body:has(#task-1:target, #task-1 :target, #change-tree :target[data-steps~="task-1"]) #change-tree li[data-steps~="task-1"],
+  body:has(#task-2:target, #task-2 :target, #change-tree :target[data-steps~="task-2"]) #change-tree li[data-steps~="task-2"],
+  body:has(#task-3:target, #task-3 :target, #change-tree :target[data-steps~="task-3"]) #change-tree li[data-steps~="task-3"],
+  body:has(#task-4:target, #task-4 :target, #change-tree :target[data-steps~="task-4"]) #change-tree li[data-steps~="task-4"],
+  body:has(#task-5:target, #task-5 :target, #change-tree :target[data-steps~="task-5"]) #change-tree li[data-steps~="task-5"],
+  body:has(#task-6:target, #task-6 :target, #change-tree :target[data-steps~="task-6"]) #change-tree li[data-steps~="task-6"],
+  body:has(#task-7:target, #task-7 :target, #change-tree :target[data-steps~="task-7"]) #change-tree li[data-steps~="task-7"],
+  body:has(#task-8:target, #task-8 :target, #change-tree :target[data-steps~="task-8"]) #change-tree li[data-steps~="task-8"],
+  body:has(#task-9:target, #task-9 :target, #change-tree :target[data-steps~="task-9"]) #change-tree li[data-steps~="task-9"],
+  body:has(#task-10:target, #task-10 :target, #change-tree :target[data-steps~="task-10"]) #change-tree li[data-steps~="task-10"],
+  body:has(#task-11:target, #task-11 :target, #change-tree :target[data-steps~="task-11"]) #change-tree li[data-steps~="task-11"],
+  body:has(#task-12:target, #task-12 :target, #change-tree :target[data-steps~="task-12"]) #change-tree li[data-steps~="task-12"],
+  body:has(#task-13:target, #task-13 :target, #change-tree :target[data-steps~="task-13"]) #change-tree li[data-steps~="task-13"],
+  body:has(#task-14:target, #task-14 :target, #change-tree :target[data-steps~="task-14"]) #change-tree li[data-steps~="task-14"],
+  body:has(#task-15:target, #task-15 :target, #change-tree :target[data-steps~="task-15"]) #change-tree li[data-steps~="task-15"]
+    { background: var(--soft); }
+  body:has(#task-1:target, #task-1 :target, #change-tree :target[data-steps~="task-1"]) #navigation a[href="#task-1"],
+  body:has(#task-2:target, #task-2 :target, #change-tree :target[data-steps~="task-2"]) #navigation a[href="#task-2"],
+  body:has(#task-3:target, #task-3 :target, #change-tree :target[data-steps~="task-3"]) #navigation a[href="#task-3"],
+  body:has(#task-4:target, #task-4 :target, #change-tree :target[data-steps~="task-4"]) #navigation a[href="#task-4"],
+  body:has(#task-5:target, #task-5 :target, #change-tree :target[data-steps~="task-5"]) #navigation a[href="#task-5"],
+  body:has(#task-6:target, #task-6 :target, #change-tree :target[data-steps~="task-6"]) #navigation a[href="#task-6"],
+  body:has(#task-7:target, #task-7 :target, #change-tree :target[data-steps~="task-7"]) #navigation a[href="#task-7"],
+  body:has(#task-8:target, #task-8 :target, #change-tree :target[data-steps~="task-8"]) #navigation a[href="#task-8"],
+  body:has(#task-9:target, #task-9 :target, #change-tree :target[data-steps~="task-9"]) #navigation a[href="#task-9"],
+  body:has(#task-10:target, #task-10 :target, #change-tree :target[data-steps~="task-10"]) #navigation a[href="#task-10"],
+  body:has(#task-11:target, #task-11 :target, #change-tree :target[data-steps~="task-11"]) #navigation a[href="#task-11"],
+  body:has(#task-12:target, #task-12 :target, #change-tree :target[data-steps~="task-12"]) #navigation a[href="#task-12"],
+  body:has(#task-13:target, #task-13 :target, #change-tree :target[data-steps~="task-13"]) #navigation a[href="#task-13"],
+  body:has(#task-14:target, #task-14 :target, #change-tree :target[data-steps~="task-14"]) #navigation a[href="#task-14"],
+  body:has(#task-15:target, #task-15 :target, #change-tree :target[data-steps~="task-15"]) #navigation a[href="#task-15"]
+    { background: var(--soft); font-weight: 700; }
+
+  @media (max-width: 1100px) {
+    #layout { grid-template-columns: 18rem minmax(0, 1fr); gap: 1.2rem; }
+  }
+  @media (max-width: 850px) {
+    #layout { display: flex; flex-direction: column; padding: 1rem; }
+    #sidebar { position: static; max-height: min(45vh, 24rem); padding: 0; width: 100%; }
+    #sidebar:not([open]) { width: 2.75rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print {
+    #review-link-menu { display: none; }
+    body { background: white; font-size: 10pt; }
+    #layout { display: flex; flex-direction: column; padding: 0; }
+    #sidebar, #sidebar:not([open]) { order: 1; position: static; width: 100%; max-height: none; overflow: visible; }
+    #navigation, body > a, #sidebar > summary { display: none; }
+    main { order: 0; }
+    #modules { break-before: page; }
+    details::details-content { content-visibility: visible; display: block; }
+    [data-code], figure, tr { break-inside: avoid; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    figure > div, [data-table-scroll] { overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<a href="#main">Skip to plan</a>
+<div id="layout">
+<details id="sidebar" aria-label="Reading order and changed files" open>
+  <summary title="Show or hide navigation and changed files"><span>Navigation and changed files</span></summary>
+  <nav id="navigation" aria-label="Reading order">
+    <p>Reading order</p>
+    <p class="cluster"><a href="#cluster-containers">1 · Containers and deletion</a></p>
+    <ol>
+      <li><a href="#task-4">1.1 · Task 4 — detached containers</a></li>
+      <li><a href="#task-6">1.2 · Task 6 — library-built relationships</a></li>
+      <li><a href="#task-8">1.3 · Task 8 — edge component no-op delete</a></li>
+      <li><a href="#task-11">1.4 · Task 11 — delete only unlinks</a></li>
+      <li><a href="#task-13">1.5 · Task 13 — web-class resolver (refactor)</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-rounding">2 · Daily chart totals</a></p>
+    <ol>
+      <li><a href="#task-5">2.1 · Task 5 — significant-figure rounding</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-dom">3 · Responses that address the DOM</a></p>
+    <ol>
+      <li><a href="#task-3">3.1 · Task 3 — server owns card removal</a></li>
+      <li><a href="#task-2">3.2 · Task 2 — membership OOB when mounted</a></li>
+      <li><a href="#task-12">3.3 · Task 12 — highlight within owning canvas</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-calc">4 · Calculated-attribute panels</a></p>
+    <ol>
+      <li><a href="#task-9">4.1 · Task 9 — empty entries, decorated views</a></li>
+      <li><a href="#task-10">4.2 · Task 10 — per-item ids</a></li>
+      <li><a href="#task-14">4.3 · Task 14 — template dispatch (refactor)</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-guard">5 · Unsaved-changes guard</a></p>
+    <ol>
+      <li><a href="#task-1">5.1 · Task 1 — guard blocks</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-constant">6 · Recurrent constant editor</a></p>
+    <ol>
+      <li><a href="#task-7">6.1 · Task 7 — "each hour"</a></li>
+    </ol>
+    <p class="cluster"><a href="#cluster-invariants">7 · Invariant tests</a></p>
+    <ol>
+      <li><a href="#task-15">7.1 · Task 15 — example-wide sweeps</a></li>
+    </ol>
+    <p><a href="#execution-plan">Execution plan</a> · <a href="#decisions">Planning decisions</a></p>
+  </nav>
+  <section id="modules">
+    <h2>Changed files</h2>
+    <p>Select a task to highlight its files. Click a linked file to open it in VS Code, or right-click it for a diff against <code>main</code>. Task links return to the walkthrough. Paths are relative to <code>e-footprint-interface/</code>; no library file changes.</p>
+    <div id="change-tree">
+      <details open>
+        <summary>e-footprint-interface /</summary>
+        <ul>
+          <li id="f-changelog" data-steps="task-1 task-2 task-3 task-4 task-5 task-6 task-7 task-8 task-9 task-10 task-11 task-12">
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
+            <span data-reading-links><a href="#task-1">1</a>–<a href="#task-12">12</a></span>
+            <small>One <code>## [Unreleased]</code> entry per bug task (Tasks 1–12); consolidate per run.</small>
+          </li>
+        </ul>
+        <details open>
+          <summary>model_builder/application/use_cases/</summary>
+          <ul>
+            <li id="f-delete-object" data-steps="task-3 task-11 task-13">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py"><code>delete_object.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-11">T11</a> · <a href="#task-3">T3</a> · <a href="#task-13">T13</a></span>
+              <small>T11: nesting-only removal targets, residual-reference block, one deletion tail. T3: <code>web_id</code> on the output. T13: <code>type(web_obj)</code> instead of re-lookup. Order 11 → 3 → 13.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/domain/</summary>
+          <ul>
+            <li id="f-mapping" data-steps="task-6 task-13">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py"><code>efootprint_to_web_mapping.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-13">T13</a></span>
+              <small>T6: <code>"ExternalAPIServer"</code> entry. T13: one resolver replaces both lookup rules.</small>
+            </li>
+            <li id="f-mow" data-steps="task-4 task-6 task-13 task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a> · <a href="#task-6">T6</a> · <a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
+              <small>T4 then T6 on adjacent lines of the container properties; T13 resolver and <code>has_edit_panel</code>; T14 <code>wrap_explainable()</code>.</small>
+            </li>
+            <li id="f-explainable-web" data-steps="task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py"><code>entities/web_abstract_modeling_classes/explainable_objects_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-14">T14</a></span>
+              <small><code>template_kind</code>, <code>wrap_explainable()</code>.</small>
+            </li>
+            <li id="f-olmow" data-steps="task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py"><code>entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-14">T14</a></span>
+              <small>Templates stop reading <code>class_as_snake_str</code>.</small>
+            </li>
+            <li id="f-ts-utils" data-steps="task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py"><code>entities/web_core/explainable_timeseries_utils.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-14">T14</a></span>
+              <small>Uses <code>wrap_explainable()</code>.</small>
+            </li>
+            <li id="f-mw-utils" data-steps="task-5">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web_utils.py" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web_utils.py"><code>entities/web_core/model_web_utils.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-5">T5</a></span>
+              <small><code>to_rounded_daily_values</code> rounds to 6 significant figures.</small>
+            </li>
+            <li id="f-edge-component-web" data-steps="task-8">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py" data-review-source-href="../../../model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py"><code>entities/web_core/hardware/edge/edge_component_base_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-8">T8</a></span>
+              <small><code>mirrored_cards</code> places components under their device's cards.</small>
+            </li>
+            <li id="f-edge-builders" data-steps="task-8">
+              <code>entities/web_builders/hardware/edge/</code>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py"><code>edge_computer_cpu_component.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_ram_component.py" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_computer_ram_component.py"><code>edge_computer_ram_component.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_appliance_component.py" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_appliance_component.py"><code>edge_appliance_component.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-8">T8</a></span>
+              <small>Subclass <code>EdgeComponentWeb</code>; container overrides removed.</small>
+            </li>
+            <li id="f-up-base" data-steps="task-11">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py"><code>entities/web_core/usage/usage_pattern_web_base_class.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-11">T11</a></span>
+              <small>Redundant <code>mirrored_cards</code> override removed (S7); comments reworded.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/adapters/</summary>
+          <ul>
+            <li id="f-presenter" data-steps="task-3">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py"><code>presenters/htmx_presenter.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-3">T3</a></span>
+              <small>OOB delete for uncovered top-level cards; <code>HX-Reswap</code> branch and hyperscript flag removed.</small>
+            </li>
+            <li id="f-views-dict" data-steps="task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py" data-review-source-href="../../../model_builder/adapters/views/views_dict_mutation.py"><code>views/views_dict_mutation.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a></span>
+              <small>Membership region only when <code>membership_section_mounted</code> is posted.</small>
+            </li>
+            <li id="f-views" data-steps="task-9">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py" data-review-source-href="../../../model_builder/adapters/views/views.py"><code>views/views.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-9">T9</a></span>
+              <small>Exception decorator on four calculated-attribute views, calculus graph and source-table fragments.</small>
+            </li>
+            <li id="f-views-other" data-steps="task-9">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_deletion.py" data-review-source-href="../../../model_builder/adapters/views/views_deletion.py"><code>views/views_deletion.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/sankey_views.py" data-review-source-href="../../../model_builder/adapters/views/sankey_views.py"><code>views/sankey_views.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_help.py" data-review-source-href="../../../model_builder/adapters/views/views_help.py"><code>views/views_help.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-9">T9</a></span>
+              <small>S5: decorate the remaining fragment views, or record why one is exempt.</small>
+            </li>
+            <li id="f-views-edition" data-steps="task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py" data-review-source-href="../../../model_builder/adapters/views/views_edition.py"><code>views/views_edition.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small>Comment only.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>model_builder/templates/model_builder/</summary>
+          <ul>
+            <li id="f-delete-modal" data-steps="task-3">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html"><code>modals/delete_card_modal.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-3">T3</a></span>
+              <small><code>script=</code> remover removed.</small>
+            </li>
+            <li id="f-unsaved-modal" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html" data-review-source-href="../../../model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html"><code>modals/warn_before_side_panel_closing_modal.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:84:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L84"><code>model_builder_main.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Discard wording; Cancel no longer hides the loading bar.</small>
+            </li>
+            <li id="f-dict-count" data-steps="task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html" data-review-source-href="../../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html"><code>object_cards/partials/dict_entry_count_unlink.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html"><code>side_panels/edit/dict_membership_section.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a></span>
+              <small>Spread <code>dictMembershipVals(id)</code> into <code>hx-vals</code>.</small>
+            </li>
+            <li id="f-constant" data-steps="task-7">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html"><code>side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-7">T7</a></span>
+              <small>"each hour" inside the unit box; new helper text.</small>
+            </li>
+            <li id="f-calc-dict" data-steps="task-9 task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html"><code>…/calculated_attributes/explainable_object_dict.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-9">T9</a> · <a href="#task-14">T14</a></span>
+              <small>T9: dynamic include. T14: <code>template_kind</code>.</small>
+            </li>
+            <li id="f-calc-ids" data-steps="task-10">
+              <code>…/calculated_attributes/</code>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html"><code>explainable_object_template.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html"><code>components/get_calculated_attribute_explanation_button.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html"><code>eco_logits_explainable_quantity.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html"><code>explainable_quantity.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-10">T10</a></span>
+              <small>T10: ids keyed by <code>item.web_id</code>.</small>
+            </li>
+            <li id="f-calc-section" data-steps="task-10 task-14">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html"><code>side_panels/edit/calculated_attributes_section.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-10">T10</a> · <a href="#task-14">T14</a></span>
+              <small>T10 optional <code>aria-controls</code>; T14 <code>template_kind</code> include.</small>
+            </li>
+            <li id="f-calc-links" data-steps="task-13 task-14">
+              <code>…/calculated_attributes/</code>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html"><code>components/ancestor_or_child_list_element.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestors_formula_and_children.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestors_formula_and_children.html"><code>components/ancestors_formula_and_children.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/calculated_attribute_chart.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/calculated_attribute_chart.html"><code>calculated_attribute_chart.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/recurrent_attribute_chart.html" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/recurrent_attribute_chart.html"><code>recurrent_attribute_chart.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
+              <small>T13: <code>has_edit_panel</code> replaces class-name lists. T14: ancestor branches by <code>template_kind</code>.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>theme/static/scripts/</summary>
+          <ul>
+            <li id="f-side-panel-js" data-steps="task-1 task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js"><code>side_panel_utils.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a> · <a href="#task-1">T1</a></span>
+              <small>T2 adds <code>dictMembershipVals</code> beside <code>recomputationVals</code>; T1 replaces the beforeRequest guard. Run back to back.</small>
+            </li>
+            <li id="f-main-js" data-steps="task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small><code>cardButtonsForWebId</code> scoped to the owning canvas.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>js_tests/</summary>
+          <ul>
+            <li id="f-js-fixtures" data-steps="task-2 task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py" data-review-source-href="../../../js_tests/build_fixtures.py"><code>build_fixtures.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/fixtures/inline_count_autosave.html" data-review-source-href="../../../js_tests/fixtures/inline_count_autosave.html"><code>fixtures/inline_count_autosave.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a> · <a href="#task-2">T2</a></span>
+              <small>T12 new mirrored two-canvas case; T2 regenerates the inline-count fixture.</small>
+            </li>
+            <li id="f-js-guard" data-steps="task-1 task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/side_panel_switch_guard.test.js" data-review-source-href="../../../js_tests/side_panel_switch_guard.test.js"><code>side_panel_switch_guard.test.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a> · <a href="#task-1">T1</a></span>
+              <small>T1 <code>#sidePanel</code> branch cases; T2 helper case (the file already loads <code>side_panel_utils.js</code>).</small>
+            </li>
+            <li id="f-js-main" data-steps="task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js"><code>model_builder_main.test.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small>Pulse and opened sets on active vs parked canvas.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests/unit_tests/</summary>
+          <ul>
+            <li id="t-views-deletion" data-steps="task-3 task-4 task-8 task-11">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py"><code>adapters/views/test_views_deletion.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a> · <a href="#task-8">T8</a> · <a href="#task-11">T11</a> · <a href="#task-3">T3</a></span>
+              <small>Shared iot-example loader, introduced by T4.</small>
+            </li>
+            <li id="t-views-edition" data-steps="task-6 task-8">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_edition.py"><code>adapters/views/test_views_edition.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-8">T8</a></span>
+              <small>Panels open; component and storage edits swap the device card.</small>
+            </li>
+            <li id="t-views-calc" data-steps="task-9 task-10 task-14">
+              <code>adapters/views/test_views_calculated_attributes.py</code> <span data-change="new">New</span>
+              <span data-reading-links><a href="#task-9">T9</a> · <a href="#task-10">T10</a> · <a href="#task-14">T14</a></span>
+              <small>Created by T9; T10 and T14 append.</small>
+            </li>
+            <li id="t-views-dict" data-steps="task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_dict_mutation.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_dict_mutation.py"><code>adapters/views/test_views_dict_mutation.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a></span>
+            </li>
+            <li id="t-presenter" data-steps="task-3">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py"><code>adapters/presenters/test_htmx_presenter.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-3">T3</a></span>
+            </li>
+            <li id="t-delete-uc" data-steps="task-6 task-8 task-11">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py"><code>application/use_cases/test_delete_object.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-8">T8</a> · <a href="#task-11">T11</a></span>
+            </li>
+            <li id="t-mow" data-steps="task-4 task-6">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py"><code>domain/…/test_modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a> · <a href="#task-6">T6</a></span>
+            </li>
+            <li id="t-wrappers" data-steps="task-6 task-13">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/test_web_efootprint_wrappers.py" data-review-source-href="../../../tests/unit_tests/domain/test_web_efootprint_wrappers.py"><code>domain/test_web_efootprint_wrappers.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-13">T13</a></span>
+              <small>T6 drops the stale <code>"ExternalAPIServer"</code> exclusion; T13 pins resolver agreement.</small>
+            </li>
+            <li id="t-edge-component" data-steps="task-8">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py"><code>domain/…/edge/test_edge_component_web.py</code></a> <span data-change="modified">Modified</span>,
+              three <code>web_builders/…/test_edge_*_component_web.py</code> override tests <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-8">T8</a></span>
+            </li>
+            <li id="t-model-web" data-steps="task-5">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web_utils.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web_utils.py"><code>domain/…/test_model_web_utils.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py"><code>test_model_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-5">T5</a></span>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests/integration/</summary>
+          <ul>
+            <li id="t-int-deletion" data-steps="task-3 task-11">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_deletion.py" data-review-source-href="../../../tests/integration/test_deletion.py"><code>test_deletion.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-11">T11</a> · <a href="#task-3">T3</a></span>
+            </li>
+            <li id="t-int-modeling" data-steps="task-5">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_modeling_integration.py" data-review-source-href="../../../tests/integration/test_modeling_integration.py"><code>test_modeling_integration.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-5">T5</a></span>
+            </li>
+            <li id="t-int-invariants" data-steps="task-15">
+              &lt;invariant sweep module(s)&gt; <span data-change="new">New</span>
+              <span data-reading-links><a href="#task-15">T15</a></span>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests/e2e/</summary>
+          <ul>
+            <li id="t-e2e-forms" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_forms.py" data-review-source-href="../../../tests/e2e/test_forms.py"><code>test_forms.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+            </li>
+            <li id="t-e2e-groups" data-steps="task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_device_groups.py" data-review-source-href="../../../tests/e2e/objects/test_edge_device_groups.py"><code>objects/test_edge_device_groups.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-2">T2</a></span>
+            </li>
+            <li id="t-e2e-delete" data-steps="task-3">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_usage_journeys.py" data-review-source-href="../../../tests/e2e/objects/test_usage_journeys.py"><code>objects/test_usage_journeys.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py" data-review-source-href="../../../tests/e2e/objects/test_jobs.py"><code>objects/test_jobs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-3">T3</a></span>
+            </li>
+            <li id="t-e2e-edge" data-steps="task-7 task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py"><code>objects/test_edge_objects.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-7">T7</a> · <a href="#task-12">T12</a></span>
+              <small>T7 "each hour" assertions; T12 optional mirror assertion.</small>
+            </li>
+            <li id="t-e2e-calc" data-steps="task-10">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_calculus_graph.py" data-review-source-href="../../../tests/e2e/test_calculus_graph.py"><code>test_calculus_graph.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_external_api_objects.py" data-review-source-href="../../../tests/e2e/objects/test_external_api_objects.py"><code>objects/test_external_api_objects.py</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_video_external_api_objects.py" data-review-source-href="../../../tests/e2e/objects/test_video_external_api_objects.py"><code>objects/test_video_external_api_objects.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-10">T10</a></span>
+              <small>Selectors become <code>^=</code> prefixes.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>specs/</summary>
+          <ul>
+            <li id="d-forms-rel" data-steps="task-8 task-11">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:167:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L167"><code>architecture/forms-and-relationships.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-8">T8</a> · <a href="#task-11">T11</a></span>
+              <small>Library-built relationships are never removal targets; journeys blocked while any pattern holds them.</small>
+            </li>
+            <li id="d-rendering" data-steps="task-3 task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:37:1" data-review-source-href="../../../specs/architecture/rendering.html#L37"><code>architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-3">T3</a> · <a href="#task-12">T12</a></span>
+            </li>
+            <li id="d-workspace" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:41:1" data-review-source-href="../../../specs/architecture/workspace.html#L41"><code>architecture/workspace.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/design/journeys/build-a-model.html:358:1" data-review-source-href="../../../specs/design/journeys/build-a-model.html#L358"><code>design/journeys/build-a-model.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/design/journeys/compare-models.html:638:1" data-review-source-href="../../../specs/design/journeys/compare-models.html#L638"><code>design/journeys/compare-models.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/server-rendered-state-follow-up/kickoff.md:40:1" data-review-source-href="../../../specs/features/server-rendered-state-follow-up/kickoff.md#L40"><code>features/server-rendered-state-follow-up/kickoff.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+            </li>
+            <li id="d-layers" data-steps="task-5">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/layers-and-wrappers.html:81:1" data-review-source-href="../../../specs/architecture/layers-and-wrappers.html#L81"><code>architecture/layers-and-wrappers.html</code></a> <span data-change="modified">Optional</span>
+              <span data-reading-links><a href="#task-5">T5</a></span>
+            </li>
+            <li id="d-testing" data-steps="task-15">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/testing.md:140:1" data-review-source-href="../../../specs/testing.md#L140"><code>testing.md</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-15">T15</a></span>
+              <small>Shipped examples as an explicit fixture exception.</small>
+            </li>
+          </ul>
+        </details>
+      </details>
+    </div>
+  </section>
+</details>
+
+<main id="main">
+  <header>
+    <p>Bug-batch plan · under review · 2026-10-21</p>
+    <h1>bug-fixes-2026-10 — implementation plan</h1>
+    <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/tasks.md" data-review-source-href="tasks.md">tasks.md</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/smell-sweep.md" data-review-source-href="smell-sweep.md">smell-sweep.md</a> · <a href="#modules">Changed files</a> · <a href="#execution-plan">Execution plan</a> · <a href="#decisions">Planning decisions</a></p>
+    <p>Twelve diagnosed bugs (all <code>CONFIRMED</code>) and three approved smell-sweep refactors, all in
+      <code>e-footprint-interface</code>. The batch is closed: every diagnostic has exactly one task, Tasks 13–15 carry
+      smell-sweep findings S3, S4/S11 and S6/S10 (S8 dropped, decision 2), S1/S7 became Task 11, S2 Task 12, S5 folds into Task 9, and S9/S12
+      are deliberately left (see <a href="#deferred">Deferred</a>). Diagnostics were traced on <code>dev</code> at
+      <code>7f78a329</code> and <code>9dc54426</code>; since then only <code>views.py</code> moved (+4–5 lines after
+      line 277), and the links below use current lines.</p>
+  </header>
+
+  <aside data-note="review">
+    <p><strong>Planning decisions (taken by default, open to review)</strong></p>
+    <p><a href="#decision-eval">1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</a></p>
+    <p><a href="#decision-s8">2 · Task 14 drops the S8 URL template tag — APPLIED</a></p>
+  </aside>
+
+  <section id="walkthrough">
+    <h2>Bugs by failure mechanism</h2>
+    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code>.
+      Reading order follows the batch ordering rule; task numbers are stable labels.</p>
+
+    <!-- ============================== Cluster 1 ============================== -->
+    <h2 id="cluster-containers">1 · How the interface reads a modeling object's containers</h2>
+    <div class="cluster-intro">
+      <p>Every wrapper derives its containers from the library's raw
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a>.
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:383:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L383"><code>list_containers_and_attr_name_in_list_container</code></a>
+        classifies an entry as a list membership by indexing the container's constructor signature, and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:398:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L398"><code>dict_containers_and_attr_name_in_dict_container</code></a>
+        reads <code>dict_container</code>. Three consumers trust the answer:
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:412:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L412"><code>mirrored_cards</code></a>
+        places cards; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75"><code>check_can_delete</code></a>
+        chooses between "Yes, delete" and the blocking modal; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:158:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L158"><code>_delete</code></a>
+        chooses between unlinking from containers and <code>self_delete()</code>. The properties miss three library facts:
+        detached wrappers stay in the raw list (Task 4); builders create some relationships in <code>after_init</code>, outside the
+        constructor (Tasks 6, 8); a pattern references its journeys without owning them (Task 11). Each mismatch surfaces as a
+        crash, a false removal target or a delete that only unlinks. Owning page:
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:167:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L167">forms and relationships</a>.</p>
+    </div>
+
+    <article id="task-4" data-step>
+      <h3><a href="#task-4">Task 4 · Deleting a recurrent need: ignore detached contextual containers</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-need-delete-render-error.md" data-review-source-href="diagnostics/recurrent-need-delete-render-error.md">diagnostic</a> · GitHub #151</p>
+      <p data-files><span>Files</span> <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#t-mow"><code>test_modeling_object_web.py</code></a> · <a href="#f-changelog"><code>CHANGELOG.md</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Deleting a <code>RecurrentServerNeed</code> or <code>RecurrentEdgeProcess</code> shows
+          <code>'NoneType' object has no attribute 'efootprint_class'</code>; the need is deleted but its card stays until reload.</dd>
+        <dt>Root cause, followed on the Industrial IoT example</dt>
+        <dd>
+          <p><strong>The data structure.</strong> In the library, a link "object A's attribute points to object B" is a
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py:6:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py#L6"><code>ContextualModelingObjectAttribute</code></a>
+            wrapper. A stores the wrapper as its attribute value, and the wrapper's constructor also appends itself to B's
+            <code>contextual_modeling_obj_containers</code> list (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py:17:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py#L17">constructor</a> →
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:482:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L482"><code>add_to_contextual_modeling_obj_containers</code></a>).
+            That list is B's reverse index: "who points at me, and through which attribute". Each wrapper records the pointing object in
+            <code>modeling_obj_container</code> and the attribute name in <code>attr_name_in_mod_obj_container</code>.</p>
+          <p>Unlinking never removes a wrapper from that list. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:65:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L65"><code>set_modeling_obj_container(None, None)</code></a>
+            only sets both fields to <code>None</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:80:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L80">:80-81</a>). The wrapper stays in B's list, <em>detached</em>.
+            Library readers filter detached wrappers out, for example
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:460:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L460"><code>modeling_obj_containers</code></a>
+            keeps only entries whose container <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:465:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L465">is not <code>None</code></a>.
+            The interface reads the raw list through
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a>,
+            because it needs each entry's attribute name, and does not filter.</p>
+
+          <p><strong>The example.</strong> In <code>iot_industrial.json</code>, the edge function
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json:180:1" data-review-source-href="../../../model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json#L180"><code>Sensor-records-and-uploads-readings</code></a>
+            lists two recurrent edge processes in <code>recurrent_edge_device_needs</code>:
+            <code>Measure-temperature-and-vibration</code> (the one the user deletes) and its sibling
+            <code>Keep-recent-readings-on-the-sensor</code>. Both, and the server need <code>Upload-sensor-readings</code>, have
+            <code>edge_device</code> = <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json:263:1" data-review-source-href="../../../model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json#L263"><code>Factory-sensor</code></a>
+            (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json:196:1" data-review-source-href="../../../model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json#L196">:196</a>,
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json:230:1" data-review-source-href="../../../model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json#L230">:230</a>).
+            After loading, the two reverse lists that matter hold only live wrappers (probe output, wrapper ids shortened):</p>
+          <div data-code>
+            <p data-code-file><code>Probe output</code> <small>before the delete; <code>container</code> is the wrapper's <code>modeling_obj_container</code></small></p>
+            <pre><code>Factory-sensor.contextual_modeling_obj_containers
+  w1  container=Measure-temperature-and-vibration    attr=edge_device
+  w2  container=Keep-recent-readings-on-the-sensor   attr=edge_device
+  w3  container=Upload-sensor-readings               attr=edge_device
+
+Keep-recent-readings-on-the-sensor.contextual_modeling_obj_containers
+  w4  container=Sensor-records-and-uploads-readings  attr=recurrent_edge_device_needs</code></pre>
+          </div>
+
+          <p><strong>What "Yes, delete" does to them.</strong></p>
+          <ol>
+            <li>The view runs <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_deletion.py:47:1" data-review-source-href="../../../model_builder/adapters/views/views_deletion.py#L47"><code>DeleteObjectUseCase.execute</code></a>.
+              The need is held in a list (its edge function's), so
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:180:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L180"><code>_delete</code> takes the list branch</a>: it builds
+              <code>{"recurrent_edge_device_needs": ["Keep-recent-readings-on-the-sensor"]}</code>
+              (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:200:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L200">:200-205</a>) and calls
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:208:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L208"><code>edit_with_cascade_cleanup</code></a> on the edge function.</li>
+            <li>The library replaces the whole list. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_update.py:122:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py#L122"><code>ModelingUpdate.apply_changes</code></a>
+              calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:186:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L186"><code>replace_in_mod_obj_container_without_recomputation</code></a>
+              on the old list, which <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:214:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L214">detaches it</a> and attaches the new one.
+              Detaching a list <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/list_linked_to_modeling_obj.py:64:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/list_linked_to_modeling_obj.py#L64">detaches every entry</a>, so <code>w4</code> on the
+              sibling becomes detached. The new list holds a fresh wrapper <code>w5</code> for the sibling, appended to the sibling's list by the wrapper constructor.</li>
+            <li><code>EditService</code> sees that the deleted need left the function's accordion children and has no live container left, so it
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/edit_service.py:66:1" data-review-source-href="../../../model_builder/domain/services/edit_service.py#L66">calls <code>self_delete()</code></a>. The library's
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:674:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L674"><code>self_delete</code></a>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:694:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L694">detaches every link the deleted need owns</a>, including its
+              <code>edge_device</code> wrapper <code>w1</code>, which still sits in <code>Factory-sensor</code>'s list.</li>
+          </ol>
+          <div data-code>
+            <p data-code-file><code>Probe output</code> <small>after <code>_delete</code>, same in-memory model</small></p>
+            <pre><code>Factory-sensor.contextual_modeling_obj_containers
+  w1  container=None                                 attr=None      &lt;- detached in step 3
+  w2  container=Keep-recent-readings-on-the-sensor   attr=edge_device
+  w3  container=Upload-sensor-readings               attr=edge_device
+Factory-sensor.modeling_obj_containers (library, filtered)
+  [Keep-recent-readings-on-the-sensor, Upload-sensor-readings]
+
+Keep-recent-readings-on-the-sensor.contextual_modeling_obj_containers
+  w4  container=None                                 attr=None      &lt;- detached in step 2
+  w5  container=Sensor-records-and-uploads-readings  attr=recurrent_edge_device_needs</code></pre>
+          </div>
+          <p>The library's own view is correct: the deleted need no longer points at <code>Factory-sensor</code>. Only the raw lists carry the leftovers.</p>
+
+          <p><strong>Where it crashes: the response render, on the same model.</strong></p>
+          <ol start="4">
+            <li>The view hands the output to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_deletion.py:51:1" data-review-source-href="../../../model_builder/adapters/views/views_deletion.py#L51"><code>present_deleted_object</code></a>, which
+              takes the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:318:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L318">list-deletion branch</a> and
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:281:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L281">renders the top-parent card</a> of the edited function, the edge usage journey,
+              without reloading the model.</li>
+            <li>That card renders the surviving sibling need. Its <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:360:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L360"><code>links_to</code></a>
+              (used to draw the leader line) walks its direct object attributes, here only <code>edge_device</code>, and asks
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:366:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L366"><code>Factory-sensor</code>'s <code>mirrored_cards</code></a>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:412:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L412"><code>mirrored_cards</code></a> reads
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:383:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L383"><code>list_containers_and_attr_name_in_list_container</code></a>,
+              which <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:386:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L386">loops over the raw list</a>. Its first entry is
+              <code>w1</code>; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:388:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L388"><code>container</code></a> is
+              <code>None</code>, and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L389"><code>container.efootprint_class</code></a>
+              raises <code>AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code> (reproduced by the probe).</li>
+            <li><code>@render_exception_modal_if_error</code> turns that into the reported modal. The deletion itself is already persisted, but no card swap is sent,
+              and the modal's hyperscript cannot remove a nested card (Task 3), so the stale card stays.</li>
+          </ol>
+          <p><strong>Why it looks intermittent.</strong> A reload deserializes the saved model, which creates only live wrappers, so the canvas is right again.
+            Job and step deletions never reach this path: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/job_web.py:33:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/job_web.py#L33"><code>JobWeb.links_to</code></a>
+            returns a <code>web_id</code> without calling <code>mirrored_cards</code>. A need without a sibling sharing its edge device renders nothing that asks the device
+            for its cards. Any other mutation that detaches a wrapper and then re-renders cards in the same request hits the same line, such as relinking a need's
+            <code>edge_device</code>. The sibling's own detached <code>w4</code> would crash any caller of the sibling's <code>mirrored_cards</code> the same way.</p>
+          <p>The reporter located the error in the presenter. The presenter is only the caller; the fault is the unfiltered read in the domain wrapper.</p>
+        </dd>
+        <dt>Fix</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a>
+          returns only entries whose <code>modeling_obj_container is not None</code>. Both container properties read through it,
+          so <code>w1</code> and <code>w4</code> are skipped and the dict property's implicit guard becomes explicit too. This also fixes the latent same crash after an
+          <code>edge_device</code> relink.</dd>
+        <dt>Tests</dt>
+        <dd>View: iot <code>Upload-sensor-readings</code> and <code>Measure-temperature-and-vibration</code> deletions return 200,
+          no exception modal, top-parent OOB swap present, deleted id absent, sibling present, session updated. This introduces the
+          iot loader that Tasks 8, 11 and 3 reuse. Domain unit: both container properties ignore a detached entry; <code>mirrored_cards</code> does not raise.</dd>
+        <dt>Flags</dt>
+        <dd>Once shipped, nested-child deletions surface Task 3's hyperscript "is null" console error, which the crash masked today.</dd>
+      </dl>
+    </article>
+
+    <article id="task-6" data-step>
+      <h3><a href="#task-6">Task 6 · Edit panels for objects held by library-built relationships open</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/check-can-delete-keyerror.md" data-review-source-href="diagnostics/check-can-delete-keyerror.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#f-mapping"><code>efootprint_to_web_mapping.py</code></a> · <a href="#t-mow"><code>test_modeling_object_web.py</code></a> · <a href="#t-delete-uc"><code>test_delete_object.py</code></a> · <a href="#t-views-edition"><code>test_views_edition.py</code></a> · <a href="#t-wrappers"><code>test_web_efootprint_wrappers.py</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Clicking a calculated-attribute link to an <code>EdgeStorage</code>, a recurrent edge process component need or an EcoLogits
+          API server shows an error modal instead of its edit panel; <code>ask-delete-object</code> on them is a raw 500.</dd>
+        <dt>Root cause</dt>
+        <dd>(1) <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:390:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L390"><code>container_signature[attr_name]</code></a>
+          raises <code>KeyError</code> for relationships a builder creates in <code>after_init</code>
+          (<code>EdgeComputer.components</code>, <code>recurrent_edge_component_needs</code>, <code>ExternalAPI.server</code>).
+          (2) <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:92:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L92"><code>get_corresponding_web_class</code></a>
+          resolves EcoLogits servers to the canonical <code>ExternalAPIServer</code>, which
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:37:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L37"><code>EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING</code></a>
+          lacks, while <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:84:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L84"><code>wrap_efootprint_object</code></a> falls back to <code>ModelingObjectWeb</code>.</dd>
+        <dt>Fix</dt>
+        <dd>At <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L389"><code>modeling_object_web.py:389-390</code></a>,
+          look the parameter up with <code>.get(attr_name)</code> and <code>continue</code> on <code>None</code> (the library's own
+          "not a structural input" idiom); no <code>None</code>-container guard is needed after Task 4. Add
+          <code>"ExternalAPIServer": ModelingObjectWeb</code> beside the external API entries at
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:52:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L52"><code>efootprint_to_web_mapping.py:52-54</code></a>,
+          and drop <code>"ExternalAPIServer"</code> from the now-stale exclusion list in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/test_web_efootprint_wrappers.py:25:1" data-review-source-href="../../../tests/unit_tests/domain/test_web_efootprint_wrappers.py#L25"><code>test_make_sure_that_all_canonical_classes_are_mapped</code></a>.
+          The objects then fall into the default direct-reference block, so Delete shows "referenced by &lt;owner&gt;".</dd>
+        <dt>Tests</dt>
+        <dd>Domain: a non-constructor entry is ignored while a list-typed sibling is returned. Use case: <code>check_can_delete</code>
+          is False naming the owner for iot <code>Sensor-local-storage</code>, <code>Measure-temperature-and-vibration-CPU-need</code>,
+          ai_chatbot <code>Small-LLM-API-server</code>. View: <code>open-edit-object-panel</code> returns 200 with <code>btn-ask-delete</code> for those plus genai_video
+          <code>Seedance-video-generation-API-server</code>.</dd>
+        <dt>Settled · flags</dt>
+        <dd>Both parts ship together (2026-10-21). Task 8 must follow in the same run: with Task 6 alone, an <code>EdgeStorage</code>
+          edit from its newly openable panel saves but swaps a card id that is not on the canvas. The diagnostic's "smoke check" is answered by
+          Task 8's edit regression.</dd>
+      </dl>
+    </article>
+
+    <article id="task-8" data-step>
+      <h3><a href="#task-8">Task 8 · Library-built edge components are blocked from deletion</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/edge-component-delete-silent-noop.md" data-review-source-href="diagnostics/edge-component-delete-silent-noop.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-edge-component-web"><code>edge_component_base_web.py</code></a> · <a href="#f-edge-builders">three component web classes</a> · <a href="#d-forms-rel"><code>forms-and-relationships.html</code></a> · <a href="#t-edge-component">component tests</a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#t-views-edition"><code>test_views_edition.py</code></a> · <a href="#t-delete-uc"><code>test_delete_object.py</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Deleting an edge computer's CPU or RAM, or an edge appliance's component, offers "Yes, delete", returns 200 and re-renders
+          the device card, but the saved model is unchanged.</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py:6:1" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py#L6"><code>EdgeComputerCPUComponentWeb</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_ram_component.py:6:1" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_computer_ram_component.py#L6">RAM</a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_appliance_component.py:8:1" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_appliance_component.py#L8">appliance</a>
+          overrides return <code>[edge_device], "components"</code>. Rendering needs that (it places component edits under the device card);
+          deletion reads it as a removal target. <code>_delete</code> then edits <code>components</code>, which
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/object_factory.py:180:1" data-review-source-href="../../../model_builder/domain/object_factory.py#L180"><code>prepare_input_changes</code></a> skips as a non-constructor
+          key, so nothing changes and nothing is deleted.</dd>
+        <dt>Fix</dt>
+        <dd>Separate placement from removal. <code>EdgeComponentWeb</code> gains one <code>mirrored_cards</code> override; the three
+          classes subclass it and lose their container overrides (and the appliance file its unused <code>typing</code> import).
+          With Task 6, the base property drops <code>components</code>, so the default direct-reference block names the device.</dd>
+      </dl>
+      <div data-code>
+        <p data-code-file><a href="#f-edge-component-web"><code>model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py</code></a>
+          <small>Proposed addition to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py:9:1" data-review-source-href="../../../model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py#L9"><code>EdgeComponentWeb</code></a></small></p>
+        <pre><code>@property
+def mirrored_cards(self):
+    """Components render under their device's cards, whether the library or the user built them."""
+    return [type(self)(self._modeling_obj, self.model_web, list_container=parent)
+            for parent in self.edge_device.mirrored_cards]</code></pre>
+      </div>
+      <dl>
+        <dt>Tests</dt>
+        <dd>Replace the three override unit tests with one placement test in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py"><code>test_edge_component_web.py</code></a>.
+          View: iot <code>Factory-sensor-CPU</code>, <code>-RAM</code> and a created appliance component show "referenced by", no "Yes, delete", session unchanged.
+          Edit: renaming <code>Factory-sensor-CPU</code> and <code>Sensor-local-storage</code> returns 200 with an OOB swap of the edge computer card.
+          <code>check_can_delete</code> False beside Task 6's cases. Existing device-cascade integration tests and the custom-device component E2E keep passing.</dd>
+        <dt>Settled · flags</dt>
+        <dd>Blocking modal, existing copy, Delete not hidden (2026-10-21). Hard dependency on Task 6. Confirm, rather than guard, that no
+          <code>EdgeComponent</code> exists with <code>edge_device is None</code>.</dd>
+      </dl>
+    </article>
+
+    <article id="task-11" data-step>
+      <h3><a href="#task-11">Task 11 · A referenced object is blocked; a confirmed delete never only unlinks</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/list-deletion-only-unlinks.md" data-review-source-href="diagnostics/list-deletion-only-unlinks.md">diagnostic</a> · smell-sweep S1, S7</p>
+      <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-up-base"><code>usage_pattern_web_base_class.py</code></a> · <a href="#d-forms-rel"><code>forms-and-relationships.html</code></a> · <a href="#t-delete-uc"><code>test_delete_object.py</code></a> · <a href="#t-int-deletion"><code>test_deletion.py</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>A usage journey (or edge journey) in a pattern holding two journeys offers "Yes, delete"; it is only unlinked and returns on
+          reload. A pattern that still holds it but keeps other journeys is missing from the blocking modal. A custom edge-device component
+          referenced by a component need is dropped from the device but survives inside the need.</dd>
+        <dt>Root cause</dt>
+        <dd>Patterns are dict/list containers of journeys, so
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:62:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L62"><code>_container_removal_targets</code></a> treats them as removal targets.
+          The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:92:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L92">sole-member block</a> then blocks only when a pattern would be left empty,
+          and the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:106:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L106">direct-reference block</a> is skipped whenever any removal target exists.
+          The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:180:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L180">list/dict branch</a> only edits containers and relies on
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/edit_service.py:31:1" data-review-source-href="../../../model_builder/domain/services/edit_service.py#L31"><code>edit_with_cascade_cleanup</code></a>'s accordion-children diff to delete orphans;
+          journeys are never accordion children of a pattern (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py:58:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py#L58"><code>accordion_children</code></a>)
+          and opt out of cascade (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/journey_base_web.py:7:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/journey_base_web.py#L7"><code>gets_deleted_if_unique_mod_obj_container_gets_deleted</code></a>).
+          The user's "referenced by Daily analyst sessions, Usage pattern 2" modal is the sole-member rule, not a general reference rule.</dd>
+        <dt>Fix</dt>
+        <dd>Three changes in <code>delete_object.py</code>, plus S7's cleanup:</dd>
+      </dl>
+      <div data-code>
+        <p data-code-file><a href="#f-delete-object"><code>model_builder/application/use_cases/delete_object.py</code></a>
+          <small>Proposed shape (illustrative)</small></p>
+        <pre><code># _container_removal_targets: only containers that nest their child are removal targets
+list_containers = [c for c in list_containers if c.renders_relationship_children_as_nested_cards]
+dict_containers = [c for c in dict_containers if c.renders_relationship_children_as_nested_cards]
+
+# check_can_delete: sole-member block deleted; residual references block
+removal_ids = {c.efootprint_id for c in list_containers + dict_containers}
+residual = [c for c in web_obj.modeling_obj_containers if c.efootprint_id not in removal_ids]
+if residual:
+    ...  # existing can_delete hook, else block naming residual
+
+# _delete: one tail for both branches
+if list_containers or dict_containers:
+    ...  # unlink loop unchanged
+if web_obj.efootprint_id in self.model_web.flat_efootprint_objs_dict:
+    if web_class and hasattr(web_class, "pre_delete"):
+        web_class.pre_delete(web_obj, self.model_web)
+    web_obj.self_delete()  # library raises PermissionError on any leftover reference
+oob_regions = web_obj.delete_side_effects()</code></pre>
+      </div>
+      <dl>
+        <dd>Journeys then have no removal target, so every holding pattern blocks and is named. The sole-member block becomes dead and goes;
+          <code>required_non_empty_relationships</code> stays for the membership sections' last-member guard. In
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py:18:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py#L18"><code>UsagePatternWebBaseClass</code></a>,
+          the redundant <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py:43:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py#L43"><code>mirrored_cards</code></a> override goes and the remaining comments say "the System is never a removal or blocking container;
+          patterns reference journeys, never own them". The tail is a backstop: after the first two changes every list/dict deletion left is an owned nested child the cascade already deletes.</dd>
+        <dt>Tests</dt>
+        <dd>Use case: journey in a two-journey pattern blocked (edge too); journey in two patterns names both whatever their counts; need-referenced
+          custom component blocked naming the need, deletable without it; <code>Device</code> in <code>UsagePattern.devices</code> blocked; patterns, grouped devices, jobs, steps and needs unchanged.
+          Integration: unlinked-then-deleted journey goes with its unshared steps; <code>_delete</code> forced on a referenced journey raises and leaves the repository unchanged.
+          View (iot): after <code>link-dict-entry</code> adds a second journey to <code>Daily-analyst-sessions</code>, ask-delete shows "referenced by Daily analyst sessions";
+          a direct POST shows the exception modal with the session unchanged.</dd>
+        <dt>Settled · flags</dt>
+        <dd>Journeys blocked while any pattern holds them; need-referenced component blocked; copy deferred with S12 (all 2026-10-21).
+          Hard dependency on Task 8 (otherwise an appliance's built-in component reaches the tail and gets an error modal). Task 3's OOB-delete rule is unchanged:
+          list deletions now target only nested cards. Behavior change: one more click per pattern to detach a journey first. FULL review surface.</dd>
+      </dl>
+    </article>
+
+    <article id="task-13" data-step>
+      <h3><a href="#task-13">Task 13 · One web-class resolver and a <code>has_edit_panel</code> property (refactor)</a></h3>
+      <p><span data-chip>smell-sweep S4 + S11</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/smell-sweep.md" data-review-source-href="smell-sweep.md">smell sweep</a></p>
+      <p data-files><span>Files</span> <a href="#f-mapping"><code>efootprint_to_web_mapping.py</code></a> · <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#f-calc-links">four calculated-attribute templates</a> · <a href="#t-wrappers"><code>test_web_efootprint_wrappers.py</code></a></p>
+      <dl>
+        <dt>Today</dt>
+        <dd>Three rules map a library class to its web class: exact name else <code>ModelingObjectWeb</code>
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:84:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L84"><code>wrap_efootprint_object</code></a>); exact name else canonical
+          parent else <code>KeyError</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:92:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L92"><code>get_corresponding_web_class</code></a>,
+          forms); and a second <code>MAPPING.get</code> on already-wrapped objects in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:87:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L87"><code>check_can_delete</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:175:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L175"><code>_delete</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:235:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L235"><code>modeling_object_web.py</code></a>
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:270:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L270">:270</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:554:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L554">:554</a>). Separately, "has an edit panel" is a class-name list
+          that differs per template (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html:4:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html#L4">ancestor list</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestors_formula_and_children.html:39:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestors_formula_and_children.html#L39">direct children</a>, none in the chart headers).</dd>
+        <dt>Change</dt>
+        <dd>One resolver in <code>efootprint_to_web_mapping.py</code>: exact name, else nearest mapped MRO ancestor, else <code>ModelingObjectWeb</code>.
+          <code>wrap_efootprint_object</code> and form generation call it; use cases read <code>type(web_obj)</code>. A <code>has_edit_panel</code> wrapper property derived from it
+          replaces the class-name lists in the four templates.</dd>
+        <dt>Prevents</dt>
+        <dd>Task 6 part 2 (<code>KeyError 'ExternalAPIServer'</code>) is exactly this disagreement. After Task 6,
+          <code>RecurrentEdgeProcess{CPU,RAM,Storage}Need</code> and <code>RecurrentEdgeWorkloadNeed</code> panels open with
+          <code>ModelingObjectWeb</code> for panel, canvas and deletion but <code>RecurrentEdgeComponentNeedWeb</code> for forms.</dd>
+        <dt>Behavior change</dt>
+        <dd>Deliberate, only for those four need classes: one wrapper everywhere. Verify their panels open and edit.</dd>
+        <dt>Tests</dt>
+        <dd>A unit test in <code>test_web_efootprint_wrappers.py</code> pinning that wrapping and form resolution agree for every concrete library class; view checks for the four need panels.</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 2 ============================== -->
+    <h2 id="cluster-rounding">2 · Daily chart series rounded in the display unit</h2>
+    <div class="cluster-intro">
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/emissions_calculation_service.py:63:1" data-review-source-href="../../../model_builder/domain/services/emissions_calculation_service.py#L63"><code>calculate_daily_emissions</code></a>
+        picks one display unit from the whole-period total (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/emissions_calculation_service.py:90:1" data-review-source-href="../../../model_builder/domain/services/emissions_calculation_service.py#L90">:90</a>),
+        converts each category's hourly series to it, and passes it to
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web_utils.py:46:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web_utils.py#L46"><code>to_rounded_daily_values</code></a>,
+        which bins and rounds to 5 decimals. Both result charts re-sum those daily values in the browser; the Sankey reads the library total.</p>
+    </div>
+
+    <article id="task-5" data-step>
+      <h3><a href="#task-5">Task 5 · Round daily chart emissions to significant figures</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/daily-emissions-rounding-drift.md" data-review-source-href="diagnostics/daily-emissions-rounding-drift.md">diagnostic</a> · GitHub #146, helps #106</p>
+      <p data-files><span>Files</span> <a href="#f-mw-utils"><code>model_web_utils.py</code></a> · <a href="#t-model-web">unit tests</a> · <a href="#t-int-modeling"><code>test_modeling_integration.py</code></a> · <a href="#d-layers"><code>layers-and-wrappers.html</code></a> (optional)</p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>The cumulative chart ends at 9.54 kt while the Sankey shows 9.55 kt; small categories show 0 in tooltips.</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web_utils.py:78:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web_utils.py#L78"><code>np.round(daily, rounding_depth)</code></a>
+          is a fixed step of 1e-5 display units (10 kg at kt). Since <code>479e9a7f</code> converts to the display unit before rounding, the step grows with
+          the model total. Sub-step categories vanish and periodic daily values repeat the same signed error every day, so the drift grows linearly
+          (+16.6 t simulated at the reporter's scale). Reporter's hypothesis held; the drift can go either way.</dd>
+        <dt>Fix</dt>
+        <dd>Per-value 6-significant-figure rounding, vectorized; unit, payload shape and JS unchanged. Rename <code>rounding_depth</code> to <code>sig_figs</code> and update the docstring.</dd>
+      </dl>
+      <div data-code>
+        <p data-code-file><a href="#f-mw-utils"><code>model_builder/domain/entities/web_core/model_web_utils.py</code></a>
+          <small>Proposed tail of <code>to_rounded_daily_values</code> (illustrative)</small></p>
+        <pre><code>magnitude = np.floor(np.log10(np.abs(daily), where=daily != 0, out=np.zeros_like(daily)))
+scale = 10.0 ** (sig_figs - 1 - magnitude)
+return (np.round(daily * scale) / scale).tolist()</code></pre>
+      </div>
+      <dl>
+        <dt>Tests</dt>
+        <dd>Unit: adapt <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web_utils.py:57:1" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web_utils.py#L57"><code>test_to_rounded_daily_values_respects_aggregation_strategy</code></a>;
+          sub-step constant series stays non-zero, sum within 1e-5 relative, zeros stay 0, mean works.
+          Beside <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py:77:1" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py#L77"><code>test_system_emissions</code></a>: ≈4,748-day kt regression sums to <code>total_footprint</code> within 1e-5, small category &gt; 0.
+          Integration: every introductory example's <code>system_emissions["values"]</code> sums to the library total within 1e-5 (fails today on ai_chatbot and iot_industrial). Run <code>npm run jest</code> once.</dd>
+        <dt>Settled · flags</dt>
+        <dd>6 significant figures, accepting about +68 % raw inline JSON at long, large-unit scale (2026-10-21). The regression must carry over to whatever replaces
+          <code>EmissionsCalculationService</code> in <code>results-analysis</code>. The calculated-attribute chart caller inherits the policy harmlessly.</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 3 ============================== -->
+    <h2 id="cluster-dom">3 · Mutation responses that address DOM nodes that may not be there</h2>
+    <div class="cluster-intro">
+      <p>The server names an object by its canonical
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:151:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L151"><code>web_id</code></a>,
+        root form <code>sys-&lt;system&gt;-Class-id</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:163:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L163"><code>_system_web_id_prefix</code></a>),
+        while a nested card renders <code>Class-id_in_&lt;parent web_id&gt;</code>. Three response paths address the DOM from that id or from a region
+        that lives in an optional side panel: the delete modal's hyperscript removes <code>#&lt;web_id&gt;</code> (Task 3); dict mutations always
+        swap a membership section that exists only while the child's panel is open (Task 2); the highlight expansion assumes nested ids start with the
+        canonical id (Task 12). The shared invariant: emit or address only what is mounted, expand the canonical id inside the canvas that owns it, and keep
+        highlight headers constant-size. Owning page: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:37:1" data-review-source-href="../../../specs/architecture/rendering.html#L37">rendering</a>.</p>
+    </div>
+
+    <article id="task-3" data-step>
+      <h3><a href="#task-3">Task 3 · The server owns card removal on delete</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/delete-card-modal-hyperscript-null.md" data-review-source-href="diagnostics/delete-card-modal-hyperscript-null.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-presenter"><code>htmx_presenter.py</code></a> · <a href="#f-delete-modal"><code>delete_card_modal.html</code></a> · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#t-presenter">presenter</a>, <a href="#t-views-deletion">view</a>, <a href="#t-int-deletion">integration</a> and <a href="#t-e2e-delete">E2E</a> tests</p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Card deletions log hyperscript <code>'#sys-…' is null</code>.</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L9"><code>delete_card_modal.html:9-10</code></a> runs
+          <code>remove #{{ obj.web_id }}</code> after the request. For nested cards the root-form selector never matches; for canvas or edge-list
+          re-renders the response already removed the card. The intake's "dead hyperscript" hypothesis is only half true: for a plain top-level deletion with no
+          constraint flip (unused journey, non-last pattern, edge usage pattern, ungrouped edge device, job-less server or API), the
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:331:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L331">response</a> leaves the card and the hyperscript is the only remover.
+          The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:337:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L337"><code>HX-Reswap: none</code> branch</a> is unreachable because
+          <code>delete_side_effects</code> always returns <code>results_buttons</code>.</dd>
+        <dt>Fix</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:35:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L35"><code>DeleteObjectOutput</code></a> gains <code>web_id</code>, captured
+          before deletion; after Task 11 there is one tail, so it is set when the deletion is not a list deletion. In
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:301:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L301"><code>present_deleted_object</code></a>, the non-list path becomes one
+          <code>_build_oob_response</code> whose HTML starts with the delete unless the canvas is re-rendered. The modal's <code>script=</code> and
+          <code>remove_card_with_hyperscript</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:381:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L381">:381</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:402:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L402">:402</a>) go.</dd>
+      </dl>
+      <div data-code>
+        <p data-code-file><a href="#f-presenter"><code>model_builder/adapters/presenters/htmx_presenter.py</code></a>
+          <small>Proposed replacement of lines 331–343 (illustrative)</small></p>
+        <pre><code>card_delete = "" if canvas_oob else f'&lt;div id="{output.web_id}" hx-swap-oob="delete"&gt;&lt;/div&gt;'
+return self._build_oob_response(
+    card_delete + render_oob_regions(self.model_web, output.oob_regions),
+    toast_and_highlight_data, extra_settle_triggers=extra_settle)</code></pre>
+      </div>
+      <dl>
+        <dd>Emitting it first keeps the root <code>EdgeDeviceGroup</code> case order-safe (delete, then <code>#edge-device-groups-list</code> replaced). The delete
+          toast moves from <code>HX-Trigger</code> to <code>HX-Trigger-After-Settle</code>, like every other mutation.</dd>
+        <dt>Tests</dt>
+        <dd>Presenter: replace <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py:59:1" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py#L59">the <code>HX-Reswap</code> assertion</a>; delete element present and first for results-only and
+          <code>edge_device_lists</code> outputs, absent with <code>model_canvas</code> and for list deletions. View: modal has no <code>script=</code> (mirrored and not); iot
+          <code>UsagePattern</code> delete emits it, <code>Job</code> delete does not. Integration: <code>output.web_id</code> equals the pre-deletion card id. E2E
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_usage_journeys.py:63:1" data-review-source-href="../../../tests/e2e/objects/test_usage_journeys.py#L63"><code>test_delete_usage_journey</code></a> and the job deletion in <code>test_jobs.py</code>
+          assert no console errors with the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_comparison.py:201:1" data-review-source-href="../../../tests/e2e/test_model_comparison.py#L201">collector pattern</a>; comparison and full-journey deletion E2E keep passing.</dd>
+        <dt>Flags</dt>
+        <dd>HTMX/OOB transition: FULL review surface. E2E needs the local server.</dd>
+      </dl>
+    </article>
+
+    <article id="task-2" data-step>
+      <h3><a href="#task-2">Task 2 · Emit the dict membership-section region only when that section is mounted</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/membership-section-oob-no-target.md" data-review-source-href="diagnostics/membership-section-oob-no-target.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-dict-count">two templates</a> · <a href="#f-views-dict"><code>views_dict_mutation.py</code></a> · <a href="#f-js-fixtures">fixture</a> · <a href="#t-views-dict">unit</a>, <a href="#f-js-guard">Jest</a> and <a href="#t-e2e-groups">E2E</a> tests</p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Canvas inline count edits (also in two-model workspaces) and edge group-entry count/✕ log <code>htmx:oobErrorNoTarget</code>.</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py:52:1" data-review-source-href="../../../model_builder/adapters/views/views_dict_mutation.py#L52"><code>_run_edit_and_present</code></a> always adds
+          <code>dict_membership_section</code> for the child; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/oob_regions.py:34:1" data-review-source-href="../../../model_builder/adapters/presenters/oob_regions.py#L34"><code>_render_dict_membership_section</code></a>
+          targets <code>#dict-membership-section-&lt;id&gt;</code>, which exists only while that child's edit panel is open. The intake's list-path half was
+          disproven: list endpoints are posted only from inside the mounted section.</dd>
+        <dt>Fix</dt>
+        <dd>A one-line <code>dictMembershipVals(id)</code> beside
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:5:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L5"><code>recomputationVals()</code></a> returns
+          <code>{membership_section_mounted: true}</code> when the section is in the DOM (the bookmarks
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/bookmarks.js:105:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/bookmarks.js#L105"><code>mounted</code></a> precedent). It is spread into
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html:15:1" data-review-source-href="../../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html#L15"><code>dict_entry_count_unlink.html:15</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html#L24">:24</a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html:28:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html#L28"><code>dict_membership_section.html:28</code></a>;
+          <code>_run_edit_and_present</code> adds the region only when the flag is posted and its comment says so. The list path is unchanged.</dd>
+        <dt>Tests</dt>
+        <dd>Unit: the three dict endpoints without the flag contain no <code>#dict-membership-section-</code>, with it they do. Jest: the helper case in
+          <code>side_panel_switch_guard.test.js</code>, which already loads <code>side_panel_utils.js</code>. Regenerate <code>inline_count_autosave.html</code> through
+          <code>build_fixtures.py</code>. E2E: console-error collector around canvas group-entry count and ✕; new case with the step's panel open, canvas count edit, panel count synced, no error.</dd>
+        <dt>Settled</dt>
+        <dd>Keep the canvas → open-child-panel count sync; option (a) (2026-10-21).</dd>
+      </dl>
+    </article>
+
+    <article id="task-12" data-step>
+      <h3><a href="#task-12">Task 12 · Card highlight expands the canonical id within its owning canvas</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/card-highlight-id-mismatch.md" data-review-source-href="diagnostics/card-highlight-id-mismatch.md">diagnostic</a> · smell-sweep S2</p>
+      <p data-files><span>Files</span> <a href="#f-main-js"><code>model_builder_main.js</code></a> · <a href="#f-views-edition"><code>views_edition.py</code></a> (comment) · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#f-js-fixtures"><code>build_fixtures.py</code></a> · <a href="#f-js-main"><code>model_builder_main.test.js</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>Creating or editing a job, step, edge function, need or edge component gives no pulse and no scroll-into-view; mirrored objects lose the "opened" highlight on every mirror but the clicked one.</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:205:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L205"><code>cardButtonsForWebId</code></a> matches
+          <code>button-&lt;webId&gt;</code> or <code>button-&lt;webId&gt;_in_…</code>. <code>0b2f361b</code> made the server send only the canonical id
+          (nginx header limit, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py:38:1" data-review-source-href="../../../model_builder/adapters/views/views_edition.py#L38"><code>views_edition.py:38-44</code></a>);
+          <code>cc9611c3</code> then prefixed only root ids with <code>sys-…-</code>, so nested ids never start with the canonical id.</dd>
+        <dt>Fix</dt>
+        <dd>Client only; the header stays one canonical id.</dd>
+      </dl>
+      <div data-code>
+        <p data-code-file><a href="#f-main-js"><code>theme/static/scripts/model_builder_main.js</code></a>
+          <small>Proposed <code>cardButtonsForWebId</code> (illustrative)</small></p>
+        <pre><code>function cardButtonsForWebId(webId) {
+    const owner = Array.from(document.querySelectorAll("[data-model-canvas][data-system-id]"))
+        .filter(canvas =&gt; webId.startsWith(`sys-${canvas.dataset.systemId}-`))
+        .sort((a, b) =&gt; b.dataset.systemId.length - a.dataset.systemId.length)[0];
+    if (!owner) return [];
+    const localId = webId.slice(`sys-${owner.dataset.systemId}-`.length);
+    return owner.querySelectorAll(`[id="button-${webId}"], [id^="button-${localId}_in_"]`);
+}</code></pre>
+      </div>
+      <dl>
+        <dd>Scoping by owning system, not visibility, keeps the parked canvas out even for a duplicated model with identical object ids
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L13"><code>data-system-id</code></a>). The <code>_in_</code> delimiter bounds <code>localId</code>.
+          Both listeners keep calling it unchanged; the comments at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:201:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L201"><code>model_builder_main.js:201-204</code></a> and
+          <code>views_edition.py:38-40</code> are corrected.</dd>
+        <dt>Tests</dt>
+        <dd>Python-rendered fixture: a step and job shared by two journeys, a prefix-sharing sibling job, active and parked canvases with the same object ids; expected button ids embedded as JSON.
+          Jest: exact pulse and opened sets on the active canvas, nothing on the parked canvas or the sibling, root card, unknown system highlights nothing and does not throw.
+          Optional E2E in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py:308:1" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py#L308"><code>test_edge_function_name_mirroring</code></a>.</dd>
+        <dt>Settled</dt>
+        <dd>Constant-size single-id payload, client expansion scoped by <code>data-system-id</code>; the server-side <code>local_web_id</code> variant was rejected (2026-10-21).</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 4 ============================== -->
+    <h2 id="cluster-calc">4 · Calculated-attribute panels: dispatch by class name, ids by attribute name</h2>
+    <div class="cluster-intro">
+      <p>An edit panel lists calculated attributes through per-class partials, chosen either by a dynamic include on
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py:71:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py#L71"><code>class_as_snake_str</code></a>
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html:15:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html#L15">section</a>) or by hand-written branches
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html#L24">dict entries</a>,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html:16:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html#L16">ancestor lists</a>).
+        Per-item DOM ids are built from the attribute name only
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html:29:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html#L29"><code>explainable_object_template.html:29</code></a>),
+        yet some panels render several objects' attributes together
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_web.py:20:1" data-review-source-href="../../../model_builder/domain/entities/web_builders/hardware/edge/edge_computer_web.py#L20"><code>EdgeComputerWeb.calculated_attributes_values</code></a>).
+        Values whose class is not in a branch, and attributes shared across objects, break those assumptions. The read views behind these partials have no exception decorator.</p>
+    </div>
+
+    <article id="task-9" data-step>
+      <h3><a href="#task-9">Task 9 · Empty dict entries render "no value"; fragment views show the error modal</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/hourly-chart-empty-timeseries-500.md" data-review-source-href="diagnostics/hourly-chart-empty-timeseries-500.md">diagnostic</a> · smell-sweep S5 folded in</p>
+      <p data-files><span>Files</span> <a href="#f-calc-dict"><code>explainable_object_dict.html</code></a> · <a href="#f-views"><code>views.py</code></a> · <a href="#f-views-other">deletion, Sankey and help views</a> · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> (new)</p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>In the iot Factory-sensor panel, the chart button of three <code>Sensor-local-storage</code> entries fails silently (raw 500, empty chart pane).</dd>
+        <dt>Root cause</dt>
+        <dd>The library leaves <code>EdgeStorage.unitary_power_per_usage_pattern</code> and its derived dicts empty on purpose.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html#L24"><code>explainable_object_dict.html:24-28</code></a>
+          sends every non-quantity entry to the hourly-chart partial, and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L86"><code>prepare_hourly_quantity_data</code></a> reads
+          <code>plot_aggregation_strategy</code>, which <code>EmptyExplainableObject</code> lacks. The trigger is the dict entry's chart button, not "(see graph)" as reported.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:574:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L574"><code>get_explainable_hourly_quantity_chart_and_explanation</code></a> carries only <code>@time_it</code>.</dd>
+        <dt>Fix</dt>
+        <dd>Replace the two-way branch with the section's dynamic include by <code>sub_item.class_as_snake_str</code>; empty entries then use
+          <code>empty_explainable_object.html</code> ("no value", formula and calculus-graph buttons, no chart). Add <code>@render_exception_modal_if_error</code> above
+          <code>@time_it</code> on the four calculated-attribute views (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:573:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L573">:573</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:588:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L588">:588</a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:603:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L603">:603</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:616:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L616">:616</a>) and, for S5, on
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_deletion.py:15:1" data-review-source-href="../../../model_builder/adapters/views/views_deletion.py#L15"><code>ask_delete_object</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:442:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L442"><code>get_calculus_graph</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:453:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L453"><code>display_calculus_graph</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:548:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L548"><code>source_table</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:567:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L567"><code>source_table_row_editor</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/sankey_views.py:439:1" data-review-source-href="../../../model_builder/adapters/views/sankey_views.py#L439"><code>sankey_form</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/sankey_views.py:459:1" data-review-source-href="../../../model_builder/adapters/views/sankey_views.py#L459"><code>sankey_cards</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/sankey_views.py:498:1" data-review-source-href="../../../model_builder/adapters/views/sankey_views.py#L498"><code>sankey_delete_card</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_help.py:8:1" data-review-source-href="../../../model_builder/adapters/views/views_help.py#L8"><code>open_help_drawer</code></a>. Leave a view undecorated only if it is a full page, a download or a
+          JSON/fetch endpoint with its own rejection path, and say why in the commit.</dd>
+        <dt>Tests</dt>
+        <dd>New <code>test_views_calculated_attributes.py</code>: Factory-sensor panel has no storage chart URL but its explanation URL, CPU/RAM chart URLs remain;
+          every hourly chart URL in that panel returns 200; a forced exception returns 500, <code>HX-Reswap: none</code>, modal markup and <code>openModalDialog</code>
+          (conventions of <code>test_exception_handling.py</code>). Optional URLconf test requiring decoration or explicit exemption.</dd>
+        <dt>Settled · flags</dt>
+        <dd>"No value" UX, no empty chart; all four read views decorated; S5 folded in (2026-10-21). Invariant: chart preparers gain no empty-value branch.
+          Rerun the 632-link crawl after Task 6 has landed (Run A).</dd>
+      </dl>
+    </article>
+
+    <article id="task-10" data-step>
+      <h3><a href="#task-10">Task 10 · Calculated-attribute explanation ids are scoped per item</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/calculated-attribute-collapse-id-collision.md" data-review-source-href="diagnostics/calculated-attribute-collapse-id-collision.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-calc-ids">four calculated-attribute templates</a> · <a href="#f-calc-section"><code>calculated_attributes_section.html</code></a> (optional) · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> · <a href="#t-e2e-calc">three E2E files</a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>In the Factory-sensor panel (and every Boavizta server panel), RAM's formula button swaps RAM's explanation into the CPU row, toggles all three collapses,
+          and after one more click RAM's explanation is unreachable until the panel reopens.</dd>
+        <dt>Root cause</dt>
+        <dd><code>id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"</code> and its three references in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html#L8"><code>get_calculated_attribute_explanation_button.html:8,14,16</code></a>
+          repeat for same-named attributes of CPU, RAM and storage. HTMX swaps into the first match; Bootstrap toggles every match; <code>click once</code> then blocks the refetch.</dd>
+        <dt>Fix</dt>
+        <dd>Key every per-item id and reference by <code>item.web_id</code>, which already encodes attribute, dict key and container:
+          the collapse id, the button's <code>hx-target</code>/<code>data-bs-target</code>/<code>aria-controls</code> (also in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html:7:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html#L7"><code>eco_logits_explainable_quantity.html:7,13,15</code></a>),
+          and the disabled input ids and label <code>for</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html#L3"><code>explainable_object_template.html:3,15</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html#L6"><code>explainable_quantity.html:6</code></a>,
+          <code>eco_logits_explainable_quantity.html:23</code>). <code>name=</code> stays. Optional: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html:7:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html#L7"><code>aria-controls</code></a> on the section button.</dd>
+        <dt>Tests</dt>
+        <dd>Programmatic <code>EdgeComputer</code> + <code>EdgeStorage</code> system in two edge usage patterns: no duplicate <code>id=</code> in the computer panel; the CPU button's targets
+          point at its own existing row. E2E selector prefixes in <code>test_calculus_graph.py:59</code>, <code>test_external_api_objects.py:70,74</code>,
+          <code>test_video_external_api_objects.py:147,149</code>; run those three files.</dd>
+        <dt>Flags</dt>
+        <dd>After Task 9: shares the new test file, and gives Task 9's empty dict entries distinct ids with two patterns.</dd>
+      </dl>
+    </article>
+
+    <article id="task-14" data-step>
+      <h3><a href="#task-14">Task 14 · Calculated-attribute template dispatch by <code>template_kind</code> (refactor)</a></h3>
+      <p><span data-chip>smell-sweep S6 + S10 (S8 dropped)</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/smell-sweep.md" data-review-source-href="smell-sweep.md">smell sweep</a></p>
+      <p data-files><span>Files</span> <a href="#f-explainable-web"><code>explainable_objects_web.py</code></a> · <a href="#f-olmow"><code>object_linked_to_modeling_obj_web.py</code></a> · <a href="#f-ts-utils"><code>explainable_timeseries_utils.py</code></a> · <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#f-calc-section">section</a>, <a href="#f-calc-dict">dict</a> and <a href="#f-calc-links">ancestor</a> templates</p>
+      <dl>
+        <dt>Today</dt>
+        <dd>Partials are chosen by exact concrete class name, through the dynamic include (section, and dicts after Task 9) and through
+          <code>if/elif</code> lists in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html:16:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/ancestor_or_child_list_element.html#L16"><code>ancestor_or_child_list_element.html:16-46</code></a>.
+          Library subclasses fall through: ai_chatbot's <code>utc_hourly_occurrences</code> lists its input with no "(see graph)", and 9 explainable subclasses have no template,
+          so a dynamic include of one would raise <code>TemplateDoesNotExist</code>. The explainable wrapper choice is repeated six times
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py:33:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py#L33"><code>explainable_objects_web.py:33</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py:56:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py#L56">:56</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py:67:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py#L67">:67</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py:97:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py#L97">:97</a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:39:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L39"><code>explainable_timeseries_utils.py:39</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:80:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L80"><code>modeling_object_web.py:80</code></a>).</dd>
+        <dt>Change</dt>
+        <dd><code>ExplainableObjectWeb.template_kind</code>, resolved by <code>isinstance</code> (quantity / eco_logits / hourly / recurrent / empty / default), drives the three
+          templates; one <code>wrap_explainable()</code> factory replaces the six choices (S10). The four dict/non-dict URL branches stay as they are (<a href="#decision-s8">decision 2</a>). The domain still never reverses URLs.</dd>
+        <dt>Enables · behavior change</dt>
+        <dd>Near-preserving: adds "(see graph)" for input-timeseries ancestors, and a subclass value no longer crashes the panel. Would have kept Task 9's empty entries
+          from reaching the chart partial by construction.</dd>
+        <dt>Tests</dt>
+        <dd>Unit: <code>template_kind</code> per explainable subclass, including the nine without a template. View: the <code>utc_hourly_occurrences</code> explanation lists its input with "(see graph)" and the link returns 200. Tasks 9 and 10 tests keep passing.</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 5 ============================== -->
+    <h2 id="cluster-guard">5 · The unsaved-changes guard that suspends and replays</h2>
+    <div class="cluster-intro">
+      <p>Two listeners in <code>side_panel_utils.js</code> stop requests while the panel is dirty: an
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:127:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L127"><code>htmx:beforeRequest</code> guard</a> for elements whose own
+        <code>hx-target</code> is <code>#sidePanel</code>, and an <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:162:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L162"><code>htmx:confirm</code> guard</a>
+        for panel-discarding paths. Both store the request and continue it after "Yes, Continue", which the mission now forbids
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/mission.md:26:1" data-review-source-href="../../../specs/mission.md#L26">mission.md:26-28</a>). Owning page: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:41:1" data-review-source-href="../../../specs/architecture/workspace.html#L41">workspace</a>.</p>
+    </div>
+
+    <article id="task-1" data-step>
+      <h3><a href="#task-1">Task 1 · The <code>#sidePanel</code> unsaved-changes guard blocks instead of replaying</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/side-panel-replay-hand-parsing.md" data-review-source-href="diagnostics/side-panel-replay-hand-parsing.md">diagnostic</a></p>
+      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-unsaved-modal">modal templates</a> · <a href="#d-workspace">four docs</a> · <a href="#f-js-guard">Jest</a> · <a href="#t-e2e-forms"><code>test_forms.py</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>With a dirty panel, Help → "Data &amp; privacy" then "Yes, Continue" loads the builder page into the side panel (shown in jsdom with the bundled htmx; the new E2E confirms it in a browser).</dd>
+        <dt>Root cause</dt>
+        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:199:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L199"><code>proceedWithPendingRequest()</code></a> rebuilds the request from
+          <code>hx-get</code>/<code>hx-target</code>/<code>hx-swap</code>/<code>hx-vals</code> (with <code>eval</code>). The boosted anchors in
+          <code>help_menu.html</code> and <code>workspace_storage_status.html</code> have no <code>hx-get</code>, so htmx GETs the current page. The intake's
+          "no visible defect" and its two proposed directions (url + source shrink, <code>issueRequest</code> replay) are disproven or ruled out by the mission.</dd>
+        <dt>Fix</dt>
+        <dd>Delete <code>pendingRequest</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:2:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L2">:2</a>, resets at :61, :77), the beforeRequest guard
+          with its <code>hideLoadingBar</code> timeout, and <code>proceedWithPendingRequest()</code>. In the <code>htmx:confirm</code> listener, before the path check, a
+          dirty request whose <code>detail.elt.getAttribute("hx-target") === "#sidePanel"</code> is prevented and shows <code>#unsavedModal</code> with Continue wired to
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:222:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L222"><code>closeWarningModalAndCloseSidePanel()</code></a>; it never calls <code>issueRequest</code>.
+          Matching the element's own attribute (not <code>detail.target</code>) keeps <code>htmx.ajax</code> openers from stacking two dialogs. The guard comment
+          (:141–154) is rewritten. Cancel in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html#L9"><code>warn_before_side_panel_closing_modal.html</code></a>
+          calls <code>closeWarningModal()</code> only. Copy: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:84:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L84">message</a>
+          "The open side panel has unsaved changes. Discard them?", buttons "Keep editing" / "Discard changes"; the two journey pages, <code>workspace.html:41-43</code> and
+          <code>kickoff.md:40</code> follow.</dd>
+        <dt>Tests</dt>
+        <dd>Jest in <code>side_panel_switch_guard.test.js</code>: modified/unmodified/other element, Discard issues nothing, an event matching both branches shows the modal once.
+          E2E: rewrite <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_forms.py:67:1" data-review-source-href="../../../tests/e2e/test_forms.py#L67"><code>test_pending_request_preserves_hx_vals</code></a> (Discard closes; the next click sends <code>hx-vals</code> and locks);
+          new dirty-panel Data &amp; privacy case; assert the new copy once.</dd>
+        <dt>Settled</dt>
+        <dd>Scope (a): this guard only; the navigation guard and <code>runAfterSidePanelDiscardConfirmation</code> stay for <code>server-rendered-state-follow-up</code>. Discard copy (2026-10-21).
+          The <code>eval</code> acceptance covers the guard path only (<a href="#decision-eval">decision 1</a>). Local E2E server required.</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 6 ============================== -->
+    <h2 id="cluster-constant">6 · Recurrent constant editor</h2>
+    <div class="cluster-intro">
+      <p>Every recurrent field's constant editor renders
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L19"><code>recurrent_quantities_from_constant.html</code></a>.
+        The library replays each of the 168 values hour by hour, but stores a unit with no time dimension, and the editor shows only that unit.</p>
+    </div>
+
+    <article id="task-7" data-step>
+      <h3><a href="#task-7">Task 7 · Show "each hour" after the unit</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-unit-each-hour.md" data-review-source-href="diagnostics/recurrent-unit-each-hour.md">diagnostic</a> · GitHub #150</p>
+      <p data-files><span>Files</span> <a href="#f-constant"><code>recurrent_quantities_from_constant.html</code></a> · <a href="#t-e2e-edge"><code>test_edge_objects.py</code></a></p>
+      <dl>
+        <dt>Symptom</dt>
+        <dd>"1 occurrence … repeated over the entire canonical week" reads as a weekly total; entering one gives results 168 times too high.</dd>
+        <dt>Root cause</dt>
+        <dd>The readonly unit box (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L19">:19-25</a>)
+          and helper text (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:28:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L28">:28-30</a>) give no time reference.</dd>
+        <dt>Fix</dt>
+        <dd>Move the box styling to a wrapper holding the unchanged readonly <code>__constant_unit</code> input (borderless, same <code>name</code>/<code>id</code>/<code>value</code>, still updated by the component-need form)
+          and a non-submitted <code>span</code> "each hour"; widen from <code>w-25</code> if "GB_stored each hour" needs it. Helper text:
+          "All hours of the canonical week (168 hours) will use this value."</dd>
+        <dt>Tests</dt>
+        <dd>E2E near <code>test_edge_objects.py:411</code>: "each hour" visible, input value still <code>cpu_core</code>, still there after switching to a storage component.
+          A rendered-form test (the implementer picks the existing test that renders this template) asserting the helper text and that no <code>…__constant_unit</code> value contains "each hour".</dd>
+        <dt>Settled</dt>
+        <dd>Interface-only; raw pint units; one suffix for all fields; weekly-pattern editor unchanged (2026-10-21).</dd>
+      </dl>
+    </article>
+
+    <!-- ============================== Cluster 7 ============================== -->
+    <h2 id="cluster-invariants">7 · Invariants none of the tests check</h2>
+    <div class="cluster-intro">
+      <p>Tasks 4, 6, 8, 9, 10 and 11 each break one of three invariants that existing tests check only case by case
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_deletion.py" data-review-source-href="../../../tests/integration/test_deletion.py"><code>test_deletion.py</code></a>): every rendered panel link resolves, no panel has duplicate ids, and every offered delete deletes.</p>
+    </div>
+
+    <article id="task-15" data-step>
+      <h3><a href="#task-15">Task 15 · Example-wide invariant tests (test-only refactor)</a></h3>
+      <p><span data-chip>smell-sweep S3</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/smell-sweep.md" data-review-source-href="smell-sweep.md">smell sweep</a></p>
+      <p data-files><span>Files</span> <a href="#t-int-invariants">new integration module(s)</a> · <a href="#d-testing"><code>testing.md</code></a></p>
+      <dl>
+        <dt>Today</dt>
+        <dd>The diagnostic sweeps live only in scratch; each task adds a one-panel regression.</dd>
+        <dt>Change</dt>
+        <dd>Parametrized integration tests over <code>INTRO_EXAMPLES</code> (precedent:
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_intro_examples_load_and_compute.py:31:1" data-review-source-href="../../../tests/integration/test_intro_examples_load_and_compute.py#L31"><code>test_intro_examples_load_and_compute.py</code></a>):
+          (i) every rendered <code>open-edit-object-panel</code> and <code>get_*</code> fragment link returns 200 (about 8 s over 632 fragments);
+          (ii) no edit panel has duplicate <code>id</code>s; (iii) every delete offered by <code>ask-delete-object</code> removes the object from the saved model.
+          Synthetic cases cover Task 11's shapes. Task 9/10 single-panel regressions may fold in. <code>specs/testing.md</code> gains one line making the shipped examples an explicit exception to programmatic fixtures.</dd>
+        <dt>Prevents</dt>
+        <dd>Every bug in the batch except Tasks 1, 2, 5 and 7 would have failed one of these.</dd>
+        <dt>Tests</dt>
+        <dd>The three families pass on every example once Tasks 1–14 have shipped; suite runtime grows by about 10–20 s. Rebuild from the diagnostics if the scratch sweeps are gone.</dd>
+      </dl>
+    </article>
+  </section>
+
+  <!-- ============================== Execution plan ============================== -->
+  <section id="execution-plan">
+    <h2>Execution plan</h2>
+    <p>Three <code>feature-implement</code> runs, each in a fresh session, in this order. Every bug task adds a <code>CHANGELOG.md</code> entry under
+      <code>## [Unreleased]</code>; consolidate them within a run. Nothing is cross-repository; no migration or serialization change.</p>
+    <ol id="runs">
+      <li><strong>Run A · silent correctness and the deletion chain — Tasks 5 → 4 → 6 → 8 → 11 → 3</strong>
+        <ul>
+          <li>Task 5 is independent and fixes a silently wrong total; it goes first.</li>
+          <li>4 then 6: adjacent lines of the same container property in <a href="#f-mow"><code>modeling_object_web.py</code></a> (independent behavior, ordered to avoid conflicts). 6 → 8 → 11 is a hard chain: Task 8 needs Task 6's <code>.get</code> skip and must follow it directly; Task 11 needs Task 8.</li>
+          <li>Task 3 last: Task 4 makes nested-need deletions reach the presenter, so Task 3's console-error E2E covers them; Task 11 rewrites the <code>_delete</code> tail that Task 3 adds <code>web_id</code> to.</li>
+          <li>Shared test files: <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> (4, 8, 11, 3; Task 4 introduces the iot loader), <a href="#t-delete-uc"><code>test_delete_object.py</code></a> (6, 8, 11), <a href="#t-int-deletion"><code>test_deletion.py</code></a> (11, 3).</li>
+          <li>User-facing behavior change to call out at review: journeys held by a pattern are now blocked (Task 11).</li>
+          <li>Validation: non-E2E suite; local E2E server for Task 3.</li>
+        </ul></li>
+      <li><strong>Run B · contained UI fixes — Tasks 9 → 10 → 12 → 2 → 1 → 7</strong>
+        <ul>
+          <li>After Run A: Task 6 unblocks the panels the Task 9 and 10 acceptance sweeps must reach.</li>
+          <li>Task 10 appends to the test file Task 9 creates.</li>
+          <li>Tasks 12 and 2 both touch <a href="#f-js-fixtures"><code>js_tests/build_fixtures.py</code></a> output; 2 and 1 both edit <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> and <code>side_panel_switch_guard.test.js</code>: run them back to back.</li>
+          <li>Task 1's E2E confirms the Data &amp; privacy defect in a browser.</li>
+          <li>Validation: <code>npm run jest</code> (12, 2, 1); local E2E server for 1, 2, 7 and Task 10's selector updates.</li>
+        </ul></li>
+      <li><strong>Run C · refactors and invariant tests — Tasks 13 → 14 → 15</strong>
+        <ul>
+          <li>Task 13 needs Task 8 (and therefore 4, 6); it touches <a href="#f-delete-object"><code>delete_object.py</code></a> after 11 and 3. Verify the four recurrent process/workload need panels.</li>
+          <li>Task 14 needs Task 10 (and 9); S8 is out (<a href="#decision-s8">decision 2</a>). It shares the ancestor templates with Task 13.</li>
+          <li>Task 15 runs last and locks in Tasks 4–14.</li>
+        </ul></li>
+    </ol>
+
+    <figure>
+      <div>
+        <svg viewBox="0 0 760 250" role="img" aria-labelledby="dep-title dep-desc">
+          <title id="dep-title">Task dependencies</title>
+          <desc id="dep-desc">4 and 6 share lines; hard chain 6 to 8 to 11; 8 to 13; 9 to 10 to 14; soft orderings and shared files as described in the runs.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#21312f"/></marker>
+            <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#835219"/></marker>
+          </defs>
+          <g font-family="system-ui, sans-serif" font-size="13" text-anchor="middle">
+            <text x="20" y="22" text-anchor="start" fill="#5e706e" font-size="12">Run A</text>
+            <text x="20" y="122" text-anchor="start" fill="#5e706e" font-size="12">Run B</text>
+            <text x="20" y="212" text-anchor="start" fill="#5e706e" font-size="12">Run C</text>
+            <!-- Run A nodes -->
+            <a href="#task-5"><rect x="70" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="95" y="55">5</text></a>
+            <a href="#task-4"><rect x="160" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="185" y="55">4</text></a>
+            <a href="#task-6"><rect x="250" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="275" y="55">6</text></a>
+            <a href="#task-8"><rect x="340" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="365" y="55">8</text></a>
+            <a href="#task-11"><rect x="430" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="455" y="55">11</text></a>
+            <a href="#task-3"><rect x="520" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="545" y="55">3</text></a>
+            <line x1="210" y1="50" x2="250" y2="50" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
+            <line x1="300" y1="50" x2="338" y2="50" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="390" y1="50" x2="428" y2="50" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="480" y1="50" x2="518" y2="50" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
+            <path d="M185 35 C 260 5, 470 5, 540 33" fill="none" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
+            <!-- Run B nodes -->
+            <a href="#task-9"><rect x="70" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="95" y="155">9</text></a>
+            <a href="#task-10"><rect x="160" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="185" y="155">10</text></a>
+            <a href="#task-12"><rect x="250" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="275" y="155">12</text></a>
+            <a href="#task-2"><rect x="340" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="365" y="155">2</text></a>
+            <a href="#task-1"><rect x="430" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="455" y="155">1</text></a>
+            <a href="#task-7"><rect x="520" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="545" y="155">7</text></a>
+            <line x1="120" y1="150" x2="158" y2="150" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="300" y1="150" x2="338" y2="150" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
+            <line x1="390" y1="150" x2="428" y2="150" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
+            <line x1="275" y1="65" x2="105" y2="133" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
+            <!-- Run C nodes -->
+            <a href="#task-13"><rect x="340" y="195" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="365" y="215">13</text></a>
+            <a href="#task-14"><rect x="160" y="195" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="185" y="215">14</text></a>
+            <a href="#task-15"><rect x="560" y="195" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="585" y="215">15</text></a>
+            <path d="M365 65 C 400 110, 400 160, 368 193" fill="none" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <line x1="185" y1="165" x2="185" y2="193" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
+            <text x="640" y="215" text-anchor="start" fill="#5e706e" font-size="12">after all</text>
+            <!-- Legend -->
+            <g font-size="11" text-anchor="start" fill="#5e706e">
+              <line x1="600" y1="40" x2="630" y2="40" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/><text x="636" y="44">hard dependency</text>
+              <line x1="600" y1="62" x2="630" y2="62" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/><text x="636" y="66">soft ordering</text>
+              <line x1="600" y1="84" x2="630" y2="84" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/><text x="636" y="88">shared file, back to back</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Hard dependencies: 6 → 8 → 11, 8 → 13, 9 → 10 → 14. Soft ordering: 11 and 4 before 3 (shared tail, E2E coverage); Task 6 before Task 9's crawl.
+        Shared lines or files run back to back: 4/6 (<code>modeling_object_web.py</code>), 12/2 (fixtures), 2/1 (<code>side_panel_utils.js</code>). Task 5 and 7 are independent.</figcaption>
+    </figure>
+
+    <h3>Deduplication verdicts</h3>
+    <div data-table-scroll>
+      <table>
+        <thead><tr><th scope="col">Pair</th><th scope="col">Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>4 · 6</td><td>Distinct: detached wrappers (<code>None</code> container) vs. non-constructor attribute names; adjacent lines, both needed.</td></tr>
+          <tr><td>6 · 8</td><td>Distinct: Task 6 crashes on library-built relationships in the generic lookup; Task 8's overrides claim one as a removal target. Same library fact, different code.</td></tr>
+          <tr><td>8 · 11</td><td>Distinct: Task 8 is one instance of Task 11's "only unlinks" class, but its cause is a false target. Task 11's tail alone would turn it into an error modal, not the blocking modal, and would not fix edit placement.</td></tr>
+          <tr><td>3 · 12</td><td>Distinct: both meet root-form ids vs. nested <code>_in_</code> ids, but one is a client remover on delete and the other the highlight expansion; fixes live on different sides.</td></tr>
+          <tr><td>2 · 3</td><td>Distinct: unconditional OOB region vs. client-side remover; both now respect "address only what is mounted".</td></tr>
+          <tr><td>3 · 11</td><td>Distinct: Task 11 decides what is deleted; Task 3 how the card leaves the canvas. Task 3's non-list rule stays valid after Task 11.</td></tr>
+          <tr><td>9 · 10</td><td>Distinct: wrong partial for empty values vs. ids keyed by attribute name; Task 10 also de-duplicates the ids Task 9 newly renders.</td></tr>
+          <tr><td>6 · 13, 9 · 14</td><td>Refactors that generalize the bug fix's mechanism; the bug tasks ship first and stand alone.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="deferred">Deferred, not in this batch</h3>
+    <ul>
+      <li>Copy backlog: the blocking-modal noun derived from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:363:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L363"><code>modeling_obj_containers[0]</code></a> (S12), "reorient these edge devices" when the blocker is a need, and journey blocking wording (Task 11 decision). File under <code>specs/backlog/</code>.</li>
+      <li>S9 (post-mutation relationship payload built in four places): left as is.</li>
+      <li><code>Device</code> has no web mapping or edit panel (unreachable); Task 11 blocks its deletion.</li>
+      <li>The remaining <code>eval</code> in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:82:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L82"><code>setRecomputationToTrueIfResultPaneIsOpen</code></a> (Save path, outside Task 1; <a href="#decision-eval">decision 1</a>). File under <code>specs/backlog/</code>.</li><li>S8, the dict/non-dict URL template tag (<a href="#decision-s8">decision 2</a>): revisit when a dict-valued recurrent or EcoLogits attribute appears.</li>
+    </ul>
+  </section>
+
+  <!-- ============================== Decisions ============================== -->
+  <section id="decisions">
+    <h2>Planning decisions</h2>
+    <p>Both were taken as planning defaults and are already reflected above and in <code>tasks.md</code>; reverting either is a local edit.</p>
+
+    <aside id="decision-eval" data-note="review">
+      <p><strong>1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</strong></p>
+      <p>Task 1 and its diagnostic accept only when "no <code>eval</code> remains in <code>side_panel_utils.js</code>". Removing the replay deletes the
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:207:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L207"><code>eval</code> in <code>proceedWithPendingRequest</code></a>, but a second one stays in
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:91:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L91"><code>setRecomputationToTrueIfResultPaneIsOpen</code></a>, which the Save button calls on every side-panel
+        submit (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/side_panel_structure.html:26:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/side_panel_structure.html#L26"><code>side_panel_structure.html:26</code></a>) to merge
+        <code>recomputation</code> into the form's <code>hx-vals</code>. The diagnostic never traced it. Removing it means reworking how every <code>#sidePanelForm</code> submit sends
+        <code>recomputation</code>, which is Save-path behavior outside this guard.</p>
+      <p><strong>Applied:</strong> Task 1's acceptance now reads "the <code>#sidePanel</code> guard path contains no <code>eval</code>, <code>pendingRequest</code> or
+        <code>htmx:beforeRequest</code> listener"; the Save-path <code>eval</code> is a deferred backlog item. Rejected alternative: widen Task 1 to replace it too,
+        which touches the Save flow in an easy task.</p>
+    </aside>
+
+    <aside id="decision-s8" data-note="review">
+      <p><strong>2 · Task 14 drops the S8 URL template tag — APPLIED</strong></p>
+      <p>S8 replaces the four <code>{% if item.dict_container %}…_from_dict…{% else %}…</code> URL branches
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html:3:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html#L3"><code>get_calculated_attribute_explanation_button.html:3-7</code></a>
+        and three siblings) with a new <code>model_builder/templatetags/</code> module. Its stated risk is a dict-valued recurrent or EcoLogits attribute missing a branch;
+        the Task 10 diagnostic found only hourly and empty values in every calculated dict of the shipped examples, so no such attribute is reachable today. Each branch is
+        five readable lines; the tag adds a module and an indirection to remove them, and it is not what fixes any bug or delivers the missing "(see graph)" link
+        (that is S6's <code>template_kind</code>).</p>
+      <p><strong>Applied:</strong> Task 14 keeps S6 and S10 and drops S8; a dict variant is added when such an attribute appears. Rejected alternative: keep the tag
+        as originally approved.</p>
+    </aside>
+  </section>
+</main>
+</div>
+<script src="../../review-links.js" defer></script>
+</body>
+</html>

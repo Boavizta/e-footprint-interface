@@ -1,8 +1,8 @@
 # bug-fixes-2026-10 — tasks
 
-**Status:** diagnosed 2026-10-21; nothing implemented. Each task links its diagnostic, which replaces
-`spec.html` and `plan.html` for `feature-implement`. Run the "Execution plan" runs in order, each in a
-fresh `feature-implement` session.
+**Status:** diagnosed and planned 2026-10-21; nothing implemented. Each task links its diagnostic;
+[`plan.html`](plan.html) digests them and orders the runs. Run them in order, each in a fresh
+`feature-implement` session.
 
 The original intake for Reports 1–3 (parked during `request-lifecycle-simplification`, evidence on
 `dev` at `2eced3c0`) is kept below for traceability; the diagnostics supersede it where they differ.
@@ -110,7 +110,9 @@ them?" with "Keep editing" / "Discard changes".
   correctly; assert the new message and labels once.
 
 **Acceptance:**
-- No path re-issues an interrupted `#sidePanel` request; no `eval` remains in `side_panel_utils.js`.
+- No path re-issues an interrupted `#sidePanel` request; the `#sidePanel` guard path contains no `eval`,
+  `pendingRequest` or `htmx:beforeRequest` listener. The Save-path `eval` in
+  `setRecomputationToTrueIfResultPaneIsOpen` stays (out of scope; plan decision 1, 2026-10-21).
 - Dirty panel + Data & privacy never loads the builder page into the side panel.
 - The navigation guard and Simplified-inputs entry keep their current behavior under the new copy.
 
@@ -685,13 +687,13 @@ verify.
 **Goal:** Calculated-attribute templates choose their partial from one `template_kind` property on
 `ExplainableObjectWeb`, resolved by `isinstance` (quantity / eco_logits / hourly / recurrent / empty
 / default), instead of exact concrete class names (`class_as_snake_str` includes and hand-written
-`if/elif` lists). One adapter template tag chooses the dict or non-dict URL variant (S8), and one
-`wrap_explainable()` factory replaces the six duplicated wrapper choices (S10). Near-preserving: it
+`if/elif` lists). One `wrap_explainable()` factory replaces the six duplicated wrapper choices (S10). Near-preserving: it
 also adds the missing "(see graph)" link for input-timeseries ancestors (e.g. ai_chatbot
 `utc_hourly_occurrences`), and a library subclass no longer raises `TemplateDoesNotExist`. The
-domain must not reverse URLs.
+domain must not reverse URLs. Settled 2026-10-21 (plan decision 2): S8's URL template tag is dropped;
+the four dict/non-dict URL branches stay.
 
-**Diagnostic:** [`smell-sweep.md`](smell-sweep.md) — findings S6, S8 and S10.
+**Diagnostic:** [`smell-sweep.md`](smell-sweep.md) — findings S6 and S10 (S8 dropped).
 
 **Repository:** `e-footprint-interface`
 
@@ -704,10 +706,7 @@ domain must not reverse URLs.
 - Templates under `model_builder/templates/model_builder/side_panels/edit/`:
   `calculated_attributes_section.html` (around 15), `calculated_attributes/explainable_object_dict.html`
   (as changed by Task 9), `calculated_attributes/components/ancestor_or_child_list_element.html`
-  (around 16–46), and the four dict/non-dict URL sites (`explainable_hourly_quantities.html`,
-  `components/ancestor_or_child_list_element.html`, `components/calculus_graph_link.html`,
-  `components/get_calculated_attribute_explanation_button.html`).
-- A template tag module under `model_builder/templatetags/` for the URL choice.
+  (around 16–46).
 
 **Tests added/changed:**
 - Unit: `template_kind` for each explainable subclass, including the nine without a template today.
@@ -760,78 +759,4 @@ deterministic.
 
 ## Execution plan
 
-### Deduplication verdict
-
-Every task has a distinct cause; tasks that share files or a surface are listed together.
-
-| Task | Distinct cause |
-|---|---|
-| 1 | `htmx:beforeRequest` guard stores and hand-replays the request (mission forbids replay; breaks boosted links) |
-| 2 | Dict mutation always emits the membership-section OOB region, even when that section is not mounted |
-| 3 | Delete modal hyperscript is the only remover of no-flip root cards and uses a root-form selector |
-| 4 | Card wrapper reads the library's detached contextual containers as live parents |
-| 5 | Daily chart series rounded to fixed decimals of a large display unit |
-| 6 | Container lookup indexes constructor params with library-built attribute names; missing `ExternalAPIServer` mapping |
-| 7 | Recurrent constant editor shows the unit without "each hour" (GitHub #150; diagnosed in a parallel session) |
-| 8 | Internal edge-component web overrides declare the library-built `components` list a removal target |
-| 9 | Dict template sends empty entries to the hourly-chart partial; fragment views lack the exception decorator |
-| 10 | Calculated-attribute ids built from the attribute name only |
-| 11 | `_delete` only unlinks and relies on accordion-children cascade; non-nesting containers skip the reference block |
-| 12 | Client highlight expansion assumes nested ids start with the `sys-`-prefixed canonical id |
-| 13 | Three web-class lookups disagree (refactor) |
-| 14 | Template dispatch keyed on exact class names (refactor) |
-| 15 | No example-wide invariant tests (test-only) |
-
-Tasks 4, 6, 8 and 11 all touch container/deletion logic, but each fixes a different mechanism, and
-each depends on the previous one. Task 8 is one instance of Task 11's bug class. It still ships on
-its own because it removes a false removal target and fixes edit placement, which Task 11 does not.
-
-### Run 1 — silent correctness and the deletion chain (Tasks 5, 4, 6, 8, 11, 3)
-
-Order: **5 → 4 → 6 → 8 → 11 → 3**.
-
-- Task 5 is independent and fixes a silently wrong total; it goes first.
-- 4 → 6 → 8 is a hard chain on `modeling_object_web.py` (adjacent lines of the container
-  properties). Task 8 must directly follow Task 6, or `EdgeStorage` edits from newly openable panels
-  refresh the wrong card.
-- Task 11 hard-depends on Task 8. It shares `delete_object.py`, `test_delete_object.py` and
-  `test_views_deletion.py` with Tasks 3, 4, 6 and 8.
-- Task 3 goes last in the run. Once Task 4 has landed, its new no-console-error E2E checks cover
-  recurrent-need deletion. Its OOB-delete rule is unchanged by Task 11. It shares
-  `htmx_presenter.py`/`test_views_deletion.py` with Task 11 and is a full review surface (HTMX/OOB).
-- Every task adds a `CHANGELOG.md` entry: consolidate them under `## [Unreleased]`.
-
-### Run 2 — contained UI fixes (Tasks 9, 10, 12, 2, 1, 7)
-
-Order: **9 → 10 → 12 → 2 → 1 → 7**.
-
-- Run 1 first: Task 6 unblocks panels that the acceptance crawls of Tasks 9 and 10 must reach.
-- Task 10 builds on the test file Task 9 creates (`test_views_calculated_attributes.py`).
-- Task 12 is client-only (`model_builder_main.js`). It shares `js_tests/build_fixtures.py` with Task 2.
-- Tasks 2 and 1 both edit `theme/static/scripts/side_panel_utils.js` (Task 2 adds a helper; Task 1
-  rewrites the guard): run them back to back.
-- Task 1 changes `#unsavedModal` copy and narrows `server-rendered-state-follow-up/kickoff.md:40`.
-  Its new E2E confirms the Data & privacy defect in a real browser.
-- Task 7 is independent (one template). Its decisions were settled in the parallel session that
-  diagnosed it.
-- E2E validation needs the local server (`poetry run pytest tests/e2e -n 4`): Tasks 1, 2, 3 and
-  10's selector updates.
-
-### Run 3 — behavior-preserving refactors (Tasks 13, 14, 15)
-
-Order: **13 → 14 → 15**.
-
-- Task 13 needs Task 8. It verifies that the four recurrent process/workload need panels now use
-  one wrapper everywhere.
-- Task 14 needs Task 10. It adds the missing "(see graph)" link for input-timeseries ancestors.
-- Task 15 runs last. It locks in Tasks 4–14 and needs a one-line `specs/testing.md` exception for
-  shipped-example fixtures.
-
-### Deferred, not in this batch
-
-- Copy backlog: blocking-modal noun derived from `modeling_obj_containers[0]` (smell-sweep S12),
-  "reorient these edge devices" when the blocker is a need, journey confirmation wording (Task 11
-  decision). File under `specs/backlog/` when convenient.
-- Smell-sweep S9 (relationship-payload construction in four places): left as is.
-- `Device` objects have no edit panel or web mapping (unreachable today; Task 11 blocks their
-  deletion).
+Runs, ordering, deduplication verdicts and deferred items: [`plan.html#execution-plan`](plan.html#execution-plan).
