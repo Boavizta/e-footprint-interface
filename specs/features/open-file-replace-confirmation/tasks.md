@@ -1,6 +1,6 @@
 # Open a file: confirm before replacing — tasks
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: approved
+Status: run A implemented (interface `a90109e1..53626e5e`)
 
 ## Implementation runs
 | Run | Delivered milestone | Tasks in execution order | Prerequisites |
@@ -15,7 +15,8 @@ Status: approved
 ## Task 1 — Confirm before "Open a file" replaces a modeling
 Goal: pressing Open in the "Open a file" panel asks first when any modeling has content, with the
 single-session or comparison-session wording; Cancel uploads nothing.
-Status: approved
+Status: done (`545c0852`, review fix `53626e5e`)
+Archive lead: `specs/design/journeys/save-and-load.html` ("Open a file" screen help and code-trace) should mention the session-aware replace confirmation.
 Brief: [briefs/task-1.md](briefs/task-1.md)
 Repository: e-footprint-interface
 Files touched: `model_builder/adapters/views/views.py`,
