@@ -41,6 +41,9 @@ All of those use `hx-get`, so the hand-built GET works for them. Three exception
 
 `specs/features/server-rendered-state-follow-up/kickoff.md` (Group 2, "Deferred side-panel request replay") already plans to make all three block.
 
+## Reproduction
+- none — the settled fix (Decisions, 2026-10-21) replaces the replay contract rather than correcting it: after "Discard changes" nothing is issued and the user repeats the click, as the mission's guards-block rule requires. The boosted-link misfire exists only inside the replay path that the task deletes, so there is no expected behaviour of the current mechanism to assert. The new contract is pinned by the tests listed under Tests (Jest branch cases and the rewritten and new E2E tests), which the task names as its public-contract tests. The misfire was shown in jsdom only; the new Data & privacy E2E confirms it in a browser and is the test to watch fail first if a reviewer wants the defect observed.
+
 ## Fix approach
 
 **Recommended: make this guard block, and move it to `htmx:confirm`.**

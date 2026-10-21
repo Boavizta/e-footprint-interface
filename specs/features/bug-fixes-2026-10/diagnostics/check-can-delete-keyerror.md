@@ -59,6 +59,41 @@ With part 1 patched, the EcoLogits server panel still returns 500. Form building
 
 Task 4 adds a filter in `efootprint_contextual_modeling_obj_containers` (`modeling_object_web.py:378-380`) that drops detached entries (`modeling_obj_container is None`). This fix edits the loop directly below it (`:389-390`). The two changes are independent in behavior: Task 4 removes `None` containers, and this fix skips non-constructor attribute names. They touch adjacent lines of one property, so they should land in sequence (Task 4 first, then this one, or both by one implementer). After Task 4, this fix needs no `None` guard.
 
+## Reproduction
+
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner` — view (Django client and session, system built programmatically); fails on `dev@6a1c10ea`. It is parametrized over `EdgeStorage`, `RecurrentEdgeProcessCPUNeed`, `RecurrentEdgeWorkloadNeed` and `EcoLogitsGenAIExternalAPIServer`. Each case asserts that `open-edit-object-panel` returns 200 with `id="btn-ask-delete"`, then that `ask-delete-object` returns 200 with "is referenced by", the owner's name, and no "Yes, delete". All four cases record `assert 500 == 200` at `test_views_edition.py:255`, because `@render_exception_modal_if_error` turns the exception into the error modal. The workload need, which was only read in code above, is now reproduced as well.
+- Traceback, part 1 (`EdgeStorage`; the two component needs differ only in `KeyError: 'recurrent_edge_component_needs'`):
+  ```
+  e-footprint-interface/model_builder/adapters/views/exception_handling.py:140 wrapper
+  e-footprint-interface/model_builder/adapters/views/views_edition.py:44 open_edit_object_panel
+  e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:415 mirrored_cards
+  e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:390 list_containers_and_attr_name_in_list_container
+  KeyError: 'components'
+  ```
+  The EcoLogits server goes through the same frames with `KeyError: 'server'`. That failure shows only once part 2 is patched, because part 2 fails first, at `views_edition.py:27`.
+- Traceback, part 2 (`EcoLogitsGenAIExternalAPIServer`):
+  ```
+  e-footprint-interface/model_builder/adapters/views/exception_handling.py:140 wrapper
+  e-footprint-interface/model_builder/adapters/views/views_edition.py:27 open_edit_object_panel
+  e-footprint-interface/model_builder/adapters/forms/form_context_builder.py:143 build_edition_context
+  e-footprint-interface/model_builder/adapters/forms/strategies/simple.py:110 build_edition_context
+  e-footprint-interface/model_builder/adapters/forms/form_field_generator.py:238 generate_dynamic_form
+  e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:111 get_corresponding_web_class
+  KeyError: 'ExternalAPIServer'
+  ```
+- Watch:
+  - `(container.class_as_simple_str, attr_name)` at `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389` → `('EdgeComputer', 'components')`; `('RecurrentEdgeProcess', 'recurrent_edge_component_needs')`; `('RecurrentEdgeWorkload', 'recurrent_edge_component_needs')`; `('EcoLogitsGenAIExternalAPI', 'server')`. The `EdgeStorage` also has the entries `('EdgeComputer', 'storage')` and `('RecurrentEdgeProcessStorageNeed', 'edge_component')`.
+  - `attr_name in container_signature` at `…/modeling_object_web.py:390` → `False` for the four entries above, so `container_signature[attr_name]` raises. It is `True` for `storage` and `edge_component`.
+  - `corresponding_canonical_class.__name__` at `e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:111`, for `efootprint_class=EcoLogitsGenAIExternalAPIServer` → `'ExternalAPIServer'`.
+  - `'ExternalAPIServer' in EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING` at `…/efootprint_to_web_mapping.py:111` → `False`.
+  - `panel_response.status_code` at `e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py:255` → `500` in all four cases.
+- Debug recipe: run `poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner"` and break on `test_views_edition.py:255`, right after the panel request. The decorator swallows the exception, so to step through the chain, break at `modeling_object_web.py:390` or `efootprint_to_web_mapping.py:111`.
+- Discrimination: I ran Tasks 4 and 6 as scratch monkeypatches with `--runxfail`, without committing them:
+  - Task 4 with both parts: 4 passed. Both parts without Task 4 also pass, so the test does not depend on Task 4.
+  - Task 4 with part 1 only: the server case fails (`KeyError: 'ExternalAPIServer'`).
+  - Task 4 with part 2 only: all four fail; the server now fails with `KeyError: 'server'`.
+  - Task 4 alone: all four fail.
+
 ## Fix approach
 
 1. **`:389-390`:** look the parameter up with `.get(attr_name)` and `continue` when it is `None`. This follows the library's own "not in the init signature means not a structural input" rule (`modeling_object.py:423-425`, `:491-493`). A library-built relationship is not a user-editable list membership. It must not become a list-removal target either: removing the object would mean editing a non-constructor attribute. Two outcomes follow:
@@ -82,22 +117,19 @@ Rejected alternatives:
 
 - `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py`: in `list_containers_and_attr_name_in_list_container` (`:389-390`), replace `container_signature[attr_name]` with `.get(attr_name)` and skip `None`. Rebase onto Task 4's `:378-380` filter.
 - `e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py`: add `"ExternalAPIServer": ModelingObjectWeb` near `:52-54`.
-- `e-footprint-interface/tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py`: extend the list-container test (`:308-334`).
-- `e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py`: add `check_can_delete` cases in the `# --- check_can_delete ---` section (`:16`).
-- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py`: add the view regression.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py`: remove the reproduction's expected-failure marker.
+- `e-footprint-interface/tests/unit_tests/domain/test_web_efootprint_wrappers.py`: drop `"ExternalAPIServer"` from the exclusion list in `test_make_sure_that_all_canonical_classes_are_mapped` (`:25`).
 - `e-footprint-interface/CHANGELOG.md`: add a `## [Unreleased]` fix entry.
 
 ## Tests
 
-- **Domain unit** (`test_modeling_object_web.py`): add a stub contextual entry whose container class signature lacks `attr_name`. It must be ignored, while a sibling entry on a list-typed constructor input is still returned with its attribute name.
-- **Use case** (`test_delete_object.py`, real examples loaded into a `ModelWeb`):
-  - `check_can_delete` on `iot_industrial.json` `Sensor-local-storage` returns `can_delete=False`, with `Factory sensor` among the blocking containers;
-  - on `Measure-temperature-and-vibration-CPU-need`, it returns `can_delete=False` and lists `Measure temperature and vibration`;
-  - on `ai_chatbot.json` `Small-LLM-API-server`, it returns `can_delete=False` and lists `Small LLM API`.
-
-  All three raise `KeyError` before the fix.
-- **View regression** (`test_views_edition.py`, Django client plus session, parametrized over the three example/object pairs above plus `genai_video.json` `Seedance-video-generation-API-server`): `GET /model_builder/open-edit-object-panel/<id>/` returns 200 and contains `btn-ask-delete`. Run it with `RAISE_EXCEPTIONS` unset and assert no exception modal. Optionally chain `GET /model_builder/ask-delete-object/<id>/` and assert 200 with the "referenced by" text. Before the fix, the panel returns 500 (`KeyError 'components'`, `'recurrent_edge_component_needs'`, or `'ExternalAPIServer'`).
-- **E2E is not required**: the behavior is server-rendered and the view test covers it.
+- The reproduction is this task's only test:
+  - `tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner`. Remove its expected-failure marker.
+  - It covers both parts at the supported boundary: the panel opens, and Delete is blocked by the owner.
+  - No separate domain or use-case cases are needed: `check_can_delete` is exercised through `ask-delete-object`.
+- One existing-test edit: drop `"ExternalAPIServer"` from the exclusion list in `tests/unit_tests/domain/test_web_efootprint_wrappers.py::test_make_sure_that_all_canonical_classes_are_mapped` (`:25`). Once the mapping entry exists the exclusion is stale. This removes an exclusion and adds no test.
+- The edit-submit smoke check under Risks is answered by Task 8's reproduction: renaming `Sensor-local-storage` returns 200 with an out-of-band swap of the edge computer card.
+- No E2E test is needed: the behavior is server-rendered, and the view test covers it.
 
 ## Acceptance criteria
 

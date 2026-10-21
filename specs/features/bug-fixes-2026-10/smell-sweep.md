@@ -72,5 +72,15 @@ is known: S1's post-delete check.
    process/workload need panels.
 3. **S6 (+S8, S10): `template_kind` dispatch, one URL tag and one explainable wrapper factory.** Run it after Task 10.
 
+### Reproductions
+
+The three refactor tasks carry no reproduction test:
+
+- **Task 13 (S4 + S11)** and **Task 14 (S6 + S10)** are refactors and rely on the existing suite. Their few deliberate
+  behaviour deltas (one wrapper for the four recurrent process/workload needs; the "(see graph)" link for input-timeseries
+  ancestors) are new contracts, pinned by the tests each task lists, not defects of today's mechanism.
+- **Task 15 (S3)** is test-only: its invariant tests are the deliverable. They pass only once Tasks 1–14 have shipped, and
+  the confirmed bugs they would catch already have their own reproductions.
+
 Two new bug tasks to diagnose and order into the batch: **S1** (silent partial deletion, after Task 8; fold in S7) and **S2**
 (highlight expansion broken for nested cards). **S5** folds into Task 9 (decorate `ask_delete_object`).

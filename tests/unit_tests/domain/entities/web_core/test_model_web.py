@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import ciso8601
 import numpy as np
+import pytest
 import pytz
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
@@ -88,6 +89,38 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Devices_manufacturing"], [0, 2.7])
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
         self.assertListEqual(emissions["values"]["Edge_devices_manufacturing"], [3.1, 0])
+
+    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 5")
+    def test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period(self):
+        start_date = pytz.utc.localize(ciso8601.parse_datetime("2027-01-01 00:00"))
+        n_hours = 4748 * 24
+
+        def constant_hourly_kg(kg_per_hour):
+            return ExplainableHourlyQuantities(
+                Quantity(np.full(n_hours, kg_per_hour, dtype=np.float32), u.kg), start_date=start_date, label="test")
+
+        empty_footprints = {
+            key: EmptyExplainableObject()
+            for key in ["Servers", "Storage", "ExternalAPIs", "Devices", "Network", "EdgeDevices"]}
+        long_model_web = ModelWeb.__new__(ModelWeb)
+        long_model_web._system_emissions = None
+        long_model_web.system = MagicMock()
+        long_model_web.system.total_use_footprints = {
+            **empty_footprints, "Network": constant_hourly_kg(0.0833)}
+        long_model_web.system.total_manufacturing_footprints = {
+            **empty_footprints, "Servers": constant_hourly_kg(5.14403), "EdgeDevices": constant_hourly_kg(83.3456)}
+        long_model_web.system.total_footprint = (
+            long_model_web.system.total_use_footprints["Network"]
+            + long_model_web.system.total_manufacturing_footprints["Servers"]
+            + long_model_web.system.total_manufacturing_footprints["EdgeDevices"])
+
+        emissions = long_model_web.system_emissions
+
+        self.assertEqual(emissions["display_unit"], "kt")
+        library_total = long_model_web.system.total_footprint.sum().value.to(u.kt).magnitude
+        payload_total = sum(sum(daily_values) for daily_values in emissions["values"].values())
+        self.assertAlmostEqual(payload_total / library_total, 1, delta=1e-5)
+        self.assertGreater(sum(emissions["values"]["Network_energy"]), 0)
 
     def test_system_emissions_returns_empty_result_when_no_hourly_quantities(self):
         empty_model_web = ModelWeb.__new__(ModelWeb)

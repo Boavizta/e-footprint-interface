@@ -232,14 +232,11 @@ GitHub #151, and the latent same-crash after an `edge_device` relink.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/adapters/views/test_views_deletion.py` — view regression on
-  `iot_industrial.json`, parametrized over `Upload-sensor-readings` and
-  `Measure-temperature-and-vibration`: 200, no exception modal, top-parent OOB swap present,
-  deleted id absent, sibling need present, session data updated.
-- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` —
-  list and dict container properties ignore a detached entry; `mirrored_cards` does not raise.
+- `tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card`
+  — reproduction; remove its expected-failure marker. No other tests.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - Deleting a recurrent server or edge need on the Industrial IoT example shows no error modal; the
   canvas immediately matches what a reload shows.
 - Deletion of jobs, steps, usage patterns and edge components is unchanged.
@@ -270,18 +267,13 @@ rounding is unchanged. Fixes GitHub #146 (regression from `479e9a7f`) and helps 
 - `CHANGELOG.md` — `## [Unreleased]` fix entry referencing #146.
 
 **Tests added/changed:**
-- `tests/unit_tests/domain/entities/web_core/test_model_web_utils.py` — adapt
-  `test_to_rounded_daily_values_respects_aggregation_strategy`; sub-step constant series stays
-  non-zero, sum within 1e-5 relative, zeros stay 0, mean aggregation works.
-- `tests/unit_tests/domain/entities/web_core/test_model_web.py` — long-period (≈4,748 days, kt)
-  regression beside `test_system_emissions`: values sum to `total_footprint` within 1e-5, small
-  category sum > 0.
-- `tests/integration/test_modeling_integration.py` — every introductory example's
-  `system_emissions["values"]` sums to the library total within 1e-5 (fails today on `ai_chatbot`
-  and `iot_industrial`).
-- Run `npm run jest` once; no JS change.
+- `tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period`
+  — reproduction; remove its expected-failure marker. No other tests.
+- `tests/unit_tests/domain/entities/web_core/test_model_web_utils.py::test_to_rounded_daily_values_respects_aggregation_strategy`
+  — drop or rename its `rounding_depth=1` keyword after the rename; expected values unchanged.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - The cumulative chart's final point equals the Sankey total at the displayed 3 significant figures
   (the reporter's model shows 9.55 kt on both).
 - No 0 tooltip for a category the library reports as non-zero.
@@ -318,26 +310,20 @@ diagnosing #151.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` — a
-  contextual entry whose attribute is not a constructor input is ignored; a list-typed sibling is
-  still returned.
-- `tests/unit_tests/application/use_cases/test_delete_object.py` — `check_can_delete` returns
-  `can_delete=False` with the owner for `iot_industrial` `Sensor-local-storage` and
-  `Measure-temperature-and-vibration-CPU-need`, and `ai_chatbot` `Small-LLM-API-server`.
-- `tests/unit_tests/adapters/views/test_views_edition.py` — `open-edit-object-panel` returns 200
-  with `btn-ask-delete` and no exception modal for those three plus `genai_video`
-  `Seedance-video-generation-API-server`; optionally `ask-delete-object` shows "referenced by".
-- Smoke check (not covered by the diagnosis): submit an edit from one newly openable panel (e.g.
-  `Sensor-local-storage`) and confirm it saves and re-renders.
+- `tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner`
+  — reproduction; remove its expected-failure marker. No other tests.
+- `tests/unit_tests/domain/test_web_efootprint_wrappers.py::test_make_sure_that_all_canonical_classes_are_mapped` — drop the
+  stale `"ExternalAPIServer"` exclusion.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - Those panels open from their calculated-attribute links on the shipped examples; Delete shows the
   blocking modal naming the owner and leaves the model unchanged.
 - Jobs, needs, edge devices, CPU/RAM components and usage patterns behave as before.
 
 **Depends on:** Task 4 (adjacent lines of the same property). Task 8 must follow in the same run:
 with Task 6 alone, an `EdgeStorage` edit from its newly openable panel saves but swaps a card id
-not on the canvas, so the edge computer card is not refreshed (the smoke check above will show it).
+not on the canvas, so the edge computer card is not refreshed (Task 8's reproduction covers it).
 
 **Implementation:** easy — two one-line changes with verified causes.
 
@@ -409,21 +395,17 @@ Task 6, not hiding Delete.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- Replace the override unit tests in
+- `tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device`
+  — reproduction; remove its expected-failure marker. No other tests.
+- Delete `test_list_containers_and_attr_name_in_list_container` from
   `tests/unit_tests/domain/entities/web_builders/hardware/edge/test_edge_computer_cpu_component_web.py`,
-  `test_edge_computer_ram_component_web.py`, `test_edge_appliance_component_web.py` with a placement
-  test in `tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py`.
-- `tests/unit_tests/adapters/views/test_views_deletion.py` — iot `Factory-sensor-CPU` and
-  `Factory-sensor-RAM` plus a created `EdgeAppliance` component: `ask-delete-object` shows
-  "referenced by" and no "Yes, delete"; session data unchanged.
-- `tests/unit_tests/adapters/views/test_views_edition.py` — renaming `Factory-sensor-CPU` and
-  `Sensor-local-storage` returns 200 with an OOB swap of the edge computer card id.
-- `tests/unit_tests/application/use_cases/test_delete_object.py` — `check_can_delete` is False for
-  the CPU, RAM and appliance component, beside Task 6's cases.
-- Existing `tests/integration/test_deletion.py` device-cascade tests and the custom-edge-device
-  component E2E (`tests/e2e/objects/test_edge_objects.py`, around line 363) must keep passing.
+  `test_edge_computer_ram_component_web.py` and `test_edge_appliance_component_web.py` (they test the deleted overrides);
+  keep their calculated-attribute filter tests.
+- Existing `tests/integration/test_deletion.py` device-cascade tests and the custom-edge-device component E2E
+  (`tests/e2e/objects/test_edge_objects.py`, around line 334) must keep passing.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - Delete on a CPU, RAM or appliance component shows the blocking modal naming its device; the model
   is unchanged.
 - Renaming a CPU, RAM or appliance component, or an edge storage, re-renders the owning device card
@@ -568,22 +550,13 @@ Task 3's OOB-delete rule is unchanged.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/application/use_cases/test_delete_object.py` — journey in a 2-journey pattern
-  blocked (also for edge journeys); journey held by two patterns names both whatever their journey
-  counts; need-referenced custom component blocked naming the need, deletable without it; `Device`
-  in `UsagePattern.devices` blocked; patterns still deletable, grouped edge devices still blocked;
-  job, step and need deletion unchanged.
-- `tests/integration/test_deletion.py` — a journey unlinked from all patterns, then deleted, goes
-  with its unshared steps; `_delete` forced on a still-referenced journey or component raises and
-  leaves the repository unchanged.
-- `tests/unit_tests/adapters/views/test_views_deletion.py` (iot) — after `link-dict-entry` adds a
-  second journey to `Daily-analyst-sessions`, `ask-delete-object` on `Analyst-reviews-sensor-data`
-  shows "referenced by Daily analyst sessions" and no "Yes, delete"; a direct `delete-object` POST
-  shows the exception modal with the session unchanged.
-- Existing E2E unused-journey deletions (`test_usage_journeys.py::test_delete_usage_journey`,
-  `test_full_journey.py:143-165`) keep passing. Task 15's sweep covers these shapes.
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
+  — reproduction; remove its expected-failure marker. No other tests.
+- Existing E2E unused-journey deletions (`test_usage_journeys.py::test_delete_usage_journey`, `test_full_journey.py:143-165`)
+  and the deletion suites keep passing.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - A journey or edge journey held by any pattern shows the blocking modal naming every holding
   pattern, never "Yes, delete"; after the membership × removes it from all patterns, it deletes
   with its unshared steps or functions.

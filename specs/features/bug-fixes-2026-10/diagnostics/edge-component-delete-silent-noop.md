@@ -54,6 +54,42 @@ By contrast, a custom `EdgeDevice` takes `components: List[EdgeComponent]` as a 
 
 Control: a component added to a custom `EdgeDevice` (synthetic `EdgeCPUComponent`) is offered for deletion and is actually deleted.
 
+## Reproduction
+
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device` — view (Django client and session, `RAISE_EXCEPTIONS` unset, programmatic `edge_system_data` fixture extended with an `EdgeAppliance` under a `RecurrentEdgeWorkload`); fails on `dev@6a1c10ea`. It is parametrized over `EdgeComputerCPUComponent`, `EdgeComputerRAMComponent`, `EdgeStorage` (owner: "Shared edge computer") and `EdgeApplianceComponent` (owner: "Edge appliance"). Each case asserts three things in order:
+  1. `ask-delete-object` shows "is referenced by" with the device's name and no "Yes, delete".
+  2. A direct `delete-object` POST is not a 200, and the component is still saved, in the device's `components` too.
+  3. Renaming the component through `edit-object` returns 200 with an out-of-band swap of the device card.
+
+  The third assertion holds today for CPU, RAM and the appliance component, through the overrides. It guards the placement that the fix moves into `EdgeComponentWeb.mirrored_cards`.
+- Failures recorded with `--runxfail`:
+  - CPU, RAM and appliance component, at `test_views_deletion.py:111`: `assert 'is referenced by' in '…<p id="exception-msg" class="modal-message">Are you sure you want to delete this EdgeComputerCPUComponent ?</p>… Yes, delete …'`. RAM and the appliance component fail the same way, with their own class names.
+  - `EdgeStorage`, at HEAD, raises from the `ask-delete-object` call at `:110`. This is Task 6's failure, not this task's:
+    ```
+    e-footprint-interface/model_builder/adapters/views/views_deletion.py:22 ask_delete_object
+    e-footprint-interface/model_builder/application/use_cases/delete_object.py:89 check_can_delete
+    e-footprint-interface/model_builder/application/use_cases/delete_object.py:69 _container_removal_targets
+    e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:390 list_containers_and_attr_name_in_list_container
+    KeyError: 'components'
+    ```
+  - `EdgeStorage` with Task 6's part 1 applied: assertions 1 and 2 pass, and the case then fails for this task's reason at `:123`: `assert "hx-swap-oob='outerHTML:#sys-…-EdgeComputer-…'" in '<div hx-swap-oob=\'outerHTML:#sys-…-EdgeStorage-…\'>…'`. The edit swaps a storage card that is not on the canvas, and the edge computer card is not refreshed. This layering is why the storage case belongs here: Task 6 makes it reachable, and Task 8 places it.
+  - The masked assertion 1 stops the run before the POST. A scratch observation of the same POST on the same fixture (below) gives, for all three classes: `status=200`, no modal, the component id still in the device's `components`, and the device card swapped. That is the silent no-op.
+- Watch (values from the recorded run; the three classes differ only in names):
+  - `[c.name for c in containers], attr_name` returned at `e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py:8` (RAM `edge_computer_ram_component.py:8`, appliance `edge_appliance_component.py:10`) → `(['Shared edge computer'], 'components')`; for the appliance `(['Edge appliance'], 'components')`.
+  - `list_or_dict_containers` at `e-footprint-interface/model_builder/application/use_cases/delete_object.py:106` → `['Shared edge computer']`, so the direct-reference block is skipped. `check_can_delete` returns `can_delete=True, is_list_or_dict_deletion=True` at `:140-141`.
+  - `edit_data` at `e-footprint-interface/model_builder/application/use_cases/delete_object.py:205` → `{'name': 'Shared edge computer', 'components': [<RAM id>, <storage id>]}` for the CPU; for the appliance `{'name': 'Edge appliance', 'components': []}`.
+  - `attr_name not in init_sig_params` at `e-footprint-interface/model_builder/domain/object_factory.py:180`, for `components` on `EdgeComputer` or `EdgeAppliance` → `True`, so the key is skipped. `prepare_input_changes` returns `0` changes, and `proposed` is empty at `:352`.
+  - `deletion.status_code`, plus the component id in `saved_after['EdgeComputer'][device_id]['components']`, after the POST at `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:115` → `200`, `True` (scratch observation).
+- Debug recipe: run `poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device"` and break on `test_views_deletion.py:111`, right after the `ask-delete-object` call. To step through the silent POST, break at `delete_object.py:205` and `object_factory.py:180` and evaluate the POST from the debugger, because assertion 1 stops the test first.
+- Discrimination: I ran Tasks 6 and 8 as scratch pytest plugins with `--runxfail`, without committing them:
+  - Tasks 6 + 8: 4 passed. Tasks 4 + 6 + 8 also pass.
+  - Task 6 alone: all 4 fail. CPU, RAM and the appliance component still get "Yes, delete"; `EdgeStorage` swaps the wrong card.
+  - Task 8 alone: all 4 fail with `KeyError: 'components'` from `ask-delete-object`, which confirms the hard dependency.
+  - Task 6 plus deleting the three overrides without the placement override (rejected alternative): all 4 fail. CPU, RAM and the appliance component fail with `assert 500 == 200` at `:122` on the edit; `EdgeStorage` swaps the wrong card.
+
+  The plugins are `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task6/task6_plugin.py` (`TASK6_PATCH=part1`) and `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task8/task8_plugin.py` (`TASK8_PATCH=1|removal`, `TASK8_WATCH=1`); the observation test is `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task8/test_task8_observe.py`.
+- Line numbers cited in Root cause were re-checked against `6a1c10ea`; none drifted.
+
 ## Fix approach
 
 The fix lands on top of Task 6's `.get(attr_name)` skip in the base property. It separates the overrides' rendering role from the removal role they claim by accident:
@@ -86,17 +122,17 @@ Rejected alternatives:
 - `e-footprint-interface/model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py`, `edge_computer_ram_component.py`, `edge_appliance_component.py`: base class `EdgeComponentWeb`; delete the `list_containers_and_attr_name_in_list_container` overrides (`:5-8`, `:5-8`, `:7-10`); drop the unused `typing` import in the appliance file.
 - `e-footprint-interface/specs/architecture/forms-and-relationships.html` (or `layers-and-wrappers.html`, wherever `mirrored_cards`/list containers are described): one line. Library-built relationships are never removal targets, and edge components are placed under their device's cards through `EdgeComponentWeb.mirrored_cards`.
 - `e-footprint-interface/CHANGELOG.md`: `## [Unreleased]` fix entry.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py`: remove the reproduction's `xfail` marker.
+- `e-footprint-interface/tests/unit_tests/domain/entities/web_builders/hardware/edge/test_edge_computer_cpu_component_web.py`, `test_edge_computer_ram_component_web.py`, `test_edge_appliance_component_web.py`: delete the override tests (see Tests).
 
 ## Tests
 
-- **Replace the override unit tests** `tests/unit_tests/domain/entities/web_builders/hardware/edge/test_edge_computer_cpu_component_web.py:13`, `test_edge_computer_ram_component_web.py:13` and `test_edge_appliance_component_web.py:11`. They currently assert `([edge_device], "components")`. Move a placement test to `tests/unit_tests/domain/entities/web_core/hardware/edge/test_edge_component_web.py`: `mirrored_cards` returns one mirror per device mirror, with `list_container` set to it.
-- **View regression** (`tests/unit_tests/adapters/views/test_views_deletion.py`, Django client plus session, `RAISE_EXCEPTIONS` unset). On `iot_industrial.json`, parametrize over `Factory-sensor-CPU` and `Factory-sensor-RAM`, plus an `EdgeAppliance` created in the test:
-  - `ask-delete-object` returns 200 with "referenced by" and without "Yes, delete";
-  - the session data still holds the component and the device's `components` is unchanged.
-  - Before the fix, the modal offers "Yes, delete".
-- **Edit regression** (`tests/unit_tests/adapters/views/test_views_edition.py`). `edit-object/Factory-sensor-CPU/` with `EdgeComputerCPUComponent_name` returns 200 with an OOB swap of the edge computer card id. Add the same for `Sensor-local-storage` with `EdgeStorage_name`; this needs Task 6.
-- **Integration**: `tests/integration/test_deletion.py::test_delete_edge_computer_cascades_to_components` and `::test_delete_edge_appliance_cascades_to_component` must keep passing. Add `check_can_delete(...).can_delete is False` for the CPU, RAM and appliance component in `tests/unit_tests/application/use_cases/test_delete_object.py`, beside Task 6's cases.
-- **E2E**: not required (server-rendered). The existing custom-edge-device component flow in `tests/e2e/objects/test_edge_objects.py` (around `:363`) must keep passing.
+- The reproduction is this task's only test: `tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device`. Remove its expected-failure marker.
+  - It covers deletion blocking, direct-POST refusal and device-card placement at the view boundary, for CPU, RAM, edge storage and the appliance component. Task 6's reproduction listed edge-storage edit placement as a smoke check; this test now carries it.
+  - No placement unit test, separate edit-view test or `check_can_delete` use-case case is needed. `check_can_delete` is exercised through `ask-delete-object`, and placement through `edit-object`. No other existing test covers a component edit re-rendering the device card; the reproduction's third assertion is that coverage.
+- Required existing-test edits: delete `test_list_containers_and_attr_name_in_list_container` from `tests/unit_tests/domain/entities/web_builders/hardware/edge/test_edge_computer_cpu_component_web.py:13`, `test_edge_computer_ram_component_web.py:13` and `test_edge_appliance_component_web.py:11`. They test the overrides that the fix deletes. Keep their `test_calculated_attributes_filters_known_fields` tests.
+- Must keep passing: `tests/integration/test_deletion.py::test_delete_edge_computer_cascades_to_components` and `::test_delete_edge_appliance_cascades_to_component`, and the custom-edge-device component flow `tests/e2e/objects/test_edge_objects.py::TestEdgeObjects::test_edge_device_with_cpu_ram_components_and_component_needs` (`:334`).
+- No E2E test is needed: the behavior is server-rendered, and the view test covers it.
 
 ## Acceptance criteria
 

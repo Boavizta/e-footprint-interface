@@ -52,6 +52,21 @@
 - Daily binning for chart transport is presentation shaping and stays in the interface. The fix must make it faithful to the library total, not replace that total.
 - Separately, the draft `results-analysis` feature plans to retire `EmissionsCalculationService` in favor of library-delivered daily projections (`e-footprint-interface/specs/features/results-analysis/plan.html:31-36`, `:160-161`). That feature is not started. This bug should be fixed now.
 
+## Reproduction
+
+- `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period` — unit, at the `ModelWeb.system_emissions` payload boundary; fails on `dev@6a1c10ea`.
+  - Layer: a sibling of `test_system_emissions`, reusing its stand-in style (a `MagicMock` system holding real `ExplainableHourlyQuantities`). It covers 4,748 days from 2027-01-01, the reporter's period length. There are three constant categories: `EdgeDevices` manufacturing at 83.3456 kg/h (dominant), `Servers` manufacturing at 5.14403 kg/h (mid-size, off the 1e-5 kt grid) and `Network` energy at 0.0833 kg/h (small, ≈2 kg/day). `total_footprint` is their library `+`, so `total_footprint.sum()` is the library's float32 total. The test reaches kt scale in 0.15 s. A from_defaults system or an introductory-example integration test would cost a full 13-year computation and is not needed to reach the failing scale.
+  - When the marker goes, it stays as the long-period sibling of `test_system_emissions`. Its assertions are tolerance-based, while that test's are exact-value, so the two do not merge.
+- Assertion (trimmed): `AssertionError: 0.997294973517452 != 1 within 1e-05 delta (0.002705026482548001 difference)` at `test_model_web.py:122`. The payload sums to 10.06576 kt against a library total of 10.093062 kt, which is 27.3 t short (2.7e-3 relative). The small-category assertion is never reached: `Network_energy` sums to 0.0 (see the watch below).
+- Watch:
+  - `best_display_unit(system.total_footprint.sum().value)` at `e-footprint-interface/model_builder/domain/services/emissions_calculation_service.py:90` → `10093062.0 kg` → `kilometric_ton` (kt)
+  - `np.round(daily, rounding_depth)` at `e-footprint-interface/model_builder/domain/entities/web_core/model_web_utils.py:78`, `Network_energy` → `daily[0]` 1.9992000375168573e-06 kt before → 0.0 after. All 4,748 days sum to 0.0, a loss of ≈9.49 t.
+  - Same line, `Servers_and_storage_manufacturing` → `daily[0]` 0.0001234567243955098 kt before → 0.00012 after. The same −3.46e-6 kt error repeats every day: the payload sum is 0.56976 kt, ≈16.4 t short.
+  - Same line, `Edge_devices_manufacturing` → `daily[0]` 0.002000294392928481 kt before → 0.002 after. The payload sum is 9.496 kt, ≈1.4 t short.
+  - `payload_total / library_total` at `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py:122` → 0.997294973517452
+- Debug recipe: break at `test_model_web.py:120`, after the act at `:117`. Run `poetry run pytest --runxfail "tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period"`.
+- Discrimination: a scratch pytest plugin monkeypatches the plan's vectorized 6-significant-figure rounding into `to_rounded_daily_values`. With it, the test passes under `--runxfail`, and all five `TestModelWeb` tests pass, including the exact-value `test_system_emissions`. Without `--runxfail`, it reports XPASS(strict). The plugin was not committed.
+
 ## Fix approach
 
 **Recommended:** in `to_rounded_daily_values`, replace fixed-decimal rounding with **per-value significant-figure rounding**, 6 significant figures (vectorized NumPy, O(n_hours)). Keep everything else unchanged: the shared display unit, the payload shape and the JS.
@@ -85,29 +100,19 @@ Implement it as a small local helper (`decimals = sig_figs - 1 - floor(log10|v|)
 
 ## Files to touch
 - `e-footprint-interface/model_builder/domain/entities/web_core/model_web_utils.py` — `to_rounded_daily_values` (`:46-78`): significant-figure rounding (default 6) instead of `np.round(daily, rounding_depth)`. Update the docstring.
-- `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web_utils.py` — adapt `test_to_rounded_daily_values_respects_aggregation_strategy` (`:50-62`, currently passes `rounding_depth=1`) and add the regression cases below.
-- `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py` — add a long-period regression next to `test_system_emissions` (`:77`). Existing expectations ([1, 0], [0, 1.1], …) remain valid.
+- `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web_utils.py`: in `test_to_rounded_daily_values_respects_aggregation_strategy` (`:61`), drop or rename the `rounding_depth=1` keyword argument. The expected values are unchanged.
+- `e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py`: remove the strict-xfail marker from the reproduction.
 - `e-footprint-interface/CHANGELOG.md` — Fixed entry referencing #146.
 - `e-footprint-interface/specs/architecture/layers-and-wrappers.html` — optional one-liner at `:81`: chart daily series are rounded to significant figures, so sums stay faithful to the library total.
 
 No `emissions_calculation_service.py`, JS, template or library change is needed.
 
 ## Tests
-- **Unit (`test_model_web_utils.py`).**
-  - A series in a large unit with a constant sub-step value (for example 2e-6 kt/day for 4,748 days) returns non-zero daily values.
-  - Its sum matches the unrounded sum within relative 1e-5.
-  - Exact zeros stay 0.
-  - Mean aggregation still works.
-- **Unit (`test_model_web.py` or `tests/unit_tests/domain/services/`, matching existing placement).**
-  - Build a `SystemWithFootprints` stand-in in the style of the existing `test_system_emissions` fixture. Use about 4,748 days of hourly kg data: one dominant category of about 2 t/day, plus one repeated small category of about 2 kg/day and one constant mid-size category whose daily value sits off the 1e-5 kt grid.
-  - `display_unit == "kt"`.
-  - The sum of all `values` matches `total_footprint.sum()` converted to kt within relative 1e-5. The library sum accumulates in float32.
-  - The small category's sum is > 0.
-  - This fails on the current code: the small category vanishes, about 9.5 t on about 9.5 kt, 1e-3 relative.
-- **Integration (`tests/integration/test_modeling_integration.py`, next to `:120`).**
-  - For each introductory example, the summed `system_emissions["values"]` matches `system.total_footprint.sum()` in the display unit within relative 1e-5.
-  - Current code fails this on `ai_chatbot` (6.6e-5) and `iot_industrial` (2.8e-5).
-- **JS.** No change. `js_tests/result_chart_display.test.js` already covers 3-significant-figure display rounding. Run `npm run jest` once to confirm.
+- **Reproduction (the task's only test):** `tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period` (see Reproduction). Remove its strict-xfail marker once the fix lands.
+- **Existing-test adjustment:** in `tests/unit_tests/domain/entities/web_core/test_model_web_utils.py`, `test_to_rounded_daily_values_respects_aggregation_strategy` (`:57-62`) calls the helper with `rounding_depth=1`. Renaming that parameter to `sig_figs` breaks this call with a `TypeError`. The expected values do not break: the prototype returns `[48.0, 48.0]` and `[2.0, 2.0]`. Drop the keyword argument or rename it. Do not change the expectations.
+- The exact-value `test_system_emissions` stays valid under the new rounding (checked with the prototype).
+- **Subsumed:** the earlier list of `to_rounded_daily_values` unit cases is covered by the reproduction at the payload boundary. Those cases were: sub-step constant series, sum within 1e-5, zeros stay 0, and mean aggregation. Mean aggregation stays covered by the existing parametrized test. The per-introductory-example integration check in `test_modeling_integration.py` is also covered by the reproduction. Neither is added.
+- **JS:** no change. Running `npm run jest` once is optional.
 
 ## Acceptance criteria
 - For any model, the cumulative chart's final point (all categories stacked) equals the Sankey/library total at the displayed 3-significant-figure precision. The reporter's model shows 9.55 kt on both.

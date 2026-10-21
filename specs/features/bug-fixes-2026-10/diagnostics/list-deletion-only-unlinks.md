@@ -113,6 +113,37 @@ pattern's results have changed. After Task 3 drops the hyperscript, the card wou
   removes. `JourneyBaseWeb`'s flag also stops the forward cascade on pattern delete (`modeling_object_web.py:578-583`).
   Unlinking and pattern deletion keep reusable journeys alive, which is correct.
 
+## Reproduction
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
+  — use case (`check_can_delete`, then a forced `execute`); fails on `dev@6a1c10ea`. Parametrized over programmatic
+  systems. The asserted tuple is (`can_delete`, sorted blocking names, "object gone or repository
+  unchanged after the forced delete").
+- Assertion failures (`--runxfail`):
+  - `[journey_in_two_journey_pattern]`: `(True, [], False) == (False, ['Pattern'], True)`.
+  - `[edge_journey_in_two_journey_edge_pattern]`: `(True, [], False) == (False, ['Edge pattern'], True)`.
+  - `[journey_in_two_patterns]` (R2 shape: sole member of "Sole pattern", one of two in "Shared pattern"):
+    `(False, ['Sole pattern'], False) == (False, ['Shared pattern', 'Sole pattern'], True)`.
+  - `[edge_component_referenced_by_need]`: `(True, [], False) == (False, ['CPU need'], True)`.
+  - In every case the forced delete returns normally and the object stays in the saved model, only unlinked.
+- Watch (values from the recorded run; `[edge_component_referenced_by_need]` in brackets):
+  - `self._container_removal_targets(web_obj, web_class)` at `model_builder/application/use_cases/delete_object.py:89`
+    → dict containers `['Pattern']` (`usage_journeys`); edge: list containers `['Edge pattern']`; two patterns:
+    `['Shared pattern', 'Sole pattern']` [list containers `['Device']` (`components`)].
+  - `blocking_required_containers` at `delete_object.py:99` → `[]`; two patterns: `['Sole pattern']` only.
+  - `web_obj.modeling_obj_containers and not list_or_dict_containers` at `delete_object.py:106` → `False`, with
+    containers `['Pattern']` [`['Device', 'CPU need']`]: the direct-reference block is skipped.
+  - `removed_children` at `model_builder/domain/services/edit_service.py:59` → `[]`, because the pattern's
+    `accordion_children` is `[]` [`[CPU]`, but `len(child.modeling_obj_containers) == 1` at `:67`, so it is not
+    deleted].
+  - `input_data.object_id in self.model_web.flat_efootprint_objs_dict` at `delete_object.py:212` (`_delete`'s
+    list/dict branch, `:180` → `True`) → `True`; remaining containers `[]` [`['CPU need']`].
+- Debug recipe: break at the test's `data_after = repository.get_system_data()` line, after the forced `execute`.
+  Unmasked run: `poetry run pytest --runxfail "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked"`.
+- Discrimination: passes (4/4, whole file 10/10) with the settled-fix prototype `s1_block_plugin.py` applied via
+  `-p` and no other prototype (Tasks 4, 6 and 8 are not needed for these shapes). The rejected delete-everywhere
+  prototype `s1_fix_plugin.py` passes only the component case and fails the three journey cases on the blocking
+  names.
+
 ## Fix approach
 
 **Settled (2026-10-21): a pattern's reference blocks deleting the journey.** This generalizes
@@ -185,27 +216,14 @@ re-render covers. Prototyped in `s1_block_plugin.py`: the suite stays green, and
   blocked instead of silently unlinking it. A custom edge component referenced by a need is blocked.
 
 ## Tests
-- **Unit** (`tests/unit_tests/application/use_cases/test_delete_object.py`):
-  - `check_can_delete` on a journey held by a pattern with two journeys returns `can_delete=False`, naming the
-    pattern. The same holds for an edge journey;
-  - a journey held by two patterns names both, whatever their journey counts (R2 and R3 shapes);
-  - a custom `EdgeDevice` component referenced by a need is blocked, naming the need. Without the need it is still
-    deletable;
-  - `Device` in `UsagePattern.devices` is blocked, naming the pattern;
-  - patterns stay deletable, grouped edge devices stay blocked, and job, step and need deletion is unchanged.
-- **Integration** (`tests/integration/test_deletion.py`):
-  - after unlinking a journey from its patterns through the edit use case, deleting it removes it and its unshared
-    steps;
-  - `_delete` forced on a still-referenced journey or component, without `check_can_delete`, raises and leaves the
-    repository unchanged.
-- **View** (`tests/unit_tests/adapters/views/test_views_deletion.py`): iot `Analyst-reviews-sensor-data` after
-  adding a second journey to `Daily-analyst-sessions` (via `link-dict-entry`). `ask-delete-object` shows
-  "referenced by Daily analyst sessions" and no "Yes, delete". A direct `delete-object` POST shows the exception
-  modal and leaves the session unchanged.
-- **E2E**: not required (server-rendered modal). The existing unused-journey deletions
-  (`tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey`, `test_full_journey.py:143-165`) must keep
-  passing.
-- S3's planned "every offered delete removes the object" sweep should include the R3 and edge shapes and case c.
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
+  is the task's only test: remove its expected-failure marker. It covers the journey and edge-journey blocks, every holding pattern named, the need-referenced component, and "deleted or model unchanged" for a forced
+  delete.
+- Existing coverage that must keep passing (not new tests): the E2E unused-journey deletions
+  (`tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey`, `test_full_journey.py:143-165`) and the
+  existing deletion suites (patterns, grouped edge devices, jobs, steps, needs).
+- The earlier list (unit, integration and view cases, the `Device` in `UsagePattern.devices` case) is subsumed by
+  the reproduction and the existing suites.
 
 ## Acceptance criteria
 - A journey or edge journey held by any pattern shows the blocking modal naming every holding pattern. It is never

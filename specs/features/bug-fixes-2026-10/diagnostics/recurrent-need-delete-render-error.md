@@ -10,7 +10,7 @@
 
 **Library state at that point (by design).** When the library unlinks a relationship, it detaches the `ContextualModelingObjectAttribute` wrapper (`set_modeling_obj_container(None, None)`). The wrapper stays in the referenced object's `contextual_modeling_obj_containers`. It was appended at construction (`e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py:17`) and detaching only nulls its container (`e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:65-81`). This detaching happens in two places:
 - `self_delete` detaches all of the deleted object's forward links (`e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:693-699`). The deleted need's `edge_device` wrapper stays on the shared `EdgeComputer`.
-- A list replacement detaches the old entries (`e-footprint/efootprint/abstract_modeling_classes/list_linked_to_modeling_obj.py:74-97`). The surviving sibling need gets a detached entry from the function's old list.
+- A list replacement detaches the old entries (`e-footprint/efootprint/abstract_modeling_classes/list_linked_to_modeling_obj.py:64-67`, reached from `ModelingUpdate.apply_changes` at `e-footprint/efootprint/abstract_modeling_classes/modeling_update.py:122` through `object_linked_to_modeling_obj.py:214`). The surviving sibling need gets a detached entry from the function's old list.
 
 Every library reader treats detached entries as absent:
 - `modeling_obj_containers` (`e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:459-465`)
@@ -42,8 +42,29 @@ The bug is **not deletion-only**. Relinking a server need's `edge_device` to ano
 
 **Why tests miss it.**
 - Integration deletion tests stop at the use case (`e-footprint-interface/tests/fixtures/use_case_helpers.py:26-28`) and never render.
-- The only view-level deletion test deletes a `UsagePattern`, which takes the non-list path (`e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:7-24`).
+- The only view-level deletion test deletes a `UsagePattern`, which takes the non-list path (`e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:51-68`).
 - The unit test for the property uses stubs with live containers only (`e-footprint-interface/tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py:308-334`).
+
+## Reproduction
+
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card` — Django view test (client plus session, POST `/model_builder/delete-object/<id>/`), parametrized over `[RecurrentServerNeed-Server need]` and `[RecurrentEdgeProcess-Edge process]`; fails on `dev@6a1c10ea` (library checkout `e-footprint@33fb6e20`). Fixture `edge_system_data` builds the Industrial IoT shape with `from_defaults()`: one edge function whose two recurrent edge processes and one recurrent server need share one `EdgeComputer`.
+- Failure at the boundary: `assert response.status_code == 200` → `assert 500 == 200` (the exception modal) at `test_views_deletion.py:86`, both cases. Raw traceback under `RAISE_EXCEPTIONS=1` (trimmed, Django and template frames elided, innermost last):
+  - `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:83 test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card`
+  - `e-footprint-interface/model_builder/adapters/views/exception_handling.py:140 wrapper`
+  - `e-footprint-interface/model_builder/adapters/views/views_deletion.py:51 delete_object`
+  - `e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:326 present_deleted_object`
+  - `e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:281 <genexpr>` (`render_to_string` of the top-parent card)
+  - `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:366 links_to`
+  - `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:415 mirrored_cards`
+  - `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389 list_containers_and_attr_name_in_list_container`
+  - `AttributeError: 'NoneType' object has no attribute 'efootprint_class'`
+- Watch (observed with a scratch line tracer on the recorded run):
+  - `[(v._value.name, v.modeling_obj_container) for v in self]` at `e-footprint/efootprint/abstract_modeling_classes/list_linked_to_modeling_obj.py:67` (on return, caller `object_linked_to_modeling_obj.py:214`) → edge-process case: old `recurrent_edge_device_needs` `[('Edge process', None), ('Sibling edge process', None)]`; server-need case: old `recurrent_server_needs` `[('Server need', None)]`. The sibling's old wrapper is detached here, but the crash below never reads it.
+  - `contextual_attr.attr_name_in_mod_obj_container, contextual_attr._value.name` at `e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:695` in the deleted need's `self_delete` (called from `modeling_object_web.py:585` ← `edit_service.py:69`) → `('edge_device', 'Shared edge computer')`, detached.
+  - `self._modeling_obj.contextual_modeling_obj_containers` at `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:380` on `Shared edge computer`, as `(container name, attr)` → edge-process case `[(None, None), ('Sibling edge process', 'edge_device'), ('Server need', 'edge_device')]`; server-need case `[('Edge process', 'edge_device'), ('Sibling edge process', 'edge_device'), (None, None)]`.
+  - `container` at `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:388` on `Shared edge computer` → `None` (with `attr_name` `None`); `:389` then raises.
+- Debug recipe: break at `test_views_deletion.py:85` (`body = response.content.decode()`, right after the POST), or on `modeling_object_web.py:389` with condition `container is None`. Unmasked run: `poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"`; prefix `RAISE_EXCEPTIONS=1` for the raw traceback instead of the modal.
+- Discrimination: with the Fix approach filter applied by a scratch plugin (`efootprint_contextual_modeling_obj_containers` skips entries whose `modeling_obj_container is None`), both cases pass under `--runxfail` and report strict `XPASS` failures with the marker.
 
 ## Fix approach
 
@@ -65,22 +86,12 @@ Rejected alternatives:
 ## Files to touch
 
 - `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py`: in `efootprint_contextual_modeling_obj_containers` (`:378-380`), skip contextual containers whose `modeling_obj_container` is `None`.
-- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py`: add a view-level regression (below).
-- `e-footprint-interface/tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py`: extend the list and dict container tests with a detached entry (`modeling_obj_container=None`) that must be ignored.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py`: remove the reproduction's expected-failure marker.
 - `e-footprint-interface/CHANGELOG.md`: add a `## [Unreleased]` fix entry.
 
 ## Tests
 
-- **View regression** (`tests/unit_tests/adapters/views/test_views_deletion.py`, Django client plus session, like the existing test there). Load `model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json` into the session. Parametrize over `Upload-sensor-readings` (`RecurrentServerNeed`) and `Measure-temperature-and-vibration` (`RecurrentEdgeProcess`). POST `/model_builder/delete-object/<id>/` and assert:
-  - status 200 and no exception modal;
-  - the body contains the `outerHTML` OOB swap of the `EdgeUsageJourney` top-parent card;
-  - the deleted need's id is absent from the body, and its sibling need is still present;
-  - the session system data no longer contains the need.
-
-  Run it under `RAISE_EXCEPTIONS` unset: the decorator then returns the modal, and the test asserts it is absent. Before the fix it fails with the reported `AttributeError` (reproduced by the scratch test).
-- **Domain unit**: `list_containers_and_attr_name_in_list_container` and `dict_containers_and_attr_name_in_dict_container` ignore a contextual entry whose `modeling_obj_container` is `None`, and `mirrored_cards` on such an object returns `[self]` or its live mirrors without raising.
-- **Optional**: an integration-level assertion that, after `DeleteObjectUseCase.execute` on a need, `mirrored_cards` of the shared edge device and of the sibling need resolve on the same `ModelWeb`. This covers the use case → domain boundary without Django.
-- **E2E is not required.** The behavior is fully server-rendered, and the view test covers the response.
+- The [reproduction](#reproduction) `e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card` is this task's only test: the fix removes its `xfail` marker and adds no other tests. It subsumes the earlier list (domain unit tests on both container properties with a detached entry, an optional use-case-level `mirrored_cards` check): the view boundary exercises the same filter through the real delete-and-render path. E2E is not required; the behavior is fully server-rendered.
 
 ## Acceptance criteria
 
