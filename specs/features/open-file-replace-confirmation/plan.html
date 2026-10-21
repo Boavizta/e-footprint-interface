@@ -207,7 +207,7 @@
               <small>Assert prompt over content, none on empty, cancel keeps the modeling.</small>
             </li>
             <li id="file-integration" data-steps="tests">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:277:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L277:1"><code>integration/test_workspace_file.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:299:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L299:1"><code>integration/test_workspace_file.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#tests">1.2</a></span>
               <small>Panel renders the single vs comparison message.</small>
             </li>
@@ -215,7 +215,7 @@
         </details>
         <ul>
           <li id="file-changelog" data-steps="press-open">
-            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:10:1" data-review-source-href="../../../CHANGELOG.md#L10:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
             <small>One <code>### Fixed</code> line under <code>## [Unreleased]</code>.</small>
           </li>
         </ul>
@@ -229,14 +229,13 @@
     <p>Plan · approved · 2026-10-21</p>
     <h1>Open a file: confirm before replacing — implementation plan</h1>
     <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/open-file-replace-confirmation/spec.html" data-review-source-href="spec.html">Spec</a> · <a href="#modules">Changed files</a></p>
-    <aside data-note="review"><p><strong>Draft.</strong> Written during <code>spec-specify</code> because
-      the issue already names the template and the attribute to reuse. Refine it in the
-      <code>spec-plan</code> stage.</p></aside>
+    <aside data-note><p><strong>Implemented as planned</strong> in run A (interface <code>545c0852</code> and
+      <code>53626e5e</code>). The code links below point at the delivered files.</p></aside>
   </header>
 
   <section id="walkthrough">
     <h2>1. Follow the interactions through the code</h2>
-    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to
+    <p data-reading-note>Implemented as planned. Paths are relative to
       <code>e-footprint-interface/</code>. Library untouched.</p>
 
     <article id="press-open" data-step>
@@ -252,7 +251,7 @@
         (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/onboarding/template_picker.html:33:1" data-review-source-href="../../../model_builder/templates/model_builder/onboarding/template_picker.html#L33:1"><code>template_picker.html</code></a>)
         both GET <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:274:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L274:1"><code>open_import_json_panel()</code></a>.
         The panel's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/import_model.html:10:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/import_model.html#L10:1"><code>#sidePanelForm</code></a>
-        POSTs straight to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:346:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L346:1"><code>upload_json()</code></a>,
+        POSTs straight to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:350:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L350:1"><code>upload_json()</code></a>,
         which replaces the active slot or restores both. No confirmation step exists.</p>
 
       <p><strong>Guard reused as is.</strong> The body-level <code>htmx:confirm</code> listener in
@@ -272,7 +271,7 @@
 
       <div data-code>
         <p data-code-file><a href="#file-import-panel"><code>model_builder/templates/model_builder/side_panels/import_model.html</code></a>
-          <small>Proposed: one attribute on the existing form</small></p>
+          <small>Implemented: one attribute on the existing form</small></p>
         <pre><code>&lt;form id="sidePanelForm" class="my-3"
         hx-post="{% url 'upload-json' %}"
         hx-disabled-elt="button:not(:disabled)"
@@ -287,7 +286,7 @@
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/repositories/session_workspace_repository.py:29:1" data-review-source-href="../../../model_builder/adapters/repositories/session_workspace_repository.py#L29:1"><code>SessionWorkspaceRepository.list_slots()</code></a>:</p>
       <div data-code>
         <p data-code-file><a href="#file-views"><code>model_builder/adapters/views/views.py</code></a>
-          <small>Proposed change to <code>open_import_json_panel()</code></small></p>
+          <small>Implemented in <code>open_import_json_panel()</code>, abridged</small></p>
         <pre><code>def open_import_json_panel(request):
     is_comparison = len(SessionWorkspaceRepository(request.session).list_slots()) &gt; 1
     replace_confirmation = (
@@ -321,30 +320,34 @@
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py:450:1" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py#L450:1"><code>import_json_file()</code></a>
         would be cancelled and its <code>expect_response("upload-json")</code> would time out. The helper is
         used by seven test files, including the download/upload round trips in
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_card_order_persistence.py:42:1" data-review-source-href="../../../tests/e2e/test_card_order_persistence.py#L42:1"><code>test_card_order_persistence.py</code></a>,
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_source_metadata.py:272:1" data-review-source-href="../../../tests/e2e/test_source_metadata.py#L272:1"><code>test_source_metadata.py</code></a> and
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_weekly_pattern_builder.py:68:1" data-review-source-href="../../../tests/e2e/test_weekly_pattern_builder.py#L68:1"><code>test_weekly_pattern_builder.py</code></a>.
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_card_order_persistence.py:71:1" data-review-source-href="../../../tests/e2e/test_card_order_persistence.py#L71:1"><code>test_card_order_persistence.py</code></a>,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_source_metadata.py:292:1" data-review-source-href="../../../tests/e2e/test_source_metadata.py#L292:1"><code>test_source_metadata.py</code></a> and
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_weekly_pattern_builder.py:164:1" data-review-source-href="../../../tests/e2e/test_weekly_pattern_builder.py#L164:1"><code>test_weekly_pattern_builder.py</code></a>.
         Change the helper once: register a dialog handler that records each message and accepts it,
         remove it after the response, and return the messages. Callers stay unchanged, and no
         handler is left behind to accept an unrelated dialog later in the test.</p>
       <div data-code>
         <p data-code-file><a href="#file-e2e-page"><code>tests/e2e/pages/model_builder_page.py</code></a>
-          <small>Proposed shape</small></p>
+          <small>Implemented, abridged</small></p>
         <pre><code>def import_json_file(self, file_path: str) -&gt; list[str]:
-    """Import a JSON model file, accepting the replace confirmation; returns the dialog messages."""
+    """Import a JSON model file, accepting the replace confirmation when the model has content.
     ...
-    messages = []
-    def accept(dialog):
-        messages.append(dialog.message)
+    """
+    ...
+    dialog_messages = []
+
+    def accept_dialog(dialog):
+        dialog_messages.append(dialog.message)
         dialog.accept()
-    self.page.on("dialog", accept)
+
+    self.page.on("dialog", accept_dialog)
     try:
         with self.page.expect_response(lambda r: "upload-json" in r.url):
             self.page.locator("button[type='submit']").click()
     finally:
-        self.page.remove_listener("dialog", accept)
+        self.page.remove_listener("dialog", accept_dialog)
     self.side_panel.should_be_closed()
-    return messages</code></pre>
+    return dialog_messages</code></pre>
       </div>
     </article>
   </section>
@@ -363,14 +366,14 @@
         <thead><tr><th scope="col">Behavior / risk</th><th scope="col">Critical assertion</th><th scope="col">Existing test layer</th></tr></thead>
         <tbody>
           <tr><td>Prompt over a modeling with content</td><td><code>import_json_file()</code> returns exactly one message, equal to the single-session text; the imported objects appear.</td><td>E2E, extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:95:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L95:1"><code>test_import_json_replaces_existing_model</code></a></td></tr>
-          <tr><td>No prompt on an empty modeling</td><td>Returned messages are empty.</td><td>E2E, extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:126:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L126:1"><code>test_import_json_into_empty_model_adds_objects</code></a></td></tr>
-          <tr><td>Cancel keeps everything</td><td>Dismiss the dialog: no <code>upload-json</code> request; the original cards and the open panel remain.</td><td>E2E, new test in <code>test_toolbar.py</code></td></tr>
-          <tr><td>Session-dependent wording</td><td>The panel HTML carries the single text in a one-slot session and the comparison text in a two-slot session.</td><td>Integration, beside <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:277:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L277:1"><code>test_workspace_file.py</code></a> two-slot setup</td></tr>
+          <tr><td>No prompt on an empty modeling</td><td>Returned messages are empty.</td><td>E2E, extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:153:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L153:1"><code>test_import_json_into_empty_model_adds_objects</code></a></td></tr>
+          <tr><td>Cancel keeps everything</td><td>Dismiss the dialog: no <code>upload-json</code> request; the original cards and the open panel remain.</td><td>E2E, new <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_toolbar.py:127:1" data-review-source-href="../../../tests/e2e/test_toolbar.py#L127:1"><code>test_open_file_cancel_keeps_modeling_and_panel</code></a> in <code>test_toolbar.py</code>. It dismisses through an inline <code>page.on("dialog")</code> handler, because <code>expect_event("dialog")</code> around the click would block on the native confirm.</td></tr>
+          <tr><td>Session-dependent wording</td><td>The panel HTML carries the single text in a one-slot session and the comparison text in a two-slot session.</td><td>Integration, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_workspace_file.py:299:1" data-review-source-href="../../../tests/integration/test_workspace_file.py#L299:1"><code>test_open_file_panel_confirmation_names_the_modelings_the_session_replaces</code></a></td></tr>
           <tr><td>Other import callers keep working</td><td>Existing round-trip tests pass unchanged.</td><td>Full E2E run</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Coverage above is planned, not executed. The JS listener is unchanged, so no Jest change.</p>
+    <p>Each row above is implemented as planned. The JS listener is unchanged, so no Jest change.</p>
   </section>
 
   <section id="decisions">
