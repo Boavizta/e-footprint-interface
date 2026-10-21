@@ -1,7 +1,7 @@
 # Calculation explanations after reload — decision record
 
-Status: decided 2026-10-19, superseding the 2026-10-15 discussion synthesis. The feature is specified in the library
-repository under `e-footprint/specs/features/explanation-links-from-formula-and-slots/` (library-driven, cross-repo).
+Status: decided 2026-10-19, superseding the 2026-10-15 discussion synthesis. The feature shipped in efootprint 27.0.0 (library-driven,
+cross-repo); its spec folder `e-footprint/specs/features/explanation-links-from-formula-and-slots/` is archived in git history.
 This file records why the direction changed and is kept for context only.
 
 ## Observed failure
