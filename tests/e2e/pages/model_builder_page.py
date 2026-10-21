@@ -447,19 +447,33 @@ class ModelBuilderPage:
         self.page.locator("input[type='file']").wait_for(state="attached")
         return self.side_panel
 
-    def import_json_file(self, file_path: str):
-        """Import a JSON model file.
+    def import_json_file(self, file_path: str) -> list[str]:
+        """Import a JSON model file, accepting the replace confirmation when the model has content.
 
         Args:
             file_path: Path to the JSON file to import
+
+        Returns:
+            The messages of the confirmation dialogs shown during the import.
         """
         self.open_import_panel()
         self.page.locator("input[type='file']").set_input_files(file_path)
         # Here we don’t use click_and_wait_for_htmx because hx attributes are not on the button but on the form
         self.page.wait_for_timeout(20)
-        with self.page.expect_response(lambda r: "upload-json" in r.url):
-            self.page.locator("button[type='submit']").click()
+        dialog_messages = []
+
+        def accept_dialog(dialog):
+            dialog_messages.append(dialog.message)
+            dialog.accept()
+
+        self.page.on("dialog", accept_dialog)
+        try:
+            with self.page.expect_response(lambda r: "upload-json" in r.url):
+                self.page.locator("button[type='submit']").click()
+        finally:
+            self.page.remove_listener("dialog", accept_dialog)
         self.side_panel.should_be_closed()
+        return dialog_messages
         return self
 
     def download_active_model(self, file_path: str):

@@ -277,8 +277,12 @@ def open_import_json_panel(request):
     ``upload_json`` content-detects which (the `models` key) and routes: a workspace file restores
     both slots, a single-model file replaces the active model.
     """
+    is_comparison = len(SessionWorkspaceRepository(request.session).list_slots()) > 1
+    replace_confirmation = (
+        "This will replace the active modeling, or both modelings if the file holds a comparison. Continue?"
+        if is_comparison else "This will replace your current modeling. Continue?")
     return render(request, "model_builder/side_panels/import_model.html", context={
-              "header_name": "Open a file", "save_button_label": "Open"})
+              "header_name": "Open a file", "save_button_label": "Open", "replace_confirmation": replace_confirmation})
 
 
 def _single_model_document(repository, model_web=None) -> dict:

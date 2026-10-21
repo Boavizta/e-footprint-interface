@@ -4,7 +4,7 @@ from playwright.sync_api import expect
 
 from tests.e2e.conftest import load_system_dict_into_browser
 from tests.e2e.pages import ModelBuilderPage, card_id_selector
-from tests.e2e.utils import click_and_wait_for_htmx, EMPTY_SYSTEM_DICT
+from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle, EMPTY_SYSTEM_DICT
 
 
 @pytest.mark.e2e
@@ -114,7 +114,8 @@ class TestToolbarFeatures:
                 """)
 
         # Import a system containing a usage journey
-        model_builder.import_json_file(seeded_journey_json_path)
+        dialog_messages = model_builder.import_json_file(seeded_journey_json_path)
+        assert dialog_messages == ["This will replace your current modeling. Continue?"]
 
         # Verify initLeaderLines was called
         leader_lines_called = page.evaluate("window.initLeaderLinesCalled")
@@ -122,6 +123,32 @@ class TestToolbarFeatures:
 
         # Verify objects from the imported model exist
         model_builder.object_should_exist("UsageJourney", "My first usage journey")
+
+    def test_open_file_cancel_keeps_modeling_and_panel(
+            self, minimal_complete_model_builder: ModelBuilderPage, seeded_journey_json_path: str):
+        """Cancelling the replace confirmation of "Open a file" uploads nothing and keeps the open panel."""
+        model_builder = minimal_complete_model_builder
+        page = model_builder.page
+        upload_requests = []
+        page.on("request", lambda request: upload_requests.append(request.url) if "upload-json" in request.url
+                else None)
+        dialogs = []
+
+        def dismiss(dialog):
+            dialogs.append(dialog.message)
+            dialog.dismiss()
+
+        page.on("dialog", dismiss)
+        model_builder.open_import_panel()
+        page.locator("input[type='file']").set_input_files(seeded_journey_json_path)
+        page.locator("button[type='submit']").click()
+        wait_for_htmx_idle(page)
+
+        assert dialogs == ["This will replace your current modeling. Continue?"]
+        assert not upload_requests, "Cancelling the confirmation must not send the file"
+        model_builder.object_should_exist("UsagePattern", "Test Usage Pattern")
+        model_builder.object_should_exist("UsageJourney", "Test Journey")
+        expect(model_builder.side_panel.form).to_be_visible()
 
     def test_import_json_into_empty_model_adds_objects(
             self, model_builder_page: ModelBuilderPage, seeded_journey_json_path: str):
@@ -135,7 +162,8 @@ class TestToolbarFeatures:
         expect(page.locator(card_id_selector("UsagePattern"))).to_have_count(0)
 
         # Import a system containing a usage journey
-        empty_model.import_json_file(seeded_journey_json_path)
+        dialog_messages = empty_model.import_json_file(seeded_journey_json_path)
+        assert dialog_messages == [], "Importing into an empty model should not ask for confirmation"
 
         # Objects from the imported model should now exist
         empty_model.object_should_exist("UsageJourney", "My first usage journey")

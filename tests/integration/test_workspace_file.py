@@ -296,6 +296,22 @@ def test_single_model_file_via_open_file_in_two_model_session_replaces_active_sl
 
 
 @pytest.mark.django_db
+def test_open_file_panel_confirmation_names_the_modelings_the_session_replaces(client, minimal_system):
+    """The "Open a file" replace confirmation names the active modeling in a single-model session and
+    both modelings in a two-model session, where a comparison file would replace both."""
+    _seed_active_slot(client, minimal_system)
+    single_text = "This will replace your current modeling. Continue?"
+    comparison_text = ("This will replace the active modeling, or both modelings if the file holds a comparison. "
+                       "Continue?")
+    assert single_text in client.get("/model_builder/open-import-json-panel/").content.decode()
+
+    client.post("/model_builder/add-model/", {"source": "blank"})
+    panel_html = client.get("/model_builder/open-import-json-panel/").content.decode()
+    assert comparison_text in panel_html
+    assert single_text not in panel_html
+
+
+@pytest.mark.django_db
 def test_malformed_second_model_keeps_both_live_models_and_active_slot(client, minimal_system, monkeypatch):
     _seed_active_slot(client, minimal_system, {"simplified_inputs": {"title": "Reference", "fields": {}}})
     client.post("/model_builder/add-model/", {"source": "duplicate"})

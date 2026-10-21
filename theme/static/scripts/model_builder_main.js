@@ -360,7 +360,7 @@ document.body.addEventListener("htmx:afterSettle", function (event) {
     initTruncatedTextTooltips(event.detail.elt);
 });
 
-// Conditional confirmation for destructive model-replacing actions (toolbar reboot, picker cards).
+// Conditional confirmation for destructive model-replacing actions (toolbar reboot, picker cards, Open a file).
 // The triggering element carries `data-confirm-when-model-not-empty="<question>"`; we only prompt
 // when the canvas actually holds objects (`.model-builder-card`) — rebooting/replacing an empty
 // model has nothing to discard. Decided here at click time from the live DOM, so it stays correct
