@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "26.0.1",
+    "efootprint_version": "27.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -513,6 +513,76 @@
         }
     },
     "Job": {
+        "Receive-sensor-upload": {
+            "name": "Receive sensor upload",
+            "id": "Receive-sensor-upload",
+            "data_transferred": {
+                "value": 30.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 0.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 200.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 80.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.05,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
+        "Store-sensor-reading": {
+            "name": "Store sensor reading",
+            "id": "Store-sensor-reading",
+            "data_transferred": {
+                "value": 8.0,
+                "unit": "kilobyte",
+                "label": "Sum of all data uploads and downloads by request",
+                "source": "hypothesis"
+            },
+            "data_stored": {
+                "value": 25.0,
+                "unit": "kilobyte_stored",
+                "label": "Data stored by request",
+                "source": "hypothesis"
+            },
+            "request_duration": {
+                "value": 250.0,
+                "unit": "millisecond",
+                "label": "Request duration",
+                "source": "hypothesis"
+            },
+            "ram_needed": {
+                "value": 100.0,
+                "unit": "megabyte_ram",
+                "label": "RAM needed during job processing",
+                "source": "hypothesis"
+            },
+            "compute_needed": {
+                "value": 0.08,
+                "unit": "cpu_core",
+                "label": "cpu cores needed on server Sensor data server during job processing",
+                "source": "hypothesis"
+            },
+            "server": "Sensor-data-server"
+        },
         "Open-analysis-dashboard": {
             "name": "Open analysis dashboard",
             "id": "Open-analysis-dashboard",
@@ -612,76 +682,6 @@
             },
             "compute_needed": {
                 "value": 0.5,
-                "unit": "cpu_core",
-                "label": "cpu cores needed on server Sensor data server during job processing",
-                "source": "hypothesis"
-            },
-            "server": "Sensor-data-server"
-        },
-        "Receive-sensor-upload": {
-            "name": "Receive sensor upload",
-            "id": "Receive-sensor-upload",
-            "data_transferred": {
-                "value": 30.0,
-                "unit": "kilobyte",
-                "label": "Sum of all data uploads and downloads by request",
-                "source": "hypothesis"
-            },
-            "data_stored": {
-                "value": 0.0,
-                "unit": "kilobyte_stored",
-                "label": "Data stored by request",
-                "source": "hypothesis"
-            },
-            "request_duration": {
-                "value": 200.0,
-                "unit": "millisecond",
-                "label": "Request duration",
-                "source": "hypothesis"
-            },
-            "ram_needed": {
-                "value": 80.0,
-                "unit": "megabyte_ram",
-                "label": "RAM needed during job processing",
-                "source": "hypothesis"
-            },
-            "compute_needed": {
-                "value": 0.05,
-                "unit": "cpu_core",
-                "label": "cpu cores needed on server Sensor data server during job processing",
-                "source": "hypothesis"
-            },
-            "server": "Sensor-data-server"
-        },
-        "Store-sensor-reading": {
-            "name": "Store sensor reading",
-            "id": "Store-sensor-reading",
-            "data_transferred": {
-                "value": 8.0,
-                "unit": "kilobyte",
-                "label": "Sum of all data uploads and downloads by request",
-                "source": "hypothesis"
-            },
-            "data_stored": {
-                "value": 25.0,
-                "unit": "kilobyte_stored",
-                "label": "Data stored by request",
-                "source": "hypothesis"
-            },
-            "request_duration": {
-                "value": 250.0,
-                "unit": "millisecond",
-                "label": "Request duration",
-                "source": "hypothesis"
-            },
-            "ram_needed": {
-                "value": 100.0,
-                "unit": "megabyte_ram",
-                "label": "RAM needed during job processing",
-                "source": "hypothesis"
-            },
-            "compute_needed": {
-                "value": 0.08,
                 "unit": "cpu_core",
                 "label": "cpu cores needed on server Sensor data server during job processing",
                 "source": "hypothesis"

@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### Changed
-- Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed. Requires efootprint 27.0.0 (saved schema version 27).
+### Fixed
+- Upgrade to e-footprint 27.0.0: Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed.
 
 ## [V1.14.0] - 2026-10-20
 

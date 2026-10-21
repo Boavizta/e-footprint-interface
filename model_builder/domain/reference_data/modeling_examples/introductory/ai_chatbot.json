@@ -1,5 +1,5 @@
 {
-    "efootprint_version": "26.0.1",
+    "efootprint_version": "27.0.0",
     "Sources": {
         "Base-ADEME_V19": {
             "id": "Base-ADEME_V19",
@@ -156,6 +156,80 @@
                     "value": 1.0,
                     "unit": "dimensionless",
                     "label": "Times per journey",
+                    "source": "hypothesis"
+                }
+            }
+        }
+    },
+    "UsageJourneyStep": {
+        "Open-the-assistant": {
+            "name": "Open the assistant",
+            "id": "Open-the-assistant",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Serve-chat-interface": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Ask-a-quick-question": {
+            "name": "Ask a quick question",
+            "id": "Ask-a-quick-question",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Handle-quick-question": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Small-LLM-short-answer": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                }
+            }
+        },
+        "Ask-a-detailed-question": {
+            "name": "Ask a detailed question",
+            "id": "Ask-a-detailed-question",
+            "user_time_spent": {
+                "value": 1.0,
+                "unit": "minute",
+                "label": "Time spent by user",
+                "source": "hypothesis"
+            },
+            "jobs": {
+                "Prepare-detailed-question": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Small-LLM-route-complex-request": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
+                    "source": "hypothesis"
+                },
+                "Big-LLM-detailed-answer": {
+                    "value": 1.0,
+                    "unit": "dimensionless",
+                    "label": "Times per step",
                     "source": "hypothesis"
                 }
             }
@@ -398,80 +472,6 @@
             "fixed_nb_of_instances": {
                 "value": null,
                 "label": "User defined number of instances"
-            }
-        }
-    },
-    "UsageJourneyStep": {
-        "Open-the-assistant": {
-            "name": "Open the assistant",
-            "id": "Open-the-assistant",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Serve-chat-interface": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Ask-a-quick-question": {
-            "name": "Ask a quick question",
-            "id": "Ask-a-quick-question",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Handle-quick-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                },
-                "Small-LLM-short-answer": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
-            }
-        },
-        "Ask-a-detailed-question": {
-            "name": "Ask a detailed question",
-            "id": "Ask-a-detailed-question",
-            "user_time_spent": {
-                "value": 1.0,
-                "unit": "minute",
-                "label": "Time spent by user",
-                "source": "hypothesis"
-            },
-            "jobs": {
-                "Prepare-detailed-question": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                },
-                "Small-LLM-route-complex-request": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                },
-                "Big-LLM-detailed-answer": {
-                    "value": 1.0,
-                    "unit": "dimensionless",
-                    "label": "Times per step",
-                    "source": "hypothesis"
-                }
             }
         }
     },
