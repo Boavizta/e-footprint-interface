@@ -474,7 +474,6 @@ class ModelBuilderPage:
             self.page.remove_listener("dialog", accept_dialog)
         self.side_panel.should_be_closed()
         return dialog_messages
-        return self
 
     def download_active_model(self, file_path: str):
         """Download saved active state from a direct link or available menu."""
