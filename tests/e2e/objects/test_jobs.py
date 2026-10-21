@@ -154,3 +154,35 @@ class TestJobs:
         side_panel.confirm_delete()
 
         assert not step_with_job.has_link_existing_child_button("JobBase")
+
+    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 3")
+    def test_deleting_nested_and_top_level_cards_logs_no_console_error(
+            self, model_with_two_steps_one_job: ModelBuilderPage):
+        """Deleting a nested job card and an unused top-level journey card removes each card without console errors.
+
+        The job card is nested in its step (its id carries an `_in_<parent>` suffix); the unused journey's deletion
+        flips no creation constraint, so the response does not re-render the canvas around it.
+        """
+        model_builder = model_with_two_steps_one_job
+        side_panel = model_builder.side_panel
+        page = model_builder.page
+
+        console_errors: list[str] = []
+        page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+        page.on("pageerror", lambda exc: console_errors.append(str(exc)))
+
+        model_builder.get_object_card("UsageJourneyStep", "Step With Job").open_accordion()
+        model_builder.get_object_card("VideoStreamingJob", "Test Job").click_edit_button()
+        side_panel.click_delete_button()
+        side_panel.confirm_delete()
+        model_builder.object_should_not_exist("VideoStreamingJob", "Test Job")
+
+        model_builder.click_add_usage_journey()
+        side_panel.fill_field("UsageJourney_name", "Unused Journey")
+        side_panel.submit_and_wait_for_close()
+        model_builder.get_object_card("UsageJourney", "Unused Journey").click_edit_button()
+        side_panel.click_delete_button()
+        side_panel.confirm_delete()
+        model_builder.object_should_not_exist("UsageJourney", "Unused Journey")
+
+        assert console_errors == []

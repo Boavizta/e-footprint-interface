@@ -68,6 +68,44 @@ payload must stay constant-size.
 or `border-pulse-after-add-edit-object`. The two toast tests in `js_tests/model_builder_main.test.js:211-237` send no
 `id`. `js_tests/model_comparison.test.js` (added by `cc9611c3`) does not cover highlighting.
 
+## Reproduction
+
+- `js_tests/model_builder_main.test.js › pulse and opened highlights cover every card of the object on its own canvas
+  only` — Jest `test.failing`, on the fixture `card_highlight_two_canvases` rendered by
+  `js_tests/build_fixtures.py` (`render_card_highlight_canvases`); fails on `dev@624b9e44`. The fixture renders the
+  real `model_builder_main.html` for a two-slot `InMemoryWorkspaceRepository`: slot 0 (system `system`, active) and
+  the same data added as slot 1 (fresh system id from `add_slot`, same object ids, parked). Step `step` sits in
+  journeys `journey 1` and `journey 2`, and holds job `job` and its prefix-sharing sibling `job-2`. Python embeds,
+  for each case, the canonical `web_id`, the expected `button-` ids (`mirrored_cards`) and the parked canvas's buttons
+  for the same object. The test dispatches `displayToastAndHighlightObjects` and `highlightOpenedObjects` with each
+  canonical id and compares the document-wide pulsed and opened sets.
+- Assertion (trimmed, `expect(received).toEqual(expected)`): for `nested job` and `mirrored step`, `pulsed` and `opened`
+  are expected to be the two `button-Job-job_in_UsageJourneyStep-step_in_sys-system-UsageJourney-journey-{1,2}` (and
+  the two `button-UsageJourneyStep-step_in_sys-system-UsageJourney-journey-{1,2}`), received `[]`. `root journey`
+  (`button-sys-system-UsageJourney-journey-1`), `unknown system` (`[]`) and every `parked` list match.
+- Watch:
+  - `obj_to_edit.web_id` at `model_builder/adapters/views/views_edition.py:44` (also `output.web_id` at
+    `model_builder/adapters/presenters/htmx_presenter.py:208`, from `web_id=edited_obj.web_id` at
+    `model_builder/application/use_cases/edit_object.py:116`) → `sys-system-Job-job` (fixture `canonical`, same
+    `get_web_object_from_efootprint_id(...).web_id`).
+  - nested `web_id` at
+    `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:159` → card button
+    `button-Job-job_in_UsageJourneyStep-step_in_sys-system-UsageJourney-journey-1` (and `…-journey-2`); the parked
+    copy ends `_in_sys-<fresh id>-UsageJourney-journey-1`.
+  - `` `[id="${base}"], [id^="${base}_in_"]` `` at `theme/static/scripts/model_builder_main.js:207` →
+    `[id="button-sys-system-Job-job"], [id^="button-sys-system-Job-job_in_"]`.
+  - match count of that query at `theme/static/scripts/model_builder_main.js:207` (consumed at `:213` and `:239`) →
+    `0` for `sys-system-Job-job` and `sys-system-UsageJourneyStep-step`, `1` for
+    `sys-system-UsageJourney-journey-1`.
+- Debug: break in `cardButtonsForWebId` at `theme/static/scripts/model_builder_main.js:207`, or at
+  `js_tests/model_builder_main.test.js:258` after both dispatches. Unmasked run: temporarily change `test.failing(` to
+  `test(` and run `npx jest js_tests/model_builder_main.test.js -t "own canvas only"` (it then fails with the diff above;
+  `npm run jest -- …` also rebuilds the fixture first). With the marker in place the same command reports the test as
+  passing because it fails.
+- Discrimination: against a scratch `model_builder_main.js` with the settled owner-canvas fix the unmasked test passes
+  and the marked test reports "Failing test passed even though it was supposed to fail"; an unscoped
+  `[id^="button-<local>_in_"]` variant still fails: it pulses and marks opened the parked canvas's two step and two job buttons.
+
 ## Fix approach
 
 Fix only the client expansion and scope it to the canvas that owns the id. The server payload stays as it is: one
@@ -108,8 +146,7 @@ Rejected alternatives:
   `[data-model-canvas][data-system-id]`, prefix stripping, scoped query, and a corrected comment.
 - `model_builder/adapters/views/views_edition.py` — comment only (`:38-40`): the client expands the id within its owning
   canvas. The code is unchanged.
-- `js_tests/build_fixtures.py` — new fixture case (below).
-- `js_tests/model_builder_main.test.js` — new tests.
+- `js_tests/model_builder_main.test.js` — remove the `test.failing` marker and its task comment from the reproduction.
 - `specs/architecture/rendering.html` — one line beside "Toast notifications and tooltips" (`:26`): the toast or opened
   highlight carries one canonical `web_id`, and `cardButtonsForWebId` expands it to the owning canvas's root and
   `_in_` mirrors. Constant-size header (nginx).
@@ -117,28 +154,11 @@ Rejected alternatives:
 
 ## Tests
 
-- **Fixture (`js_tests/build_fixtures.py`).** Build a programmatic system (per `specs/testing.md`) in which one
-  `UsageJourneyStep` with a `Job` sits in two `UsageJourney`s, so the step and job are mirrored twice. Add a second
-  `Job` whose id shares the first job's id as a prefix (for example ids `job` and `job-2` in name-as-id mode, or two
-  fixed ids). Render it through `ModelWeb` and the real canvas template twice:
-  - slot 0 active;
-  - slot 1 parked (`d-none`), with the same data after `assign_fresh_system_id`. Same object ids, different system id.
-
-  Wrap each in the `data-model-canvas` / `data-system-id` div from `model_builder_main.html:13`. Embed the expected ids
-  as `<script type="application/json" id="expected-highlight-ids">`: for the job, step and a root card, give
-  `{canonical: web_id, buttons: ["button-" + m.web_id for m in mirrored_cards]}`. Python generates the ids, so a future
-  change to `web_id` breaks the test instead of the feature.
-- **Jest (`js_tests/model_builder_main.test.js`).**
-  - Dispatch `displayToastAndHighlightObjects` `{action_type: "edit_object", id: canonical}`. Exactly the expected
-    buttons in slot 0 get `border-pulse-after-add-edit-object`. Nothing in slot 1 does, and neither does the
-    prefix-sharing sibling job.
-  - Dispatch `highlightOpenedObjects` `{value: canonical}`. The same set gets `model-builder-card-opened`.
-  - Root card: exactly its own button.
-  - An id that belongs to no canvas (unknown system) highlights nothing and does not throw.
-  - Stub `bootstrap.Toast` as the existing toast test does.
-- **Optional E2E.** In `tests/e2e/objects/test_edge_objects.py::test_edge_function_name_mirroring`, after
-  `click_edit_button()`, assert that both function mirrors have `.model-builder-card-opened`. It is a cheap
-  browser-level pin on the already-mirrored fixture.
+- The reproduction above is the task's only test change: `js_tests/model_builder_main.test.js › pulse and opened
+  highlights cover every card of the object on its own canvas only`, with its fixture `card_highlight_two_canvases`
+  case in `js_tests/build_fixtures.py` (the generated HTML is gitignored and rebuilt by `npm run jest`). The fix removes the `test.failing` marker and
+  the `bug-fixes-2026-10 Task 12` comment; no other tests are added. Scroll-into-view is not asserted (jsdom gives
+  every element a zero rect), and the E2E mirroring assertion once suggested here is dropped.
 
 ## Acceptance criteria
 
@@ -166,8 +186,7 @@ Rejected alternatives:
   the presenter untouched (delete toasts carry no `id`), so there is no shared product file. It shares `CHANGELOG.md`
   with every task, and `js_tests/build_fixtures.py` with any task that adds fixtures. Ordering is free.
 - The fix is client-only, with no serialization or migration impact and no library dependency.
-- Validation needs `npm run jest`. Its `build:js-test-fixtures` step renders the fixture through Django. The optional
-  E2E needs the local server.
+- Validation needs `npm run jest`. Its `build:js-test-fixtures` step renders the fixture through Django.
 - Constitution §1.4: the server still decides what to highlight (one canonical id). The client only maps that id to
   DOM nodes, which the nginx header limit requires.
 

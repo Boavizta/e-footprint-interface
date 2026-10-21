@@ -142,17 +142,16 @@ affected (its endpoints are posted only from inside the mounted section) and sta
   (around line 28) — spread the helper into `hx-vals`.
 - `model_builder/adapters/views/views_dict_mutation.py` — add the region only when the flag is
   posted (around line 52).
-- `js_tests/fixtures/inline_count_autosave.html` — regenerate via `js_tests/build_fixtures.py`.
+- Run `npm run jest` once: it rebuilds the gitignored `js_tests/fixtures/inline_count_autosave.html` from the changed template.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- Unit (dict mutation views): region absent without the flag, present with it.
-- E2E: console-error assertion (collector pattern from `test_model_comparison.py:201-203`) on canvas
-  inline count and group-entry count/✕; new case — child panel open, canvas count edit → panel count
-  synced, no console error.
-- Jest for the helper if `side_panel_utils.js` has Jest coverage.
+- `tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error`
+  — reproduction; remove its expected-failure marker. No other tests (no Jest case: `dictMembershipVals` is an
+  `hx-vals` transport detail the reproduction drives both ways).
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - No `htmx:oobErrorNoTarget` on any listed path, with or without a panel open, in one- and
   two-model workspaces.
 - With the child's edit panel open, a canvas count edit still updates the panel's count.
@@ -190,27 +189,22 @@ unreachable `HX-Reswap: none` branch go.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/adapters/presenters/test_htmx_presenter.py` — replace the `HX-Reswap == "none"`
-  assertion; OOB delete present (and first) for results-only and `edge_device_lists` outputs, absent
-  with `model_canvas` and for list deletions.
-- `tests/unit_tests/adapters/views/test_views_deletion.py` — modal has no `script=`/`remove #`
-  (mirrored and not); iot example: `UsagePattern` delete emits the OOB delete, `Job` delete does not.
-  Shares the iot loader with Task 4.
-- `tests/integration/test_deletion.py` — `output.web_id` equals the pre-deletion card id.
-- E2E `tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey` and the job deletion in
-  `tests/e2e/objects/test_jobs.py` — no console errors (collector from
-  `test_model_comparison.py:201-203`), card still disappears. Existing comparison and full-journey
-  deletion E2E tests must keep passing.
+- `tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error`
+  — reproduction; remove its expected-failure marker. No other tests.
+- `tests/unit_tests/adapters/presenters/test_htmx_presenter.py::test_successful_crud_presentations_append_one_metadata_status_oob`
+  — drop the `HX-Reswap == "none"` assertion and give its `DeleteObjectOutput` a `web_id`.
+- Existing comparison, full-journey and `test_usage_journeys.py::test_delete_usage_journey` deletion E2E keep passing.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - Deleting any card (top-level, nested, mirrored, constraint-flipping, root edge group) logs no
   console error.
 - Top-level no-flip deletions remove the card from the active canvas only; a parked comparison
   canvas is untouched.
 
-**Depends on:** Task 4 (soft: no shared product file, but shipping Task 4 first lets the new
-no-console-error checks cover recurrent-need deletion). Shares `test_views_deletion.py` and
-`CHANGELOG.md` with Task 4.
+**Depends on:** Task 11 (soft: it rewrites the `_delete` tail this task adds `web_id` to) and Task 4
+(soft: after it, nested-need deletions stop crashing and rely on this removal too). Shares
+`CHANGELOG.md` with both.
 
 **Implementation:** standard — small diff, but an HTMX/OOB transition (full review surface).
 
@@ -599,19 +593,15 @@ The header stays one canonical id (the nginx limit fixed by `0b2f361b`). Reprodu
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `js_tests/build_fixtures.py` — programmatic system with a step and job shared by two journeys, a
-  sibling job whose id shares a prefix, rendered on an active and a parked canvas (same object ids,
-  fresh system id); expected button ids embedded as JSON from Python.
-- `js_tests/model_builder_main.test.js` — pulse and opened sets match exactly on the active canvas;
-  nothing on the parked canvas or the prefix-sharing sibling; root card; unknown system highlights
-  nothing and does not throw.
-- Optional: `tests/e2e/objects/test_edge_objects.py::test_edge_function_name_mirroring` asserts both
-  mirrors get `.model-builder-card-opened`.
+- `js_tests/model_builder_main.test.js › pulse and opened highlights cover every card of the object on its own canvas only`
+  — reproduction (`test.failing`, fixture case `render_card_highlight_canvases` in `js_tests/build_fixtures.py`); switch it
+  to `test(` once fixed. No other tests.
 
 **Acceptance:**
+- The reproduction passes as a plain `test(`.
 - As in the goal; the highlight headers stay constant-size.
 
-**Depends on:** none (shares only `CHANGELOG.md` and `js_tests/build_fixtures.py` with other tasks).
+**Depends on:** none (shares only `CHANGELOG.md` with other tasks).
 
 **Implementation:** easy — one client function, with a Python-generated fixture pinning the id rule.
 

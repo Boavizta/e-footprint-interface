@@ -51,6 +51,36 @@ Reproduction matrix (scratch Playwright under `/private/tmp/claude-502/-Users-vi
 - The console-error pattern exists only in the Compare-chart tests (`tests/e2e/test_model_comparison.py:201-203`, `:230`).
 - `htmx:oobErrorNoTarget` is only a console error, not a failed request or a visible DOM change.
 
+## Reproduction
+
+- `tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error[chromium]` — E2E (Playwright); fails on `dev@624b9e44`. The defect is a browser `console.error` raised during htmx's OOB swap, so no server-side layer can observe it without asserting the fix's flag. One flow on one page covers every listed path. The system is `minimal_system` plus an edge group "Rack A" holding a device with count 2. The flow:
+  - step count and job count, no panel open;
+  - group-entry count, no panel open;
+  - step count with the step's own panel open, which must sync the panel's count to 5;
+  - group-entry count with the step panel still open (an unrelated panel);
+  - group-entry ✕, no panel open;
+  - step count after "Duplicate current modeling" (two models).
+  An init-script listener also logs the target htmx could not find, because htmx itself logs only the event name.
+- Failure (`--runxfail`, `tests/e2e/test_model_canva.py:99`):
+  ```
+  AssertionError: Console errors per canvas edit: {
+    'step count, no panel': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-2b1a0207-9ae'],
+    'job count, no panel': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-d7b88373-d81'],
+    'group entry count, no panel': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-46cd9514-dc8'],
+    'step count, step panel open': [],
+    'group entry count, step panel open': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-46cd9514-dc8'],
+    'group entry unlink, no panel': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-46cd9514-dc8'],
+    'step count, two models': ['htmx:oobErrorNoTarget', 'No OOB target: #dict-membership-section-2b1a0207-9ae']}
+  ```
+  The panel-sync `expect` at `:85` passes today: the only clean entry is the step panel's own section.
+- Watch (object ids are regenerated on every import, so they differ between the recorded runs):
+  - `request.post_data` for the hx-vals at `model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html:15` and `:24` → `count=3` for the canvas step count and `None` for the group-entry ✕. No field says whether a membership section is mounted.
+  - `request.POST` in `_run_edit_and_present` at `model_builder/adapters/views/views_dict_mutation.py:47` → `{'count': ['3']}`. `extra_oob_regions` at `:52` → `[OobRegion(key='dict_membership_section', params=(('object_id', '900d51d4-0c7'),))]`, with the step id (scratch Django-client spy).
+  - Response fragment from `model_builder/adapters/presenters/oob_regions.py:42` → `hx-swap-oob='outerHTML:#dict-membership-section-7c9fe922-db4'` on all seven canvas posts, the step-panel-open one included.
+  - `document.getElementById("dict-membership-section-7c9fe922-db4")` in the `htmx:oobErrorNoTarget` listener → `null` on six posts. The seventh post (step panel open) raised no event.
+- Debug recipe: break at `tests/e2e/test_model_canva.py:73`, right after the first canvas `set_inline_count("3")` and before `record`. Run unmasked with `poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000`.
+- Discrimination: the test passes against the unchanged dev server when Playwright simulates fix (a). An `htmx:configRequest` init script posts `membership_section_mounted` only when `#dict-membership-section-<key id>` is in the DOM. A `page.route` handler then neutralizes the region's `hx-swap-oob` in dict-mutation responses that lack the flag. Result: six unflagged responses stripped, the panel-open one kept, no console error, and the panel synced to 5. Scratch only: `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task2/test_task2_probe.py`.
+
 ## Fix approach
 
 **Recommended (a): the request reports whether the child's membership section is mounted, and the server emits the region only then.** This is the same DOM-derived "what is mounted" signal that saved bookmarks already send: `mounted` in `theme/static/scripts/simplified_inputs/bookmarks.js:105-111`, consumed at `model_builder/adapters/views/views_simplified_inputs.py:157`, `:179`. It reads the rendered DOM instead of keeping client state, so it is compatible with `specs/conventions.md:28` ("the rendered fragment is the state"; use `hx-vals` where it expresses the need).
@@ -83,20 +113,17 @@ This removes the error on every reachable path. It keeps the canvas → open-chi
 - `e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html` — extend `hx-vals` on the count input (line 15) and the unlink button (line 24).
 - `e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html` — extend `hx-vals` on the "Add to…" button (line 28).
 - `e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py` — emit the `dict_membership_section` region only when `membership_section_mounted` is posted (lines 47-55); fix the comment at 50-51.
-- `e-footprint-interface/js_tests/fixtures/inline_count_autosave.html` — regenerate through `js_tests/build_fixtures.py` (case at line 289), because it renders the real `dict_entry_count_unlink.html`.
+- `e-footprint-interface/tests/e2e/test_model_canva.py:47` — remove the strict `xfail` marker from the reproduction test. Make no other test change.
 - `e-footprint-interface/specs/design/journeys/build-a-model.html:799` — optional wording: "only when that panel is mounted (the request says so)". A one-line mention in `specs/architecture/rendering.html` or `forms-and-relationships.html` is optional, under the dict-relationship paragraph.
 
 ## Tests
 
-- **Unit, `tests/unit_tests/adapters/views/test_views_dict_mutation.py`:**
-  - `update-dict-count`, `unlink-dict-entry` and `link-dict-entry` posted without `membership_section_mounted` must not contain `#dict-membership-section-`.
-  - The same requests with `membership_section_mounted=true` must contain `outerHTML:#dict-membership-section-<key id>`.
-  - Parametrize over the three endpoints, reusing the step/job fixture at lines 224-260.
-- **E2E, `tests/e2e/objects/test_edge_device_groups.py:98-120`:** attach the console/pageerror collector pattern from `tests/e2e/test_model_comparison.py:201-203` around the canvas group-entry `set_inline_count` and `click_unlink_button`, and assert no console errors.
-- **E2E, new case (e.g. beside `test_device_edit_panel_updates_and_removes_group_membership`, or in `tests/e2e/test_model_canva.py`):** open a step's edit panel, edit that step's inline count on the journey card, then assert:
-  - the panel's `[data-dict-membership-name] input[name='count']` shows the new value (sync is preserved);
-  - no console error was logged.
-- **Optional JS (`js_tests/`):** `dictMembershipVals` returns the flag only when `#dict-membership-section-<id>` is present. The E2E above already covers this end to end.
+- The [reproduction](#reproduction) is the task's only test: `tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error`. Its marker is removed when the fix lands. It covers:
+  - canvas step, job and group-entry counts and the group-entry ✕, with no panel and with an unrelated panel open;
+  - the two-model workspace;
+  - the preserved canvas → open-child-panel sync.
+- No Jest case for `dictMembershipVals`. `side_panel_utils.js` has Jest coverage, but the helper is an internal transport detail of this fix, read only by `hx-vals`, not a public contract. The reproduction exercises both of its branches end to end: absent section, and the step panel's mounted section. No unit test for the view flag, for the same reason.
+- `js_tests/fixtures/inline_count_autosave.html` renders the real `dict_entry_count_unlink.html`; it is gitignored and rebuilt by `npm run jest` (`js_tests/build_fixtures.py`, case at line 289), so run `npm run jest` once after the template change. Nothing to commit.
 
 ## Acceptance criteria
 

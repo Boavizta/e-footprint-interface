@@ -232,3 +232,36 @@ test("edit toast renders every repair notice and authored name as text", () => {
     expect(body.textContent).toBe("Another object has been saved!");
     delete global.bootstrap;
 });
+
+// bug-fixes-2026-10 Task 12
+test.failing("pulse and opened highlights cover every card of the object on its own canvas only", () => {
+    document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures", "card_highlight_two_canvases.html"), "utf8");
+    loadModule();
+    jest.useFakeTimers();
+    global.bootstrap = {Toast: {getOrCreateInstance: jest.fn(() => ({show: jest.fn()}))}};
+    const cases = JSON.parse(document.getElementById("expected-highlight-ids").textContent);
+    const highlighted = className => {
+        const elements = Array.from(document.getElementsByClassName(className));
+        elements.forEach(element => element.classList.remove(className));
+        return elements.map(element => element.id).sort();
+    };
+    const expected = {};
+    const received = {};
+
+    for (const [label, {canonical, buttons, parked_buttons}] of Object.entries(cases)) {
+        document.body.dispatchEvent(new CustomEvent("displayToastAndHighlightObjects", {detail: {
+            action_type: "edit_object", name: label, id: canonical}}));
+        const pulsed = highlighted("border-pulse-after-add-edit-object");
+        document.body.dispatchEvent(new CustomEvent("highlightOpenedObjects", {detail: {value: canonical}}));
+        // The parked canvas holds the same object ids, so its cards must exist and stay unmarked.
+        expected[label] = {pulsed: [...buttons].sort(), opened: [...buttons].sort(), parked: parked_buttons};
+        received[label] = {pulsed, opened: highlighted("model-builder-card-opened"),
+            parked: parked_buttons.filter(id => document.getElementById(id))};
+    }
+
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    delete global.bootstrap;
+
+    expect(received).toEqual(expected);
+});

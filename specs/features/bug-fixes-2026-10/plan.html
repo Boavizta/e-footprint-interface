@@ -399,20 +399,15 @@
         <details open>
           <summary>js_tests/</summary>
           <ul>
-            <li id="f-js-fixtures" data-steps="task-2 task-12">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py" data-review-source-href="../../../js_tests/build_fixtures.py"><code>build_fixtures.py</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/fixtures/inline_count_autosave.html" data-review-source-href="../../../js_tests/fixtures/inline_count_autosave.html"><code>fixtures/inline_count_autosave.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-12">T12</a> · <a href="#task-2">T2</a></span>
-              <small>T12 new mirrored two-canvas case; T2 regenerates the inline-count fixture.</small>
-            </li>
-            <li id="f-js-guard" data-steps="task-1 task-2">
+            <li id="f-js-guard" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/side_panel_switch_guard.test.js" data-review-source-href="../../../js_tests/side_panel_switch_guard.test.js"><code>side_panel_switch_guard.test.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-2">T2</a> · <a href="#task-1">T1</a></span>
-              <small>T1 <code>#sidePanel</code> branch cases; T2 helper case (the file already loads <code>side_panel_utils.js</code>).</small>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>T1 <code>#sidePanel</code> branch cases.</small>
             </li>
             <li id="f-js-main" data-steps="task-12">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js"><code>model_builder_main.test.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-12">T12</a></span>
-              <small>Pulse and opened sets on active vs parked canvas.</small>
+              <small>T12 reproduction (fixture case in <code>build_fixtures.py</code>); the fix switches <code>test.failing</code> to <code>test</code>.</small>
             </li>
           </ul>
         </details>
@@ -434,13 +429,10 @@
               <span data-reading-links><a href="#task-9">T9</a> · <a href="#task-10">T10</a> · <a href="#task-14">T14</a></span>
               <small>Created by T9; T10 and T14 append.</small>
             </li>
-            <li id="t-views-dict" data-steps="task-2">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_dict_mutation.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_dict_mutation.py"><code>adapters/views/test_views_dict_mutation.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-2">T2</a></span>
-            </li>
             <li id="t-presenter" data-steps="task-3">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py"><code>adapters/presenters/test_htmx_presenter.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-3">T3</a></span>
+              <small>Drop the <code>HX-Reswap</code> assertion; give the delete output a <code>web_id</code>.</small>
             </li>
             <li id="t-delete-uc" data-steps="task-11">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py"><code>application/use_cases/test_delete_object.py</code></a> <span data-change="modified">Modified</span>
@@ -470,10 +462,6 @@
         <details open>
           <summary>tests/integration/</summary>
           <ul>
-            <li id="t-int-deletion" data-steps="task-3">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_deletion.py" data-review-source-href="../../../tests/integration/test_deletion.py"><code>test_deletion.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-3">T3</a></span>
-            </li>
             <li id="t-int-invariants" data-steps="task-15">
               &lt;invariant sweep module(s)&gt; <span data-change="new">New</span>
               <span data-reading-links><a href="#task-15">T15</a></span>
@@ -487,14 +475,15 @@
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_forms.py" data-review-source-href="../../../tests/e2e/test_forms.py"><code>test_forms.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
             </li>
-            <li id="t-e2e-groups" data-steps="task-2">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_device_groups.py" data-review-source-href="../../../tests/e2e/objects/test_edge_device_groups.py"><code>objects/test_edge_device_groups.py</code></a> <span data-change="modified">Modified</span>
+            <li id="t-e2e-canva" data-steps="task-2">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:48:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L48"><code>test_model_canva.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-2">T2</a></span>
+              <small>T2 reproduction; the fix removes its marker.</small>
             </li>
             <li id="t-e2e-delete" data-steps="task-3">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_usage_journeys.py" data-review-source-href="../../../tests/e2e/objects/test_usage_journeys.py"><code>objects/test_usage_journeys.py</code></a>,
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py" data-review-source-href="../../../tests/e2e/objects/test_jobs.py"><code>objects/test_jobs.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:159:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L159"><code>objects/test_jobs.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-3">T3</a></span>
+              <small>T3 reproduction; the fix removes its marker.</small>
             </li>
             <li id="t-e2e-edge" data-steps="task-7 task-12">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py"><code>objects/test_edge_objects.py</code></a> <span data-change="modified">Modified</span>
@@ -557,7 +546,7 @@
       <code>7f78a329</code> and <code>9dc54426</code>; since then only <code>views.py</code> moved (+4–5 lines after
       line 277), and the links below use current lines.</p>
     <p><strong>Reproductions:</strong> each confirmed bug gets a strict-xfail reproduction recorded on <code>dev@6a1c10ea</code>, added cluster by cluster.
-      Clusters 1 and 2 (Tasks 4, 6, 8, 11, 5) are done and their steps follow the breakpoint-chain shape; later clusters still read as first planned
+      Clusters 1–3 (Tasks 4, 6, 8, 11, 5, 3, 2, 12) are done and their steps follow the breakpoint-chain shape; later clusters still read as first planned
       until their pass lands. Tasks 1, 13, 14 and 15 have none, with the reason in their diagnostic or the smell sweep.</p>
   </header>
 
@@ -984,18 +973,36 @@ return (np.round(daily * scale) / scale).tolist()</code></pre>
       <h3><a href="#task-3">Task 3 · The server owns card removal on delete</a></h3>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/delete-card-modal-hyperscript-null.md" data-review-source-href="diagnostics/delete-card-modal-hyperscript-null.md">diagnostic</a></p>
-      <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-presenter"><code>htmx_presenter.py</code></a> · <a href="#f-delete-modal"><code>delete_card_modal.html</code></a> · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#t-presenter">presenter</a>, <a href="#t-views-deletion">view</a>, <a href="#t-int-deletion">integration</a> and <a href="#t-e2e-delete">E2E</a> tests</p>
+      <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-presenter"><code>htmx_presenter.py</code></a> · <a href="#f-delete-modal"><code>delete_card_modal.html</code></a> · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#t-e2e-delete"><code>test_jobs.py</code></a> · <a href="#t-presenter"><code>test_htmx_presenter.py</code></a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>Card deletions log hyperscript <code>'#sys-…' is null</code>.</dd>
+        <dd>Card deletions log hyperscript <code>'#sys-…' is null</code>.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:159:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L159"><code>test_deleting_nested_and_top_level_cards_logs_no_console_error</code></a> (E2E: delete the nested "Test Job", then create and delete an
+          unused journey) records at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:188:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L188">:188</a>
+          <code>["'#sys-0c45ec1c-df3-VideoStreamingJob-c1d0680d-276' is null", 'hypertrace /// ', '  -&gt; on htmx:afterRequest   - JSHandle@node'] == []</code>.
+          Only the job logs; the journey half passes today and guards against a fix that only drops the hyperscript.</dd>
         <dt>Root cause</dt>
-        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L9"><code>delete_card_modal.html:9-10</code></a> runs
-          <code>remove #{{ obj.web_id }}</code> after the request. For nested cards the root-form selector never matches; for canvas or edge-list
-          re-renders the response already removed the card. The intake's "dead hyperscript" hypothesis is only half true: for a plain top-level deletion with no
-          constraint flip (unused journey, non-last pattern, edge usage pattern, ungrouped edge device, job-less server or API), the
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:331:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L331">response</a> leaves the card and the hyperscript is the only remover.
-          The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:337:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L337"><code>HX-Reswap: none</code> branch</a> is unreachable because
-          <code>delete_side_effects</code> always returns <code>results_buttons</code>.</dd>
+        <dd>
+          <p>The modal removes the card client-side with the root-form <code>web_id</code> after the request. For nested cards that selector never matches; for a plain
+            top-level deletion with no constraint flip (unused journey, non-last pattern, edge usage pattern, ungrouped edge device, job-less server or API), the response
+            leaves the card and the hyperscript is the only remover. The intake's "dead hyperscript" hypothesis is only half true. Job case, journey case in brackets:</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:381:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L381"><code>htmx_presenter.py:381</code></a> sets <code>remove_card_with_hyperscript</code>, rendered at
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html#L9"><code>delete_card_modal.html:9-10</code></a> · "Yes, delete" <code>script</code> →
+              <code>on htmx:afterRequest remove #sys-…-VideoStreamingJob-…</code> [<code>… remove #sys-…-UsageJourney-…</code>].</li>
+            <li>Browser, before the click · <code>document.getElementById('sys-…-VideoStreamingJob-…')</code> → <code>null</code>: the card is
+              <code>VideoStreamingJob-…_in_UsageJourneyStep-…_in_sys-…-UsageJourney-…</code>
+              (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:158:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L158"><code>modeling_object_web.py:158-160</code></a>) [the card element].</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:318:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L318"><code>htmx_presenter.py:318</code></a>, the list-deletion branch · OOB swaps → the top-parent journey card plus the results and status
+              regions [<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:331:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L331">:331</a>: only the results and status regions, nothing touches the card]. <code>HX-Reswap</code> absent in both; the
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:337:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L337"><code>HX-Reswap: none</code> branch</a> is unreachable because <code>delete_side_effects</code> always returns <code>results_buttons</code>.</li>
+            <li>Browser, capture-phase <code>htmx:afterRequest</code> on the button · selector target present → <code>false</code>, the hyperscript throws
+              [<code>true</code>, the hyperscript removes the card].</li>
+          </ol>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:178:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L178"><code>test_jobs.py:178</code></a> after the job deletion (or :186 for the journey);
+            <code>poetry run pytest --runxfail "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error" --base-url http://localhost:8000 --headed</code>
+            against a running server.</p>
+        </dd>
         <dt>Fix</dt>
         <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:35:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L35"><code>DeleteObjectOutput</code></a> gains <code>web_id</code>, captured
           before deletion; after Task 11 there is one tail, so it is set when the deletion is not a list deletion. In
@@ -1016,11 +1023,11 @@ return self._build_oob_response(
         <dd>Emitting it first keeps the root <code>EdgeDeviceGroup</code> case order-safe (delete, then <code>#edge-device-groups-list</code> replaced). The delete
           toast moves from <code>HX-Trigger</code> to <code>HX-Trigger-After-Settle</code>, like every other mutation.</dd>
         <dt>Tests</dt>
-        <dd>Presenter: replace <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py:59:1" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py#L59">the <code>HX-Reswap</code> assertion</a>; delete element present and first for results-only and
-          <code>edge_device_lists</code> outputs, absent with <code>model_canvas</code> and for list deletions. View: modal has no <code>script=</code> (mirrored and not); iot
-          <code>UsagePattern</code> delete emits it, <code>Job</code> delete does not. Integration: <code>output.web_id</code> equals the pre-deletion card id. E2E
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_usage_journeys.py:63:1" data-review-source-href="../../../tests/e2e/objects/test_usage_journeys.py#L63"><code>test_delete_usage_journey</code></a> and the job deletion in <code>test_jobs.py</code>
-          assert no console errors with the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_comparison.py:201:1" data-review-source-href="../../../tests/e2e/test_model_comparison.py#L201">collector pattern</a>; comparison and full-journey deletion E2E keep passing.</dd>
+        <dd>The reproduction is the only test. In
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py:24:1" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py#L24"><code>test_successful_crud_presentations_append_one_metadata_status_oob</code></a>,
+          drop the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py:59:1" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py#L59"><code>HX-Reswap == "none"</code> assertion</a> and give its
+          <code>DeleteObjectOutput</code> a <code>web_id</code>. Comparison, full-journey and <code>test_delete_usage_journey</code> deletion E2E keep passing.
+          Discrimination: the fix on a scratch server makes it pass; dropping only the hyperscript leaves the unused journey's card on the canvas at :186.</dd>
         <dt>Flags</dt>
         <dd>HTMX/OOB transition: FULL review surface. E2E needs the local server.</dd>
       </dl>
@@ -1030,15 +1037,33 @@ return self._build_oob_response(
       <h3><a href="#task-2">Task 2 · Emit the dict membership-section region only when that section is mounted</a></h3>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/membership-section-oob-no-target.md" data-review-source-href="diagnostics/membership-section-oob-no-target.md">diagnostic</a></p>
-      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-dict-count">two templates</a> · <a href="#f-views-dict"><code>views_dict_mutation.py</code></a> · <a href="#f-js-fixtures">fixture</a> · <a href="#t-views-dict">unit</a>, <a href="#f-js-guard">Jest</a> and <a href="#t-e2e-groups">E2E</a> tests</p>
+      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-dict-count">two templates</a> · <a href="#f-views-dict"><code>views_dict_mutation.py</code></a> · <a href="#t-e2e-canva"><code>test_model_canva.py</code></a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>Canvas inline count edits (also in two-model workspaces) and edge group-entry count/✕ log <code>htmx:oobErrorNoTarget</code>.</dd>
+        <dd>Canvas inline count edits (also in two-model workspaces) and edge group-entry count/✕ log <code>htmx:oobErrorNoTarget</code>.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:48:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L48"><code>test_canvas_dict_count_edits_and_unlinks_log_no_console_error</code></a> (E2E, one flow over every listed path) records at
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:99:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L99">:99</a> <code>htmx:oobErrorNoTarget</code> plus <code>No OOB target: #dict-membership-section-&lt;child id&gt;</code> on six of seven edits;
+          the only clean one is a step count with that step's own panel open, whose panel count still syncs to 5.</dd>
         <dt>Root cause</dt>
-        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py:52:1" data-review-source-href="../../../model_builder/adapters/views/views_dict_mutation.py#L52"><code>_run_edit_and_present</code></a> always adds
-          <code>dict_membership_section</code> for the child; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/oob_regions.py:34:1" data-review-source-href="../../../model_builder/adapters/presenters/oob_regions.py#L34"><code>_render_dict_membership_section</code></a>
-          targets <code>#dict-membership-section-&lt;id&gt;</code>, which exists only while that child's edit panel is open. The intake's list-path half was
-          disproven: list endpoints are posted only from inside the mounted section.</dd>
+        <dd>
+          <p>The dict-mutation response always carries the child's membership-section region, which has a target only while that child's edit panel is
+            open; nothing in the request says whether it is. The intake's list-path half was disproven: list endpoints are posted only from inside the mounted section.</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html:15:1" data-review-source-href="../../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html#L15"><code>dict_entry_count_unlink.html:15</code></a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html#L24">:24</a> · posted body →
+              <code>count=3</code> for the canvas step count, empty for the ✕: no mounted signal.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py:52:1" data-review-source-href="../../../model_builder/adapters/views/views_dict_mutation.py#L52"><code>views_dict_mutation.py:52</code></a> in
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_dict_mutation.py:47:1" data-review-source-href="../../../model_builder/adapters/views/views_dict_mutation.py#L47"><code>_run_edit_and_present</code></a> · <code>extra_oob_regions</code> →
+              <code>[OobRegion(key='dict_membership_section', params=(('object_id', &lt;step id&gt;),))]</code>, unconditionally.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/oob_regions.py:42:1" data-review-source-href="../../../model_builder/adapters/presenters/oob_regions.py#L42"><code>oob_regions.py:42</code></a> in
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/oob_regions.py:34:1" data-review-source-href="../../../model_builder/adapters/presenters/oob_regions.py#L34"><code>_render_dict_membership_section</code></a> · fragment →
+              <code>hx-swap-oob='outerHTML:#dict-membership-section-&lt;id&gt;'</code> on all seven responses.</li>
+            <li>Browser, in the test's <code>htmx:oobErrorNoTarget</code> listener · <code>document.getElementById("dict-membership-section-&lt;id&gt;")</code> →
+              <code>null</code> on six posts.</li>
+          </ol>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:73:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L73"><code>test_model_canva.py:73</code></a>, after the first canvas count edit;
+            <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code>
+            against a running server.</p>
+        </dd>
         <dt>Fix</dt>
         <dd>A one-line <code>dictMembershipVals(id)</code> beside
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:5:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L5"><code>recomputationVals()</code></a> returns
@@ -1049,9 +1074,9 @@ return self._build_oob_response(
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html:28:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/dict_membership_section.html#L28"><code>dict_membership_section.html:28</code></a>;
           <code>_run_edit_and_present</code> adds the region only when the flag is posted and its comment says so. The list path is unchanged.</dd>
         <dt>Tests</dt>
-        <dd>Unit: the three dict endpoints without the flag contain no <code>#dict-membership-section-</code>, with it they do. Jest: the helper case in
-          <code>side_panel_switch_guard.test.js</code>, which already loads <code>side_panel_utils.js</code>. Regenerate <code>inline_count_autosave.html</code> through
-          <code>build_fixtures.py</code>. E2E: console-error collector around canvas group-entry count and ✕; new case with the step's panel open, canvas count edit, panel count synced, no error.</dd>
+        <dd>The reproduction is the only test; run <code>npm run jest</code> once, which rebuilds the gitignored <code>inline_count_autosave.html</code> from the changed template. No Jest case for
+          <code>dictMembershipVals</code>: it is an <code>hx-vals</code> transport detail, and the reproduction drives both of its outcomes. Discrimination: simulating the fix in
+          Playwright (flag posted only when the section is mounted, region stripped otherwise) against the unchanged server gives no console error and keeps the panel sync.</dd>
         <dt>Settled</dt>
         <dd>Keep the canvas → open-child-panel count sync; option (a) (2026-10-21).</dd>
       </dl>
@@ -1061,15 +1086,33 @@ return self._build_oob_response(
       <h3><a href="#task-12">Task 12 · Card highlight expands the canonical id within its owning canvas</a></h3>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/card-highlight-id-mismatch.md" data-review-source-href="diagnostics/card-highlight-id-mismatch.md">diagnostic</a> · smell-sweep S2</p>
-      <p data-files><span>Files</span> <a href="#f-main-js"><code>model_builder_main.js</code></a> · <a href="#f-views-edition"><code>views_edition.py</code></a> (comment) · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#f-js-fixtures"><code>build_fixtures.py</code></a> · <a href="#f-js-main"><code>model_builder_main.test.js</code></a></p>
+      <p data-files><span>Files</span> <a href="#f-main-js"><code>model_builder_main.js</code></a> · <a href="#f-views-edition"><code>views_edition.py</code></a> (comment) · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#f-js-main"><code>model_builder_main.test.js</code></a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>Creating or editing a job, step, edge function, need or edge component gives no pulse and no scroll-into-view; mirrored objects lose the "opened" highlight on every mirror but the clicked one.</dd>
+        <dd>Creating or editing a job, step, edge function, need or edge component gives no pulse and no scroll-into-view; mirrored objects lose the "opened" highlight on every mirror but the clicked one.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:237:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L237"><code>pulse and opened highlights cover every card of the object on its own canvas only</code></a>
+          (Jest <code>test.failing</code>; real <code>model_builder_main.html</code> with an active and a parked canvas holding the same object ids) records, for the nested job
+          and the mirrored step, pulsed and opened sets <code>[]</code> where the two <code>button-…_in_…-UsageJourney-journey-{1,2}</code> cards are expected;
+          the root journey, the unknown system and every parked card match.</dd>
         <dt>Root cause</dt>
-        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:205:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L205"><code>cardButtonsForWebId</code></a> matches
-          <code>button-&lt;webId&gt;</code> or <code>button-&lt;webId&gt;_in_…</code>. <code>0b2f361b</code> made the server send only the canonical id
-          (nginx header limit, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py:38:1" data-review-source-href="../../../model_builder/adapters/views/views_edition.py#L38"><code>views_edition.py:38-44</code></a>);
-          <code>cc9611c3</code> then prefixed only root ids with <code>sys-…-</code>, so nested ids never start with the canonical id.</dd>
+        <dd>
+          <p><code>0b2f361b</code> made the server send only the canonical id (nginx header limit); <code>cc9611c3</code> then prefixed only root ids with
+            <code>sys-…-</code>, so a nested card id never starts with the canonical id the client expands.</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py:44:1" data-review-source-href="../../../model_builder/adapters/views/views_edition.py#L44"><code>views_edition.py:44</code></a> (also
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:208:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L208"><code>htmx_presenter.py:208</code></a> after an edit) ·
+              <code>obj_to_edit.web_id</code> → <code>sys-system-Job-job</code>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:159:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L159"><code>modeling_object_web.py:159</code></a>,
+              nested <code>web_id</code> · card button → <code>button-Job-job_in_UsageJourneyStep-step_in_sys-system-UsageJourney-journey-1</code>; the parked copy ends
+              <code>_in_sys-&lt;fresh id&gt;-UsageJourney-journey-1</code>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:207:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L207"><code>model_builder_main.js:207</code></a> in
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:205:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L205"><code>cardButtonsForWebId</code></a> · the selector →
+              <code>[id="button-sys-system-Job-job"], [id^="button-sys-system-Job-job_in_"]</code>; match count → 0 for the job and the step, 1 for the root journey.</li>
+          </ol>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:207:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L207"><code>model_builder_main.js:207</code></a> or at
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js:258:1" data-review-source-href="../../../js_tests/model_builder_main.test.js#L258"><code>model_builder_main.test.js:258</code></a> after both dispatches. To unmask, change <code>test.failing(</code> to <code>test(</code>, then
+            <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code> (rebuilds the fixture first).</p>
+        </dd>
         <dt>Fix</dt>
         <dd>Client only; the header stays one canonical id.</dd>
       </dl>
@@ -1091,9 +1134,10 @@ return self._build_oob_response(
           Both listeners keep calling it unchanged; the comments at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:201:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L201"><code>model_builder_main.js:201-204</code></a> and
           <code>views_edition.py:38-40</code> are corrected.</dd>
         <dt>Tests</dt>
-        <dd>Python-rendered fixture: a step and job shared by two journeys, a prefix-sharing sibling job, active and parked canvases with the same object ids; expected button ids embedded as JSON.
-          Jest: exact pulse and opened sets on the active canvas, nothing on the parked canvas or the sibling, root card, unknown system highlights nothing and does not throw.
-          Optional E2E in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py:308:1" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py#L308"><code>test_edge_function_name_mirroring</code></a>.</dd>
+        <dd>The reproduction is the only test, with its fixture case <code>card_highlight_two_canvases</code> in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py:460:1" data-review-source-href="../../../js_tests/build_fixtures.py#L460"><code>build_fixtures.py</code></a> (generated fixtures are gitignored and rebuilt by <code>npm run jest</code>).
+          Scrolling is not asserted: jsdom gives every element a zero-size box. Discrimination: the snippet above makes it pass; an unscoped
+          <code>[id^="button-&lt;local&gt;_in_"]</code> variant still fails by marking the parked canvas's cards.</dd>
         <dt>Settled</dt>
         <dd>Constant-size single-id payload, client expansion scoped by <code>data-system-id</code>; the server-side <code>local_web_id</code> variant was rejected (2026-10-21).</dd>
       </dl>
@@ -1325,10 +1369,11 @@ return self._build_oob_response(
         <ul>
           <li>Task 5 is independent and fixes a silently wrong total; it goes first.</li>
           <li>4 then 6: adjacent lines of the same container property in <a href="#f-mow"><code>modeling_object_web.py</code></a> (independent behavior, ordered to avoid conflicts). 6 → 8 → 11 is a hard chain: Task 8 needs Task 6's <code>.get</code> skip and must follow it directly; Task 11 needs Task 8.</li>
-          <li>Task 3 last: Task 4 makes nested-need deletions reach the presenter, so Task 3's console-error E2E covers them; Task 11 rewrites the <code>_delete</code> tail that Task 3 adds <code>web_id</code> to.</li>
-          <li>Shared test files: <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> (4, 8, 3; Task 8's reproduction reuses Task 4's <code>edge_system_data</code> fixture), <a href="#t-int-deletion"><code>test_deletion.py</code></a> (3).</li>
-          <li>Reproductions, unmasked (Task 3's joins with cluster 3):
-            <code>poetry run pytest --runxfail "tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period" "tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card" "tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner" "tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device" "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked"</code>.
+          <li>Task 3 last: Task 11 rewrites the <code>_delete</code> tail that Task 3 adds <code>web_id</code> to; after Task 4, nested-need deletions stop crashing and also rely on Task 3's server-side card removal.</li>
+          <li>Shared test files: <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> (4, 8; Task 8's reproduction reuses Task 4's <code>edge_system_data</code> fixture).</li>
+          <li>Reproductions, unmasked; Task 3's is E2E and needs a running server:
+            <code>poetry run pytest --runxfail "tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period" "tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card" "tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner" "tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device" "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked"</code>, then
+            <code>poetry run pytest --runxfail "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error" --base-url http://localhost:8000</code>.
             Each fix removes its own marker; Task 8's reproduction passes only once Task 6 has landed.</li>
           <li>User-facing behavior change to call out at review: journeys held by a pattern are now blocked (Task 11).</li>
           <li>Validation: non-E2E suite; local E2E server for Task 3.</li>
@@ -1337,7 +1382,9 @@ return self._build_oob_response(
         <ul>
           <li>After Run A: Task 6 unblocks the panels the Task 9 and 10 acceptance sweeps must reach.</li>
           <li>Task 10 appends to the test file Task 9 creates.</li>
-          <li>Tasks 12 and 2 both touch <a href="#f-js-fixtures"><code>js_tests/build_fixtures.py</code></a> output; 2 and 1 both edit <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> and <code>side_panel_switch_guard.test.js</code>: run them back to back.</li>
+          <li>Tasks 2 and 1 both edit <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a>: run them back to back.</li>
+          <li>Reproductions, unmasked (cluster 4 and 6 tasks join when their pass lands): Task 12 — switch <code>test.failing(</code> to <code>test(</code>, then <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code>; Task 2 —
+            <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code>.</li>
           <li>Task 1's E2E confirms the Data &amp; privacy defect in a browser.</li>
           <li>Validation: <code>npm run jest</code> (12, 2, 1); local E2E server for 1, 2, 7 and Task 10's selector updates.</li>
         </ul></li>
@@ -1382,7 +1429,6 @@ return self._build_oob_response(
             <a href="#task-1"><rect x="430" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="455" y="155">1</text></a>
             <a href="#task-7"><rect x="520" y="135" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="545" y="155">7</text></a>
             <line x1="120" y1="150" x2="158" y2="150" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
-            <line x1="300" y1="150" x2="338" y2="150" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
             <line x1="390" y1="150" x2="428" y2="150" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
             <line x1="275" y1="65" x2="105" y2="133" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
             <!-- Run C nodes -->
@@ -1402,7 +1448,7 @@ return self._build_oob_response(
         </svg>
       </div>
       <figcaption>Hard dependencies: 6 → 8 → 11, 8 → 13, 9 → 10 → 14. Soft ordering: 11 and 4 before 3 (shared tail, E2E coverage); Task 6 before Task 9's crawl.
-        Shared lines or files run back to back: 4/6 (<code>modeling_object_web.py</code>), 12/2 (fixtures), 2/1 (<code>side_panel_utils.js</code>). Task 5 and 7 are independent.</figcaption>
+        Shared lines or files run back to back: 4/6 (<code>modeling_object_web.py</code>), 2/1 (<code>side_panel_utils.js</code>). Task 5 and 7 are independent.</figcaption>
     </figure>
 
     <h3>Deduplication verdicts</h3>

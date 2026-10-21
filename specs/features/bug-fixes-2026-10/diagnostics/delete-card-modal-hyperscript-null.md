@@ -35,7 +35,7 @@ flag to `True` (`model_builder/adapters/presenters/htmx_presenter.py:381`) and c
 mirrored objects (`:401-402`), meaning objects with more than one card
 (`model_builder/application/use_cases/delete_object.py:127`).
 
-**What the response removes** (`present_deleted_object`, `htmx_presenter.py:301-342`):
+**What the response removes** (`present_deleted_object`, `htmx_presenter.py:301-343`):
 
 | Deletion kind | Response branch | Card removed by response? | Hyperscript |
 |---|---|---|---|
@@ -71,13 +71,59 @@ hyperscript's detached-owner guard (`n!==e&&!e.isConnected`) does not skip it ei
 
 **Dead branch.** `delete_side_effects` always returns at least `results_buttons`
 (`modeling_object_web.py:328`, `:354-356`). The trailing `HX-Reswap: none` branch at
-`htmx_presenter.py:336-342` is therefore unreachable in production. Only the synthetic presenter
-unit test, with `oob_regions=[]`, reaches it (`tests/unit_tests/adapters/presenters/test_htmx_presenter.py:47-57`).
+`htmx_presenter.py:337-343` is therefore unreachable in production. Only the synthetic presenter
+unit test, with `oob_regions=[]`, reaches it (`tests/unit_tests/adapters/presenters/test_htmx_presenter.py:47-59`).
 
 **A second, unverified weakness.** `specs/conventions.md:35` documents that hyperscript wires
 handlers on swapped content asynchronously after `htmx:load`. The "Yes, delete" button arrives in a
 swapped modal. A click inside that window would delete server-side but skip the only remover on the
 load-bearing path. The fix removes that window. It was not reproduced.
+
+## Reproduction
+
+- `e-footprint-interface/tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error`
+  — E2E (Playwright against the dev server); fails on `dev@624b9e44`. It is a sibling of
+  `test_link_existing_job_to_step` reusing `model_with_two_steps_one_job`. It deletes the nested "Test Job" (the
+  selector-never-matches row), then creates and deletes "Unused Journey" (the load-bearing no-flip row), checks that
+  each card leaves the canvas, and asserts that no `console` error or `pageerror` was collected. E2E is the cheapest
+  layer: the defect is the browser evaluating the modal's hyperscript after htmx's swaps, and a view test could only
+  assert the fix's response shape. The journey half passes on `dev`. It is the guard that a hyperscript-only removal
+  would fail. When the marker goes, the test stays as the deletion console guard beside
+  `test_link_existing_job_to_step`.
+- Assertion (trimmed), at `test_jobs.py:188`:
+  ```
+  AssertionError: assert ["'#sys-0c45ec1c-df3-VideoStreamingJob-c1d0680d-276' is null",
+                          'hypertrace /// ', '  -> on htmx:afterRequest   - JSHandle@node'] == []
+  ```
+  Only the job deletion logs. The journey deletion logs nothing and its card is removed, by the hyperscript.
+- Watch (values from a scratch Playwright probe over the same fixture against the same server; ids vary per run):
+  - Rendered `script` attribute of "Yes, delete", the output of `remove #{{ obj.web_id }}` at
+    `e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html:9-10`, gated by
+    `"remove_card_with_hyperscript": True` at
+    `e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:381` (not mirrored, so `:401-402` does not
+    clear it) → job: `on htmx:afterRequest remove #sys-14671dba-efe-VideoStreamingJob-5c6e8e63-e08`; journey:
+    `… remove #sys-14671dba-efe-UsageJourney-7186e2e8-f84`.
+  - `document.getElementById('sys-14671dba-efe-VideoStreamingJob-5c6e8e63-e08')` in the browser before the click
+    → `null`. The rendered job card is `VideoStreamingJob-5c6e8e63-e08_in_UsageJourneyStep-b5d229f0-732_in_sys-14671dba-efe-UsageJourney-20ee3d49-47e`
+    (`e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:158-160`).
+    For the journey, the same lookup → the card element.
+  - OOB elements in the `delete-object` response, from `present_deleted_object` at
+    `e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:318-329` (job, a list deletion) and
+    `:331-335` (journey) → job: `outerHTML:#sys-14671dba-efe-UsageJourney-20ee3d49-47e` (the top-parent journey card),
+    then `#btn-open-panel-result`, `#show-results-toolbar-btn`, `#workspace-storage-status`; journey: only those three
+    results/status regions, nothing that touches its card. In both cases, `HX-Reswap` is absent. The `:337-343` branch
+    was not reached.
+  - `document.getElementById(<selector id>) !== null`, sampled by a capture-phase `htmx:afterRequest` listener on the
+    button, which fires just before the hyperscript handler → job: `false` (the hyperscript throws `'#…' is null`);
+    journey: `true` (the hyperscript removes it, and it is `false` by the bubbled event on `#modal-container`).
+- Debug recipe: run `poetry run pytest --runxfail "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error" --base-url http://localhost:8000 --headed`
+  and break on `test_jobs.py:178`, after the job deletion's act at `:177`. `console_errors` already holds the three
+  lines. Break on `:186` for the journey half.
+- Discrimination: the settled fix was applied to a scratch copy served on port 8013 (`web_id` on `DeleteObjectOutput`,
+  the OOB delete first unless `canvas_oob`, with the modal `script=`, the flag and the `HX-Reswap` branch removed).
+  The test passed under `--runxfail` and reported XPASS(strict) without it. A "drop the hyperscript only" variant
+  (no OOB delete) failed at `test_jobs.py:186`: the "Unused Journey" card stayed visible. The prototype was not
+  committed.
 
 ## Fix approach
 
@@ -89,7 +135,7 @@ Make the server the sole owner of card removal and delete the client remover:
    The presenter cannot compute it after deletion, and rebuilding the `sys-…` format in the adapter
    would duplicate the domain chokepoint.
 2. In `present_deleted_object`, replace the `if output.oob_regions:` branch and the dead `HX-Reswap`
-   branch (`:331-342`) with one `_build_oob_response`. For a non-list deletion that is not
+   branch (`:331-343`) with one `_build_oob_response`. For a non-list deletion that is not
    `canvas_oob`, its HTML **starts with** `<div id="{output.web_id}" hx-swap-oob="delete"></div>`,
    followed by `render_oob_regions(...)`. Emitting it first lets the `EdgeDeviceGroup` case stay
    order-safe: the delete lands, then `#edge-device-groups-list` is replaced. Skipping it under
@@ -112,16 +158,18 @@ Make the server the sole owner of card removal and delete the client remover:
 
 ## Files to touch
 - `e-footprint-interface/model_builder/application/use_cases/delete_object.py`: add `web_id: str = ""`
-  to `DeleteObjectOutput` (`:35`). Set it in the normal-deletion return (`:231-235`) from `web_obj.web_id`,
+  to `DeleteObjectOutput` (`:35`). Set it in the normal-deletion return (`:230-235`) from `web_obj.web_id`,
   captured before `self_delete()` (`:226`).
 - `e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py`: in `present_deleted_object`
-  (`:331-342`), prepend the OOB delete for non-list, non-`canvas_oob` deletions and drop the
+  (`:331-343`), prepend the OOB delete for non-list, non-`canvas_oob` deletions and drop the
   unreachable `HX-Reswap` branch. In `present_delete_confirmation`, drop `remove_card_with_hyperscript`
   (`:381`, `:402`).
 - `e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html`: remove the
   `script=` attribute (`:9-10`).
-- `e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py`: replace the
-  `HX-Reswap == "none"` assertion (`:57`) and add the branch cases below.
+- `e-footprint-interface/tests/e2e/objects/test_jobs.py`: remove the strict-xfail marker from
+  `test_deleting_nested_and_top_level_cards_logs_no_console_error`.
+- `e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py`: required edit to an existing
+  test (see Tests).
 - `e-footprint-interface/specs/architecture/rendering.html`: one line next to "Mutation entry points"
   (`:37`) saying that the server owns card removal on delete (OOB `delete` for an uncovered top-level
   card) and that no client-side remover exists.
@@ -129,34 +177,21 @@ Make the server the sole owner of card removal and delete the client remover:
   deletion no longer logs a console error, and top-level cards are removed by the server response.
 
 ## Tests
-- **Presenter unit** (`tests/unit_tests/adapters/presenters/test_htmx_presenter.py`):
-  - a non-list output with `web_id` and `[OobRegion("results_buttons")]` gives a body that contains
-    exactly one `hx-swap-oob="delete"` element with that id, placed before the results-button regions;
-  - the same output plus `OobRegion("model_canvas")` gives no delete element;
-  - a non-list output with `edge_device_lists` gives the delete element before
-    `#edge-device-groups-list`;
-  - a `was_list_deletion=True` output gives no delete element.
-- **View** (`tests/unit_tests/adapters/views/test_views_deletion.py`, Django client plus session, like
-  the existing test):
-  - the `ask-delete-object` modal body contains no `script=` and no `remove #`, both for a
-    non-mirrored and for a mirrored object;
-  - loading `model_builder/domain/reference_data/modeling_examples/introductory/iot_industrial.json`
-    and POSTing delete for the `UsagePattern` (a no-flip top-level deletion in the probe) gives a body
-    with `id="sys-…-UsagePattern-<id>" hx-swap-oob="delete"`, and no `model-canva` target;
-  - deleting a `Job` gives no delete element and still contains its top-parent journey card swap.
-
-  This shares the iot loader with #151's regression in the same file.
-- **Integration** (`tests/integration/test_deletion.py`): `DeleteObjectUseCase.execute` on an unused
-  top-level object returns `output.web_id` equal to the pre-deletion card id.
-- **E2E**: in `tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey` (the load-bearing
-  path) and the job deletion in `tests/e2e/objects/test_jobs.py` (around `:150-156`, the nested
-  "never in DOM" path), capture `console` errors and `pageerror` the way
-  `tests/e2e/test_model_comparison.py:201-203` does, and assert none were raised. The card must
-  still disappear. The existing
-  `test_model_comparison.py::test_delayed_object_deletion_keeps_native_buttons_and_count_controls_independent[True]`
-  and `test_full_journey.py:143-165` already cover card removal for an unused journey (including on
-  the prefixed comparison canvas) and must keep passing. They are the regression gate that a
-  hyperscript-only removal would fail.
+- The reproduction is this task's only test:
+  `tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error`.
+  Remove its strict-xfail marker. No new presenter, view or integration tests.
+- Required edit to an existing test that asserts the removed branch:
+  `tests/unit_tests/adapters/presenters/test_htmx_presenter.py::test_successful_crud_presentations_append_one_metadata_status_oob`
+  asserts `responses[-1]["HX-Reswap"] == "none"` (`:59`) for a `DeleteObjectOutput` with no `oob_regions`. Drop that
+  assertion, and give the `deleted` output a `web_id` (e.g. `"Server-deleted"`) so the OOB delete it now emits has a
+  real id. Its one-storage-status-OOB check stays. No other test asserts the modal's `script=` or
+  `remove_card_with_hyperscript`. The other `HX-Reswap` assertions under `tests/unit_tests/` are for non-delete
+  responses and do not change.
+- These must keep passing:
+  `tests/e2e/test_model_comparison.py::test_delayed_object_deletion_keeps_native_buttons_and_count_controls_independent[True]`,
+  `tests/e2e/test_full_journey.py` (`:143-165`), `tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey`
+  and `test_jobs.py::test_link_existing_job_to_step`. Together they cover unused-journey removal on the prefixed
+  comparison canvas as well.
 
 ## Acceptance criteria
 - Deleting any card (top-level, nested, mirrored, constraint-flipping, root edge group) logs no

@@ -453,6 +453,77 @@ SORTABLE_CANVAS_CASES = {"sortable_canvas_six_lists": {}}
 
 
 # ---------------------------------------------------------------------------
+# model_builder_main.test.js — card highlights on the full builder page (active + parked canvas)
+# ---------------------------------------------------------------------------
+
+
+def render_card_highlight_canvases(_case_ctx):
+    """A step shared by two journeys holds job `job` and its prefix-sharing sibling `job-2`. The same
+    model is added as a second slot (fresh system id, same object ids) and rendered parked. The expected
+    card buttons per canonical web_id come from the wrappers, so a web_id format change fails the test."""
+    from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
+    from efootprint.abstract_modeling_classes.source_objects import SourceValue
+    from efootprint.api_utils.system_to_json import system_to_json
+    from efootprint.constants.countries import country_generator, tz
+    from efootprint.constants.units import u
+    from efootprint.core.hardware.device import Device
+    from efootprint.core.hardware.network import Network
+    from efootprint.core.hardware.server import Server
+    from efootprint.core.hardware.storage import Storage
+    from efootprint.core.system import System
+    from efootprint.core.usage.job import Job
+    from efootprint.core.usage.usage_journey import UsageJourney
+    from efootprint.core.usage.usage_journey_step import UsageJourneyStep
+    from efootprint.core.usage.usage_pattern import UsagePattern
+    from model_builder.adapters.repositories import InMemoryWorkspaceRepository
+    from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class_help_info
+    from model_builder.adapters.views.views import build_workspace_slots
+    from tests.fixtures.system_builders import create_hourly_usage
+
+    ModelingObject._use_name_as_id = True
+    try:
+        server = Server.from_defaults("server", storage=Storage.from_defaults("storage"))
+        job = Job.from_defaults("job", server=server)
+        step = UsageJourneyStep.from_defaults("step", jobs=[job, Job.from_defaults("job-2", server=server)])
+        journey = UsageJourney("journey 1", uj_steps=[step])
+        usage_pattern = UsagePattern(
+            "usage pattern",
+            usage_journeys={journey: SourceValue(1 * u.dimensionless),
+                            UsageJourney("journey 2", uj_steps=[step]): SourceValue(1 * u.dimensionless)},
+            devices=[Device.from_defaults("device")], network=Network.from_defaults("network"),
+            country=country_generator("country", "TST", SourceValue(100 * u.g / u.kWh), tz("Europe/Paris"))(),
+            hourly_occurrences=create_hourly_usage())
+        system = System("system", usage_patterns=[usage_pattern], edge_usage_patterns=[])
+    finally:
+        ModelingObject._use_name_as_id = False
+
+    system_data = system_to_json(system, save_computed_state=False)
+    workspace = InMemoryWorkspaceRepository(initial_data=system_data)
+    workspace.add_slot(system_data)
+    active, parked = build_workspace_slots(workspace)
+
+    def card_buttons(model_web, efootprint_id):
+        web_obj = model_web.get_web_object_from_efootprint_id(efootprint_id)
+        return web_obj.web_id, [f"button-{card.web_id}" for card in web_obj.mirrored_cards]
+
+    cases = {}
+    for label, efootprint_id in (("nested job", job.id), ("mirrored step", step.id), ("root journey", journey.id)):
+        canonical, buttons = card_buttons(active["model_web"], efootprint_id)
+        cases[label] = {"canonical": canonical, "buttons": buttons,
+                        "parked_buttons": card_buttons(parked["model_web"], efootprint_id)[1]}
+    unknown_system = cases["nested job"]["canonical"].replace(f"sys-{system.id}-", "sys-unknown-system-", 1)
+    cases["unknown system"] = {"canonical": unknown_system, "buttons": [], "parked_buttons": []}
+
+    page = render_to_string("model_builder/model_builder_main.html", {
+        "workspace_slots": [active, parked], "model_web": active["model_web"],
+        "class_help_info": build_canvas_class_help_info()})
+    return page + f'<script type="application/json" id="expected-highlight-ids">{json.dumps(cases)}</script>'
+
+
+CARD_HIGHLIGHT_CASES = {"card_highlight_two_canvases": {}}
+
+
+# ---------------------------------------------------------------------------
 # weekly_pattern_builder.test.js — composite builder + weekly editor templates
 # ---------------------------------------------------------------------------
 
@@ -714,6 +785,7 @@ GROUPS = [
     (CONDITIONAL_SELECT_CASES, render_select_str_input),
     (TOUR_CASES, render_tour_steps),
     (SORTABLE_CANVAS_CASES, render_sortable_canvas),
+    (CARD_HIGHLIGHT_CASES, render_card_highlight_canvases),
     (WEEKLY_PATTERN_CASES, render_weekly_pattern),
     (HOURLY_PREVIEW_CASES, render_hourly_preview),
     (TIMESERIES_PREVIEW_CASES, render_timeseries_preview),
