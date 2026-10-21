@@ -337,19 +337,17 @@ weekly-pattern editor unchanged. Fixes GitHub #150.
 
 **Files touched:**
 - `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html`:
-  move the unit box styling (lines 19-24) to a wrapper that holds the existing readonly input (borderless,
+  move the unit box styling (lines 19-25) to a wrapper that holds the existing readonly input (borderless,
   `name`/`id`/`value` unchanged) and a `span` "each hour". Widen it from `w-25` if needed. New helper text
   (lines 28-30).
 - `CHANGELOG.md`: `## [Unreleased]` fix entry referencing #150.
 
 **Tests added/changed:**
-- `tests/e2e/objects/test_edge_objects.py` (near line 411): "each hour" is visible beside the unit; the
-  input value is still `cpu_core`; after switching to a storage component the value updates and "each
-  hour" stays.
-- A form-rendering unit or integration test of the constant template: new helper text, and no
-  `…__constant_unit` field value contains "each hour".
+- `tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value`
+  — reproduction; remove its expected-failure marker. No other tests.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - Server-need, edge-process and component-need constant editors show `<unit> each hour` in one visual
   box, plus the new helper text.
 - Posted units, saved models and results are unchanged.
@@ -442,16 +440,12 @@ fragment views get it too.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- New `tests/unit_tests/adapters/views/test_views_calculated_attributes.py`:
-  - iot `Factory-sensor` panel: no hourly chart URL for `Sensor-local-storage` empty entries, their
-    explanation URL present, CPU/RAM hourly chart URLs still present;
-  - every hourly chart URL rendered in that panel returns 200;
-  - decorator: a forced exception returns 500, `HX-Reswap: none`, modal markup and
-    `openModalDialog` trigger (conventions of `test_exception_handling.py`).
-- Optional (S5): a URLconf test requiring every HTMX fragment view to be decorated or listed as an
-  explicit exemption.
+- `tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently`
+  — reproduction; remove its expected-failure marker. No other tests: the other S5 views have no reachable defect on
+  `dev`, and their decoration relies on the decorator's existing modal tests.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - In the iot Factory-sensor panel, the three Sensor local storage dict entries show "no value",
   a working formula button and a calculus-graph link, and no chart button.
 - Every hourly-chart link rendered on the four introductory examples returns 200 (rerun the
@@ -490,15 +484,14 @@ and already used by the dict toggle and `ancestors-formula-and-children-*`).
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/adapters/views/test_views_calculated_attributes.py` (created by Task 9) —
-  programmatic EdgeComputer + EdgeStorage system with two edge usage patterns: no duplicate `id=`
-  in the edge computer panel; the CPU button's `hx-target`/`data-bs-target` point at its own row id,
-  which exists.
-- E2E selector updates to `^=` prefixes: `tests/e2e/test_calculus_graph.py:59`,
+- `tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row`
+  — reproduction; remove its expected-failure marker. No other tests.
+- E2E selector updates to `^=` prefixes (the ids change): `tests/e2e/test_calculus_graph.py:59`,
   `tests/e2e/objects/test_external_api_objects.py:70,74`,
   `tests/e2e/objects/test_video_external_api_objects.py:147,149`; run those three files.
 
 **Acceptance:**
+- The reproduction passes with its marker removed.
 - No duplicate ids in any shipped example's panels (rerun the diagnostic's sweep after Task 6, which
   unblocks the component and storage panels).
 - In the Factory-sensor panel, each CPU/RAM/storage formula button opens only its own explanation,

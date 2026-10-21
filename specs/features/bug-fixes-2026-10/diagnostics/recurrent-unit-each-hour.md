@@ -21,12 +21,39 @@
   (`occurrence`, `GB_stored`, `cpu_core`…).
 - Every recurrent field's constant editor renders the same template:
   `e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html`.
-  The readonly unit box (lines 19-24) shows only the stored unit, and the helper text (lines 28-30) says the
+  The readonly unit box (lines 19-25) shows only the stored unit, and the helper text (lines 28-30) says the
   value "will be repeated over the entire canonical week (168 hours)". Nothing on screen says the value
   applies per hour, so a weekly-total reading is natural. Entering a weekly total gives results 168 times
   too high, and no validation can catch it.
 - Storage: `RecurrentEdgeProcess.recurrent_storage_needed` and `RecurrentEdgeStorageNeed.recurrent_need`
   go through the same template with a `GB_stored` unit, so they have the same gap.
+
+## Reproduction
+
+- `tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value`
+  — Python unit view test (`open-create-object-panel`), parametrized over the server need
+  (`occurrence`), the edge process compute and storage fields (`cpu_core`, `GB_stored`) and the
+  component need (`concurrent`); fails on `dev@8f8c63a1`. It reads the unit box as the readonly
+  `…__constant_unit` input's value plus the visible text up to the helper, and checks every
+  `…__constant_unit` value stays the raw unit.
+- Assertion (trimmed), the same for all four cases:
+  `assert 'occurrence' == 'occurrence each hour'` (likewise `'cpu_core'`, `'GB_stored'`, `'concurrent'`).
+  Past that line, the helper reads "This constant value will be repeated over the entire canonical week
+  (168 hours)." instead of "All hours of the canonical week (168 hours) will use this value."
+- Watch:
+  - `builder.default_inputs(value)` at `model_builder/adapters/forms/timeseries_builder_registry.py:119`
+    → `{'constant_value': 1, 'constant_unit': 'occurrence'}` (raw unit, no time reference; `cpu_core`,
+    `GB_stored`, `concurrent` in the other cases).
+  - `value="{{ builder.default.constant_unit }}"` at
+    `model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:23`
+    → `value="occurrence"`, and nothing renders between this input (closed at `:25`) and the helper.
+  - helper text at `…/recurrent_quantities_from_constant.html:29` → "This constant value will be repeated
+    over the entire canonical week (168 hours)."
+- Debug: break at `tests/unit_tests/adapters/views/test_views_addition.py:138` (after the GET);
+  `poetry run pytest "tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value" --runxfail`.
+- Discrimination: with Django's template DIRS pointed at a scratch copy carrying the settled change, all
+  four cases pass; a copy putting "each hour" into the input's `value` fails on `'occurrence each hour'
+  == 'occurrence'`, and one keeping the old helper fails on the helper text.
 
 ## Fix approach
 
@@ -58,16 +85,23 @@ Alternatives rejected:
 ## Files to touch
 
 - `e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html`:
-  wrapper + "each hour" span around the unit input (lines 19-24); new helper text (lines 28-30).
+  wrapper + "each hour" span around the unit input (lines 19-25); new helper text (lines 28-30).
 - `e-footprint-interface/CHANGELOG.md`: `## [Unreleased]` fix entry referencing #150.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py`: remove the strict xfail marker
+  from `test_recurrent_constant_editor_reads_as_a_per_hour_value`; no other test change.
 
 ## Tests
 
-- `tests/e2e/objects/test_edge_objects.py` (near line 411, which already asserts the unit input value
-  `cpu_core`): the "each hour" text is visible beside the unit, and the input value is still `cpu_core`.
-  After selecting a storage component, the unit value changes and "each hour" stays.
-- A rendered-form unit or integration test, wherever the constant template is rendered today. Assert the
-  new helper text and that no form field named `…__constant_unit` contains "each hour".
+- The reproduction above is the task's only test change: remove its marker once the template is fixed.
+- No new E2E. The planned check near `tests/e2e/objects/test_edge_objects.py:411` is dropped: the only
+  browser-only behaviour is the component-need form's script, which rewrites the unit input's `value`
+  by id when the component changes
+  (`model_builder/templates/model_builder/side_panels/add/add_recurrent_edge_component_need.html:31-38`)
+  and never touches sibling text, so a static "each hour" next to the input cannot be lost on switch.
+  The reproduction already fails if "each hour" goes into the input's value (the script would overwrite
+  it, and `theme/static/scripts/weekly_pattern_builder.js:468-475` would copy it into the weekly-pattern
+  units). The existing E2E assertions on that input's id and value (`test_edge_objects.py:411`, `:424`,
+  `:433`) keep the id/value contract covered and must pass unchanged.
 - Existing posts of `__constant_unit` (`tests/unit_tests/adapters/forms/test_form_data_parser.py:377`,
   `tests/integration/test_edge_objects.py:282`) must pass unchanged.
 

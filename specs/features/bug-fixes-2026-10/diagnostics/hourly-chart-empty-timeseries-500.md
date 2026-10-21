@@ -29,12 +29,12 @@
   - **Formula explanation and calculus graph:** `get_calculated_attribute_explanation_from_dict` and `display-calculus-graph-from-dict` both return 200 for all three empty entries (probe).
 
 **4. The crash path.**
-- `views.py:569-582`: the view calls `prepare_timeseries_chart_context`.
+- `views.py:573-586`: the view calls `prepare_timeseries_chart_context`.
 - `explainable_timeseries_utils.py:65-67`: that function resolves the dict entry as an `ExplainableObjectWeb` that wraps the empty value (`:34-42`), then calls `prepare_hourly_quantity_data`.
 - `explainable_timeseries_utils.py:86` reads `ehq.plot_aggregation_strategy` and raises `AttributeError`.
 
 **5. The view has no decorator, so the failure is invisible.**
-- `get_explainable_hourly_quantity_chart_and_explanation` (`e-footprint-interface/model_builder/adapters/views/views.py:569-570`) carries only `@time_it`. Its sibling read views are also undecorated: the recurrent chart (`:584`), the EcoLogits explanation (`:599`) and the calculated-attribute explanation (`:612`).
+- `get_explainable_hourly_quantity_chart_and_explanation` (`e-footprint-interface/model_builder/adapters/views/views.py:573-574`) carries only `@time_it`. Its sibling read views are also undecorated: the recurrent chart (`:588`), the EcoLogits explanation (`:603`) and the calculated-attribute explanation (`:616`).
 - The unhandled exception goes to `handler500` (`e_footprint_interface/urls.py:22`), which renders the full recovery page.
 - `ComputationMemoryMiddleware.process_exception` turns only `ComputationMemoryLimitExceeded` into a modal (`e_footprint_interface/computation_memory_middleware.py:395-403`).
 - htmx 2.0.6 does not swap 5xx responses by default, and no global `htmx:responseError` handler exists. `theme/static/scripts/support.js:56` covers only the feedback link.
@@ -45,6 +45,45 @@
 - `tests/integration/test_calculated_attributes.py:43-49` charts dict entries only after checking `isinstance(value, ExplainableHourlyQuantities)`. Empty entries are skipped.
 - No test asserts which link the template renders.
 
+## Reproduction
+
+- `tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently` — Python unit, view boundary (Django test client, `raise_request_exception = False`, `RAISE_EXCEPTIONS` unset); fails on `dev@8f8c63a1`. Fixture `edge_computer_system_data` (same file): an `EdgeComputer.from_defaults` with an `EdgeStorage`, its CPU and RAM components, one `RecurrentEdgeProcess` and one `EdgeUsagePattern`, built programmatically rather than from the iot example. It asserts, in the edge computer's edit panel:
+  1. the three empty storage dict entries render no hourly-chart URL and do render their `get_calculated_attribute_explanation/<storage>/<attr>/<usage pattern>` URL;
+  2. CPU and RAM chart URLs remain, and every rendered chart URL returns 200;
+  3. the empty entry's chart URL, requested directly, returns 200 or the standard exception modal (500, `HX-Reswap: none`, `openModalDialog`);
+  4. after another tab loads a different model into the session, the stale hourly-chart, recurrent-chart, explanation and `ask-delete-object` URLs also return the modal, never a raw 500.
+  The storage keeps legitimate hourly chart URLs (`cumulative_unitary_storage_need_per_usage_pattern`, `manufacturing_footprint_per_edge_device*`), so the assertion is per empty entry, not "no storage chart URL".
+- Assertion failure (`--runxfail`):
+  ```
+  E   AssertionError: assert '/model_builder/get_explainable_hourly_quantity_chart_and_explanation/4126ddeb-b74/unitary_power_per_usage_pattern/b0cf0ec4-1e0' not in ['/model_builder/get_explainable_hourly_quantity_chart_and_explanation/fd127d9a…', …]
+  tests/unit_tests/adapters/views/test_views_calculated_attributes.py:65: AssertionError
+  ```
+- Traceback of the raw 500 behind that chart URL (trimmed, innermost last; `raise_request_exception = True`):
+  ```
+  django/core/handlers/base.py:197 _get_response
+  e-footprint/efootprint/utils/tools.py:66 wrapper                      (@time_it, the only decorator)
+  model_builder/adapters/views/views.py:577 get_explainable_hourly_quantity_chart_and_explanation
+  model_builder/domain/entities/web_core/explainable_timeseries_utils.py:67 prepare_timeseries_chart_context
+  model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86 prepare_hourly_quantity_data
+  AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregation_strategy'
+  ```
+  With exceptions not re-raised, the response is `500`, `HX-Reswap` absent, `HX-Trigger-After-Settle` absent, body is the `handler500` recovery page.
+- Watch:
+  - `sub_item.class_as_snake_str` at `model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py:72` → `'empty_explainable_object'` for each of the three storage dict entries (`type(sub_item.efootprint_object).__name__ == 'EmptyExplainableObject'`)
+  - `sub_item.class_as_snake_str == "explainable_quantity"` at `model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html:24` → `False`, so line 27 includes `explainable_hourly_quantities.html`
+  - `{% url 'get_explainable_hourly_quantity_chart_and_explanation_from_dict' … %}` at `model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html:13` → `/model_builder/get_explainable_hourly_quantity_chart_and_explanation/<storage id>/unitary_power_per_usage_pattern/<usage pattern id>`, with no formula button (no `get_calculated_attribute_explanation` URL for the entry)
+  - `ehq.plot_aggregation_strategy` at `model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86` → `AttributeError` on `EmptyExplainableObject`
+  - decorators on `get_explainable_hourly_quantity_chart_and_explanation` at `model_builder/adapters/views/views.py:573` → `@time_it` only; response `500`, `HX-Reswap` `None`. Same for `ask_delete_object` at `model_builder/adapters/views/views_deletion.py:14`: the stale id raises `KeyError` at `model_builder/domain/entities/web_core/model_web.py:289` → raw `500`
+- Debug recipe: break at `tests/unit_tests/adapters/views/test_views_calculated_attributes.py:62` (after the panel request) and inspect `panel`/`chart_urls`; unmasked run: `poetry run pytest tests/unit_tests/adapters/views/test_views_calculated_attributes.py --runxfail -x`. To see the view raise, set `client.raise_request_exception = True` or run with `RAISE_EXCEPTIONS=1`.
+- Discrimination: a scratch plugin (`/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task9/fix_plugin.py`) that adds the dynamic include through a scratch template dir and wraps the four read views and `ask_delete_object` in `render_exception_modal_if_error`, then reloads the URLconf, makes the test pass under `--runxfail`. The template change alone still fails (raw 500 on the empty entry's direct chart URL). The decorators alone still fail (chart URL rendered). Leaving out only `ask_delete_object` still fails on the stale `ask-delete-object` URL.
+- S5 coverage: on `dev`, the reachable raw-500 paths without monkeypatching are stale object ids, which raise `KeyError` at `model_web.py:289` in the four read views and in `ask_delete_object`. The test covers them through a stale page, except the EcoLogits explanation, because an edge model holds no EcoLogits URL. The remaining S5 views have no reproducible defect on `dev`:
+  - `get_calculus_graph` returns its own 404 for a missing key.
+  - `source_table_row_editor` returns 404 for stale or unknown ids and attributes.
+  - `open_help_drawer` returns 404 for an unknown class.
+  - `source_table`, `sankey_form`, `sankey_cards` and `sankey_delete_card` returned 200 on the probed inputs.
+  - `display_calculus_graph` raises on a stale id, but it is a `target="_blank"` full page (`components/calculus_graph_link.html`), which the task may exempt.
+  Their decoration is hardening; it relies on the decorator's existing modal tests.
+
 ## Fix approach
 
 1. **Template (the root fix).** In `explainable_object_dict.html:23-29`, replace the two-way branch with the dynamic include already used at `calculated_attributes_section.html:15`:
@@ -52,7 +91,7 @@
    - Empty entries then render "no value", the formula button and the calculus-graph link, with no chart button. This matches the top-level and "(see graph)" behavior.
    - Quantity and hourly entries render exactly as today.
    - A rendered simulation on `Sensor-local-storage.energy_per_edge_device_per_usage_pattern` emitted no chart URL and a working `get_calculated_attribute_explanation_from_dict` button.
-2. **Decorator (§1.4).** Add `@render_exception_modal_if_error` to `get_explainable_hourly_quantity_chart_and_explanation`. For consistency, also add it to the sibling panel-fragment read views `get_explainable_recurrent_quantity_chart_and_explanation`, `get_eco_logits_calculated_attribute_explanation` and `get_calculated_attribute_explanation` (`views.py:584, 599, 612`), placed above `@time_it` as at `views.py:419-420`. A future failure on any of these then shows the standard modal over an untouched canvas instead of an invisible failed swap.
+2. **Decorator (§1.4).** Add `@render_exception_modal_if_error` to `get_explainable_hourly_quantity_chart_and_explanation`. For consistency, also add it to the sibling panel-fragment read views `get_explainable_recurrent_quantity_chart_and_explanation`, `get_eco_logits_calculated_attribute_explanation` and `get_calculated_attribute_explanation` (`views.py:588, 603, 616`), placed above `@time_it` as at `views.py:423-424`. A future failure on any of these then shows the standard modal over an untouched canvas instead of an invisible failed swap.
 
 **Rejected alternatives:**
 - **Make `prepare_hourly_quantity_data` chart empty values as an all-zero series.** The interface would have to invent a start date, a length and a unit that the library deliberately leaves out. The library owns the meaning, and "no value" is not a dated series in a physical unit (§1.3). This would also be a defensive branch for a route the UI should never offer (§3.1).
@@ -63,23 +102,16 @@
 ## Files to touch
 
 - `e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html`: dynamic include by `sub_item.class_as_snake_str` (`:23-29`).
-- `e-footprint-interface/model_builder/adapters/views/views.py`: add `@render_exception_modal_if_error` to the hourly chart view (`:569`) and its calculated-attribute siblings (`:584, :599, :612`). Import it from `model_builder.adapters.views.exception_handling`.
-- `e-footprint-interface/tests/unit_tests/adapters/views/`: new regression tests (see Tests).
+- `e-footprint-interface/model_builder/adapters/views/views.py`: add `@render_exception_modal_if_error` to the hourly chart view (`:573`) and its calculated-attribute siblings (`:588, :603, :616`). Import it from `model_builder.adapters.views.exception_handling`.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py`: remove the reproduction's expected-failure marker (see Tests).
 - `e-footprint-interface/CHANGELOG.md`: `## [Unreleased]` fix entry.
 
 ## Tests
 
-- **View/template regression** (new, `tests/unit_tests/adapters/views/test_views_calculated_attributes.py`, Django test client):
-  1. Load `iot_industrial`.
-  2. `GET /model_builder/open-edit-object-panel/Factory-sensor/`.
-  3. Assert the body contains no `get_explainable_hourly_quantity_chart_and_explanation/Sensor-local-storage/` URL.
-  4. Assert it does contain `get_calculated_attribute_explanation/Sensor-local-storage/energy_per_edge_device_per_usage_pattern/Factory-sensors-starting-up`.
-  5. Assert the CPU and RAM hourly dict entries still render their chart URL.
-  - This test fails before the template fix.
-- **Rendered-link sweep** (same file): for that panel, request every rendered `get_explainable_hourly_quantity_chart_and_explanation…` URL and assert 200. This locks in the invariant that every chart link the UI renders resolves.
-- **Decorator regression** (same file): with `RAISE_EXCEPTIONS` unset, monkeypatch `prepare_hourly_quantity_data` (as imported in `views.py`) to raise. `GET` a valid chart URL and assert status 500, `HX-Reswap: none`, the exception modal markup and the `openModalDialog` trigger. Follow the conventions in `test_exception_handling.py`.
-- **Optional integration hardening:** extend `tests/integration/test_calculated_attributes.py:43-49` so that an `EmptyExplainableObject` dict entry asserts the explanation path (`compute_literal_formula_and_ancestors_mapped_to_symbols_list`) works and the hourly preparer is not called. This is low value once the view test exists.
-- No E2E test is needed. This is display-only routing, covered at view level.
+- The reproduction (`tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently`) is the task's only test. Remove its expected-failure marker. It covers the template dispatch, the rendered-link sweep for the panel, the direct empty-entry chart URL, and the stale-page modal for the hourly chart, recurrent chart, explanation and `ask_delete_object` views.
+- No monkeypatched decorator test and no URLconf decoration test: the optional URLconf test is dropped, as no new public contract is named. The S5 views with no reproducible defect on `dev` rely on the reproduction and on the decorator's existing modal tests (`tests/unit_tests/adapters/views/test_views_addition.py`, `test_views_edition.py`, `test_sankey_views.py`).
+- Task 10 appends its reproduction to the same file and reuses the `edge_computer_system_data` fixture.
+- No integration or E2E test: this is display-only routing, covered at the view boundary.
 
 ## Acceptance criteria
 

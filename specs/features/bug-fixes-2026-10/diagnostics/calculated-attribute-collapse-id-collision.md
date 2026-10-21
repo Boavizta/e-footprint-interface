@@ -58,6 +58,44 @@
   - Every `web_id` starts with the attribute name, a letter, so `#collapse-calculated_attributes-{web_id}` is a valid selector.
 - Both precedents in this template folder already key by this `web_id`: the dict toggle and `ancestors-formula-and-children-*`. `specs/architecture/rendering.html:75` defines `web_id` as the DOM identity, separate from the route identity `route_id`.
 
+## Reproduction
+
+- `tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row`
+  — view test (Django client), reusing Task 9's `edge_computer_system_data` fixture (EdgeComputer + EdgeStorage, CPU,
+  RAM, one `RecurrentEdgeProcess`) with a second `EdgeUsagePattern` added locally, so the storage's per-pattern dicts
+  hold two entries; fails on `dev@8f8c63a1`. It `GET`s `/model_builder/open-edit-object-panel/{edge computer id}/`
+  and asserts that no `id="…"` value repeats, that every explanation button's `hx-target`, `data-bs-target` and
+  `#aria-controls` name one id that occurs in its own row (between this button and the next one), and that the CPU's
+  and the RAM's `carbon_footprint_manufacturing` buttons target different ids. It does not assert the id format.
+- Assertion (trimmed, `--runxfail -vv`), at the no-duplicate check (`:104`):
+  ```
+  AssertionError: assert {'calculated_...facturing': 3} == {}
+    Left contains 2 more items:
+    {'calculated_attributes-carbon_footprint_manufacturing': 3,
+     'collapse-calculated_attributes-carbon_footprint_manufacturing': 3}
+  ```
+- Watch (recorded run: CPU `ece80d94-782`, RAM `13f36691-8b6`, storage `9296aa78-065`, edge computer `7ca44da1-eb1`):
+  - `id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"` at
+    `model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html:29`
+    → `collapse-calculated_attributes-carbon_footprint_manufacturing` for each of CPU, RAM and storage.
+  - `hx-target` / `data-bs-target` at
+    `model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html:8,14`
+    → `#collapse-calculated_attributes-carbon_footprint_manufacturing` on the buttons whose `hx-get` is
+    `…/get_calculated_attribute_explanation/ece80d94-782/carbon_footprint_manufacturing/`, `…/13f36691-8b6/…` and
+    `…/9296aa78-065/…`.
+  - `item.web_id` at
+    `model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py:40` → already
+    distinct: `carbon_footprint_manufacturing-in-ece80d94-782`, `…-in-13f36691-8b6`, `…-in-9296aa78-065`.
+  - `panel.count('id="collapse-calculated_attributes-carbon_footprint_manufacturing"')` at
+    `tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103` (after the panel `GET` at `:101`) → `3`.
+- Debug: break at `tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103`, after the panel `GET`.
+  Unmasked run: `poetry run pytest tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row --runxfail -vv`.
+- Discrimination: with the settled `item.web_id` change applied to scratch copies of the four templates (template
+  `DIRS` override, `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/a41b7a33-6432-494e-94e6-03d14dee464c/scratchpad/task10/fix_plugin.py`)
+  the unmasked test passes, alone and layered on Task 9's scratch dict template. With Task 9's template alone it still
+  fails, now also on `collapse-calculated_attributes-{unitary_power,energy_per_edge_device,use_footprint_per_edge_device}_per_usage_pattern`
+  ×2 each: the second usage pattern covers the within-dict collision (Root cause 3).
+
 ## Fix approach
 
 Key every per-item id and its references by `item.web_id`, which already includes the attribute name:
@@ -82,23 +120,25 @@ Key every per-item id and its references by `item.web_id`, which already include
 - `e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html`: the same three references (`:7,13,15`) and the input id (`:23`).
 - `e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html`: input id (`:6`).
 - Optional: `e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html`: `aria-controls` (`:7`).
-- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py`: regression test. Task 9 creates this file, so add to it.
-- `e-footprint-interface/tests/e2e/test_calculus_graph.py:59`, `tests/e2e/objects/test_external_api_objects.py:70,74` and `tests/e2e/objects/test_video_external_api_objects.py:147,149`: selector updates.
+- `e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py`: remove the `xfail` marker from `test_edit_panel_explanation_buttons_target_their_own_row` (see Reproduction).
+- `e-footprint-interface/tests/e2e/test_calculus_graph.py:59`, `tests/e2e/objects/test_external_api_objects.py:70,74` and `tests/e2e/objects/test_video_external_api_objects.py:147,149`: required selector updates, because they match the old exact id.
 - `e-footprint-interface/CHANGELOG.md`: `## [Unreleased]` fix entry. For example: "Formula buttons in device and server edit panels now open the explanation of their own component instead of another component's."
 
 ## Tests
 
-- **View regression (fails today)** in `tests/unit_tests/adapters/views/test_views_calculated_attributes.py`, with the Django client and a programmatic system as `specs/testing.md` requires (efootprint classes, not JSON).
-  - Setup: build `EdgeStorage.from_defaults` + `EdgeComputer.from_defaults` + `RecurrentEdgeProcess` + `EdgeFunction` + `EdgeUsageJourney` in **two** `EdgeUsagePattern`s, in a `System`. Use the shape of `tests/integration/test_results_views_smoke.py:93-110`, and save it with `SessionSystemRepository(client.session).save_data(system_to_json(system, save_computed_state=False))`. Then `GET /model_builder/open-edit-object-panel/{computer.id}/`.
-  - Assert no `id="…"` value occurs twice. Use a regex that excludes `data-*-id`, such as `(?<![\w-])id="([^"]+)"`. Today this yields 3x `collapse-calculated_attributes-carbon_footprint_manufacturing`.
-  - Assert the CPU button whose `hx-get` contains `/get_calculated_attribute_explanation/{cpu_id}/carbon_footprint_manufacturing/` has `hx-target` and `data-bs-target` equal to `#collapse-calculated_attributes-carbon_footprint_manufacturing-in-{cpu web id}`, and that this id exists in the body.
-  - With two edge usage patterns, once Task 9 has landed, the same no-duplicate assertion also covers the within-dict empty entries.
-- **E2E selector updates:** prefix matches stay unambiguous in those single-object panels.
-  - `test_calculus_graph.py:59`: `button[data-bs-target^='#collapse-calculated_attributes-duration-in-']`.
-  - `test_external_api_objects.py:70,74` and `test_video_external_api_objects.py:147,149`: `[data-bs-target^='#collapse-calculated_attributes-generation_latency-in-']` and `[id^='collapse-calculated_attributes-generation_latency-in-']`.
-  - `test_calculated_attributes.py:62` and `test_calculus_graph.py:101` already use a prefix on the unchanged dict id. Leave them.
-  - Run these three E2E files (constitution §2.2).
-- No new E2E test and no Jest test: no JS changes. The view test owns the id contract, and the existing E2E tests still exercise click → swap → explanation.
+- **The reproduction is the task's only test:**
+  `tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row`
+  (see Reproduction). The fix is done when it passes with its `xfail` marker removed. Add no other test.
+- **Required existing-test edits:** these E2E tests match the old exact id string, so they must change with the ids
+  (constitution §2.2). All five lines verified at `dev@8f8c63a1`. Prefix matches stay unambiguous in these
+  single-object panels.
+  - `tests/e2e/test_calculus_graph.py:59`: `button[data-bs-target^='#collapse-calculated_attributes-duration-in-']`.
+  - `tests/e2e/objects/test_external_api_objects.py:70,74` and `tests/e2e/objects/test_video_external_api_objects.py:147,149`:
+    `[data-bs-target^='#collapse-calculated_attributes-generation_latency-in-']` and
+    `[id^='collapse-calculated_attributes-generation_latency-in-']`.
+  - No other test or script references `calculated_attributes-<attr>` ids. `test_calculated_attributes.py:62` and
+    `test_calculus_graph.py:101` use a prefix on the unchanged dict id; leave them.
+  - Run these three E2E files.
 
 ## Acceptance criteria
 

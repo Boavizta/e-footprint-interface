@@ -424,10 +424,15 @@
               <span data-reading-links><a href="#task-6">T6</a></span>
               <small>T6 reproduction: panels open and Delete is blocked by the owner.</small>
             </li>
+            <li id="t-views-addition" data-steps="task-7">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py:128:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_addition.py#L128"><code>adapters/views/test_views_addition.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-7">T7</a></span>
+              <small>T7 reproduction; the fix removes its marker.</small>
+            </li>
             <li id="t-views-calc" data-steps="task-9 task-10 task-14">
-              <code>adapters/views/test_views_calculated_attributes.py</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py"><code>adapters/views/test_views_calculated_attributes.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-9">T9</a> · <a href="#task-10">T10</a> · <a href="#task-14">T14</a></span>
-              <small>Created by T9; T10 and T14 append.</small>
+              <small>T9 and T10 reproductions (added with this plan, sharing <code>edge_computer_system_data</code>); the fixes remove their markers; T14 adds its listed "(see graph)" view check.</small>
             </li>
             <li id="t-presenter" data-steps="task-3">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/presenters/test_htmx_presenter.py" data-review-source-href="../../../tests/unit_tests/adapters/presenters/test_htmx_presenter.py"><code>adapters/presenters/test_htmx_presenter.py</code></a> <span data-change="modified">Modified</span>
@@ -485,11 +490,6 @@
               <span data-reading-links><a href="#task-3">T3</a></span>
               <small>T3 reproduction; the fix removes its marker.</small>
             </li>
-            <li id="t-e2e-edge" data-steps="task-7 task-12">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py"><code>objects/test_edge_objects.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-7">T7</a> · <a href="#task-12">T12</a></span>
-              <small>T7 "each hour" assertions; T12 optional mirror assertion.</small>
-            </li>
             <li id="t-e2e-calc" data-steps="task-10">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_calculus_graph.py" data-review-source-href="../../../tests/e2e/test_calculus_graph.py"><code>test_calculus_graph.py</code></a>,
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_external_api_objects.py" data-review-source-href="../../../tests/e2e/objects/test_external_api_objects.py"><code>objects/test_external_api_objects.py</code></a>,
@@ -545,9 +545,8 @@
       are deliberately left (see <a href="#deferred">Deferred</a>). Diagnostics were traced on <code>dev</code> at
       <code>7f78a329</code> and <code>9dc54426</code>; since then only <code>views.py</code> moved (+4–5 lines after
       line 277), and the links below use current lines.</p>
-    <p><strong>Reproductions:</strong> each confirmed bug gets a strict-xfail reproduction recorded on <code>dev@6a1c10ea</code>, added cluster by cluster.
-      Clusters 1–3 (Tasks 4, 6, 8, 11, 5, 3, 2, 12) are done and their steps follow the breakpoint-chain shape; later clusters still read as first planned
-      until their pass lands. Tasks 1, 13, 14 and 15 have none, with the reason in their diagnostic or the smell sweep.</p>
+    <p><strong>Reproductions:</strong> every confirmed bug except Task 1 has a committed strict-xfail reproduction (recorded on <code>dev</code> at <code>6a1c10ea</code>–<code>8f8c63a1</code>); it is the task's only test.
+      Every bug step now follows the breakpoint-chain shape. Tasks 1, 13, 14 and 15 have none, with the reason in their diagnostic or the smell sweep.</p>
   </header>
 
   <aside data-note="review">
@@ -1165,14 +1164,41 @@ return self._build_oob_response(
       <p data-files><span>Files</span> <a href="#f-calc-dict"><code>explainable_object_dict.html</code></a> · <a href="#f-views"><code>views.py</code></a> · <a href="#f-views-other">deletion, Sankey and help views</a> · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> (new)</p>
       <dl>
         <dt>Symptom</dt>
-        <dd>In the iot Factory-sensor panel, the chart button of three <code>Sensor-local-storage</code> entries fails silently (raw 500, empty chart pane).</dd>
+        <dd>In an edge computer's panel, the chart button of three edge-storage dict entries fails silently (raw 500, empty chart pane).
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:49:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L49"><code>test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently</code></a>
+          records at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:65:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L65">:65</a> that the <code>unitary_power_per_usage_pattern/&lt;usage pattern&gt;</code> chart URL is rendered. It also checks that every
+          rendered chart URL returns 200, and that the empty entry's chart URL and stale chart, explanation and <code>ask-delete-object</code> URLs (after another tab
+          loads a different model) return 200 or the exception modal, never a raw 500.</dd>
         <dt>Root cause</dt>
-        <dd>The library leaves <code>EdgeStorage.unitary_power_per_usage_pattern</code> and its derived dicts empty on purpose.
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html#L24"><code>explainable_object_dict.html:24-28</code></a>
-          sends every non-quantity entry to the hourly-chart partial, and
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L86"><code>prepare_hourly_quantity_data</code></a> reads
-          <code>plot_aggregation_strategy</code>, which <code>EmptyExplainableObject</code> lacks. The trigger is the dict entry's chart button, not "(see graph)" as reported.
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:574:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L574"><code>get_explainable_hourly_quantity_chart_and_explanation</code></a> carries only <code>@time_it</code>.</dd>
+        <dd>
+          <p>The library leaves <code>EdgeStorage.unitary_power_per_usage_pattern</code> and its derived dicts empty on purpose; the dict template sends every non-quantity
+            entry to the hourly-chart partial, and the chart view, carrying only <code>@time_it</code>, turns the failure into a raw 500. The trigger is the dict entry's
+            chart button, not "(see graph)" as reported.</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py:72:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py#L72"><code>object_linked_to_modeling_obj_web.py:72</code></a> ·
+              <code>sub_item.class_as_snake_str</code> → <code>'empty_explainable_object'</code> for each of the three storage entries.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html:24:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html#L24"><code>explainable_object_dict.html:24</code></a> ·
+              <code>sub_item.class_as_snake_str == "explainable_quantity"</code> → <code>False</code>, so :27 includes the hourly partial.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html#L13"><code>explainable_hourly_quantities.html:13</code></a> · rendered URL →
+              <code>…/get_explainable_hourly_quantity_chart_and_explanation/&lt;storage&gt;/unitary_power_per_usage_pattern/&lt;usage pattern&gt;</code>, and no formula button.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L86"><code>explainable_timeseries_utils.py:86</code></a> · <code>ehq.plot_aggregation_strategy</code> → <code>AttributeError</code>
+              on <code>EmptyExplainableObject</code>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:573:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L573"><code>views.py:573</code></a> · decorators → <code>@time_it</code> only: response 500, no <code>HX-Reswap</code>. A stale id raises
+              <code>KeyError</code> at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:289:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L289"><code>model_web.py:289</code></a> the same way here and in
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_deletion.py:15:1" data-review-source-href="../../../model_builder/adapters/views/views_deletion.py#L15"><code>ask_delete_object</code></a>.</li>
+          </ol>
+          <div data-code>
+            <p data-code-file><code>Traceback</code> <small>the empty entry's chart URL, <code>raise_request_exception = True</code>, innermost last</small></p>
+            <pre><code><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/utils/tools.py:66:1" data-review-source-href="../../../../e-footprint/efootprint/utils/tools.py#L66">efootprint/utils/tools.py:66</a> wrapper   <small># @time_it, the only decorator</small>
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:577:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L577">views.py:577</a> get_explainable_hourly_quantity_chart_and_explanation
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:67:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L67">explainable_timeseries_utils.py:67</a> prepare_timeseries_chart_context
+<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L86">explainable_timeseries_utils.py:86</a> prepare_hourly_quantity_data
+AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregation_strategy'</code></pre>
+          </div>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:62:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L62"><code>test_views_calculated_attributes.py:62</code></a>, after the panel request;
+            <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently"</code>;
+            set <code>client.raise_request_exception = True</code> or <code>RAISE_EXCEPTIONS=1</code> to see the view raise.</p>
+        </dd>
         <dt>Fix</dt>
         <dd>Replace the two-way branch with the section's dynamic include by <code>sub_item.class_as_snake_str</code>; empty entries then use
           <code>empty_explainable_object.html</code> ("no value", formula and calculus-graph buttons, no chart). Add <code>@render_exception_modal_if_error</code> above
@@ -1190,9 +1216,13 @@ return self._build_oob_response(
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_help.py:8:1" data-review-source-href="../../../model_builder/adapters/views/views_help.py#L8"><code>open_help_drawer</code></a>. Leave a view undecorated only if it is a full page, a download or a
           JSON/fetch endpoint with its own rejection path, and say why in the commit.</dd>
         <dt>Tests</dt>
-        <dd>New <code>test_views_calculated_attributes.py</code>: Factory-sensor panel has no storage chart URL but its explanation URL, CPU/RAM chart URLs remain;
-          every hourly chart URL in that panel returns 200; a forced exception returns 500, <code>HX-Reswap: none</code>, modal markup and <code>openModalDialog</code>
-          (conventions of <code>test_exception_handling.py</code>). Optional URLconf test requiring decoration or explicit exemption.</dd>
+        <dd>The reproduction is the only test; its programmatic <code>edge_computer_system_data</code> fixture is reused by Task 10. The storage keeps legitimate chart URLs,
+          so the assertion is per empty entry. Of the S5 views, only <code>ask_delete_object</code> has a reachable raw 500 on <code>dev</code> (stale id), and the
+          reproduction covers it; decorating the others is hardening that rides on the decorator's existing modal tests (<code>get_calculus_graph</code>,
+          <code>source_table_row_editor</code> and <code>open_help_drawer</code> return their own 404s; <code>display_calculus_graph</code> is a <code>target="_blank"</code> full page
+          that may stay exempt). The forced-exception and URLconf tests are dropped.
+          Discrimination: template plus decorators pass; the template alone leaves the direct chart URL's raw 500; decorators alone leave the chart URL rendered;
+          leaving <code>ask_delete_object</code> undecorated fails on its stale URL.</dd>
         <dt>Settled · flags</dt>
         <dd>"No value" UX, no empty chart; all four read views decorated; S5 folded in (2026-10-21). Invariant: chart preparers gain no empty-value branch.
           Rerun the 632-link crawl after Task 6 has landed (Run A).</dd>
@@ -1206,12 +1236,29 @@ return self._build_oob_response(
       <p data-files><span>Files</span> <a href="#f-calc-ids">four calculated-attribute templates</a> · <a href="#f-calc-section"><code>calculated_attributes_section.html</code></a> (optional) · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> · <a href="#t-e2e-calc">three E2E files</a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>In the Factory-sensor panel (and every Boavizta server panel), RAM's formula button swaps RAM's explanation into the CPU row, toggles all three collapses,
-          and after one more click RAM's explanation is unreachable until the panel reopens.</dd>
+        <dd>In an edge computer's panel (and every Boavizta server panel), RAM's formula button swaps RAM's explanation into the CPU row, toggles all three collapses,
+          and after one more click RAM's explanation is unreachable until the panel reopens.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:87:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L87"><code>test_edit_panel_explanation_buttons_target_their_own_row</code></a> (Task 9's fixture plus a second usage pattern) records at
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:104:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L104">:104</a>
+          <code>{'calculated_attributes-carbon_footprint_manufacturing': 3, 'collapse-calculated_attributes-carbon_footprint_manufacturing': 3} == {}</code>.</dd>
         <dt>Root cause</dt>
-        <dd><code>id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"</code> and its three references in
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html#L8"><code>get_calculated_attribute_explanation_button.html:8,14,16</code></a>
-          repeat for same-named attributes of CPU, RAM and storage. HTMX swaps into the first match; Bootstrap toggles every match; <code>click once</code> then blocks the refetch.</dd>
+        <dd>
+          <p>Per-item collapse ids and their references are built from the attribute name alone, so same-named attributes of CPU, RAM and storage collide;
+            HTMX swaps into the first match, Bootstrap toggles every match and <code>click once</code> blocks the refetch. Values for the three components:</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html:29:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html#L29"><code>explainable_object_template.html:29</code></a> · collapse id →
+              <code>collapse-calculated_attributes-carbon_footprint_manufacturing</code> for each of CPU, RAM and storage.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html#L8"><code>get_calculated_attribute_explanation_button.html:8,14</code></a> ·
+              <code>hx-target</code> / <code>data-bs-target</code> → <code>#collapse-calculated_attributes-carbon_footprint_manufacturing</code> on all three buttons, whose
+              <code>hx-get</code> names three different objects.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py:40:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/object_linked_to_modeling_obj_web.py#L40"><code>object_linked_to_modeling_obj_web.py:40</code></a> ·
+              <code>item.web_id</code> → already distinct: <code>carbon_footprint_manufacturing-in-&lt;cpu&gt;</code>, <code>…-in-&lt;ram&gt;</code>, <code>…-in-&lt;storage&gt;</code>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L103"><code>test_views_calculated_attributes.py:103</code></a> ·
+              <code>panel.count('id="collapse-calculated_attributes-carbon_footprint_manufacturing"')</code> → 3.</li>
+          </ol>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L103"><code>test_views_calculated_attributes.py:103</code></a>, after the panel request;
+            <code>poetry run pytest --runxfail -vv "tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row"</code>.</p>
+        </dd>
         <dt>Fix</dt>
         <dd>Key every per-item id and reference by <code>item.web_id</code>, which already encodes attribute, dict key and container:
           the collapse id, the button's <code>hx-target</code>/<code>data-bs-target</code>/<code>aria-controls</code> (also in
@@ -1220,9 +1267,11 @@ return self._build_oob_response(
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html:6:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html#L6"><code>explainable_quantity.html:6</code></a>,
           <code>eco_logits_explainable_quantity.html:23</code>). <code>name=</code> stays. Optional: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html:7:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html#L7"><code>aria-controls</code></a> on the section button.</dd>
         <dt>Tests</dt>
-        <dd>Programmatic <code>EdgeComputer</code> + <code>EdgeStorage</code> system in two edge usage patterns: no duplicate <code>id=</code> in the computer panel; the CPU button's targets
-          point at its own existing row. E2E selector prefixes in <code>test_calculus_graph.py:59</code>, <code>test_external_api_objects.py:70,74</code>,
-          <code>test_video_external_api_objects.py:147,149</code>; run those three files.</dd>
+        <dd>The reproduction is the only test; it asserts uniqueness and self-targeting, not the id format. Because the ids change, update the selectors in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_calculus_graph.py:59:1" data-review-source-href="../../../tests/e2e/test_calculus_graph.py#L59"><code>test_calculus_graph.py:59</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_external_api_objects.py:70:1" data-review-source-href="../../../tests/e2e/objects/test_external_api_objects.py#L70"><code>test_external_api_objects.py:70,74</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_video_external_api_objects.py:147:1" data-review-source-href="../../../tests/e2e/objects/test_video_external_api_objects.py#L147"><code>test_video_external_api_objects.py:147,149</code></a> to prefixes, and run those three files.
+          Discrimination: the <code>item.web_id</code> templates pass, alone and on top of Task 9's; Task 9's template alone still fails, now also on the per-pattern dict ids (×2 each).</dd>
         <dt>Flags</dt>
         <dd>After Task 9: shares the new test file, and gives Task 9's empty dict entries distinct ids with two patterns.</dd>
       </dl>
@@ -1273,7 +1322,9 @@ return self._build_oob_response(
       <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-unsaved-modal">modal templates</a> · <a href="#d-workspace">four docs</a> · <a href="#f-js-guard">Jest</a> · <a href="#t-e2e-forms"><code>test_forms.py</code></a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>With a dirty panel, Help → "Data &amp; privacy" then "Yes, Continue" loads the builder page into the side panel (shown in jsdom with the bundled htmx; the new E2E confirms it in a browser).</dd>
+        <dd>With a dirty panel, Help → "Data &amp; privacy" then "Yes, Continue" loads the builder page into the side panel (shown in jsdom with the bundled htmx; the new E2E confirms it in a browser).
+          No reproduction: the settled fix replaces the replay contract (Discard closes the panel, nothing is issued) rather than correcting it, so its
+          Jest and E2E tests are new-contract tests; the new Data &amp; privacy E2E is the one to watch fail first.</dd>
         <dt>Root cause</dt>
         <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:199:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L199"><code>proceedWithPendingRequest()</code></a> rebuilds the request from
           <code>hx-get</code>/<code>hx-target</code>/<code>hx-swap</code>/<code>hx-vals</code> (with <code>eval</code>). The boosted anchors in
@@ -1311,20 +1362,34 @@ return self._build_oob_response(
       <h3><a href="#task-7">Task 7 · Show "each hour" after the unit</a></h3>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-unit-each-hour.md" data-review-source-href="diagnostics/recurrent-unit-each-hour.md">diagnostic</a> · GitHub #150</p>
-      <p data-files><span>Files</span> <a href="#f-constant"><code>recurrent_quantities_from_constant.html</code></a> · <a href="#t-e2e-edge"><code>test_edge_objects.py</code></a></p>
+      <p data-files><span>Files</span> <a href="#f-constant"><code>recurrent_quantities_from_constant.html</code></a> · <a href="#t-views-addition"><code>test_views_addition.py</code></a></p>
       <dl>
         <dt>Symptom</dt>
-        <dd>"1 occurrence … repeated over the entire canonical week" reads as a weekly total; entering one gives results 168 times too high.</dd>
+        <dd>"1 occurrence … repeated over the entire canonical week" reads as a weekly total; entering one gives results 168 times too high.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py:128:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_addition.py#L128"><code>test_recurrent_constant_editor_reads_as_a_per_hour_value</code></a> (create panel; server need, edge process compute and storage, component need)
+          records <code>assert 'occurrence' == 'occurrence each hour'</code> (likewise <code>cpu_core</code>, <code>GB_stored</code>, <code>concurrent</code>).</dd>
         <dt>Root cause</dt>
-        <dd>The readonly unit box (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:19:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L19">:19-25</a>)
-          and helper text (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:28:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L28">:28-30</a>) give no time reference.</dd>
+        <dd>
+          <p>The constant editor shows the raw pint unit and a helper that says nothing about hours, so the value reads as a total. The library's unit is right.</p>
+          <ol>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/forms/timeseries_builder_registry.py:119:1" data-review-source-href="../../../model_builder/adapters/forms/timeseries_builder_registry.py#L119"><code>timeseries_builder_registry.py:119</code></a> ·
+              <code>builder.default_inputs(value)</code> → <code>{'constant_value': 1, 'constant_unit': 'occurrence'}</code>.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:23:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L23"><code>recurrent_quantities_from_constant.html:23</code></a> · the readonly input → <code>value="occurrence"</code>; nothing renders
+              between it (closed at :25) and the helper.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:29:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L29"><code>:29</code></a> · helper → "This constant value will be repeated over the entire canonical week (168 hours)."</li>
+          </ol>
+          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py:138:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_addition.py#L138"><code>test_views_addition.py:138</code></a>, after the GET;
+            <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value"</code>.</p>
+        </dd>
         <dt>Fix</dt>
         <dd>Move the box styling to a wrapper holding the unchanged readonly <code>__constant_unit</code> input (borderless, same <code>name</code>/<code>id</code>/<code>value</code>, still updated by the component-need form)
           and a non-submitted <code>span</code> "each hour"; widen from <code>w-25</code> if "GB_stored each hour" needs it. Helper text:
           "All hours of the canonical week (168 hours) will use this value."</dd>
         <dt>Tests</dt>
-        <dd>E2E near <code>test_edge_objects.py:411</code>: "each hour" visible, input value still <code>cpu_core</code>, still there after switching to a storage component.
-          A rendered-form test (the implementer picks the existing test that renders this template) asserting the helper text and that no <code>…__constant_unit</code> value contains "each hour".</dd>
+        <dd>The reproduction is the only test; it also checks every <code>…__constant_unit</code> value stays the raw unit. No E2E: the component-need script
+          only sets the input's <code>.value</code> by id, so it cannot remove a static suffix beside it, and the existing checks at
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_edge_objects.py:411:1" data-review-source-href="../../../tests/e2e/objects/test_edge_objects.py#L411"><code>test_edge_objects.py:411</code></a> keep covering that contract.
+          Discrimination: the settled template passes; putting "each hour" into the value, or keeping the old helper, fails.</dd>
         <dt>Settled</dt>
         <dd>Interface-only; raw pint units; one suffix for all fields; weekly-pattern editor unchanged (2026-10-21).</dd>
       </dl>
@@ -1380,13 +1445,13 @@ return self._build_oob_response(
         </ul></li>
       <li><strong>Run B · contained UI fixes — Tasks 9 → 10 → 12 → 2 → 1 → 7</strong>
         <ul>
-          <li>After Run A: Task 6 unblocks the panels the Task 9 and 10 acceptance sweeps must reach.</li>
-          <li>Task 10 appends to the test file Task 9 creates.</li>
+          <li>After Run A: Task 6 unblocks the panels the Task 9 and 10 acceptance crawls over the shipped examples must reach. Task 10's reproduction shares Task 9's fixture and test file.</li>
           <li>Tasks 2 and 1 both edit <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a>: run them back to back.</li>
-          <li>Reproductions, unmasked (cluster 4 and 6 tasks join when their pass lands): Task 12 — switch <code>test.failing(</code> to <code>test(</code>, then <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code>; Task 2 —
-            <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code>.</li>
+          <li>Reproductions, unmasked: <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_calculated_attributes.py" "tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value"</code> (Tasks 9, 10, 7);
+            <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code> (Task 2, running server);
+            Task 12 — switch <code>test.failing(</code> to <code>test(</code>, then <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code>. Task 1 has none.</li>
           <li>Task 1's E2E confirms the Data &amp; privacy defect in a browser.</li>
-          <li>Validation: <code>npm run jest</code> (12, 2, 1); local E2E server for 1, 2, 7 and Task 10's selector updates.</li>
+          <li>Validation: <code>npm run jest</code> (12, 1); local E2E server for 1, 2 and Task 10's selector updates.</li>
         </ul></li>
       <li><strong>Run C · refactors and invariant tests — Tasks 13 → 14 → 15</strong>
         <ul>
