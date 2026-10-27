@@ -1,0 +1,66 @@
+"""Build summary.md for a run dir: one comparison table plus per-record details for expert review."""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+
+def load_records(run_dir: Path) -> list[dict]:
+    return [json.loads(p.read_text()) for p in sorted(run_dir.glob("*__r*.json")) if not p.name.endswith(".e-f.json")]
+
+
+def write_summary(run_dir: Path):
+    records = load_records(run_dir)
+    lines = [f"# Run {run_dir.name}", "",
+             "| case | model | rep | json | schema | build | compute | export | checks | in tok | out tok | reasoning | latency s | cost USD | total kg CO2e |",
+             "|---|---|---|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|"]
+    by_model: dict[str, list] = {}
+    for r in records:
+        ok = lambda k: "✅" if r.get(k) else "❌"  # noqa: E731
+        checks = r.get("checks", {})
+        checks_str = f"{sum(1 for v in checks.values() if v)}/{len(checks)}" if checks else "-"
+        if "api_error" in r:
+            lines.append(f"| {r['case']} | {r['model']} | {r['rep']} | API error: {r['api_error'][:80]} | | | | | | | | | | | |")
+            continue
+        lines.append(
+            f"| {r['case']} | {r['model']} | {r['rep']} | {ok('json_ok')}{'' if r.get('json_first_attempt_ok') else ' (repaired)'} "
+            f"| {ok('schema_ok')} | {ok('build_ok')} | {ok('compute_ok')} | {ok('export_ok')} | {checks_str} "
+            f"| {r.get('input_tokens')} | {r.get('output_tokens')} | {r.get('reasoning_tokens') or ''} "
+            f"| {r.get('latency_s')} | {r.get('cost_usd', 0):.4f} | {r.get('total_kg_co2e_over_horizon', '')} |")
+        by_model.setdefault(r["model"], []).append(r)
+    lines += ["", "## Per model", "", "| model | runs | export ok | checks passed | mean out tok | mean latency s | mean cost USD |",
+              "|---|---:|---:|---:|---:|---:|---:|"]
+    for model, rs in by_model.items():
+        n = len(rs)
+        exported = sum(1 for r in rs if r.get("export_ok"))
+        checks_total = sum(len(r.get("checks", {})) for r in rs)
+        checks_passed = sum(sum(1 for v in r.get("checks", {}).values() if v) for r in rs)
+        lines.append(f"| {model} | {n} | {exported}/{n} | {checks_passed}/{checks_total} "
+                     f"| {sum(r.get('output_tokens', 0) for r in rs) / n:.0f} | {sum(r.get('latency_s', 0) for r in rs) / n:.1f} "
+                     f"| {sum(r.get('cost_usd', 0) for r in rs) / n:.4f} |")
+    lines += ["", "## Details", ""]
+    for r in records:
+        lines += [f"### {r['case']} / {r['model']} / r{r['rep']}", ""]
+        for key in ("api_error", "json_error", "schema_error", "build_error", "compute_error", "export_error"):
+            if r.get(key):
+                lines += [f"- **{key}**: `{r[key][:600]}`"]
+        if r.get("checks"):
+            lines += ["- checks: " + ", ".join(f"{k}={'ok' if v else 'FAIL'}" for k, v in r["checks"].items())]
+        if r.get("counts"):
+            lines += ["- counts: " + ", ".join(f"{k}={v}" for k, v in r["counts"].items() if v)]
+        if r.get("use_by_category_kg"):
+            lines += ["- use kg: " + ", ".join(f"{k}={v}" for k, v in r["use_by_category_kg"].items() if v),
+                      "- manufacturing kg: " + ", ".join(f"{k}={v}" for k, v in r["manufacturing_by_category_kg"].items() if v)]
+        if r.get("raw_output"):
+            try:
+                pretty = json.dumps(json.loads(r["raw_output"]), indent=1)
+            except json.JSONDecodeError:
+                pretty = r["raw_output"]
+            lines += ["", "<details><summary>model output</summary>", "", "```json", pretty[:12000], "```", "", "</details>", ""]
+    (run_dir / "summary.md").write_text("\n".join(lines))
+    print(f"Wrote {run_dir / 'summary.md'}")
+
+
+if __name__ == "__main__":
+    write_summary(Path(sys.argv[1]))
