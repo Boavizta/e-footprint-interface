@@ -1,0 +1,46 @@
+{
+  "system_name": "Smart building energy monitoring",
+  "servers": [
+    {"name": "Ingestion API", "kind": "cpu", "assumption": "Stateless API in front of the time-series DB"},
+    {"name": "Time-series DB", "kind": "cpu", "storage_gb": 500},
+    {"name": "Report worker", "kind": "cpu", "assumption": "Batch worker generating monthly PDFs"}
+  ],
+  "genai_apis": [],
+  "jobs": [
+    {"name": "Ingest telemetry batch", "server": "Ingestion API", "data_transferred_kb": 20, "data_stored_kb": 20},
+    {"name": "Write telemetry", "server": "Time-series DB", "data_stored_kb": 20},
+    {"name": "Load dashboard", "server": "Ingestion API", "data_transferred_kb": 800},
+    {"name": "Query charts", "server": "Time-series DB", "data_transferred_kb": 200},
+    {"name": "Render PDF report", "server": "Report worker", "request_duration_s": 20, "cpu_cores": 1},
+    {"name": "Read month of data", "server": "Time-series DB", "data_transferred_kb": 2000}
+  ],
+  "journeys": [
+    {"name": "Facility manager checks dashboard", "steps": [
+      {"name": "Open dashboard", "user_time_spent_min": 3, "jobs": ["Load dashboard", "Query charts"]}]},
+    {"name": "Monthly report batch", "steps": [
+      {"name": "Generate one building report", "user_time_spent_min": 0.5, "jobs": ["Read month of data", "Render PDF report"]}]}
+  ],
+  "usage_patterns": [
+    {"name": "Managers in France", "journey": "Facility manager checks dashboard", "device": "laptop", "network": "wifi",
+     "country": "FRANCE", "volume": {"value": 36000, "per": "month"}, "assumption": "3,000 users x 3 visits a week"},
+    {"name": "Monthly reports", "journey": "Monthly report batch", "device": "box", "network": "wifi",
+     "country": "FRANCE", "volume": {"value": 1500, "per": "month"}, "growth_pct_per_year": 48}
+  ],
+  "edge_devices": [
+    {"name": "Gateway", "kind": "computer", "cores": 4, "ram_gb": 4, "storage_gb": 32, "power_w": 6, "lifespan_years": 5},
+    {"name": "Wireless sensor", "kind": "appliance", "power_w": 0.05, "embodied_kg": 1, "lifespan_years": 7}
+  ],
+  "edge_functions": [
+    {"name": "Aggregate and upload telemetry", "device": "Gateway", "cpu_cores_avg": 0.3, "ram_gb_avg": 1,
+     "storage_gb_per_week": 0.05, "server_calls": [{"job": "Ingest telemetry batch", "times_per_hour": 6}, {"job": "Write telemetry", "times_per_hour": 6}]},
+    {"name": "Sense every minute", "device": "Wireless sensor", "workload_fraction": 1}
+  ],
+  "edge_deployments": [
+    {"name": "Equipped buildings", "functions": ["Aggregate and upload telemetry"], "country": "FRANCE", "network": "mobile",
+     "new_devices": {"value": 60, "per": "month"}, "usage_span_years": 5,
+     "assumption": "Only new installations are modeled; the 1,500 existing gateways would need an initial stock"},
+    {"name": "Sensors in equipped buildings", "functions": ["Sense every minute"], "country": "FRANCE", "network": "wifi",
+     "new_devices": {"value": 2400, "per": "month"}, "usage_span_years": 7}
+  ],
+  "open_questions": ["Should the 1,500 already-deployed buildings be modeled as an initial stock?", "How long is telemetry retained?"]
+}

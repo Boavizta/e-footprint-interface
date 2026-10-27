@@ -1,0 +1,25 @@
+{
+  "id": "02_video_learning_ml_training",
+  "title": "Video learning platform with transcoding and weekly recommender training",
+  "user_prompt": "I run product for an online learning platform used by about 50,000 learners across Europe, mainly Germany and France. Learners watch course videos in their browser (a typical session is two 15-minute videos), take short quizzes, and get personalised course recommendations. Instructors upload videos a few hundred times a month; each upload is transcoded into several resolutions in the background. Our data team retrains the recommendation model every week on GPUs, it takes a few hours, and recommendations are then served from the model. Everything is hosted in a European cloud region. I want a first footprint model to see whether the video streaming or the ML part dominates.",
+  "facts_if_asked": {
+    "video": "1080p streams at about 5 Mbps; videos stored at 3 resolutions, about 1.5 GB per course hour overall.",
+    "training": "4 GPUs for about 6 hours weekly, on a 200 GB dataset.",
+    "recommendations": "Served from a small CPU service, under 50 ms per request.",
+    "sessions": "About 400,000 learning sessions per month."
+  },
+  "expected_properties": [
+    "A learner journey with a video watching step whose job has large data_transferred (hundreds of MB), separated from quiz and recommendation jobs.",
+    "A background transcoding journey with a low volume (hundreds per month), with a long request_duration job on a CPU server.",
+    "A weekly training journey with a volume of about 52 per year on a gpu server, with a GPU job, long duration.",
+    "Recommendation serving is a job on a CPU server (or GPU if justified), distinct from training.",
+    "Video storage reflected through data_stored on the upload/transcoding job or a storage_gb on the server.",
+    "Usage patterns for GERMANY and FRANCE (or one Europe pattern with an assumption), laptop device."
+  ],
+  "checks": {
+    "min_journeys": 3,
+    "requires_gpu_server": true,
+    "requires_low_volume_journey": true,
+    "countries_must_include": ["GERMANY"]
+  }
+}

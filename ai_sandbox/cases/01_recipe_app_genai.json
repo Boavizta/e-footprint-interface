@@ -1,0 +1,26 @@
+{
+  "id": "01_recipe_app_genai",
+  "title": "Recipe mobile app with a GenAI cooking assistant",
+  "user_prompt": "We're a small startup with a recipe app on iOS and Android. We have about 200,000 monthly active users, mostly in France, who open the app roughly 3 times a week. People browse recipes (lots of photos), save favourites, and upload photos of their own dishes. Last spring we added \"Ask the chef\", a chat feature where users ask cooking questions and get answers from an LLM; we use OpenAI for that and about a quarter of our users try it each month, with 2 or 3 questions per session. Our backend is on a cloud provider in Europe, I think it's a classic API plus a Postgres database and an object store for the photos. We'd like to understand the footprint of the app, and in particular what the AI feature changes.",
+  "facts_if_asked": {
+    "backend": "One Node API service, one managed Postgres, S3-compatible object storage for photos. No CDN.",
+    "photos": "Average uploaded photo 2 MB after compression; recipe pages show about 6 thumbnails of 80 kB each.",
+    "llm_model": "gpt-5-mini, average answer about 250 tokens.",
+    "retention": "User photos kept indefinitely."
+  },
+  "expected_properties": [
+    "A browsing journey and an 'Ask the chef' journey (or steps) that are distinguishable, so the AI feature's share can be read.",
+    "A GenAI API object with provider openai and a job on it, referenced from the chat step.",
+    "One API server and one database server shared across journeys; no duplicate database per journey.",
+    "Photo upload modeled as a job with significant data_transferred and data_stored, on the API or object store server.",
+    "Usage patterns on smartphone, mobile or wifi network, country FRANCE, with a volume consistent with 200k MAU x ~12 sessions/month (~2.4M journeys/month) or an explicit split between browsing and chat journeys.",
+    "open_questions should ask about things that matter: photo size/retention, model used, session mix."
+  ],
+  "checks": {
+    "min_journeys": 2,
+    "requires_genai_api": true,
+    "requires_server_shared_by_journeys": true,
+    "devices_must_include": ["smartphone"],
+    "countries_must_include": ["FRANCE"]
+  }
+}
