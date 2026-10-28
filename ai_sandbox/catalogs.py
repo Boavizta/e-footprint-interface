@@ -83,8 +83,13 @@ def genai_models_by_provider() -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in out.items()}
 
 
-def resolve_genai(provider: str, model_name: str, resolutions: list[Resolution]) -> tuple[str, str]:
+def resolve_genai(provider: str, model_name: str | None, resolutions: list[Resolution]) -> tuple[str, str]:
     catalog = genai_models_by_provider()
+    if not model_name:
+        provider_key = GENAI_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "_"), "openai")
+        default = GENAI_DEFAULT_MODEL.get(provider_key, catalog[provider_key][0])
+        resolutions.append(Resolution("genai_model", f"{provider}/<unstated>", f"{provider_key}/{default}", "default"))
+        return provider_key, default
     provider_key = GENAI_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "_"))
     if provider_key is None:
         # last resort: the provider whose catalog contains the model name

@@ -63,7 +63,7 @@ class Completion:
                 + self.cache_write_tokens * price_in * 1.25 + self.output_tokens * price_out) / 1e6
 
 
-MAX_OUTPUT_TOKENS = 8000
+MAX_OUTPUT_TOKENS = 16000  # reasoning models spend most of it thinking; 8000 cut mistral-large-4 off
 
 
 def _anthropic(model, system, prompt, effort) -> Completion:
@@ -91,9 +91,10 @@ def _anthropic(model, system, prompt, effort) -> Completion:
 def _openai(model, system, prompt, effort) -> Completion:
     from openai import OpenAI
     client = OpenAI()
+    # OpenAI's JSON mode requires the word "json" in the input itself, instructions do not count.
     params = dict(
-        model=model, instructions=system, input=prompt, max_output_tokens=MAX_OUTPUT_TOKENS,
-        text={"format": {"type": "json_object"}})
+        model=model, instructions=system, input=prompt + "\n\nRespond with the JSON object only.",
+        max_output_tokens=MAX_OUTPUT_TOKENS, text={"format": {"type": "json_object"}})
     if effort:
         params["reasoning"] = {"effort": effort}
     start = time.perf_counter()
@@ -122,11 +123,15 @@ def _mistral(model, system, prompt, effort) -> Completion:
     latency = time.perf_counter() - start
     choice = response.choices[0]
     content = choice.message.content
-    if not isinstance(content, str):  # list of content chunks
+    thinking_chars = 0
+    if not isinstance(content, str):  # list of chunks: TextChunk and, on reasoning models, ThinkChunk
+        thinking_chars = sum(len(getattr(t, "text", "")) for chunk in content for t in getattr(chunk, "thinking", []) or [])
         content = "".join(getattr(chunk, "text", "") for chunk in content)
     usage = response.usage
+    # Mistral reports no reasoning token split; approximate from the thinking text at 4 chars per token.
     return Completion(
         text=content, input_tokens=usage.prompt_tokens, output_tokens=usage.completion_tokens,
+        reasoning_tokens=thinking_chars // 4 if thinking_chars else None,
         latency_s=latency, stop_reason=choice.finish_reason,
         request_params={k: v for k, v in params.items() if k != "messages"})
 
