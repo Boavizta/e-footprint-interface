@@ -68,8 +68,9 @@ def _names(items) -> set[str]:
     return {i.get("name") for i in items if isinstance(i, dict) and i.get("name")}
 
 
-def _assumption(obj: dict) -> str:
-    return f'<span class="asm">{esc(obj["assumption"])}</span>' if obj.get("assumption") else ""
+def _comments(obj: dict) -> str:
+    comments = obj.get("comments") if isinstance(obj.get("comments"), dict) else {}
+    return "".join(f'<span class="asm">{esc(field.replace("_", " "))}: {esc(text)}</span>' for field, text in comments.items())
 
 
 def _volume(v) -> str:
@@ -137,7 +138,7 @@ def render_tree(data: dict) -> str:
         nums = ", ".join(f"{k.replace('_', ' ')}={job[k]}" for k in ("data_transferred_kb", "data_stored_kb", "request_duration_s",
                                                                      "cpu_cores", "gpus", "ram_mb", "output_tokens") if job.get(k) is not None)
         return (f'<li><span class="kind">job</span>{esc(name)} {target} <span class="muted">{esc(nums)}</span>'
-                f'{_assumption(job)}</li>')
+                f'{_comments(job)}</li>')
 
     def journey_ul(name: str) -> str:
         journey = journeys.get(name)
@@ -155,7 +156,7 @@ def render_tree(data: dict) -> str:
         parts.append(
             f'<li><span class="kind">usage</span>{esc(up.get("name"))} <span class="muted">{esc(up.get("device"))} · '
             f'{esc(up.get("network"))} · {esc(up.get("country"))} · {_volume(up.get("volume"))}{growth}</span>'
-            f'{_assumption(up)}{journey_ul(up.get("journey"))}</li>')
+            f'{_comments(up)}{journey_ul(up.get("journey"))}</li>')
     for dep in data.get("edge_deployments", []):
         fns = []
         for fn_name in dep.get("functions", []):
@@ -168,24 +169,25 @@ def render_tree(data: dict) -> str:
             calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(c.get("job"))[4:]
                             for c in fn.get("server_calls", []))
             fns.append(f'<li><span class="kind">function</span>{esc(fn_name)} on <span class="kind">device</span>{esc(fn.get("device"))} '
-                       f'<span class="muted">{esc(nums)}</span>{_assumption(fn)}<ul>{calls}</ul></li>')
+                       f'<span class="muted">{esc(nums)}</span>{_comments(fn)}<ul>{calls}</ul></li>')
         span = f", {dep['usage_span_years']} yrs" if dep.get("usage_span_years") else ""
+        span = (f" + {dep['existing_devices']} existing" if dep.get("existing_devices") else "") + span
         parts.append(f'<li><span class="kind">edge</span>{esc(dep.get("name"))} <span class="muted">{esc(dep.get("country"))} · '
-                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_devices"))} new devices{span}</span>{_assumption(dep)}'
+                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_devices"))} new devices{span}</span>{_comments(dep)}'
                      f'<ul>{"".join(fns)}</ul></li>')
     for s in data.get("servers", []):
         specs = ", ".join(f"{k.replace('_', ' ')}={s[k]}" for k in ("cores", "ram_gb", "gpus", "storage_gb", "cloud_provider",
                                                                      "instance_type", "carbon_intensity_g_per_kwh") if s.get(k) is not None)
         parts.append(f'<li><span class="kind">{esc(s.get("kind", "cpu"))} server</span>{esc(s.get("name"))} '
-                     f'<span class="muted">{esc(specs)}</span>{_assumption(s)}</li>')
+                     f'<span class="muted">{esc(specs)}</span>{_comments(s)}</li>')
     for api in data.get("genai_apis", []):
         parts.append(f'<li><span class="kind">GenAI</span>{esc(api.get("name"))} <span class="muted">{esc(api.get("provider"))}/'
-                     f'{esc(api.get("model_name") or "<unstated>")}</span>{_assumption(api)}</li>')
+                     f'{esc(api.get("model_name") or "<unstated>")}</span>{_comments(api)}</li>')
     for d in data.get("edge_devices", []):
         specs = ", ".join(f"{k.replace('_', ' ')}={d[k]}" for k in ("cores", "ram_gb", "storage_gb", "power_w", "embodied_kg",
                                                                      "lifespan_years") if d.get(k) is not None)
         parts.append(f'<li><span class="kind">{esc(d.get("kind", "computer"))}</span>{esc(d.get("name"))} '
-                     f'<span class="muted">{esc(specs)}</span>{_assumption(d)}</li>')
+                     f'<span class="muted">{esc(specs)}</span>{_comments(d)}</li>')
     parts.append("</ul>")
     return "".join(parts)
 

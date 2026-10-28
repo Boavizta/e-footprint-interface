@@ -9,7 +9,7 @@
     "reports": "1 PDF per building per month, around 20 s of CPU each."
   },
   "expected_properties": [
-    "An edge deployment with new_devices about 60 per month (or 1,500 existing plus growth, with an assumption), country FRANCE, and a usage span of several years.",
+    "An edge deployment with new_devices about 60 per month and existing_devices about 1,500 (gateways) and 60,000 (sensors), country FRANCE, and a usage span of several years.",
     "A gateway edge device of kind computer, and a sensor edge device of kind appliance (or an explicit assumption folding sensors into the gateway).",
     "An edge function on the gateway with server_calls to a telemetry ingestion job at 6 times per hour.",
     "The ingestion job on a time-series DB server; the dashboard journey reads from the same server or a dedicated API server that reads it; no duplicate DB.",

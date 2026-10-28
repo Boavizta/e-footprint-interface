@@ -37,11 +37,9 @@ MODELS = {
     "mistral-large-4": ("mistral", 1.36, 4.18),
 }
 
-DEFAULT_MODELS = [
-    "claude-haiku-5-5", "claude-sonnet-5-5",
-    "gpt-6-luna", "gpt-6.1-terra",
-    "mistral-small-latest", "mistral-medium-latest", "mistral-large-4",
-]
+# The first full run (2026-10-28, 3 cases x 7 models x 2 reps) kept these two: Haiku for quality per dollar, Luna as
+# the cheap comparison point. Sonnet and Large 4 cost 10x for no structural gain, Medium and Small misread volumes.
+DEFAULT_MODELS = ["claude-haiku-5-5", "gpt-6-luna"]
 
 
 @dataclass

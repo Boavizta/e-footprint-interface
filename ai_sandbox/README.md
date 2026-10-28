@@ -9,7 +9,7 @@ Nothing here is part of the Django application. Run outputs under `runs/` are gi
 ## How it works
 
 1. `prompts/system_prompt.md` teaches the model the e-footprint mental model and a compact JSON DSL
-   (objects, relationships, optional numbers, one `assumption` per judgement call, a few `open_questions`).
+   (objects, relationships, optional numbers, a `comments` sentence per stated number that becomes the value's comment in the model, a few `open_questions`).
 2. `cases/*.json` hold a realistic product-person prompt, facts available if asked (for later clarification
    experiments), expected properties for expert review, and machine checks.
 3. `providers.py` calls Anthropic, OpenAI or Mistral with the same system prompt and user prompt, and records
@@ -48,7 +48,7 @@ record with:
 
 - a **structure tree** rendered from the DSL JSON the model wrote: usage patterns → journey → steps → jobs → server or
   GenAI API, edge deployments → functions → device and server calls, then the declared servers, APIs and edge
-  devices, with assumptions muted under their object. It shows what the model said, not the effective values after
+  devices, with field comments muted under their object. It shows what the model said, not the effective values after
   library defaults filled the gaps;
 - **structural warnings** computed from the DSL (dangling references, unused objects, jobs with no target), the
   record's checks, counts, totals by category, catalog resolutions (non-exact ones highlighted), cost, and the case's
@@ -64,19 +64,21 @@ record with:
 `output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral); omitted means
 the provider default, which is recorded in `request_params`.
 
-## Models compared by default
+## Models
 
-| Model | Provider | USD in / out per M tokens |
-|---|---|---:|
-| claude-haiku-5-5 | Anthropic | 0.10 / 0.50 |
-| claude-sonnet-5-5 | Anthropic | 2.00 / 10.00 |
-| gpt-6-luna | OpenAI | 0.10 / 0.50 |
-| gpt-6.1-terra | OpenAI | 1.00 / 5.00 |
-| mistral-small-latest | Mistral | 0.15 / 0.60 |
-| mistral-medium-latest | Mistral | 1.50 / 7.50 |
-| mistral-large-4 | Mistral | 1.36 / 4.18 |
+| Model | Provider | USD in / out per M tokens | Default run |
+|---|---|---:|---|
+| claude-haiku-5-5 | Anthropic | 0.10 / 0.50 | yes |
+| gpt-6-luna | OpenAI | 0.10 / 0.50 | yes |
+| claude-sonnet-5-5 | Anthropic | 2.00 / 10.00 | `--models` |
+| gpt-6.1-terra | OpenAI | 1.00 / 5.00 | `--models` |
+| mistral-small-latest | Mistral | 0.15 / 0.60 | `--models` |
+| mistral-medium-latest | Mistral | 1.50 / 7.50 | `--models` |
+| mistral-large-4 | Mistral | 1.36 / 4.18 | `--models` |
+| claude-opus-5-5 | Anthropic | 4.00 / 20.00 | `--models`, reference |
 
-`claude-opus-5-5` is configured as an optional reference model (pass it with `--models`).
+The first full run (`runs/20261028-164221`, 3 cases x 7 models x 2 reps) narrowed the default to Haiku and Luna:
+Sonnet and Large 4 cost 10x for no structural gain, Medium and Small take the user count as the journey volume.
 
 ## Design choices worth challenging
 
@@ -92,5 +94,10 @@ the provider default, which is recorded in `request_params`.
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
   specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python ai_sandbox/catalogs.py refresh`).
   Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
+- **Numbers are asked for, not left out.** The first prompt said to leave unstated numbers to library defaults.
+  Models that obeyed answered "does video or ML dominate" with a default payload for a 30-minute video stream,
+  and sized nothing for 60,000 deployed sensors. The prompt now asks for an order-of-magnitude estimate whenever
+  the description implies one, with the derivation in a per-field `comments` entry that becomes the value's
+  comment in the model.
 - **Checks are coarse.** They catch missing object kinds, missing sharing, missing low-volume batch journeys.
   Semantic quality still needs expert review of `summary.md` and of the exported model in the interface.
