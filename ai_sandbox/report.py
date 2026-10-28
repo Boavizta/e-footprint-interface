@@ -10,8 +10,14 @@ def load_records(run_dir: Path) -> list[dict]:
     return [json.loads(p.read_text()) for p in sorted(run_dir.glob("*__r*.json")) if not p.name.endswith(".e-f.json")]
 
 
+def load_cases() -> dict[str, dict]:
+    cases_dir = Path(__file__).parent / "cases"
+    return {c["id"]: c for c in (json.loads(p.read_text()) for p in cases_dir.glob("0*.json"))}
+
+
 def write_summary(run_dir: Path):
     records = load_records(run_dir)
+    cases = load_cases()
     lines = [f"# Run {run_dir.name}", "",
              "| case | model | rep | json | schema | build | compute | export | checks | in tok | out tok | reasoning | latency s | cost USD | total kg CO2e |",
              "|---|---|---|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|"]
@@ -47,6 +53,9 @@ def write_summary(run_dir: Path):
                 lines += [f"- **{key}**: `{r[key][:600]}`"]
         if r.get("checks"):
             lines += ["- checks: " + ", ".join(f"{k}={'ok' if v else 'FAIL'}" for k, v in r["checks"].items())]
+        if r.get("catalog_resolutions"):
+            lines += ["- catalog resolutions: " + "; ".join(
+                f"{c['kind']} {c['requested']} → {c['resolved']} ({c['how']})" for c in r["catalog_resolutions"])]
         if r.get("counts"):
             lines += ["- counts: " + ", ".join(f"{k}={v}" for k, v in r["counts"].items() if v)]
         if r.get("use_by_category_kg"):
@@ -54,9 +63,19 @@ def write_summary(run_dir: Path):
                       "- manufacturing kg: " + ", ".join(f"{k}={v}" for k, v in r["manufacturing_by_category_kg"].items() if v)]
         if r.get("raw_output"):
             try:
-                pretty = json.dumps(json.loads(r["raw_output"]), indent=1)
+                data = json.loads(r["raw_output"])
+                pretty = json.dumps(data, indent=1)
             except json.JSONDecodeError:
-                pretty = r["raw_output"]
+                data, pretty = {}, r["raw_output"]
+            questions = data.get("open_questions") if isinstance(data, dict) else None
+            if questions:
+                lines += ["- open questions asked:"] + [f"  - {q}" for q in questions]
+            case = cases.get(r["case"], {})
+            if case.get("facts_if_asked"):
+                lines += ["- facts the user could have given (for judging the questions above):"] + [
+                    f"  - **{k}**: {v}" for k, v in case["facts_if_asked"].items()]
+            if case.get("expected_properties"):
+                lines += ["- expected properties (expert rubric):"] + [f"  - [ ] {e}" for e in case["expected_properties"]]
             lines += ["", "<details><summary>model output</summary>", "", "```json", pretty[:12000], "```", "", "</details>", ""]
     (run_dir / "summary.md").write_text("\n".join(lines))
     print(f"Wrote {run_dir / 'summary.md'}")

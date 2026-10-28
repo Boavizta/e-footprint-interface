@@ -53,6 +53,7 @@ the provider default, which is recorded in `request_params`.
 | gpt-6.1-terra | OpenAI | 1.00 / 5.00 |
 | mistral-small-latest | Mistral | 0.15 / 0.60 |
 | mistral-medium-latest | Mistral | 1.50 / 7.50 |
+| mistral-large-4 | Mistral | 1.36 / 4.18 |
 
 `claude-opus-5-5` is configured as an optional reference model (pass it with `--models`).
 
@@ -66,5 +67,9 @@ the provider default, which is recorded in `request_params`.
   structured outputs are a separate knob to test later.
 - **One year horizon, constant weekly profiles.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in
   `dsl.py`; edge needs are flat 168-hour arrays. Both are fine for structure comparison, not for final numbers.
+- **Catalog choices are resolved in code, not in the prompt.** `catalogs.py` snaps a GenAI `provider`/`model_name`
+  to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
+  specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python ai_sandbox/catalogs.py refresh`).
+  Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
 - **Checks are coarse.** They catch missing object kinds, missing sharing, missing low-volume batch journeys.
   Semantic quality still needs expert review of `summary.md` and of the exported model in the interface.

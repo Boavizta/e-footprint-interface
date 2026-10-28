@@ -2,7 +2,7 @@
   "system_name": "Smart building energy monitoring",
   "servers": [
     {"name": "Ingestion API", "kind": "cpu", "assumption": "Stateless API in front of the time-series DB"},
-    {"name": "Time-series DB", "kind": "cpu", "storage_gb": 500},
+    {"name": "Time-series DB", "kind": "cpu", "cores": 8, "ram_gb": 32, "storage_gb": 500, "cloud_provider": "OVH"},
     {"name": "Report worker", "kind": "cpu", "assumption": "Batch worker generating monthly PDFs"}
   ],
   "genai_apis": [],
