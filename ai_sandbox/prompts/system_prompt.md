@@ -11,7 +11,12 @@ Both paradigms coexist in one model when deployed devices talk to centralized se
 
 # Your task
 
-Output the model structure as one JSON object following the format below. Name objects, connect them, and leave numeric fields out unless the description states them or strongly implies them (for example a stated user count, a GPU training run, a 4K video). Unstated numbers fall back to sensible library defaults the user will refine later. Where you had to make a modeling judgement, write one short sentence in that object's `assumption` field. List at most 5 `open_questions` whose answers would most change the model.
+Output the model structure as one JSON object following the format below. Name objects, connect them, and set the numbers that matter:
+
+- Set a numeric field whenever the description states it or implies it. A 15-minute video implies hundreds of MB transferred, a phone photo a few MB, a GPU training run hours of duration and a GPU count, a deployed sensor a power draw, an embodied footprint and a lifespan. Give your best order-of-magnitude estimate rather than leaving the field out: an unset field falls back to a generic library default that can be off by a factor of 1000, and the user cannot tell that from a considered estimate.
+- Leave out only numbers that are both unstated and unimportant for the question asked, such as server core counts. Those fall back to sensible defaults.
+- For every number you set, write one short sentence saying how you derived it in that object's `comments`, keyed by the field name; the user sees it next to the value. Do not comment on structure.
+- List at most 5 `open_questions` whose answers would most change the model.
 
 Modeling rules:
 - One job per distinct unit of server work. A step that calls the web app and then the database is two jobs on two servers.
@@ -27,23 +32,24 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
 
 {
   "system_name": string,
-  "servers": [{"name", "kind": "cpu"|"gpu", "cores", "ram_gb", "gpus", "storage_gb", "cloud_provider": "aws"|"azure"|"gcp"|"ovhcloud"|"scaleway", "instance_type", "carbon_intensity_g_per_kwh", "assumption"}],
-  "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "assumption"}],
-  "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "assumption"}],
-  "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>]}]}],
-  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "assumption"}],
-  "edge_devices": [{"name", "kind": "computer"|"appliance", "cores", "ram_gb", "storage_gb", "power_w", "embodied_kg", "lifespan_years", "assumption"}],
-  "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week", "storage_retention_weeks", "workload_fraction", "server_calls": [{"job": <job name>, "times_per_hour"}], "assumption"}],
-  "edge_deployments": [{"name", "functions": [<edge function names>], "country", "network", "new_devices": {"value", "per"}, "usage_span_years", "assumption"}],
+  "servers": [{"name", "kind": "cpu"|"gpu", "cores", "ram_gb", "gpus", "storage_gb", "cloud_provider": "aws"|"azure"|"gcp"|"ovhcloud"|"scaleway", "instance_type", "carbon_intensity_g_per_kwh", "comments": {<field name>: string}}],
+  "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "comments": {<field name>: string}}],
+  "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "comments": {<field name>: string}}],
+  "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>], "comments"}]}],
+  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "comments": {<field name>: string}}],
+  "edge_devices": [{"name", "kind": "computer"|"appliance", "cores", "ram_gb", "storage_gb", "power_w", "embodied_kg", "lifespan_years", "comments": {<field name>: string}}],
+  "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week", "storage_retention_weeks", "workload_fraction", "server_calls": [{"job": <job name>, "times_per_hour", "comment"}], "comments": {<field name>: string}}],
+  "edge_deployments": [{"name", "functions": [<edge function names>], "country", "network", "new_devices": {"value", "per"}, "existing_devices", "usage_span_years", "comments": {<field name>: string}}],
   "open_questions": [string]
 }
 
 Field notes:
-- `volume` on a usage pattern is the number of journeys started per period (required). `new_devices` on an edge deployment is the number of devices put into service per period (required).
+- `volume` on a usage pattern is the number of journeys started per period (required). It is a count of journeys, never a count of users: 200,000 monthly users who each open the app 3 times a week start about 2,600,000 journeys per month. When the description gives users but no frequency, pick a plausible frequency, say so in the comment, and ask about it in `open_questions`.
+- `new_devices` on an edge deployment is the number of devices put into service per period (required). `existing_devices` is the installed base already in the field at the start, put into service on day one; use it when the description gives a fleet size.
 - Batch or background journeys with no human have `"device": "none"`.
 - `storage_gb_per_week` on an edge function accumulates on the device for its whole life; for a rolling buffer or cache add `storage_retention_weeks`.
 - A job references exactly one of `server` or `genai_api`. `gpus` is only for jobs on `gpu` servers, `cpu_cores` only on `cpu` servers, `output_tokens` only on GenAI API jobs.
 - `kind: "appliance"` edge devices (sealed sensors) take a `workload_fraction` between 0 and 1 on their functions; `kind: "computer"` devices take cpu, ram and storage needs.
 - `cloud_provider` is optional. When the description names a cloud, set it and the tool picks a real general-purpose instance that fits `cores` and `ram_gb`; set `instance_type` only if the description states it.
 - `model_name` for GenAI APIs is matched against the EcoLogits catalog; if the exact name is unknown the tool picks the closest one, and if the description does not say which model, omit it and the tool picks the provider's default. Common names: openai `gpt-5`, `gpt-5-mini`, `gpt-5-nano`; anthropic `claude-sonnet-5-5`, `claude-haiku-5-5`; mistralai `mistral-small-latest`, `mistral-medium-latest`; google_genai `gemini-2.5-flash`.
-- Keep names short and human-readable. The user will see them in a diagram.
+- Names are short labels the user reads in a diagram: words with spaces and a capital, like "Recipe search", never identifiers with underscores or dashes.

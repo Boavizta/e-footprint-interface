@@ -127,9 +127,9 @@ def evaluate(data: dict, case: dict, export_path: Path | None) -> dict:
         "journeys": len(spec.journeys), "steps": sum(len(j.steps) for j in spec.journeys),
         "usage_patterns": len(spec.usage_patterns), "edge_devices": len(spec.edge_devices),
         "edge_functions": len(spec.edge_functions), "edge_deployments": len(spec.edge_deployments),
-        "assumptions": sum(1 for section in (spec.servers, spec.jobs, spec.usage_patterns, spec.edge_devices,
-                                             spec.edge_functions, spec.edge_deployments, spec.genai_apis)
-                           for obj in section if obj.assumption),
+        "comments": sum(len(obj.comments) for section in (
+            spec.servers, spec.genai_apis, spec.jobs, spec.usage_patterns, spec.edge_devices, spec.edge_functions,
+            spec.edge_deployments, [st for jo in spec.journeys for st in jo.steps]) for obj in section),
         "open_questions": len(spec.open_questions)}
     try:
         start = time.perf_counter()
