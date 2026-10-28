@@ -65,8 +65,8 @@ class ServerSpec(Strict):
 
 class GenAIApiSpec(Strict):
     name: str
-    provider: str
-    model_name: str
+    provider: str = "openai"
+    model_name: Optional[str] = None  # unstated in the description -> provider default, recorded as a resolution
     assumption: Optional[str] = None
 
 
