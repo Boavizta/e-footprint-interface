@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from . import views
-from model_builder.adapters.views.views_onboarding import load_example_deeplink
+from model_builder.adapters.views.views_onboarding import load_example_deeplink, load_local_file
 from model_builder.adapters.views.views_support import support
 
 
@@ -16,6 +17,10 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
+
+if settings.DEBUG:
+    # Local dev tooling: the AI sandbox report's "Open in interface" links (ai_sandbox/README.md).
+    urlpatterns.append(path("dev/load-file/", load_local_file, name="load-local-file"))
 
 # Project-wide safety net for unhandled 500s (only fires when DEBUG=False, i.e. in production):
 # render the same recovery page so users can reset and report the bug instead of a blank error.

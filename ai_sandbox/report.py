@@ -1,9 +1,17 @@
-"""Build summary.md for a run dir: one comparison table plus per-record details for expert review."""
+"""Build summary.md and summary.html for a run dir, and refresh runs/index.html.
+
+The Markdown is the grep-able record; the HTML (report_html.py) is the browsing view with structure trees
+and "Open in interface" links.
+"""
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+import report_html  # noqa: E402
 
 
 def load_records(run_dir: Path) -> list[dict]:
@@ -78,7 +86,9 @@ def write_summary(run_dir: Path):
                 lines += ["- expected properties (expert rubric):"] + [f"  - [ ] {e}" for e in case["expected_properties"]]
             lines += ["", "<details><summary>model output</summary>", "", "```json", pretty[:12000], "```", "", "</details>", ""]
     (run_dir / "summary.md").write_text("\n".join(lines))
-    print(f"Wrote {run_dir / 'summary.md'}")
+    html_path = report_html.write_html(run_dir, records, cases)
+    index_path = report_html.write_index(run_dir.parent)
+    print(f"Wrote {run_dir / 'summary.md'}, {html_path} and {index_path}")
 
 
 if __name__ == "__main__":
