@@ -5,6 +5,10 @@ full builder page (target ``#main-content-block``) so the picker and the loaded
 model land with the app chrome intact and the model preserved in the session —
 no separate partial-swap container to keep in sync.
 """
+import json
+from pathlib import Path
+
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
@@ -59,4 +63,28 @@ def load_example_deeplink(request, example_id):
     except KeyError:
         raise Http404(f"Unknown example: {example_id!r}")
     load_system_into_session(repository, raw_system_data, workspace=workspace)
+    return redirect("model-builder")
+
+
+# Local dev tooling: files the DEBUG-only ``load_local_file`` route may open. Everything else 404s,
+# so even a local GET endpoint never turns into an arbitrary file read.
+LOCAL_FILE_ROOTS = (settings.BASE_DIR / "ai_sandbox" / "runs",)
+
+
+def load_local_file(request):
+    """DEBUG-only GET deep link that opens an exported ``.e-f.json`` from the local disk.
+
+    Registered only when ``settings.DEBUG`` is true (see ``e_footprint_interface/urls.py``), it is what
+    the AI sandbox report links to ("Open in interface") so a generated model lands on the canvas without
+    the manual *Open file* upload. Like the docs deep link it replaces the active model without
+    confirmation. ``path`` must resolve under one of ``LOCAL_FILE_ROOTS``.
+    """
+    raw_path = request.GET.get("path", "")
+    path = Path(raw_path).resolve() if raw_path else None
+    if path is None or not path.is_file() or not any(path.is_relative_to(root) for root in LOCAL_FILE_ROOTS):
+        raise Http404(f"Not a loadable local file: {raw_path!r}")
+    with open(path) as file:
+        raw_system_data = json.load(file)
+    workspace = SessionWorkspaceRepository(request.session)
+    load_system_into_session(workspace.active_repository(), raw_system_data, workspace=workspace)
     return redirect("model-builder")

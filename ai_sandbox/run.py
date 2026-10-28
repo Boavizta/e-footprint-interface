@@ -7,11 +7,12 @@ Usage (from the interface repo root):
     poetry run python ai_sandbox/run.py --dry-run cases/_handwritten_03.json   # pipeline check without an LLM
 
 Each run writes ai_sandbox/runs/<timestamp>/<case>__<model>__r<rep>.json plus the exported model
-<...>.e-f.json when the build succeeds. summary.md in the run dir is produced by report.py.
+<...>.e-f.json when the build succeeds. summary.md, summary.html and runs/index.html are produced by report.py.
 """
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import re
 import sys
@@ -25,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pydantic import ValidationError  # noqa: E402
 
 import providers  # noqa: E402
+import report  # noqa: E402
 from dsl import ModelSpec, build_system  # noqa: E402
 
 SANDBOX = Path(__file__).parent
@@ -203,6 +205,7 @@ def replay(run_dir: Path):
             record.update(evaluate(data, cases[record["case"]], path.with_suffix(".e-f.json")))
         path.write_text(json.dumps(record, indent=2))
         print(path.name, summary_line(record))
+    report.write_summary(run_dir)
 
 
 def summary_line(r: dict) -> str:
@@ -248,17 +251,14 @@ def main():
         {"cases": [c["id"] for c in cases], "models": args.models, "reps": args.reps, "effort": args.effort,
          "system_prompt": SYSTEM_PROMPT}, indent=2))
     total_cost = 0.0
-    for case in cases:
-        for model in args.models:
-            for rep in range(1, args.reps + 1):
-                if total_cost >= args.max_cost_usd:
-                    print(f"Budget {args.max_cost_usd} USD reached, stopping.")
-                    return
-                record = run_one(case, model, rep, args.effort, run_dir)
-                total_cost += record.get("cost_usd", 0)
-                print(f"{case['id']:32} {model:24} r{rep}  {summary_line(record)}")
+    for case, model, rep in itertools.product(cases, args.models, range(1, args.reps + 1)):
+        if total_cost >= args.max_cost_usd:
+            print(f"Budget {args.max_cost_usd} USD reached, stopping.")
+            break
+        record = run_one(case, model, rep, args.effort, run_dir)
+        total_cost += record.get("cost_usd", 0)
+        print(f"{case['id']:32} {model:24} r{rep}  {summary_line(record)}")
     print(f"\nRun dir: {run_dir}\nTotal cost: ${total_cost:.4f}")
-    import report
     report.write_summary(run_dir)
 
 

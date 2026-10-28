@@ -17,8 +17,8 @@ Nothing here is part of the Django application. Run outputs under `runs/` are gi
 4. `dsl.py` validates the output against the DSL (pydantic) and builds a real `System` with `from_defaults`,
    so every unstated value falls back to the library default.
 5. `run.py` computes the system, exports it to the interface JSON format (`*.e-f.json`, importable through
-   *Open file* in the interface), reloads it to prove it round-trips, runs the structural checks, and writes
-   one record per call. `report.py` turns a run dir into `summary.md`.
+   *Open file* in the interface or the report's *Open in interface* link), reloads it to prove it round-trips, runs the
+   structural checks, and writes one record per call. `report.py` turns a run dir into `summary.md` and `summary.html`.
 
 Stages recorded per call: JSON parse (first attempt vs repaired) → schema valid → build → compute → export.
 A failure at any stage is recorded with the error, never raised.
@@ -38,6 +38,27 @@ poetry run python ai_sandbox/run.py --reps 2 --effort medium         # all cases
 poetry run python ai_sandbox/run.py --replay ai_sandbox/runs/<dir>    # re-evaluate recorded outputs, no API call
 poetry run python ai_sandbox/report.py ai_sandbox/runs/<dir>
 ```
+
+## Browsing results
+
+Every run (and `--replay`) ends by writing `summary.md`, `summary.html` and `runs/index.html`; `report.py <run dir>`
+regenerates them. Open `ai_sandbox/runs/index.html` in a browser: it lists the runs and links to each `summary.html`,
+which holds the sortable comparison table (filter by case or model), the per-model aggregates, and one section per
+record with:
+
+- a **structure tree** rendered from the DSL JSON the model wrote: usage patterns → journey → steps → jobs → server or
+  GenAI API, edge deployments → functions → device and server calls, then the declared servers, APIs and edge
+  devices, with assumptions muted under their object. It shows what the model said, not the effective values after
+  library defaults filled the gaps;
+- **structural warnings** computed from the DSL (dangling references, unused objects, jobs with no target), the
+  record's checks, counts, totals by category, catalog resolutions (non-exact ones highlighted), cost, and the case's
+  rubric;
+- previous/next links across the other outputs for the same case, and the raw output in a collapsible block;
+- an **Open in interface** link. It targets `/dev/load-file/?path=<export path>` on a locally running interface
+  (`poetry run python manage.py runserver`, `http://localhost:8000` by default, override with
+  `EFOOTPRINT_INTERFACE_URL`). That route exists only when Django `DEBUG` is true, only opens files under
+  `ai_sandbox/runs/`, and replaces the active model in the browser session without confirmation, exactly like the docs'
+  "Load this scenario" deep link.
 
 `--max-cost-usd` (default 3) stops launching calls past that total. `--effort` maps to
 `output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral); omitted means
