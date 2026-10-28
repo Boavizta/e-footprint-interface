@@ -131,8 +131,9 @@ def evaluate(data: dict, case: dict, export_path: Path | None) -> dict:
         "open_questions": len(spec.open_questions)}
     try:
         start = time.perf_counter()
-        system = build_system(spec)
+        system, resolutions = build_system(spec)
         result["build_ok"] = True
+        result["catalog_resolutions"] = [res.as_dict() for res in resolutions]
         total = system.total_footprint.sum()
         result["compute_ok"] = True
         result["total_kg_co2e_over_horizon"] = round(float(total.value.to(u.kg).magnitude), 1)

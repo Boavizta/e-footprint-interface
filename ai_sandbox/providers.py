@@ -34,12 +34,13 @@ MODELS = {
     "gpt-6.1-terra": ("openai", 1.00, 5.00),
     "mistral-small-latest": ("mistral", 0.15, 0.60),
     "mistral-medium-latest": ("mistral", 1.50, 7.50),
+    "mistral-large-4": ("mistral", 1.36, 4.18),
 }
 
 DEFAULT_MODELS = [
     "claude-haiku-5-5", "claude-sonnet-5-5",
     "gpt-6-luna", "gpt-6.1-terra",
-    "mistral-small-latest", "mistral-medium-latest",
+    "mistral-small-latest", "mistral-medium-latest", "mistral-large-4",
 ]
 
 

@@ -1,0 +1,786 @@
+{
+ "aws": {
+  "m5.12xlarge": {
+   "avg_power_w": 271.1,
+   "embodied_kg": 580.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m5.16xlarge": {
+   "avg_power_w": 361.47,
+   "embodied_kg": 770.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m5.2xlarge": {
+   "avg_power_w": 45.18,
+   "embodied_kg": 100.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m5.4xlarge": {
+   "avg_power_w": 90.37,
+   "embodied_kg": 190.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m5.8xlarge": {
+   "avg_power_w": 160.84,
+   "embodied_kg": 390.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m5.large": {
+   "avg_power_w": 11.3,
+   "embodied_kg": 24.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m5.xlarge": {
+   "avg_power_w": 22.59,
+   "embodied_kg": 48.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "m5a.12xlarge": {
+   "avg_power_w": 181.55,
+   "embodied_kg": 530.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m5a.16xlarge": {
+   "avg_power_w": 242.07,
+   "embodied_kg": 700.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m5a.2xlarge": {
+   "avg_power_w": 30.26,
+   "embodied_kg": 88.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m5a.4xlarge": {
+   "avg_power_w": 60.52,
+   "embodied_kg": 180.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m5a.8xlarge": {
+   "avg_power_w": 121.04,
+   "embodied_kg": 350.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m5a.large": {
+   "avg_power_w": 7.56,
+   "embodied_kg": 22.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m5a.xlarge": {
+   "avg_power_w": 15.13,
+   "embodied_kg": 44.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "m6g.12xlarge": {
+   "avg_power_w": 144.24,
+   "embodied_kg": 660.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m6g.16xlarge": {
+   "avg_power_w": 192.32,
+   "embodied_kg": 880.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m6g.2xlarge": {
+   "avg_power_w": 24.04,
+   "embodied_kg": 110.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m6g.4xlarge": {
+   "avg_power_w": 48.08,
+   "embodied_kg": 220.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m6g.8xlarge": {
+   "avg_power_w": 96.16,
+   "embodied_kg": 440.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m6g.large": {
+   "avg_power_w": 6.01,
+   "embodied_kg": 28.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m6g.medium": {
+   "avg_power_w": 3.0,
+   "embodied_kg": 14.0,
+   "ram_gb": 4.0,
+   "vcpu": 1.0
+  },
+  "m6g.xlarge": {
+   "avg_power_w": 12.02,
+   "embodied_kg": 55.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "m6i.12xlarge": {
+   "avg_power_w": 256.18,
+   "embodied_kg": 520.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m6i.16xlarge": {
+   "avg_power_w": 341.57,
+   "embodied_kg": 700.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m6i.2xlarge": {
+   "avg_power_w": 42.7,
+   "embodied_kg": 87.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m6i.4xlarge": {
+   "avg_power_w": 85.39,
+   "embodied_kg": 170.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m6i.8xlarge": {
+   "avg_power_w": 170.78,
+   "embodied_kg": 350.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m6i.large": {
+   "avg_power_w": 10.67,
+   "embodied_kg": 22.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m6i.xlarge": {
+   "avg_power_w": 21.35,
+   "embodied_kg": 44.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "m7g.12xlarge": {
+   "avg_power_w": 186.3,
+   "embodied_kg": 660.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m7g.16xlarge": {
+   "avg_power_w": 248.4,
+   "embodied_kg": 880.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m7g.2xlarge": {
+   "avg_power_w": 31.05,
+   "embodied_kg": 110.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m7g.4xlarge": {
+   "avg_power_w": 62.1,
+   "embodied_kg": 220.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m7g.8xlarge": {
+   "avg_power_w": 124.2,
+   "embodied_kg": 440.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m7g.large": {
+   "avg_power_w": 7.76,
+   "embodied_kg": 27.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m7g.medium": {
+   "avg_power_w": 3.88,
+   "embodied_kg": 14.0,
+   "ram_gb": 4.0,
+   "vcpu": 1.0
+  },
+  "m7g.xlarge": {
+   "avg_power_w": 15.53,
+   "embodied_kg": 55.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "m7i.12xlarge": {
+   "avg_power_w": 213.67,
+   "embodied_kg": 490.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "m7i.16xlarge": {
+   "avg_power_w": 284.89,
+   "embodied_kg": 650.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "m7i.2xlarge": {
+   "avg_power_w": 35.61,
+   "embodied_kg": 81.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "m7i.4xlarge": {
+   "avg_power_w": 71.22,
+   "embodied_kg": 160.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "m7i.8xlarge": {
+   "avg_power_w": 142.44,
+   "embodied_kg": 320.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "m7i.large": {
+   "avg_power_w": 8.9,
+   "embodied_kg": 20.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "m7i.xlarge": {
+   "avg_power_w": 17.81,
+   "embodied_kg": 41.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  }
+ },
+ "azure": {
+  "d16ads_v5": {
+   "avg_power_w": 47.93,
+   "embodied_kg": 210.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "d16as_v5": {
+   "avg_power_w": 45.59,
+   "embodied_kg": 180.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "d16ds_v5": {
+   "avg_power_w": 80.27,
+   "embodied_kg": 210.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "d16s_v5": {
+   "avg_power_w": 77.93,
+   "embodied_kg": 190.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "d2ads_v5": {
+   "avg_power_w": 5.99,
+   "embodied_kg": 26.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "d2as_v5": {
+   "avg_power_w": 5.7,
+   "embodied_kg": 23.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "d2ds_v5": {
+   "avg_power_w": 10.03,
+   "embodied_kg": 27.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "d2s_v5": {
+   "avg_power_w": 9.74,
+   "embodied_kg": 24.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "d32ads_v5": {
+   "avg_power_w": 95.87,
+   "embodied_kg": 420.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "d32as_v5": {
+   "avg_power_w": 91.18,
+   "embodied_kg": 370.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "d32ds_v5": {
+   "avg_power_w": 160.55,
+   "embodied_kg": 430.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "d32s_v5": {
+   "avg_power_w": 155.86,
+   "embodied_kg": 380.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "d48ads_v5": {
+   "avg_power_w": 143.8,
+   "embodied_kg": 630.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "d48as_v5": {
+   "avg_power_w": 136.77,
+   "embodied_kg": 550.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "d48ds_v5": {
+   "avg_power_w": 240.82,
+   "embodied_kg": 640.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "d48s_v5": {
+   "avg_power_w": 233.79,
+   "embodied_kg": 570.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "d4ads_v5": {
+   "avg_power_w": 11.98,
+   "embodied_kg": 52.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "d4as_v5": {
+   "avg_power_w": 11.4,
+   "embodied_kg": 46.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "d4ds_v5": {
+   "avg_power_w": 20.07,
+   "embodied_kg": 54.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "d4s_v5": {
+   "avg_power_w": 19.48,
+   "embodied_kg": 47.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "d64ads_v5": {
+   "avg_power_w": 191.74,
+   "embodied_kg": 800.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "d64as_v5": {
+   "avg_power_w": 182.36,
+   "embodied_kg": 740.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "d64ds_v5": {
+   "avg_power_w": 321.1,
+   "embodied_kg": 900.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "d64s_v5": {
+   "avg_power_w": 311.72,
+   "embodied_kg": 760.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "d8ads_v5": {
+   "avg_power_w": 23.97,
+   "embodied_kg": 100.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "d8as_v5": {
+   "avg_power_w": 22.8,
+   "embodied_kg": 92.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "d8ds_v5": {
+   "avg_power_w": 40.14,
+   "embodied_kg": 110.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "d8s_v5": {
+   "avg_power_w": 38.97,
+   "embodied_kg": 90.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "d96ads_v5": {
+   "avg_power_w": 287.6,
+   "embodied_kg": 1300.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  },
+  "d96as_v5": {
+   "avg_power_w": 273.54,
+   "embodied_kg": 1100.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  },
+  "d96ds_v5": {
+   "avg_power_w": 481.65,
+   "embodied_kg": 1300.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  },
+  "d96s_v5": {
+   "avg_power_w": 467.58,
+   "embodied_kg": 1100.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  }
+ },
+ "gcp": {
+  "c4a-standard-1": {
+   "avg_power_w": 4.04,
+   "embodied_kg": 13.0,
+   "ram_gb": 4.0,
+   "vcpu": 1.0
+  },
+  "c4a-standard-16": {
+   "avg_power_w": 64.62,
+   "embodied_kg": 210.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "c4a-standard-2": {
+   "avg_power_w": 8.08,
+   "embodied_kg": 26.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "c4a-standard-32": {
+   "avg_power_w": 129.24,
+   "embodied_kg": 410.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "c4a-standard-4": {
+   "avg_power_w": 16.16,
+   "embodied_kg": 51.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "c4a-standard-48": {
+   "avg_power_w": 193.86,
+   "embodied_kg": 620.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "c4a-standard-64": {
+   "avg_power_w": 258.49,
+   "embodied_kg": 820.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "c4a-standard-72": {
+   "avg_power_w": 290.8,
+   "embodied_kg": 900.0,
+   "ram_gb": 288.0,
+   "vcpu": 72.0
+  },
+  "c4a-standard-8": {
+   "avg_power_w": 32.31,
+   "embodied_kg": 100.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "e2-standard-16": {
+   "avg_power_w": 57.67,
+   "embodied_kg": 230.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "e2-standard-2": {
+   "avg_power_w": 7.21,
+   "embodied_kg": 28.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "e2-standard-32": {
+   "avg_power_w": 115.35,
+   "embodied_kg": 450.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "e2-standard-4": {
+   "avg_power_w": 14.42,
+   "embodied_kg": 57.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "e2-standard-8": {
+   "avg_power_w": 28.84,
+   "embodied_kg": 110.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "n2-standard-128": {
+   "avg_power_w": 616.8,
+   "embodied_kg": 1300.0,
+   "ram_gb": 512.0,
+   "vcpu": 128.0
+  },
+  "n2-standard-16": {
+   "avg_power_w": 77.1,
+   "embodied_kg": 160.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "n2-standard-2": {
+   "avg_power_w": 9.64,
+   "embodied_kg": 20.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "n2-standard-32": {
+   "avg_power_w": 154.2,
+   "embodied_kg": 320.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "n2-standard-4": {
+   "avg_power_w": 19.27,
+   "embodied_kg": 40.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "n2-standard-48": {
+   "avg_power_w": 231.3,
+   "embodied_kg": 480.0,
+   "ram_gb": 192.0,
+   "vcpu": 48.0
+  },
+  "n2-standard-64": {
+   "avg_power_w": 308.4,
+   "embodied_kg": 640.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "n2-standard-8": {
+   "avg_power_w": 38.55,
+   "embodied_kg": 80.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "n2-standard-80": {
+   "avg_power_w": 385.5,
+   "embodied_kg": 800.0,
+   "ram_gb": 320.0,
+   "vcpu": 80.0
+  },
+  "n2-standard-96": {
+   "avg_power_w": 462.6,
+   "embodied_kg": 1000.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  }
+ },
+ "ovhcloud": {
+  "b3-128": {
+   "avg_power_w": 99.18,
+   "embodied_kg": 340.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "b3-16": {
+   "avg_power_w": 13.4,
+   "embodied_kg": 46.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "b3-256": {
+   "avg_power_w": 190.36,
+   "embodied_kg": 670.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "b3-32": {
+   "avg_power_w": 26.8,
+   "embodied_kg": 90.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "b3-512": {
+   "avg_power_w": 372.72,
+   "embodied_kg": 1300.0,
+   "ram_gb": 512.0,
+   "vcpu": 128.0
+  },
+  "b3-64": {
+   "avg_power_w": 53.59,
+   "embodied_kg": 180.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "b3-640": {
+   "avg_power_w": 463.9,
+   "embodied_kg": 1600.0,
+   "ram_gb": 640.0,
+   "vcpu": 160.0
+  },
+  "b3-8": {
+   "avg_power_w": 6.7,
+   "embodied_kg": 23.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  }
+ },
+ "scaleway": {
+  "coparm1-16c-64g": {
+   "avg_power_w": 26.4,
+   "embodied_kg": 130.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "coparm1-2c-8g": {
+   "avg_power_w": 3.37,
+   "embodied_kg": 17.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "coparm1-32c-128g": {
+   "avg_power_w": 52.71,
+   "embodied_kg": 270.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "coparm1-4c-16g": {
+   "avg_power_w": 6.66,
+   "embodied_kg": 34.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "coparm1-8c-32g": {
+   "avg_power_w": 13.24,
+   "embodied_kg": 67.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "dev1-l": {
+   "avg_power_w": 22.57,
+   "embodied_kg": 46.0,
+   "ram_gb": 8.0,
+   "vcpu": 4.0
+  },
+  "dev1-m": {
+   "avg_power_w": 16.61,
+   "embodied_kg": 31.0,
+   "ram_gb": 4.0,
+   "vcpu": 3.0
+  },
+  "dev1-s": {
+   "avg_power_w": 10.99,
+   "embodied_kg": 19.0,
+   "ram_gb": 2.0,
+   "vcpu": 2.0
+  },
+  "dev1-xl": {
+   "avg_power_w": 23.25,
+   "embodied_kg": 54.0,
+   "ram_gb": 12.0,
+   "vcpu": 4.0
+  },
+  "ent1-2xl": {
+   "avg_power_w": 400.75,
+   "embodied_kg": 1000.0,
+   "ram_gb": 384.0,
+   "vcpu": 96.0
+  },
+  "ent1-l": {
+   "avg_power_w": 133.81,
+   "embodied_kg": 320.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "ent1-m": {
+   "avg_power_w": 67.08,
+   "embodied_kg": 160.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "ent1-s": {
+   "avg_power_w": 33.71,
+   "embodied_kg": 80.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "ent1-xl": {
+   "avg_power_w": 267.28,
+   "embodied_kg": 640.0,
+   "ram_gb": 256.0,
+   "vcpu": 64.0
+  },
+  "ent1-xs": {
+   "avg_power_w": 17.03,
+   "embodied_kg": 40.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "ent1-xxs": {
+   "avg_power_w": 8.68,
+   "embodied_kg": 21.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  },
+  "pro2-l": {
+   "avg_power_w": 133.64,
+   "embodied_kg": 320.0,
+   "ram_gb": 128.0,
+   "vcpu": 32.0
+  },
+  "pro2-m": {
+   "avg_power_w": 66.91,
+   "embodied_kg": 160.0,
+   "ram_gb": 64.0,
+   "vcpu": 16.0
+  },
+  "pro2-s": {
+   "avg_power_w": 33.54,
+   "embodied_kg": 80.0,
+   "ram_gb": 32.0,
+   "vcpu": 8.0
+  },
+  "pro2-xs": {
+   "avg_power_w": 16.85,
+   "embodied_kg": 40.0,
+   "ram_gb": 16.0,
+   "vcpu": 4.0
+  },
+  "pro2-xxs": {
+   "avg_power_w": 8.51,
+   "embodied_kg": 20.0,
+   "ram_gb": 8.0,
+   "vcpu": 2.0
+  }
+ }
+}

@@ -27,7 +27,7 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
 
 {
   "system_name": string,
-  "servers": [{"name", "kind": "cpu"|"gpu", "cores", "ram_gb", "gpus", "storage_gb", "carbon_intensity_g_per_kwh", "assumption"}],
+  "servers": [{"name", "kind": "cpu"|"gpu", "cores", "ram_gb", "gpus", "storage_gb", "cloud_provider": "aws"|"azure"|"gcp"|"ovhcloud"|"scaleway", "instance_type", "carbon_intensity_g_per_kwh", "assumption"}],
   "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "assumption"}],
   "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "assumption"}],
   "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>]}]}],
@@ -42,5 +42,6 @@ Field notes:
 - `volume` on a usage pattern is the number of journeys started per period (required). `new_devices` on an edge deployment is the number of devices put into service per period (required).
 - A job references exactly one of `server` or `genai_api`. `gpus` is only for jobs on `gpu` servers, `cpu_cores` only on `cpu` servers, `output_tokens` only on GenAI API jobs.
 - `kind: "appliance"` edge devices (sealed sensors) take a `workload_fraction` between 0 and 1 on their functions; `kind: "computer"` devices take cpu, ram and storage needs.
-- `model_name` for GenAI APIs must be a real current model of that provider (for example `gpt-5-mini`, `claude-sonnet-5-5`, `mistral-small-latest`).
+- `cloud_provider` is optional. When the description names a cloud, set it and the tool picks a real general-purpose instance that fits `cores` and `ram_gb`; set `instance_type` only if the description states it.
+- `model_name` for GenAI APIs is matched against the EcoLogits catalog; if the exact name is unknown the tool picks the closest one. Common names: openai `gpt-5`, `gpt-5-mini`, `gpt-5-nano`; anthropic `claude-sonnet-5-5`, `claude-haiku-5-5`; mistralai `mistral-small-latest`, `mistral-medium-latest`; google_genai `gemini-2.5-flash`.
 - Keep names short and human-readable. The user will see them in a diagram.

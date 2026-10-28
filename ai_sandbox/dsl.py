@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceRecurrentValues, SourceValue
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
     EcoLogitsGenAIExternalAPI, EcoLogitsGenAIExternalAPIJob)
+from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
 from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
@@ -39,6 +40,8 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from catalogs import Resolution, resolve_cloud_instance, resolve_genai
+
 MODELING_START_DATE = "2026-01-01"
 MODELING_DURATION_YEARS = 1
 
@@ -54,6 +57,8 @@ class ServerSpec(Strict):
     ram_gb: Optional[float] = None
     gpus: Optional[int] = None
     storage_gb: Optional[float] = None
+    cloud_provider: Optional[str] = None
+    instance_type: Optional[str] = None
     carbon_intensity_g_per_kwh: Optional[float] = None
     assumption: Optional[str] = None
 
@@ -209,8 +214,10 @@ def _lookup(mapping: dict, name: str, kind: str):
     return mapping[name]
 
 
-def build_system(spec: ModelSpec) -> System:
+def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
+    """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
     shared = _Shared()
+    resolutions: list[Resolution] = []
 
     servers = {}
     for s in spec.servers:
@@ -222,13 +229,21 @@ def build_system(spec: ModelSpec) -> System:
         if s.kind == "gpu":
             _opt(kwargs, "compute", s.gpus, u.gpu)
             servers[s.name] = GPUServer.from_defaults(s.name, **kwargs)
+        elif s.cloud_provider:
+            # Catalog instance: cores and RAM then come from Boavizta, the stated ones only drive the pick.
+            provider, instance = resolve_cloud_instance(s.cloud_provider, s.instance_type, s.cores, s.ram_gb, resolutions)
+            servers[s.name] = BoaviztaCloudServer.from_defaults(
+                s.name, provider=SourceObject(provider), instance_type=SourceObject(instance), **kwargs)
         else:
             _opt(kwargs, "compute", s.cores, u.cpu_core)
             _opt(kwargs, "ram", s.ram_gb, u.GB_ram)
             servers[s.name] = Server.from_defaults(s.name, **kwargs)
 
-    apis = {a.name: EcoLogitsGenAIExternalAPI.from_defaults(
-        a.name, provider=SourceObject(a.provider), model_name=SourceObject(a.model_name)) for a in spec.genai_apis}
+    apis = {}
+    for a in spec.genai_apis:
+        provider, model_name = resolve_genai(a.provider, a.model_name, resolutions)
+        apis[a.name] = EcoLogitsGenAIExternalAPI.from_defaults(
+            a.name, provider=SourceObject(provider), model_name=SourceObject(model_name))
 
     jobs = {}
     for j in spec.jobs:
@@ -319,7 +334,7 @@ def build_system(spec: ModelSpec) -> System:
             dep.name, [bundle], shared.network(dep.network), shared.country(dep.country),
             _volume_timeseries(dep.new_devices), **kwargs))
 
-    return System(spec.system_name, usage_patterns, edge_patterns)
+    return System(spec.system_name, usage_patterns, edge_patterns), resolutions
 
 
 def json_schema() -> dict:
