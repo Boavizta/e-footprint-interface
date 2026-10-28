@@ -31,15 +31,17 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
   "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "assumption"}],
   "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "assumption"}],
   "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>]}]}],
-  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"month"|"year"}, "growth_pct_per_year", "assumption"}],
+  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "assumption"}],
   "edge_devices": [{"name", "kind": "computer"|"appliance", "cores", "ram_gb", "storage_gb", "power_w", "embodied_kg", "lifespan_years", "assumption"}],
-  "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week", "workload_fraction", "server_calls": [{"job": <job name>, "times_per_hour"}], "assumption"}],
+  "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week", "storage_retention_weeks", "workload_fraction", "server_calls": [{"job": <job name>, "times_per_hour"}], "assumption"}],
   "edge_deployments": [{"name", "functions": [<edge function names>], "country", "network", "new_devices": {"value", "per"}, "usage_span_years", "assumption"}],
   "open_questions": [string]
 }
 
 Field notes:
 - `volume` on a usage pattern is the number of journeys started per period (required). `new_devices` on an edge deployment is the number of devices put into service per period (required).
+- Batch or background journeys with no human have `"device": "none"`.
+- `storage_gb_per_week` on an edge function accumulates on the device for its whole life; for a rolling buffer or cache add `storage_retention_weeks`.
 - A job references exactly one of `server` or `genai_api`. `gpus` is only for jobs on `gpu` servers, `cpu_cores` only on `cpu` servers, `output_tokens` only on GenAI API jobs.
 - `kind: "appliance"` edge devices (sealed sensors) take a `workload_fraction` between 0 and 1 on their functions; `kind: "computer"` devices take cpu, ram and storage needs.
 - `cloud_provider` is optional. When the description names a cloud, set it and the tool picks a real general-purpose instance that fits `cores` and `ram_gb`; set `instance_type` only if the description states it.

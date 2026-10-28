@@ -97,14 +97,14 @@ class JourneySpec(Strict):
 
 class VolumeSpec(Strict):
     value: float
-    per: Literal["hour", "day", "month", "year"]
+    per: Literal["minute", "hour", "day", "week", "month", "year"]
 
 
 class UsagePatternSpec(Strict):
     name: str
     journey: str
-    device: Literal["smartphone", "laptop", "screen", "box"] = "laptop"
-    network: Literal["wifi", "mobile"] = "wifi"
+    device: Optional[str] = "laptop"  # smartphone | laptop | screen | box | none (batch work has no user device)
+    network: str = "wifi"             # wifi | mobile; other words are snapped (ethernet -> wifi, 5g -> mobile)
     country: str = "FRANCE"
     volume: VolumeSpec
     growth_pct_per_year: float = 0
@@ -134,6 +134,7 @@ class EdgeFunctionSpec(Strict):
     cpu_cores_avg: Optional[float] = None
     ram_gb_avg: Optional[float] = None
     storage_gb_per_week: Optional[float] = None
+    storage_retention_weeks: Optional[float] = None  # set for a rolling buffer: occupied = weekly write x retention
     workload_fraction: Optional[float] = None
     server_calls: list[EdgeServerCallSpec] = Field(default_factory=list)
     assumption: Optional[str] = None
@@ -143,7 +144,7 @@ class EdgeDeploymentSpec(Strict):
     name: str
     functions: list[str]
     country: str = "FRANCE"
-    network: Literal["wifi", "mobile"] = "wifi"
+    network: str = "wifi"
     new_devices: VolumeSpec
     usage_span_years: Optional[float] = None
     assumption: Optional[str] = None
@@ -173,10 +174,38 @@ def _const_week(value: float, unit) -> SourceRecurrentValues:
     return SourceRecurrentValues(Quantity(np.array([value] * 168, dtype=np.float32), unit))
 
 
+def _edge_storage_need(f: "EdgeFunctionSpec", device, spec: "ModelSpec", resolutions: list[Resolution]):
+    """Weekly storage curve of an edge function.
+
+    Without retention the library accumulates writes for the whole usage span; a 32 GB gateway writing
+    1 GB a week overflows after 32 weeks and the build fails. A rolling buffer (retention given, or fitted
+    when the accumulation would overflow) keeps a steady occupied volume on the device storage instead.
+    """
+    weekly = f.storage_gb_per_week
+    capacity_gb = float(device.storage.storage_capacity_per_unit.value.to(u.GB_stored).magnitude)
+    span_years = max([d.usage_span_years or 6 for d in spec.edge_deployments if f.name in d.functions] or [6])
+    retention = f.storage_retention_weeks
+    if retention is None and weekly * 52 * span_years > capacity_gb:
+        retention = round(0.8 * capacity_gb / weekly, 1)
+        resolutions.append(Resolution(
+            "edge_storage", f"{f.name}: {weekly} GB/week over {span_years} y on {capacity_gb:.0f} GB",
+            f"rolling buffer, {retention} weeks retention", "fitted"))
+    if retention is None:
+        return _const_week(weekly / 168, u.GB_stored)
+    occupied = SourceValue(weekly * retention * u.GB_stored)
+    device.storage.base_storage_need = (device.storage.base_storage_need + occupied).set_label(
+        f"Base storage need incl. {f.name} buffer")
+    return _const_week(0, u.GB_stored)
+
+
 def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0):
     value, per = volume.value, volume.per
-    if per == "hour":
+    if per == "minute":
+        value, per = value * 60 * 24, "day"
+    elif per == "hour":
         value, per = value * 24, "day"
+    elif per == "week":
+        value, per = value / 7, "day"
     return ExplainableHourlyQuantitiesFromFormInputs({
         "start_date": MODELING_START_DATE,
         "modeling_duration_value": MODELING_DURATION_YEARS,
@@ -188,18 +217,45 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0):
     }, source=Sources.USER_DATA)
 
 
+DEVICE_ARCHETYPES = ("smartphone", "laptop", "screen", "box")
+NO_DEVICE_WORDS = ("none", "null", "no", "server", "cpu", "batch", "cron", "appliance", "gateway", "sensor", "edge")
+NETWORK_ALIASES = {
+    "wifi": "wifi", "wi-fi": "wifi", "wlan": "wifi", "ethernet": "wifi", "wired": "wifi", "fiber": "wifi",
+    "fibre": "wifi", "lan": "wifi", "broadband": "wifi", "fixed": "wifi",
+    "mobile": "mobile", "cellular": "mobile", "4g": "mobile", "5g": "mobile", "lte": "mobile", "3g": "mobile",
+    "zigbee": "mobile", "lora": "mobile", "lorawan": "mobile", "sigfox": "mobile", "nb-iot": "mobile",
+    "nbiot": "mobile", "bluetooth": "mobile", "ble": "mobile", "satellite": "mobile",
+}
+
+
 class _Shared:
     """One instance per device archetype, network and country, shared across patterns."""
 
-    def __init__(self):
+    def __init__(self, resolutions: list[Resolution]):
         self.devices, self.networks, self.countries = {}, {}, {}
+        self.resolutions = resolutions
 
-    def device(self, kind):
-        return self.devices.setdefault(kind, getattr(Device, kind)())
+    def devices_for(self, kind: str | None) -> list:
+        """Returns the device list of a usage pattern: one archetype, or none for batch work."""
+        key = (kind or "none").strip().lower()
+        if key in DEVICE_ARCHETYPES:
+            return [self.devices.setdefault(key, getattr(Device, key)())]
+        if key in NO_DEVICE_WORDS:
+            if key != "none":
+                self.resolutions.append(Resolution("device", kind, "none", "normalized"))
+            return []
+        self.resolutions.append(Resolution("device", kind, "laptop", "fallback"))
+        return [self.devices.setdefault("laptop", Device.laptop())]
 
-    def network(self, kind):
-        factory = Network.wifi_network if kind == "wifi" else Network.mobile_network
-        return self.networks.setdefault(kind, factory())
+    def network(self, kind: str):
+        key = NETWORK_ALIASES.get(kind.strip().lower())
+        if key is None:
+            key = "wifi"
+            self.resolutions.append(Resolution("network", kind, key, "fallback"))
+        elif key != kind:
+            self.resolutions.append(Resolution("network", kind, key, "normalized"))
+        factory = Network.wifi_network if key == "wifi" else Network.mobile_network
+        return self.networks.setdefault(key, factory())
 
     def country(self, name):
         key = name.strip().upper().replace(" ", "_")
@@ -216,8 +272,8 @@ def _lookup(mapping: dict, name: str, kind: str):
 
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
-    shared = _Shared()
     resolutions: list[Resolution] = []
+    shared = _Shared(resolutions)
 
     servers = {}
     for s in spec.servers:
@@ -278,7 +334,7 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
 
     usage_patterns = [
         UsagePattern(
-            p.name, [_lookup(journeys, p.journey, "journey")], [shared.device(p.device)], shared.network(p.network),
+            p.name, [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device), shared.network(p.network),
             shared.country(p.country), _volume_timeseries(p.volume, p.growth_pct_per_year))
         for p in spec.usage_patterns]
 
@@ -313,8 +369,8 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
                 kwargs["recurrent_compute_needed"] = _const_week(f.cpu_cores_avg, u.cpu_core)
             if f.ram_gb_avg is not None:
                 kwargs["recurrent_ram_needed"] = _const_week(f.ram_gb_avg, u.GB_ram)
-            if f.storage_gb_per_week is not None:
-                kwargs["recurrent_storage_needed"] = _const_week(f.storage_gb_per_week / 168, u.GB_stored)
+            if f.storage_gb_per_week:
+                kwargs["recurrent_storage_needed"] = _edge_storage_need(f, device, spec, resolutions)
             device_needs = [RecurrentEdgeProcess.from_defaults(f"{f.name} process", **kwargs)]
         server_needs = [
             RecurrentServerNeed(
