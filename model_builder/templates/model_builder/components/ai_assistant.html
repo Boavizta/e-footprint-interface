@@ -1,8 +1,10 @@
 {% comment %}
 Experimental AI assistant box (AI_ASSISTANT_ENABLED, dev app only). Posts the description and re-renders the
 whole builder; the feedback of the last answer renders under the form. Collapsible, open by default. Hidden while
-edge modeling is on, while the simplified-inputs workspace is shown (body[data-base-view]) and while the results
-panel is open (its inline height is 100%, and the box follows the panel as its next sibling).
+edge modeling is on, while the simplified-inputs workspace is shown (body[data-base-view], set by setBaseView in
+simplified_inputs/workspace.js) and while the results panel is open: displayPanelResult() in hammer_utils.js sets
+the panel's inline height to 100% (also its open signal there), and a builder re-render replaces the panel without
+it, so no state is left stale. The box must stay a later sibling of #panel-result-btn.
 {% endcomment %}
 <style>
     #ai-assistant { position: absolute; right: 1rem; bottom: 4.5rem; width: 26rem; max-width: calc(100% - 2rem); z-index: 3; }
