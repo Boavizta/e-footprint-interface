@@ -1,12 +1,18 @@
 """The experimental AI assistant box and its generate path, with the provider call replaced by a fake."""
+import json
 from pathlib import Path
 
 import pytest
 from django.conf import settings as django_settings
+from efootprint.api_utils.system_to_json import system_to_json
 
-from model_builder.adapters.repositories import SessionSystemRepository
+from model_builder.adapters.repositories import InMemorySystemRepository, SessionSystemRepository
 from model_builder.adapters.views import views_ai_assistant
-from providers import Completion  # importable once views_ai_assistant has put ai_sandbox on sys.path
+from model_builder.domain.entities.web_core.model_web import ModelWeb
+# importable once views_ai_assistant has put ai_sandbox on sys.path
+from dsl import build_system, validate_tolerating_extras
+from edit import system_to_dsl
+from providers import Completion
 
 HANDWRITTEN_CASE = Path(django_settings.BASE_DIR) / "ai_sandbox" / "cases" / "_handwritten_01_recipe_app.json"
 URL = "/model_builder/ai-assistant/"
@@ -83,3 +89,21 @@ def test_flag_off_hides_the_box_and_404s_the_route(client, settings):
     settings.AI_ASSISTANT_ENABLED = False  # independent of a developer's .env turning the flag on
     assert client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"}).status_code == 404
     assert b'id="ai-assistant"' not in client.get("/model_builder/").content
+
+
+def test_reading_a_built_model_back_rebuilds_the_same_footprint():
+    spec, _ = validate_tolerating_extras(json.loads(HANDWRITTEN_CASE.read_text()))
+    system, _ = build_system(spec)
+    model_web = ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
+
+    read_back = system_to_dsl(model_web)
+    rebuilt, _ = build_system(validate_tolerating_extras(json.loads(json.dumps(read_back)))[0])
+
+    original_kg = system.total_footprint.sum().to("kg").magnitude
+    assert rebuilt.total_footprint.sum().to("kg").magnitude == pytest.approx(original_kg, rel=0.01)
+    steps = {st["name"]: st for jo in read_back["journeys"] for st in jo["steps"]}
+    assert steps["Ask a question"]["jobs"] == ["Chef answer", "Chef answer"]
+    servers = {s["name"]: s for s in read_back["servers"]}
+    assert servers["Photo store"]["comments"] == {"storage_gb": "About 1 million dish photos of 2 MB each."}
+    jobs = {j["name"]: j for j in read_back["jobs"]}
+    assert jobs["Recipe thumbnails"]["comments"] == {"data_transferred_kb": "6 thumbnails of 80 kB per recipe page."}
