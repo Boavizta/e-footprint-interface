@@ -4,10 +4,12 @@ Usage (from the interface repo root):
     poetry run python ai_sandbox/run.py --cases 01 --models claude-haiku-5-5 --reps 1
     poetry run python ai_sandbox/run.py                      # all cases, DEFAULT_MODELS, 1 rep
     poetry run python ai_sandbox/run.py --replay runs/<run_dir>   # re-validate recorded outputs, no API call
-    poetry run python ai_sandbox/run.py --dry-run cases/_handwritten_03.json   # pipeline check without an LLM
+    poetry run python ai_sandbox/run.py --dry-run cases/_handwritten_01_recipe_app.json   # pipeline check without an LLM
 
 Each run writes ai_sandbox/runs/<timestamp>/<case>__<model>__r<rep>.json plus the exported model
 <...>.e-f.json when the build succeeds. summary.md, summary.html and runs/index.html are produced by report.py.
+A call whose output fails to parse, validate, build or compute is retried with the error (--retries, default 1);
+the record holds the last attempt at top level and every attempt's outcome under "attempts".
 """
 from __future__ import annotations
 
@@ -91,15 +93,10 @@ def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
             results[key] = any(len(v) >= 2 for v in server_journeys.values())
         elif key == "requires_low_volume_journey":
             results[key] = low_volume
-        elif key == "requires_edge_deployment":
-            results[key] = bool(spec.edge_deployments)
-        elif key == "requires_edge_server_call":
-            results[key] = any(f.server_calls for f in spec.edge_functions)
         elif key == "devices_must_include":
             results[key] = set(expected) <= {p.device for p in spec.usage_patterns}
         elif key == "countries_must_include":
-            results[key] = set(expected) <= {p.country.upper() for p in spec.usage_patterns} | {
-                d.country.upper() for d in spec.edge_deployments}
+            results[key] = set(expected) <= {p.country.upper() for p in spec.usage_patterns}
         else:
             raise ValueError(f"Unknown check {key}")
     results["all_journeys_have_usage_pattern"] = {j.name for j in spec.journeys} <= pattern_journeys
@@ -125,11 +122,10 @@ def evaluate(data: dict, case: dict, export_path: Path | None) -> dict:
     result["counts"] = {
         "servers": len(spec.servers), "genai_apis": len(spec.genai_apis), "jobs": len(spec.jobs),
         "journeys": len(spec.journeys), "steps": sum(len(j.steps) for j in spec.journeys),
-        "usage_patterns": len(spec.usage_patterns), "edge_devices": len(spec.edge_devices),
-        "edge_functions": len(spec.edge_functions), "edge_deployments": len(spec.edge_deployments),
+        "usage_patterns": len(spec.usage_patterns),
         "comments": sum(len(obj.comments) for section in (
-            spec.servers, spec.genai_apis, spec.jobs, spec.usage_patterns, spec.edge_devices, spec.edge_functions,
-            spec.edge_deployments, [st for jo in spec.journeys for st in jo.steps]) for obj in section),
+            spec.servers, spec.genai_apis, spec.jobs, spec.usage_patterns, [st for jo in spec.journeys for st in jo.steps])
+            for obj in section),
         "open_questions": len(spec.open_questions)}
     try:
         start = time.perf_counter()
@@ -166,27 +162,68 @@ def load_cases(selectors: list[str] | None) -> list[dict]:
     return cases
 
 
-def run_one(case: dict, model: str, rep: int, effort: str | None, run_dir: Path) -> dict:
-    stem = f"{case['id']}__{model}__r{rep}"
-    record = {"case": case["id"], "model": model, "rep": rep, "effort": effort,
-              "timestamp": datetime.now().isoformat(timespec="seconds"),
-              "system_prompt_chars": len(SYSTEM_PROMPT), "user_prompt": case["user_prompt"]}
-    try:
-        completion = providers.complete(model, SYSTEM_PROMPT, case["user_prompt"], effort)
-    except Exception as error:  # noqa: BLE001
-        record["api_error"] = f"{type(error).__name__}: {error}"[:2000]
-        (run_dir / f"{stem}.json").write_text(json.dumps(record, indent=2))
-        return record
-    record.update({
+RETRY_PROMPT = """{user_prompt}
+
+---
+Your previous answer was:
+{previous_output}
+
+It failed with this error:
+{error}
+
+Return the corrected complete JSON object."""
+SUMMED_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens", "cache_write_tokens", "reasoning_tokens",
+               "latency_s", "cost_usd")
+
+
+def model_error(result: dict) -> str | None:
+    """The error to send back for a retry: a model mistake at parse, schema, build or compute. Export is ours."""
+    for stage, key in (("json_ok", "json_error"), ("schema_ok", "schema_error"), ("build_ok", "build_error"),
+                       ("compute_ok", "compute_error")):
+        if not result.get(stage):
+            return re.sub(r"\n\s+For further information visit \S+", "", result.get(key) or f"{stage[:-3]} failed")
+    return None
+
+
+def attempt(case: dict, model: str, prompt: str, effort: str | None, export_path: Path) -> dict:
+    completion = providers.complete(model, SYSTEM_PROMPT, prompt, effort)
+    result = {
         "raw_output": completion.text, "input_tokens": completion.input_tokens,
         "output_tokens": completion.output_tokens, "cached_input_tokens": completion.cached_input_tokens,
         "cache_write_tokens": completion.cache_write_tokens, "reasoning_tokens": completion.reasoning_tokens,
         "latency_s": round(completion.latency_s, 2), "cost_usd": round(completion.cost_usd(model), 6),
-        "stop_reason": completion.stop_reason, "request_params": completion.request_params})
+        "stop_reason": completion.stop_reason, "request_params": completion.request_params}
     data, first_ok, parse_error = parse_json(completion.text)
-    record.update({"json_first_attempt_ok": first_ok, "json_ok": data is not None, "json_error": parse_error})
+    result.update({"json_first_attempt_ok": first_ok, "json_ok": data is not None, "json_error": parse_error})
     if data is not None:
-        record.update(evaluate(data, case, run_dir / f"{stem}.e-f.json"))
+        result.update(evaluate(data, case, export_path))
+    return result
+
+
+def run_one(case: dict, model: str, rep: int, effort: str | None, retries: int, run_dir: Path) -> dict:
+    stem = f"{case['id']}__{model}__r{rep}"
+    record = {"case": case["id"], "model": model, "rep": rep, "effort": effort,
+              "timestamp": datetime.now().isoformat(timespec="seconds"),
+              "system_prompt_chars": len(SYSTEM_PROMPT), "user_prompt": case["user_prompt"]}
+    attempts, prompt = [], case["user_prompt"]
+    try:
+        for _ in range(retries + 1):
+            result = attempt(case, model, prompt, effort, run_dir / f"{stem}.e-f.json")
+            attempts.append(result)
+            error = model_error(result)
+            if error is None:
+                break
+            result["retry_error"] = error
+            prompt = RETRY_PROMPT.format(user_prompt=case["user_prompt"], previous_output=result["raw_output"], error=error)
+    except Exception as error:  # noqa: BLE001
+        record["api_error"] = f"{type(error).__name__}: {error}"[:2000]
+    if attempts:
+        record.update(attempts[-1])
+        for key in SUMMED_KEYS:
+            values = [a[key] for a in attempts if a.get(key) is not None]
+            record[key] = round(sum(values), 6) if values else None
+        record["first_try_ok"] = bool(attempts[0].get("export_ok"))
+        record["attempts"] = [{k: v for k, v in a.items() if k != "request_params"} for a in attempts[:-1]]
     (run_dir / f"{stem}.json").write_text(json.dumps(record, indent=2))
     return record
 
@@ -197,7 +234,7 @@ def replay(run_dir: Path):
         if path.name.endswith(".e-f.json"):
             continue
         record = json.loads(path.read_text())
-        if "raw_output" not in record:
+        if "raw_output" not in record or record["case"] not in cases:
             continue
         data, first_ok, parse_error = parse_json(record["raw_output"])
         record.update({"json_first_attempt_ok": first_ok, "json_ok": data is not None, "json_error": parse_error})
@@ -212,6 +249,7 @@ def summary_line(r: dict) -> str:
     if "api_error" in r:
         return f"API ERROR {r['api_error'][:120]}"
     stages = " ".join(f"{k[:-3]}={'ok' if r.get(k) else 'FAIL'}" for k in ("json_ok", "schema_ok", "build_ok", "compute_ok", "export_ok"))
+    stages += f" tries={len(r.get('attempts', [])) + 1}"
     checks = r.get("checks", {})
     passed = sum(1 for v in checks.values() if v)
     return (f"{stages} checks={passed}/{len(checks)} out_tok={r.get('output_tokens')} "
@@ -220,10 +258,11 @@ def summary_line(r: dict) -> str:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cases", nargs="*", help="case id prefixes, e.g. 01 03")
+    parser.add_argument("--cases", nargs="*", help="case id prefixes, e.g. 01 02")
     parser.add_argument("--models", nargs="*", default=providers.DEFAULT_MODELS)
     parser.add_argument("--reps", type=int, default=1)
     parser.add_argument("--effort", default=None, help="low|medium|high; omitted = provider default")
+    parser.add_argument("--retries", type=int, default=1, help="extra calls with the error when an output fails")
     parser.add_argument("--replay", help="existing run dir to re-evaluate without API calls")
     parser.add_argument("--dry-run", help="a hand-written DSL json file to push through evaluate()")
     parser.add_argument("--max-cost-usd", type=float, default=3.0, help="stop launching new calls past this total")
@@ -249,13 +288,14 @@ def main():
     run_dir.mkdir(parents=True)
     (run_dir / "config.json").write_text(json.dumps(
         {"cases": [c["id"] for c in cases], "models": args.models, "reps": args.reps, "effort": args.effort,
+         "retries": args.retries,
          "system_prompt": SYSTEM_PROMPT}, indent=2))
     total_cost = 0.0
     for case, model, rep in itertools.product(cases, args.models, range(1, args.reps + 1)):
         if total_cost >= args.max_cost_usd:
             print(f"Budget {args.max_cost_usd} USD reached, stopping.")
             break
-        record = run_one(case, model, rep, args.effort, run_dir)
+        record = run_one(case, model, rep, args.effort, args.retries, run_dir)
         total_cost += record.get("cost_usd", 0)
         print(f"{case['id']:32} {model:24} r{rep}  {summary_line(record)}")
     print(f"\nRun dir: {run_dir}\nTotal cost: ${total_cost:.4f}")

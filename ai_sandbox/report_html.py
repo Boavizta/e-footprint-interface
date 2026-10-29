@@ -80,9 +80,8 @@ def _volume(v) -> str:
 def structural_warnings(data: dict) -> list[str]:
     """Dangling references and orphans in the DSL. Both are what a reader checks first."""
     servers, apis, jobs = _names(data.get("servers", [])), _names(data.get("genai_apis", [])), _names(data.get("jobs", []))
-    journeys, devices, functions = (_names(data.get("journeys", [])), _names(data.get("edge_devices", [])),
-                                    _names(data.get("edge_functions", [])))
-    warnings, used_jobs, used_servers, used_apis, used_journeys, used_devices, used_functions = [], set(), set(), set(), set(), set(), set()
+    journeys = _names(data.get("journeys", []))
+    warnings, used_jobs, used_servers, used_apis, used_journeys = [], set(), set(), set(), set()
     for job in data.get("jobs", []):
         if job.get("server") and job.get("genai_api"):
             warnings.append(f"job '{job['name']}' targets both a server and a GenAI API")
@@ -103,22 +102,8 @@ def structural_warnings(data: dict) -> list[str]:
         if up.get("journey") not in journeys:
             warnings.append(f"usage pattern '{up.get('name')}' → unknown journey '{up.get('journey')}'")
         used_journeys.add(up.get("journey"))
-    for fn in data.get("edge_functions", []):
-        if fn.get("device") not in devices:
-            warnings.append(f"edge function '{fn.get('name')}' → unknown edge device '{fn.get('device')}'")
-        used_devices.add(fn.get("device"))
-        for call in fn.get("server_calls", []):
-            if call.get("job") not in jobs:
-                warnings.append(f"edge function '{fn.get('name')}' → unknown job '{call.get('job')}'")
-            used_jobs.add(call.get("job"))
-    for dep in data.get("edge_deployments", []):
-        for fn in dep.get("functions", []):
-            if fn not in functions:
-                warnings.append(f"edge deployment '{dep.get('name')}' → unknown edge function '{fn}'")
-            used_functions.add(fn)
     for label, declared, used in (("server", servers, used_servers), ("GenAI API", apis, used_apis), ("job", jobs, used_jobs),
-                                  ("journey", journeys, used_journeys), ("edge device", devices, used_devices),
-                                  ("edge function", functions, used_functions)):
+                                  ("journey", journeys, used_journeys)):
         for name in sorted(declared - used):
             warnings.append(f"unused {label} '{name}'")
     return warnings
@@ -127,7 +112,6 @@ def structural_warnings(data: dict) -> list[str]:
 def render_tree(data: dict) -> str:
     jobs = {j["name"]: j for j in data.get("jobs", []) if isinstance(j, dict) and j.get("name")}
     journeys = {j["name"]: j for j in data.get("journeys", []) if isinstance(j, dict) and j.get("name")}
-    functions = {f["name"]: f for f in data.get("edge_functions", []) if isinstance(f, dict) and f.get("name")}
 
     def job_li(name: str) -> str:
         job = jobs.get(name)
@@ -157,24 +141,6 @@ def render_tree(data: dict) -> str:
             f'<li><span class="kind">usage</span>{esc(up.get("name"))} <span class="muted">{esc(up.get("device"))} · '
             f'{esc(up.get("network"))} · {esc(up.get("country"))} · {_volume(up.get("volume"))}{growth}</span>'
             f'{_comments(up)}{journey_ul(up.get("journey"))}</li>')
-    for dep in data.get("edge_deployments", []):
-        fns = []
-        for fn_name in dep.get("functions", []):
-            fn = functions.get(fn_name)
-            if fn is None:
-                fns.append(f'<li><span class="kind">function</span><span class="fail">{esc(fn_name)} (unknown)</span></li>')
-                continue
-            nums = ", ".join(f"{k.replace('_', ' ')}={fn[k]}" for k in ("cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week",
-                                                                        "workload_fraction") if fn.get(k) is not None)
-            calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(c.get("job"))[4:]
-                            for c in fn.get("server_calls", []))
-            fns.append(f'<li><span class="kind">function</span>{esc(fn_name)} on <span class="kind">device</span>{esc(fn.get("device"))} '
-                       f'<span class="muted">{esc(nums)}</span>{_comments(fn)}<ul>{calls}</ul></li>')
-        span = f", {dep['usage_span_years']} yrs" if dep.get("usage_span_years") else ""
-        span = (f" + {dep['existing_devices']} existing" if dep.get("existing_devices") else "") + span
-        parts.append(f'<li><span class="kind">edge</span>{esc(dep.get("name"))} <span class="muted">{esc(dep.get("country"))} · '
-                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_devices"))} new devices{span}</span>{_comments(dep)}'
-                     f'<ul>{"".join(fns)}</ul></li>')
     for s in data.get("servers", []):
         specs = ", ".join(f"{k.replace('_', ' ')}={s[k]}" for k in ("cores", "ram_gb", "gpus", "storage_gb", "cloud_provider",
                                                                      "instance_type", "carbon_intensity_g_per_kwh") if s.get(k) is not None)
@@ -183,11 +149,6 @@ def render_tree(data: dict) -> str:
     for api in data.get("genai_apis", []):
         parts.append(f'<li><span class="kind">GenAI</span>{esc(api.get("name"))} <span class="muted">{esc(api.get("provider"))}/'
                      f'{esc(api.get("model_name") or "<unstated>")}</span>{_comments(api)}</li>')
-    for d in data.get("edge_devices", []):
-        specs = ", ".join(f"{k.replace('_', ' ')}={d[k]}" for k in ("cores", "ram_gb", "storage_gb", "power_w", "embodied_kg",
-                                                                     "lifespan_years") if d.get(k) is not None)
-        parts.append(f'<li><span class="kind">{esc(d.get("kind", "computer"))}</span>{esc(d.get("name"))} '
-                     f'<span class="muted">{esc(specs)}</span>{_comments(d)}</li>')
     parts.append("</ul>")
     return "".join(parts)
 
@@ -225,6 +186,9 @@ def stats_block(record: dict, case: dict) -> str:
     for key in ("api_error", "json_error", "schema_error", "build_error", "compute_error", "export_error"):
         if record.get(key):
             parts.append(f'<dt class="fail">{key}</dt><dd><pre>{esc(record[key][:1500])}</pre></dd>')
+    for n, earlier in enumerate(record.get("attempts", []), start=1):
+        parts.append(f'<dt class="warn">Attempt {n} failed, retried with</dt><dd><pre>{esc(earlier.get("retry_error", "")[:1500])}</pre>'
+                     f'<details><summary>attempt {n} output</summary><pre>{esc((earlier.get("raw_output") or "")[:20000])}</pre></details></dd>')
     if record.get("counts"):
         parts.append(f"<dt>Counts</dt><dd>{esc(_kv_list(record['counts']))}</dd>")
     if record.get("total_kg_co2e_over_horizon") is not None:
@@ -270,7 +234,7 @@ def record_section(record: dict, case: dict, siblings: list[dict]) -> str:
 
 def overview_table(records: list[dict]) -> str:
     head = ("<thead><tr><th>case</th><th>model</th><th>rep</th>" + "".join(f"<th>{s[:-3]}</th>" for s in STAGES)
-            + '<th>checks</th><th class="num">in tok</th><th class="num">out tok</th><th class="num">reasoning</th>'
+            + '<th class="num">tries</th><th>checks</th><th class="num">in tok</th><th class="num">out tok</th><th class="num">reasoning</th>'
             '<th class="num">latency s</th><th class="num">cost USD</th><th class="num">total kg</th><th>open</th></tr></thead>')
     rows = []
     for r in records:
@@ -282,7 +246,7 @@ def overview_table(records: list[dict]) -> str:
             stages = "".join(f'<td class="{"ok" if r.get(s) else "fail"}">{"✓" if r.get(s) else "✗"}'
                              f'{"" if s != "json_ok" or r.get("json_first_attempt_ok") else " (repaired)"}</td>' for s in STAGES)
         rows.append(f'<tr data-case="{esc(r["case"])}" data-model="{esc(r["model"])}"><td><a href="#rec-{esc(stem(r))}">{esc(r["case"])}</a></td>'
-                    f'<td>{esc(r["model"])}</td><td>{r["rep"]}</td>{stages}<td>{checks_str}</td>'
+                    f'<td>{esc(r["model"])}</td><td>{r["rep"]}</td>{stages}<td class="num">{len(r.get("attempts", [])) + 1}</td><td>{checks_str}</td>'
                     f'<td class="num">{r.get("input_tokens", "")}</td><td class="num">{r.get("output_tokens", "")}</td>'
                     f'<td class="num">{r.get("reasoning_tokens") or ""}</td><td class="num">{r.get("latency_s", "")}</td>'
                     f'<td class="num">{r.get("cost_usd", 0):.4f}</td><td class="num">{r.get("total_kg_co2e_over_horizon", "")}</td>'
@@ -300,12 +264,13 @@ def per_model_table(records: list[dict]) -> str:
         exported = sum(1 for r in rs if r.get("export_ok"))
         checks_total = sum(len(r.get("checks", {})) for r in rs)
         checks_passed = sum(sum(1 for v in r.get("checks", {}).values() if v) for r in rs)
-        rows.append(f'<tr><td>{esc(model)}</td><td class="num">{n}</td><td class="num">{exported}/{n}</td>'
+        first_try = sum(1 for r in rs if r.get("first_try_ok", r.get("export_ok")))
+        rows.append(f'<tr><td>{esc(model)}</td><td class="num">{n}</td><td class="num">{first_try}/{n}</td><td class="num">{exported}/{n}</td>'
                     f'<td class="num">{checks_passed}/{checks_total}</td>'
                     f'<td class="num">{sum(r.get("output_tokens", 0) for r in rs) / n:.0f}</td>'
                     f'<td class="num">{sum(r.get("latency_s", 0) for r in rs) / n:.1f}</td>'
                     f'<td class="num">{sum(r.get("cost_usd", 0) for r in rs) / n:.4f}</td></tr>')
-    return ('<table class="sortable"><thead><tr><th>model</th><th class="num">runs</th><th class="num">export ok</th>'
+    return ('<table class="sortable"><thead><tr><th>model</th><th class="num">runs</th><th class="num">ok first try</th><th class="num">export ok</th>'
             '<th class="num">checks passed</th><th class="num">mean out tok</th><th class="num">mean latency s</th>'
             f'<th class="num">mean cost USD</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
 

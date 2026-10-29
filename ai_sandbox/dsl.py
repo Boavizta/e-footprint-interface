@@ -10,34 +10,21 @@ from typing import Literal, Optional
 
 import re
 
-import numpy as np
-from pint import Quantity
 from pydantic import BaseModel, ConfigDict, Field
 
-from efootprint.abstract_modeling_classes.source_objects import (
-    SourceHourlyValues, SourceObject, SourceRecurrentValues, SourceValue)
+from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
     EcoLogitsGenAIExternalAPI, EcoLogitsGenAIExternalAPIJob)
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
-from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
-from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
-from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
-from efootprint.builders.usage.edge.recurrent_edge_workload import RecurrentEdgeWorkload
 from efootprint.constants.countries import Countries
 from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
-from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.network import Network
-from efootprint.core.hardware.server import Server
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
-from efootprint.core.usage.edge.edge_function import EdgeFunction
-from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
-from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
-from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
 from efootprint.core.usage.job import GPUJob, Job
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
@@ -115,47 +102,6 @@ class UsagePatternSpec(Strict):
     comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
 
 
-class EdgeDeviceSpec(Strict):
-    name: str
-    kind: Literal["computer", "appliance"] = "computer"
-    cores: Optional[float] = None
-    ram_gb: Optional[float] = None
-    storage_gb: Optional[float] = None
-    power_w: Optional[float] = None
-    embodied_kg: Optional[float] = None
-    lifespan_years: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
-
-
-class EdgeServerCallSpec(Strict):
-    job: str
-    times_per_hour: float
-    comment: Optional[str] = None
-
-
-class EdgeFunctionSpec(Strict):
-    name: str
-    device: str
-    cpu_cores_avg: Optional[float] = None
-    ram_gb_avg: Optional[float] = None
-    storage_gb_per_week: Optional[float] = None
-    storage_retention_weeks: Optional[float] = None  # set for a rolling buffer: occupied = weekly write x retention
-    workload_fraction: Optional[float] = None
-    server_calls: list[EdgeServerCallSpec] = Field(default_factory=list)
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
-
-
-class EdgeDeploymentSpec(Strict):
-    name: str
-    functions: list[str]
-    country: str = "FRANCE"
-    network: str = "wifi"
-    new_devices: VolumeSpec
-    existing_devices: Optional[float] = None  # installed base at the start of the modeling period
-    usage_span_years: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
-
-
 class ModelSpec(Strict):
     system_name: str
     servers: list[ServerSpec] = Field(default_factory=list)
@@ -163,9 +109,6 @@ class ModelSpec(Strict):
     jobs: list[JobSpec] = Field(default_factory=list)
     journeys: list[JourneySpec] = Field(default_factory=list)
     usage_patterns: list[UsagePatternSpec] = Field(default_factory=list)
-    edge_devices: list[EdgeDeviceSpec] = Field(default_factory=list)
-    edge_functions: list[EdgeFunctionSpec] = Field(default_factory=list)
-    edge_deployments: list[EdgeDeploymentSpec] = Field(default_factory=list)
     open_questions: list[str] = Field(default_factory=list)
 
 
@@ -199,38 +142,8 @@ def _opt(kwargs: dict, key: str, c: _Comments, field: str, unit):
         kwargs[key] = SourceValue(value * unit, comment=c.take(field))
 
 
-def _const_week(value: float, unit, comment: Optional[str] = None) -> SourceRecurrentValues:
-    return SourceRecurrentValues(Quantity(np.array([value] * 168, dtype=np.float32), unit), comment=comment)
-
-
-def _edge_storage_need(f: "EdgeFunctionSpec", c: _Comments, device, spec: "ModelSpec", resolutions: list[Resolution]):
-    """Weekly storage curve of an edge function.
-
-    Without retention the library accumulates writes for the whole usage span; a 32 GB gateway writing
-    1 GB a week overflows after 32 weeks and the build fails. A rolling buffer (retention given, or fitted
-    when the accumulation would overflow) keeps a steady occupied volume on the device storage instead.
-    """
-    weekly = f.storage_gb_per_week
-    capacity_gb = float(device.storage.storage_capacity_per_unit.value.to(u.GB_stored).magnitude)
-    span_years = max([d.usage_span_years or 6 for d in spec.edge_deployments if f.name in d.functions] or [6])
-    retention = f.storage_retention_weeks
-    if retention is None and weekly * 52 * span_years > capacity_gb:
-        retention = round(0.8 * capacity_gb / weekly, 1)
-        resolutions.append(Resolution(
-            "edge_storage", f"{f.name}: {weekly} GB/week over {span_years} y on {capacity_gb:.0f} GB",
-            f"rolling buffer, {retention} weeks retention", "fitted"))
-    comment = " ".join(filter(None, (c.take("storage_gb_per_week"), c.take("storage_retention_weeks")))) or None
-    if retention is None:
-        return _const_week(weekly / 168, u.GB_stored, comment)
-    occupied = SourceValue(weekly * retention * u.GB_stored, comment=comment)
-    device.storage.base_storage_need = (device.storage.base_storage_need + occupied).set_label(
-        f"Base storage need incl. {f.name} buffer")
-    return _const_week(0, u.GB_stored)
-
-
-def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None,
-                       initial_stock: Optional[float] = None):
-    """Hourly volume from the DSL period, with an optional installed base put into service in the first hour."""
+def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
+    """Hourly volume from the DSL period."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -238,7 +151,7 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comme
         value, per = value * 24, "day"
     elif per == "week":
         value, per = value / 7, "day"
-    series = ExplainableHourlyQuantitiesFromFormInputs({
+    return ExplainableHourlyQuantitiesFromFormInputs({
         "start_date": MODELING_START_DATE,
         "modeling_duration_value": MODELING_DURATION_YEARS,
         "modeling_duration_unit": "year",
@@ -247,22 +160,15 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comme
         "net_growth_rate_in_percentage": growth_pct_per_year,
         "net_growth_rate_timespan": "year",
     }, source=Sources.USER_DATA, comment=comment)
-    if not initial_stock:
-        return series
-    hourly = np.array(series.value.magnitude, dtype=np.float32)
-    hourly[0] += initial_stock
-    return SourceHourlyValues(Quantity(hourly, series.value.units), start_date=series.start_date,
-                              source=Sources.USER_DATA, comment=comment)
 
 
 DEVICE_ARCHETYPES = ("smartphone", "laptop", "screen", "box")
-NO_DEVICE_WORDS = ("none", "null", "no", "server", "cpu", "batch", "cron", "appliance", "gateway", "sensor", "edge")
+NO_DEVICE_WORDS = ("none", "null", "no", "server", "cpu", "batch", "cron")
 NETWORK_ALIASES = {
     "wifi": "wifi", "wi-fi": "wifi", "wlan": "wifi", "ethernet": "wifi", "wired": "wifi", "fiber": "wifi",
     "fibre": "wifi", "lan": "wifi", "broadband": "wifi", "fixed": "wifi",
     "mobile": "mobile", "cellular": "mobile", "4g": "mobile", "5g": "mobile", "lte": "mobile", "3g": "mobile",
-    "zigbee": "mobile", "lora": "mobile", "lorawan": "mobile", "sigfox": "mobile", "nb-iot": "mobile",
-    "nbiot": "mobile", "bluetooth": "mobile", "ble": "mobile", "satellite": "mobile",
+    "satellite": "mobile",
 }
 
 
@@ -338,17 +244,15 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
         if s.kind == "gpu":
             _opt(kwargs, "compute", c, "gpus", u.gpu)
             servers[s.name] = GPUServer.from_defaults(L(s.name), **kwargs)
-        elif s.cloud_provider:
-            # Catalog instance: cores and RAM then come from Boavizta, the stated ones only drive the pick.
+        else:
+            # Always a catalog cloud instance: the library's plain Server default is a whole physical machine, 30-40x
+            # the footprint of a small instance, so naming a provider or not would swing the result. Cores and RAM
+            # then come from Boavizta, the stated ones only drive the pick.
             provider, instance = resolve_cloud_instance(s.cloud_provider, s.instance_type, s.cores, s.ram_gb, resolutions)
             sizing = " ".join(filter(None, (c.take("cores"), c.take("ram_gb"), c.take("instance_type")))) or None
             servers[s.name] = BoaviztaCloudServer.from_defaults(
                 L(s.name), provider=SourceObject(provider, comment=c.take("cloud_provider")),
                 instance_type=SourceObject(instance, comment=sizing), **kwargs)
-        else:
-            _opt(kwargs, "compute", c, "cores", u.cpu_core)
-            _opt(kwargs, "ram", c, "ram_gb", u.GB_ram)
-            servers[s.name] = Server.from_defaults(L(s.name), **kwargs)
         c.close()
 
     apis = {}
@@ -405,71 +309,7 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
             shared.country(p.country), _volume_timeseries(p.volume, p.growth_pct_per_year, volume_comment)))
         c.close()
 
-    edge_devices = {}
-    for d in spec.edge_devices:
-        c = _Comments(d, resolutions)
-        kwargs = {}
-        _opt(kwargs, "power", c, "power_w", u.W)
-        _opt(kwargs, "carbon_footprint_manufacturing", c, "embodied_kg", u.kg)
-        _opt(kwargs, "lifespan", c, "lifespan_years", u.year)
-        if d.kind == "appliance":
-            edge_devices[d.name] = EdgeAppliance.from_defaults(L(d.name), **kwargs)
-        else:
-            # The library default reserves 30 GB of base need, more than a small gateway's flash: start at 0.
-            storage_kwargs = {"base_storage_need": SourceValue(0 * u.GB_stored)}
-            _opt(storage_kwargs, "storage_capacity_per_unit", c, "storage_gb", u.GB_stored)
-            kwargs["storage"] = EdgeStorage.from_defaults(f"{L(d.name)} storage", **storage_kwargs)
-            _opt(kwargs, "compute", c, "cores", u.cpu_core)
-            _opt(kwargs, "ram", c, "ram_gb", u.GB_ram)
-            if d.ram_gb is not None:
-                # The library default reserves 1 GB of base RAM, all of a small gateway's: cap it at a quarter.
-                kwargs["base_ram_consumption"] = SourceValue(min(1, d.ram_gb / 4) * u.GB_ram)
-            edge_devices[d.name] = EdgeComputer.from_defaults(L(d.name), **kwargs)
-        c.close()
-
-    edge_functions = {}
-    for f in spec.edge_functions:
-        c = _Comments(f, resolutions)
-        device = _lookup(edge_devices, f.device, "edge_device")
-        if isinstance(device, EdgeAppliance):
-            kwargs = {"edge_device": device}
-            if f.workload_fraction is not None:
-                kwargs["recurrent_workload"] = _const_week(f.workload_fraction, u.concurrent, c.take("workload_fraction"))
-            device_needs = [RecurrentEdgeWorkload.from_defaults(f"{L(f.name)} workload", **kwargs)]
-        else:
-            kwargs = {"edge_device": device}
-            if f.cpu_cores_avg is not None:
-                kwargs["recurrent_compute_needed"] = _const_week(f.cpu_cores_avg, u.cpu_core, c.take("cpu_cores_avg"))
-            if f.ram_gb_avg is not None:
-                kwargs["recurrent_ram_needed"] = _const_week(f.ram_gb_avg, u.GB_ram, c.take("ram_gb_avg"))
-            if f.storage_gb_per_week:
-                kwargs["recurrent_storage_needed"] = _edge_storage_need(f, c, device, spec, resolutions)
-            device_needs = [RecurrentEdgeProcess.from_defaults(f"{L(f.name)} process", **kwargs)]
-        server_needs = [
-            RecurrentServerNeed(
-                f"{L(f.name)}: {L(call.job)}", edge_device=device,
-                recurrent_volume_per_edge_device=_const_week(call.times_per_hour, u.occurrence, call.comment),
-                jobs=[_lookup(jobs, call.job, "job")])
-            for call in f.server_calls]
-        edge_functions[f.name] = EdgeFunction(L(f.name), device_needs, server_needs)
-        c.close()
-
-    edge_patterns = []
-    for dep in spec.edge_deployments:
-        c = _Comments(dep, resolutions)
-        bundle = EdgeUsageJourney(
-            f"{L(dep.name)} functions", [_lookup(edge_functions, name, "edge_function") for name in dep.functions])
-        kwargs = {}
-        _opt(kwargs, "usage_span", c, "usage_span_years", u.year)
-        edge_patterns.append(EdgeUsagePattern(
-            L(dep.name), [bundle], shared.network(dep.network), shared.country(dep.country),
-            _volume_timeseries(
-                dep.new_devices, comment=" ".join(filter(None, (c.take("new_devices"), c.take("existing_devices")))) or None,
-                initial_stock=dep.existing_devices),
-            **kwargs))
-        c.close()
-
-    return System(L(spec.system_name), usage_patterns, edge_patterns), resolutions
+    return System(L(spec.system_name), usage_patterns, []), resolutions
 
 
 def json_schema() -> dict:
