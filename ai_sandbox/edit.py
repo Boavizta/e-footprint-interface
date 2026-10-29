@@ -52,7 +52,7 @@ def _read_fields(entry: dict, obj, table: dict, fields=None):
     for field in fields or table:
         attr, unit = table[field]
         value = getattr(obj, attr)
-        entry[field] = _number(value.to(unit).magnitude)
+        entry[field] = _number(value.value.to(unit).magnitude)  # ExplainableQuantity.to would convert the model
         if value.comment:
             entry["comments"][field] = value.comment
 

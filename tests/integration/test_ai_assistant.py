@@ -95,8 +95,11 @@ def test_reading_a_built_model_back_rebuilds_the_same_footprint():
     spec, _ = validate_tolerating_extras(json.loads(HANDWRITTEN_CASE.read_text()))
     system, _ = build_system(spec)
     model_web = ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
+    model_before = system_to_json(model_web.system.modeling_obj, save_computed_state=False)
 
     read_back = system_to_dsl(model_web)
+    # Reading leaves the live model as it was (the default API server storage stays in TB, not converted to GB).
+    assert system_to_json(model_web.system.modeling_obj, save_computed_state=False) == model_before
     rebuilt, _ = build_system(validate_tolerating_extras(json.loads(json.dumps(read_back)))[0])
 
     original_kg = system.total_footprint.sum().to("kg").magnitude
