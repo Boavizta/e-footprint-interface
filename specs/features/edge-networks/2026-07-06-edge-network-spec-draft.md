@@ -48,7 +48,7 @@ Mirrors `RecurrentEdgeComponentNeed`: attaches to an `EdgeNetworkInterface`, car
 
 ### 3.3 `EdgeGateway` — user-owned local infrastructure
 
-The concentrator the device radio talks to before IP backhaul: LoRaWAN gateway/relay, Thread border router, BLE hub, WiFi access point. Modeled as an always-on, mains-powered `EdgeDevice` (plain device or thin subclass/factory with gateway defaults) — **not** an allocation constant.
+The concentrator the device radio talks to before IP backhaul: LoRaWAN gateway/relay, Thread border router, BLE hub, WiFi access point. Its own `ModelingObject` type — **not** an `EdgeDevice` subclass and **not** an allocation constant. An `EdgeDevice` only reaches usage patterns through recurrent needs in a journey and only draws power through component needs, so a gateway subclass would contribute zero unless given a `RecurrentEdgeDeviceNeed`, which is the wrong mechanism for an always-on box with no workload. Instead `EdgeGateway` follows the `Network`/`Server` shape: the things that use it point at it, and it derives its activity from them.
 
 | Attribute | Default | Unit |
 |---|---|---|
@@ -56,7 +56,13 @@ The concentrator the device radio talks to before IP backhaul: LoRaWAN gateway/r
 | `carbon_footprint_fabrication` | 25 kg CO2e (Pirson & Bol blocks, to refine) | kg |
 | `lifespan` | 6 yr | yr |
 
-Fleet sizing comes from composition, like every other edge device: the gateway's count per deployment is its `EdgeDeviceGroup` count (default **1 per deployment** — one deployment in an `EdgeUsagePattern` is one site, one gateway per site), and the devices it serves are those whose `EdgeNetworkInterface.edge_gateway` points to it. There is no `n_devices_served` input; the ratio is derived as Σ served devices' `total_nb_of_units` / gateway `total_nb_of_units` and only used for per-device attribution views. Energy and fabrication flow through the standard `EdgeDevice` amortization (power × `nb_deployments_in_parallel`), so no gateway-specific allocation formula is needed.
+**Wiring.** `EdgeNetworkInterface.edge_gateway` is a forward link; `EdgeGateway.edge_network_interfaces` is the `ReverseCollection`. The gateway's `edge_usage_patterns` is the union of its interfaces' patterns (which interfaces get from their `RecurrentMessagingNeed`s like any component). Guards: lifespan ≥ usage span of every pattern (as `EdgeDevice`), and refuse a link from an operator-side technology.
+
+**Fleet sizing** comes from composition, like every other deployed unit: the gateway sits in an `EdgeDeviceGroup` with a count (default **1 per deployment** when it is in no group, matching the device default — one deployment in an `EdgeUsagePattern` is one site, one gateway per site). There is no `n_devices_served` input and no gateway-specific allocation formula: hourly energy and manufacturing scale by `total_nb_of_units` × `nb_deployments_in_parallel` exactly as for a device.
+
+**Shared parent class.** `EdgeDevice` and `EdgeGateway` both play the "countable deployed unit" role, which today lives on `EdgeDevice` as a cluster of members: `parent_groups`, root-group lookup, `total_nb_of_units`, the delete guard against group references, `lifespan` + `lifespan_validation`, and the per-pattern instance scaling summed into `instances_energy` / `use_footprint` / `instances_manufacturing_footprint`. Lift that cluster into an abstract parent (working name `EdgeHardwareUnit`) with two abstract hooks — how to find `edge_usage_patterns`, and unitary hourly energy/manufacturing per pattern. `EdgeDevice` answers through its recurrent needs and components (behaviour unchanged); `EdgeGateway` answers through its linked interfaces and constant `power` + `carbon_footprint_fabrication / lifespan`. `EdgeDeviceGroup.edge_device_counts` widens its value type to the parent. Keep the `EdgeDeviceGroup` / `edge_device_counts` names (≈80 library + 40 interface files reference the class); a rename to e.g. `EdgeDeploymentGroup` / `unit_counts` is mechanical, cross-repo, and belongs in its own commit if wanted — decide at plan stage.
+
+**Attribution.** The gateway is its own line in the system breakdown, like `Network` — never folded into the devices that use it. A breakdown of the gateway by linked interface weighted by each device's `total_nb_of_units` is a cheap optional view (cf. server breakdown by job), not a transfer of totals.
 
 **Shared gateway** (e.g. a campus LoRaWAN gateway also used by other tenants): no dedicated sharing input in v1. The user scales the gateway's power, fabrication footprint, or group count by the share attributable to this system (e.g. 0.25 gateway per deployment). Stated in the user docs so nobody looks for a missing feature.
 
@@ -97,11 +103,11 @@ operator_share_per_device_hour =
     + operator_network_embodied_per_device_hour
 ```
 
-Per deployment, user-owned gateway (standard `EdgeDevice` path, no allocation step):
+Per pattern, user-owned gateway (same scaling as a device, no allocation step):
 
 ```
-E_gateway = power × Δt × gateway_count_per_deployment × nb_deployments_in_parallel
-gateway fabrication amortization = EdgeDevice standard
+E_gateway           = power × Δt × gateway.total_nb_of_units × nb_deployments_in_parallel
+gateway_fab_hourly  = carbon_footprint_fabrication / lifespan × Δt × gateway.total_nb_of_units × nb_deployments_in_parallel
 ```
 
 ```
@@ -144,9 +150,9 @@ messaging = RecurrentMessagingNeed(
     messages_per_hour=weekly_pattern([...]),   # 168 values
     payload_size=SourceValue(24 * u.B),
 )
-gateway = EdgeGateway("farm LoRa gateway")       # EdgeDevice with gateway defaults (5 W, 25 kg, 6 yr)
+gateway = EdgeGateway("farm LoRa gateway")       # own type, defaults 5 W, 25 kg, 6 yr
 interface.edge_gateway = gateway                  # or passed in from_technology(...)
-farm = EdgeDeviceGroup("farm", edge_device_counts={device: 80, gateway: 1})
+farm = EdgeDeviceGroup("farm", edge_device_counts={device: 80, gateway: 1})   # gateway is group-countable
 usage = EdgeUsagePattern(..., network=backhaul_network, country=france)
 ```
 
@@ -159,15 +165,16 @@ Optimization workflow enabled: swap SF, batch messages (payload↑, N_msg↓), c
 - Unit: `E_msg` against published figures — Casals Table (1 msg/5 min, 2400 mAh ≈ 1 yr equivalent avg power), Gomez SIGFOX (~900 mJ per 12 B message, Martinez cross-check), Lauridsen NB-IoT state powers.
 - Unit: fragmentation (payload > max_payload → Nfr), Ntr at PER 0.2 = 1.25, SIGFOX ×3 replicas, Thread per-message poll energy present.
 - Unit: dimensional checks (pint units end-to-end).
-- Integration: full system CO2 with owned gateway (via group count) + backhaul, no double counting (backhaul GB = payload only); derived devices-per-gateway equals the group ratio.
+- Integration: full system CO2 with owned gateway (via group count) + backhaul, no double counting (backhaul GB = payload only); gateway appears as its own line in the system breakdown; a gateway in no group counts as 1 per deployment.
+- Unit: `EdgeDevice` behaviour unchanged after lifting the shared parent (existing device tests pass untouched); `EdgeDeviceGroup` accepts a gateway in `edge_device_counts` and a gateway's `total_nb_of_units` unrolls nested groups like a device's.
 - Integration: NB-IoT interface carries the operator per-device-hour share and no gateway; LoRaWAN interface carries a gateway and zero operator share.
 - Sensitivity sanity: at 1 msg/day, sleep term > 90% of E_interface for asynchronous techs (Morin finding #3); for Thread at 2.5 s poll period, sync term dominates (Nordic nwp_049: 94.5–99.3%).
 - Validation: Thread leaf at 10 s message period ≈ 30 µA average (Kim et al. 2019).
 
 ## 8. Design choices & open points
 
-1. **Gateway**: user-owned gateway is a deployed `EdgeDevice` sized by `EdgeDeviceGroup` counts and linked from `EdgeNetworkInterface.edge_gateway`; `n_devices_served` dropped (it duplicated the fleet-sizing the library already derives from composition and could contradict it). Operator networks (NB-IoT, SIGFOX) are two per-device-hour allocation rows on the technology defaults, mirroring how `Network` charges a slice of unowned infrastructure. No sharing-fraction input for an owned gateway in v1 — fractional count or scaled inputs cover it.
-1b. **Open — gateway ↔ usage pattern binding**: an `EdgeDevice` reaches an `EdgeUsagePattern` through a `RecurrentEdgeDeviceNeed` in a journey, heavy for a constant-power box. Lighter alternative: the gateway inherits its usage patterns from the interfaces linked to it. Decide at plan stage.
+1. **Gateway**: user-owned gateway is its own `ModelingObject` type, linked from `EdgeNetworkInterface.edge_gateway`, reaching usage patterns through its interfaces, and sized by `EdgeDeviceGroup` counts via a shared abstract parent with `EdgeDevice` (§3.3). `n_devices_served` dropped: it duplicated the fleet-sizing the library derives from composition and could contradict it. An `EdgeDevice` subclass was rejected because devices only get patterns and power through recurrent needs, which a gateway has none of. Operator networks (NB-IoT, SIGFOX) are two per-device-hour allocation rows on the technology defaults, mirroring how `Network` charges a slice of unowned infrastructure. No sharing-fraction input for an owned gateway in v1 — fractional count or scaled inputs cover it.
+1b. **Open — naming**: whether to rename `EdgeDeviceGroup` / `edge_device_counts` now that they hold gateways too. Lean: keep names in v1, revisit in a dedicated commit if the vocabulary grates.
 2. **Battery→lifespan coupling**: deferred to v2. Default lifespans exist (`EdgeDevice`/`EdgeComponent` default 6 yr; PEP ecopassport reference lifetimes usable as per-product sources), so deferral does not load the user. v2: `lifespan = battery_energy / avg_power`, feeding fabrication amortization — creates a calculation dependency loop to design carefully.
 3. Open: exact class placement in the e-footprint edge module (`efootprint/core/hardware/edge/`) and whether `RecurrentMessagingNeed` merges into the existing recurrent-need hierarchy.
 
