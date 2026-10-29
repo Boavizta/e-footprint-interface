@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI assistant proof of concept — Implementation plan (draft)</title>
+<style>
+  :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
+    --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
+    --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+  body { margin: 0; font: 16px/1.6 system-ui, -apple-system, sans-serif; color: var(--ink); background: var(--bg); }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem;
+    border: 1px solid var(--line); border-radius: .5rem; background: var(--paper);
+    box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  #layout { max-width: 64rem; margin: auto; padding: 2rem 1.5rem 5rem; }
+  header > p:first-child, small, figcaption { color: var(--muted); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.2; letter-spacing: -.03em; }
+  h2 { font-size: 1.4rem; line-height: 1.3; }
+  h3 { font-size: 1.08rem; margin: 1.5rem 0 .4rem; }
+  main > section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  main p { max-width: 76ch; }
+  code { background: #eef2ef; padding: .08rem .25rem; border-radius: 3px;
+    font: .86em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  pre { overflow: auto; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem;
+    background: #f8faf7; font: .86rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  pre code { background: none; padding: 0; font: inherit; }
+  #change-tree { padding: .7rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--paper); font-size: .85rem; }
+  #change-tree ul { list-style: none; border-left: 1px solid var(--line); margin: .25rem 0 .25rem .35rem; padding: 0 0 0 .7rem; }
+  #change-tree li { padding: .3rem; }
+  #change-tree li > small { display: block; margin-top: .2rem; }
+  [data-change] { font-size: .65rem; font-weight: 700; text-transform: uppercase;
+    border-radius: .25rem; padding: .1rem .3rem; background: #eef2ef; color: var(--muted); }
+  [data-change="new"] { color: var(--accent); background: var(--soft); }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg);
+    padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .65rem; }
+  th { background: var(--soft); }
+</style>
+</head>
+<body>
+<div id="layout">
+<header>
+  <p>Draft plan · 2026-10-29 · captured from the kickoff conversation, to be refined in the <code>spec-plan</code> stage</p>
+  <h1>AI assistant proof of concept — Implementation plan</h1>
+  <p>Companion to <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/ai-assistant-poc/spec.html" data-review-source-href="spec.html">spec.html</a>. Everything here is HOW. The sandbox under
+    <code>ai_sandbox/</code> is reused as is wherever possible; new code is kept in that folder too, since the
+    feature is an experiment that may be deleted after the hackathon.</p>
+</header>
+
+<main>
+<section id="files">
+  <h2>Changed files</h2>
+  <p>Click a linked file to open it in VS Code, right-click for a diff against <code>main</code>.</p>
+  <div id="change-tree">
+    <strong>e-footprint-interface/</strong>
+    <ul>
+      <li><code>ai_sandbox/__init__.py</code> <span data-change="new">New</span>
+        <small>Empty. Makes the sandbox importable from Django as <code>ai_sandbox.*</code>.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:324:1" data-review-source-href="../../../ai_sandbox/dsl.py#L324:1"><code>ai_sandbox/dsl.py</code></a> <span data-change="modified">Modified</span>
+        <small><code>parse_json</code> and <code>validate_tolerating_extras</code> move here from <code>run.py</code>; each DSL object spec gains an optional <code>id</code>.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:40:1" data-review-source-href="../../../ai_sandbox/run.py#L40:1"><code>ai_sandbox/run.py</code></a> <span data-change="modified">Modified</span>
+        <small>Imports the two helpers from <code>dsl</code>.</small></li>
+      <li><code>ai_sandbox/to_dsl.py</code> <span data-change="new">New</span>
+        <small><code>system_to_dsl(system) -&gt; dict</code>: the mirror of <code>build_system</code>, with library ids and value comments.</small></li>
+      <li><code>ai_sandbox/patching.py</code> <span data-change="new">New</span>
+        <small><code>apply_edits(dsl: dict, edits: list) -&gt; dict</code>: the three edit operations, validated against the DSL.</small></li>
+      <li><code>ai_sandbox/impacts.py</code> <span data-change="new">New</span>
+        <small><code>call_footprint_mg(model, completion) -&gt; float</code> over EcoLogits.</small></li>
+      <li><code>ai_sandbox/prompts/edit_prompt.md</code> <span data-change="new">New</span>
+        <small>System prompt of the edit path: the DSL vocabulary, the edit operations, "change only what is asked".</small></li>
+      <li><code>model_builder/adapters/views/views_ai_assistant.py</code> <span data-change="new">New</span>
+        <small>One POST view: branch on emptiness, call the assistant, load or keep the model, render the builder with the feedback.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:17:1" data-review-source-href="../../../model_builder/urls.py#L17:1"><code>model_builder/urls.py</code></a> <span data-change="modified">Modified</span>
+        <small>Route <code>ai-assistant/</code>, appended only when the flag is on.</small></li>
+      <li><code>model_builder/templates/model_builder/components/ai_assistant.html</code> <span data-change="new">New</span>
+        <small>The box: hint, textarea, button, feedback block. HTMX POST targeting <code>#main-content-block</code>.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L8:1"><code>model_builder/templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span>
+        <small>Includes the box under the toolbar when enabled.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:189:1" data-review-source-href="../../../e_footprint_interface/settings.py#L189:1"><code>e_footprint_interface/settings.py</code></a> <span data-change="modified">Modified</span>
+        <small><code>AI_ASSISTANT_ENABLED</code> and <code>AI_ASSISTANT_MODEL</code> from the environment.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/pyproject.toml" data-review-source-href="../../../pyproject.toml"><code>pyproject.toml</code></a> <span data-change="modified">Modified</span>
+        <small><code>anthropic</code> and <code>pydantic</code> become runtime dependencies; <code>openai</code> and <code>mistralai</code> stay dev.</small></li>
+      <li><code>tests/integration/test_ai_assistant_view.py</code> <span data-change="new">New</span>
+        <small>Three tests with a fake <code>complete</code>.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="walkthrough">
+  <h2>1. Follow the interactions through the code</h2>
+
+  <article id="shared">
+    <h3>1.1 · Shared: the sandbox becomes a package</h3>
+    <p>An empty <code>ai_sandbox/__init__.py</code> lets the view import
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:324:1" data-review-source-href="../../../ai_sandbox/dsl.py#L324:1"><code>build_system()</code></a>,
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:148:1" data-review-source-href="../../../ai_sandbox/providers.py#L148:1"><code>complete()</code></a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/catalogs.py:86:1" data-review-source-href="../../../ai_sandbox/catalogs.py#L86:1"><code>resolve_genai()</code></a> directly. The sandbox's
+      own scripts keep their <code>sys.path</code> trick, so nothing changes for the CLI.
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:40:1" data-review-source-href="../../../ai_sandbox/run.py#L40:1"><code>parse_json()</code></a> and
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:54:1" data-review-source-href="../../../ai_sandbox/run.py#L54:1"><code>validate_tolerating_extras()</code></a> move to
+      <code>dsl.py</code> because both paths of the view need them.</p>
+    <p>The assistant model comes from <code>settings.AI_ASSISTANT_MODEL</code>, default
+      <code>claude-haiku-5-5</code>, which must be a key of
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:28:1" data-review-source-href="../../../ai_sandbox/providers.py#L28:1"><code>MODELS</code></a>. The provider key is read from the
+      environment by the adapter as today; <code>load_dotenv</code> is not called from Django.</p>
+  </article>
+
+  <article id="generate">
+    <h3>1.2 · Empty model → generate</h3>
+    <p>The view mirrors <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_onboarding.py:35:1" data-review-source-href="../../../model_builder/adapters/views/views_onboarding.py#L35:1"><code>load_example()</code></a>.
+      Emptiness is <code>not model_web.usage_patterns and not model_web.edge_usage_patterns</code> on the active slot
+      (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:442:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L442:1"><code>ModelWeb.usage_patterns</code></a>).
+      Sequence:</p>
+    <ol>
+      <li><code>complete(model, system_prompt, description)</code> with the sandbox system prompt.</li>
+      <li><code>parse_json</code> → <code>validate_tolerating_extras</code> → <code>build_system</code>. The
+        catalog resolutions are kept for the feedback line.</li>
+      <li><code>system_to_json(system, save_computed_state=False)</code> to a dict, then
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:46:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L46:1"><code>load_system_into_session()</code></a>
+        on the active repository, exactly as the example loader does. Reloading through the import service is
+        what validates the payload; no second <code>json_to_system</code> round trip.</li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:124:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L124:1"><code>render_model_builder()</code></a>
+        with <code>show_example_picker=False</code> and an <code>ai_feedback</code> context dict.</li>
+    </ol>
+    <p>Any exception in steps 1 to 3 is caught in one place, formatted as "stage: message", and rendered in the
+      same builder response with the model untouched. No retry, no JSON repair beyond what
+      <code>parse_json</code> already does.</p>
+  </article>
+
+  <article id="edit">
+    <h3>1.3 · Non-empty model → edit</h3>
+    <p><code>system_to_dsl(model_web.system)</code> produces the DSL dict the LLM reads, one object per
+      library object the DSL covers, each with its library <code>id</code> and the field values the builder
+      would have set, read back through the same unit conversions in reverse. Comments on those values come back
+      into <code>comments</code>. Objects or attributes outside the vocabulary are not represented; the
+      feedback copy says that hand-set values on such fields may be reset.</p>
+    <p>The edit prompt gives the DSL and the request and asks for:</p>
+<pre><code>{"edits": [
+   {"op": "set", "section": "usage_patterns", "id": "...", "field": "volume", "value": {"value": 5200000, "per": "month"}},
+   {"op": "add", "section": "jobs", "object": {"name": "Push notification", "server": "API server"}},
+   {"op": "remove", "section": "jobs", "id": "..."}],
+ "note": "one sentence on what was changed and what was assumed"}</code></pre>
+    <p><code>apply_edits</code> checks each edit: known section, known id for <code>set</code> and
+      <code>remove</code>, a field of that section's spec for <code>set</code>, and raises with the offending edit
+      otherwise. References inside objects stay by name, as in the DSL today; a removed object that is still
+      referenced fails at <code>build_system</code> with its existing error. The patched dict goes through
+      <code>validate_tolerating_extras</code> and <code>build_system</code>, then the same load and render as
+      the generate path. Ids are not preserved across the rebuild: the canvas re-renders fully anyway.</p>
+    <aside id="plan-decision-edits" data-note="review">
+      <p><strong>Edit operations instead of RFC 6902 JSON Patch</strong></p>
+      <p>Three named operations addressed by section and id are easier for the model to get right than
+        index-based paths over a list, and easier to validate and to echo in the feedback. The cost is a
+        30-line applier instead of a dependency.</p>
+    </aside>
+  </article>
+
+  <article id="feedback">
+    <h3>1.4 · Feedback line</h3>
+    <p>From the <code>Completion</code>: latency, <code>cost_usd(model)</code>, token counts. The footprint uses
+      <code>ecologits.tracers.utils.llm_impacts(provider, model_name, output_token_count, request_latency)</code>
+      with the EcoLogits provider and model resolved by <code>resolve_genai</code> from the entry in
+      <code>MODELS</code>; its <code>gwp.value</code> is in kg and is shown in mg. Only one call per request,
+      so the line is computed in the view, no new persistence. The generate path lists the DSL's
+      <code>open_questions</code>; the edit path shows the <code>note</code> and the applied edits.</p>
+  </article>
+
+  <article id="chrome">
+    <h3>1.5 · The box</h3>
+    <p>Included from
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L8:1"><code>model_builder_main.html</code></a>
+      right under the toolbar include, guarded by <code>settings.AI_ASSISTANT_ENABLED</code> exposed through the
+      existing context. A plain form with <code>hx-post</code>, <code>hx-target="#main-content-block"</code>,
+      <code>hx-disabled-elt="this"</code> and <code>hx-indicator</code> on the button. The hint, placeholder
+      and button label are chosen server-side from the emptiness flag. The feedback block renders from
+      <code>ai_feedback</code> when present.</p>
+  </article>
+</section>
+
+<section id="delivery">
+  <h2>2. Delivery and verification</h2>
+  <h3>Implementation sequence</h3>
+  <ol>
+    <li>Package the sandbox, move the two helpers, add the settings flags and the dependency change.</li>
+    <li>Generate path: view, route, template, feedback line. Deployable after this step.</li>
+    <li><code>to_dsl.py</code> with a round-trip check on the handwritten smart-building case: build → to_dsl → build
+      gives the same total footprint.</li>
+    <li>Edit path: prompt, <code>patching.py</code>, the branch in the view.</li>
+    <li>Changelog, flag on in the dev app's environment with the key, smoke in a browser.</li>
+  </ol>
+  <h3>Verification map</h3>
+  <table>
+    <tr><th>Check</th><th>How</th></tr>
+    <tr><td>Generate path loads a model and shows feedback</td><td>Integration test: fake <code>complete</code> returning the handwritten case JSON; assert session model name and feedback text in the response.</td></tr>
+    <tr><td>Edit path changes only what is asked</td><td>Integration test: load an example, fake <code>complete</code> returning one <code>set</code> edit; assert the value changed and another hand-set value survived.</td></tr>
+    <tr><td>Failure leaves the model untouched</td><td>Integration test: fake <code>complete</code> returning prose; assert the session model is unchanged and the error text is rendered.</td></tr>
+    <tr><td>to_dsl round trip</td><td>Unit test on the handwritten case, equality of totals.</td></tr>
+    <tr><td>Flag off hides everything</td><td>Covered by the existing suite running with the flag off; the route test from <code>test_load_local_file_view.py</code> is the pattern if one is wanted.</td></tr>
+  </table>
+  <p>Gates: <code>poetry run pytest tests --ignore=tests/e2e</code> and the dependency test on
+    <code>pyproject.toml</code>. No E2E test: the flow is a form POST already covered by the integration tests
+    and the feature lives one day.</p>
+</section>
+
+<section id="decisions">
+  <h2>3. Decisions for review</h2>
+  <ul>
+    <li>Code stays under <code>ai_sandbox/</code> rather than <code>model_builder/</code>, so deleting the
+      experiment is deleting a folder and one view. The view is the only Django-aware piece.</li>
+    <li>The whole builder re-renders on every assistant response, success or failure, so there is a single
+      HTMX target and no out-of-band swap to maintain.</li>
+    <li>Edits rebuild the system from the patched DSL instead of applying attribute writes through the use
+      cases. Simpler, and matches the generate path; the price is lost ids and lost non-DSL values, both
+      accepted in the spec.</li>
+    <li>Default model <code>claude-haiku-5-5</code>, the sandbox winner on quality per dollar. The three
+      open-weight models were added to the sandbox after the comparison and are untested at the time of
+      writing; switching is one environment variable.</li>
+  </ul>
+</section>
+</main>
+</div>
+<script src="../../review-links.js" defer></script>
+</body>
+</html>
