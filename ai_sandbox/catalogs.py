@@ -168,11 +168,17 @@ def load_instance_specs() -> dict:
 
 
 DEFAULT_CORES, DEFAULT_RAM_GB = 2, 4
+# Servers whose description names no cloud still get a sized general-purpose instance, on the most common cloud.
+DEFAULT_CLOUD_PROVIDER = "aws"
 
 
-def resolve_cloud_instance(provider: str, instance_type: str | None, cores: float | None, ram_gb: float | None,
+def resolve_cloud_instance(provider: str | None, instance_type: str | None, cores: float | None, ram_gb: float | None,
                            resolutions: list[Resolution]) -> tuple[str, str]:
-    provider_key = CLOUD_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "-").replace("_", "-"))
+    if provider is None:
+        provider = provider_key = DEFAULT_CLOUD_PROVIDER
+        resolutions.append(Resolution("provider", "<unstated>", provider_key, "default"))
+    else:
+        provider_key = CLOUD_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "-").replace("_", "-"))
     if provider_key is None:
         provider_key = "scaleway"
         resolutions.append(Resolution("provider", provider, provider_key, "fallback"))

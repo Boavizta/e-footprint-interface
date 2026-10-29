@@ -4,6 +4,11 @@ Local experiment runner for the AI-assistance exploration described in
 [`specs/ai-assistance/README.md`](../specs/ai-assistance/README.md). It tests one facet only:
 **from a complete user description, can an LLM produce a useful e-footprint model structure, at what cost?**
 
+Scope is web modeling only (usage journeys, servers, GenAI APIs), as if the interface's edge toggle were off. Edge
+modeling was removed on 2026-10-29 to keep the prompt and DSL small: it is a different problem (device counts and
+ratios, embodied footprints), and the two serious semantic errors of the last run that had it were both edge
+mistakes. If it returns, it is a separate assistant reusing the server and job vocabulary.
+
 Nothing here is part of the Django application. Run outputs under `runs/` are git-ignored.
 
 ## How it works
@@ -21,7 +26,11 @@ Nothing here is part of the Django application. Run outputs under `runs/` are gi
    structural checks, and writes one record per call. `report.py` turns a run dir into `summary.md` and `summary.html`.
 
 Stages recorded per call: JSON parse (first attempt vs repaired) → schema valid → build → compute → export.
-A failure at any stage is recorded with the error, never raised.
+A failure at any stage is recorded with the error, never raised. When parse, schema, build or compute fails, the
+model is called again with its previous output and the error (`--retries`, default 1; export failures are ours and
+are not retried). The record holds the last attempt at top level, summed tokens, latency and cost, `first_try_ok`,
+and the earlier attempts under `attempts`; the reports show tries per record and first-try success per model.
+`--replay` re-evaluates the last attempt only.
 
 ## Commands
 
@@ -30,7 +39,7 @@ A failure at any stage is recorded with the error, never raised.
 poetry run python ai_sandbox/providers.py
 
 # pipeline check without an LLM
-poetry run python ai_sandbox/run.py --dry-run ai_sandbox/cases/_handwritten_03_smart_building.json
+poetry run python ai_sandbox/run.py --dry-run ai_sandbox/cases/_handwritten_01_recipe_app.json
 
 # experiments (ANTHROPIC_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY read from .env)
 poetry run python ai_sandbox/run.py --cases 01 --models claude-haiku-5-5 mistral-small-latest --reps 1
@@ -47,8 +56,7 @@ which holds the sortable comparison table (filter by case or model), the per-mod
 record with:
 
 - a **structure tree** rendered from the DSL JSON the model wrote: usage patterns → journey → steps → jobs → server or
-  GenAI API, edge deployments → functions → device and server calls, then the declared servers, APIs and edge
-  devices, with field comments muted under their object. It shows what the model said, not the effective values after
+  GenAI API, then the declared servers and APIs, with field comments muted under their object. It shows what the model said, not the effective values after
   library defaults filled the gaps;
 - **structural warnings** computed from the DSL (dangling references, unused objects, jobs with no target), the
   record's checks, counts, totals by category, catalog resolutions (non-exact ones highlighted), cost, and the case's
@@ -94,15 +102,19 @@ default run on 2026-10-29.
 - **No provider-side schema enforcement.** All providers get the same "JSON only" instruction (plus JSON mode
   where it is free: OpenAI and Mistral). Validity is checked locally so results are comparable. Strict
   structured outputs are a separate knob to test later.
-- **One year horizon, constant weekly profiles.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in
-  `dsl.py`; edge needs are flat 168-hour arrays. Both are fine for structure comparison, not for final numbers.
+- **One year horizon, constant volumes.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in `dsl.py`. Fine
+  for structure comparison, not for final numbers.
 - **Catalog choices are resolved in code, not in the prompt.** `catalogs.py` snaps a GenAI `provider`/`model_name`
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
   specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python ai_sandbox/catalogs.py refresh`).
   Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
+- **Every CPU server is a cloud instance.** A server with no `cloud_provider` is sized on `DEFAULT_CLOUD_PROVIDER`
+  (aws) in `catalogs.py`. The library's plain `Server` default is a whole physical machine, 30-40x the footprint of
+  a small instance, so whether a model happened to name a provider swung the server total (Luna never names one, the
+  open-weight models always guess one). GPU servers keep the library `GPUServer` default.
 - **Numbers are asked for, not left out.** The first prompt said to leave unstated numbers to library defaults.
-  Models that obeyed answered "does video or ML dominate" with a default payload for a 30-minute video stream,
-  and sized nothing for 60,000 deployed sensors. The prompt now asks for an order-of-magnitude estimate whenever
+  Models that obeyed answered "does video or ML dominate" with a default payload for a 30-minute video stream.
+  The prompt now asks for an order-of-magnitude estimate whenever
   the description implies one, with the derivation in a per-field `comments` entry that becomes the value's
   comment in the model.
 - **Checks are coarse.** They catch missing object kinds, missing sharing, missing low-volume batch journeys.

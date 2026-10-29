@@ -1,0 +1,37 @@
+{
+  "system_name": "Recipe app",
+  "servers": [
+    {"name": "API server", "cores": 4, "ram_gb": 8, "cloud_provider": "scaleway"},
+    {"name": "Postgres database", "cores": 4, "ram_gb": 16, "storage_gb": 100},
+    {"name": "Photo store", "cores": 2, "ram_gb": 4, "storage_gb": 2000,
+     "comments": {"storage_gb": "About 1 million dish photos of 2 MB each."}}
+  ],
+  "genai_apis": [{"name": "OpenAI", "provider": "openai", "model_name": "gpt-5-mini"}],
+  "jobs": [
+    {"name": "Recipe list", "server": "API server", "data_transferred_kb": 100, "request_duration_s": 0.3},
+    {"name": "Recipe query", "server": "Postgres database", "data_transferred_kb": 20, "request_duration_s": 0.05},
+    {"name": "Recipe thumbnails", "server": "Photo store", "data_transferred_kb": 480,
+     "comments": {"data_transferred_kb": "6 thumbnails of 80 kB per recipe page."}},
+    {"name": "Photo upload", "server": "Photo store", "data_transferred_kb": 2000, "data_stored_kb": 2000},
+    {"name": "Chef answer", "genai_api": "OpenAI", "output_tokens": 250}
+  ],
+  "journeys": [
+    {"name": "Browse recipes", "steps": [
+      {"name": "Open feed", "user_time_spent_min": 4, "jobs": ["Recipe list", "Recipe query", "Recipe thumbnails"]}]},
+    {"name": "Upload dish photo", "steps": [
+      {"name": "Upload photo", "user_time_spent_min": 1, "jobs": ["Photo upload"]}]},
+    {"name": "Ask the chef", "steps": [
+      {"name": "Ask a question", "user_time_spent_min": 2, "jobs": ["Chef answer", "Chef answer"],
+       "comments": {"user_time_spent_min": "Two to three questions per session."}}]}
+  ],
+  "usage_patterns": [
+    {"name": "Browsing", "journey": "Browse recipes", "device": "smartphone", "network": "mobile", "country": "FRANCE",
+     "volume": {"value": 2600000, "per": "month"},
+     "comments": {"volume": "200,000 monthly users opening the app 3 times a week."}},
+    {"name": "Photo uploads", "journey": "Upload dish photo", "device": "smartphone", "network": "mobile",
+     "country": "FRANCE", "volume": {"value": 50000, "per": "month"}},
+    {"name": "Chef sessions", "journey": "Ask the chef", "device": "smartphone", "network": "mobile",
+     "country": "FRANCE", "volume": {"value": 50000, "per": "month"}}
+  ],
+  "open_questions": ["How long does a typical browsing session last?"]
+}
