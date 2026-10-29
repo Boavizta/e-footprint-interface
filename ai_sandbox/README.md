@@ -29,7 +29,11 @@ The interface's experimental assistant (`AI_ASSISTANT_ENABLED`, dev app only) im
 it runs the same stages and loads the built system; on a non-empty model `edit.py` reads the model back into the DSL
 (`system_to_dsl`), the request is sent with `prompts/edit_prompt.md` appended to the system prompt, and the answer's
 changed, added and removed objects are applied to the live model through the same builders and field tables
-(`apply_edits`), with the session persisted once at the end. Removals are the interface's delete use case.
+(`apply_edits`), with the session persisted once at the end. Removals are the interface's delete use case; a step or
+job that a re-listed journey or step leaves out is deleted the same way once nothing uses it. A field echoed with its
+read-back value and no new comment is ignored; a null, or a new value for a field the DSL shows but cannot change (a
+server's `kind`, a job's `server`/`genai_api`, a pattern's `journey`, `device`, `network`, `country`),
+fails the request.
 
 Stages recorded per call: JSON parse (first attempt vs repaired) → schema valid → build → compute → export.
 A failure at any stage is recorded with the error, never raised. When parse, schema, build or compute fails, the
