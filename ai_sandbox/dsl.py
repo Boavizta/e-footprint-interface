@@ -421,6 +421,9 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
             kwargs["storage"] = EdgeStorage.from_defaults(f"{L(d.name)} storage", **storage_kwargs)
             _opt(kwargs, "compute", c, "cores", u.cpu_core)
             _opt(kwargs, "ram", c, "ram_gb", u.GB_ram)
+            if d.ram_gb is not None:
+                # The library default reserves 1 GB of base RAM, all of a small gateway's: cap it at a quarter.
+                kwargs["base_ram_consumption"] = SourceValue(min(1, d.ram_gb / 4) * u.GB_ram)
             edge_devices[d.name] = EdgeComputer.from_defaults(L(d.name), **kwargs)
         c.close()
 
