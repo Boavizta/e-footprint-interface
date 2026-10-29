@@ -76,9 +76,15 @@ the provider default, which is recorded in `request_params`.
 | mistral-medium-latest | Mistral | 1.50 / 7.50 | `--models` |
 | mistral-large-4 | Mistral | 1.36 / 4.18 | `--models` |
 | claude-opus-5-5 | Anthropic | 4.00 / 20.00 | `--models`, reference |
+| zai-glm-5-3-flash | Z.ai via Mistral | 0.15 / 0.50 | yes, open weights |
+| deepseek-v4-1-flash-1017 | DeepSeek via Mistral | 0.30 / 1.20 | yes, open weights |
+| zai-glm-5-3 | Z.ai via Mistral | 1.40 / 4.40 | yes, open weights |
 
 The first full run (`runs/20261028-164221`, 3 cases x 7 models x 2 reps) narrowed the default to Haiku and Luna:
 Sonnet and Large 4 cost 10x for no structural gain, Medium and Small take the user count as the journey volume.
+The three open-weight models were added afterwards through the Mistral platform (one key, same adapter); GLM
+reasoning cannot be switched off, so they run at effort `low` unless `--effort` says otherwise. They joined the
+default run on 2026-10-29.
 
 ## Design choices worth challenging
 
