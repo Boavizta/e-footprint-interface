@@ -1,10 +1,12 @@
-"""The experimental AI assistant box and its generate path, with the provider call replaced by a fake."""
+"""The experimental AI assistant box, its generate and edit paths, with the provider call replaced by a fake."""
 import json
 from pathlib import Path
 
 import pytest
 from django.conf import settings as django_settings
+from efootprint.abstract_modeling_classes.source_objects import SourceValue
 from efootprint.api_utils.system_to_json import system_to_json
+from efootprint.constants.units import u
 
 from model_builder.adapters.repositories import InMemorySystemRepository, SessionSystemRepository
 from model_builder.adapters.views import views_ai_assistant
@@ -16,6 +18,16 @@ from providers import Completion
 
 HANDWRITTEN_CASE = Path(django_settings.BASE_DIR) / "ai_sandbox" / "cases" / "_handwritten_01_recipe_app.json"
 URL = "/model_builder/ai-assistant/"
+EDIT_ANSWER = {
+    "changed": {
+        "usage_patterns": [{"name": "Browsing", "volume": {"value": 5200000, "per": "month"},
+                            "comments": {"volume": "Doubled as asked."}}],
+        "jobs": [{"name": "Push notification", "server": "API server", "data_transferred_kb": 2}],
+        "journeys": [{"name": "Browse recipes", "steps": [
+            {"name": "Open feed", "jobs": ["Recipe list", "Recipe query", "Recipe thumbnails", "Push notification"]}]}]},
+    "removed": {"jobs": ["Photo upload"]},
+    "note": "Doubled the browsing volume, added the push job, removed the photo upload.",
+}
 
 
 def _fake_complete(text, calls):
@@ -32,6 +44,21 @@ def _system_name(system_data):
 @pytest.fixture
 def assistant_on(settings):
     settings.AI_ASSISTANT_ENABLED = True
+
+
+def _generate_recipe_app(client, monkeypatch):
+    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), []))
+    client.get("/model_builder/")  # starts the session with the empty model
+    assert client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"}).status_code == 200
+    return ModelWeb(SessionSystemRepository(client.session))
+
+
+def _named(objects, name):
+    return next(obj for obj in objects if obj.name == name)
+
+
+def _steps(system):
+    return {step.name: step for journey in system.usage_journeys for step in journey.uj_steps}
 
 
 @pytest.mark.django_db
@@ -67,6 +94,60 @@ def test_unparseable_answer_leaves_the_model_untouched(client, assistant_on, mon
     assert response.status_code == 200
     assert SessionSystemRepository(client.session).get_system_data() == before
     assert "The answer is not JSON" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
+    model_web = _generate_recipe_app(client, monkeypatch)
+    system = model_web.system.modeling_obj
+    _named(system.servers, "API server").lifespan = SourceValue(7 * u.year, comment="Hand-set, outside the DSL.")
+    model_web.persist_to_cache()
+    ids_before = set(model_web.flat_efootprint_objs_dict)
+    photo_upload_id = _named(system.jobs, "Photo upload").id
+    calls = []
+    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(EDIT_ANSWER), calls))
+
+    response = client.post(URL, {"prompt": "Double the browsing volume", "model": "zai-glm-5-3-flash"})
+
+    assert response.status_code == 200
+    assert calls[0][1].startswith("Current model:\n{") and calls[0][1].endswith("Request: Double the browsing volume")
+    edited = ModelWeb(SessionSystemRepository(client.session))
+    system = edited.system.modeling_obj
+    browsing = _named(system.usage_patterns, "Browsing").hourly_occurrences
+    assert browsing.form_inputs["initial_volume"] == 5200000 and browsing.form_inputs["start_date"] == "2026-01-01"
+    steps = _steps(system)
+    assert [job.name for job in steps["Open feed"].jobs] == ["Recipe list", "Recipe query", "Recipe thumbnails",
+                                                             "Push notification"]
+    assert _named(system.jobs, "Push notification").data_transferred.value == 2 * u.kB
+    assert list(steps["Upload photo"].jobs) == []
+    assert "Photo upload" not in {job.name for job in system.jobs}
+    assert photo_upload_id not in edited.flat_efootprint_objs_dict
+    lifespan = _named(system.servers, "API server").lifespan
+    assert lifespan.value == 7 * u.year and lifespan.comment == "Hand-set, outside the DSL."
+    assert ids_before - {photo_upload_id} <= set(edited.flat_efootprint_objs_dict)
+    assistant_box = response.content.decode().split('id="ai-assistant"')[1]
+    assert "Doubled the browsing volume, added the push job" in assistant_box
+    for line in ("set Browsing.volume to 5,200,000 per month", "added job Push notification on API server",
+                 "set Open feed.jobs to Recipe list, Recipe query, Recipe thumbnails, Push notification",
+                 "removed job Photo upload"):
+        assert f"<li>{line}</li>" in assistant_box
+
+
+@pytest.mark.django_db
+def test_edit_answer_naming_an_unknown_job_leaves_the_model_untouched(client, assistant_on, monkeypatch):
+    _generate_recipe_app(client, monkeypatch)
+    before = SessionSystemRepository(client.session).get_system_data()
+    answer = {"changed": {**EDIT_ANSWER["changed"], "journeys": [{"name": "Browse recipes", "steps": [
+        {"name": "Open feed", "jobs": ["Recipe list", "Nightly digest"]}]}]}}  # the volume is doubled before this fails
+    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(answer), []))
+
+    response = client.post(URL, {"prompt": "Add a nightly digest", "model": "zai-glm-5-3-flash"})
+
+    assert response.status_code == 200
+    assert SessionSystemRepository(client.session).get_system_data() == before
+    assistant_box = response.content.decode().split('id="ai-assistant"')[1]
+    assert "Unknown job" in assistant_box and "Nightly digest" in assistant_box
+    assert "<li>" not in assistant_box
 
 
 @pytest.mark.django_db
