@@ -6,7 +6,7 @@ Context saved on 2026-10-27 from a discussion begun on 2026-09-24. This folder b
 
 ## Resume here
 
-1. Read this document, then the current [architecture index](../architecture/index.html), [mission](../mission.md), and [constitution](../constitution.md) as needed.
+1. Read this document, then the current [architecture index](../../architecture/index.html), [mission](../../mission.md), and [constitution](../../constitution.md) as needed.
 2. Continue as a thinking partner. The user's latest instruction is: **“Don’t make edits until I tell you explicitly. By default, we are discussion and I want your unbiased, constructive opinion. Don’t agree with me just to please me.”** This handoff-writing request does not authorize subsequent implementation or paid experiments.
 3. The discussion started with `/spec-specify`, but the user explicitly deferred writing HTML files until they say to proceed. This Markdown context record is not a formal spec or plan.
 4. The latest substantive question was how to design and prove this feature through an inexpensive AI experiment sandbox before investing in implementation. The assistant proposed an experiment brief and three reviewed cases as the next concrete deliverable; the user has not yet approved their creation.
@@ -76,7 +76,7 @@ The September discussion treated Jev as early access. Vendor speed and efficienc
 
 Distinguish **suggest an assumption** from **research evidence**. A plausible value and a persuasive rationale do not establish an improvement in modeling accuracy.
 
-The library's [modeling-method roadmap](../../../e-footprint/specs/modeling_logic_roadmap.md) already identifies unresolved workload-to-resource estimation problems, especially database queries. A real benchmark can still be poorly applicable to a different workload or environment. Preserve those limitations in assistance.
+The library's [modeling-method roadmap](../../../../e-footprint/specs/modeling_logic_roadmap.md) already identifies unresolved workload-to-resource estimation problems, especially database queries. A real benchmark can still be poorly applicable to a different workload or environment. Preserve those limitations in assistance.
 
 Proposed priorities:
 
@@ -127,7 +127,7 @@ Optimize resource use **per useful completed modeling**, including failures, aba
 
 Measure mean cost and the expensive tail separately; an association-wide spending limit is another possible operational control. No limits or thresholds have been chosen yet.
 
-Price, latency, and token count do not independently establish environmental impact. [EcoLogits](https://ecologits.ai/latest/methodology/) may help where models and providers are supported, with methodological limitations stated. Do not infer Jev's footprint from its price. The existing [reference modeling of the interface](../e-footprint-modeling/README.md) provides a related place to connect future operational evidence.
+Price, latency, and token count do not independently establish environmental impact. [EcoLogits](https://ecologits.ai/latest/methodology/) may help where models and providers are supported, with methodological limitations stated. Do not infer Jev's footprint from its price. The existing [reference modeling of the interface](../../e-footprint-modeling/README.md) provides a related place to connect future operational evidence.
 
 ## Proposed experiment sandbox
 
@@ -203,14 +203,14 @@ Illustrative experiment arithmetic: 12 cases × 2 workflows × 3 repetitions = 7
 - Which evidence sources are suitable for numerical refinement, and where must the tool abstain or preserve a hypothesis?
 - What are the experiment budget, latency goals, retry limits, and decision thresholds?
 
-The proposed next step is a short experiment brief and three reviewed cases, followed by a minimal runner if authorized. Results should determine the initial product scope and then inform the formal spec, plan, and UX. The [spec-driven workflow](../workflow.md) permits investigations before shipping feature work; this handoff does not advance those gates.
+The proposed next step is a short experiment brief and three reviewed cases, followed by a minimal runner if authorized. Results should determine the initial product scope and then inform the formal spec, plan, and UX. The [spec-driven workflow](../../workflow.md) permits investigations before shipping feature work; this handoff does not advance those gates.
 
 ## Relevant project references
 
-- [Interface architecture](../architecture/index.html), [mission](../mission.md), [constitution](../constitution.md), and [design hub](../design/index.html).
-- [Forms and relationships](../architecture/forms-and-relationships.html) for current source metadata and simplified inputs; [onboarding](../architecture/onboarding.html) for current starting examples.
-- [Library architecture](../../../e-footprint/specs/architecture/index.html) and [modeling-method roadmap](../../../e-footprint/specs/modeling_logic_roadmap.md).
-- [Interface reference modeling](../e-footprint-modeling/README.md) and [user needs backlog](../../user_research/needs-backlog.md), including operational data import and telemetry needs.
-- [Canonical workflow](../../../e-footprint/specs/workflow.md) and [local spec-specify skill](../../../e-footprint/.agents/skills/spec-specify/SKILL.md).
+- [Interface architecture](../../architecture/index.html), [mission](../../mission.md), [constitution](../../constitution.md), and [design hub](../../design/index.html).
+- [Forms and relationships](../../architecture/forms-and-relationships.html) for current source metadata and simplified inputs; [onboarding](../../architecture/onboarding.html) for current starting examples.
+- [Library architecture](../../../../e-footprint/specs/architecture/index.html) and [modeling-method roadmap](../../../../e-footprint/specs/modeling_logic_roadmap.md).
+- [Interface reference modeling](../../e-footprint-modeling/README.md) and [user needs backlog](../../../user_research/needs-backlog.md), including operational data import and telemetry needs.
+- [Canonical workflow](../../../../e-footprint/specs/workflow.md) and [local spec-specify skill](../../../../e-footprint/.agents/skills/spec-specify/SKILL.md).
 
 These references supply current implementation context; this document preserves the conversation's ideas without asserting that they have since shipped elsewhere.
