@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Experimental, dev-only AI assistant that builds or edits the model from a description, behind `AI_ASSISTANT_ENABLED`.
+
 ### Fixed
 - "Open a file" asks for confirmation before replacing a modeling that has content, naming the modeling or both modelings of a comparison.
 - Upgrade to e-footprint 27.0.0: Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed.
