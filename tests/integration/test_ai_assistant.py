@@ -42,11 +42,12 @@ def test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback(client,
     assert calls == [("zai-glm-5-3-flash", "A recipe app")]
     assert _system_name(SessionSystemRepository(client.session).get_system_data()) == "Recipe app"
     assert client.session["ai_assistant_model"] == "zai-glm-5-3-flash"
-    content = response.content.decode()
-    assert "Recipe app" in content
-    assert "USD" in content
-    assert "Raw answer" in content
-    assert 'id="example-picker"' not in content
+    canvas, assistant_box = response.content.decode().split('id="ai-assistant"')
+    assert "Recipe app" in canvas  # the re-rendered builder shows the loaded model, not only the echoed answer
+    assert "USD" in assistant_box
+    assert "Values set from the description carry a comment" in assistant_box
+    assert "Raw answer" in assistant_box
+    assert 'id="example-picker"' not in canvas + assistant_box
 
 
 @pytest.mark.django_db
@@ -78,6 +79,7 @@ def test_edge_model_is_refused_without_a_provider_call(client, assistant_on, mon
 
 
 @pytest.mark.django_db
-def test_flag_off_hides_the_box_and_404s_the_route(client):
+def test_flag_off_hides_the_box_and_404s_the_route(client, settings):
+    settings.AI_ASSISTANT_ENABLED = False  # independent of a developer's .env turning the flag on
     assert client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"}).status_code == 404
     assert b'id="ai-assistant"' not in client.get("/model_builder/").content
