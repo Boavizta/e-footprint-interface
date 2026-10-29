@@ -5,7 +5,6 @@ the result through the same persistence step as the example loader. Any failure 
 box with the model left untouched. The route is always registered; the view 404s unless AI_ASSISTANT_ENABLED.
 """
 import sys
-from time import perf_counter
 
 from django.conf import settings
 from django.http import Http404
