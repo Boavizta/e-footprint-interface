@@ -54,6 +54,16 @@ A possible five-round journey is: check description → complete description and
 - Preserve established values and sources when switching modes. Flag assumptions affected by structural edits.
 - Show proposed changes and support acceptance, editing, and undo. Make default-filled results visibly provisional.
 
+### Separate web and edge paths (to explore)
+
+Assistance will probably follow three independent paths rather than one generator covering everything:
+
+- **Web**: usage journeys, steps, jobs, servers, and GenAI APIs, sized from demand.
+- **Edge**: deployed devices, edge functions, and deployments, sized from fleet counts, ratios, and device footprints.
+- **Connection**: linking edge functions to the server jobs they call, once both sides exist.
+
+Each path keeps its prompt, vocabulary, and checks small, which suits small models; the two paradigms share few failure modes, and edge mistakes (device counts, devices per site) differ from web ones (journey volumes, session length). Separate entry points also match how users think about their product and keep each step understandable. The connection path stays narrow: it references objects the other two paths created rather than regenerating them. The sandbox has been web-only since 2026-10-29, as if the interface's edge toggle were off.
+
 ### Challenges to the proposed AI split
 
 Structure generation may require substantial reasoning: choosing granularity, sharing infrastructure, and avoiding double counting can be harder than filling values. Compact output is desirable, but forcing minimal reasoning could increase correction rounds.
@@ -138,7 +148,7 @@ Start with structure generation and editing; a good classifier cannot compensate
 
 ### Cases and expected outcomes
 
-Start with **three carefully reviewed cases**, then expand toward **12–20**. Suggested coverage: a conventional web service, substantial background processing, and edge/IoT if included in initial scope.
+Start with **three carefully reviewed cases**, then expand toward **12–20**. Suggested coverage: a conventional web service and substantial background processing; edge/IoT cases belong to the separate edge path (see [Separate web and edge paths](#separate-web-and-edge-paths-to-explore)).
 
 Each case should contain a realistic description, omissions and ambiguities, facts available if asked, genuinely unknown facts, important modeling properties, follow-up edits, and applicable evidence. Expected outcomes should allow multiple valid structures. For example, require that two journeys share one database without double counting, rather than matching exact names or a single graph.
 
@@ -185,7 +195,7 @@ Illustrative experiment arithmetic: 12 cases × 2 workflows × 3 repetitions = 7
 
 - What qualifies as a useful completed modeling, and which errors are unacceptable?
 - Which three initial cases best represent the target audience and intended first scope?
-- Does initial scope include edge/IoT, research, result explanation, and scenario comparison?
+- Does initial scope include research, result explanation, and scenario comparison? (Edge/IoT is to be explored as a separate path.)
 - How much user knowledge can the clarification process reasonably require?
 - Does generation adapt examples, construct new structures, or combine both?
 - Does Jev improve outcomes enough to justify another dependency?
