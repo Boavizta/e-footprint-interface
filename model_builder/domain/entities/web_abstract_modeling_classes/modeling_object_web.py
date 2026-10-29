@@ -377,7 +377,9 @@ class ModelingObjectWeb:
 
     @property
     def efootprint_contextual_modeling_obj_containers(self):
-        return self._modeling_obj.contextual_modeling_obj_containers
+        # A detached wrapper (unlinked or deleted referrer) has no container; modeling_obj_containers skips it too.
+        return [contextual_container for contextual_container in self._modeling_obj.contextual_modeling_obj_containers
+                if contextual_container.modeling_obj_container is not None]
 
     @property
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List["ModelingObjectWeb"], Optional[str]]:

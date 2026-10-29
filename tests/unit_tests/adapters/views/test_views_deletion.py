@@ -68,7 +68,6 @@ def test_object_deletion_requires_post_and_confirmation_uses_it(client, minimal_
     assert object_id not in SessionSystemRepository(client.session).get_system_data().get("UsagePattern", {})
 
 
-@pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 4")
 @pytest.mark.django_db
 @pytest.mark.parametrize("class_name,name", [("RecurrentServerNeed", "Server need"),
                                              ("RecurrentEdgeProcess", "Edge process")])

@@ -123,6 +123,17 @@ class TestDeleteObjectUseCase:
         assert result.can_delete is False
         assert "Test Job" in result.blocking_containers
 
+    def test_check_can_delete_ignores_a_referrer_deleted_in_the_same_model(self, minimal_model_web):
+        """A job deleted earlier leaves its server deletable without re-hydrating the model."""
+        use_case = DeleteObjectUseCase(minimal_model_web, input_catalog)
+        server = minimal_model_web.servers[0]
+        job = next(obj for obj in minimal_model_web.flat_efootprint_objs_dict.values() if obj.name == "Test Job")
+        use_case._delete(DeleteObjectInput(object_id=job.id))
+
+        result = use_case.check_can_delete(server.efootprint_id)
+
+        assert (result.can_delete, result.blocking_containers) == (True, [])
+
     # --- execute ---
 
     def test_execute_returns_deleted_object_info(self, minimal_model_web):
