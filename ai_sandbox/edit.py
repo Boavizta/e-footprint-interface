@@ -167,14 +167,19 @@ KINDS = {"servers": "server", "genai_apis": "GenAI API", "jobs": "job", "journey
 NOT_SUPPORTED = "not supported by the assistant in this experiment; change it by hand"
 SIZING_FIELDS = ("cores", "ram_gb", "cloud_provider", "instance_type")
 HORIZON_KEYS = ("start_date", "modeling_duration_value", "modeling_duration_unit")
+READ_BACK = {"servers": _server, "genai_apis": _genai_api, "jobs": _job, "journeys": _journey,
+             "usage_patterns": _usage_pattern}
+# Fields the DSL describes but the assistant cannot change, with their value when the read-back leaves them out.
+DESCRIBING = {"servers": {"kind": "cpu"}, "jobs": {"server": None, "genai_api": None},
+              "usage_patterns": {"journey": None, "device": None, "network": None, "country": None}}
 
 
 def apply_edits(answer: dict, model_web: ModelWeb) -> list[str]:
     """Applies the `changed` and `removed` sections of an edit answer to the live model; returns one line per change.
 
-    Objects are matched by name within their section; a known name sets the listed fields, an unknown one is a
-    complete new object. Steps and jobs a re-list leaves out are deleted once nothing uses them, as the form
-    path's cascade does. Removals come last so a job re-listed and removed in one answer ends up removed. Any
+    Objects are matched by name within their section; a known name sets the listed fields that differ from the
+    read-back (a describing-only field that differs is refused), an unknown one is a complete new object. Steps
+    and jobs a re-list leaves out are deleted once nothing uses them, as the form path's cascade does. Removals come last so a job re-listed and removed in one answer ends up removed. Any
     problem raises before persistence, leaving the session's model as it was.
     """
     if not isinstance(answer, dict):
@@ -234,6 +239,10 @@ class _Edits:
         if obj is None:
             self.add(section, SECTIONS[section].model_validate(entry))
         else:
+            fields = _changed_fields(fields, entry, {**DESCRIBING.get(section, {}), **READ_BACK[section](obj)})
+            for field in DESCRIBING.get(section, {}):
+                if field in fields:
+                    raise ValueError(f"Changing {obj.name}.{field} is {NOT_SUPPORTED}")
             getattr(self, f"_set_{section}")(obj, entry, fields)
             if fields:
                 raise ValueError(f"Changing {obj.name}.{', '.join(fields)} is {NOT_SUPPORTED}")
@@ -265,7 +274,6 @@ class _Edits:
             countries={entry["country"]: p.country for p, entry in zip(patterns, read)})
 
     def _set_servers(self, server, entry: dict, fields: dict):
-        _refuse_unless_unchanged(server, fields, _server(server), ("kind",))
         if "gpus" in fields and not isinstance(server, GPUServer):
             raise ValueError(f"{server.name} is not a GPU server; gpus is {NOT_SUPPORTED}")
         self._set_fields(server, entry, fields, SERVER_FIELDS)
@@ -305,7 +313,6 @@ class _Edits:
         current = _job(job)
         if "server" not in current and "genai_api" not in current and fields:
             raise ValueError(f"{job.name} is a job kind the assistant cannot edit; changing it is {NOT_SUPPORTED}")
-        _refuse_unless_unchanged(job, fields, current, ("server", "genai_api"))
         if isinstance(job, EcoLogitsGenAIExternalAPIJob):
             allowed = ("output_tokens",)
         else:
@@ -328,7 +335,7 @@ class _Edits:
                 self.lines.append(f"added step {step.name} to {journey.name}")
                 new_steps[step] = 1
             else:
-                self._set_step(step, step_entry, step_fields)
+                self._set_step(step, step_entry, _changed_fields(step_fields, step_entry, _step(step)))
                 new_steps[step] = weights[step]  # the DSL cannot say a step's weight: a surviving step keeps its own
         if list(new_steps) != current_steps:
             journey.uj_steps = to_weighted_explainable_object_dict(new_steps, weight_label=journey.weight_labels["uj_steps"])
@@ -357,7 +364,6 @@ class _Edits:
 
     def _set_usage_patterns(self, pattern, entry: dict, fields: dict):
         current = _usage_pattern(pattern)
-        _refuse_unless_unchanged(pattern, fields, current, ("journey", "device", "network", "country"))
         volume, growth = fields.pop("volume", None), fields.pop("growth_pct_per_year", None)
         if volume is None and growth is None:
             return
@@ -385,16 +391,22 @@ class _Edits:
     # --- removals ---
 
     def remove(self, section: str, obj):
-        if obj.id in self.removed_ids:
+        if obj.id in self.removed_ids:  # already deleted with its journey or step
             return
-        if obj.id in self.model_web.flat_efootprint_objs_dict:  # else already deleted with its journey or step
-            check = self.delete_use_case.check_can_delete(obj.id)
-            if not check.can_delete:
-                raise ValueError(
-                    f"Cannot remove {KINDS[section]} {obj.name}: still used by {', '.join(check.blocking_containers)}")
-            self.delete_use_case._delete(DeleteObjectInput(obj.id))
+        check = self.delete_use_case.check_can_delete(obj.id)
+        if not check.can_delete:
+            raise ValueError(
+                f"Cannot remove {KINDS[section]} {obj.name}: still used by {', '.join(check.blocking_containers)}")
+        objects_before = dict(self.model_web.flat_efootprint_objs_dict)
+        self.delete_use_case._delete(DeleteObjectInput(obj.id))
         self.removed_ids.add(obj.id)
         self.lines.append(f"removed {KINDS[section]} {obj.name}")
+        job_ids = {job.id for job in self.objects["jobs"]}
+        for deleted_id, deleted in objects_before.items():  # the steps and jobs the delete cascaded to
+            kind = "job" if deleted_id in job_ids else "step" if deleted.class_as_simple_str == "UsageJourneyStep" else None
+            if kind and deleted_id not in self.model_web.flat_efootprint_objs_dict and deleted_id not in self.removed_ids:
+                self.removed_ids.add(deleted_id)
+                self.lines.append(f"removed {kind} {deleted.name}")
 
 
 def _fields(entry, spec_class, section: str) -> dict:
@@ -411,13 +423,12 @@ def _fields(entry, spec_class, section: str) -> dict:
     return fields
 
 
-def _refuse_unless_unchanged(obj, fields: dict, current: dict, names: tuple):
-    """Fields the DSL only describes (device, server...): accepted when they repeat the model, refused otherwise."""
-    for name in names:
-        if name in fields:
-            if fields[name] != current.get(name, "cpu" if name == "kind" else None):
-                raise ValueError(f"Changing {obj.name}.{name} is {NOT_SUPPORTED}")
-            fields.pop(name)
+def _changed_fields(fields: dict, entry: dict, current: dict) -> dict:
+    """Drops the fields an answer echoes: same value as the read-back and no new comment. An echo then never
+    replaces a hand-set source or comment, nor rebuilds a series the DSL cannot describe."""
+    comments, current_comments = entry.get("comments", {}), current.get("comments", {})
+    return {field: value for field, value in fields.items()
+            if value != current.get(field) or comments.get(field, current_comments.get(field)) != current_comments.get(field)}
 
 
 def _horizon(occurrences) -> dict:
