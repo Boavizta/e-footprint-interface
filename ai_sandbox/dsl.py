@@ -23,9 +23,10 @@ from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.network import Network
+from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
-from efootprint.core.usage.job import GPUJob, Job
+from efootprint.core.usage.job import GPUJob, Job, JobBase
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
@@ -167,10 +168,25 @@ class _Comments:
             self.resolutions.append(Resolution("comment", f"{self.obj.name}.{field}", text, "unattached"))
 
 
-def _opt(kwargs: dict, key: str, c: _Comments, field: str, unit):
-    value = c.value(field)
-    if value is not None:
-        kwargs[key] = SourceValue(value * unit, comment=c.take(field))
+# DSL field -> (library attribute, unit). Read by the builders below and by edit.py.
+SERVER_FIELDS = {"carbon_intensity_g_per_kwh": ("average_carbon_intensity", u.g / u.kWh),
+                 "gpus": ("compute", u.gpu)}  # gpu servers only
+STORAGE_FIELDS = {"storage_gb": ("base_storage_need", u.GB_stored)}  # on server.storage
+JOB_FIELDS = {"data_transferred_kb": ("data_transferred", u.kB), "data_stored_kb": ("data_stored", u.kB_stored),
+              "request_duration_s": ("request_duration", u.s), "ram_mb": ("ram_needed", u.MB_ram),
+              "cpu_cores": ("compute_needed", u.cpu_core), "gpus": ("compute_needed", u.gpu),
+              "output_tokens": ("output_token_count", u.dimensionless)}
+STEP_FIELDS = {"user_time_spent_min": ("user_time_spent", u.min)}
+SERVER_JOB_FIELDS = ("data_transferred_kb", "data_stored_kb", "request_duration_s", "ram_mb")  # + cpu_cores or gpus
+
+
+def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
+    """Sets each stated field of `fields` (default: the whole table) as a SourceValue carrying its comment."""
+    for field in fields or table:
+        attr, unit = table[field]
+        value = c.value(field)
+        if value is not None:
+            kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
 def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
@@ -203,25 +219,31 @@ NETWORK_ALIASES = {
 }
 
 
+def _label(name: str, resolutions: list[Resolution]) -> str:
+    """Object names are labels the user reads in a diagram: identifiers get their separators replaced.
+
+    Only identifier shapes are touched (snake_case, or kebab-case without spaces); hyphenated English such as
+    "Time-series DB" or "Ask follow-up" is left alone.
+    """
+    if "_" not in name and not ("-" in name and " " not in name):
+        return name
+    label = re.sub(r"[_-]+", " ", name).strip()
+    label = label[:1].upper() + label[1:]
+    resolutions.append(Resolution("name", name, label, "humanized"))
+    return label
+
+
 class _Shared:
-    """One instance per device archetype, network and country, shared across patterns."""
+    """One instance per device archetype, network and country, shared across patterns.
 
-    def __init__(self, resolutions: list[Resolution]):
-        self.devices, self.networks, self.countries = {}, {}, {}
+    Seeding it with a model's existing instances (keyed by archetype, network kind and country key) makes new
+    patterns reuse them instead of adding a second "Default smartphone".
+    """
+
+    def __init__(self, resolutions: list[Resolution], devices: dict = None, networks: dict = None,
+                 countries: dict = None):
+        self.devices, self.networks, self.countries = dict(devices or {}), dict(networks or {}), dict(countries or {})
         self.resolutions = resolutions
-
-    def label(self, name: str) -> str:
-        """Object names are labels the user reads in a diagram: identifiers get their separators replaced.
-
-        Only identifier shapes are touched (snake_case, or kebab-case without spaces); hyphenated English such as
-        "Time-series DB" or "Ask follow-up" is left alone.
-        """
-        if "_" not in name and not ("-" in name and " " not in name):
-            return name
-        label = re.sub(r"[_-]+", " ", name).strip()
-        label = label[:1].upper() + label[1:]
-        self.resolutions.append(Resolution("name", name, label, "humanized"))
-        return label
 
     def devices_for(self, kind: str | None) -> list:
         """Returns the device list of a usage pattern: one archetype, or none for batch work."""
@@ -258,89 +280,97 @@ def _lookup(mapping: dict, name: str, kind: str):
     return mapping[name]
 
 
+def build_server(s: ServerSpec, resolutions: list[Resolution]) -> ServerBase:
+    c = _Comments(s, resolutions)
+    name = _label(s.name, resolutions)
+    storage_kwargs = {}
+    _apply_fields(storage_kwargs, c, STORAGE_FIELDS)
+    kwargs = {"storage": Storage.from_defaults(f"{name} storage", **storage_kwargs)}
+    if s.kind == "gpu":
+        _apply_fields(kwargs, c, SERVER_FIELDS)
+        server = GPUServer.from_defaults(name, **kwargs)
+    else:
+        _apply_fields(kwargs, c, SERVER_FIELDS, ["carbon_intensity_g_per_kwh"])
+        # Always a catalog cloud instance: the library's plain Server default is a whole physical machine, 30-40x
+        # the footprint of a small instance, so naming a provider or not would swing the result. Cores and RAM
+        # then come from Boavizta, the stated ones only drive the pick.
+        provider, instance = resolve_cloud_instance(s.cloud_provider, s.instance_type, s.cores, s.ram_gb, resolutions)
+        sizing = " ".join(filter(None, (c.take("cores"), c.take("ram_gb"), c.take("instance_type")))) or None
+        server = BoaviztaCloudServer.from_defaults(
+            name, provider=SourceObject(provider, comment=c.take("cloud_provider")),
+            instance_type=SourceObject(instance, comment=sizing), **kwargs)
+    c.close()
+    return server
+
+
+def build_genai_api(a: GenAIApiSpec, resolutions: list[Resolution]) -> EcoLogitsGenAIExternalAPI:
+    c = _Comments(a, resolutions)
+    provider, model_name = resolve_genai(a.provider, a.model_name, resolutions)
+    api = EcoLogitsGenAIExternalAPI.from_defaults(
+        _label(a.name, resolutions), provider=SourceObject(provider, comment=c.take("provider")),
+        model_name=SourceObject(model_name, comment=c.take("model_name")))
+    c.close()
+    return api
+
+
+def build_job(j: JobSpec, servers: dict, apis: dict, resolutions: list[Resolution]) -> JobBase:
+    if (j.server is None) == (j.genai_api is None):
+        raise ValueError(f"Job '{j.name}' must reference exactly one of server or genai_api")
+    c = _Comments(j, resolutions)
+    name = _label(j.name, resolutions)
+    if j.genai_api:
+        kwargs = {"external_api": _lookup(apis, j.genai_api, "genai_api")}
+        _apply_fields(kwargs, c, JOB_FIELDS, ["output_tokens"])
+        job = EcoLogitsGenAIExternalAPIJob.from_defaults(name, **kwargs)
+    else:
+        server = _lookup(servers, j.server, "server")
+        kwargs = {"server": server}
+        if isinstance(server, GPUServer):
+            _apply_fields(kwargs, c, JOB_FIELDS, SERVER_JOB_FIELDS + ("gpus",))
+            job = GPUJob.from_defaults(name, **kwargs)
+        else:
+            _apply_fields(kwargs, c, JOB_FIELDS, SERVER_JOB_FIELDS + ("cpu_cores",))
+            job = Job.from_defaults(name, **kwargs)
+    c.close()
+    return job
+
+
+def build_step(st: StepSpec, jobs: dict, resolutions: list[Resolution]) -> UsageJourneyStep:
+    c = _Comments(st, resolutions)
+    kwargs = {"jobs": [_lookup(jobs, name, "job") for name in st.jobs]}
+    _apply_fields(kwargs, c, STEP_FIELDS)
+    step = UsageJourneyStep.from_defaults(_label(st.name, resolutions), **kwargs)
+    c.close()
+    return step
+
+
+def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) -> UsageJourney:
+    steps = [build_step(st, jobs, resolutions) for st in jo.steps]
+    return UsageJourney(_label(jo.name, resolutions), uj_steps=steps)
+
+
+def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
+                        resolutions: list[Resolution]) -> UsagePattern:
+    c = _Comments(p, resolutions)
+    volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year")))) or None
+    pattern = UsagePattern(
+        _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
+        shared.network(p.network), shared.country(p.country),
+        _volume_timeseries(p.volume, p.growth_pct_per_year, volume_comment))
+    c.close()
+    return pattern
+
+
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
-    L = shared.label
-
-    servers = {}
-    for s in spec.servers:
-        c = _Comments(s, resolutions)
-        storage_kwargs = {}
-        _opt(storage_kwargs, "base_storage_need", c, "storage_gb", u.GB_stored)
-        storage = Storage.from_defaults(f"{L(s.name)} storage", **storage_kwargs)
-        kwargs = {"storage": storage}
-        _opt(kwargs, "average_carbon_intensity", c, "carbon_intensity_g_per_kwh", u.g / u.kWh)
-        if s.kind == "gpu":
-            _opt(kwargs, "compute", c, "gpus", u.gpu)
-            servers[s.name] = GPUServer.from_defaults(L(s.name), **kwargs)
-        else:
-            # Always a catalog cloud instance: the library's plain Server default is a whole physical machine, 30-40x
-            # the footprint of a small instance, so naming a provider or not would swing the result. Cores and RAM
-            # then come from Boavizta, the stated ones only drive the pick.
-            provider, instance = resolve_cloud_instance(s.cloud_provider, s.instance_type, s.cores, s.ram_gb, resolutions)
-            sizing = " ".join(filter(None, (c.take("cores"), c.take("ram_gb"), c.take("instance_type")))) or None
-            servers[s.name] = BoaviztaCloudServer.from_defaults(
-                L(s.name), provider=SourceObject(provider, comment=c.take("cloud_provider")),
-                instance_type=SourceObject(instance, comment=sizing), **kwargs)
-        c.close()
-
-    apis = {}
-    for a in spec.genai_apis:
-        c = _Comments(a, resolutions)
-        provider, model_name = resolve_genai(a.provider, a.model_name, resolutions)
-        apis[a.name] = EcoLogitsGenAIExternalAPI.from_defaults(
-            L(a.name), provider=SourceObject(provider, comment=c.take("provider")),
-            model_name=SourceObject(model_name, comment=c.take("model_name")))
-        c.close()
-
-    jobs = {}
-    for j in spec.jobs:
-        if (j.server is None) == (j.genai_api is None):
-            raise ValueError(f"Job '{j.name}' must reference exactly one of server or genai_api")
-        c = _Comments(j, resolutions)
-        if j.genai_api:
-            kwargs = {"external_api": _lookup(apis, j.genai_api, "genai_api")}
-            _opt(kwargs, "output_token_count", c, "output_tokens", u.dimensionless)
-            jobs[j.name] = EcoLogitsGenAIExternalAPIJob.from_defaults(L(j.name), **kwargs)
-            c.close()
-            continue
-        server = _lookup(servers, j.server, "server")
-        kwargs = {"server": server}
-        _opt(kwargs, "data_transferred", c, "data_transferred_kb", u.kB)
-        _opt(kwargs, "data_stored", c, "data_stored_kb", u.kB_stored)
-        _opt(kwargs, "request_duration", c, "request_duration_s", u.s)
-        _opt(kwargs, "ram_needed", c, "ram_mb", u.MB_ram)
-        if isinstance(server, GPUServer):
-            _opt(kwargs, "compute_needed", c, "gpus", u.gpu)
-            jobs[j.name] = GPUJob.from_defaults(L(j.name), **kwargs)
-        else:
-            _opt(kwargs, "compute_needed", c, "cpu_cores", u.cpu_core)
-            jobs[j.name] = Job.from_defaults(L(j.name), **kwargs)
-        c.close()
-
-    journeys = {}
-    for jo in spec.journeys:
-        steps = []
-        for st in jo.steps:
-            c = _Comments(st, resolutions)
-            kwargs = {"jobs": [_lookup(jobs, name, "job") for name in st.jobs]}
-            _opt(kwargs, "user_time_spent", c, "user_time_spent_min", u.min)
-            steps.append(UsageJourneyStep.from_defaults(L(st.name), **kwargs))
-            c.close()
-        journeys[jo.name] = UsageJourney(L(jo.name), uj_steps=steps)
-
-    usage_patterns = []
-    for p in spec.usage_patterns:
-        c = _Comments(p, resolutions)
-        volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year")))) or None
-        usage_patterns.append(UsagePattern(
-            L(p.name), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device), shared.network(p.network),
-            shared.country(p.country), _volume_timeseries(p.volume, p.growth_pct_per_year, volume_comment)))
-        c.close()
-
-    return System(L(spec.system_name), usage_patterns, []), resolutions
+    servers = {s.name: build_server(s, resolutions) for s in spec.servers}
+    apis = {a.name: build_genai_api(a, resolutions) for a in spec.genai_apis}
+    jobs = {j.name: build_job(j, servers, apis, resolutions) for j in spec.jobs}
+    journeys = {jo.name: build_journey(jo, jobs, resolutions) for jo in spec.journeys}
+    usage_patterns = [build_usage_pattern(p, journeys, shared, resolutions) for p in spec.usage_patterns]
+    return System(_label(spec.system_name, resolutions), usage_patterns, []), resolutions
 
 
 def json_schema() -> dict:
