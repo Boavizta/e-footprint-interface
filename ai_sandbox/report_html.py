@@ -169,10 +169,7 @@ def preview_block(record: dict) -> str:
         return (f'<p class="fail">tree not renderable ({type(error).__name__}: {esc(error)})</p>'
                 f"<pre>{esc(json.dumps(data, indent=1)[:6000])}</pre>")
     warnings_html = ("<ul class=\"warnings\">" + "".join(f"<li>{esc(w)}</li>" for w in warnings) + "</ul>") if warnings else ""
-    questions = data.get("open_questions") or []
-    questions_html = ("<p><strong>Open questions</strong></p><ul>" + "".join(f"<li>{esc(q)}</li>" for q in questions) + "</ul>"
-                      if questions else "")
-    return tree + warnings_html + questions_html
+    return tree + warnings_html
 
 
 # --- Record and run pages ------------------------------------------------------------------------

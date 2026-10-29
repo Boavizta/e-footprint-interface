@@ -125,8 +125,7 @@ def evaluate(data: dict, case: dict, export_path: Path | None) -> dict:
         "usage_patterns": len(spec.usage_patterns),
         "comments": sum(len(obj.comments) for section in (
             spec.servers, spec.genai_apis, spec.jobs, spec.usage_patterns, [st for jo in spec.journeys for st in jo.steps])
-            for obj in section),
-        "open_questions": len(spec.open_questions)}
+            for obj in section)}
     try:
         start = time.perf_counter()
         system, resolutions = build_system(spec)

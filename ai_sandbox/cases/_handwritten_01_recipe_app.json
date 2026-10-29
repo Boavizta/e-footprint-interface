@@ -32,6 +32,5 @@
      "country": "FRANCE", "volume": {"value": 50000, "per": "month"}},
     {"name": "Chef sessions", "journey": "Ask the chef", "device": "smartphone", "network": "mobile",
      "country": "FRANCE", "volume": {"value": 50000, "per": "month"}}
-  ],
-  "open_questions": ["How long does a typical browsing session last?"]
+  ]
 }
