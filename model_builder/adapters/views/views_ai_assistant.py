@@ -1,9 +1,12 @@
-"""Experimental AI assistant: builds the model from a free-text description (dev app only).
+"""Experimental AI assistant: builds the model from a free-text description, or edits it (dev app only).
 
-Runs the ai_sandbox stages in sequence (provider call, JSON parsing, DSL validation, system build) and loads
-the result through the same persistence step as the example loader. Any failure is rendered in the assistant
-box with the model left untouched. The route is always registered; the view 404s unless AI_ASSISTANT_ENABLED.
+On an empty model, runs the ai_sandbox stages in sequence (provider call, JSON parsing, DSL validation, system
+build) and loads the result through the same persistence step as the example loader. On a non-empty model, sends
+the model read back into the DSL with the request, applies the answer to the live model and persists once at the
+end. Any failure is rendered in the assistant box with the model left untouched. The route is always registered;
+the view 404s unless AI_ASSISTANT_ENABLED.
 """
+import json
 import sys
 
 from django.conf import settings
@@ -21,9 +24,12 @@ from model_builder.domain.services import is_empty_model
 sys.path.insert(0, str(settings.BASE_DIR / "ai_sandbox"))
 from catalogs import GENAI_PROVIDER_ALIASES, resolve_genai  # noqa: E402
 from dsl import build_system, parse_json, validate_tolerating_extras  # noqa: E402
+from edit import apply_edits, system_to_dsl  # noqa: E402
 from providers import DEFAULT_MODELS, MODELS, complete  # noqa: E402
 
-SYSTEM_PROMPT = (settings.BASE_DIR / "ai_sandbox" / "prompts" / "system_prompt.md").read_text()
+PROMPTS = settings.BASE_DIR / "ai_sandbox" / "prompts"
+SYSTEM_PROMPT = (PROMPTS / "system_prompt.md").read_text()
+EDIT_PROMPT = SYSTEM_PROMPT + "\n\n" + (PROMPTS / "edit_prompt.md").read_text()
 
 
 class AssistantError(Exception):
@@ -63,18 +69,26 @@ def ai_assistant(request):
     try:
         if model_web.has_edge_objects:
             raise AssistantError("This model contains edge objects, which the assistant does not handle yet.")
-        if not is_empty_model(model_web.system_data):
-            raise AssistantError("Editing is not available in this build.")
-        completion = complete(model, SYSTEM_PROMPT, prompt)
+        editing = not is_empty_model(model_web.system_data)
+        if editing:
+            current = json.dumps(system_to_dsl(model_web), indent=1)
+            completion = complete(model, EDIT_PROMPT, f"Current model:\n{current}\n\nRequest: {prompt}")
+        else:
+            completion = complete(model, SYSTEM_PROMPT, prompt)
         data, _, error = parse_json(completion.text)
         if data is None:
             raise AssistantError(f"The answer is not JSON: {error}")
-        spec, _ = validate_tolerating_extras(data)
-        system, _ = build_system(spec)
-        model_web = load_system_into_session(
-            repository, system_to_json(system, save_computed_state=False), workspace=workspace)
-        feedback["note"] = ("Values set from the description carry a comment; values the description "
-                            "does not state use library defaults.")
+        if editing:
+            feedback["applied"] = apply_edits(data, model_web)  # mutates the hydrated model, raises on the first problem
+            model_web.persist_to_cache()  # the only write of this path
+            feedback["note"] = data.get("note", "")
+        else:
+            spec, _ = validate_tolerating_extras(data)
+            system, _ = build_system(spec)
+            model_web = load_system_into_session(
+                repository, system_to_json(system, save_computed_state=False), workspace=workspace)
+            feedback["note"] = ("Values set from the description carry a comment; values the description "
+                                "does not state use library defaults.")
     except Exception as error:  # provider error, invalid JSON, schema, build, refusal: all shown as is
         feedback["error"] = str(error) if isinstance(error, AssistantError) else f"{type(error).__name__}: {error}"
         model_web = ModelWeb(repository)  # the system was not written on this path

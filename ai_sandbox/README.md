@@ -25,6 +25,12 @@ Nothing here is part of the Django application. Run outputs under `runs/` are gi
    *Open file* in the interface or the report's *Open in interface* link), reloads it to prove it round-trips, runs the
    structural checks, and writes one record per call. `report.py` turns a run dir into `summary.md` and `summary.html`.
 
+The interface's experimental assistant (`AI_ASSISTANT_ENABLED`, dev app only) imports this folder: on an empty model
+it runs the same stages and loads the built system; on a non-empty model `edit.py` reads the model back into the DSL
+(`system_to_dsl`), the request is sent with `prompts/edit_prompt.md` appended to the system prompt, and the answer's
+changed, added and removed objects are applied to the live model through the same builders and field tables
+(`apply_edits`), with the session persisted once at the end. Removals are the interface's delete use case.
+
 Stages recorded per call: JSON parse (first attempt vs repaired) → schema valid → build → compute → export.
 A failure at any stage is recorded with the error, never raised. When parse, schema, build or compute fails, the
 model is called again with its previous output and the error (`--retries`, default 1; export failures are ours and

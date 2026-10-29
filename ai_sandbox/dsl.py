@@ -189,8 +189,13 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
-    """Hourly volume from the DSL period."""
+SANDBOX_HORIZON = {"start_date": MODELING_START_DATE, "modeling_duration_value": MODELING_DURATION_YEARS,
+                   "modeling_duration_unit": "year"}
+
+
+def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None,
+                       horizon: dict = SANDBOX_HORIZON):
+    """Hourly volume from the DSL period, over the sandbox horizon unless an existing series' start and duration are given."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -199,9 +204,7 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comme
     elif per == "week":
         value, per = value / 7, "day"
     return ExplainableHourlyQuantitiesFromFormInputs({
-        "start_date": MODELING_START_DATE,
-        "modeling_duration_value": MODELING_DURATION_YEARS,
-        "modeling_duration_unit": "year",
+        **horizon,
         "initial_volume": value,
         "initial_volume_timespan": per,
         "net_growth_rate_in_percentage": growth_pct_per_year,
