@@ -29,7 +29,7 @@ from pydantic import ValidationError  # noqa: E402
 
 import providers  # noqa: E402
 import report  # noqa: E402
-from dsl import ModelSpec, build_system  # noqa: E402
+from dsl import ModelSpec, build_system, parse_json, validate_tolerating_extras  # noqa: E402
 
 SANDBOX = Path(__file__).parent
 CASES_DIR = SANDBOX / "cases"
@@ -37,37 +37,7 @@ RUNS_DIR = SANDBOX / "runs"
 SYSTEM_PROMPT = (SANDBOX / "prompts" / "system_prompt.md").read_text()
 
 
-# --- Parsing and checks ----------------------------------------------------------------------
-
-def parse_json(text: str) -> tuple[dict | None, bool, str | None]:
-    """Returns (data, first_attempt_ok, error). Repairs only by stripping a code fence or surrounding prose."""
-    try:
-        return json.loads(text), True, None
-    except json.JSONDecodeError as first_error:
-        match = re.search(r"\{.*\}", text, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group(0)), False, f"repaired: {first_error}"
-            except json.JSONDecodeError:
-                pass
-        return None, False, str(first_error)
-
-
-def validate_tolerating_extras(data: dict) -> tuple[ModelSpec, list[str]]:
-    """Strict validation, except that unknown fields are stripped and reported instead of failing the run."""
-    try:
-        return ModelSpec.model_validate(data), []
-    except ValidationError as error:
-        extras = [e["loc"] for e in error.errors() if e["type"] == "extra_forbidden"]
-        if not extras or len(extras) != len(error.errors()):
-            raise
-    for loc in extras:
-        node = data
-        for key in loc[:-1]:
-            node = node[key]
-        del node[loc[-1]]
-    return ModelSpec.model_validate(data), [".".join(str(k) for k in loc) for loc in extras]
-
+# --- Checks ----------------------------------------------------------------------------------
 
 def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
     results = {}

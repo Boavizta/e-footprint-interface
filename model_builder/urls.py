@@ -1,6 +1,7 @@
 from django.urls import path
 
 import model_builder.adapters.views.views_addition
+import model_builder.adapters.views.views_ai_assistant
 import model_builder.adapters.views.views_deletion
 import model_builder.adapters.views.views_dict_mutation
 import model_builder.adapters.views.views_list_mutation
@@ -37,6 +38,7 @@ urlpatterns = [
          name="open-example-picker"),
     path("load-example/<example_id>/", model_builder.adapters.views.views_onboarding.load_example,
          name="load-example"),
+    path("ai-assistant/", model_builder.adapters.views.views_ai_assistant.ai_assistant, name="ai-assistant"),
     path("reset-model/", views.reset_model, name="reset-model"),
     path("save-card-order/", views.save_card_order, name="save-card-order"),
     path("timeseries-preview/", model_builder.adapters.views.views_timeseries_preview.timeseries_preview,

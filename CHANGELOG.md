@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [V1.14.1]
 
+### Added
+- Experimental, dev-only AI assistant that builds or edits the model from a description, behind `AI_ASSISTANT_ENABLED`.
+
 ### Fixed
 - Correct cumulative chart precision (#146) and recurrent-need deletion refreshes (#151). Internally managed objects open read-only inspection panels and reject standalone edits or deletion; editable storage saves without rendering absent cards. Journey and component deletion names blocking references, and server responses remove deleted cards without console errors.
 - "Open a file" asks for confirmation before replacing a modeling that has content, naming the modeling or both modelings of a comparison.

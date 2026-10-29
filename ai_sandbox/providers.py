@@ -46,8 +46,9 @@ DEFAULT_EFFORT = {"zai-glm-5-3-flash": "low", "zai-glm-5-3": "low"}
 
 # The first full run (2026-10-28, 3 cases x 7 models x 2 reps) kept these two: Haiku for quality per dollar, Luna as
 # the cheap comparison point. Sonnet and Large 4 cost 10x for no structural gain, Medium and Small misread volumes.
-# The three open-weight models joined them on 2026-10-29 for a second comparison.
-DEFAULT_MODELS = ["claude-haiku-5-5", "gpt-6-luna", "zai-glm-5-3-flash", "deepseek-v4-1-flash-1017", "zai-glm-5-3"]
+# The three open-weight models joined them on 2026-10-29 for a second comparison; zai-glm-5-3-flash comes first
+# because the interface's AI assistant preselects the first model of this list.
+DEFAULT_MODELS = ["zai-glm-5-3-flash", "claude-haiku-5-5", "gpt-6-luna", "deepseek-v4-1-flash-1017", "zai-glm-5-3"]
 
 
 @dataclass

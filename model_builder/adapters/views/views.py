@@ -121,7 +121,7 @@ def compare_enabled(workspace_slots) -> bool:
     return all(validator.validate_for_computation(slot["model_web"]).is_valid for slot in workspace_slots)
 
 
-def render_model_builder(request, model_web, show_example_picker, workspace=None):
+def render_model_builder(request, model_web, show_example_picker, workspace=None, extra_context=None):
     """Render the builder canvas, optionally overlaying the first-run example picker.
 
     Renders the tab strip plus one resident canvas per workspace slot (active visible). When no
@@ -158,6 +158,7 @@ def render_model_builder(request, model_web, show_example_picker, workspace=None
                "tour_steps": build_tour_steps(is_blank=model_is_empty)}
     if show_example_picker:
         context["example_picker_groups"] = build_picker_groups()
+    context.update(extra_context or {})
 
     http_response = htmx_render(request, "model_builder/model_builder_main.html", context=context)
 
