@@ -270,7 +270,7 @@
 
 <main id="main">
   <header>
-    <p>Plan · under review · 2026-10-29 · refined from the kickoff draft for a one-day hackathon experiment</p>
+    <p>Plan · approved with tasks · 2026-10-29 · refined from the kickoff draft for a one-day hackathon experiment</p>
     <h1>AI assistant proof of concept — implementation plan</h1>
     <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/ai-assistant-poc/spec.html" data-review-source-href="spec.html">Approved spec</a> · <a href="#modules">Changed files</a></p>
     <p>Everything new that is not Django lives under <code>ai_sandbox/</code>, next to the harness it reuses; the
@@ -280,9 +280,10 @@
       2026-10-29), the sandbox packaging, the dependency move, the form-data translation of edits, the id field
       on DSL objects, null-resets and tolerance comparisons, and the URLconf gating.</p>
     <aside id="plan-updates" data-note="review">
-      <p><strong>Plan updates (spec changes proposed for review)</strong></p>
-      <p><a href="#plan-update-01">[PLAN-UPDATE-01] Edits are applied to the library model through the sandbox builders, not through the form use cases — PROPOSED</a></p>
-      <p><a href="#plan-update-02">[PLAN-UPDATE-02] No open questions in the generation feedback — PROPOSED</a></p>
+      <p><strong>Plan updates (spec changes, decided at the tasks stage on 2026-10-29)</strong></p>
+      <p><a href="#plan-update-01">[PLAN-UPDATE-01] Edits are applied to the library model through the sandbox builders, not through the form use cases — ACCEPTED</a></p>
+      <p><a href="#plan-update-02">[PLAN-UPDATE-02] No open questions in the generation feedback — ACCEPTED</a></p>
+      <p><a href="#plan-update-03">[PLAN-UPDATE-03] zai-glm-5-3-flash is the default model — ACCEPTED</a></p>
     </aside>
   </header>
 
@@ -385,6 +386,13 @@ def ai_assistant(request):
         A model whose key is absent renders as a disabled option. The provider keys are read from the process
         environment by the adapters as today; the sandbox's <code>load_dotenv</code> is not called from Django, the
         dev app sets its variables itself.</p>
+      <aside id="plan-update-03" data-note="review">
+        <p><strong>[PLAN-UPDATE-03] — ACCEPTED · zai-glm-5-3-flash is the default model</strong></p>
+        <p><em>Decision (user, 2026-10-29):</em> <code>zai-glm-5-3-flash</code> moves to the first position of
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:50:1" data-review-source-href="../../../ai_sandbox/providers.py#L50:1"><code>DEFAULT_MODELS</code></a>;
+          the select preselects the session's remembered model, otherwise the first model of the list whose key is
+          present. The sandbox CLI's default model order changes with it, which is harmless.</p>
+      </aside>
       <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:33:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L33:1"><code>model_builder_main.html</code></a>
         includes the component right after the <code>#panel-result-btn</code> block, inside <code>#model-builder-page</code>,
         under <code>{% if AI_ASSISTANT_ENABLED and not model_web.has_edge_objects %}</code>;
@@ -635,39 +643,18 @@ feedback["note"] = answer.get("note", "")</code></pre>
         value outside the DSL vocabulary and every source, confidence and comment the user set survive, which is
         success criterion 2.</p>
       <aside id="plan-update-01" data-note="review">
-        <p><strong>[PLAN-UPDATE-01] — PROPOSED · Edits are applied to the library model through the sandbox builders, not through the form use cases</strong></p>
-        <p><em>Spec clauses:</em> §1 "Edits go through the interface's own create, edit and delete paths, so hand-set
-          values survive an assistant edit" and §3 "applied as a set of edits to the current model through the same
-          paths a user's form submissions take". This is a spec change, not an implementation choice within scope.</p>
-        <p><em>Current:</em> each operation is translated into
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/create_object.py:48:1" data-review-source-href="../../../model_builder/application/use_cases/create_object.py#L48:1"><code>CreateObjectUseCase</code></a>
-          or
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/edit_object.py:63:1" data-review-source-href="../../../model_builder/application/use_cases/edit_object.py#L63:1"><code>EditObjectUseCase</code></a>
-          input with pre-parsed form data. <em>Proposed:</em> sets and adds go to the hydrated library objects through
-          the per-object builders and field tables of 1.1; only removals use the delete use case's internals.</p>
-        <p><em>Complexity removed:</em> the use-case route is a second DSL-to-library mapping next to the one
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:229:1" data-review-source-href="../../../ai_sandbox/dsl.py#L229:1"><code>build_system()</code></a>
-          already is, written in the parsed-form shapes
+        <p><strong>[PLAN-UPDATE-01] — ACCEPTED · Edits are applied to the library model through the sandbox builders, not through the form use cases</strong></p>
+        <p><em>Decision (2026-10-29):</em> sets and adds mutate the hydrated library objects through the per-object
+          builders and field tables of 1.1; only removals use the delete use case's internals
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:158:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L158:1"><code>_delete()</code></a>).
+          The spec's §1 and §3 clauses about "the interface's own create, edit and delete paths" are edited accordingly.</p>
+        <p><em>Rationale:</em> the use-case route would be a second DSL-to-library mapping written in the parsed-form shapes
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/object_factory.py:100:1" data-review-source-href="../../../model_builder/domain/object_factory.py#L100:1"><code>create_efootprint_obj_from_parsed_data()</code></a>
-          expects: <code>{"value", "unit"}</code> dicts for quantities, <code>{id: count}</code> dicts for weighted
-          relationships, the form-inputs dict for a timeseries, ids of default devices and countries for references,
-          plus the server's nested storage form data its <code>pre_create</code> hook reads. Each is a shape to learn
-          and test, with no sandbox precedent. And every use case persists immediately (<code>execute</code> →
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>
-          → <code>persist_to_cache</code>), so "nothing half-applied" would need a snapshot of the session payload
-          restored on failure.</p>
-        <p><em>User tradeoffs:</em> hand-set values, ids, sources, confidence and comments still survive, so success
-          criterion 2 holds. What is lost is the form path's metadata and conditional-choice repair in
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/object_factory.py:281:1" data-review-source-href="../../../model_builder/domain/object_factory.py#L281:1"><code>apply_input_edits()</code></a>:
-          a provider change is set together with the resolved instance type, and if the library refuses the pair
-          the request fails visibly. Assistant-set values carry the library's hypothesis source and the DSL
-          comment, as generated values do today. Architecturally an adapter mutates library objects directly,
-          bypassing the application layer; the code is confined to the deletable experiment and the library remains
-          the only validator.</p>
-        <p><em>Recommendation:</em> accept. <em>Uncertainties:</em> the weighted-dict rebuild and the paired
-          catalog update are confirmed in implementation; quantity sets, volume replacement, usage pattern append,
-          job unlink plus <code>self_delete</code> and the export round trip were exercised today on the handwritten
-          case.</p>
+          expects, and every use case persists immediately through
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>,
+          so "nothing half-applied" would need a session snapshot. Hand-set values, ids, sources, confidence and comments
+          still survive (success criterion 2); what is lost is the form path's conditional-choice repair, replaced by
+          setting a provider and its resolved instance type together and failing visibly if the library refuses the pair.</p>
       </aside>
       <aside id="plan-decision-edit-vs-regenerate" data-note>
         <p><strong>Considered and kept out: edit as a regeneration</strong></p>
@@ -709,20 +696,13 @@ feedback["note"] = answer.get("note", "")</code></pre>
         latency, input and output tokens, cost, then the prompt and the answer text. Nothing is stored anywhere else.
         The dev app's log retention is the day's record and the box says so.</p>
       <aside id="plan-update-02" data-note="review">
-        <p><strong>[PLAN-UPDATE-02] — PROPOSED · No open questions in the generation feedback</strong></p>
-        <p><em>Spec clauses:</em> §2 first criterion "and the assistant's open questions appear under the prompt
-          box"; §3 in scope "the assistant's open questions or its note about what it did"; the §4 mockup's
-          <code>fb-questions</code> line.</p>
-        <p><em>Evidence:</em> the sandbox working tree of 2026-10-29 (uncommitted) removes <code>open_questions</code>
-          from
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:105:1" data-review-source-href="../../../ai_sandbox/dsl.py#L105:1"><code>ModelSpec</code></a>,
-          from the prompt and from the handwritten case, and the README records why: clarification is a separate
-          step before generation, and the questions produced rarely targeted the dominant driver. Keeping the spec
-          clause would mean re-adding the field against that direction.</p>
-        <p><em>Proposed:</em> the generation feedback shows the metrics line, the fixed sentence about comments and
-          defaults, and the raw answer; nothing else. <em>Tradeoff:</em> testers get no prompt about what to refine
-          after a generation; the comments on values carry the assumptions instead. <em>Recommendation:</em> accept;
-          on acceptance the three spec passages are edited and the mockup line removed.</p>
+        <p><strong>[PLAN-UPDATE-02] — ACCEPTED · No open questions in the generation feedback</strong></p>
+        <p><em>Decision (2026-10-29):</em> the generation feedback shows the metrics line, the fixed sentence about comments
+          and defaults, and the raw answer; nothing else. The three spec passages and the mockup line are edited.</p>
+        <p><em>Rationale:</em> the sandbox removed <code>open_questions</code> from
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:105:1" data-review-source-href="../../../ai_sandbox/dsl.py#L105:1"><code>ModelSpec</code></a>
+          and from the prompt on 2026-10-29: clarification is a separate step before generation, and the questions
+          produced rarely targeted the dominant driver. The comments on generated values carry the assumptions instead.</p>
       </aside>
       <p><code>CHANGELOG.md</code> gets one line under
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>Unreleased</code></a>
@@ -743,7 +723,7 @@ feedback["note"] = answer.get("note", "")</code></pre>
       <li><strong>C · <code>system_to_dsl</code></strong>With the round-trip test 6. <small>Depends on B for the tables.</small></li>
       <li><strong>D · <code>apply_edits</code>, the addendum, the edit branch</strong>Test 2. <small>Depends on B and C. The cut line: if it overruns, A ships alone.</small></li>
       <li><strong>E · Ship</strong>Changelog line, README paragraph, the flag and the three keys on the dev app,
-        a browser smoke on both paths. <small>Check that the dev deployment installs the dev dependency group like the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/Dockerfile:61:1" data-review-source-href="../../../Dockerfile#L61:1"><code>Dockerfile</code></a> does; if not, an optional <code>ai</code> group for the three SDKs.</small></li>
+        a browser smoke on both paths. <small>Checked at the tasks stage: the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/Dockerfile:61:1" data-review-source-href="../../../Dockerfile#L61:1"><code>Dockerfile</code></a> runs a plain <code>poetry install</code>, the dev group is not optional and <code>.dockerignore</code> keeps <code>ai_sandbox/</code>, so no <code>ai</code> group is needed.</small></li>
     </ol>
     <h3>Verification map</h3>
     <div data-table-scroll>
@@ -768,9 +748,11 @@ feedback["note"] = answer.get("note", "")</code></pre>
   <section id="decisions">
     <h2>3. Decisions for review</h2>
     <ul>
-      <li><strong>Two spec changes are proposed</strong>, <a href="#plan-update-01">PLAN-UPDATE-01</a> and
-        <a href="#plan-update-02">PLAN-UPDATE-02</a>; the rest of the plan does not depend on them except the edit
-        mechanics of 1.4, which are provisional on 01.</li>
+      <li><strong>Three plan updates accepted at the tasks stage</strong>, <a href="#plan-update-01">PLAN-UPDATE-01</a>,
+        <a href="#plan-update-02">PLAN-UPDATE-02</a> and <a href="#plan-update-03">PLAN-UPDATE-03</a>; the spec was
+        edited to match. The task breakdown is in <a href="tasks.md">tasks.md</a>: task 1 is step A (plus the two moved
+        helpers and the changelog line), task 2 is steps B and C, task 3 is step D and the README paragraph; the dev-app
+        part of step E is a deployment gate.</li>
       <li><strong>No dependency change.</strong> The three SDKs stay in the dev group of
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/pyproject.toml" data-review-source-href="../../../pyproject.toml"><code>pyproject.toml</code></a>:
         the image runs plain <code>poetry install</code>, which includes that group, and pydantic and EcoLogits are
