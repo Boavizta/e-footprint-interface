@@ -1,7 +1,7 @@
 # AI sandbox: structure generation experiments
 
 Local experiment runner for the AI-assistance exploration described in
-[`specs/ai-assistance/README.md`](../specs/ai-assistance/README.md). It tests one facet only:
+[`specs/features/ai-assistance/README.md`](../specs/features/ai-assistance/README.md). It tests one facet only:
 **from a complete user description, can an LLM produce a useful e-footprint model structure, at what cost?**
 
 Scope is web modeling only (usage journeys, servers, GenAI APIs), as if the interface's edge toggle were off. Edge
