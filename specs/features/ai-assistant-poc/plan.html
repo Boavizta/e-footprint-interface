@@ -71,24 +71,26 @@
         <small>Imports the two helpers from <code>dsl</code>.</small></li>
       <li><code>ai_sandbox/to_dsl.py</code> <span data-change="new">New</span>
         <small><code>system_to_dsl(system) -&gt; dict</code>: the mirror of <code>build_system</code>, with library ids and value comments.</small></li>
-      <li><code>ai_sandbox/patching.py</code> <span data-change="new">New</span>
-        <small><code>apply_edits(dsl: dict, edits: list) -&gt; dict</code>: the three edit operations, validated against the DSL.</small></li>
+      <li><code>ai_sandbox/edits.py</code> <span data-change="new">New</span>
+        <small>The DSL field table (section, field → library attribute, unit) shared with the builder, the diff of returned objects against the current DSL, and the translation of each resulting operation into a create, edit or delete use-case input.</small></li>
       <li><code>ai_sandbox/impacts.py</code> <span data-change="new">New</span>
         <small><code>call_footprint_mg(model, completion) -&gt; float</code> over EcoLogits.</small></li>
       <li><code>ai_sandbox/prompts/edit_prompt.md</code> <span data-change="new">New</span>
-        <small>System prompt of the edit path: the DSL vocabulary, the edit operations, "change only what is asked".</small></li>
+        <small>System prompt of the edit path: the web DSL vocabulary, the changed-objects format, "change only what is asked".</small></li>
+      <li><code>ai_sandbox/prompts/web_system_prompt.md</code> <span data-change="new">New</span>
+        <small>The generation prompt without the edge paragraph, the edge DSL lines and their field notes; the sandbox keeps the full prompt for case 3.</small></li>
       <li><code>model_builder/adapters/views/views_ai_assistant.py</code> <span data-change="new">New</span>
-        <small>One POST view: branch on emptiness, call the assistant, load or keep the model, render the builder with the feedback.</small></li>
+        <small>One POST view: refuse a model with edge objects, branch on emptiness, call the assistant, load or keep the model, render the builder with the feedback.</small></li>
       <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:17:1" data-review-source-href="../../../model_builder/urls.py#L17:1"><code>model_builder/urls.py</code></a> <span data-change="modified">Modified</span>
         <small>Route <code>ai-assistant/</code>, appended only when the flag is on.</small></li>
       <li><code>model_builder/templates/model_builder/components/ai_assistant.html</code> <span data-change="new">New</span>
-        <small>The box: hint, textarea, button, feedback block. HTMX POST targeting <code>#main-content-block</code>.</small></li>
-      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L8:1"><code>model_builder/templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span>
-        <small>Includes the box under the toolbar when enabled.</small></li>
+        <small>The box: hint, logging notice, textarea, model select, button, feedback block with the collapsed raw answer. Fixed at the lower right above the results band. HTMX POST targeting <code>#main-content-block</code>.</small></li>
+      <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:34:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L34:1"><code>model_builder/templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span>
+        <small>Includes the box next to the results bar button when enabled.</small></li>
       <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:189:1" data-review-source-href="../../../e_footprint_interface/settings.py#L189:1"><code>e_footprint_interface/settings.py</code></a> <span data-change="modified">Modified</span>
-        <small><code>AI_ASSISTANT_ENABLED</code> and <code>AI_ASSISTANT_MODEL</code> from the environment.</small></li>
+        <small><code>AI_ASSISTANT_ENABLED</code> from the environment.</small></li>
       <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/pyproject.toml" data-review-source-href="../../../pyproject.toml"><code>pyproject.toml</code></a> <span data-change="modified">Modified</span>
-        <small><code>anthropic</code> and <code>pydantic</code> become runtime dependencies; <code>openai</code> and <code>mistralai</code> stay dev.</small></li>
+        <small><code>anthropic</code>, <code>openai</code>, <code>mistralai</code> and <code>pydantic</code> move from the dev group to runtime dependencies.</small></li>
       <li><code>tests/integration/test_ai_assistant_view.py</code> <span data-change="new">New</span>
         <small>Three tests with a fake <code>complete</code>.</small></li>
       <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span></li>
@@ -100,7 +102,12 @@
   <h2>1. Follow the interactions through the code</h2>
 
   <article id="shared">
-    <h3>1.1 · Shared: the sandbox becomes a package</h3>
+    <h3>1.1 · Shared: the sandbox becomes a package, web vocabulary only</h3>
+    <p>The interface uses the web subset of the DSL: <code>servers</code>, <code>genai_apis</code>,
+      <code>jobs</code>, <code>journeys</code> and <code>usage_patterns</code>. The generation prompt the view
+      sends is a copy of the sandbox prompt without its edge content; <code>system_to_dsl</code> and the edit
+      prompt cover the same five sections. The pydantic specs and <code>build_system</code> are unchanged, the
+      edge sections simply stay empty. The sandbox CLI keeps the full prompt so case 3 still runs there.</p>
     <p>An empty <code>ai_sandbox/__init__.py</code> lets the view import
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:324:1" data-review-source-href="../../../ai_sandbox/dsl.py#L324:1"><code>build_system()</code></a>,
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:148:1" data-review-source-href="../../../ai_sandbox/providers.py#L148:1"><code>complete()</code></a> and
@@ -109,16 +116,23 @@
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:40:1" data-review-source-href="../../../ai_sandbox/run.py#L40:1"><code>parse_json()</code></a> and
       <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:54:1" data-review-source-href="../../../ai_sandbox/run.py#L54:1"><code>validate_tolerating_extras()</code></a> move to
       <code>dsl.py</code> because both paths of the view need them.</p>
-    <p>The assistant model comes from <code>settings.AI_ASSISTANT_MODEL</code>, default
-      <code>claude-haiku-5-5</code>, which must be a key of
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:28:1" data-review-source-href="../../../ai_sandbox/providers.py#L28:1"><code>MODELS</code></a>. The provider key is read from the
-      environment by the adapter as today; <code>load_dotenv</code> is not called from Django.</p>
+    <p>The selectable models are
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:50:1" data-review-source-href="../../../ai_sandbox/providers.py#L50:1"><code>DEFAULT_MODELS</code></a>,
+      posted with the form as <code>model</code> and remembered in the session under one key so the select
+      reopens on the last choice; the first choice defaults to the first entry. A posted model outside the list
+      is rejected. A model whose provider key is absent from the environment is rendered disabled, using the
+      key check from <code>list_models()</code>. The price table is
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:28:1" data-review-source-href="../../../ai_sandbox/providers.py#L28:1"><code>MODELS</code></a>. The provider keys are read from the
+      environment by the adapters as today; <code>load_dotenv</code> is not called from Django.</p>
   </article>
 
   <article id="generate">
     <h3>1.2 · Empty model → generate</h3>
     <p>The view mirrors <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_onboarding.py:35:1" data-review-source-href="../../../model_builder/adapters/views/views_onboarding.py#L35:1"><code>load_example()</code></a>.
-      Emptiness is <code>not model_web.usage_patterns and not model_web.edge_usage_patterns</code> on the active slot
+      The view first refuses a model where
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:368:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L368:1"><code>ModelWeb.has_edge_objects</code></a>
+      is true, rendering the builder with the refusal as feedback. Emptiness is then
+      <code>not model_web.usage_patterns</code> on the active slot
       (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:442:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L442:1"><code>ModelWeb.usage_patterns</code></a>).
       Sequence:</p>
     <ol>
@@ -142,25 +156,51 @@
     <p><code>system_to_dsl(model_web.system)</code> produces the DSL dict the LLM reads, one object per
       library object the DSL covers, each with its library <code>id</code> and the field values the builder
       would have set, read back through the same unit conversions in reverse. Comments on those values come back
-      into <code>comments</code>. Objects or attributes outside the vocabulary are not represented; the
-      feedback copy says that hand-set values on such fields may be reset.</p>
-    <p>The edit prompt gives the DSL and the request and asks for:</p>
-<pre><code>{"edits": [
-   {"op": "set", "section": "usage_patterns", "id": "...", "field": "volume", "value": {"value": 5200000, "per": "month"}},
-   {"op": "add", "section": "jobs", "object": {"name": "Push notification", "server": "API server"}},
-   {"op": "remove", "section": "jobs", "id": "..."}],
+      into <code>comments</code>. The LLM answers with the objects it changes, each reduced to its <code>id</code>
+      and the fields that change, plus the ids it removes:</p>
+<pre><code>{"changed": {
+   "usage_patterns": [{"id": "...", "volume": {"value": 5200000, "per": "month"},
+                       "comments": {"volume": "Doubled as asked"}}],
+   "jobs": [{"name": "Push notification", "server": "API server", "data_transferred_kb": 2}]},
+ "removed": ["..."],
  "note": "one sentence on what was changed and what was assumed"}</code></pre>
-    <p><code>apply_edits</code> checks each edit: known section, known id for <code>set</code> and
-      <code>remove</code>, a field of that section's spec for <code>set</code>, and raises with the offending edit
-      otherwise. References inside objects stay by name, as in the DSL today; a removed object that is still
-      referenced fails at <code>build_system</code> with its existing error. The patched dict goes through
-      <code>validate_tolerating_extras</code> and <code>build_system</code>, then the same load and render as
-      the generate path. Ids are not preserved across the rebuild: the canvas re-renders fully anyway.</p>
+    <p>In a changed object an omitted field means unchanged, a present field is compared with the current DSL
+      value after normalization and with a tolerance and becomes a <code>set</code> only when it differs, and an
+      explicit <code>null</code> resets the field to the library default taken from the class's
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:184:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L184:1"><code>default_values</code></a>.
+      An object without an id is an add and is a normal DSL object, references by name. The format is the DSL
+      the model already writes reliably, with no operation names or paths; a one-field edit costs a three-line
+      object, and the model cannot alter a field it does not mention, which removes the drift of re-emitting
+      whole objects.</p>
+    <p>Each resulting operation is translated into the input of the interface's own use case and applied to the live model,
+      never by rebuilding it, so ids, sources, confidence, comments and every value outside the DSL vocabulary
+      survive:</p>
+    <ul>
+      <li><code>set</code> → <code>EditObjectUseCase</code> with pre-parsed form data for the one attribute: the
+        DSL field table gives the library attribute name and unit, the same table <code>build_system</code>
+        uses through <code>_opt</code>. Composite fields map to their form shape: <code>volume</code> and
+        <code>growth_pct_per_year</code> to the form-inputs timeseries, <code>cloud_provider</code> and
+        <code>instance_type</code> through <code>resolve_cloud_instance</code>, GenAI <code>provider</code> and
+        <code>model_name</code> through <code>resolve_genai</code>, <code>device</code>, <code>network</code> and
+        <code>country</code> to the id of the matching existing object or a new archetype.</li>
+      <li><code>add</code> → <code>CreateObjectUseCase</code> with the object type and the form data derived from the
+        DSL fragment, references resolved by name to existing ids, plus the parent the DSL implies (a job's
+        step, a step's journey, a journey's usage pattern).</li>
+      <li><code>remove</code> → <code>DeleteObjectUseCase</code> after <code>check_can_delete</code>; a blocked
+        delete fails the request with the use case's reason.</li>
+    </ul>
+    <p>Operations are validated up front (known section, known id, known field, a step for a new job) and then
+      applied in order on the session model; the first failure raises, the model is reloaded from the repository, and the error is
+      rendered. The exact form-data shape per object type is read from the use cases' integration tests during
+      <code>spec-plan</code>; that is the main unknown of this path.</p>
     <aside id="plan-decision-edits" data-note="review">
-      <p><strong>Edit operations instead of RFC 6902 JSON Patch</strong></p>
-      <p>Three named operations addressed by section and id are easier for the model to get right than
-        index-based paths over a list, and easier to validate and to echo in the feedback. The cost is a
-        30-line applier instead of a dependency.</p>
+      <p><strong>Edits through the use cases, not a rebuild from the patched DSL</strong></p>
+      <p>A rebuild was the 30-line option but reset every value outside the DSL vocabulary that the user had
+        set by hand, and every id. Going through the use cases costs the field table and the three
+        translations, about a day, and keeps the library and the interface as the only writers of the model.
+        The model returns changed objects rather than JSON Patch operations or a full re-output: the first
+        asks for a second grammar that small models get wrong, the second costs 10 to 15x the output tokens and
+        20 to 30 s per edit, against a product target of a cent per session.</p>
     </aside>
   </article>
 
@@ -171,17 +211,28 @@
       with the EcoLogits provider and model resolved by <code>resolve_genai</code> from the entry in
       <code>MODELS</code>; its <code>gwp.value</code> is in kg and is shown in mg. Only one call per request,
       so the line is computed in the view, no new persistence. The generate path lists the DSL's
-      <code>open_questions</code>; the edit path shows the <code>note</code> and the applied edits.</p>
+      <code>open_questions</code>; the edit path shows the <code>note</code> and the applied operations. The raw
+      answer text goes under a closed <code>details</code> block. The view also writes one
+      <code>logger.info</code> line per call with the prompt, the model, the answer, token counts and cost; the
+      dev app's log retention is the only storage.</p>
   </article>
 
   <article id="chrome">
     <h3>1.5 · The box</h3>
     <p>Included from
-      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:8:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L8:1"><code>model_builder_main.html</code></a>
-      right under the toolbar include, guarded by <code>settings.AI_ASSISTANT_ENABLED</code> exposed through the
-      existing context. A plain form with <code>hx-post</code>, <code>hx-target="#main-content-block"</code>,
-      <code>hx-disabled-elt="this"</code> and <code>hx-indicator</code> on the button. The hint, placeholder
-      and button label are chosen server-side from the emptiness flag. The feedback block renders from
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:34:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L34:1"><code>model_builder_main.html</code></a>
+      next to the results bar button include, positioned fixed at the lower right above the results band with
+      its own small style block. That style block also hides the box under <code>body.edge-modeling-on</code>,
+      the class
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/edge_modeling_toggle.js:1:1" data-review-source-href="../../../theme/static/scripts/edge_modeling_toggle.js#L1:1"><code>edge_modeling_toggle.js</code></a>
+      drives from the toggle and the latch, so switching edge modeling on hides it without a request. The include
+      itself is skipped when <code>model_web.has_edge_objects</code>, and guarded by <code>settings.AI_ASSISTANT_ENABLED</code> exposed through the
+      existing context. A plain form with <code>hx-post</code>, <code>hx-target="#main-content-block"</code>, the page's
+      existing <code>hx-disabled-elt</code> selector so every enabled button is disabled for the duration, as
+      the canvas container already does at
+      <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:20:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L20:1"><code>model_builder_main.html</code></a>,
+      <code>hx-indicator</code> on the button, and a <code>select</code> of the models next to it. The hint, placeholder and button label are chosen server-side from the
+      emptiness flag. The feedback block renders from
       <code>ai_feedback</code> when present.</p>
   </article>
 </section>
@@ -194,16 +245,17 @@
     <li>Generate path: view, route, template, feedback line. Deployable after this step.</li>
     <li><code>to_dsl.py</code> with a round-trip check on the handwritten smart-building case: build → to_dsl → build
       gives the same total footprint.</li>
-    <li>Edit path: prompt, <code>patching.py</code>, the branch in the view.</li>
+    <li>Edit path: prompt, the field table and <code>edits.py</code>, the branch in the view.</li>
     <li>Changelog, flag on in the dev app's environment with the key, smoke in a browser.</li>
   </ol>
   <h3>Verification map</h3>
   <table>
     <tr><th>Check</th><th>How</th></tr>
     <tr><td>Generate path loads a model and shows feedback</td><td>Integration test: fake <code>complete</code> returning the handwritten case JSON; assert session model name and feedback text in the response.</td></tr>
-    <tr><td>Edit path changes only what is asked</td><td>Integration test: load an example, fake <code>complete</code> returning one <code>set</code> edit; assert the value changed and another hand-set value survived.</td></tr>
+    <tr><td>Edit path changes only what is asked</td><td>Integration test: load an example, set a value outside the DSL vocabulary by hand, fake <code>complete</code> returning one changed object, one new object and one removed id; assert the three took effect, the hand-set value and the object ids survived.</td></tr>
     <tr><td>Failure leaves the model untouched</td><td>Integration test: fake <code>complete</code> returning prose; assert the session model is unchanged and the error text is rendered.</td></tr>
     <tr><td>to_dsl round trip</td><td>Unit test on the handwritten case, equality of totals.</td></tr>
+    <tr><td>A model with edge objects is refused</td><td>Integration test: load the IoT example, post a prompt; assert the refusal text and an unchanged session model. The client-side hide under the toggle is CSS and is not tested.</td></tr>
     <tr><td>Flag off hides everything</td><td>Covered by the existing suite running with the flag off; the route test from <code>test_load_local_file_view.py</code> is the pattern if one is wanted.</td></tr>
   </table>
   <p>Gates: <code>poetry run pytest tests --ignore=tests/e2e</code> and the dependency test on
@@ -218,12 +270,10 @@
       experiment is deleting a folder and one view. The view is the only Django-aware piece.</li>
     <li>The whole builder re-renders on every assistant response, success or failure, so there is a single
       HTMX target and no out-of-band swap to maintain.</li>
-    <li>Edits rebuild the system from the patched DSL instead of applying attribute writes through the use
-      cases. Simpler, and matches the generate path; the price is lost ids and lost non-DSL values, both
-      accepted in the spec.</li>
-    <li>Default model <code>claude-haiku-5-5</code>, the sandbox winner on quality per dollar. The three
-      open-weight models were added to the sandbox after the comparison and are untested at the time of
-      writing; switching is one environment variable.</li>
+    <li>Edits are applied through the create, edit and delete use cases; only the generate path builds a
+      system from scratch. See the callout in 1.3.</li>
+    <li>The model list is the sandbox's <code>DEFAULT_MODELS</code>, so the interface and the sandbox compare
+      the same set and a change in one place updates both. The first entry is the default.</li>
   </ul>
 </section>
 </main>
