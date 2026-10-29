@@ -15,8 +15,10 @@ from django.views.decorators.http import require_POST
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.logger import logger
 
+from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views.views import load_system_into_session, render_model_builder
+from model_builder.application.use_cases.simplified_inputs import persist_structural_change
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import is_empty_model
 
@@ -80,7 +82,7 @@ def ai_assistant(request):
             raise AssistantError(f"The answer is not JSON: {error}")
         if editing:
             feedback["applied"] = apply_edits(data, model_web)  # mutates the hydrated model, raises on the first problem
-            model_web.persist_to_cache()  # the only write of this path
+            persist_structural_change(model_web, input_catalog)  # the only write; prunes deleted simplified inputs
             feedback["note"] = data.get("note", "")
         else:
             spec, _ = validate_tolerating_extras(data)

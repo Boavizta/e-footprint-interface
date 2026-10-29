@@ -7,6 +7,8 @@ library validates every assignment and nothing is persisted here.
 """
 from __future__ import annotations
 
+from collections import Counter
+
 from efootprint.abstract_modeling_classes.explainable_object_dict import to_weighted_explainable_object_dict
 from efootprint.abstract_modeling_classes.modeling_update import ModelingUpdate
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
@@ -171,7 +173,8 @@ def apply_edits(answer: dict, model_web: ModelWeb) -> list[str]:
     """Applies the `changed` and `removed` sections of an edit answer to the live model; returns one line per change.
 
     Objects are matched by name within their section; a known name sets the listed fields, an unknown one is a
-    complete new object. Removals come last so a job re-listed and removed in one answer ends up removed. Any
+    complete new object. Steps and jobs a re-list leaves out are deleted once nothing uses them, as the form
+    path's cascade does. Removals come last so a job re-listed and removed in one answer ends up removed. Any
     problem raises before persistence, leaving the session's model as it was.
     """
     if not isinstance(answer, dict):
@@ -184,6 +187,9 @@ def apply_edits(answer: dict, model_web: ModelWeb) -> list[str]:
     for section in SECTIONS:  # dependency order: servers and APIs before jobs, jobs before steps, journeys before patterns
         for entry in changed.get(section) or []:
             edits.change(section, entry)
+    for section, obj in edits.dropped:  # after every re-list, so a job moved to another step survives
+        if not obj.modeling_obj_containers:
+            edits.remove(section, obj)
     for section in reversed(SECTIONS):  # referrers first: a pattern before its journey, a job before its server
         for name in removed.get(section) or []:
             edits.remove(section, edits.lookup(section, name))
@@ -198,6 +204,8 @@ class _Edits:
         self.system = model_web.system.modeling_obj
         self.objects = library_objects(self.system)
         self.lines: list[str] = []
+        self.dropped: list[tuple[str, object]] = []  # steps and jobs a re-list left out, deleted if then unused
+        self.removed_ids: set[str] = set()
         self.resolutions: list = []  # catalog resolutions of the builders, not shown in this experiment
         self.delete_use_case = DeleteObjectUseCase(model_web, input_catalog)
 
@@ -325,9 +333,7 @@ class _Edits:
         if list(new_steps) != current_steps:
             journey.uj_steps = to_weighted_explainable_object_dict(new_steps, weight_label=journey.weight_labels["uj_steps"])
             self.lines.append(f"set {journey.name}.steps to {', '.join(step.name for step in new_steps)}")
-            for step in current_steps:
-                if step not in new_steps:
-                    self.remove("steps", step)
+            self.dropped += [("steps", step) for step in current_steps if step not in new_steps]
 
     def _set_step(self, step, entry: dict, fields: dict):
         self._set_fields(step, entry, fields, STEP_FIELDS)
@@ -340,7 +346,11 @@ class _Edits:
                 raise ValueError(f"{job.name} runs {weight.value.magnitude} times per {step.name}; re-listing it is "
                                  f"{NOT_SUPPORTED}")
         if jobs != [job for job, weight in step.jobs.items() for _ in range(int(weight.value.magnitude))]:
-            step.jobs = to_weighted_explainable_object_dict(jobs, weight_label=step.weight_labels["jobs"])
+            current_weights = dict(step.jobs.items())
+            new_jobs = {job: current_weights[job] if job in current_weights and current_weights[job].value.magnitude == count
+                        else count for job, count in Counter(jobs).items()}  # an unchanged count keeps its weight
+            self.dropped += [("jobs", job) for job in current_weights if job not in new_jobs]
+            step.jobs = to_weighted_explainable_object_dict(new_jobs, weight_label=step.weight_labels["jobs"])
             self.lines.append(f"set {step.name}.jobs to {', '.join(job.name for job in jobs) or 'none'}")
         if fields:
             raise ValueError(f"Changing {step.name}.{', '.join(fields)} is {NOT_SUPPORTED}")
@@ -352,7 +362,8 @@ class _Edits:
         if volume is None and growth is None:
             return
         comments = entry.get("comments", {})
-        comment = " ".join(filter(None, (comments.get("volume"), comments.get("growth_pct_per_year")))) or None
+        volume_comment = comments.get("volume") if volume is not None else pattern.hourly_occurrences.comment
+        comment = " ".join(filter(None, (volume_comment, comments.get("growth_pct_per_year")))) or None
         volume_spec = VolumeSpec.model_validate(volume if volume is not None else current["volume"])
         pattern.hourly_occurrences = _volume_timeseries(
             volume_spec, current["growth_pct_per_year"] if growth is None else growth, comment,
@@ -374,13 +385,15 @@ class _Edits:
     # --- removals ---
 
     def remove(self, section: str, obj):
-        check = self.delete_use_case.check_can_delete(obj.id)
-        if not check.can_delete:
-            raise ValueError(
-                f"Cannot remove {KINDS[section]} {obj.name}: still used by {', '.join(check.blocking_containers)}")
-        self.delete_use_case._delete(DeleteObjectInput(obj.id))
-        if section in self.objects:
-            self.objects[section].remove(obj)
+        if obj.id in self.removed_ids:
+            return
+        if obj.id in self.model_web.flat_efootprint_objs_dict:  # else already deleted with its journey or step
+            check = self.delete_use_case.check_can_delete(obj.id)
+            if not check.can_delete:
+                raise ValueError(
+                    f"Cannot remove {KINDS[section]} {obj.name}: still used by {', '.join(check.blocking_containers)}")
+            self.delete_use_case._delete(DeleteObjectInput(obj.id))
+        self.removed_ids.add(obj.id)
         self.lines.append(f"removed {KINDS[section]} {obj.name}")
 
 

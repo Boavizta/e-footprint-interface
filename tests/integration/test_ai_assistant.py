@@ -13,7 +13,7 @@ from model_builder.adapters.views import views_ai_assistant
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 # importable once views_ai_assistant has put ai_sandbox on sys.path
 from dsl import build_system, validate_tolerating_extras
-from edit import system_to_dsl
+from edit import apply_edits, system_to_dsl
 from providers import Completion
 
 HANDWRITTEN_CASE = Path(django_settings.BASE_DIR) / "ai_sandbox" / "cases" / "_handwritten_01_recipe_app.json"
@@ -101,9 +101,11 @@ def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
     model_web = _generate_recipe_app(client, monkeypatch)
     system = model_web.system.modeling_obj
     _named(system.servers, "API server").lifespan = SourceValue(7 * u.year, comment="Hand-set, outside the DSL.")
+    photo_upload_id = _named(system.jobs, "Photo upload").id
+    model_web.repository.interface_config = {"simplified_inputs": {"fields": {
+        photo_upload_id: {"data_transferred": {"included": True, "help": ""}}}}}
     model_web.persist_to_cache()
     ids_before = set(model_web.flat_efootprint_objs_dict)
-    photo_upload_id = _named(system.jobs, "Photo upload").id
     calls = []
     monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(EDIT_ANSWER), calls))
 
@@ -125,6 +127,7 @@ def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
     lifespan = _named(system.servers, "API server").lifespan
     assert lifespan.value == 7 * u.year and lifespan.comment == "Hand-set, outside the DSL."
     assert ids_before - {photo_upload_id} <= set(edited.flat_efootprint_objs_dict)
+    assert edited.repository.interface_config["simplified_inputs"]["fields"] == {}  # the removed job's input is dropped
     assistant_box = response.content.decode().split('id="ai-assistant"')[1]
     assert "Doubled the browsing volume, added the push job" in assistant_box
     for line in ("set Browsing.volume to 5,200,000 per month", "added job Push notification on API server",
@@ -191,3 +194,25 @@ def test_reading_a_built_model_back_rebuilds_the_same_footprint():
     assert servers["Photo store"]["comments"] == {"storage_gb": "About 1 million dish photos of 2 MB each."}
     jobs = {j["name"]: j for j in read_back["jobs"]}
     assert jobs["Recipe thumbnails"]["comments"] == {"data_transferred_kb": "6 thumbnails of 80 kB per recipe page."}
+
+
+def test_a_re_list_deletes_only_the_children_nothing_else_uses():
+    spec, _ = validate_tolerating_extras(json.loads(HANDWRITTEN_CASE.read_text()))
+    system, _ = build_system(spec)
+    model_web = ModelWeb(InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False)))
+    system = model_web.system.modeling_obj
+    open_feed = _steps(system)["Open feed"]
+    _named(system.usage_journeys, "Upload dish photo").uj_steps[open_feed] = SourceValue(1 * u.dimensionless)
+    answer = {"changed": {"journeys": [
+        {"name": "Upload dish photo", "steps": [{"name": "Upload photo", "jobs": ["Photo upload", "Recipe query"]}]},
+        {"name": "Browse recipes", "steps": [{"name": "Open feed", "jobs": ["Recipe list"]}]}]},
+        "removed": {"usage_patterns": ["Chef sessions"], "journeys": ["Ask the chef"], "jobs": ["Chef answer"]}}
+
+    lines = apply_edits(answer, model_web)
+
+    journeys = {journey.name: [step.name for step in journey.uj_steps] for journey in system.usage_journeys}
+    assert journeys == {"Browse recipes": ["Open feed"], "Upload dish photo": ["Upload photo"]}
+    assert sorted(job.name for job in system.jobs) == ["Photo upload", "Recipe list", "Recipe query"]
+    assert "Recipe thumbnails" not in {obj.name for obj in model_web.flat_efootprint_objs_dict.values()}
+    assert lines[-4:] == ["removed job Recipe thumbnails", "removed usage pattern Chef sessions",
+                          "removed journey Ask the chef", "removed job Chef answer"]
