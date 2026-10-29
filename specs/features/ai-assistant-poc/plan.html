@@ -176,29 +176,34 @@
           <summary>ai_sandbox/</summary>
           <ul>
             <li id="file-dsl" data-steps="shared generate edit">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:229:1" data-review-source-href="../../../ai_sandbox/dsl.py#L229:1"><code>dsl.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:172:1" data-review-source-href="../../../ai_sandbox/dsl.py#L172:1"><code>dsl.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#shared">1.1</a> · <a href="#generate">1.3</a> · <a href="#edit">1.4</a></span>
               <small>Field tables per section; the loop bodies of <code>build_system</code> become one builder function per object kind; <code>parse_json</code> and <code>validate_tolerating_extras</code> move in from <code>run.py</code>. Same behavior for the CLI.</small>
             </li>
             <li id="file-run" data-steps="shared">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:42:1" data-review-source-href="../../../ai_sandbox/run.py#L42:1"><code>run.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:32:1" data-review-source-href="../../../ai_sandbox/run.py#L32:1"><code>run.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#shared">1.1</a></span>
               <small>Imports the two moved helpers from <code>dsl</code>.</small>
             </li>
             <li id="file-edit" data-steps="edit">
-              <code>edit.py</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:1:1" data-review-source-href="../../../ai_sandbox/edit.py#L1:1"><code>edit.py</code></a> <span data-change="new">New</span>
               <span data-reading-links><a href="#edit">1.4</a></span>
               <small><code>system_to_dsl()</code> reads the current model back into the DSL; <code>apply_edits()</code> applies the answer's changed, added and removed objects to the live library model.</small>
             </li>
             <li id="file-edit-prompt" data-steps="edit">
-              <code>prompts/edit_prompt.md</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/prompts/edit_prompt.md:1:1" data-review-source-href="../../../ai_sandbox/prompts/edit_prompt.md#L1:1"><code>prompts/edit_prompt.md</code></a> <span data-change="new">New</span>
               <span data-reading-links><a href="#edit">1.4</a></span>
               <small>Addendum appended to the generation prompt for edits: the current-model block, the changed-objects answer format, "change only what is asked".</small>
             </li>
             <li id="file-readme" data-steps="shared">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/README.md:97:1" data-review-source-href="../../../ai_sandbox/README.md#L97:1"><code>README.md</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/README.md:28:1" data-review-source-href="../../../ai_sandbox/README.md#L28:1"><code>README.md</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#shared">1.1</a></span>
               <small>One paragraph: the interface's flagged assistant imports this folder; the edit addendum and <code>edit.py</code>.</small>
+            </li>
+            <li id="file-providers" data-steps="box">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:51:1" data-review-source-href="../../../ai_sandbox/providers.py#L51:1"><code>providers.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#box">1.2</a></span>
+              <small><code>DEFAULT_MODELS</code>: <code>zai-glm-5-3-flash</code> first, preselected by the view (PLAN-UPDATE-03).</small>
             </li>
           </ul>
         </details>
@@ -206,7 +211,7 @@
           <summary>model_builder/</summary>
           <ul>
             <li id="file-view" data-steps="generate edit feedback">
-              <code>adapters/views/views_ai_assistant.py</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:1:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L1:1"><code>adapters/views/views_ai_assistant.py</code></a> <span data-change="new">New</span>
               <span data-reading-links><a href="#generate">1.3</a> · <a href="#edit">1.4</a> · <a href="#feedback">1.5</a></span>
               <small>The one POST view: flag check, edge refusal, generate or edit, feedback metrics, log line, builder re-render. Imports the sandbox the way <code>run.py</code> does.</small>
             </li>
@@ -216,24 +221,29 @@
               <small><code>render_model_builder</code> gains an optional <code>extra_context</code> argument so the feedback reaches the template.</small>
             </li>
             <li id="file-ctx" data-steps="box">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:5:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L5:1"><code>adapters/context_processors.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:18:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L18:1"><code>adapters/context_processors.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#box">1.2</a></span>
               <small>New <code>ai_assistant</code> processor: the flag and the selectable models with their key presence.</small>
             </li>
             <li id="file-urls" data-steps="generate">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:38:1" data-review-source-href="../../../model_builder/urls.py#L38:1"><code>urls.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:41:1" data-review-source-href="../../../model_builder/urls.py#L41:1"><code>urls.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#generate">1.3</a></span>
               <small>Route <code>ai-assistant/</code>, always registered; the view answers 404 when the flag is off.</small>
             </li>
             <li id="file-box" data-steps="box feedback">
-              <code>templates/model_builder/components/ai_assistant.html</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L1:1"><code>templates/model_builder/components/ai_assistant.html</code></a> <span data-change="new">New</span>
               <span data-reading-links><a href="#box">1.2</a> · <a href="#feedback">1.5</a></span>
-              <small>The box: hint, logging notice, textarea, model select, button, feedback block with the collapsed raw answer, own small style block.</small>
+              <small>The box: hint, logging notice, textarea, model select, button, feedback block with the collapsed raw answer, own small style block. Collapsible since b01c40ee (see 1.2).</small>
             </li>
             <li id="file-main" data-steps="box">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:33:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L33:1"><code>templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:37:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L37:1"><code>templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#box">1.2</a></span>
               <small>Includes the box after the results band when the flag is on and the model has no edge objects.</small>
+            </li>
+            <li id="file-object-web" data-steps="">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379:1"><code>domain/entities/web_abstract_modeling_classes/modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
+              <small>Skips detached contextual containers in the container properties.</small>
             </li>
           </ul>
         </details>
@@ -241,7 +251,7 @@
           <summary>e_footprint_interface/</summary>
           <ul>
             <li id="file-settings" data-steps="box">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:193:1" data-review-source-href="../../../e_footprint_interface/settings.py#L193:1"><code>settings.py</code></a> <span data-change="modified">Modified</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:198:1" data-review-source-href="../../../e_footprint_interface/settings.py#L198:1"><code>settings.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#box">1.2</a></span>
               <small><code>AI_ASSISTANT_ENABLED</code> from the environment, default off; the new context processor registered.</small>
             </li>
@@ -251,16 +261,31 @@
           <summary>tests/integration/</summary>
           <ul>
             <li id="file-tests" data-steps="generate edit feedback">
-              <code>test_ai_assistant.py</code> <span data-change="new">New</span>
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:1:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L1:1"><code>test_ai_assistant.py</code></a> <span data-change="new">New</span>
               <span data-reading-links><a href="#delivery">2</a></span>
-              <small>Five view tests with a fake <code>complete</code>, plus the <code>system_to_dsl</code> round trip.</small>
+              <small>Seven view tests with a fake <code>complete</code>, plus the <code>system_to_dsl</code> round trip and the echo and re-list rule tests.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>tests/unit_tests/</summary>
+          <ul>
+            <li id="file-unit-tests" data-steps="">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>application/use_cases/test_delete_object.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
+              <small>Regression: a referrer deleted in the same model does not block its server.</small>
+            </li>
+            <li id="file-views-deletion" data-steps="">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:72:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L72:1"><code>adapters/views/test_views_deletion.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
+              <small>Expected-failure marker of the bug-batch reproduction removed.</small>
             </li>
           </ul>
         </details>
         <ul>
           <li id="file-changelog" data-steps="feedback">
             <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
-            <small>Unreleased · Added: experimental, dev-only AI assistant behind <code>AI_ASSISTANT_ENABLED</code>.</small>
+            <small>Unreleased · Added: experimental, dev-only AI assistant behind <code>AI_ASSISTANT_ENABLED</code>. Fixed: the detached-container line of <a href="#impl-decision-02">IMPL-DECISION-02</a>.</small>
           </li>
         </ul>
       </details>
@@ -296,26 +321,27 @@
 
   <section id="walkthrough">
     <h2>1. Follow the interactions through the code</h2>
-    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to
+    <p data-reading-note>Implemented in <code>e7ade421..19b1ef3e</code> as planned, except where a passage or an IMPL-DECISION callout says otherwise. Paths are relative to
       <code>e-footprint-interface/</code>; library files are under <code>../e-footprint/</code>.</p>
 
     <article id="shared" data-step>
       <h3><a href="#shared">1.1 · Shared: DSL field tables and per-object builders</a></h3>
+      <p><span data-chip>Implemented as planned</span></p> <small>Routine differences (builder signatures, <code>_label</code>, the moved helpers) are reflected in the snippet and the prose below.</small>
       <p data-files><span>Files</span>
         <a href="#file-dsl"><code>ai_sandbox/dsl.py</code></a> ·
         <a href="#file-run"><code>ai_sandbox/run.py</code></a> ·
         <a href="#file-readme"><code>ai_sandbox/README.md</code></a></p>
       <p>Today the DSL-to-library mapping is written once, inline in
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:229:1" data-review-source-href="../../../ai_sandbox/dsl.py#L229:1"><code>build_system()</code></a>:
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:369:1" data-review-source-href="../../../ai_sandbox/dsl.py#L369:1"><code>build_system()</code></a>:
         each section loop calls
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:138:1" data-review-source-href="../../../ai_sandbox/dsl.py#L138:1"><code>_opt()</code></a>
+        <code>_opt()</code> (<em>removed by this refactor</em>)
         once per numeric field with the library attribute name and unit. The edit path of
         <a href="#edit">1.4</a> needs the same mapping twice more, to read a model back and to set one field, so the
         <code>_opt</code> arguments become tables and the loop bodies become functions. This is a pure refactor of
         the builder; the sandbox CLI and its <code>--dry-run</code> check keep working unchanged.</p>
       <div data-code>
         <p data-code-file><a href="#file-dsl"><code>ai_sandbox/dsl.py</code></a>
-          <small>Proposed: the tables replace the per-field <code>_opt</code> arguments</small></p>
+          <small>Implemented, abridged: the tables replace the per-field <code>_opt</code> arguments</small></p>
         <pre><code># DSL field -> (library attribute, unit). Read by the builders below and by edit.py.
 SERVER_FIELDS = {"carbon_intensity_g_per_kwh": ("average_carbon_intensity", u.g / u.kWh),
                  "gpus": ("compute", u.gpu)}            # gpu servers only
@@ -325,13 +351,14 @@ JOB_FIELDS = {"data_transferred_kb": ("data_transferred", u.kB), "data_stored_kb
               "cpu_cores": ("compute_needed", u.cpu_core), "gpus": ("compute_needed", u.gpu),
               "output_tokens": ("output_token_count", u.dimensionless)}
 STEP_FIELDS = {"user_time_spent_min": ("user_time_spent", u.min)}
+SERVER_JOB_FIELDS = ("data_transferred_kb", "data_stored_kb", "request_duration_s", "ram_mb")  # + cpu_cores or gpus
 
-def build_server(s: ServerSpec, shared: _Shared, resolutions) -> ServerBase: ...
-def build_genai_api(a: GenAIApiSpec, resolutions) -> EcoLogitsGenAIExternalAPI: ...
-def build_job(j: JobSpec, servers: dict, apis: dict, resolutions) -> JobBase: ...
-def build_step(st: StepSpec, jobs: dict, resolutions) -> UsageJourneyStep: ...
-def build_journey(jo: JourneySpec, jobs: dict, resolutions) -> UsageJourney: ...
-def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, resolutions) -> UsagePattern: ...
+def build_server(s: ServerSpec, resolutions: list[Resolution]) -> ServerBase: ...
+def build_genai_api(a: GenAIApiSpec, resolutions: list[Resolution]) -> EcoLogitsGenAIExternalAPI: ...
+def build_job(j: JobSpec, servers: dict, apis: dict, resolutions: list[Resolution]) -> JobBase: ...
+def build_step(st: StepSpec, jobs: dict, resolutions: list[Resolution]) -> UsageJourneyStep: ...
+def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) -> UsageJourney: ...
+def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, resolutions: list[Resolution]) -> UsagePattern: ...
 
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     # the existing loops, each body now a call to the builder of that kind</code></pre>
@@ -345,14 +372,14 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
         as today, and 1.4 reuses those calls. Each builder takes name-to-object lookups (<code>servers</code>,
         <code>apis</code>, <code>jobs</code>, <code>journeys</code>) instead of reading the dicts
         <code>build_system</code> accumulates, which is what lets 1.4 hand them the current model's objects.
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:174:1" data-review-source-href="../../../ai_sandbox/dsl.py#L174:1"><code>_Shared</code></a>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:239:1" data-review-source-href="../../../ai_sandbox/dsl.py#L239:1"><code>_Shared</code></a>
         gains the possibility to be seeded with existing devices, networks and countries so an edit does not add a
         second "Default smartphone".</p>
-      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:42:1" data-review-source-href="../../../ai_sandbox/run.py#L42:1"><code>parse_json()</code></a>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:117:1" data-review-source-href="../../../ai_sandbox/dsl.py#L117:1"><code>parse_json()</code></a>
         and
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:56:1" data-review-source-href="../../../ai_sandbox/run.py#L56:1"><code>validate_tolerating_extras()</code></a>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:131:1" data-review-source-href="../../../ai_sandbox/dsl.py#L131:1"><code>validate_tolerating_extras()</code></a>
         move to <code>dsl.py</code> because the view needs them and should not import the CLI module; <code>run.py</code>
-        imports them back. The sandbox stays a folder of top-level modules: the view inserts the folder on
+        imports them back. The sandbox stays a folder of top-level modules: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:26:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L26:1">the view</a> inserts the folder on
         <code>sys.path</code> exactly as
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/run.py:26:1" data-review-source-href="../../../ai_sandbox/run.py#L26:1"><code>run.py</code></a>
         does and imports <code>dsl</code>, <code>providers</code>, <code>catalogs</code> and <code>edit</code> by
@@ -362,32 +389,34 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
 
     <article id="box" data-step>
       <h3><a href="#box">1.2 · Opening the builder: the box</a></h3>
+      <p><span data-chip="review">Delivered as planned; changed after the range by b01c40ee, supervisor decision needed</span></p> <small>Pending: the bottom offset is tuned in the dev-app browser smoke (deployment gate in tasks.md).</small>
       <p data-files><span>Files</span>
         <a href="#file-settings"><code>e_footprint_interface/settings.py</code></a> ·
         <a href="#file-ctx"><code>model_builder/adapters/context_processors.py</code></a> ·
         <a href="#file-main"><code>model_builder_main.html</code></a> ·
         <a href="#file-box"><code>components/ai_assistant.html</code></a></p>
-      <p><code>settings.py</code> reads <code>AI_ASSISTANT_ENABLED = env.bool("AI_ASSISTANT_ENABLED", default=False)</code>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:198:1" data-review-source-href="../../../e_footprint_interface/settings.py#L198:1"><code>settings.py</code></a> reads <code>AI_ASSISTANT_ENABLED = env.bool("AI_ASSISTANT_ENABLED", default=False)</code>
         next to
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:193:1" data-review-source-href="../../../e_footprint_interface/settings.py#L193:1"><code>EDGE_MODELING_DOC_URL</code></a>.
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:194:1" data-review-source-href="../../../e_footprint_interface/settings.py#L194:1"><code>EDGE_MODELING_DOC_URL</code></a>.
         Templates do not see settings, so a second context processor beside
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:5:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L5:1"><code>edge_modeling_doc_url()</code></a>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:7:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L7:1"><code>edge_modeling_doc_url()</code></a>
         exposes the flag and the selectable models:</p>
       <div data-code>
         <p data-code-file><a href="#file-ctx"><code>model_builder/adapters/context_processors.py</code></a>
-          <small>Proposed</small></p>
-        <pre><code>KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "mistral": "MISTRAL_API_KEY"}
+          <small>Implemented, abridged: the default model of PLAN-UPDATE-03 is added</small></p>
+        <pre><code>AI_ASSISTANT_KEY_ENV = {"anthropic": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY", "mistral": "MISTRAL_API_KEY"}
 
 def ai_assistant(request):
     del request
     if not settings.AI_ASSISTANT_ENABLED:
         return {"AI_ASSISTANT_ENABLED": False}
     from model_builder.adapters.views.views_ai_assistant import DEFAULT_MODELS, MODELS
-    return {"AI_ASSISTANT_ENABLED": True,
-            "AI_ASSISTANT_MODELS": [(name, bool(os.environ.get(KEY_ENV[MODELS[name][0]]))) for name in DEFAULT_MODELS]}</code></pre>
+    models = [(name, bool(os.environ.get(AI_ASSISTANT_KEY_ENV[MODELS[name][0]]))) for name in DEFAULT_MODELS]
+    default_model = next((name for name, available in models if available), DEFAULT_MODELS[0])
+    return {"AI_ASSISTANT_ENABLED": True, "AI_ASSISTANT_MODELS": models, "AI_ASSISTANT_DEFAULT_MODEL": default_model}</code></pre>
       </div>
       <p>The model list is
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:50:1" data-review-source-href="../../../ai_sandbox/providers.py#L50:1"><code>DEFAULT_MODELS</code></a>,
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:51:1" data-review-source-href="../../../ai_sandbox/providers.py#L51:1"><code>DEFAULT_MODELS</code></a>,
         the provider of each comes from
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:28:1" data-review-source-href="../../../ai_sandbox/providers.py#L28:1"><code>MODELS</code></a>.
         A model whose key is absent renders as a disabled option. The provider keys are read from the process
@@ -395,19 +424,19 @@ def ai_assistant(request):
         dev app sets its variables itself.</p>
       <aside id="plan-update-03" data-note="review">
         <p><strong>[PLAN-UPDATE-03] — ACCEPTED · zai-glm-5-3-flash is the default model</strong></p>
-        <p><em>Decision (user, 2026-10-29):</em> <code>zai-glm-5-3-flash</code> moves to the first position of
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:50:1" data-review-source-href="../../../ai_sandbox/providers.py#L50:1"><code>DEFAULT_MODELS</code></a>;
-          the select preselects the session's remembered model, otherwise the first model of the list whose key is
-          present. The sandbox CLI's default model order changes with it, which is harmless.</p>
+        <p><em>Decision (user, 2026-10-29):</em> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:39:1" data-review-source-href="../../../ai_sandbox/providers.py#L39:1"><code>zai-glm-5-3-flash</code></a> moves to the first position of
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:51:1" data-review-source-href="../../../ai_sandbox/providers.py#L51:1"><code>DEFAULT_MODELS</code></a>;
+          the select preselects the session's remembered model, otherwise <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:25:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L25:1">the first model of the list whose key is
+          present</a>. The sandbox CLI's default model order changes with it, which is harmless.</p>
       </aside>
-      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:33:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L33:1"><code>model_builder_main.html</code></a>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:37:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L37:1"><code>model_builder_main.html</code></a>
         includes the component right after the <code>#panel-result-btn</code> block, inside <code>#model-builder-page</code>,
         under <code>{% if AI_ASSISTANT_ENABLED and not model_web.has_edge_objects %}</code>;
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:368:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L368:1"><code>ModelWeb.has_edge_objects</code></a>
         is the property the edge latch already uses. The component is one form plus a style block:</p>
       <div data-code>
         <p data-code-file><a href="#file-box"><code>model_builder/templates/model_builder/components/ai_assistant.html</code></a>
-          <small>Proposed, copy from the spec mockup</small></p>
+          <small>Delivered version, abridged: the copy, a max-width rule and the details wrapper differ from the mockup</small></p>
         <pre><code>&lt;style&gt;
   #ai-assistant { position: absolute; right: 1rem; bottom: 4.5rem; width: 26rem; z-index: 3; }
   body.edge-modeling-on #ai-assistant { display: none; }
@@ -432,6 +461,7 @@ def ai_assistant(request):
   {% if ai_feedback %} … see 1.5 … {% endif %}
 &lt;/form&gt;</code></pre>
       </div>
+      <p><strong>After the range (b01c40ee).</strong> The box is now a <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L13:1">collapsible <code>details</code></a> open by default, its form has id <code>ai-assistant-form</code>, and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L9:1">the style rule also hides it</a> in the simplified-inputs view and while the results panel is open. The snippet above shows the delivered version. No IMPL-DECISION records this change, so it is left for the supervisor.</p>
       <p>The style block is in the component rather than in <code>custom.scss</code> so the experiment needs no SCSS
         rebuild and leaves no rule behind when deleted. <code>body.edge-modeling-on</code> is the class
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/edge_modeling_toggle.js:16:1" data-review-source-href="../../../theme/static/scripts/edge_modeling_toggle.js#L16:1"><code>applyEdgeModelingState()</code></a>
@@ -442,9 +472,9 @@ def ai_assistant(request):
         the canvas already uses at
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:20:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L20:1"><code>model_builder_main.html</code></a>,
         so every button on the page is disabled for the duration of the call; there is no other progress
-        indication, as the spec scopes. The hint, placeholder and button label switch on <code>model_is_empty</code>,
+        indication, as the spec scopes. The hint, placeholder and button label switch on <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:148:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L148:1"><code>model_is_empty</code></a>,
         which
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:148:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L148:1"><code>render_model_builder()</code></a>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:124:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L124:1"><code>render_model_builder()</code></a>
         already puts in the context. The remembered model is read straight from
         <code>request.session.ai_assistant_model</code> through the request context processor; the view writes it
         (1.3). The bottom offset is tuned in the browser against the results band; the number above is a guess.</p>
@@ -452,13 +482,14 @@ def ai_assistant(request):
 
     <article id="generate" data-step>
       <h3><a href="#generate">1.3 · Submit on an empty model: generate</a></h3>
+      <p><span data-chip>Implemented as planned</span></p>
       <p data-files><span>Files</span>
         <a href="#file-view"><code>views_ai_assistant.py</code></a> ·
         <a href="#file-urls"><code>model_builder/urls.py</code></a> ·
         <a href="#file-views"><code>views.py</code></a> ·
         <a href="#file-dsl"><code>ai_sandbox/dsl.py</code></a></p>
       <p>The form posts to <code>ai-assistant/</code>, registered in
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:38:1" data-review-source-href="../../../model_builder/urls.py#L38:1"><code>urls.py</code></a>
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:41:1" data-review-source-href="../../../model_builder/urls.py#L41:1"><code>urls.py</code></a>
         next to <code>load-example</code>. The route is always present; the view raises <code>Http404</code> when the
         flag is off, which is what a client observes either way and spares the tests the URLconf reload that
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_load_local_file_view.py:34:1" data-review-source-href="../../../tests/integration/test_load_local_file_view.py#L34:1"><code>debug_urls</code></a>
@@ -466,7 +497,7 @@ def ai_assistant(request):
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_onboarding.py:35:1" data-review-source-href="../../../model_builder/adapters/views/views_onboarding.py#L35:1"><code>load_example()</code></a>:</p>
       <div data-code>
         <p data-code-file><a href="#file-view"><code>model_builder/adapters/views/views_ai_assistant.py</code></a>
-          <small>Proposed</small></p>
+          <small>Implemented, abridged: the <code>else</code> branch is 1.4, the feedback is 1.5</small></p>
         <pre><code>sys.path.insert(0, str(settings.BASE_DIR / "ai_sandbox"))   # same trick as ai_sandbox/run.py
 from dsl import build_system, parse_json, validate_tolerating_extras
 from providers import DEFAULT_MODELS, MODELS, complete
@@ -520,7 +551,7 @@ def ai_assistant(request):
                                 extra_context={"ai_feedback": feedback})</code></pre>
       </div>
       <p>Server processing follows the sandbox stages: <code>complete</code>
-        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:148:1" data-review-source-href="../../../ai_sandbox/providers.py#L148:1"><code>providers.complete()</code></a>,
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:149:1" data-review-source-href="../../../ai_sandbox/providers.py#L149:1"><code>providers.complete()</code></a>,
         one call, no retry), <code>parse_json</code>, <code>validate_tolerating_extras</code>,
         <code>build_system</code>, then
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/api_utils/system_to_json.py:225:1" data-review-source-href="../../../../e-footprint/efootprint/api_utils/system_to_json.py#L225:1"><code>system_to_json()</code></a>
@@ -535,12 +566,13 @@ def ai_assistant(request):
         the app's own definition, which <code>render_model_builder</code> also uses for the copy of 1.2.</p>
       <p>Rendering: the whole builder re-renders into <code>#main-content-block</code>, success or failure, through
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:124:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L124:1"><code>render_model_builder()</code></a>,
-        which gains <code>extra_context=None</code> merged into its context dict (two lines). One HTMX target, no
+        which gains <code>extra_context=None</code> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:161:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L161:1">merged into its context dict</a> (two lines). One HTMX target, no
         out-of-band swap, the box re-renders with the feedback because it is part of the page.</p>
     </article>
 
     <article id="edit" data-step>
       <h3><a href="#edit">1.4 · Submit on a non-empty model: edit</a></h3>
+      <p><span data-chip="review">Implemented with IMPL-DECISION-01 to 04; the rename rule needs supervisor resolution</span></p>
       <p data-files><span>Files</span>
         <a href="#file-edit"><code>ai_sandbox/edit.py</code></a> ·
         <a href="#file-edit-prompt"><code>ai_sandbox/prompts/edit_prompt.md</code></a> ·
@@ -550,17 +582,17 @@ def ai_assistant(request):
         applies the answer to the live model and persists once:</p>
       <div data-code>
         <p data-code-file><a href="#file-view"><code>model_builder/adapters/views/views_ai_assistant.py</code></a>
-          <small>Proposed, the <code>else</code> branch of 1.3</small></p>
-        <pre><code>current = system_to_dsl(model_web)
-completion = complete(model, EDIT_PROMPT, f"Current model:\n{json.dumps(current, indent=1)}\n\nRequest: {prompt}")
-answer, _, error = parse_json(completion.text)
-if answer is None:
+          <small>Implemented, abridged: the <code>else</code> branch of 1.3</small></p>
+        <pre><code>current = json.dumps(system_to_dsl(model_web), indent=1)
+completion = complete(model, EDIT_PROMPT, f"Current model:\n{current}\n\nRequest: {prompt}")
+data, _, error = parse_json(completion.text)
+if data is None:
     raise AssistantError(f"The answer is not JSON: {error}")
-feedback["applied"] = apply_edits(answer, model_web)   # mutates the in-memory model, raises on the first problem
-persist_structural_change(model_web, input_catalog)    # the only write of this path (IMPL-DECISION-03)
-feedback["note"] = answer.get("note", "")</code></pre>
+feedback["applied"] = apply_edits(data, model_web)   # mutates the in-memory model, raises on the first problem
+persist_structural_change(model_web, input_catalog)  # the only write of this path (IMPL-DECISION-03)
+feedback["note"] = data.get("note", "")</code></pre>
       </div>
-      <p><strong>Reading the model back.</strong> <code>system_to_dsl(model_web)</code> in <code>edit.py</code> is the
+      <p><strong>Reading the model back.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:49:1" data-review-source-href="../../../ai_sandbox/edit.py#L49:1"><code>system_to_dsl(model_web)</code></a> in <code>edit.py</code> is the
         mirror of the builders: servers from
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:360:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L360:1"><code>ModelWeb.servers</code></a>
         (<code>cloud_provider</code>/<code>instance_type</code> for a Boavizta server, <code>kind: "gpu"</code> and
@@ -581,18 +613,18 @@ feedback["note"] = answer.get("note", "")</code></pre>
         <p><strong>[IMPL-DECISION-01] — APPLIED</strong> · newly discovered pre-existing library behavior, task 2 review</p>
         <p>The plan and the task 2 brief prescribed <code>value.to(unit).magnitude</code> for the read-back. In
           efootprint 27.0.0 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:67:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L67:1"><code>ExplainableQuantity.to()</code></a>
-          converts <em>in place</em> (<code>self.value = self.value.to(...)</code>, returns <code>self</code>), so
+          converts <em>in place</em> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:68:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L68:1"><code>self.value = self.value.to(...)</code></a>, returns <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:70:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L70:1"><code>self</code></a>), so
           reading the model back changed the live objects' units: the handwritten case's API server storage went from
-          TB to GB, the chatbot and IoT examples' <code>request_duration</code> from ms to s, the video and IoT
-          examples' <code>data_transferred</code> from MB to kB. Footprints were unchanged, but task 3 reads the model
+          TB to GB, the chatbot and IoT examples' <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/usage/job.py:126:1" data-review-source-href="../../../../e-footprint/efootprint/core/usage/job.py#L126:1"><code>request_duration</code></a> from ms to s, the video and IoT
+          examples' <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/core/usage/job.py:125:1" data-review-source-href="../../../../e-footprint/efootprint/core/usage/job.py#L125:1"><code>data_transferred</code></a> from MB to kB. Footprints were unchanged, but task 3 reads the model
           back before every edit and persists at the end, so each successful assistant edit would have silently saved
           the user's display units converted.</p>
-        <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:50:1" data-review-source-href="../../../ai_sandbox/edit.py#L50:1"><code>_read_fields()</code></a> now converts the
-          underlying pint quantity (<code>value.value.to(unit).magnitude</code>) and leaves the
-          <code>ExplainableQuantity</code> alone. The round-trip test
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:94:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L94:1"><code>test_reading_a_built_model_back_rebuilds_the_same_footprint</code></a>
-          asserts the exported model is identical before and after <code>system_to_dsl</code>; it failed before the
-          fix. Rule carried into task 3: never read a live value through <code>ExplainableQuantity.to()</code>.</p>
+        <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:63:1" data-review-source-href="../../../ai_sandbox/edit.py#L63:1"><code>_read_fields()</code></a> now converts the
+          underlying pint quantity (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:68:1" data-review-source-href="../../../ai_sandbox/edit.py#L68:1"><code>value.value.to(unit).magnitude</code></a>) and leaves the
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:14:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L14:1"><code>ExplainableQuantity</code></a> alone. The round-trip test
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:214:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L214:1"><code>test_reading_a_built_model_back_rebuilds_the_same_footprint</code></a>
+          asserts the exported model is identical before and after <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:49:1" data-review-source-href="../../../ai_sandbox/edit.py#L49:1"><code>system_to_dsl</code></a>; it failed before the
+          fix. Rule carried into task 3: never read a live value through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:67:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L67:1"><code>ExplainableQuantity.to()</code></a>.</p>
       </aside>
       <p><strong>The answer.</strong> The addendum <code>edit_prompt.md</code> is appended to the generation prompt, so
         the vocabulary is taught once. It asks for the objects that change, each reduced to its name and the
@@ -609,44 +641,43 @@ feedback["note"] = answer.get("note", "")</code></pre>
  "removed": {"jobs": ["Photo upload"]},
  "note": "one sentence on what was changed and what was assumed"}</code></pre>
       </div>
-      <p>Rules the prompt states and <code>apply_edits</code> enforces: an object is matched by name within its section
+      <p>Rules the prompt states and <code>apply_edits</code> enforces: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:220:1" data-review-source-href="../../../ai_sandbox/edit.py#L220:1">matched by name within its section</a>
         (two objects with the same name in a section fail the request, naming them); a known name with fields is a
         set of those fields, an omitted field is unchanged; an unknown name is a new object and must be complete, it
-        is validated with the section's existing pydantic class (<code>JobSpec.model_validate</code> and so on); a
+        is validated with the section's existing pydantic class (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:64:1" data-review-source-href="../../../ai_sandbox/dsl.py#L64:1"><code>JobSpec.model_validate</code></a> and so on); a
         journey's <code>steps</code> and a step's <code>jobs</code> re-list all their children, new steps as full
         objects, jobs by name only since jobs are top level. No ids: names are what the DSL already uses for every
         reference and what the sandbox showed small models copy reliably, and dropping the id keeps the pydantic
         specs unchanged. No null-reset and no tolerance comparison: a present field is set, except that a field echoed with
         its read-back value and no new comment is ignored, and a child left out of a re-list is deleted once nothing
         uses it (<a href="#impl-decision-04">IMPL-DECISION-04</a>).</p>
-      <p><strong>Applying.</strong> <code>apply_edits(answer, model_web)</code> builds the name lookups from the same
-        walk as <code>system_to_dsl</code>, then works in order: new servers and APIs, new jobs, changed and new
-        journeys and steps, new usage patterns, sets, removals. Everything mutates the hydrated library model
+      <p><strong>Applying.</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:177:1" data-review-source-href="../../../ai_sandbox/edit.py#L177:1"><code>apply_edits(answer, model_web)</code></a> builds the name lookups from the same
+        walk as <code>system_to_dsl</code>, then works in order: the changed sections in dependency order (servers, APIs, jobs, journeys with their steps, usage patterns; each entry is added or set in place), the dropped-children cleanup, then the removals in reverse order. Everything mutates the hydrated library model
         behind <code>model_web</code>; the library recomputes and validates on each assignment through
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:602:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L602:1"><code>ModelingObject.__setattr__</code></a>.</p>
       <ul>
-        <li><em>Set a table field</em>: <code>setattr(obj, attr, SourceValue(value * unit, comment=comments.get(field)))</code>.
+        <li><em>Set a table field</em>: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:390:1" data-review-source-href="../../../ai_sandbox/edit.py#L390:1"><code>setattr(obj, attr, SourceValue(value * unit, comment=comments.get(field)))</code></a>.
           Verified today on the handwritten case: setting a job's data transferred recomputed the total.</li>
-        <li><em>Set volume or growth</em>: <code>up.hourly_occurrences = _volume_timeseries(VolumeSpec, growth, comment)</code>
+        <li><em>Set volume or growth</em>: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:376:1" data-review-source-href="../../../ai_sandbox/edit.py#L376:1"><code>pattern.hourly_occurrences = _volume_timeseries(volume_spec, growth, comment, horizon=...)</code></a>
           with
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:144:1" data-review-source-href="../../../ai_sandbox/dsl.py#L144:1"><code>_volume_timeseries()</code></a>;
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:196:1" data-review-source-href="../../../ai_sandbox/dsl.py#L196:1"><code>_volume_timeseries()</code></a>;
           the half the answer omits is read from the current <code>form_inputs</code>, or growth 0 when the current
-          series is not a form one. Verified today.</li>
+          series is not a form one. The horizon keeps the current start date and duration (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:436:1" data-review-source-href="../../../ai_sandbox/edit.py#L436:1"><code>_horizon()</code></a>). Verified today.</li>
         <li><em>Set server sizing or GenAI model</em>: merge the given fields with the current ones, call
           <code>resolve_cloud_instance</code> or <code>resolve_genai</code>, and set <code>provider</code> and
           <code>instance_type</code> (or <code>provider</code> and <code>model_name</code>) in one
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_update.py:18:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py#L18:1"><code>ModelingUpdate</code></a>
           batch so the conditional pair changes together. Only on a Boavizta cloud server or an EcoLogits API; a
-          plain <code>Server</code> fails the request with that reason. To confirm in implementation.</li>
+          plain <code>Server</code> fails the request with that reason. Confirmed in the final code at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:286:1" data-review-source-href="../../../ai_sandbox/edit.py#L286:1"><code>_set_servers()</code></a>; a change of <code>cloud_provider</code> alone keeps the current instance name, snapped to the new catalog.</li>
         <li><em>Add</em>: the builder of that kind from <a href="#shared">1.1</a> with the current lookups and a
-          <code>_Shared</code> seeded from the model; each created object, and the storage, devices, network and
+          <code>_Shared</code> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:268:1" data-review-source-href="../../../ai_sandbox/edit.py#L268:1">seeded from the model</a>; each created object, and the storage, devices, network and
           country it carries, is registered with
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:311:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L311:1"><code>ModelWeb.add_new_efootprint_object_to_system()</code></a>,
           which already follows one level of attributes. A new usage pattern is appended to
-          <code>system.usage_patterns</code> as
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:263:1" data-review-source-href="../../../ai_sandbox/edit.py#L263:1"><code>system.usage_patterns</code></a> as
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py:96:1" data-review-source-href="../../../model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py#L96:1"><code>pre_add_to_system()</code></a>
           does. Verified today.</li>
-        <li><em>Re-list children</em>: <code>step.jobs = to_weighted_explainable_object_dict([objects by name], weight_label=...)</code>
+        <li><em>Re-list children</em>: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:362:1" data-review-source-href="../../../ai_sandbox/edit.py#L362:1"><code>step.jobs = to_weighted_explainable_object_dict([objects by name], weight_label=...)</code></a>
           with the library's
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_object_dict.py:27:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_object_dict.py#L27:1"><code>to_weighted_explainable_object_dict()</code></a>,
           the same constructor sugar the step's <code>__init__</code> uses; repetition gives the weight. A plain list
@@ -655,16 +686,15 @@ feedback["note"] = answer.get("note", "")</code></pre>
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75:1"><code>check_can_delete()</code></a>
           then
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:158:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L158:1"><code>_delete()</code></a>
-          rather than <code>execute()</code>, because <code>execute</code> persists to the session through
-          <code>persist_structural_change</code> and the request must persist only once it has fully succeeded. A
-          blocked delete fails the request with the use case's reason.</li>
+          rather than <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:151:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L151:1"><code>execute()</code></a>, because <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:151:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L151:1"><code>execute</code></a> persists to the session through
+          <code>persist_structural_change</code> and the request must persist only once it has fully succeeded. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:399:1" data-review-source-href="../../../ai_sandbox/edit.py#L399:1">A blocked delete</a> fails the request with the use case's reason.</li>
         <li><em>Not expressible</em>: <code>device</code>, <code>network</code>, <code>country</code>, <code>kind</code>,
-          renames and <code>null</code> values fail the request with "not supported by the assistant in this
-          experiment; change it by hand".</li>
+          renames and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:424:1" data-review-source-href="../../../ai_sandbox/edit.py#L424:1"><code>null</code></a> values fail the request with "not supported by the assistant in this
+          experiment; change it by hand". <span data-chip="review">Needs supervisor resolution</span> Renames are not refused by a check: an unknown name is added as a new object (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:252:1" data-review-source-href="../../../ai_sandbox/edit.py#L252:1"><code>add()</code></a>), so the old object stays. Either a refusal is added or this line is changed to match.</li>
       </ul>
       <p>Atomicity costs nothing: the model is mutated in memory and
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>
-        (which ends in <code>persist_to_cache()</code>, see <a href="#impl-decision-03">IMPL-DECISION-03</a>) runs after the last operation, so a failure anywhere leaves the session's model as it was and the handler of
+        (which ends in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:187:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L187:1"><code>persist_to_cache()</code></a>, see <a href="#impl-decision-03">IMPL-DECISION-03</a>) runs after the last operation, so a failure anywhere leaves the session's model as it was and the handler of
         1.3 re-hydrates a fresh <code>ModelWeb</code> for the render. Because the live model is edited, every id, every
         value outside the DSL vocabulary and every source, confidence and comment the user set survive, which is
         success criterion 2.</p>
@@ -685,30 +715,30 @@ feedback["note"] = answer.get("note", "")</code></pre>
       <aside id="impl-decision-02" data-note="review">
         <p><strong>[IMPL-DECISION-02] — APPLIED</strong> · newly discovered pre-existing defect, task 3 review (commit <code>0ac6b40c</code>)</p>
         <p>An answer removing a job and then its server (or API) failed with
-          <code>AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code>. Deleting the job leaves a
-          detached contextual wrapper on the server whose <code>modeling_obj_container</code> is <code>None</code>; the
-          library's own <code>modeling_obj_containers</code> skips such entries, but the interface's
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code></a>. Deleting the job leaves a
+          detached contextual wrapper on the server whose <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:49:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L49:1"><code>modeling_obj_container</code></a> is <code>None</code>; the
+          library's own <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:460:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L460:1"><code>modeling_obj_containers</code></a> skips such entries, but the interface's
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379:1"><code>ModelingObjectWeb.efootprint_contextual_modeling_obj_containers</code></a>
           did not, so the list and dict container properties built on it crashed, and with them
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75:1"><code>DeleteObjectUseCase.check_can_delete()</code></a>
           on the server. The same crash is the bug-fixes-2026-10 task 4 report (GitHub #151, a recurrent need's
-          delete re-render); that task is now marked shipped by this commit and its reproduction's expected-failure
-          marker is removed.</p>
+          delete re-render); that task is now marked shipped by this commit and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:72:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L72:1">its reproduction's expected-failure
+          marker is removed</a>.</p>
         <p>Fix: the property filters out detached entries, matching the library's rule in the one place both derived
           properties read. Regression:
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>test_check_can_delete_ignores_a_referrer_deleted_in_the_same_model</code></a>.
-          List-held referrers (a pattern holding a journey) never had the problem. The CHANGELOG carries the fix line
+          List-held referrers (a pattern holding a journey) never had the problem. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:13:1" data-review-source-href="../../../CHANGELOG.md#L13:1">The CHANGELOG carries the fix line</a>
           the bug batch called for.</p>
       </aside>
       <aside id="impl-decision-03" data-note="review">
         <p><strong>[IMPL-DECISION-03] — APPLIED</strong> · material plan difference, task 3 review</p>
-        <p>The plan's single write was <code>ModelWeb.persist_to_cache()</code>. Every form create and delete in the
+        <p>The plan's single write was <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:187:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L187:1"><code>ModelWeb.persist_to_cache()</code></a>. Every form create and delete in the
           app writes through
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>,
-          which reconciles the simplified-input bookmarks in <code>interface_config</code> before the same
-          <code>persist_to_cache()</code>; <code>DeleteObjectUseCase.execute()</code> is <code>_delete()</code> plus
+          which reconciles the simplified-input bookmarks in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:154:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L154:1"><code>interface_config</code></a> before the same
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:187:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L187:1"><code>persist_to_cache()</code></a>; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:151:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L151:1"><code>DeleteObjectUseCase.execute()</code></a> is <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:158:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L158:1"><code>_delete()</code></a> plus
           that call. Persisting with the bare method left a removed object's bookmarked simplified inputs dangling
-          in the session config. The view now calls <code>persist_structural_change(model_web, input_catalog)</code> at
+          in the session config. The view now calls <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:85:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L85:1"><code>persist_structural_change(model_web, input_catalog)</code></a> at
           <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:85:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L85:1"><code>views_ai_assistant.py</code></a>:
           still the single write of the path, after the last mutation, and it restores the config when the write
           fails. Row 2 bookmarks a field of the removed job and asserts the bookmark is dropped
@@ -720,15 +750,15 @@ feedback["note"] = answer.get("note", "")</code></pre>
         <p><em>Orphans from a re-list.</em> The plan let a re-list simply replace a step's <code>jobs</code> or a
           journey's <code>steps</code>. Two defects followed: a job left out of a step stayed in the saved model as an
           orphan that neither the canvas nor the read-back can show, and a step left out of a journey was deleted
-          at once even when another journey still used it. The form path's <code>edit_with_cascade_cleanup</code>
+          at once even when another journey still used it. The form path's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/services/edit_service.py:31:1" data-review-source-href="../../../model_builder/domain/services/edit_service.py#L31:1"><code>edit_with_cascade_cleanup</code></a>
           deletes orphaned children, so the assistant now does the same: each re-list in
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:322:1" data-review-source-href="../../../ai_sandbox/edit.py#L322:1"><code>_Edits._set_journeys()</code></a> and
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:345:1" data-review-source-href="../../../ai_sandbox/edit.py#L345:1"><code>_Edits._set_step()</code></a> records the children it drops; after all
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:324:1" data-review-source-href="../../../ai_sandbox/edit.py#L324:1"><code>_Edits._set_journeys()</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:347:1" data-review-source-href="../../../ai_sandbox/edit.py#L347:1"><code>_Edits._set_step()</code></a> records the children it drops; after all
           <code>changed</code> entries, and before the explicit removals, every dropped child that nothing uses any
-          more is deleted through the same <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:393:1" data-review-source-href="../../../ai_sandbox/edit.py#L393:1"><code>_Edits.remove()</code></a>. A job moved to another
-          step survives. <code>remove()</code> tracks deleted ids and lists the steps and jobs a delete cascaded to,
+          more is deleted through the same <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:395:1" data-review-source-href="../../../ai_sandbox/edit.py#L395:1"><code>_Edits.remove()</code></a>. A job moved to another
+          step survives. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:395:1" data-review-source-href="../../../ai_sandbox/edit.py#L395:1"><code>remove()</code></a> tracks deleted ids and lists the steps and jobs a delete cascaded to,
           so an answer removing a pattern, its journey and the journey's job in one go works and the feedback names
-          every deletion once. The prompt addendum states the rule.</p>
+          every deletion once. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/prompts/edit_prompt.md:16:1" data-review-source-href="../../../ai_sandbox/prompts/edit_prompt.md#L16:1">The prompt addendum states the rule.</a></p>
         <p><em>Weights the DSL cannot say.</em> A surviving step keeps its own weight object in a journey re-list and
           a job whose count is unchanged keeps its weight object in a step re-list, so hand-set sources and comments on
           weights survive; a step re-list where a surviving job's weight is fractional is refused with the plan's
@@ -737,16 +767,16 @@ feedback["note"] = answer.get("note", "")</code></pre>
           the read-back rounds to six significant figures and converts units, so an echoed value is not always equal to
           the live one: echoing it replaced the value, its source and its comment, an echoed volume rebuilt the series
           (flattening an uploaded, non-form series to a constant) and every echo produced a misleading "set …" line.
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:236:1" data-review-source-href="../../../ai_sandbox/edit.py#L236:1"><code>_Edits.change()</code></a> now compares each entry with its
-          <code>system_to_dsl</code> read-back through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:426:1" data-review-source-href="../../../ai_sandbox/edit.py#L426:1"><code>_changed_fields()</code></a> and drops a
-          field with the same value and no new comment before dispatch; describing-only fields (<code>kind</code>,
-          a job's <code>server</code>/<code>genai_api</code>, a pattern's <code>journey</code>, <code>device</code>,
-          <code>network</code>, <code>country</code>) are accepted when echoed and refused when different, under that
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:238:1" data-review-source-href="../../../ai_sandbox/edit.py#L238:1"><code>_Edits.change()</code></a> now compares each entry with its
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:49:1" data-review-source-href="../../../ai_sandbox/edit.py#L49:1"><code>system_to_dsl</code></a> read-back through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:428:1" data-review-source-href="../../../ai_sandbox/edit.py#L428:1"><code>_changed_fields()</code></a> and drops a
+          field with the same value and no new comment before dispatch; describing-only fields (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>kind</code></a>,
+          a job's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>server</code></a>/<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>genai_api</code></a>, a pattern's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>journey</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>device</code></a>,
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>network</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:173:1" data-review-source-href="../../../ai_sandbox/edit.py#L173:1"><code>country</code></a>) are accepted when echoed and refused when different, under that
           one rule. Known limit: a describing-only field echoed with a new comment counts as changed and is refused.
-          Tests: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:205:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L205:1"><code>test_an_echoed_field_keeps_its_hand_set_source_and_comment</code></a> and
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:220:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L220:1"><code>test_a_re_list_deletes_only_the_children_nothing_else_uses</code></a>.</p>
-        <p><em>Cost accepted.</em> <code>apply_edits</code> carries a dropped-children list, a removed-id set and a
-          read-back comparison that future maintainers must keep aligned with <code>system_to_dsl</code>; this is the
+          Tests: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:241:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L241:1"><code>test_an_echoed_field_keeps_its_hand_set_source_and_comment</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:256:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L256:1"><code>test_a_re_list_deletes_only_the_children_nothing_else_uses</code></a>.</p>
+        <p><em>Cost accepted.</em> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:177:1" data-review-source-href="../../../ai_sandbox/edit.py#L177:1"><code>apply_edits</code></a> carries a dropped-children list, a removed-id set and a
+          read-back comparison that future maintainers must keep aligned with <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:49:1" data-review-source-href="../../../ai_sandbox/edit.py#L49:1"><code>system_to_dsl</code></a>; this is the
           price of editing the live model without a second mapping and without silently destroying what the
           assistant could not see.</p>
       </aside>
@@ -755,7 +785,7 @@ feedback["note"] = answer.get("note", "")</code></pre>
         <p>Sending the DSL of the current model plus the request and rebuilding from the full answer would delete
           <code>apply_edits</code> and the builder refactor, about half of this step. It was rejected at kickoff and
           the code confirms why: the builder turns every CPU server into a Boavizta cloud instance
-          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:229:1" data-review-source-href="../../../ai_sandbox/dsl.py#L229:1"><code>build_system()</code></a>,
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:369:1" data-review-source-href="../../../ai_sandbox/dsl.py#L369:1"><code>build_system()</code></a>,
           30 to 40x the footprint of a plain <code>Server</code> per the README), flattens any non-form timeseries to a
           constant, and resets every value outside the DSL. A tester starting from an example and asking for one
           change would watch the total move for unrelated reasons. The implementation sequence keeps it as the cut
@@ -765,14 +795,15 @@ feedback["note"] = answer.get("note", "")</code></pre>
 
     <article id="feedback" data-step>
       <h3><a href="#feedback">1.5 · Feedback line, log line, failures</a></h3>
+      <p><span data-chip>Implemented as planned</span></p>
       <p data-files><span>Files</span>
         <a href="#file-view"><code>views_ai_assistant.py</code></a> ·
         <a href="#file-box"><code>components/ai_assistant.html</code></a> ·
         <a href="#file-changelog"><code>CHANGELOG.md</code></a></p>
-      <p><code>call_metrics(model, completion)</code> in the view module reads the
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:54:1" data-review-source-href="../../../ai_sandbox/providers.py#L54:1"><code>Completion</code></a>:
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:41:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L41:1"><code>call_metrics(model, completion)</code></a> in the view module reads the
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:55:1" data-review-source-href="../../../ai_sandbox/providers.py#L55:1"><code>Completion</code></a>:
         <code>latency_s</code>, token counts,
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:65:1" data-review-source-href="../../../ai_sandbox/providers.py#L65:1"><code>cost_usd()</code></a>.
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:66:1" data-review-source-href="../../../ai_sandbox/providers.py#L66:1"><code>cost_usd()</code></a>.
         The call's own footprint comes from EcoLogits, already installed with the library:
         <code>llm_impacts(provider, model_name, output_tokens, latency_s)</code> from
         <a href="vscode://file//Users/vinville/Library/Caches/pypoetry/virtualenvs/efootprint-interface-nd5HQje2-py3.12/lib/python3.12/site-packages/ecologits/tracers/utils.py:62:1" data-review-source-href="../../../../../../Library/Caches/pypoetry/virtualenvs/efootprint-interface-nd5HQje2-py3.12/lib/python3.12/site-packages/ecologits/tracers/utils.py#L62:1"><code>ecologits.tracers.utils</code></a>
@@ -780,21 +811,21 @@ feedback["note"] = answer.get("note", "")</code></pre>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/catalogs.py:64:1" data-review-source-href="../../../ai_sandbox/catalogs.py#L64:1"><code>GENAI_PROVIDER_ALIASES</code></a>
         and the catalog name from <code>resolve_genai</code>, so the open-weight models served by Mistral snap to
         their nearest Mistral catalog entry as the spec allows. Its <code>gwp.value</code> is a
-        <code>RangeValue(min, max)</code> in kg; the line shows the midpoint in mg with "(EcoLogits)" after it.</p>
-      <p>The feedback block of the component renders, in order: <code>model · 24.3 s · USD 0.0031 · 410 mg CO2-eq (EcoLogits)</code>;
+        <code>RangeValue(min, max)</code> in kg; the line shows the midpoint in mg with "(EcoLogits, catalog entry)" after it. If the footprint cannot be estimated, the line shows "footprint unavailable" with the error instead.</p>
+      <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:34:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L34:1">The feedback block of the component</a> renders, in order: <code>model · 24.3 s · USD 0.0031 · 410 mg CO2-eq (EcoLogits, catalog entry)</code>;
         then the <code>error</code> in red when present, otherwise the <code>note</code> and, for an edit, the
         <code>applied</code> list ("set Browsing.volume to 5,200,000 per month", "added job Push notification on API
         server", "removed job Photo upload"); then <code>&lt;details&gt;Raw answer&lt;/details&gt;</code> with the answer
         text when a call was made. A refusal before the call shows only the message.</p>
-      <p>One <code>logger.info</code> line per call, using the library logger the views already import: model,
+      <p>One <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:100:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L100:1"><code>logger.info</code></a> line per call, using the library logger the views already import: model,
         latency, input and output tokens, cost, then the prompt and the answer text. Nothing is stored anywhere else.
         The dev app's log retention is the day's record and the box says so.</p>
       <aside id="plan-update-02" data-note="review">
         <p><strong>[PLAN-UPDATE-02] — ACCEPTED · No open questions in the generation feedback</strong></p>
         <p><em>Decision (2026-10-29):</em> the generation feedback shows the metrics line, the fixed sentence about comments
           and defaults, and the raw answer; nothing else. The three spec passages and the mockup line are edited.</p>
-        <p><em>Rationale:</em> the sandbox removed <code>open_questions</code> from
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:105:1" data-review-source-href="../../../ai_sandbox/dsl.py#L105:1"><code>ModelSpec</code></a>
+        <p><em>Rationale:</em> the sandbox removed <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:106:1" data-review-source-href="../../../ai_sandbox/dsl.py#L106:1"><code>open_questions</code></a> from
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:106:1" data-review-source-href="../../../ai_sandbox/dsl.py#L106:1"><code>ModelSpec</code></a>
           and from the prompt on 2026-10-29: clarification is a separate step before generation, and the questions
           produced rarely targeted the dominant driver. The comments on generated values carry the assumptions instead.</p>
       </aside>
@@ -809,14 +840,14 @@ feedback["note"] = answer.get("note", "")</code></pre>
     <h2>2. Delivery and verification</h2>
     <h3>Implementation sequence</h3>
     <ol id="phases">
-      <li><strong>A · Generate path end to end</strong>Flag, context processor, route, view with the empty-model
+      <li><span data-chip>Implemented</span> <strong>A · Generate path end to end</strong>Flag, context processor, route, view with the empty-model
         branch and the refusal, template, feedback metrics, log line, <code>extra_context</code>. Tests 1, 3, 4, 5.
         <small>Demoable on the dev app after this step; the non-empty branch answers "editing is not available in this build".</small></li>
-      <li><strong>B · Builder refactor in <code>dsl.py</code></strong>Field tables, per-object builders, seedable
+      <li><span data-chip>Implemented</span> <strong>B · Builder refactor in <code>dsl.py</code></strong>Field tables, per-object builders, seedable
         <code>_Shared</code>, the two moved helpers. <small>Pure refactor; <code>run.py --dry-run</code> on the handwritten case passes unchanged.</small></li>
-      <li><strong>C · <code>system_to_dsl</code></strong>With the round-trip test 6. <small>Depends on B for the tables.</small></li>
-      <li><strong>D · <code>apply_edits</code>, the addendum, the edit branch</strong>Test 2. <small>Depends on B and C. The cut line: if it overruns, A ships alone.</small></li>
-      <li><strong>E · Ship</strong>Changelog line, README paragraph, the flag and the three keys on the dev app,
+      <li><span data-chip>Implemented</span> <strong>C · <code>system_to_dsl</code></strong>With the round-trip test 6. <small>Depends on B for the tables.</small></li>
+      <li><span data-chip>Implemented</span> <strong>D · <code>apply_edits</code>, the addendum, the edit branch</strong>Test 2. <small>Depends on B and C. The cut line: if it overruns, A ships alone.</small></li>
+      <li><span data-chip="review">Pending</span> <strong>E · Ship</strong>Changelog line, README paragraph, the flag and the three keys on the dev app,
         a browser smoke on both paths. <small>Checked at the tasks stage: the <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/Dockerfile:61:1" data-review-source-href="../../../Dockerfile#L61:1"><code>Dockerfile</code></a> runs a plain <code>poetry install</code>, the dev group is not optional and <code>.dockerignore</code> keeps <code>ai_sandbox/</code>, so no <code>ai</code> group is needed.</small></li>
     </ol>
     <h3>Verification map</h3>
@@ -824,17 +855,17 @@ feedback["note"] = answer.get("note", "")</code></pre>
       <table>
         <thead><tr><th scope="col">Behavior / risk</th><th scope="col">Critical assertion</th><th scope="col">Test</th></tr></thead>
         <tbody>
-          <tr><td>1 · Generate loads a model and shows the feedback</td><td>Fresh session, fake <code>complete</code> returns the handwritten case; the session model is named "Recipe app", the response contains the model name and a USD cost, the picker is not shown.</td><td><code>tests/integration/test_ai_assistant.py</code>, Django client, <code>monkeypatch</code> on <code>views_ai_assistant.complete</code></td></tr>
-          <tr><td>2 · Edit changes only what is asked</td><td>Load the handwritten case, hand-set a server's <code>lifespan</code> with a comment (outside the DSL) and persist; fake answer with one changed volume, one new job re-listed in a step, one removed job. Volume doubled, job present on the step, removed job gone, lifespan and its comment intact, every surviving id unchanged.</td><td>same file</td></tr>
-          <tr><td>3 · Failure leaves the model untouched</td><td>Fake <code>complete</code> returns prose; the session payload is byte-identical before and after, the error text is rendered.</td><td>same file</td></tr>
-          <tr><td>4 · Edge model refused</td><td>Load <code>iot_industrial</code>; post a prompt; refusal text rendered, <code>complete</code> never called, payload unchanged.</td><td>same file</td></tr>
-          <tr><td>5 · Flag off</td><td>With the default settings, POST answers 404 and the builder page has no <code>#ai-assistant</code>.</td><td>same file; the rest of the suite runs flag-off and covers the include being absent</td></tr>
-          <tr><td>6 · Read-back fidelity</td><td>Handwritten case → <code>build_system</code> → in-memory <code>ModelWeb</code> → <code>system_to_dsl</code> → <code>build_system</code>: total footprint equal within 1 %.</td><td>same file, no Django</td></tr>
+          <tr><td>1 · Generate loads a model and shows the feedback</td><td>Fresh session, fake <code>complete</code> returns the handwritten case; the session model is named "Recipe app", the response contains the model name and a USD cost, the picker is not shown.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:65:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L65:1"><code>tests/integration/test_ai_assistant.py</code></a>, Django client, <code>monkeypatch</code> on <code>views_ai_assistant.complete</code></td></tr>
+          <tr><td>2 · Edit changes only what is asked</td><td>Load the handwritten case, hand-set a server's <code>lifespan</code> with a comment (outside the DSL) and persist; fake answer with one changed volume, one new job re-listed in a step, one removed job. Volume doubled, job present on the step, removed job gone, lifespan and its comment intact, every surviving id unchanged.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:100:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L100:1">same file</a></td></tr>
+          <tr><td>3 · Failure leaves the model untouched</td><td>Fake <code>complete</code> returns prose; the session payload is byte-identical before and after, the error text is rendered.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:87:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L87:1">same file</a></td></tr>
+          <tr><td>4 · Edge model refused</td><td>Load <code>iot_industrial</code>; post a prompt; refusal text rendered, <code>complete</code> never called, payload unchanged.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:193:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L193:1">same file</a></td></tr>
+          <tr><td>5 · Flag off</td><td>With the default settings, POST answers 404 and the builder page has no <code>#ai-assistant</code>.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:208:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L208:1">same file</a>; the rest of the suite runs flag-off and covers the include being absent</td></tr>
+          <tr><td>6 · Read-back fidelity</td><td>Handwritten case → <code>build_system</code> → in-memory <code>ModelWeb</code> → <code>system_to_dsl</code> → <code>build_system</code>: total footprint equal within 1 %.</td><td><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:214:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L214:1">same file</a>, no Django</td></tr>
         </tbody>
       </table>
     </div>
     <p>Gates: <code>poetry run pytest tests --ignore=tests/e2e</code>; no E2E test for a one-day flagged flow that is
-      a form POST re-rendering the builder. Coverage above is planned, not executed. No architecture page is
+      a form POST re-rendering the builder. Coverage above is implemented in the linked tests; this review did not rerun them. No architecture page is
       updated: the experiment is flagged, temporary and documented by its spec folder, the sandbox README paragraph
       and the changelog line.</p>
   </section>
@@ -859,7 +890,7 @@ feedback["note"] = answer.get("note", "")</code></pre>
         "route exists only when the flag is set"; the tests set the flag with the <code>settings</code> fixture.</li>
       <li><strong>Vocabulary of edits is deliberately partial</strong> (1.4): device, network, country, kind, renames
         and resets fail visibly. The spec already allows "an edit the assistant cannot express fails the whole
-        request with the reason shown"; this lists what that is for the hackathon.</li>
+        request with the reason shown"; this lists what that is for the hackathon. Renames are not refused by a check yet (see the open point in 1.4).</li>
       <li><strong>Whole-builder re-render on every answer</strong>, one HTMX target, no OOB regions.</li>
       <li><strong>Cut line</strong>: step A alone is a demoable generate-only assistant; D is the only step that can
         be dropped without touching the others.</li>
