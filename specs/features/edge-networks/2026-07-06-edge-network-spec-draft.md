@@ -34,6 +34,9 @@ The radio module of an `EdgeDevice`. One per device.
 | `energy_per_sync` | table §5 | µJ | one keep-alive/poll exchange |
 | `packet_error_rate` | 0 | — | user hypothesis |
 | `n_hops` | 1 | — | mesh only |
+| `operator_network_energy_per_device_hour` | table §5 (0 for user-owned-gateway techs) | Wh | Malmodin / Ruiz per-subscription figures |
+| `operator_network_embodied_per_device_hour` | table §5 (0 for user-owned-gateway techs) | g CO2e | idem |
+| `edge_gateway` | — (link to an `EdgeGateway`, `None` for operator-side techs) | — | user choice |
 | `carbon_footprint_fabrication_per_unit` | Pirson & Bol connectivity block | kg CO2e | BoaviztAPI |
 | `lifespan` | inherited from EdgeDevice | yr | — |
 
@@ -43,20 +46,25 @@ Every attribute is an `ExplainableQuantity` with source → user override = stan
 
 Mirrors `RecurrentEdgeComponentNeed`: attaches to an `EdgeNetworkInterface`, carries `messages_per_hour` (168-h weekly pattern, replayed) and `payload_size` (B).
 
-### 3.3 `EdgeGateway`
+### 3.3 `EdgeGateway` — user-owned local infrastructure
 
-Shared local infrastructure (LoRaWAN gateway/relay, Thread border router; NB-IoT is operator-side → see note below).
+The concentrator the device radio talks to before IP backhaul: LoRaWAN gateway/relay, Thread border router, BLE hub, WiFi access point. Modeled as an always-on, mains-powered `EdgeDevice` (plain device or thin subclass/factory with gateway defaults) — **not** an allocation constant.
 
 | Attribute | Default | Unit |
 |---|---|---|
-| `power` | 5 W | W |
+| `power` | 5 W (constant) | W |
 | `carbon_footprint_fabrication` | 25 kg CO2e (Pirson & Bol blocks, to refine) | kg |
 | `lifespan` | 6 yr | yr |
-| `n_devices_served` | user input | — |
 
-Allocation: **per device-hour** (time/subscriber key), never per GB — Mytton 2024, ITU-T L.1410.
-NB-IoT: no user-owned gateway; default to per-subscription network figure (Malmodin/Ruiz: order 20 kWh/yr + infra embodied per subscription) instead of `EdgeGateway`.
-Thread: `EdgeGateway` plays the border router (always-on, mains-powered); mains-powered Thread routers along the mesh path are neglected in v1 (marginal per-message energy ≈ 0 on always-on nodes; their embodied share deferred).
+Fleet sizing comes from composition, like every other edge device: the gateway's count per deployment is its `EdgeDeviceGroup` count (default **1 per deployment** — one deployment in an `EdgeUsagePattern` is one site, one gateway per site), and the devices it serves are those whose `EdgeNetworkInterface.edge_gateway` points to it. There is no `n_devices_served` input; the ratio is derived as Σ served devices' `total_nb_of_units` / gateway `total_nb_of_units` and only used for per-device attribution views. Energy and fabrication flow through the standard `EdgeDevice` amortization (power × `nb_deployments_in_parallel`), so no gateway-specific allocation formula is needed.
+
+**Shared gateway** (e.g. a campus LoRaWAN gateway also used by other tenants): no dedicated sharing input in v1. The user scales the gateway's power, fabrication footprint, or group count by the share attributable to this system (e.g. 0.25 gateway per deployment). Stated in the user docs so nobody looks for a missing feature.
+
+Thread: the `EdgeGateway` plays the border router; mains-powered Thread routers along the mesh path are neglected in v1 (marginal per-message energy ≈ 0 on always-on nodes; their embodied share deferred).
+
+### 3.3b Operator network — shared infrastructure outside the modeled scope
+
+NB-IoT (cellular base station) and SIGFOX (operator tower) have no user-owned gateway: the concentrator is shared with every subscriber in the cell and cannot be counted or configured by the user. Same situation as the existing `Network` object (a slice of infrastructure nobody models in full), so it is handled as an allocation figure, not an object: two technology defaults on the interface, `operator_network_energy_per_device_hour` and `operator_network_embodied_per_device_hour`, derived from per-subscription figures (Malmodin: order 20 kWh/yr; Ruiz 2022: 81–103 kg CO2e/subscription/yr incl. embodied, to be split) divided by hours per year. Allocation key is **per device-hour** (time/subscriber), never per GB — Mytton 2024, ITU-T L.1410. Both rows are 0 for LoRaWAN, BLE, WiFi and Thread, and `edge_gateway` is `None` for NB-IoT and SIGFOX.
 
 ### 3.4 Backhaul
 
@@ -81,16 +89,26 @@ N_sync  = max(0, Δt / sync_period − N_msg)   # data frames count as sync (Mor
 
 Sync as separate recurring term is load-bearing: for Matter-over-Thread devices, keep-alive polling is 94.5–99.3% of annual energy (Nordic nwp_049) — folding it into per-message energy would zero it out for rarely-messaging devices.
 
+Per interface (device-hour), operator-side technologies only:
+
 ```
-gateway_share_per_device_hour =
-    ( carbon_footprint_fabrication / lifespan
-      + power × Δt × country.average_carbon_intensity ) / n_devices_served
+operator_share_per_device_hour =
+    operator_network_energy_per_device_hour × country.average_carbon_intensity
+    + operator_network_embodied_per_device_hour
+```
+
+Per deployment, user-owned gateway (standard `EdgeDevice` path, no allocation step):
+
+```
+E_gateway = power × Δt × gateway_count_per_deployment × nb_deployments_in_parallel
+gateway fabrication amortization = EdgeDevice standard
 ```
 
 ```
 CO2_hour = E_interface × country.average_carbon_intensity
            + interface fabrication amortization (EdgeComponent standard)
-           + gateway_share_per_device_hour
+           + operator_share_per_device_hour            # NB-IoT, SIGFOX
+           + E_gateway × CI + gateway fabrication      # LoRaWAN, BLE, WiFi, Thread
            + backhaul via Network(payload volume)
 ```
 
@@ -106,6 +124,9 @@ CO2_hour = E_interface × country.average_carbon_intensity
 | fixed extras | RX1+RX2 windows | ×3 replicas built-in (fold into Ntr_base=3) | RRC/DRX per message | master poll per message | beacon listen + DIFS/backoff | data poll to parent per message |
 | sync_period / energy_per_sync | ∞ (async) | ∞ (async) | ∞ (PSM between messages) | 32 s / poll exchange | ~18 h max (listen interval) / beacon listen | poll period, default 2.5 s slow poll / **53 µJ per poll** (17.63 µC @ 3 V, measured) |
 | n_hops default | 1 | 1 | 1 | 1 | 1 | 1 (device→parent; mesh beyond parent neglected v1) |
+| operator_network_energy_per_device_hour | 0 (own gateway) | per-subscription figure ÷ 8760 h (to pin: Malmodin/Ruiz) | ~20 kWh/yr ÷ 8760 h ≈ 2.3 Wh | 0 | 0 | 0 |
+| operator_network_embodied_per_device_hour | 0 | per-subscription embodied ÷ 8760 h (to pin) | Ruiz 2022 subscription embodied share ÷ 8760 h (to pin) | 0 | 0 | 0 |
+| edge_gateway | required (LoRaWAN gateway) | None (operator) | None (operator) | required (hub/phone) | required (access point) | required (border router) |
 
 Sources to pin during implementation: Casals 2017, Bouguera 2018 (LoRaWAN); Gomez 2019 (SIGFOX); Lauridsen 2018, Andres-Maldonado 2019 (NB-IoT); Morin 2017 Tables III & V for BLE and WiFi PSM columns. Thread: Kim, Kumar & Culler 2019 (peer-reviewed anchor: leaf ~30 µA avg at 10 s TX period, 5.3 yr / 1400 mAh) + Nordic measurements (SED blog 2023: sleep floor 2.65 µA, 17.63 µC/poll; white paper nwp_049 2025: idle polling = 94.5–99.3% of annual energy) — Tx/Rx state powers from Morin 802.15.4 column. Caveat: Thread SoC spread is wide (ESP32-H2 ≈ 16× worse than nRF52840; board regulator can cost 3× the chip) — defaults are best-in-class, users with real hardware should override. Values above from literature note; verify each against paper tables when coding defaults. SIGFOX triple transmission modeled as base multiplier 3 on Tx term, not via PER. WiFi column targets battery devices in power-saving mode; always-on WiFi devices (mains) are better modeled as plain `EdgeDevice` power draw.
 
@@ -123,24 +144,30 @@ messaging = RecurrentMessagingNeed(
     messages_per_hour=weekly_pattern([...]),   # 168 values
     payload_size=SourceValue(24 * u.B),
 )
-gateway = EdgeGateway("farm LoRa gateway", n_devices_served=SourceValue(80 * u.dimensionless))
-usage = EdgeUsagePattern(..., edge_gateway=gateway, network=backhaul_network, country=france)
+gateway = EdgeGateway("farm LoRa gateway")       # EdgeDevice with gateway defaults (5 W, 25 kg, 6 yr)
+interface.edge_gateway = gateway                  # or passed in from_technology(...)
+farm = EdgeDeviceGroup("farm", edge_device_counts={device: 80, gateway: 1})
+usage = EdgeUsagePattern(..., network=backhaul_network, country=france)
 ```
 
-Optimization workflow enabled: swap SF, batch messages (payload↑, N_msg↓), compare chips via p_sleep, tune poll period, resize fleet per gateway.
+Devices-per-gateway (80) is read from the group, not entered twice. A shared gateway is expressed by a fractional count or scaled power/fabrication. NB-IoT/SIGFOX: no `gateway`, no group entry; the operator share comes from the technology defaults.
+
+Optimization workflow enabled: swap SF, batch messages (payload↑, N_msg↓), compare chips via p_sleep, tune poll period, resize fleet per gateway via group counts.
 
 ## 7. Tests
 
 - Unit: `E_msg` against published figures — Casals Table (1 msg/5 min, 2400 mAh ≈ 1 yr equivalent avg power), Gomez SIGFOX (~900 mJ per 12 B message, Martinez cross-check), Lauridsen NB-IoT state powers.
 - Unit: fragmentation (payload > max_payload → Nfr), Ntr at PER 0.2 = 1.25, SIGFOX ×3 replicas, Thread per-message poll energy present.
 - Unit: dimensional checks (pint units end-to-end).
-- Integration: full system CO2 with gateway allocation + backhaul, no double counting (backhaul GB = payload only).
+- Integration: full system CO2 with owned gateway (via group count) + backhaul, no double counting (backhaul GB = payload only); derived devices-per-gateway equals the group ratio.
+- Integration: NB-IoT interface carries the operator per-device-hour share and no gateway; LoRaWAN interface carries a gateway and zero operator share.
 - Sensitivity sanity: at 1 msg/day, sleep term > 90% of E_interface for asynchronous techs (Morin finding #3); for Thread at 2.5 s poll period, sync term dominates (Nordic nwp_049: 94.5–99.3%).
 - Validation: Thread leaf at 10 s message period ≈ 30 µA average (Kim et al. 2019).
 
 ## 8. Design choices & open points
 
-1. **Gateway**: full `EdgeGateway` object (rather than a single allocation constant) — needed for the "know their material" optimization use case and as Thread border router.
+1. **Gateway**: user-owned gateway is a deployed `EdgeDevice` sized by `EdgeDeviceGroup` counts and linked from `EdgeNetworkInterface.edge_gateway`; `n_devices_served` dropped (it duplicated the fleet-sizing the library already derives from composition and could contradict it). Operator networks (NB-IoT, SIGFOX) are two per-device-hour allocation rows on the technology defaults, mirroring how `Network` charges a slice of unowned infrastructure. No sharing-fraction input for an owned gateway in v1 — fractional count or scaled inputs cover it.
+1b. **Open — gateway ↔ usage pattern binding**: an `EdgeDevice` reaches an `EdgeUsagePattern` through a `RecurrentEdgeDeviceNeed` in a journey, heavy for a constant-power box. Lighter alternative: the gateway inherits its usage patterns from the interfaces linked to it. Decide at plan stage.
 2. **Battery→lifespan coupling**: deferred to v2. Default lifespans exist (`EdgeDevice`/`EdgeComponent` default 6 yr; PEP ecopassport reference lifetimes usable as per-product sources), so deferral does not load the user. v2: `lifespan = battery_energy / avg_power`, feeding fabrication amortization — creates a calculation dependency loop to design carefully.
 3. Open: exact class placement in the e-footprint edge module (`efootprint/core/hardware/edge/`) and whether `RecurrentMessagingNeed` merges into the existing recurrent-need hierarchy.
 
