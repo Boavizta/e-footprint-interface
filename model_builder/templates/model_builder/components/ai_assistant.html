@@ -1,47 +1,53 @@
 {% comment %}
 Experimental AI assistant box (AI_ASSISTANT_ENABLED, dev app only). Posts the description and re-renders the
-whole builder; the feedback of the last answer renders under the form. Hidden while edge modeling is on.
+whole builder; the feedback of the last answer renders under the form. Collapsible, open by default. Hidden while
+edge modeling is on, while the simplified-inputs workspace is shown (body[data-base-view]) and while the results
+panel is open (its inline height is 100%, and the box follows the panel as its next sibling).
 {% endcomment %}
 <style>
     #ai-assistant { position: absolute; right: 1rem; bottom: 4.5rem; width: 26rem; max-width: calc(100% - 2rem); z-index: 3; }
-    body.edge-modeling-on #ai-assistant { display: none; }
+    body.edge-modeling-on #ai-assistant,
+    body[data-base-view="simplified"] #ai-assistant,
+    #panel-result-btn[style*="height: 100%"] ~ #ai-assistant { display: none; }
 </style>
-<form id="ai-assistant" class="bg-white rounded-2 shadow-sm p-3 text-start"
-      hx-post="{% url 'ai-assistant' %}" hx-target="#main-content-block" hx-swap="innerHTML"
-      hx-disabled-elt="button:not(:disabled)">
-    {% csrf_token %}
-    <p class="mb-1"><strong>AI assistant</strong> <small>(experiment, dev only · prompts and answers are logged for the day)</small></p>
-    <p class="small mb-1">{% if model_is_empty %}Describe your digital service: what users do, how many, how often.{% else %}Ask for a change to the current model.{% endif %}</p>
-    <textarea name="prompt" rows="3" class="form-control" required
-              placeholder="{% if model_is_empty %}A recipe app with 50,000 monthly users who search and read recipes…{% else %}Double the number of users…{% endif %}"></textarea>
-    <div class="d-flex align-items-center gap-2 mt-2">
-        <button type="submit" class="btn btn-primary btn-sm">{% if model_is_empty %}Build the model{% else %}Apply to the model{% endif %}</button>
-        <label class="small">with
-            <select name="model" class="form-select form-select-sm d-inline w-auto">
-                {% with selected_model=request.session.ai_assistant_model|default:AI_ASSISTANT_DEFAULT_MODEL %}
-                {% for name, available in AI_ASSISTANT_MODELS %}
-                <option value="{{ name }}" {% if not available %}disabled{% endif %} {% if name == selected_model %}selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-                {% endwith %}
-            </select>
-        </label>
-    </div>
-    {% if ai_feedback %}
-    <div class="small mt-2" id="ai-assistant-feedback">
-        {% if ai_feedback.raw %}
-        <p class="mb-1 text-muted">{{ ai_feedback.model }} · {{ ai_feedback.latency_s|floatformat:1 }} s · USD {{ ai_feedback.cost_usd|floatformat:4 }} · {{ ai_feedback.footprint }}</p>
+<details id="ai-assistant" class="bg-white rounded-2 shadow-sm p-3 text-start" open>
+    <summary class="mb-1"><strong>AI assistant</strong> <small>(experiment, dev only · prompts and answers are logged for the day)</small></summary>
+    <form id="ai-assistant-form" class="mt-1"
+          hx-post="{% url 'ai-assistant' %}" hx-target="#main-content-block" hx-swap="innerHTML"
+          hx-disabled-elt="button:not(:disabled)">
+        {% csrf_token %}
+        <p class="small mb-1">{% if model_is_empty %}Describe your digital service: what users do, how many, how often.{% else %}Ask for a change to the current model.{% endif %}</p>
+        <textarea name="prompt" rows="3" class="form-control" required
+                  placeholder="{% if model_is_empty %}A recipe app with 50,000 monthly users who search and read recipes…{% else %}Double the number of users…{% endif %}"></textarea>
+        <div class="d-flex align-items-center gap-2 mt-2">
+            <button type="submit" class="btn btn-primary btn-sm">{% if model_is_empty %}Build the model{% else %}Apply to the model{% endif %}</button>
+            <label class="small">with
+                <select name="model" class="form-select form-select-sm d-inline w-auto">
+                    {% with selected_model=request.session.ai_assistant_model|default:AI_ASSISTANT_DEFAULT_MODEL %}
+                    {% for name, available in AI_ASSISTANT_MODELS %}
+                    <option value="{{ name }}" {% if not available %}disabled{% endif %} {% if name == selected_model %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                    {% endwith %}
+                </select>
+            </label>
+        </div>
+        {% if ai_feedback %}
+        <div class="small mt-2" id="ai-assistant-feedback">
+            {% if ai_feedback.raw %}
+            <p class="mb-1 text-muted">{{ ai_feedback.model }} · {{ ai_feedback.latency_s|floatformat:1 }} s · USD {{ ai_feedback.cost_usd|floatformat:4 }} · {{ ai_feedback.footprint }}</p>
+            {% endif %}
+            {% if ai_feedback.error %}
+            <p class="mb-1 text-danger">{{ ai_feedback.error }}</p>
+            {% else %}
+            <p class="mb-1">{{ ai_feedback.note }}</p>
+            {% if ai_feedback.applied %}
+            <ul class="mb-1">{% for change in ai_feedback.applied %}<li>{{ change }}</li>{% endfor %}</ul>
+            {% endif %}
+            {% endif %}
+            {% if ai_feedback.raw %}
+            <details><summary>Raw answer</summary><pre class="small mb-0" style="max-height: 12rem; white-space: pre-wrap;">{{ ai_feedback.raw }}</pre></details>
+            {% endif %}
+        </div>
         {% endif %}
-        {% if ai_feedback.error %}
-        <p class="mb-1 text-danger">{{ ai_feedback.error }}</p>
-        {% else %}
-        <p class="mb-1">{{ ai_feedback.note }}</p>
-        {% if ai_feedback.applied %}
-        <ul class="mb-1">{% for change in ai_feedback.applied %}<li>{{ change }}</li>{% endfor %}</ul>
-        {% endif %}
-        {% endif %}
-        {% if ai_feedback.raw %}
-        <details><summary>Raw answer</summary><pre class="small mb-0" style="max-height: 12rem; white-space: pre-wrap;">{{ ai_feedback.raw }}</pre></details>
-        {% endif %}
-    </div>
-    {% endif %}
-</form>
+    </form>
+</details>
