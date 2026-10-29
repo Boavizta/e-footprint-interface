@@ -3,7 +3,7 @@
 Prices are USD per million tokens, captured on 2026-10-27 from:
 - Anthropic: claude-api skill model table (first-party API rates)
 - OpenAI: https://developers.openai.com/api/docs/pricing
-- Mistral: https://docs.mistral.ai/inference/pricing
+- Mistral: https://docs.mistral.ai/inference/pricing (also hosts the open-weight GLM and DeepSeek models, 2026-10-28)
 Cached-input discounts are applied only for Anthropic (cache read 0.1x, cache write 1.25x). OpenAI cached
 tokens are recorded but priced at the full input rate, which overestimates slightly.
 """
@@ -35,11 +35,19 @@ MODELS = {
     "mistral-small-latest": ("mistral", 0.15, 0.60),
     "mistral-medium-latest": ("mistral", 1.50, 7.50),
     "mistral-large-4": ("mistral", 1.36, 4.18),
+    # Open-weight models served on the Mistral platform (same key, same adapter).
+    "zai-glm-5-3-flash": ("mistral", 0.15, 0.50),   # Z.ai, MIT; reasoning cannot be disabled
+    "zai-glm-5-3": ("mistral", 1.40, 4.40),         # Z.ai, near-MIT custom license; reasoning cannot be disabled
+    "deepseek-v4-1-flash-1017": ("mistral", 0.30, 1.20),  # DeepSeek, MIT; 2x the DeepSeek first-party off-peak price
 }
+
+# GLM models reason at effort "max" unless told otherwise, which is where their cost would go; start them low.
+DEFAULT_EFFORT = {"zai-glm-5-3-flash": "low", "zai-glm-5-3": "low"}
 
 # The first full run (2026-10-28, 3 cases x 7 models x 2 reps) kept these two: Haiku for quality per dollar, Luna as
 # the cheap comparison point. Sonnet and Large 4 cost 10x for no structural gain, Medium and Small misread volumes.
-DEFAULT_MODELS = ["claude-haiku-5-5", "gpt-6-luna"]
+# The three open-weight models joined them on 2026-10-29 for a second comparison.
+DEFAULT_MODELS = ["claude-haiku-5-5", "gpt-6-luna", "zai-glm-5-3-flash", "deepseek-v4-1-flash-1017", "zai-glm-5-3"]
 
 
 @dataclass
@@ -139,6 +147,7 @@ ADAPTERS = {"anthropic": _anthropic, "openai": _openai, "mistral": _mistral}
 
 def complete(model: str, system: str, prompt: str, effort: str | None = None) -> Completion:
     provider = MODELS[model][0]
+    effort = effort or DEFAULT_EFFORT.get(model)
     return ADAPTERS[provider](model, system, prompt, effort)
 
 

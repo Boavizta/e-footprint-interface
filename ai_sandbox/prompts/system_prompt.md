@@ -35,7 +35,7 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
   "servers": [{"name", "kind": "cpu"|"gpu", "cores", "ram_gb", "gpus", "storage_gb", "cloud_provider": "aws"|"azure"|"gcp"|"ovhcloud"|"scaleway", "instance_type", "carbon_intensity_g_per_kwh", "comments": {<field name>: string}}],
   "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "comments": {<field name>: string}}],
   "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "comments": {<field name>: string}}],
-  "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>], "comments"}]}],
+  "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>], "comments": {<field name>: string}}]}],
   "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "comments": {<field name>: string}}],
   "edge_devices": [{"name", "kind": "computer"|"appliance", "cores", "ram_gb", "storage_gb", "power_w", "embodied_kg", "lifespan_years", "comments": {<field name>: string}}],
   "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week", "storage_retention_weeks", "workload_fraction", "server_calls": [{"job": <job name>, "times_per_hour", "comment"}], "comments": {<field name>: string}}],
