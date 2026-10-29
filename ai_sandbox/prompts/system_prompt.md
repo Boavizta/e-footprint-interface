@@ -11,7 +11,6 @@ Output the model structure as one JSON object following the format below. Name o
 - Set a numeric field whenever the description states it or implies it. A 15-minute video implies hundreds of MB transferred, a phone photo a few MB, a GPU training run hours of duration and a GPU count. Give your best order-of-magnitude estimate rather than leaving the field out: an unset field falls back to a generic library default that can be off by a factor of 1000, and the user cannot tell that from a considered estimate.
 - Leave out only numbers that are both unstated and unimportant for the question asked, such as server core counts. Those fall back to sensible defaults.
 - For every number you set, write one short sentence saying how you derived it in that object's `comments`, keyed by the field name; the user sees it next to the value. Do not comment on structure.
-- List at most 5 `open_questions` whose answers would most change the model.
 
 Modeling rules:
 - One job per distinct unit of server work. A step that calls the web app and then the database is two jobs on two servers.
@@ -30,12 +29,11 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
   "genai_apis": [{"name", "provider": "openai"|"anthropic"|"mistralai"|"google_genai"|"cohere"|"huggingface_hub", "model_name", "comments": {<field name>: string}}],
   "jobs": [{"name", "server": <server name> OR "genai_api": <api name>, "data_transferred_kb", "data_stored_kb", "request_duration_s", "cpu_cores", "gpus", "ram_mb", "output_tokens", "comments": {<field name>: string}}],
   "journeys": [{"name", "steps": [{"name", "user_time_spent_min", "jobs": [<job names>], "comments": {<field name>: string}}]}],
-  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "comments": {<field name>: string}}],
-  "open_questions": [string]
+  "usage_patterns": [{"name", "journey": <journey name>, "device": "smartphone"|"laptop"|"screen"|"box"|"none", "network": "wifi"|"mobile", "country": <UPPER_SNAKE country, e.g. FRANCE, UNITED_STATES, GERMANY>, "volume": {"value", "per": "hour"|"day"|"week"|"month"|"year"}, "growth_pct_per_year", "comments": {<field name>: string}}]
 }
 
 Field notes:
-- `volume` on a usage pattern is the number of journeys started per period (required). It is a count of journeys, never a count of users: 200,000 monthly users who each open the app 3 times a week start about 2,600,000 journeys per month. When the description gives users but no frequency, pick a plausible frequency, say so in the comment, and ask about it in `open_questions`.
+- `volume` on a usage pattern is the number of journeys started per period (required). It is a count of journeys, never a count of users: 200,000 monthly users who each open the app 3 times a week start about 2,600,000 journeys per month. When the description gives users but no frequency, pick a plausible frequency and say so in the comment.
 - Batch or background journeys with no human have `"device": "none"`.
 - A job references exactly one of `server` or `genai_api`. `gpus` is only for jobs on `gpu` servers, `cpu_cores` only on `cpu` servers, `output_tokens` only on GenAI API jobs.
 - `cloud_provider` is optional. The tool picks a real general-purpose instance that fits `cores` and `ram_gb` on that cloud, or on a default cloud when it is unset; set it only when the description names a cloud, and `instance_type` only if the description states it.

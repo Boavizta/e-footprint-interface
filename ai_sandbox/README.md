@@ -14,7 +14,7 @@ Nothing here is part of the Django application. Run outputs under `runs/` are gi
 ## How it works
 
 1. `prompts/system_prompt.md` teaches the model the e-footprint mental model and a compact JSON DSL
-   (objects, relationships, optional numbers, a `comments` sentence per stated number that becomes the value's comment in the model, a few `open_questions`).
+   (objects, relationships, optional numbers, a `comments` sentence per stated number that becomes the value's comment in the model).
 2. `cases/*.json` hold a realistic product-person prompt, facts available if asked (for later clarification
    experiments), expected properties for expert review, and machine checks.
 3. `providers.py` calls Anthropic, OpenAI or Mistral with the same system prompt and user prompt, and records
@@ -117,5 +117,9 @@ default run on 2026-10-29.
   The prompt now asks for an order-of-magnitude estimate whenever
   the description implies one, with the derivation in a per-field `comments` entry that becomes the value's
   comment in the model.
+- **No questions during generation.** Clarification is a separate UX step before generation (the user refines the
+  description, then the model is generated), so the prompt no longer asks for `open_questions` (removed 2026-10-29).
+  The questions it produced also rarely targeted the dominant driver: in the recipe case, 1 of about 50 asked about
+  session length, which drives the phone footprint. Cases keep `facts_if_asked` for that clarification step.
 - **Checks are coarse.** They catch missing object kinds, missing sharing, missing low-volume batch journeys.
   Semantic quality still needs expert review of `summary.md` and of the exported model in the interface.

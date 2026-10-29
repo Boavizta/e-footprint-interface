@@ -109,7 +109,6 @@ class ModelSpec(Strict):
     jobs: list[JobSpec] = Field(default_factory=list)
     journeys: list[JourneySpec] = Field(default_factory=list)
     usage_patterns: list[UsagePatternSpec] = Field(default_factory=list)
-    open_questions: list[str] = Field(default_factory=list)
 
 
 # --- Builder -------------------------------------------------------------------------------------

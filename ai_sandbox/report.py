@@ -74,16 +74,12 @@ def write_summary(run_dir: Path):
                       "- manufacturing kg: " + ", ".join(f"{k}={v}" for k, v in r["manufacturing_by_category_kg"].items() if v)]
         if r.get("raw_output"):
             try:
-                data = json.loads(r["raw_output"])
-                pretty = json.dumps(data, indent=1)
+                pretty = json.dumps(json.loads(r["raw_output"]), indent=1)
             except json.JSONDecodeError:
-                data, pretty = {}, r["raw_output"]
-            questions = data.get("open_questions") if isinstance(data, dict) else None
-            if questions:
-                lines += ["- open questions asked:"] + [f"  - {q}" for q in questions]
+                pretty = r["raw_output"]
             case = cases.get(r["case"], {})
             if case.get("facts_if_asked"):
-                lines += ["- facts the user could have given (for judging the questions above):"] + [
+                lines += ["- facts the user could have given:"] + [
                     f"  - **{k}**: {v}" for k, v in case["facts_if_asked"].items()]
             if case.get("expected_properties"):
                 lines += ["- expected properties (expert rubric):"] + [f"  - [ ] {e}" for e in case["expected_properties"]]
