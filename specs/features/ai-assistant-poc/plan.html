@@ -285,6 +285,13 @@
       <p><a href="#plan-update-02">[PLAN-UPDATE-02] No open questions in the generation feedback — ACCEPTED</a></p>
       <p><a href="#plan-update-03">[PLAN-UPDATE-03] zai-glm-5-3-flash is the default model — ACCEPTED</a></p>
     </aside>
+    <aside id="impl-decisions" data-note="review">
+      <p><strong>Implementation decisions</strong></p>
+      <p><a href="#impl-decision-01">[IMPL-DECISION-01] Read-back converts a copy of each value, not the live quantity — APPLIED</a></p>
+      <p><a href="#impl-decision-02">[IMPL-DECISION-02] Pre-existing defect: detached contextual containers crashed a delete after a referrer was deleted in the same ModelWeb — APPLIED</a></p>
+      <p><a href="#impl-decision-03">[IMPL-DECISION-03] The edit path persists through persist_structural_change, not persist_to_cache — APPLIED</a></p>
+      <p><a href="#impl-decision-04">[IMPL-DECISION-04] Re-lists cascade-delete orphaned children and echoed fields are ignored — APPLIED</a></p>
+    </aside>
   </header>
 
   <section id="walkthrough">
@@ -550,7 +557,7 @@ answer, _, error = parse_json(completion.text)
 if answer is None:
     raise AssistantError(f"The answer is not JSON: {error}")
 feedback["applied"] = apply_edits(answer, model_web)   # mutates the in-memory model, raises on the first problem
-model_web.persist_to_cache()                            # the only write of this path
+persist_structural_change(model_web, input_catalog)    # the only write of this path (IMPL-DECISION-03)
 feedback["note"] = answer.get("note", "")</code></pre>
       </div>
       <p><strong>Reading the model back.</strong> <code>system_to_dsl(model_web)</code> in <code>edit.py</code> is the
@@ -561,7 +568,7 @@ feedback["note"] = answer.get("note", "")</code></pre>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:364:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L364:1"><code>ModelWeb.external_apis</code></a>,
         jobs, steps and journeys by walking
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:442:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L442:1"><code>ModelWeb.usage_patterns</code></a>.
-        Numeric fields are the tables of <a href="#shared">1.1</a> in reverse, <code>value.to(unit).magnitude</code>,
+        Numeric fields are the tables of <a href="#shared">1.1</a> in reverse, read as <code>value.value.to(unit).magnitude</code> on the underlying pint quantity (see <a href="#impl-decision-01">IMPL-DECISION-01</a>),
         with each value's <code>comment</code> back under <code>comments</code>. A usage pattern's <code>volume</code> and
         <code>growth_pct_per_year</code> are read from the <code>form_inputs</code> of its
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/builders/timeseries/explainable_hourly_quantities_from_form_inputs.py:13:1" data-review-source-href="../../../../e-footprint/efootprint/builders/timeseries/explainable_hourly_quantities_from_form_inputs.py#L13:1"><code>ExplainableHourlyQuantitiesFromFormInputs</code></a>
@@ -570,6 +577,23 @@ feedback["note"] = answer.get("note", "")</code></pre>
         and jobs are weighted dicts in the library (a job called twice has weight 2); the DSL lists the name as
         many times as its weight, the way the handwritten case already does. The read-back is lossy on purpose:
         what the DSL cannot say, the assistant cannot see or change, and it stays in the model untouched.</p>
+      <aside id="impl-decision-01" data-note="review">
+        <p><strong>[IMPL-DECISION-01] — APPLIED</strong> · newly discovered pre-existing library behavior, task 2 review</p>
+        <p>The plan and the task 2 brief prescribed <code>value.to(unit).magnitude</code> for the read-back. In
+          efootprint 27.0.0 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py:67:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_quantity.py#L67:1"><code>ExplainableQuantity.to()</code></a>
+          converts <em>in place</em> (<code>self.value = self.value.to(...)</code>, returns <code>self</code>), so
+          reading the model back changed the live objects' units: the handwritten case's API server storage went from
+          TB to GB, the chatbot and IoT examples' <code>request_duration</code> from ms to s, the video and IoT
+          examples' <code>data_transferred</code> from MB to kB. Footprints were unchanged, but task 3 reads the model
+          back before every edit and persists at the end, so each successful assistant edit would have silently saved
+          the user's display units converted.</p>
+        <p><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:50:1" data-review-source-href="../../../ai_sandbox/edit.py#L50:1"><code>_read_fields()</code></a> now converts the
+          underlying pint quantity (<code>value.value.to(unit).magnitude</code>) and leaves the
+          <code>ExplainableQuantity</code> alone. The round-trip test
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:94:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L94:1"><code>test_reading_a_built_model_back_rebuilds_the_same_footprint</code></a>
+          asserts the exported model is identical before and after <code>system_to_dsl</code>; it failed before the
+          fix. Rule carried into task 3: never read a live value through <code>ExplainableQuantity.to()</code>.</p>
+      </aside>
       <p><strong>The answer.</strong> The addendum <code>edit_prompt.md</code> is appended to the generation prompt, so
         the vocabulary is taught once. It asks for the objects that change, each reduced to its name and the
         fields that change, and for removals by name:</p>
@@ -592,7 +616,9 @@ feedback["note"] = answer.get("note", "")</code></pre>
         journey's <code>steps</code> and a step's <code>jobs</code> re-list all their children, new steps as full
         objects, jobs by name only since jobs are top level. No ids: names are what the DSL already uses for every
         reference and what the sandbox showed small models copy reliably, and dropping the id keeps the pydantic
-        specs unchanged. No null-reset and no tolerance comparison either: a present field is set, full stop.</p>
+        specs unchanged. No null-reset and no tolerance comparison: a present field is set, except that a field echoed with
+        its read-back value and no new comment is ignored, and a child left out of a re-list is deleted once nothing
+        uses it (<a href="#impl-decision-04">IMPL-DECISION-04</a>).</p>
       <p><strong>Applying.</strong> <code>apply_edits(answer, model_web)</code> builds the name lookups from the same
         walk as <code>system_to_dsl</code>, then works in order: new servers and APIs, new jobs, changed and new
         journeys and steps, new usage patterns, sets, removals. Everything mutates the hydrated library model
@@ -637,8 +663,8 @@ feedback["note"] = answer.get("note", "")</code></pre>
           experiment; change it by hand".</li>
       </ul>
       <p>Atomicity costs nothing: the model is mutated in memory and
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/model_web.py:187:1" data-review-source-href="../../../model_builder/domain/entities/web_core/model_web.py#L187:1"><code>ModelWeb.persist_to_cache()</code></a>
-        runs after the last operation, so a failure anywhere leaves the session's model as it was and the handler of
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>
+        (which ends in <code>persist_to_cache()</code>, see <a href="#impl-decision-03">IMPL-DECISION-03</a>) runs after the last operation, so a failure anywhere leaves the session's model as it was and the handler of
         1.3 re-hydrates a fresh <code>ModelWeb</code> for the render. Because the live model is edited, every id, every
         value outside the DSL vocabulary and every source, confidence and comment the user set survive, which is
         success criterion 2.</p>
@@ -655,6 +681,74 @@ feedback["note"] = answer.get("note", "")</code></pre>
           so "nothing half-applied" would need a session snapshot. Hand-set values, ids, sources, confidence and comments
           still survive (success criterion 2); what is lost is the form path's conditional-choice repair, replaced by
           setting a provider and its resolved instance type together and failing visibly if the library refuses the pair.</p>
+      </aside>
+      <aside id="impl-decision-02" data-note="review">
+        <p><strong>[IMPL-DECISION-02] — APPLIED</strong> · newly discovered pre-existing defect, task 3 review (commit <code>0ac6b40c</code>)</p>
+        <p>An answer removing a job and then its server (or API) failed with
+          <code>AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code>. Deleting the job leaves a
+          detached contextual wrapper on the server whose <code>modeling_obj_container</code> is <code>None</code>; the
+          library's own <code>modeling_obj_containers</code> skips such entries, but the interface's
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379:1"><code>ModelingObjectWeb.efootprint_contextual_modeling_obj_containers</code></a>
+          did not, so the list and dict container properties built on it crashed, and with them
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75:1"><code>DeleteObjectUseCase.check_can_delete()</code></a>
+          on the server. The same crash is the bug-fixes-2026-10 task 4 report (GitHub #151, a recurrent need's
+          delete re-render); that task is now marked shipped by this commit and its reproduction's expected-failure
+          marker is removed.</p>
+        <p>Fix: the property filters out detached entries, matching the library's rule in the one place both derived
+          properties read. Regression:
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>test_check_can_delete_ignores_a_referrer_deleted_in_the_same_model</code></a>.
+          List-held referrers (a pattern holding a journey) never had the problem. The CHANGELOG carries the fix line
+          the bug batch called for.</p>
+      </aside>
+      <aside id="impl-decision-03" data-note="review">
+        <p><strong>[IMPL-DECISION-03] — APPLIED</strong> · material plan difference, task 3 review</p>
+        <p>The plan's single write was <code>ModelWeb.persist_to_cache()</code>. Every form create and delete in the
+          app writes through
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>,
+          which reconciles the simplified-input bookmarks in <code>interface_config</code> before the same
+          <code>persist_to_cache()</code>; <code>DeleteObjectUseCase.execute()</code> is <code>_delete()</code> plus
+          that call. Persisting with the bare method left a removed object's bookmarked simplified inputs dangling
+          in the session config. The view now calls <code>persist_structural_change(model_web, input_catalog)</code> at
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:85:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L85:1"><code>views_ai_assistant.py</code></a>:
+          still the single write of the path, after the last mutation, and it restores the config when the write
+          fails. Row 2 bookmarks a field of the removed job and asserts the bookmark is dropped
+          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:100:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L100:1"><code>test_edit_changes_only_what_is_asked</code></a>).</p>
+      </aside>
+      <aside id="impl-decision-04" data-note="review">
+        <p><strong>[IMPL-DECISION-04] — APPLIED</strong> · material plan difference and lasting complexity in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:177:1" data-review-source-href="../../../ai_sandbox/edit.py#L177:1"><code>apply_edits()</code></a>, task 3 implementation and review</p>
+        <p><em>Orphans from a re-list.</em> The plan let a re-list simply replace a step's <code>jobs</code> or a
+          journey's <code>steps</code>. Two defects followed: a job left out of a step stayed in the saved model as an
+          orphan that neither the canvas nor the read-back can show, and a step left out of a journey was deleted
+          at once even when another journey still used it. The form path's <code>edit_with_cascade_cleanup</code>
+          deletes orphaned children, so the assistant now does the same: each re-list in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:322:1" data-review-source-href="../../../ai_sandbox/edit.py#L322:1"><code>_Edits._set_journeys()</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:345:1" data-review-source-href="../../../ai_sandbox/edit.py#L345:1"><code>_Edits._set_step()</code></a> records the children it drops; after all
+          <code>changed</code> entries, and before the explicit removals, every dropped child that nothing uses any
+          more is deleted through the same <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:393:1" data-review-source-href="../../../ai_sandbox/edit.py#L393:1"><code>_Edits.remove()</code></a>. A job moved to another
+          step survives. <code>remove()</code> tracks deleted ids and lists the steps and jobs a delete cascaded to,
+          so an answer removing a pattern, its journey and the journey's job in one go works and the feedback names
+          every deletion once. The prompt addendum states the rule.</p>
+        <p><em>Weights the DSL cannot say.</em> A surviving step keeps its own weight object in a journey re-list and
+          a job whose count is unchanged keeps its weight object in a step re-list, so hand-set sources and comments on
+          weights survive; a step re-list where a surviving job's weight is fractional is refused with the plan's
+          "change it by hand" message rather than rounded.</p>
+        <p><em>Echoes.</em> The plan said "a present field is set, full stop". Small models repeat whole objects, and
+          the read-back rounds to six significant figures and converts units, so an echoed value is not always equal to
+          the live one: echoing it replaced the value, its source and its comment, an echoed volume rebuilt the series
+          (flattening an uploaded, non-form series to a constant) and every echo produced a misleading "set …" line.
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:236:1" data-review-source-href="../../../ai_sandbox/edit.py#L236:1"><code>_Edits.change()</code></a> now compares each entry with its
+          <code>system_to_dsl</code> read-back through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:426:1" data-review-source-href="../../../ai_sandbox/edit.py#L426:1"><code>_changed_fields()</code></a> and drops a
+          field with the same value and no new comment before dispatch; describing-only fields (<code>kind</code>,
+          a job's <code>server</code>/<code>genai_api</code>, a pattern's <code>journey</code>, <code>device</code>,
+          <code>network</code>, <code>country</code>) are accepted when echoed and refused when different, under that
+          one rule. Known limit: a describing-only field echoed with a new comment counts as changed and is refused.
+          Tests: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:205:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L205:1"><code>test_an_echoed_field_keeps_its_hand_set_source_and_comment</code></a> and
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:220:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L220:1"><code>test_a_re_list_deletes_only_the_children_nothing_else_uses</code></a>.</p>
+        <p><em>Cost accepted.</em> <code>apply_edits</code> carries a dropped-children list, a removed-id set and a
+          read-back comparison that future maintainers must keep aligned with <code>system_to_dsl</code>; this is the
+          price of editing the live model without a second mapping and without silently destroying what the
+          assistant could not see.</p>
       </aside>
       <aside id="plan-decision-edit-vs-regenerate" data-note>
         <p><strong>Considered and kept out: edit as a regeneration</strong></p>
@@ -750,7 +844,7 @@ feedback["note"] = answer.get("note", "")</code></pre>
     <ul>
       <li><strong>Three plan updates accepted at the tasks stage</strong>, <a href="#plan-update-01">PLAN-UPDATE-01</a>,
         <a href="#plan-update-02">PLAN-UPDATE-02</a> and <a href="#plan-update-03">PLAN-UPDATE-03</a>; the spec was
-        edited to match. The task breakdown is in <a href="tasks.md">tasks.md</a>: task 1 is step A (plus the two moved
+        edited to match. The task breakdown is in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/ai-assistant-poc/tasks.md" data-review-source-href="tasks.md">tasks.md</a>: task 1 is step A (plus the two moved
         helpers and the changelog line), task 2 is steps B and C, task 3 is step D and the README paragraph; the dev-app
         part of step E is a deployment gate.</li>
       <li><strong>No dependency change.</strong> The three SDKs stay in the dev group of

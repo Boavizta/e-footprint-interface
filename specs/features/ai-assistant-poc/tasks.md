@@ -1,6 +1,6 @@
 # AI assistant proof of concept — tasks
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: under review
+Status: in progress (run A)
 
 Hackathon proof of concept: three tasks, one run, simplest code that works. Task 3 is the plan's cut line and can be
 dropped from the run without touching tasks 1 and 2.
@@ -28,7 +28,7 @@ plan and spec; no task is provisional.
 Goal: with the flag on, the builder page shows the assistant box; posting a description on an empty model replaces it
 with the generated model and shows the metrics line, the note and the raw answer; failures, edge models and the flag
 being off behave as the spec says. The non-empty branch answers "Editing is not available in this build" until task 3.
-Status: under review
+Status: done — reviewed range `e7ade421..7fbeac3e`
 Brief: [briefs/task-1.md](briefs/task-1.md)
 Repository: e-footprint-interface
 Files touched: `ai_sandbox/providers.py` (DEFAULT_MODELS order), `ai_sandbox/dsl.py` and `ai_sandbox/run.py` (move
@@ -50,7 +50,7 @@ the only judgment is the EcoLogits footprint line and the failure branch.
 ## Task 2 — Builder tables and read-back
 Goal: `dsl.py` exposes the DSL-to-library mapping as field tables and one builder per object kind (behavior unchanged),
 and new `ai_sandbox/edit.py` reads a hydrated `ModelWeb` back into the DSL vocabulary.
-Status: under review
+Status: done — reviewed range `7fbeac3e..2a5a7862`
 Brief: [briefs/task-2.md](briefs/task-2.md)
 Repository: e-footprint-interface
 Files touched: `ai_sandbox/dsl.py`, new `ai_sandbox/edit.py` (`system_to_dsl` only), `tests/integration/test_ai_assistant.py`.
@@ -66,8 +66,14 @@ out in the plan; the read-back needs ordinary judgment on web wrappers versus li
 Goal: on a non-empty model, the request is sent with the current model's DSL, the answer's changed, added and removed
 objects are applied to the live library model, and the session is persisted once at the end; any failure leaves the
 model untouched.
-Status: under review
-Brief: [briefs/task-3.md](briefs/task-3.md)
+Status: done — reviewed range `2a5a7862..20aac1a0` (includes the pre-existing defect fix `0ac6b40c`, see
+[IMPL-DECISION-02](plan.html#impl-decision-02); edit semantics in [IMPL-DECISION-03](plan.html#impl-decision-03) and
+[IMPL-DECISION-04](plan.html#impl-decision-04))
+Brief: [briefs/task-3.md]
+Supervisor decisions from the task 2 review (leads in [handoffs/task-2.md](handoffs/task-2.md)): never read live values through
+`ExplainableQuantity.to()` (in-place conversion); a volume edit keeps the current `start_date` and modeling duration; a step
+re-list refuses when a surviving job's weight is fractional; a journey re-list keeps each surviving step's weight; jobs read
+back without `server`/`genai_api` are opaque (re-listable, not editable).(briefs/task-3.md)
 Repository: e-footprint-interface
 Files touched: `ai_sandbox/edit.py` (`apply_edits`), new `ai_sandbox/prompts/edit_prompt.md`,
 `model_builder/adapters/views/views_ai_assistant.py` (non-empty branch, `EDIT_PROMPT`), `ai_sandbox/README.md`,

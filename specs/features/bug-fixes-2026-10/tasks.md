@@ -1,6 +1,6 @@
 # bug-fixes-2026-10 — tasks
 
-**Status:** diagnosed and planned 2026-10-21; nothing implemented. Each task links its diagnostic;
+**Status:** diagnosed and planned 2026-10-21; Task 4 shipped 2026-10-29 (see its status), nothing else implemented. Each task links its diagnostic;
 [`plan.html`](plan.html) digests them and orders the runs. Run them in order, each in a fresh
 `feature-implement` session.
 
@@ -209,6 +209,9 @@ unreachable `HX-Reswap: none` branch go.
 **Implementation:** standard — small diff, but an HTMX/OOB transition (full review surface).
 
 ## Task 4 — Deleting a recurrent need: ignore detached contextual containers when rendering cards
+
+**Status:** shipped 2026-10-29 by commit `0ac6b40c` during the `ai-assistant-poc` run A review (the assistant hit the same
+crash when removing a job and then its server in one answer); reproduction marker removed, CHANGELOG line added.
 
 **Goal:** Deleting a `RecurrentServerNeed` or any recurrent edge need (e.g. `RecurrentEdgeProcess`)
 re-renders the parent edge usage journey card without the deleted need, with no error modal.
