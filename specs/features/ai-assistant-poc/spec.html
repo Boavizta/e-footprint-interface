@@ -28,7 +28,7 @@
 <body>
 
 <h1>AI assistant proof of concept</h1>
-<p class="status">Status: Spec — under review · 2026-10-29</p>
+<p class="status">Status: Spec — approved, amended at the tasks stage · 2026-10-29</p>
 
 <section>
   <h2>1. Problem and audience</h2>
@@ -45,10 +45,10 @@
       is the interface wiring and the edit path.</li>
     <li><strong>Scope tradeoffs.</strong> Web modeling only: the assistant knows nothing about edge devices,
       functions and deployments, which removes the hardest third of the vocabulary and the problems the sandbox
-      found there, and cuts the prompt by about a third. No clarification questions before generation: the user is assumed to
-      write a good description, and the assistant's open questions are shown afterwards instead. No spending
-      guardrails: five people for a day is a couple of dollars at most. Edits go through the interface's own
-      create, edit and delete paths, so hand-set values survive an assistant edit; the assistant's vocabulary
+      found there, and cuts the prompt by about a third. No clarification questions before or after generation: the user is assumed to
+      write a good description, and the comments on generated values carry the assistant's assumptions. No spending
+      guardrails: five people for a day is a couple of dollars at most. Edits are applied in memory to the
+      live model through the sandbox builders and persisted once, so hand-set values survive an assistant edit; the assistant's vocabulary
       is a subset of the library's, so some requests cannot be expressed yet and fail visibly rather than
       silently. Usage frequency is unverified by construction, which is what the day is for.</li>
   </ul>
@@ -58,7 +58,7 @@
   <h2>2. Success criteria</h2>
   <ul>
     <li>With the active model empty, submitting a product description replaces it with a computed model whose
-      canvas renders, and the assistant's open questions appear under the prompt box.</li>
+      canvas renders, and the feedback line appears under the prompt box.</li>
     <li>With a non-empty active model, submitting a request changes the model as asked and nothing else: after
       "double the volume of the browsing usage pattern" that one value is doubled, and every other value, including values the user set by hand on fields the
       assistant does not know about, is still there with its source, confidence and comment.</li>
@@ -89,16 +89,16 @@
       <li>Empty model: the description becomes a full model, built with the sandbox vocabulary and the
         library's defaults for what the description does not state. Numbers the description implies are
         estimated and carry the assistant's one-line derivation as the value's comment.</li>
-      <li>Non-empty model: the request is applied as a set of edits to the current model through the same
-        paths a user's form submissions take, not a regeneration. Adding, changing and removing objects and
+      <li>Non-empty model: the request is applied as a set of edits to the current model, in memory and
+        persisted once, not a regeneration. Adding, changing and removing objects and
         values are all allowed in one request. An edit the assistant cannot express, or that the model rejects,
         fails the whole request with the reason shown; nothing is half-applied.</li>
-      <li>Technical feedback after each call: model, latency, cost, CO2-eq, and the assistant's open questions
-        or its note about what it did, with the raw answer in a collapsed block underneath.</li>
+      <li>Technical feedback after each call: model, latency, cost, CO2-eq, and, for an edit, the
+        assistant's note about what it did, with the raw answer in a collapsed block underneath.</li>
       <li>One server log line per call with the prompt, the model, the answer, tokens and cost, so the
         maintainer can read what was asked during the day; the box says so.</li>
-      <li>A model selector in the box, listing the sandbox's default models; the choice is kept for the
-        session and shown in the feedback line, so testers can compare models on the same request.</li>
+      <li>A model selector in the box, listing the sandbox's default models with zai-glm-5-3-flash
+        preselected; the choice is kept for the session and shown in the feedback line, so testers can compare models on the same request.</li>
       <li>A changelog entry marking the capability experimental and dev-only.</li>
     </ul>
   </details>
@@ -130,14 +130,12 @@
     <p><button type="button" id="go">Build the model</button>
       <label style="margin-left:1rem;font-size:.9rem">with
         <select id="model">
-          <option>claude-haiku-5-5</option><option>gpt-6-luna</option><option>zai-glm-5-3-flash</option>
+          <option>zai-glm-5-3-flash</option><option>claude-haiku-5-5</option><option>gpt-6-luna</option>
           <option>deepseek-v4-1-flash-1017</option><option>zai-glm-5-3</option>
         </select></label></p>
     <div class="feedback" id="feedback" hidden>
-      <p id="fb-ok"><strong>claude-haiku-5-5</strong> · 24.3 s · USD 0.0031 · 410 mg CO2-eq (EcoLogits) ·
+      <p id="fb-ok"><strong>zai-glm-5-3-flash</strong> · 24.3 s · USD 0.0031 · 410 mg CO2-eq (EcoLogits) ·
         values set from the description carry a comment, values the description does not state use library defaults.</p>
-      <p id="fb-questions">Open questions: Which OpenAI model powers the chat? · How large are uploaded photos? ·
-        Which cloud provider and region?</p>
       <p id="fb-note" hidden>Applied 2 changes: set volume of "Recipe browsing" to 5,200,000 per month; added job
         "Push notification" on "API server".</p>
       <p id="fb-err" class="error" hidden>The assistant's answer did not build: Unknown job 'Load feed' (known: ['Fetch feed', ...]). The model was not changed.</p>
@@ -159,7 +157,6 @@
             ? 'Double the browsing volume and add a push notification job on the API server'
             : "We're a recipe app with 200,000 monthly users in France who open it 3 times a week...";
           go.textContent = editing ? 'Apply to the model' : 'Build the model';
-          document.getElementById('fb-questions').hidden = editing;
           document.getElementById('fb-note').hidden = !editing;
           feedback.hidden = true;
         }
@@ -200,7 +197,9 @@
   <p>None open. Resolved on 2026-10-29: the raw answer is shown collapsed; the box sits at the lower right
   above the results band and is discovered after the picker; prompts and answers are logged for the day with a
   notice in the box; the <code>AI_ASSISTANT_ENABLED</code> flag stays. Scoped to web modeling the same day, gated on the edge
-  toggle and on edge objects in the model.</p>
+  toggle and on edge objects in the model. Amended at the tasks stage the same day (plan updates 01 to 03): no open
+  questions after generation; edits mutate the live model through the sandbox builders and persist once;
+  zai-glm-5-3-flash is the default model.</p>
 </section>
 
 <section>
