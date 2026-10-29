@@ -316,6 +316,7 @@
       <p><a href="#impl-decision-02">[IMPL-DECISION-02] Pre-existing defect: detached contextual containers crashed a delete after a referrer was deleted in the same ModelWeb — APPLIED</a></p>
       <p><a href="#impl-decision-03">[IMPL-DECISION-03] The edit path persists through persist_structural_change, not persist_to_cache — APPLIED</a></p>
       <p><a href="#impl-decision-04">[IMPL-DECISION-04] Re-lists cascade-delete orphaned children and echoed fields are ignored — APPLIED</a></p>
+      <p><a href="#impl-decision-05">[IMPL-DECISION-05] User request: the box only on the modeling view, collapsible and open by default — APPLIED</a></p>
     </aside>
   </header>
 
@@ -461,7 +462,26 @@ def ai_assistant(request):
   {% if ai_feedback %} … see 1.5 … {% endif %}
 &lt;/form&gt;</code></pre>
       </div>
-      <p><strong>After the range (b01c40ee).</strong> The box is now a <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L13:1">collapsible <code>details</code></a> open by default, its form has id <code>ai-assistant-form</code>, and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L9:1">the style rule also hides it</a> in the simplified-inputs view and while the results panel is open. The snippet above shows the delivered version. No IMPL-DECISION records this change, so it is left for the supervisor.</p>
+      <aside id="impl-decision-05" data-note="review">
+        <p><strong>[IMPL-DECISION-05] — APPLIED</strong> · material plan difference requested by the user on 2026-10-29, task 4 (range <code>19b1ef3e..f0cac452</code>)</p>
+        <p>The plan showed the box on every state of the builder page except edge modeling. The user asked for it on the
+          main modeling view only, and collapsible. The component is now a native
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:15:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L15:1"><code>details</code></a> element, open by default (a full builder re-render restores the default), with the
+          title line as its <code>summary</code> and the form inside as <code>#ai-assistant-form</code>; the
+          <code>hx-*</code> attributes, feedback block and select are unchanged. Two more
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:12:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L12:1"><code>hiding rules</code></a> join the edge-modeling one: <code>body[data-base-view="simplified"]</code>,
+          the attribute <code>setBaseView()</code> in
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:22:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L22:1"><code>workspace.js</code></a> already maintains for the
+          simplified-inputs workspace, and <code>#panel-result-btn[style*="height: 100%"] ~ #ai-assistant</code>, which
+          reads the results panel's existing open signal set by
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/hammer_utils.js:12:1" data-review-source-href="../../../theme/static/scripts/hammer_utils.js#L12:1"><code>displayPanelResult()</code></a>. A body class toggled in the open and
+          close functions was the first idea; it was rejected because builder re-renders into
+          <code>#main-content-block</code> replace the panel without that inline height and would leave the class stale.
+          Coupling accepted: the box must stay a later sibling of <code>#panel-result-btn</code> and the rule follows
+          the inline-height convention the <code>htmx:afterSettle</code> handler in the same script already relies on.
+          Verified in a headless browser on the e-commerce example: shown open on the modeling view, hidden in the
+          simplified view and while the results panel is open, the collapsed title line clear of the results bar.</p>
+      </aside>
       <p>The style block is in the component rather than in <code>custom.scss</code> so the experiment needs no SCSS
         rebuild and leaves no rule behind when deleted. <code>body.edge-modeling-on</code> is the class
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/edge_modeling_toggle.js:16:1" data-review-source-href="../../../theme/static/scripts/edge_modeling_toggle.js#L16:1"><code>applyEdgeModelingState()</code></a>
@@ -690,7 +710,11 @@ feedback["note"] = data.get("note", "")</code></pre>
           <code>persist_structural_change</code> and the request must persist only once it has fully succeeded. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:399:1" data-review-source-href="../../../ai_sandbox/edit.py#L399:1">A blocked delete</a> fails the request with the use case's reason.</li>
         <li><em>Not expressible</em>: <code>device</code>, <code>network</code>, <code>country</code>, <code>kind</code>,
           renames and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:424:1" data-review-source-href="../../../ai_sandbox/edit.py#L424:1"><code>null</code></a> values fail the request with "not supported by the assistant in this
-          experiment; change it by hand". <span data-chip="review">Needs supervisor resolution</span> Renames are not refused by a check: an unknown name is added as a new object (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:252:1" data-review-source-href="../../../ai_sandbox/edit.py#L252:1"><code>add()</code></a>), so the old object stays. Either a refusal is added or this line is changed to match.</li>
+          experiment; change it by hand". A rename cannot be detected: without ids, a renamed object is an unknown name and is
+          added as a new object by <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:252:1" data-review-source-href="../../../ai_sandbox/edit.py#L252:1"><code>add()</code></a>
+          while the old one stays, so the prompt forbids renames and the model is never damaged by one (the
+          duplicate is visible and removable). Resolved by the supervisor on 2026-10-29: a refusal is not possible
+          with name-only matching and the no-ids choice above stands.</li>
       </ul>
       <p>Atomicity costs nothing: the model is mutated in memory and
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/simplified_inputs.py:153:1" data-review-source-href="../../../model_builder/application/use_cases/simplified_inputs.py#L153:1"><code>persist_structural_change()</code></a>

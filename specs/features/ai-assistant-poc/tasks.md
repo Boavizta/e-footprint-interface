@@ -1,6 +1,7 @@
 # AI assistant proof of concept — tasks
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: in progress (run A)
+Status: run A delivered 2026-10-29 (tasks 1-4 done, global review done); final range `e7ade421..f0cac452` plus the
+plan guide and status commits. Outstanding: the deployment gate and the browser smoke below.
 
 Hackathon proof of concept: three tasks, one run, simplest code that works. Task 3 is the plan's cut line and can be
 dropped from the run without touching tasks 1 and 2.
@@ -16,6 +17,7 @@ dropped from the run without touching tasks 1 and 2.
 | 1 | Generate path end to end behind `AI_ASSISTANT_ENABLED`: box, route, view, feedback metrics, log line, refusals, changelog | [1.2](plan.html#box) · [1.3](plan.html#generate) · [1.5](plan.html#feedback) | e-footprint-interface | standard |
 | 2 | Builder refactor into field tables and per-object builders, plus `system_to_dsl` read-back with its round-trip test | [1.1](plan.html#shared) · [1.4](plan.html#edit) (read-back) | e-footprint-interface | standard |
 | 3 | Edit path: edit prompt addendum, `apply_edits`, the non-empty branch of the view, README paragraph | [1.4](plan.html#edit) | e-footprint-interface | hard |
+| 4 | Box refinement requested by the user on 2026-10-29: visible only on the modeling view (hidden in the simplified-inputs workspace and while the results panel is open), collapsible and open by default | [1.2](plan.html#box) | e-footprint-interface | easy |
 
 ## Plan amendments
 [Amendment index in the plan](plan.html#plan-updates). All three were accepted on 2026-10-29 and are integrated in the
@@ -86,6 +88,17 @@ Implementation: hard — `apply_edits` sequences coupled mutations on the hydrat
 registered in `ModelWeb`'s dicts, weighted-dict re-listing, paired provider/instance updates in one `ModelingUpdate`,
 delete internals without persistence) and two of those mechanisms are unconfirmed in the plan.
 
+## Task 4 — Box only on the modeling view, collapsible
+Goal: the assistant box is hidden while the simplified-inputs workspace is shown (`body[data-base-view="simplified"]`)
+and while the results panel is open (a sibling rule on the panel's existing inline-height open signal; no JS); the box
+is a native `details` element, open by default, so it can be collapsed to its title line.
+Status: done — reviewed range `19b1ef3e..f0cac452`, see [IMPL-DECISION-05](plan.html#impl-decision-05)
+Repository: e-footprint-interface
+Files touched: `model_builder/templates/model_builder/components/ai_assistant.html`.
+Acceptance: `poetry run pytest tests --ignore=tests/e2e` green; browser check of the three states on the dev app.
+Depends on: task 1.
+Implementation: easy — CSS rules on existing page state and a `details` wrapper.
+
 ## Gates and prerequisites
 - Deployment only: `AI_ASSISTANT_ENABLED=1` and the three provider keys set on the dev app.
 - Checked 2026-10-29 from the repo: the dev deployment installs the dev dependency group. `Dockerfile` runs a plain
@@ -95,3 +108,5 @@ delete internals without persistence) and two of those mechanisms are unconfirme
 - After the run: a browser smoke of both paths on the dev app with a real model; the box's bottom offset against the
   results band is tuned there.
 - No E2E test; the unit and integration suite is the gate: `poetry run pytest tests --ignore=tests/e2e`.
+- At archive: spec §5 "Providers" still says the three SDKs become runtime dependencies; the approved plan keeps them in the
+  dev group (checked against the Dockerfile above). Touch the spec line if the spec is kept.
