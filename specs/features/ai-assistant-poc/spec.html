@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI assistant proof of concept — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  .mockup textarea { width: 100%; box-sizing: border-box; font: inherit; padding: .4rem; }
+  .mockup button { font: inherit; padding: .3rem .8rem; }
+  .mockup .feedback { font-size: .85rem; color: #555; margin-top: .5rem; }
+  .mockup .error { color: #963939; }
+  .mockup .toggle { float: right; font-size: .8rem; }
+</style>
+</head>
+<body>
+
+<h1>AI assistant proof of concept</h1>
+<p class="status">Status: Spec — under review · 2026-10-29</p>
+
+<section>
+  <h2>1. Problem and audience</h2>
+  <ul>
+    <li><strong>Problem.</strong> Building a first e-footprint model takes a product person an hour of clicking
+      through forms they do not yet understand. The AI sandbox showed that a 2,000-token prompt turns a product
+      description into a computable model for well under a cent, with the structure right on every case. Nobody
+      has yet tried that from inside the interface, on their own description, and then asked for changes.</li>
+    <li><strong>Audience.</strong> The five Boavizta hackathon participants, for one day on the
+      <code>dev</code> deployment, plus the maintainer reading what they typed and what it cost. Not a
+      production feature: it is removed or re-specified after the hackathon.</li>
+    <li><strong>Why now.</strong> The hackathon is the one occasion with real users and real descriptions. The
+      sandbox harness (DSL, builder, provider adapters, catalog resolvers) already exists, so the marginal work
+      is the interface wiring and the edit path.</li>
+    <li><strong>Scope tradeoffs.</strong> No clarification questions before generation: the user is assumed to
+      write a good description, and the assistant's open questions are shown afterwards instead. No spending
+      guardrails: five people for a day is a couple of dollars at most. Manual edits on values the assistant's
+      vocabulary does not cover are lost when the assistant edits the model; the interface says so. Usage
+      frequency is unverified by construction, which is what the day is for.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. Success criteria</h2>
+  <ul>
+    <li>With the active model empty, submitting a product description replaces it with a computed model whose
+      canvas renders, and the assistant's open questions appear under the prompt box.</li>
+    <li>With a non-empty active model, submitting a request changes the model as asked and nothing else: after
+      "double the volume of the browsing usage pattern" that one value is doubled, and values the user had set
+      by hand on other objects are still there, provided they are values the assistant can express.</li>
+    <li>After every call, a feedback line shows the model used, latency in seconds, cost in USD and the call's
+      own footprint in mg CO2-eq computed with EcoLogits.</li>
+    <li>A failed call (provider error, unparseable answer, model that does not build) leaves the current model
+      untouched and shows the error text where the feedback line goes. Nothing is retried or hidden.</li>
+    <li>The prompt box exists only when the deployment enables it; <code>main</code> and production are
+      unchanged by the merge.</li>
+    <li>Each path has one automated test that runs without calling a provider.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. File paths, class/method/parameter names, refactor
+  instructions, internal hypotheses, and "mirror pattern X" code-level decisions belong in
+  <code>plan.html</code>, not here.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>A prompt box on the model builder page, visible when the feature is enabled.</li>
+      <li>Empty model: the description becomes a full model, built with the sandbox vocabulary and the
+        library's defaults for what the description does not state. Numbers the description implies are
+        estimated and carry the assistant's one-line derivation as the value's comment.</li>
+      <li>Non-empty model: the request is applied as a set of edits to the current model, not a regeneration.
+        Adding, changing and removing objects and values are all allowed in one request.</li>
+      <li>Technical feedback after each call: model, latency, cost, CO2-eq, and the assistant's open questions
+        or its note about what it did.</li>
+      <li>One assistant model, chosen by deployment configuration, defaulting to the one that won the sandbox
+        comparison.</li>
+      <li>A changelog entry marking the capability experimental and dev-only.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Clarification questions before generation, and any scripted or interactive question round.</li>
+      <li>Spending caps, rate limits, per-session quotas, abuse protection.</li>
+      <li>Preserving values outside the assistant's vocabulary across an assistant edit (the "sidecar").</li>
+      <li>Conversation memory: each prompt is independent, the model on the canvas is the only state.</li>
+      <li>Streaming, progress indication beyond a disabled box while the request runs, cancellation.</li>
+      <li>Model selection by the user, comparison of several models in the interface.</li>
+      <li>Any change to the examples, the guided tour, the simplified workspace or the comparison slot.</li>
+    </ul>
+  </details>
+</section>
+
+<section>
+  <h2>4. UX / interface</h2>
+  <p>One box under the toolbar, above the canvas. Its copy depends on whether the active model is empty.
+  The mockup below toggles between the two states and shows the feedback line after a call.</p>
+  <div class="mockup" id="mockup">
+    <label class="toggle"><input type="checkbox" id="nonempty"> model has content</label>
+    <p><strong>AI assistant</strong> <small>(experiment, dev only)</small></p>
+    <p id="hint">Describe your digital service: who uses it, how often, what it does, where it runs. The
+      assistant builds a first model you can then refine.</p>
+    <textarea rows="3" id="prompt" placeholder="We're a recipe app with 200,000 monthly users in France who open it 3 times a week..."></textarea>
+    <p><button type="button" id="go">Build the model</button></p>
+    <div class="feedback" id="feedback" hidden>
+      <p id="fb-ok"><strong>claude-haiku-5-5</strong> · 24.3 s · USD 0.0031 · 410 mg CO2-eq (EcoLogits) ·
+        values set from the description carry a comment, values the description does not state use library defaults.</p>
+      <p id="fb-questions">Open questions: Which OpenAI model powers the chat? · How large are uploaded photos? ·
+        Which cloud provider and region?</p>
+      <p id="fb-note" hidden>Applied 2 changes: set volume of "Recipe browsing" to 5,200,000 per month; added job
+        "Push notification" on "API server". Values you set by hand on fields the assistant cannot express may have been reset.</p>
+      <p id="fb-err" class="error" hidden>The assistant's answer did not build: Unknown job 'Load feed' (known: ['Fetch feed', ...]). The model was not changed.</p>
+    </div>
+    <script>
+      (function () {
+        const nonempty = document.getElementById('nonempty');
+        const hint = document.getElementById('hint');
+        const prompt = document.getElementById('prompt');
+        const go = document.getElementById('go');
+        const feedback = document.getElementById('feedback');
+        function render() {
+          const editing = nonempty.checked;
+          hint.textContent = editing
+            ? 'Ask for a change to the current model: add, change or remove objects and values. Each request is applied on its own.'
+            : 'Describe your digital service: who uses it, how often, what it does, where it runs. The assistant builds a first model you can then refine.';
+          prompt.placeholder = editing
+            ? 'Double the browsing volume and add a push notification job on the API server'
+            : "We're a recipe app with 200,000 monthly users in France who open it 3 times a week...";
+          go.textContent = editing ? 'Apply to the model' : 'Build the model';
+          document.getElementById('fb-questions').hidden = editing;
+          document.getElementById('fb-note').hidden = !editing;
+          feedback.hidden = true;
+        }
+        nonempty.addEventListener('change', render);
+        go.addEventListener('click', function () { feedback.hidden = false; });
+        render();
+      })();
+    </script>
+  </div>
+  <p>While a request runs, the box and button are disabled; the rest of the page stays usable but any other
+  server request waits behind the assistant call (see constraints). On success the whole builder re-renders
+  with the new model and the feedback line; on failure the builder re-renders unchanged with the error in the
+  feedback line.</p>
+</section>
+
+<section>
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Constitution.</strong> The library stays the modeling truth: the assistant produces the sandbox
+      vocabulary and the existing builder turns it into library objects; nothing is computed outside the
+      library. HTMX-first, no client-side state; server failures shown as rendered.</li>
+    <li><strong>Deployment.</strong> The dev app runs one web worker with a 120 s request timeout behind a
+      240 s proxy. A generation call takes 5 to 30 s depending on the model and the case; during that time
+      every other request to the dev app waits. Acceptable for five testers, stated here so nobody debugs it.</li>
+    <li><strong>Provider.</strong> One API key as an environment variable of the dev app; the matching SDK
+      becomes a runtime dependency instead of a dev one. The assistant model must exist in the EcoLogits
+      catalog for the footprint line, which is the case for the sandbox winners.</li>
+    <li><strong>Lifetime.</strong> One day of testing, then the flag is turned off and the feature is removed or
+      re-specified with questions and guardrails. The spec folder is archived either way.</li>
+    <li><strong>Changelog gate.</strong> Runtime code lands behind a flag, so it still gets its
+      <code>CHANGELOG.md</code> entry, marked experimental.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Open questions</h2>
+  <ul>
+    <li>Should the feedback also show the assistant's raw answer (DSL or edit list) in a collapsible block,
+      for the maintainer's benefit? Costs nothing, may distract testers.</li>
+    <li>Does the box replace the first-run example picker when the model is empty, or sit next to it? The
+      mockup assumes next to it: the picker stays the default entry.</li>
+    <li>Keep the prompt and the answer in the server log for the day, so the maintainer can read what people
+      asked? Needs a one-line notice in the box.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end.</li>
+    <li>Read <code>plan.html</code> for ordered steps and test gates.</li>
+    <li>Read <code>ai_sandbox/README.md</code>: the DSL, builder, provider adapters and run findings this
+      feature reuses.</li>
+    <li>Re-read the relevant spec files (start at <code>specs/architecture/index.html</code>, then
+      <code>onboarding.html</code> and <code>persistence.html</code>, and <code>specs/conventions.md</code>).</li>
+  </ol>
+</section>
+
+</body>
+</html>
