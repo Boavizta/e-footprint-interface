@@ -27,7 +27,7 @@ from model_builder.domain.entities.web_core.model_web import ModelWeb
 from catalogs import resolve_cloud_instance, resolve_genai
 from dsl import (
     JOB_FIELDS, SERVER_FIELDS, SERVER_JOB_FIELDS, STEP_FIELDS, STORAGE_FIELDS, GenAIApiSpec, JobSpec, JourneySpec,
-    ServerSpec, StepSpec, UsagePatternSpec, VolumeSpec, _Shared, _volume_timeseries, build_genai_api, build_job,
+    ServerSpec, StepSpec, UsagePatternSpec, VolumeSpec, _Shared, _label, _volume_timeseries, build_genai_api, build_job,
     build_journey, build_server, build_step, build_usage_pattern)
 
 HOURS_PER_YEAR = 365 * 24
@@ -179,8 +179,9 @@ def apply_edits(answer: dict, model_web: ModelWeb) -> list[str]:
 
     Objects are matched by name within their section; a known name sets the listed fields that differ from the
     read-back (a describing-only field that differs is refused), an unknown one is a complete new object. Steps
-    and jobs a re-list leaves out are deleted once nothing uses them, as the form path's cascade does. Removals come last so a job re-listed and removed in one answer ends up removed. Any
-    problem raises before persistence, leaving the session's model as it was.
+    and jobs a re-list leaves out are deleted once nothing uses them, as the form path's cascade does. Removals come
+    last so a job re-listed and removed in one answer ends up removed. Any problem raises before persistence, leaving
+    the session's model as it was.
     """
     if not isinstance(answer, dict):
         raise ValueError("The answer must be a JSON object")
@@ -217,7 +218,8 @@ class _Edits:
     # --- lookups ---
 
     def find(self, section: str, name: str, candidates: list = None):
-        matches = [obj for obj in (self.objects[section] if candidates is None else candidates) if obj.name == name]
+        names = (name, _label(name, []))  # an added object is named as the builders label it
+        matches = [obj for obj in (self.objects[section] if candidates is None else candidates) if obj.name in names]
         if len(matches) > 1:
             raise ValueError(f"Two {KINDS[section]}s are named '{name}'; rename one by hand first")
         return matches[0] if matches else None

@@ -137,6 +137,42 @@ def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
 
 
 @pytest.mark.django_db
+def test_edit_on_a_loaded_example_keeps_its_horizon_ids_and_bookmarks(client, assistant_on, monkeypatch):
+    assert client.post("/model_builder/load-example/ecommerce/").status_code == 200
+    model_web = ModelWeb(SessionSystemRepository(client.session))
+    model_web.repository.interface_config = {"simplified_inputs": {"fields": {
+        job_id: {"data_transferred": {"included": True, "help": ""}} for job_id in ("Update-cart", "Submit-order")}}}
+    model_web.persist_to_cache()
+    exported_before = system_to_json(model_web.system.modeling_obj, save_computed_state=False)
+    answer = {"changed": {
+        "usage_patterns": [{"name": "Daily shoppers in France", "volume": {"value": 3600000, "per": "year"}}],
+        "jobs": [{"name": "push_notification", "server": "Web application server", "data_transferred_kb": 2}],
+        "journeys": [{"name": "Shopping journey", "steps": [
+            {"name": "Browse the catalog", "jobs": ["Serve catalog page", "Read product catalog", "push_notification"]},
+            {"name": "Add an item to the cart", "jobs": ["Update cart", "Write cart row"]},
+            {"name": "Check out", "jobs": ["Submit order", "Write order row"]}]}]},
+        "removed": {"jobs": ["Update cart"]}}
+    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(answer), []))
+
+    client.post(URL, {"prompt": "Double the French shoppers and add a push job", "model": "zai-glm-5-3-flash"})
+
+    edited = ModelWeb(SessionSystemRepository(client.session))
+    exported = system_to_json(edited.system.modeling_obj, save_computed_state=False)
+    assert exported["UsagePattern"]["Daily-shoppers-in-France"]["hourly_occurrences"]["form_inputs"] == {
+        "start_date": "2025-01-01", "modeling_duration_value": 3, "modeling_duration_unit": "year",
+        "initial_volume": 3600000.0, "initial_volume_timespan": "year", "net_growth_rate_in_percentage": 8.0,
+        "net_growth_rate_timespan": "year"}
+    assert exported["UsagePattern"]["Daily-shoppers-in-the-US"] == exported_before["UsagePattern"]["Daily-shoppers-in-the-US"]
+    steps = _steps(edited.system.modeling_obj)
+    assert [job.name for job in steps["Browse the catalog"].jobs] == [
+        "Serve catalog page", "Read product catalog", "Push notification"]
+    assert [job.name for job in steps["Add an item to the cart"].jobs] == ["Write cart row"]
+    assert set(exported_before["Job"]) - {"Update-cart"} <= set(exported["Job"])
+    assert edited.repository.interface_config["simplified_inputs"]["fields"] == {
+        "Submit-order": {"data_transferred": {"included": True, "help": ""}}}
+
+
+@pytest.mark.django_db
 def test_edit_answer_naming_an_unknown_job_leaves_the_model_untouched(client, assistant_on, monkeypatch):
     _generate_recipe_app(client, monkeypatch)
     before = SessionSystemRepository(client.session).get_system_data()

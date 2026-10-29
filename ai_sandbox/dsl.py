@@ -278,9 +278,11 @@ class _Shared:
 
 
 def _lookup(mapping: dict, name: str, kind: str):
-    if name not in mapping:
-        raise ValueError(f"Unknown {kind} '{name}' (known: {sorted(mapping)})")
-    return mapping[name]
+    """By the name as written, else as the builders label it (an edit's lookups are keyed by the model's names)."""
+    for key in (name, _label(name, [])):
+        if key in mapping:
+            return mapping[key]
+    raise ValueError(f"Unknown {kind} '{name}' (known: {sorted(mapping)})")
 
 
 def build_server(s: ServerSpec, resolutions: list[Resolution]) -> ServerBase:
