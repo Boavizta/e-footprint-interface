@@ -6,6 +6,8 @@
 );
 // Self-hosted Inter font (replaces Google Fonts CDN)
 @use "inter";
+// Design tokens (single source of colour, type and size values)
+@use "tokens";
 // import custom scss from static
 @use "custom";
 @use "sankey";

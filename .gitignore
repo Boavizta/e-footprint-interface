@@ -73,3 +73,6 @@ ai-usage/.local/
 !ai-usage/config.json
 !ai-usage/prices.json
 !.claude/settings.json
+
+# Design-system check output
+tests/design_system/screenshots/

@@ -4,7 +4,7 @@ import pytest
 from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
 
 
-UI_TOKENS = {
+UI_PLACEHOLDERS = {
     "infra_panel_add_button": {
         "display": "the Add button in the Infrastructure section",
         "selector": "#add_server",
@@ -14,7 +14,7 @@ UI_TOKENS = {
         "selector": "#fancy",
     },
 }
-HTML = build_html_handlers(UI_TOKENS, mkdocs_base_url="https://docs.example/")
+HTML = build_html_handlers(UI_PLACEHOLDERS, mkdocs_base_url="https://docs.example/")
 
 
 def test_html_class_handler_emits_button_with_label():

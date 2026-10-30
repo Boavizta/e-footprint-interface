@@ -83,7 +83,7 @@
   <p class="dc-note">The narrative <b>user-journey</b> docs (build-a-model, onboarding, view-results, audit-a-result, compare-models,
     save-and-load) and the design rationale live in <code>specs/design/</code> in the repo — they're version-controlled documentation,
     reviewed in PRs. This route is the complementary <em>live</em> surface for tokens and components.</p>
-  <div class="dc-live"><b>Live, not a mirror.</b> Change a token in <code>theme/static/scss/custom.scss</code> (recompiled to
+  <div class="dc-live"><b>Live, not a mirror.</b> Change a token in <code>theme/static/scss/_tokens.scss</code> (recompiled to
     <code>bs_main.css</code>) or a component partial under <code>model_builder/templates/</code>, and this page updates automatically —
     nothing to hand-sync.</div>
 
@@ -124,7 +124,7 @@
   </div>
 
   <p class="dc-note" style="margin-top:.5rem">Edge accent rationale, from the SCSS: <em>"Orthogonal to the teal/blue brand palette and to the red/amber/green confidence palette, so the edge marker reads as 'alternative category' rather than brand chrome or a status … Designer review pending."</em></p>
-  <p class="dc-note">Confidence maps to <code>--conf-high</code> / <code>--conf-medium</code> / <code>--conf-low</code> / <code>--conf-none</code> (background + foreground pairs in <code>custom.scss</code>); the source-link colour is <code>--source-accent</code>.</p>
+  <p class="dc-note">Confidence maps to <code>--conf-high</code> / <code>--conf-medium</code> / <code>--conf-low</code> / <code>--conf-none</code> (background + foreground pairs in <code>_tokens.scss</code>); the source-link colour is <code>--source-accent</code>.</p>
 
   <h3 class="dc-sub">Typography — fluid micro-headings</h3>
   <p class="dc-kick">The real <code>.h6</code>–<code>.h8</code> classes (Inter; <code>clamp()</code> sizes). Resize the window to see them flex.</p>

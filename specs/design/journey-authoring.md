@@ -70,7 +70,7 @@ Simplified but faithful: real structure, real copy, app palette; never pixel-per
 |---|---|
 | **Centered, not full-bleed** | `body { max-width: 70rem; margin: 0 auto }`. |
 | **One window per screen** | 430px `.win`. Show only the chrome the screen needs. |
-| **App-faithful palette** | Primary **navy `--new-primary #2D4675`**, `--new-light-primary #e8eaf4`, the `--gray-50…500` ramp, edge accent **`#7B5DC7`**, danger `#dc2626`. All as CSS vars in the template; values taken from `theme/static/scss/custom.scss`. |
+| **App-faithful palette** | Primary **navy `--new-primary #2D4675`**, `--new-light-primary #e8eaf4`, the `--gray-50…500` ramp, edge accent **`#7B5DC7`**, danger `#dc2626`. All as CSS vars in the template; values taken from `theme/static/scss/_tokens.scss`. |
 | **Help beside the window** | The `.mock-help` "On this screen" caption sits **below** the window — never overlaid on the screen content. |
 | **Real strings** | Button labels, panel headers, modal/tooltip/toast copy are copied from the templates / presenter / `ui_config`, not paraphrased. |
 | **Disabled-not-errored is the spine** | The app's defining rule: an impossible action is disabled with a tooltip reason, never offered then rejected. Show the gated state (locked add button + `.lock-tip`, dimmed `.resultsbar`) wherever it's part of the flow. |

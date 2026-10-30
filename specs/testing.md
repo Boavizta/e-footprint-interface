@@ -10,6 +10,7 @@ This is the canonical testing guide. `tests/AGENTS.md`, `tests/integration/AGENT
 | Python unit | `tests/unit_tests/` | pytest | Single-class behaviour: entity hooks, form parsing, view parameter mapping, UI config providers |
 | Integration | `tests/integration/` | pytest | Cross-layer workflows without a browser: create/edit/delete round-trips, cascade deletion, calculated attributes |
 | E2E | `tests/e2e/` | Playwright + pytest | Full user workflows in a real browser; anything involving HTMX swaps, JS interactions, or rendered output |
+| Design system | `tests/design_system/` | Playwright + axe-core | WCAG AA scan and screenshot of the live `/design` catalogue. Opt-in (`DESIGN_SYSTEM_CHECKS=1`) and alert-only in CI |
 
 ## Running tests
 
@@ -21,6 +22,8 @@ poetry run pytest
 poetry run pytest tests/unit_tests
 poetry run pytest tests/integration
 poetry run pytest tests/e2e --base-url http://localhost:8000   # requires running server
+DESIGN_SYSTEM_CHECKS=1 poetry run pytest tests/design_system   # requires running server
+npm run lint:css                                               # raw colours outside _tokens.scss
 
 # Jest
 npm run jest

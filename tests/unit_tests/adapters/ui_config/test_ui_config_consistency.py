@@ -10,7 +10,7 @@ from efootprint.utils.placeholder_resolver import extract_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
-from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
+from model_builder.adapters.ui_config.ui_placeholder_registry import UI_PLACEHOLDERS
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.services.object_linking_service import (
     dict_relationship_registry, reverse_list_membership_registry)
@@ -56,13 +56,13 @@ def _ui_tokens_used_in_interactions() -> set[str]:
 
 def test_every_ui_token_in_interactions_is_registered():
     used = _ui_tokens_used_in_interactions()
-    missing = used - set(UI_TOKENS.keys())
-    assert not missing, f"{{ui:...}} tokens used in class_ui_config.json without a UI_TOKENS entry: {missing}"
+    missing = used - set(UI_PLACEHOLDERS.keys())
+    assert not missing, f"{{ui:...}} tokens used in class_ui_config.json without a UI_PLACEHOLDERS entry: {missing}"
 
 
 def test_every_ui_token_has_non_empty_display():
-    for token, entry in UI_TOKENS.items():
-        assert entry.get("display"), f"UI_TOKENS[{token!r}].display is empty"
+    for token, entry in UI_PLACEHOLDERS.items():
+        assert entry.get("display"), f"UI_PLACEHOLDERS[{token!r}].display is empty"
 
 
 # ---- class_ui_config.json completeness -------------------------------------

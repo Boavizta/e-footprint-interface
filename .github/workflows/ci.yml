@@ -65,3 +65,62 @@ jobs:
 
             - name: Run E2E tests
               run: poetry run pytest tests/e2e --base-url http://localhost:8000
+
+    # Alert-only: failures show as warnings on the PR but never block a merge.
+    design-system:
+        runs-on: ubuntu-latest
+        continue-on-error: true
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - name: Install npm dependencies
+              run: npm ci
+
+            - name: Stylelint (raw colours outside _tokens.scss)
+              continue-on-error: true
+              run: npm run lint:css
+
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
+
+            - name: Install Poetry
+              run: pipx install "poetry>=2,<3"
+
+            - name: Install Python dependencies
+              run: |
+                  poetry config virtualenvs.in-project true
+                  poetry install
+
+            - name: Prepare Django
+              run: |
+                  echo DJANGO_PROD=False >> .env
+                  echo SECRET_KEY=ci_secret_key >> .env
+                  poetry run python manage.py migrate
+
+            - name: Install Playwright browsers
+              run: poetry run playwright install --with-deps chromium
+
+            - name: Start Django server
+              run: poetry run python manage.py runserver &
+
+            - name: Wait for server to be ready
+              run: until nc -z localhost 8000; do sleep 1; done
+
+            - name: Accessibility scan and screenshot of /design
+              env:
+                  DESIGN_SYSTEM_CHECKS: "1"
+              run: poetry run pytest tests/design_system --base-url http://localhost:8000
+
+            - name: Upload /design screenshot
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: design-catalogue-screenshot
+                  path: tests/design_system/screenshots/

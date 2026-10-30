@@ -8,7 +8,7 @@ from model_builder.adapters.ui_config.efootprint_description_provider import (
     EfootprintDescriptionProvider,
 )
 from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
-from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
+from model_builder.adapters.ui_config.ui_placeholder_registry import UI_PLACEHOLDERS
 
 
 PLACEHOLDER_RE = re.compile(r"\{(class|param|calc|doc|ui):[^}]+\}")
@@ -19,7 +19,7 @@ SEPARATOR = "<br><br>"
 
 @pytest.fixture
 def provider():
-    return EfootprintDescriptionProvider(build_html_handlers(UI_TOKENS, "https://docs.example/"))
+    return EfootprintDescriptionProvider(build_html_handlers(UI_PLACEHOLDERS, "https://docs.example/"))
 
 
 # ---- field_tooltip merging (drives the four _merge branches end-to-end) ----

@@ -44,7 +44,7 @@ Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.m
 
 Tokens (colour, type scale, spacing, radii) and the component inventory are **not static pages**; they live in the app's live, intentionally-**unlinked** catalogue at **`/design`** (`e_footprint_interface/views.py::design_catalogue` → `theme/templates/design/catalogue.html`). Production: `https://e-footprint.boavizta.org/design`; reachable by direct navigation only, communicated to contributors out of band — easy for non-dev contributors, no local setup.
 
-Why live, not static files: the page loads the app's own compiled CSS, so the **tokens are the real values** (`--new-primary #2D4675`, the `--gray-*` ramp, `--new-light-primary`, the orthogonal `--edge-paradigm-accent #7B5DC7`, the four-level `--conf-*` palette — all from `theme/static/scss/custom.scss`, the source of truth; never hand-edit `bs_main.css`). And it renders the **components from a real sample `ModelWeb`** (built from the maintained `ecommerce` intro example, in memory) through the real canvas and form pipeline — the live three-column canvas (cards, gated add buttons, relationships, inline counts) and a real edit side panel (fields, source/confidence, calculated attributes). So it **can't drift from what ships**, and there's nothing to hand-sync.
+Why live, not static files: the page loads the app's own compiled CSS, so the **tokens are the real values** (`--new-primary #2D4675`, the `--gray-*` ramp, `--new-light-primary`, the orthogonal `--edge-paradigm-accent #7B5DC7`, the four-level `--conf-*` palette — all from `theme/static/scss/_tokens.scss`, the source of truth; never hand-edit `bs_main.css`). And it renders the **components from a real sample `ModelWeb`** (built from the maintained `ecommerce` intro example, in memory) through the real canvas and form pipeline — the live three-column canvas (cards, gated add buttons, relationships, inline counts) and a real edit side panel (fields, source/confidence, calculated attributes). So it **can't drift from what ships**, and there's nothing to hand-sync.
 
 The narrative **journeys** stay as static, version-controlled HTML under `journeys/` — they're flows and decisions, not live-renderable. There is no `tokens.html` / `components.html` anymore (folded into the live route).
 
@@ -60,6 +60,14 @@ A fuller design system would add the following — none required for what's here
 - **Design-tool counterpart** — the system lives in code only; no Figma library for designers who don't work in code.
 - **Governance** — versioning / changelog / a contribution gate, beyond the sync protocol below.
 
+## Automated checks (alert-only)
+
+The CI `design-system` job reports on every PR without blocking the merge:
+
+- **Stylelint** (`npm run lint:css`) flags raw colours (hex, `rgb()`, `hsl()`) anywhere in `theme/static/scss/` except `_tokens.scss`.
+- **Accessibility** (`tests/design_system/`) runs axe-core against `/design` and lists serious or critical WCAG AA violations.
+- **Screenshot** — a full-page capture of `/design`, uploaded as the `design-catalogue-screenshot` artifact for visual review.
+
 ## What we deliberately do not version here
 
 - **Hi-fi mockups.** Link to Figma or attach images in PR descriptions; never embed them in repo markdown — they rot the moment design iterates.
@@ -73,7 +81,7 @@ The handoff fails when design output is mood-board-shaped and engineering has to
 
 | Design output | Lands as |
 |---|---|
-| Token change | Edit the SCSS (`theme/static/scss/custom.scss`, the source of truth) + recompile; the live `/design` catalogue reflects it automatically. |
+| Token change | Edit the SCSS (`theme/static/scss/_tokens.scss`, the source of truth) + recompile; the live `/design` catalogue reflects it automatically. |
 | New journey or journey revision | Screen-by-screen + state list → `journeys/<name>.html`. |
 | New or revised component | Variants × states matrix + prose → the component inventory, rendered from the real template. |
 

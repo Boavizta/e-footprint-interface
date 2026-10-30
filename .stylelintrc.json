@@ -1,0 +1,16 @@
+{
+    "customSyntax": "postcss-scss",
+    "rules": {
+        "color-no-hex": true,
+        "function-disallowed-list": ["rgb", "rgba", "hsl", "hsla"]
+    },
+    "overrides": [
+        {
+            "files": ["theme/static/scss/_tokens.scss"],
+            "rules": {
+                "color-no-hex": null,
+                "function-disallowed-list": null
+            }
+        }
+    ]
+}
