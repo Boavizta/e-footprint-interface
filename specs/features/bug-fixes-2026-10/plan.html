@@ -182,7 +182,7 @@
     <p>Reading order</p>
     <p class="cluster"><a href="#cluster-containers">1 · Containers and deletion</a></p>
     <ol>
-      <li><a href="#task-4">1.1 · Task 4 — detached containers</a></li>
+      <li><a href="#task-4">1.1 · Task 4 — detached wrappers (library)</a></li>
       <li><a href="#task-6">1.2 · Task 6 — library-built relationships</a></li>
       <li><a href="#task-8">1.3 · Task 8 — edge component no-op delete</a></li>
       <li><a href="#task-11">1.4 · Task 11 — delete only unlinks</a></li>
@@ -220,7 +220,7 @@
   </nav>
   <section id="modules">
     <h2>Changed files</h2>
-    <p>Select a task to highlight its files. Click a linked source file to open it in VS Code, or right-click it for a diff against <code>main</code>. HTML documentation opens in a new browser tab. Task links return to the walkthrough. Paths are relative to <code>e-footprint-interface/</code>; no library file changes.</p>
+    <p>Select a task to highlight its files. Click a linked source file to open it in VS Code, or right-click it for a diff against <code>main</code>. HTML documentation opens in a new browser tab. Task links return to the walkthrough. Paths are relative to each repository; only Task 4 changes library files.</p>
     <div id="change-tree">
       <details open>
         <summary>e-footprint-interface /</summary>
@@ -229,6 +229,11 @@
             <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md" data-review-source-href="../../../CHANGELOG.md"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
             <span data-reading-links><a href="#task-1">1</a>–<a href="#task-12">12</a></span>
             <small>One <code>## [Unreleased]</code> entry per bug task (Tasks 1–12); consolidate per run.</small>
+          </li>
+          <li id="f-pyproject" data-steps="task-4">
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/pyproject.toml:43:1" data-review-source-href="../../../pyproject.toml#L43"><code>pyproject.toml</code></a>, <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/poetry.lock" data-review-source-href="../../../poetry.lock"><code>poetry.lock</code></a> <span data-change="modified">Modified</span>
+            <span data-reading-links><a href="#task-4">T4</a></span>
+            <small>Committed path dependency during the batch; the deployment commit restores the release pin.</small>
           </li>
         </ul>
         <details open>
@@ -249,10 +254,10 @@
               <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-13">T13</a></span>
               <small>T6: <code>"ExternalAPIServer"</code> entry. T13: one resolver replaces both lookup rules.</small>
             </li>
-            <li id="f-mow" data-steps="task-4 task-6 task-13 task-14">
+            <li id="f-mow" data-steps="task-6 task-13 task-14">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-4">T4</a> · <a href="#task-6">T6</a> · <a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
-              <small>T4 then T6 on adjacent lines of the container properties; T13 resolver and <code>has_edit_panel</code>; T14 <code>wrap_explainable()</code>.</small>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
+              <small>T6 on the list-container property; T13 resolver and <code>has_edit_panel</code>; T14 <code>wrap_explainable()</code>.</small>
             </li>
             <li id="f-explainable-web" data-steps="task-14">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py"><code>entities/web_abstract_modeling_classes/explainable_objects_web.py</code></a> <span data-change="modified">Modified</span>
@@ -530,6 +535,54 @@
           </ul>
         </details>
       </details>
+      <details open>
+        <summary>e-footprint /</summary>
+        <ul>
+          <li id="f-lib-changelog" data-steps="task-4">
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/CHANGELOG.md" data-review-source-href="../../../../e-footprint/CHANGELOG.md"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
+            <span data-reading-links><a href="#task-4">T4</a></span>
+            <small><code>## [Unreleased]</code> fix entry.</small>
+          </li>
+        </ul>
+        <details open>
+          <summary>efootprint/abstract_modeling_classes/</summary>
+          <ul>
+            <li id="f-lib-contextual" data-steps="task-4">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py"><code>contextual_modeling_object_attribute.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+              <small>Wrappers register on attach and unregister on detach.</small>
+            </li>
+            <li id="f-lib-modeling-object" data-steps="task-4">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py"><code>modeling_object.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+              <small>Identity-based removal; two reader filters go.</small>
+            </li>
+            <li id="f-lib-reverse" data-steps="task-4">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/reactive_core/reverse_relationships.py" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/reactive_core/reverse_relationships.py"><code>reactive_core/reverse_relationships.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+              <small>Reader filter goes.</small>
+            </li>
+          </ul>
+        </details>
+        <details open>
+          <summary>specs/architecture/ and tests/abstract_modeling_classes/</summary>
+          <ul>
+            <li id="f-lib-relationships" data-steps="task-4">
+              <a href="../../../../e-footprint/specs/architecture/relationships.html#relationship-types" target="_blank" rel="noopener"><code>relationships.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+              <small>One line on the list's invariant.</small>
+            </li>
+            <li id="t-lib-contextual" data-steps="task-4">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/tests/abstract_modeling_classes/test_contextual_modeling_object_attribute.py" data-review-source-href="../../../../e-footprint/tests/abstract_modeling_classes/test_contextual_modeling_object_attribute.py"><code>test_contextual_modeling_object_attribute.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+            </li>
+            <li id="t-lib-update" data-steps="task-4">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/tests/abstract_modeling_classes/test_modeling_update.py" data-review-source-href="../../../../e-footprint/tests/abstract_modeling_classes/test_modeling_update.py"><code>test_modeling_update.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-4">T4</a></span>
+            </li>
+          </ul>
+        </details>
+      </details>
     </div>
   </section>
 </details>
@@ -550,14 +603,15 @@
   </header>
 
   <aside data-note="review">
-    <p><strong>Planning decisions (taken by default, open to review)</strong></p>
+    <p><strong>Planning decisions (open to review)</strong></p>
     <p><a href="#decision-eval">1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</a></p>
     <p><a href="#decision-s8">2 · Task 14 drops the S8 URL template tag — APPLIED</a></p>
+    <p><a href="#decision-task-4">3 · Task 4 moves to the library — APPLIED</a></p>
   </aside>
 
   <section id="walkthrough">
     <h2>Bugs by failure mechanism</h2>
-    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code>.
+    <p data-reading-note>Proposed changes, not implemented code. Paths are relative to <code>e-footprint-interface/</code> unless marked as library.
       Reading order follows the batch ordering rule; task numbers are stable labels.</p>
 
     <!-- ============================== Cluster 1 ============================== -->
@@ -572,18 +626,18 @@
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:412:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L412"><code>mirrored_cards</code></a>
         places cards; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75"><code>check_can_delete</code></a>
         chooses between "Yes, delete" and the blocking modal; <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:158:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L158"><code>_delete</code></a>
-        chooses between unlinking from containers and <code>self_delete()</code>. The properties miss three library facts:
-        detached wrappers stay in the raw list (Task 4); builders create some relationships in <code>after_init</code>, outside the
+        chooses between unlinking from containers and <code>self_delete()</code>. Three library facts break them:
+        detached wrappers stay in the raw list (Task 4, fixed in the library); builders create some relationships in <code>after_init</code>, outside the
         constructor (Tasks 6, 8); a pattern references its journeys without owning them (Task 11). Each mismatch surfaces as a
         crash, a false removal target or a delete that only unlinks. Owning page:
         <a href="../../architecture/forms-and-relationships.html#required-pattern-to-journey-relationships" target="_blank" rel="noopener">forms and relationships</a>.</p>
     </div>
 
     <article id="task-4" data-step>
-      <h3><a href="#task-4">Task 4 · Deleting a recurrent need: ignore detached contextual containers</a></h3>
-      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+      <h3><a href="#task-4">Task 4 · Deleting a recurrent need: a detached wrapper leaves its target's container list</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-need-delete-render-error.md" data-review-source-href="diagnostics/recurrent-need-delete-render-error.md">diagnostic</a> · GitHub #151</p>
-      <p data-files><span>Files</span> <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#f-changelog"><code>CHANGELOG.md</code></a></p>
+      <p data-files><span>Files</span> <a href="#f-lib-contextual"><code>contextual_modeling_object_attribute.py</code></a> · <a href="#f-lib-modeling-object"><code>modeling_object.py</code></a> · <a href="#f-lib-reverse"><code>reverse_relationships.py</code></a> · <a href="#f-lib-relationships"><code>relationships.html</code></a> · <a href="#t-lib-contextual">library tests</a> · <a href="#f-lib-changelog">library <code>CHANGELOG.md</code></a> · <a href="#f-pyproject"><code>pyproject.toml</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#f-changelog"><code>CHANGELOG.md</code></a></p>
       <dl>
         <dt>Symptom</dt>
         <dd>Deleting a <code>RecurrentServerNeed</code> or <code>RecurrentEdgeProcess</code> shows
@@ -594,9 +648,13 @@
         <dt>Root cause</dt>
         <dd>
           <p>The library unlinks by setting a contextual wrapper's container to <code>None</code> and leaves it in the target's raw
-            <code>contextual_modeling_obj_containers</code> list; library readers such as
-            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:460:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L460"><code>modeling_obj_containers</code></a> skip these detached wrappers,
-            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a> does not. The reporter located the error in the presenter;
+            <code>contextual_modeling_obj_containers</code> list. Dict keys don't: their wrappers leave the list on unlink and return on relink
+            (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/explainable_object_dict.py:401:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/explainable_object_dict.py#L401"><code>_remove_self_from_key_contextual_containers</code></a>). So direct and list relationships leave dead
+            entries that nothing wants, and each reader filters them:
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:460:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L460"><code>modeling_obj_containers</code></a>,
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:801:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L801"><code>nb_of_occurrences_per_container</code></a> and
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/reactive_core/reverse_relationships.py:74:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/reactive_core/reverse_relationships.py#L74"><code>_containers_of_member_type</code></a>.
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a> reads the same list without a filter. The reporter located the error in the presenter;
             the presenter is only the caller.</p>
           <ol>
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:695:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L695"><code>modeling_object.py:695</code></a> (library), in the deleted need's
@@ -628,15 +686,37 @@ AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code></pr
             <code>RAISE_EXCEPTIONS=1 poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"</code>.</p>
         </dd>
         <dt>Fix</dt>
-        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a>
-          returns only entries whose <code>modeling_obj_container is not None</code>. Both container properties read through it,
-          so <code>w1</code> and <code>w4</code> are skipped and the dict property's implicit guard becomes explicit too. This also fixes the latent same crash after an
-          <code>edge_device</code> relink.</dd>
+        <dd>
+          <p><strong>Library:</strong> <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py:25:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py#L25"><code>set_modeling_obj_container</code></a> keeps the raw list to exactly the attached wrappers,
+            next to the reverse-node bump for the same transition. The constructor registers only when it is given a container.</p>
+          <div data-code>
+            <p data-code-file><code>contextual_modeling_object_attribute.py</code> <small>proposed</small></p>
+            <pre><code>if previous_container is not new_parent_modeling_object:
+    if new_parent_modeling_object is None:
+        self._value.remove_from_contextual_modeling_obj_containers(self)
+    elif previous_container is None:
+        self._value.add_to_contextual_modeling_obj_containers(self)
+    bump_reverse_nodes(self._value, previous_container)
+    bump_reverse_nodes(self._value, new_parent_modeling_object)</code></pre>
+          </div>
+          <ul>
+            <li>Removal compares by identity. <code>__eq__</code> compares <code>_value</code>, so every wrapper on a target is "equal" and <code>list.remove</code> would drop a sibling's.</li>
+            <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_update.py:181:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_update.py#L181"><code>ModelingUpdate.rollback</code></a> re-attaches old wrappers, which registers them again. They return at the end of the list.</li>
+            <li>The three reader filters above go. The dict-key path stays as it is.</li>
+          </ul>
+          <p><strong>Interface:</strong> remove the reproduction's marker and add the changelog entry, running against the local library. The deployment commit restores the pin.
+            <a href="#f-mow"><code>modeling_object_web.py</code></a> doesn't change. This also fixes the latent same crash after an <code>edge_device</code> relink.</p>
+        </dd>
         <dt>Tests</dt>
-        <dd>The reproduction is the only test; its programmatic <code>edge_system_data</code> fixture and <code>_id_by_name</code> helper are reused by
-          Task 8's reproduction. Discrimination: the filter patched in makes both cases pass.</dd>
+        <dd>Library: invariant tests on the wrapper and on <code>ModelingUpdate</code> (accepted update, rejected update, sibling wrappers on one target, <code>self_delete</code>).
+          Interface: the reproduction; its programmatic <code>edge_system_data</code> fixture and <code>_id_by_name</code> helper are reused by Task 8's reproduction.
+          Discrimination, on a scratch copy of the library at <code>20ba9f05</code>: both reproduction cases report <code>XPASS(strict)</code> with no interface change;
+          the library suite passes unchanged (1639); the interface non-E2E suite has only those two strict failures (1050 passed);
+          a rejected list update restores the same wrapper objects.
+          Detach plus attach on the benchmark's <code>big_system.json</code> went from 7.6 to 8.2 µs, at a largest fan-in of 10 wrappers.</dd>
         <dt>Flags</dt>
-        <dd>Once shipped, nested-child deletions surface Task 3's hyperscript "is null" console error, which the crash masked today.</dd>
+        <dd>Until the <a href="#execution-plan">deployment commit</a>, <code>dev</code> carries the path dependency, so it can't be pushed to preprod.
+          Once shipped, nested-child deletions surface Task 3's hyperscript "is null" console error, which the crash masked today.</dd>
       </dl>
     </article>
 
@@ -1427,13 +1507,13 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
   <!-- ============================== Execution plan ============================== -->
   <section id="execution-plan">
     <h2>Execution plan</h2>
-    <p>Three <code>feature-implement</code> runs, each in a fresh session, in this order. Every bug task adds a <code>CHANGELOG.md</code> entry under
-      <code>## [Unreleased]</code>; consolidate them within a run. Nothing is cross-repository; no migration or serialization change.</p>
+    <p>Three <code>feature-implement</code> runs, each in a fresh session, in this order, then the deployment commit. Every bug task adds a <code>CHANGELOG.md</code> entry under
+      <code>## [Unreleased]</code>; consolidate them within a run. Only Task 4 is cross-repository; no migration or serialization change.</p>
     <ol id="runs">
       <li><strong>Run A · silent correctness and the deletion chain — Tasks 5 → 4 → 6 → 8 → 11 → 3</strong>
         <ul>
           <li>Task 5 is independent and fixes a silently wrong total; it goes first.</li>
-          <li>4 then 6: adjacent lines of the same container property in <a href="#f-mow"><code>modeling_object_web.py</code></a> (independent behavior, ordered to avoid conflicts). 6 → 8 → 11 is a hard chain: Task 8 needs Task 6's <code>.get</code> skip and must follow it directly; Task 11 needs Task 8.</li>
+          <li>Task 4 lands its library part first, then its interface part, with <code>dev</code>'s committed path dependency on <code>../e-footprint</code> picking up the library change directly. 4 then 6 is soft: Task 6 needs no <code>None</code>-container guard once Task 4 has landed. 6 → 8 → 11 is a hard chain: Task 8 needs Task 6's <code>.get</code> skip and must follow it directly; Task 11 needs Task 8.</li>
           <li>Task 3 last: Task 11 rewrites the <code>_delete</code> tail that Task 3 adds <code>web_id</code> to; after Task 4, nested-need deletions stop crashing and also rely on Task 3's server-side card removal.</li>
           <li>Shared test files: <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> (4, 8; Task 8's reproduction reuses Task 4's <code>edge_system_data</code> fixture).</li>
           <li>Reproductions, unmasked; Task 3's is E2E and needs a running server:
@@ -1441,7 +1521,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
             <code>poetry run pytest --runxfail "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error" --base-url http://localhost:8000</code>.
             Each fix removes its own marker; Task 8's reproduction passes only once Task 6 has landed.</li>
           <li>User-facing behavior change to call out at review: journeys held by a pattern are now blocked (Task 11).</li>
-          <li>Validation: non-E2E suite; local E2E server for Task 3.</li>
+          <li>Validation: library suite and <code>benchmark_baselines.py</code> for Task 4; non-E2E suite; local E2E server for Task 3.</li>
         </ul></li>
       <li><strong>Run B · contained UI fixes — Tasks 9 → 10 → 12 → 2 → 1 → 7</strong>
         <ul>
@@ -1459,13 +1539,19 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
           <li>Task 14 needs Task 10 (and 9); S8 is out (<a href="#decision-s8">decision 2</a>). It shares the ancestor templates with Task 13.</li>
           <li>Task 15 runs last and locks in Tasks 4–14.</li>
         </ul></li>
+      <li><strong>Deployment commit · library release and interface pin</strong>
+        <ul>
+          <li>The user publishes the library release. Then <a href="#f-pyproject"><code>pyproject.toml</code></a> and <code>poetry.lock</code> pin it, replacing the path dependency, and the interface changelog entry names the upgrade. Follow <code>RELEASE_PROCESS.md</code>.</li>
+          <li>Only this commit makes <code>dev</code> deployable, so preprod testing of the batch comes after it.</li>
+          <li>Validation: non-E2E suite on the published pin.</li>
+        </ul></li>
     </ol>
 
     <figure>
       <div>
         <svg viewBox="0 0 760 250" role="img" aria-labelledby="dep-title dep-desc">
           <title id="dep-title">Task dependencies</title>
-          <desc id="dep-desc">4 and 6 share lines; hard chain 6 to 8 to 11; 8 to 13; 9 to 10 to 14; soft orderings and shared files as described in the runs.</desc>
+          <desc id="dep-desc">4 before 6 is a soft ordering; hard chain 6 to 8 to 11; 8 to 13; 9 to 10 to 14; soft orderings and shared files as described in the runs.</desc>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#21312f"/></marker>
             <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#835219"/></marker>
@@ -1481,7 +1567,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
             <a href="#task-8"><rect x="340" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="365" y="55">8</text></a>
             <a href="#task-11"><rect x="430" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="455" y="55">11</text></a>
             <a href="#task-3"><rect x="520" y="35" width="50" height="30" rx="6" fill="#fff" stroke="#176751"/><text x="545" y="55">3</text></a>
-            <line x1="210" y1="50" x2="250" y2="50" stroke="#285e91" stroke-width="1.4" stroke-dasharray="1.5 3"/>
+            <line x1="210" y1="50" x2="248" y2="50" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
             <line x1="300" y1="50" x2="338" y2="50" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
             <line x1="390" y1="50" x2="428" y2="50" stroke="#21312f" stroke-width="1.6" marker-end="url(#arrow)"/>
             <line x1="480" y1="50" x2="518" y2="50" stroke="#835219" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-soft)"/>
@@ -1512,8 +1598,8 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
           </g>
         </svg>
       </div>
-      <figcaption>Hard dependencies: 6 → 8 → 11, 8 → 13, 9 → 10 → 14. Soft ordering: 11 and 4 before 3 (shared tail, E2E coverage); Task 6 before Task 9's crawl.
-        Shared lines or files run back to back: 4/6 (<code>modeling_object_web.py</code>), 2/1 (<code>side_panel_utils.js</code>). Task 5 and 7 are independent.</figcaption>
+      <figcaption>Hard dependencies: 6 → 8 → 11, 8 → 13, 9 → 10 → 14. Soft ordering: 4 before 6 (no <code>None</code> guard needed); 11 and 4 before 3 (shared tail, E2E coverage); Task 6 before Task 9's crawl.
+        Shared files run back to back: 2/1 (<code>side_panel_utils.js</code>). Task 5 and 7 are independent.</figcaption>
     </figure>
 
     <h3>Deduplication verdicts</h3>
@@ -1521,7 +1607,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
       <table>
         <thead><tr><th scope="col">Pair</th><th scope="col">Verdict</th></tr></thead>
         <tbody>
-          <tr><td>4 · 6</td><td>Distinct: detached wrappers (<code>None</code> container) vs. non-constructor attribute names; adjacent lines, both needed.</td></tr>
+          <tr><td>4 · 6</td><td>Distinct: detached wrappers in the library's raw list vs. non-constructor attribute names in the interface; both needed.</td></tr>
           <tr><td>6 · 8</td><td>Distinct: Task 6 crashes on library-built relationships in the generic lookup; Task 8's overrides claim one as a removal target. Same library fact, different code.</td></tr>
           <tr><td>8 · 11</td><td>Distinct: Task 8 is one instance of Task 11's "only unlinks" class, but its cause is a false target. Task 11's tail alone would turn it into an error modal, not the blocking modal, and would not fix edit placement.</td></tr>
           <tr><td>3 · 12</td><td>Distinct: both meet root-form ids vs. nested <code>_in_</code> ids, but one is a client remover on delete and the other the highlight expansion; fixes live on different sides.</td></tr>
@@ -1545,7 +1631,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
   <!-- ============================== Decisions ============================== -->
   <section id="decisions">
     <h2>Planning decisions</h2>
-    <p>Both were taken as planning defaults and are already reflected above and in <code>tasks.md</code>; reverting either is a local edit.</p>
+    <p>All are already reflected above and in <code>tasks.md</code>. Decisions 1 and 2 were planning defaults, and reverting either is a local edit; decision 3 was the user's.</p>
 
     <aside id="decision-eval" data-note="review">
       <p><strong>1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</strong></p>
@@ -1570,6 +1656,15 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
         (that is S6's <code>template_kind</code>).</p>
       <p><strong>Applied:</strong> Task 14 keeps S6 and S10 and drops S8; a dict variant is added when such an attribute appears. Rejected alternative: keep the tag
         as originally approved.</p>
+    </aside>
+
+    <aside id="decision-task-4" data-note="review">
+      <p><strong>3 · Task 4 moves to the library — APPLIED</strong></p>
+      <p>Task 4 originally added an <code>is not None</code> filter to
+        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379"><code>efootprint_contextual_modeling_obj_containers</code></a>.
+        That is one more copy of a filter every library reader carries, and it encodes a library quirk rather than an interface rule. The library already prunes dict keys, so it has two conventions for one list.</p>
+      <p><strong>Applied (user decision, 2026-11-02):</strong> wrappers register and unregister themselves on attach and detach. <code>dev</code> runs on a committed path dependency, and the deployment commit restores the pin.
+        Rejected alternative: the one-line interface filter, which needs no release and leaves the dead entries in place.</p>
     </aside>
   </section>
 </main>

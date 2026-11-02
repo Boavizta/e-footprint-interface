@@ -208,37 +208,75 @@ unreachable `HX-Reswap: none` branch go.
 
 **Implementation:** standard — small diff, but an HTMX/OOB transition (full review surface).
 
-## Task 4 — Deleting a recurrent need: ignore detached contextual containers when rendering cards
+## Task 4 — Deleting a recurrent need: a detached wrapper leaves its target's container list
 
 **Goal:** Deleting a `RecurrentServerNeed` or any recurrent edge need (e.g. `RecurrentEdgeProcess`)
-re-renders the parent edge usage journey card without the deleted need, with no error modal.
-`ModelingObjectWeb.efootprint_contextual_modeling_obj_containers` skips the library's detached
-contextual wrappers (`modeling_obj_container is None`), as every library reader already does. Fixes
-GitHub #151, and the latent same-crash after an `edge_device` relink.
+re-renders the parent edge usage journey card without the deleted need, with no error modal. The
+library keeps `contextual_modeling_obj_containers` to exactly the attached wrappers: a contextual
+wrapper registers on its target when attached and removes itself when detached, the rule dict keys
+already follow. The readers' `is not None` filters go, and the interface needs no filter of its own.
+Fixes GitHub #151, and the latent same-crash after an `edge_device` relink. Settled 2026-11-02: fixed
+in the library, not in `ModelingObjectWeb`
+([decision 3](plan.html#decision-task-4)).
 
 **Diagnostic:** [`diagnostics/recurrent-need-delete-render-error.md`](diagnostics/recurrent-need-delete-render-error.md)
 
-**Repository:** `e-footprint-interface`
+**Repository:** cross-repo. Both parts land in the same run, the library part in `e-footprint` first.
+`dev` carries the committed path dependency on `../e-footprint` until the deployment commit, so it can't
+be pushed to preprod before then. The user publishes the library release at the end of the batch; no
+implementer publishes.
 
-**Files touched:**
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — filter
-  detached entries in `efootprint_contextual_modeling_obj_containers` (around lines 378–380).
+**Files touched — library part (`e-footprint`):**
+- `efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py` — `__init__` (around
+  line 17) registers only when given a container; `set_modeling_obj_container` (around line 25)
+  registers on `None` → container and removes on container → `None`.
+- `efootprint/abstract_modeling_classes/modeling_object.py` — new
+  `remove_from_contextual_modeling_obj_containers` beside `add_to_…` (around line 482). It rebuilds the
+  list with an `is not` comparison: `ContextualModelingObjectAttribute.__eq__` compares `_value`, so
+  every wrapper in the list is "equal" and `list.remove` would drop a sibling's wrapper. Drop the
+  filters in `modeling_obj_containers` (around line 460) and `nb_of_occurrences_per_container` (around
+  line 801).
+- `efootprint/abstract_modeling_classes/reactive_core/reverse_relationships.py` — drop the filter in
+  `_containers_of_member_type` (around line 84).
+- `specs/architecture/relationships.html` — one line in "Three relationship types": the list holds
+  exactly the attached wrappers.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
+**Files touched — interface part (`e-footprint-interface`):**
+- `CHANGELOG.md` — `## [Unreleased]` fix entry.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — no change.
+
+**Deployment commit, after the last run:** the user publishes the release, then `pyproject.toml` and
+`poetry.lock` pin it, following `RELEASE_PROCESS.md`, and the interface `CHANGELOG.md` entry names the
+upgrade.
+
 **Tests added/changed:**
-- `tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card`
-  — reproduction; remove its expected-failure marker. No other tests.
+- `e-footprint`: `tests/abstract_modeling_classes/test_contextual_modeling_object_attribute.py` — a
+  wrapper never attached is not registered; detaching removes only that wrapper among siblings on one
+  target; re-attaching registers it again; `self_delete` leaves no entry on a shared target.
+- `e-footprint`: `tests/abstract_modeling_classes/test_modeling_update.py` — an accepted list update
+  leaves no entry from the old list; a rejected one restores the same wrapper objects (the scratch
+  check's shape: `EdgeFunction.recurrent_edge_device_needs` plus a rejected sibling change).
+- `e-footprint-interface`:
+  `tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card`
+  — reproduction; remove its expected-failure marker, running against the local dependency.
 
 **Acceptance:**
-- The reproduction passes with its marker removed.
+- After any unlink, no entry of `contextual_modeling_obj_containers` has a `None` container, and a
+  rejected `ModelingUpdate` restores the list's wrappers.
+- `modeling_obj_containers`, `nb_of_occurrences_per_container` and reverse relationships return what
+  they returned before, without their filters. `tests/performance_tests/benchmark_baselines.py` shows
+  no meaningful regression.
+- The reproduction passes with its marker removed, against the local dependency.
 - Deleting a recurrent server or edge need on the Industrial IoT example shows no error modal; the
   canvas immediately matches what a reload shows.
 - Deletion of jobs, steps, usage patterns and edge components is unchanged.
 
-**Depends on:** none. Once shipped, nested-child deletions surface Task 3's hyperscript "is null"
-console error (previously masked by the crash).
+**Depends on:** none. Once shipped, nested-child deletions surface Task 3's hyperscript "is null" console error (previously masked by the
+crash).
 
-**Implementation:** easy — one-line filter with a verified cause; regression test shape is given.
+**Implementation:** standard — small diff with a verified cause, but it changes core link
+bookkeeping across two repositories.
 
 ## Task 5 — Round daily chart emissions to significant figures so totals match the library
 
@@ -298,7 +336,7 @@ diagnosing #151.
 **Files touched:**
 - `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` —
   `.get(attr_name)` and skip `None` in `list_containers_and_attr_name_in_list_container` (around lines
-  389–390), on top of Task 4's filter at 378–380.
+  389–390).
 - `model_builder/domain/efootprint_to_web_mapping.py` — `"ExternalAPIServer": ModelingObjectWeb`
   (around lines 52–54).
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
@@ -315,7 +353,8 @@ diagnosing #151.
   blocking modal naming the owner and leaves the model unchanged.
 - Jobs, needs, edge devices, CPU/RAM components and usage patterns behave as before.
 
-**Depends on:** Task 4 (adjacent lines of the same property). Task 8 must follow in the same run:
+**Depends on:** Task 4 (soft: after it, the property needs no `None`-container guard). Task 8 must
+follow in the same run:
 with Task 6 alone, an `EdgeStorage` edit from its newly openable panel saves but swaps a card id
 not on the canvas, so the edge computer card is not refreshed (Task 8's reproduction covers it).
 

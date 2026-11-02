@@ -53,7 +53,7 @@ is known: S1's post-delete check.
 - **`ModelingObjectWeb.self_delete` forward cascade** (`modeling_object_web.py:574-589`). `mod_obj_attributes` is wrapped
   by `__getattr__`, so the cascade recurses through web `self_delete` (and `ServerWeb.self_delete`'s services). The
   library's `modeling_obj_containers` already excludes detached wrappers (`e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:459-465`),
-  which is consistent with Task 4's filter.
+  and Task 4 removes them from the raw list.
 - **`source_table_row_editor_context` builds `{attr}-in-{object_id}` by hand**
   (`model_builder/adapters/views/source_table_row_editor_context.py:89-90`). This is deliberate: it serves a JSON-only path
   that avoids hydrating a `ModelWeb`, and it matches the library's non-dict id format

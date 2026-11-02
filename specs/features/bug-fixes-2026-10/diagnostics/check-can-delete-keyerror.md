@@ -57,7 +57,7 @@ With part 1 patched, the EcoLogits server panel still returns 500. Form building
 
 ### Interaction with Task 4 (#151)
 
-Task 4 adds a filter in `efootprint_contextual_modeling_obj_containers` (`modeling_object_web.py:378-380`) that drops detached entries (`modeling_obj_container is None`). This fix edits the loop directly below it (`:389-390`). The two changes are independent in behavior: Task 4 removes `None` containers, and this fix skips non-constructor attribute names. They touch adjacent lines of one property, so they should land in sequence (Task 4 first, then this one, or both by one implementer). After Task 4, this fix needs no `None` guard.
+Task 4 moved to the library on 2026-11-02: detached wrappers now leave `contextual_modeling_obj_containers`, so `efootprint_contextual_modeling_obj_containers` (`modeling_object_web.py:378-380`) returns only live entries with no interface change. This fix edits the loop that reads them (`:389-390`). The two changes are independent in behavior: Task 4 removes `None` containers, and this fix skips non-constructor attribute names. They no longer share lines. After Task 4, this fix needs no `None` guard. The Task 4 results recorded below used the earlier interface-side filter, which yields the same list.
 
 ## Reproduction
 
@@ -115,7 +115,7 @@ Rejected alternatives:
 
 ## Files to touch
 
-- `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py`: in `list_containers_and_attr_name_in_list_container` (`:389-390`), replace `container_signature[attr_name]` with `.get(attr_name)` and skip `None`. Rebase onto Task 4's `:378-380` filter.
+- `e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py`: in `list_containers_and_attr_name_in_list_container` (`:389-390`), replace `container_signature[attr_name]` with `.get(attr_name)` and skip `None`.
 - `e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py`: add `"ExternalAPIServer": ModelingObjectWeb` near `:52-54`.
 - `e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py`: remove the reproduction's expected-failure marker.
 - `e-footprint-interface/tests/unit_tests/domain/test_web_efootprint_wrappers.py`: drop `"ExternalAPIServer"` from the exclusion list in `test_make_sure_that_all_canonical_classes_are_mapped` (`:25`).
@@ -149,7 +149,7 @@ Rejected alternatives:
 - **§2.6:** a changelog entry is needed.
 - **Cross-repository:** none. The library semantics were read in the local `e-footprint` 27.0.0 checkout, which the interface venv resolves.
 - **Migration and serialization:** none.
-- **Ordering:** depends on Task 4 (#151), since both edit `modeling_object_web.py:378-395`. Land it after Task 4, or have one implementer do both.
+- **Ordering:** after Task 4 (#151), softly: once Task 4 has landed, this fix needs no `None` guard.
 - **Local-only validation:** none needed. All evidence comes from the Django test client against the shipped examples. Scratch harness (not committed): `/private/tmp/claude-502/-Users-vinville-dev-e-footprint-full-e-footprint-interface/23796261-1031-4f35-ab98-3b287a617058/scratchpad/keyerr/`.
 - **Unrelated observations (not diagnosed, out of scope; candidates for separate reports):**
   1. *Edge computer CPU/RAM (and likely appliance) component deletion is a silent no-op.* The overrides at `edge_computer_cpu_component.py:5-8` etc. declare the non-constructor `components` list a removal target. `ask-delete` on `Factory-sensor-CPU` offers "Yes, delete", and `delete-object` returns 200 and re-renders the Factory sensor card. The saved model still contains the CPU component with `components` unchanged. The expected behavior is probably the same blocking modal this fix gives EdgeStorage.
