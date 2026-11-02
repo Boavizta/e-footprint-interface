@@ -3,7 +3,7 @@
 The ``EFOOTPRINT_DESCRIPTION_PROVIDER`` module-level singleton is built at
 import time with HTML-mode handlers. Every method returns a placeholder-resolved
 ``SafeString`` (or ``None``); callers render with ``|safe`` and templates never
-see raw ``{kind:target}`` tokens.
+see raw ``{kind:target}`` placeholders.
 
 Interface-only abstract bases (``CLASS_UI_CONFIG`` keys that are not real
 efootprint classes, e.g. ``EdgeDeviceBase``) are first-class: class-level

@@ -1,4 +1,4 @@
-"""Registry of ``{ui:token}`` placeholders used in interface-side descriptions.
+"""Registry of ``{ui:target}`` placeholders used in interface-side descriptions.
 
 Placeholders reference UI elements (buttons, panels). Each entry carries a human
 ``display`` (rendered into help text) and an optional CSS ``selector`` (used

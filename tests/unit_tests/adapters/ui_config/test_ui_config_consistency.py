@@ -1,8 +1,8 @@
-"""Consistency invariants for class_ui_config.json and the UI token registry.
+"""Consistency invariants for class_ui_config.json and the UI placeholder registry.
 
 These guard the JSON edits in Step 3 (and any future ones) — every class key
 must reference a real efootprint class, every concrete class must be reachable
-via direct entry or MRO inheritance, and every {ui:token} used in interactions
+via direct entry or MRO inheritance, and every {ui:target} used in interactions
 must have a registered handler.
 """
 from efootprint.all_classes_in_order import ALL_EFOOTPRINT_CLASSES_DICT
@@ -40,9 +40,9 @@ EXCLUDED_CLASSES_FROM_UI_CONFIG: dict[str, str] = {
 }
 
 
-# ---- {ui:token} resolution -------------------------------------------------
+# ---- {ui:target} resolution ------------------------------------------------
 
-def _ui_tokens_used_in_interactions() -> set[str]:
+def _ui_placeholders_used_in_interactions() -> set[str]:
     used = set()
     for entry in CLASS_UI_CONFIG.values():
         text = entry.get("interactions")
@@ -54,15 +54,15 @@ def _ui_tokens_used_in_interactions() -> set[str]:
     return used
 
 
-def test_every_ui_token_in_interactions_is_registered():
-    used = _ui_tokens_used_in_interactions()
+def test_every_ui_placeholder_in_interactions_is_registered():
+    used = _ui_placeholders_used_in_interactions()
     missing = used - set(UI_PLACEHOLDERS.keys())
-    assert not missing, f"{{ui:...}} tokens used in class_ui_config.json without a UI_PLACEHOLDERS entry: {missing}"
+    assert not missing, f"{{ui:...}} placeholders used in class_ui_config.json without a UI_PLACEHOLDERS entry: {missing}"
 
 
-def test_every_ui_token_has_non_empty_display():
-    for token, entry in UI_PLACEHOLDERS.items():
-        assert entry.get("display"), f"UI_PLACEHOLDERS[{token!r}].display is empty"
+def test_every_ui_placeholder_has_non_empty_display():
+    for target, entry in UI_PLACEHOLDERS.items():
+        assert entry.get("display"), f"UI_PLACEHOLDERS[{target!r}].display is empty"
 
 
 # ---- class_ui_config.json completeness -------------------------------------
