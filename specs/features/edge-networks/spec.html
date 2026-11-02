@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edge wireless networks — interface — Spec</title>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6;
+         max-width: 52rem; margin: 2rem auto; padding: 0 1.2rem; color: #1a1a1a; }
+  h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: .3rem; }
+  h2 { margin-top: 2rem; }
+  .status { color: #666; font-size: .9rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  code { background: #f4f4f4; padding: .1rem .35rem; border-radius: 3px; font-size: .9em; }
+  details { margin: .6rem 0; border: 1px solid #e0e0e0; border-radius: 6px; padding: .4rem .8rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  .mockup { border: 1px dashed #999; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+  blockquote { border-left: 3px solid #ccc; margin: 1rem 0; padding: .2rem 1rem; color: #555; }
+  /* mockup-only styling, kept minimal and generic */
+  .mockup .panel { background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: .8rem 1rem; max-width: 30rem; }
+  .mockup .panel h4 { margin: 0 0 .6rem; font-size: 1rem; }
+  .mockup label { display: block; font-size: .85rem; margin: .5rem 0 .1rem; color: #333; }
+  .mockup select, .mockup input { width: 100%; padding: .3rem .4rem; font: inherit; border: 1px solid #bbb; border-radius: 4px; }
+  .mockup .row { display: flex; gap: .6rem; align-items: center; }
+  .mockup .src { font-size: .75rem; color: #666; }
+  .mockup .hint { font-size: .8rem; color: #555; background: #f1f1f1; padding: .4rem .6rem; border-radius: 4px; margin-top: .4rem; }
+  .mockup .btn { display: inline-block; padding: .3rem .7rem; border: 1px solid #888; border-radius: 4px; background: #f6f6f6; font-size: .85rem; }
+  .mockup .btn.purple { border-color: #8a5bb5; color: #5d3c80; }
+  .mockup .btn[aria-disabled="true"] { opacity: .5; }
+  .mockup .col { border: 1px solid #ddd; border-radius: 6px; padding: .6rem .8rem; background: #fff; margin: .4rem 0; }
+  .mockup .card { border: 1px solid #ccc; border-radius: 6px; padding: .5rem .7rem; margin: .4rem 0; background: #fff; font-size: .9rem; }
+  .mockup .chip { display: inline-block; background: #eee; border-radius: 10px; padding: 0 .5rem; font-size: .75rem; margin-left: .3rem; }
+  .mockup table { font-size: .85rem; }
+  .mockup .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<h1>Edge wireless networks — interface</h1>
+<p class="status">Status: Spec — under review · 2026-11-02 · Spec 2 of 2 in the
+<a href="README.md">edge-networks feature roadmap</a>.</p>
+<blockquote><strong>Dependency.</strong> This feature cannot start until the library feature
+(<code>e-footprint/specs/features/edge-networks/spec.html</code>) has been implemented: the three object types,
+their technology defaults, docstrings and parameter descriptions all come from the library. Plan against the
+implemented library, not against its spec.</blockquote>
+
+<section id="problem">
+  <h2>1. Problem and audience</h2>
+  <p>Once the library models wireless IoT links, interface users still cannot reach them: there is no way to
+  give an edge device a radio, to say how often it sends and how much, to declare the gateway on site, or to
+  see the gateway and the operator network in the results. The primary audience is the non-technical product
+  person who models an IoT fleet by clicking, and the industrial user who wants the technology comparison
+  without writing Python.</p>
+  <table>
+    <tr><th>Audience</th><th>Outcome</th></tr>
+    <tr><td>Non-technical product person</td>
+        <td>Picks a technology from a short list, sets how many messages per hour and how big they are, and gets
+        a footprint. Never sees a transmit power unless they open the advanced values.</td></tr>
+    <tr><td>Industrial user, edge mode</td>
+        <td>Adds the on-site gateway to the fleet group with a count, compares LoRaWAN against NB-IoT, sees the
+        gateway as its own line in the results.</td></tr>
+    <tr><td>Hardware-aware engineer</td>
+        <td>Overrides any default with a measured value and its source, as for every other input.</td></tr>
+  </table>
+  <p><strong>Why now.</strong> The library spec ships the objects; the interface is where most users meet them.
+  The interface already has every mechanic needed: component accordions on edge devices, component-need
+  accordions on device needs, group membership with counts, weekly-pattern builders, sources on every value,
+  and per-object results lines. This feature adds object types to those mechanics, not new mechanics.</p>
+  <p><strong>Scope tradeoffs taken.</strong></p>
+  <ul>
+    <li><strong>Defaults materialize on save, not live in the form.</strong> Creating a network interface asks
+    for a name and a technology only. The technology's sourced defaults appear in the card and edit panel once the
+    component is created, where any of them can be overridden. This avoids client-side prefill machinery for a
+    form that is filled once per device, and matches how the rest of the interface edits defaults.</li>
+    <li><strong>Advanced values collapsed.</strong> The edit panel shows technology, gateway and the fabrication
+    footprint up front; the radio physics (powers, bitrate, frame sizes, sync period, hops, error rate,
+    operator shares) sit in a collapsed "Advanced" group so the primary audience is not confronted with them.</li>
+    <li><strong>Gateway control follows the technology.</strong> For NB-IoT and SIGFOX the gateway control is
+    hidden with a one-line explanation, the disabled-instead-of-error rule; the library guard remains the
+    backstop for hand-crafted submissions.</li>
+    <li><strong>No new column, no new widget.</strong> The gateway is an "Add edge gateway" button in the
+    Infrastructure column next to edge devices and groups; it joins groups through the existing membership
+    controls and shows up in the existing results surfaces.</li>
+    <li><strong>No starter example in this iteration</strong> (open question 2).</li>
+  </ul>
+  <p><strong>Unverified frequency assumptions.</strong> IoT fleet modeling is a stated mission audience but there
+  is no usage measurement; the design keeps the per-model effort at three objects (interface, messaging need,
+  gateway) and assumes one technology per device.</p>
+</section>
+
+<section id="success">
+  <h2>2. Success criteria</h2>
+  <ol>
+    <li><strong>Add a network interface.</strong> From an edge device's components, the user adds a "Network
+    interface", gives it a name and picks one of the six technologies. After saving, the component card shows
+    the technology, and its edit panel shows every default with its source, grouped with the physics collapsed.
+    Overriding a value keeps the existing source and confidence conventions.</li>
+    <li><strong>Choose a gateway.</strong> The interface's edit panel offers existing edge gateways in a select
+    (none required). For NB-IoT and SIGFOX the control is hidden and a short line explains that the operator
+    network is charged automatically. Changing the technology on edit shows or hides the control accordingly.</li>
+    <li><strong>Add a messaging need.</strong> From a recurrent edge device need whose device has a network
+    interface, the user adds a "Messaging need" targeting that interface with a weekly messages-per-hour
+    pattern (existing weekly pattern builder) and a payload size. Saving recalculates and patches the
+    canvas in place like any component need.</li>
+    <li><strong>Add an edge gateway.</strong> In edge mode, the Infrastructure column has "Add edge gateway". The
+    form asks for a name, power, fabrication footprint and lifespan with defaults and sources, and offers the
+    existing group membership controls with counts. The gateway card lists the interfaces that use it and the
+    groups it belongs to; a group panel lists gateways beside devices with editable counts.</li>
+    <li><strong>Results.</strong> The gateway is its own node in the Sankey and its own line in the system
+    breakdown and source table, never folded into devices. The interface appears in its device's component
+    breakdown. The audit drill-down explains the operator share and the three energy terms through the
+    library's existing explainability.</li>
+    <li><strong>Guards.</strong> Deleting a gateway that interfaces still link to, or a gateway referenced by a
+    group, is refused with the existing explanation pattern. Library errors (lifespan shorter than usage span,
+    an operator-side link) are shown as the server renders them.</li>
+    <li><strong>Persistence.</strong> Download and upload round-trip models with the three new object types.
+    Models saved before this feature load unchanged.</li>
+    <li><strong>Onboarding copy.</strong> Canvas help and tooltips describe the three new object types in the
+    interface's writing style; the edge section of the build-a-model journey mentions them.</li>
+    <li><strong>Gates.</strong> Unit, integration and Jest suites pass; one E2E flow covers add interface,
+    add messaging need, add gateway, see results; the PyPI dependency is restored before merge; changelog entry.</li>
+  </ol>
+</section>
+
+<section id="scope">
+  <h2>3. Scope</h2>
+  <blockquote>Capability-level only. Wrapper classes, form configuration keys, templates and endpoints belong in
+  <code>plan.html</code>, written in the <code>spec-plan</code> stage.</blockquote>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Network interface as a selectable component type on edge devices built from components, with a
+      technology choice and collapsed advanced values.</li>
+      <li>Gateway select on the interface, hidden for operator-side technologies.</li>
+      <li>Messaging need as a selectable component-need type, with weekly messages-per-hour and payload size.</li>
+      <li>Edge gateway as an Infrastructure object in edge mode, with group membership and counts.</li>
+      <li>Gateway and interface in the Sankey, breakdown, source table and audit drill-down through existing
+      mechanisms.</li>
+      <li>Delete guards and server-rendered library errors.</li>
+      <li>Save/load round trip and the one-line canvas help, tooltips and journey mention.</li>
+      <li>One E2E flow, plus unit and integration coverage of the new wrappers and forms.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope (this iteration)</summary>
+    <ul>
+      <li>Network interfaces on edge computers and edge appliances (component-less device types). Their
+      component lists are internal; adding a radio to them is a follow-up once the component-built device path
+      has shipped.</li>
+      <li>Live prefill of defaults when the technology changes in an open form (defaults appear after save).</li>
+      <li>A starter example and guided-tour step for IoT fleets (open question 2).</li>
+      <li>Simplified-workspace fields for the new objects (open question 3).</li>
+      <li>A gateway-by-device breakdown view beyond the Sankey split.</li>
+      <li>A LoRaWAN spreading-factor selector (library open question 2).</li>
+    </ul>
+  </details>
+</section>
+
+<section id="ux">
+  <h2>4. UX / interface</h2>
+  <p>Three touch points, all inside existing surfaces. The first mockup is interactive: change the technology
+  to see the gateway control and the defaults react as they will after save.</p>
+
+  <h3>4.1 Edge device panel: add and edit a network interface</h3>
+  <div class="mockup" id="mock-interface">
+    <div class="panel">
+      <h4>Edit component — <span id="mi-name">Radio</span> <span class="chip">Network interface</span></h4>
+      <label for="mi-tech">Technology</label>
+      <select id="mi-tech">
+        <option>LoRaWAN</option><option>SIGFOX</option><option>NB-IoT</option>
+        <option>BLE</option><option>WiFi (power-saving)</option><option>Thread</option>
+      </select>
+      <div id="mi-gateway-row">
+        <label for="mi-gw">Edge gateway</label>
+        <select id="mi-gw"><option>— none —</option><option selected>Farm LoRa gateway</option></select>
+      </div>
+      <div id="mi-operator-row" class="hint hidden">No gateway to pick: the operator network is charged automatically
+        per device-hour (energy and embodied share shown below).</div>
+      <label for="mi-fab">Fabrication footprint (per unit)</label>
+      <div class="row"><input id="mi-fab" value="2 kg CO2e"><span class="src">Pirson &amp; Bol 2021</span></div>
+      <label for="mi-life">Lifespan</label>
+      <div class="row"><input id="mi-life" value="6 years"><span class="src">e-footprint hypothesis</span></div>
+      <details>
+        <summary>Advanced radio values (defaults from the technology, override any)</summary>
+        <table>
+          <tr><th>Value</th><th id="mi-col">LoRaWAN</th><th>Source</th></tr>
+          <tr><td>Transmit power</td><td id="mi-ptx">420 mW</td><td class="src" id="mi-src">Casals 2017</td></tr>
+          <tr><td>Receive power</td><td id="mi-prx">44 mW</td><td class="src">idem</td></tr>
+          <tr><td>Sleep power</td><td id="mi-psleep">4.3 µW</td><td class="src">idem</td></tr>
+          <tr><td>Bitrate</td><td id="mi-bitrate">5.5 kb/s</td><td class="src">idem</td></tr>
+          <tr><td>Max payload per frame</td><td id="mi-payload">222 B</td><td class="src">Morin 2017</td></tr>
+          <tr><td>Sync period / energy per sync</td><td id="mi-sync">asynchronous</td><td class="src">Morin 2017</td></tr>
+          <tr><td>Transmissions per message</td><td id="mi-ntx">1</td><td class="src">—</td></tr>
+          <tr><td>Packet error rate · hops</td><td>0 · 1</td><td class="src">user hypothesis</td></tr>
+          <tr id="mi-op-row" class="hidden"><td>Operator network per device-hour</td><td id="mi-op">—</td><td class="src">Malmodin 2018 / Ruiz 2022</td></tr>
+        </table>
+      </details>
+      <p style="margin:.8rem 0 0"><span class="btn">Save</span> <span class="btn">Cancel</span></p>
+    </div>
+    <p class="src" style="margin-top:.6rem">Creation asks only for name and technology; this edit panel is what the user
+      sees after saving. The "Advanced" group is collapsed by default.</p>
+    <script>
+      (function () {
+        var cols = {
+          "LoRaWAN":  {gw: true,  ptx: "420 mW", prx: "44 mW",  psleep: "4.3 µW", bitrate: "5.5 kb/s", payload: "222 B",  sync: "asynchronous", ntx: "1", src: "Casals 2017"},
+          "SIGFOX":   {gw: false, ptx: "147 mW", prx: "39 mW",  psleep: "4.3 µW", bitrate: "100 b/s",  payload: "12 B",   sync: "asynchronous", ntx: "3", src: "Gomez 2019", op: "to pin ÷ 8760 h"},
+          "NB-IoT":   {gw: false, ptx: "750 mW", prx: "225 mW", psleep: "25 µW",  bitrate: "25 kb/s",  payload: "1600 B", sync: "asynchronous (PSM)", ntx: "1", src: "Lauridsen 2018", op: "≈ 2.3 Wh + embodied share"},
+          "BLE":      {gw: true,  ptx: "24.1 mW", prx: "19.3 mW", psleep: "3.2 µW", bitrate: "2 Mb/s", payload: "245 B",  sync: "32 s / poll exchange", ntx: "1", src: "Morin 2017"},
+          "WiFi (power-saving)": {gw: true, ptx: "700 mW", prx: "170 mW", psleep: "9.5 µW", bitrate: "11 Mb/s", payload: "1280 B", sync: "≈ 18 h / beacon listen", ntx: "1", src: "Morin 2017"},
+          "Thread":   {gw: true,  ptx: "24.1 mW", prx: "19.3 mW", psleep: "8 µW", bitrate: "250 kb/s", payload: "≈ 100 B", sync: "2.5 s / 53 µJ per poll", ntx: "1", src: "Kim 2019 · Nordic 2023"}
+        };
+        var sel = document.getElementById("mi-tech");
+        function render() {
+          var c = cols[sel.value];
+          document.getElementById("mi-gateway-row").classList.toggle("hidden", !c.gw);
+          document.getElementById("mi-operator-row").classList.toggle("hidden", c.gw);
+          document.getElementById("mi-op-row").classList.toggle("hidden", c.gw);
+          document.getElementById("mi-col").textContent = sel.value;
+          ["ptx","prx","psleep","bitrate","payload","sync","ntx","src"].forEach(function (k) {
+            document.getElementById("mi-" + k).textContent = c[k];
+          });
+          document.getElementById("mi-op").textContent = c.op || "—";
+        }
+        sel.addEventListener("change", render);
+        render();
+      })();
+    </script>
+  </div>
+
+  <h3>4.2 Infrastructure column and group membership (edge mode on)</h3>
+  <div class="mockup">
+    <div class="col">
+      <strong>Infrastructure</strong>
+      <div style="margin:.4rem 0"><span class="btn">＋ Add server</span> <span class="btn purple">＋ Add edge device</span>
+        <span class="btn purple">＋ Add group</span> <span class="btn purple">＋ Add edge gateway</span></div>
+      <div class="card">▦ Soil sensor <span class="chip">Edge device</span><br>
+        <span class="src">Components: CPU · RAM · Radio (LoRaWAN → Farm LoRa gateway)</span></div>
+      <div class="card">⌂ Farm LoRa gateway <span class="chip">Edge gateway</span><br>
+        <span class="src">5 W · 25 kg CO2e · 6 years · used by: Radio (Soil sensor) · in group: Farm × 1</span></div>
+      <div class="card">▣ Farm <span class="chip">Edge device group</span><br>
+        <span class="src">Soil sensor × 80 · Farm LoRa gateway × 1</span></div>
+    </div>
+    <p class="src">The gateway form offers the same "join groups with counts" controls as a device. The group panel
+      lists it in the same device-counts list, with the same inline count and unlink controls.</p>
+  </div>
+
+  <h3>4.3 Results: the gateway is its own line</h3>
+  <div class="mockup">
+    <table>
+      <tr><th>Source</th><th>Manufacturing</th><th>Use</th><th>Total</th></tr>
+      <tr><td>Soil sensor (edge device) — includes Radio component</td><td>…</td><td>…</td><td>…</td></tr>
+      <tr><td><strong>Farm LoRa gateway (edge gateway)</strong></td><td>…</td><td>…</td><td>…</td></tr>
+      <tr><td>Backhaul network (existing network, via server-side job)</td><td>—</td><td>…</td><td>…</td></tr>
+      <tr><td>Ingest server</td><td>…</td><td>…</td><td>…</td></tr>
+    </table>
+    <p class="src">Same table, Sankey and drill-down as today; the gateway is one more top-level source. An NB-IoT
+      device shows its operator share inside its own line, explained in the drill-down.</p>
+  </div>
+</section>
+
+<section id="constraints">
+  <h2>5. Constraints</h2>
+  <ul>
+    <li><strong>Constitution.</strong> The library is the domain truth: no modeling logic in the interface, including
+    the technology defaults (read from the library). HTMX-first: hiding the gateway control on technology change
+    reuses the existing dynamic-form dependency mechanism or a server re-render, not a client data layer. PyPI
+    dependency restored before merge; changelog entry; no Django model change expected.</li>
+    <li><strong>Dict relationships.</strong> Gateways join groups through the existing weighted-dict membership
+    mechanism; the dict-relationship registry must resolve a gateway to the group's device-counts attribute through
+    the library's widened parent type (see <a href="../../architecture/forms-and-relationships.html#dict-based-relationships-explainableobjectdict">dict-based relationships</a>).</li>
+    <li><strong>Object descriptions</strong> come from the library's docstrings and parameter descriptions; the
+    interface adds only labels, category placement and constraint messages.</li>
+    <li><strong>Persistence.</strong> Saved-state export and import follow the existing JSON round trip; a model saved
+    before this feature must load unchanged (see <code>architecture/persistence.html</code>).</li>
+    <li><strong>Design docs.</strong> The build-a-model journey's edge section and the writing-style guide govern copy.</li>
+    <li>Owning pages: <code>architecture/forms-and-relationships.html</code>, <code>architecture/rendering.html</code>,
+    <code>architecture/persistence.html</code>, <code>design/journeys/build-a-model.html</code>.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>6. Open questions</h2>
+  <ol>
+    <li><strong>Where the gateway lives in the canvas.</strong> Recommendation: a fourth purple button in the
+    Infrastructure column, cards listed with edge devices (the library lists the gateway under the existing
+    "Edge devices" category). Alternative: its own list header. Decide at plan time if the column gets crowded.</li>
+    <li><strong>Starter example.</strong> A "LoRaWAN sensor fleet" example would make the feature discoverable to the
+    primary audience at low cost (one JSON file in the example picker). Include in this iteration, or follow up?</li>
+    <li><strong>Simplified workspace.</strong> Should messages per hour and payload size be exposed as simplified
+    inputs for the focused editor, or stay in the full panel only? Recommendation: full panel only in this
+    iteration.</li>
+    <li><strong>Edge computer and edge appliance.</strong> Confirm that giving those device types a radio is a
+    follow-up (their components are internal today).</li>
+  </ol>
+</section>
+
+<section id="resume">
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this file end to end, then <a href="README.md">the roadmap</a> and the library spec it points to.</li>
+    <li>Read <code>plan.html</code> (when written) for ordered steps and test gates.</li>
+    <li>Start at <code>specs/architecture/index.html</code> and follow its task router to forms and relationships,
+    rendering and persistence; then <code>specs/conventions.md</code> and <code>specs/testing.md</code>.</li>
+  </ol>
+</section>
+
+</body>
+</html>
