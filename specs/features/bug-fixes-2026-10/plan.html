@@ -220,7 +220,7 @@
   </nav>
   <section id="modules">
     <h2>Changed files</h2>
-    <p>Select a task to highlight its files. Click a linked file to open it in VS Code, or right-click it for a diff against <code>main</code>. Task links return to the walkthrough. Paths are relative to <code>e-footprint-interface/</code>; no library file changes.</p>
+    <p>Select a task to highlight its files. Click a linked source file to open it in VS Code, or right-click it for a diff against <code>main</code>. HTML documentation opens in a new browser tab. Task links return to the walkthrough. Paths are relative to <code>e-footprint-interface/</code>; no library file changes.</p>
     <div id="change-tree">
       <details open>
         <summary>e-footprint-interface /</summary>
@@ -503,23 +503,23 @@
           <summary>specs/</summary>
           <ul>
             <li id="d-forms-rel" data-steps="task-8 task-11">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:167:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L167"><code>architecture/forms-and-relationships.html</code></a> <span data-change="modified">Modified</span>
+              <a href="../../architecture/forms-and-relationships.html#required-pattern-to-journey-relationships" target="_blank" rel="noopener"><code>architecture/forms-and-relationships.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-8">T8</a> · <a href="#task-11">T11</a></span>
               <small>Library-built relationships are never removal targets; journeys blocked while any pattern holds them.</small>
             </li>
             <li id="d-rendering" data-steps="task-3 task-12">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:37:1" data-review-source-href="../../../specs/architecture/rendering.html#L37"><code>architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
+              <a href="../../architecture/rendering.html#rendering-in-the-web-context" target="_blank" rel="noopener"><code>architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-3">T3</a> · <a href="#task-12">T12</a></span>
             </li>
             <li id="d-workspace" data-steps="task-1">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:41:1" data-review-source-href="../../../specs/architecture/workspace.html#L41"><code>architecture/workspace.html</code></a>,
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/design/journeys/build-a-model.html:358:1" data-review-source-href="../../../specs/design/journeys/build-a-model.html#L358"><code>design/journeys/build-a-model.html</code></a>,
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/design/journeys/compare-models.html:638:1" data-review-source-href="../../../specs/design/journeys/compare-models.html#L638"><code>design/journeys/compare-models.html</code></a>,
+              <a href="../../architecture/workspace.html#two-resident-canvases-and-dom-identities" target="_blank" rel="noopener"><code>architecture/workspace.html</code></a>,
+              <a href="../../../specs/design/journeys/build-a-model.html" target="_blank" rel="noopener"><code>design/journeys/build-a-model.html</code></a>,
+              <a href="../../../specs/design/journeys/compare-models.html" target="_blank" rel="noopener"><code>design/journeys/compare-models.html</code></a>,
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/server-rendered-state-follow-up/kickoff.md:40:1" data-review-source-href="../../../specs/features/server-rendered-state-follow-up/kickoff.md#L40"><code>features/server-rendered-state-follow-up/kickoff.md</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
             </li>
             <li id="d-layers" data-steps="task-5">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/layers-and-wrappers.html:81:1" data-review-source-href="../../../specs/architecture/layers-and-wrappers.html#L81"><code>architecture/layers-and-wrappers.html</code></a> <span data-change="modified">Optional</span>
+              <a href="../../architecture/layers-and-wrappers.html#domain-services" target="_blank" rel="noopener"><code>architecture/layers-and-wrappers.html</code></a> <span data-change="modified">Optional</span>
               <span data-reading-links><a href="#task-5">T5</a></span>
             </li>
             <li id="d-testing" data-steps="task-15">
@@ -576,7 +576,7 @@
         detached wrappers stay in the raw list (Task 4); builders create some relationships in <code>after_init</code>, outside the
         constructor (Tasks 6, 8); a pattern references its journeys without owning them (Task 11). Each mismatch surfaces as a
         crash, a false removal target or a delete that only unlinks. Owning page:
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/forms-and-relationships.html:167:1" data-review-source-href="../../../specs/architecture/forms-and-relationships.html#L167">forms and relationships</a>.</p>
+        <a href="../../architecture/forms-and-relationships.html#required-pattern-to-journey-relationships" target="_blank" rel="noopener">forms and relationships</a>.</p>
     </div>
 
     <article id="task-4" data-step>
@@ -965,7 +965,7 @@ return (np.round(daily * scale) / scale).tolist()</code></pre>
         that lives in an optional side panel: the delete modal's hyperscript removes <code>#&lt;web_id&gt;</code> (Task 3); dict mutations always
         swap a membership section that exists only while the child's panel is open (Task 2); the highlight expansion assumes nested ids start with the
         canonical id (Task 12). The shared invariant: emit or address only what is mounted, expand the canonical id inside the canvas that owns it, and keep
-        highlight headers constant-size. Owning page: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/rendering.html:37:1" data-review-source-href="../../../specs/architecture/rendering.html#L37">rendering</a>.</p>
+        highlight headers constant-size. Owning page: <a href="../../architecture/rendering.html#rendering-in-the-web-context" target="_blank" rel="noopener">rendering</a>.</p>
     </div>
 
     <article id="task-3" data-step>
@@ -1312,7 +1312,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:127:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L127"><code>htmx:beforeRequest</code> guard</a> for elements whose own
         <code>hx-target</code> is <code>#sidePanel</code>, and an <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:162:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L162"><code>htmx:confirm</code> guard</a>
         for panel-discarding paths. Both store the request and continue it after "Yes, Continue", which the mission now forbids
-        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/mission.md:26:1" data-review-source-href="../../../specs/mission.md#L26">mission.md:26-28</a>). Owning page: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/architecture/workspace.html:41:1" data-review-source-href="../../../specs/architecture/workspace.html#L41">workspace</a>.</p>
+        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/mission.md:26:1" data-review-source-href="../../../specs/mission.md#L26">mission.md:26-28</a>). Owning page: <a href="../../architecture/workspace.html#two-resident-canvases-and-dom-identities" target="_blank" rel="noopener">workspace</a>.</p>
     </div>
 
     <article id="task-1" data-step>
