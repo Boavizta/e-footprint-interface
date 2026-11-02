@@ -6,7 +6,7 @@
     },
     "overrides": [
         {
-            "files": ["theme/static/scss/_tokens.scss"],
+            "files": ["theme/static/scss/_design_tokens.scss"],
             "rules": {
                 "color-no-hex": null,
                 "function-disallowed-list": null
