@@ -25,6 +25,7 @@ def test_capture_design_catalogue_screenshot(page: Page, base_url):
     """Full-page capture uploaded as a CI artifact, so a reviewer can eyeball visual changes."""
     page.set_viewport_size({"width": 1440, "height": 900})
     page.goto(f"{base_url}/design/")
-    page.wait_for_load_state("networkidle")
+    # Not "networkidle": with DEBUG=True, django-browser-reload holds an event stream open, so the page never idles.
+    page.evaluate("document.fonts.ready.then(() => true)")
     SCREENSHOT_DIR.mkdir(exist_ok=True)
     page.screenshot(path=str(SCREENSHOT_DIR / "design-catalogue.png"), full_page=True)
