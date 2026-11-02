@@ -462,12 +462,12 @@ poetry show efootprint
 
 The source should show the local path instead of PyPI.
 
-### Reverting to the Published Version
+### Committing and Reverting to the Published Version
 
-When you're done with local development, switch back to the released version:
+Commit the `pyproject.toml` and `poetry.lock` changes on `dev`. The deployment commit switches back to the released version:
 
 ```bash
 poetry add efootprint@<version>
 ```
 
-**Important**: the `pyproject.toml` and `poetry.lock` changes from `poetry add ../e-footprint --editable` should not be committed, as they reference a local path that won't exist on other machines or in CI.
+**Important**: the path dependency only resolves next to a sibling `e-footprint` checkout, so it stays on `dev`. CI and the Docker build can't resolve it: publish the library and restore the pin before merging to `main` or pushing to preprod or production. See [RELEASE_PROCESS.md](RELEASE_PROCESS.md#update-the-efootprint-pin).

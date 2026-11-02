@@ -35,7 +35,7 @@ Clever Cloud uses Docker deployment, which runs `poetry install` from your `Dock
 poetry update
 ```
 
-**Note**: Docker deployment installs dependencies from `poetry.lock` and `pyproject.toml`, not from `requirements.txt`.
+**Note**: Docker deployment installs dependencies from `poetry.lock` and `pyproject.toml`, not from `requirements.txt`. A branch carrying the `dev` path dependency on `../e-footprint` can't build; restore the published pin first ([RELEASE_PROCESS.md](RELEASE_PROCESS.md#update-the-efootprint-pin)).
 
 ### 2. Run deployment checks
 ```shell

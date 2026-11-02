@@ -39,8 +39,8 @@ exclude = '''
 
 [tool.poetry.dependencies]
 python = "^3.12"
-# efootprint = {path = "../e-footprint", develop = true}  # local dev: swap back, do NOT commit
-efootprint = "27.0.0"
+efootprint = {path = "../e-footprint", develop = true}  # dev branch only: the deployment commit restores the published pin
+# efootprint = "27.0.0"
 django= "^5.0"
 django-browser-reload = "^1.12.1"
 django-environ = "^0"

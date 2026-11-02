@@ -16,7 +16,7 @@ version = "x.y.z"
 ```
 
 ### Update the efootprint pin
-When the release moves to a new efootprint version (published on PyPI first), set it in [pyproject.toml](pyproject.toml), then refresh the stored `efootprint_version` strings: edit `model_builder/domain/reference_data/default_system_data.json` by hand and regenerate the introductory examples with `python -m scripts.build_intro_examples`. Stale strings fail the test suite.
+When the release moves to a new efootprint version (published on PyPI first), set it in [pyproject.toml](pyproject.toml), replacing any path dependency `dev` carries, then refresh the stored `efootprint_version` strings: edit `model_builder/domain/reference_data/default_system_data.json` by hand and regenerate the introductory examples with `python -m scripts.build_intro_examples`. Stale strings fail the test suite.
 
 ### Update dependencies
 ```shell
