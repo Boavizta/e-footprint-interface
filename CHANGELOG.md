@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Deleting recurrent server and edge needs immediately refreshes their parent card without an error modal (#151).
 - Daily results chart values retain six significant figures, keeping cumulative totals aligned with the library total (#146).
 - "Open a file" asks for confirmation before replacing a modeling that has content, naming the modeling or both modelings of a comparison.
 - Upgrade to e-footprint 27.0.0: Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed.
