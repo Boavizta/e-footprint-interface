@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Deleting a journey held by a pattern is blocked, naming every holding pattern, instead of silently unlinking it; custom edge components referenced by a need are also blocked.
 - Standalone edits and deletions of internally managed objects are refused with guidance to edit their parent.
 - Automatically managed internal objects open read-only inspection panels with parent links and calculated results; standalone storage edits save successfully without trying to render absent cards.
 - Deleting recurrent server and edge needs immediately refreshes their parent card without an error modal (#151).

@@ -40,23 +40,18 @@ class UsagePatternWebBaseClass(ModelingObjectWeb):
         return "basic"
 
     @property
-    def mirrored_cards(self):
-        # Usage patterns do not have mirrored cards because their container (the System) doesn't appear in the interface
-        return [self]
-
-    @property
     def modeling_obj_containers(self):
-        # Mimic having no containers for deletion checks
+        # The System never blocks deletion; pre_delete unlinks it.
         return []
 
     @property
     def list_containers_and_attr_name_in_list_container(self) -> Tuple[List, Optional[str]]:
-        # Mimic having no containers for deletion checks
+        # The System is never a removal target; pre_delete unlinks it.
         return [], None
 
     @property
     def accordion_children(self):
-        """Patterns link reusable top-level journeys; they never render them as nested cards."""
+        """Patterns reference reusable top-level journeys; they never own them."""
         return []
 
     @property

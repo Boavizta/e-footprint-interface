@@ -34,7 +34,9 @@ from unittest.mock import patch, MagicMock
 from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.application.use_cases.delete_object import (
     DeleteObjectUseCase, DeleteObjectInput, DeleteCheckResult)
+from model_builder.application.use_cases.edit_object import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.domain.services.object_linking_service import serialize_weighted_dict_entry
 from tests.fixtures.system_builders import create_hourly_usage
 
 
@@ -51,18 +53,21 @@ def _edge_usage_pattern(name, journeys):
         hourly_deployment_starts=create_source_hourly_values_from_list([1000] * 9, datetime(2025, 1, 1)))
 
 
-def _journey_in_two_journey_pattern():
+def _journey_in_two_journey_pattern(shared_child=True):
     step = UsageJourneyStep.from_defaults("Step", jobs=[])
     journey = UsageJourney("Journey", uj_steps=[step])
-    pattern = _usage_pattern("Pattern", [journey, UsageJourney("Other journey", uj_steps=[step])])
+    other_step = step if shared_child else UsageJourneyStep.from_defaults("Other step", jobs=[])
+    pattern = _usage_pattern("Pattern", [journey, UsageJourney("Other journey", uj_steps=[other_step])])
     return System("System", usage_patterns=[pattern], edge_usage_patterns=[]), journey, ["Pattern"]
 
 
-def _edge_journey_in_two_journey_edge_pattern():
+def _edge_journey_in_two_journey_edge_pattern(shared_child=True):
     function = EdgeFunction("Function", recurrent_edge_device_needs=[], recurrent_server_needs=[])
     journey = EdgeUsageJourney.from_defaults("Edge journey", edge_functions=[function])
+    other_function = function if shared_child else EdgeFunction(
+        "Other function", recurrent_edge_device_needs=[], recurrent_server_needs=[])
     pattern = _edge_usage_pattern(
-        "Edge pattern", [journey, EdgeUsageJourney.from_defaults("Other edge journey", edge_functions=[function])])
+        "Edge pattern", [journey, EdgeUsageJourney.from_defaults("Other edge journey", edge_functions=[other_function])])
     return System("System", usage_patterns=[], edge_usage_patterns=[pattern]), journey, ["Edge pattern"]
 
 
@@ -75,13 +80,14 @@ def _journey_in_two_patterns():
     return system, journey, ["Shared pattern", "Sole pattern"]
 
 
-def _edge_component_referenced_by_need():
+def _edge_component_in_device(with_need=True):
     cpu = EdgeCPUComponent.from_defaults("CPU")
     device = EdgeDevice.from_defaults("Device", components=[cpu])
     cpu_need = RecurrentEdgeComponentNeed(
         "CPU need", edge_component=cpu,
         recurrent_need=SourceRecurrentValues(Quantity(np.array([1] * 168, dtype=np.float32), u.cpu_core)))
-    device_need = RecurrentEdgeDeviceNeed("Device need", edge_device=device, recurrent_edge_component_needs=[cpu_need])
+    device_need = RecurrentEdgeDeviceNeed(
+        "Device need", edge_device=device, recurrent_edge_component_needs=[cpu_need] if with_need else [])
     function = EdgeFunction("Function", recurrent_edge_device_needs=[device_need], recurrent_server_needs=[])
     journey = EdgeUsageJourney.from_defaults("Edge journey", edge_functions=[function])
     pattern = _edge_usage_pattern("Edge pattern", [journey])
@@ -164,24 +170,66 @@ class TestDeleteObjectUseCase:
 
     # --- referenced objects ---
 
-    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 11")
     @pytest.mark.parametrize("build", [
         _journey_in_two_journey_pattern, _edge_journey_in_two_journey_edge_pattern, _journey_in_two_patterns,
-        _edge_component_referenced_by_need], ids=lambda build: build.__name__.strip("_"))
-    def test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked(self, build):
-        """Every holder blocks the delete; a forced delete removes the object or errors with the model unchanged."""
+        _edge_component_in_device], ids=lambda build: build.__name__.strip("_"))
+    def test_check_can_delete_blocks_referenced_objects_naming_every_holder(self, build):
+        """Confirmation names every blocking reference without changing the model."""
         system, target, holders = build()
         repository = InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False))
         use_case = DeleteObjectUseCase(ModelWeb(repository), input_catalog)
 
-        result = use_case.check_can_delete(target.id)
         data_before = deepcopy(repository.get_system_data())
-        try:
-            use_case.execute(DeleteObjectInput(object_id=target.id))
-        except Exception:  # The delete view turns any exception into the error modal
-            pass
-        data_after = repository.get_system_data()
-        deleted = target.id not in data_after.get(target.class_as_simple_str, {})
-        deleted_or_unchanged = deleted or data_after == data_before
+        model_before = deepcopy(use_case.model_web.to_json(save_computed_state=False))
 
-        assert (result.can_delete, sorted(result.blocking_containers), deleted_or_unchanged) == (False, holders, True)
+        result = use_case.check_can_delete(target.id)
+
+        assert result.can_delete is False
+        assert sorted(result.blocking_containers) == holders
+        assert repository.get_system_data() == data_before
+        assert use_case.model_web.to_json(save_computed_state=False) == model_before
+
+    @pytest.mark.parametrize("build, relationship, child_type", [
+        (_journey_in_two_journey_pattern, "usage_journeys", "UsageJourneyStep"),
+        (_edge_journey_in_two_journey_edge_pattern, "edge_usage_journeys", "EdgeFunction"),
+    ], ids=["journey", "edge_journey"])
+    def test_detached_journey_passes_check_and_deletes_with_unshared_children(self, build, relationship, child_type):
+        system, target, _ = build(shared_child=False)
+        repository = InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False))
+        model_web = ModelWeb(repository)
+        target_web = model_web.get_web_object_from_efootprint_id(target.id)
+        child_ids = {child.efootprint_id for child in target_web.accordion_children}
+        pattern = target_web.modeling_obj_containers[0]
+        members = pattern.get_efootprint_value(relationship)
+        remaining_ids = [journey.id for journey in members if journey.id != target.id]
+        value = {journey.id: serialize_weighted_dict_entry(weight) for journey, weight in members.items()
+                 if journey.id != target.id} if isinstance(members, dict) else remaining_ids
+
+        EditObjectUseCase(model_web, input_catalog).execute(EditObjectInput(
+            object_id=pattern.efootprint_id, form_data={"name": pattern.name, relationship: value}))
+        model_web = ModelWeb(repository)
+        assert target.id in model_web.flat_efootprint_objs_dict
+        use_case = DeleteObjectUseCase(model_web, input_catalog)
+        assert use_case.check_can_delete(target.id).can_delete is True
+
+        use_case.execute(DeleteObjectInput(object_id=target.id))
+
+        saved = repository.get_system_data()
+        assert target.id not in saved.get(target.class_as_simple_str, {})
+        assert child_ids
+        assert child_ids.isdisjoint(saved.get(child_type, {}))
+        assert all(journey_id in saved[target.class_as_simple_str] for journey_id in remaining_ids)
+
+    def test_component_without_need_passes_check_and_deletes_from_device(self):
+        system, target, _ = _edge_component_in_device(with_need=False)
+        repository = InMemorySystemRepository(initial_data=system_to_json(system, save_computed_state=False))
+        model_web = ModelWeb(repository)
+        device = model_web.get_web_object_from_efootprint_id(target.id).modeling_obj_containers[0]
+        use_case = DeleteObjectUseCase(model_web, input_catalog)
+        assert use_case.check_can_delete(target.id).can_delete is True
+
+        use_case.execute(DeleteObjectInput(object_id=target.id))
+
+        reopened = ModelWeb(repository)
+        assert target.id not in reopened.flat_efootprint_objs_dict
+        assert reopened.get_web_object_from_efootprint_id(device.efootprint_id).components == []

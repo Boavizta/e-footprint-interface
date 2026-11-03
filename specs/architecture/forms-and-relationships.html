@@ -178,8 +178,12 @@ opted-in non-nested list backlink mechanism above.</p>
 <p><a class="source" href="../../model_builder/adapters/ui_config/field_ui_config.json"><code>field_ui_config.json</code></a> supplies <code>min_items: 1</code> and <code>strictly_positive: true</code> for required web weights. The shared widgets expose those
 limits as data attributes, disable removal of the final row, and reject non-positive weights before submission. These
 are usability guards only: malformed requests still flow through the normal form parser to the library constructors,
-which remain authoritative for non-empty, positive-weight, and duplicate-free invariants. Deleting a journey is also
-blocked when it is the sole member of a required pattern relationship.</p>
+which remain authoritative for non-empty, positive-weight, and duplicate-free invariants.
+<code>required_non_empty_relationships</code> only guards last-member removal in widgets and membership sections.
+Deleting a journey is blocked while any pattern holds it, naming every holding pattern; remove it from those
+patterns through its membership section first. A container that does not nest its child
+(<code>renders_relationship_children_as_nested_cards = False</code>) is a reference, not a removal target, so it
+blocks the child's deletion.</p>
 <p>Dict relationships now cover journeys/steps/needs with a shared inline-count UX: canvas step rows and job chips render an always-visible "× n" count via <a class="source" href="../../model_builder/templates/model_builder/object_cards/partials/inline_count.html"><code>partials/inline_count.html</code></a> (count-only mode of <a class="source" href="../../model_builder/templates/model_builder/object_cards/partials/dict_entry_count_unlink.html"><code>dict_entry_count_unlink.html</code></a> — no inline unlink there, unlike edge group entries), 0-count entries get the <code>dict-entry-zero</code> dimming class, and creation panels opened from a dict-relationship parent offer a <code>parent_link_count</code> multiplier field (prefilled at 1) that the create use case passes to <code>ObjectLinkingService.link_child_to_parent</code>.</p>
 <h3 id="link-existing-flow">"Link existing" flow</h3>
 <p>When linkable objects of a child type exist, a "Link existing" button appears alongside "Add new" in object cards. It opens a focused side panel (<code>open_link_existing_panel</code> in <a class="source" href="../../model_builder/adapters/views/views_edition.py"><code>views_edition.py</code></a>) showing the relationship’s <code>select_multiple</code> or <code>dict_count</code> field, submitting to the existing <code>edit_object</code> endpoint. The <code>generate_select_multiple_field()</code> function in <a class="source" href="../../model_builder/adapters/forms/form_field_generator.py"><code>form_field_generator.py</code></a> is a standalone reusable helper for building this widget.</p>

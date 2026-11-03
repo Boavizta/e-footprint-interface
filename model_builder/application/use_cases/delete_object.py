@@ -60,7 +60,7 @@ class DeleteObjectUseCase:
 
     @staticmethod
     def _container_removal_targets(web_obj, web_class):
-        """Containers whose list/dict attribute must be edited to remove web_obj before deletion.
+        """Nesting containers whose list/dict attribute must be edited before deletion.
 
         Classes that declare `handles_own_dict_memberships` (e.g. edge group members) remove
         themselves from their parent dicts in their pre_delete hook, so their dict containers
@@ -68,6 +68,8 @@ class DeleteObjectUseCase:
         """
         list_containers, list_attr_name = web_obj.list_containers_and_attr_name_in_list_container
         dict_containers, dict_attr_name = web_obj.dict_containers_and_attr_name_in_dict_container
+        list_containers = [c for c in list_containers if c.renders_relationship_children_as_nested_cards]
+        dict_containers = [c for c in dict_containers if c.renders_relationship_children_as_nested_cards]
         if web_class and getattr(web_class, "handles_own_dict_memberships", False):
             dict_containers = []
         return list_containers, list_attr_name, dict_containers, dict_attr_name
@@ -95,29 +97,17 @@ class DeleteObjectUseCase:
         list_containers, _, dict_containers, _ = self._container_removal_targets(web_obj, web_class)
         list_or_dict_containers = list_containers + dict_containers
 
-        blocking_required_containers = []
-        for container in list_or_dict_containers:
-            required_attrs = getattr(type(container), "required_non_empty_relationships", frozenset())
-            for attr_name in required_attrs:
-                relationship = container.get_efootprint_value(attr_name)
-                if relationship is not None and web_obj.modeling_obj in relationship and len(relationship) == 1:
-                    blocking_required_containers.append(container.name)
-        if blocking_required_containers:
-            return DeleteCheckResult(
-                can_delete=False,
-                blocking_containers=sorted(set(blocking_required_containers)),
-            )
-
-        # Check for blocking containers (direct references, not through list nor dict)
-        if web_obj.modeling_obj_containers and not list_or_dict_containers:
+        removal_ids = {container.efootprint_id for container in list_or_dict_containers}
+        residual_containers = [container for container in web_obj.modeling_obj_containers
+                               if container.efootprint_id not in removal_ids]
+        if residual_containers:
             # Check if class has custom blocking logic via can_delete hook
             if web_class and hasattr(web_class, 'can_delete'):
                 can_delete, blocking_names = web_class.can_delete(web_obj)
                 if not can_delete:
                     return DeleteCheckResult(can_delete=False, blocking_containers=blocking_names)
             else:
-                # Default: block if has non-list containers
-                blocking_names = [obj.name for obj in web_obj.modeling_obj_containers]
+                blocking_names = [obj.name for obj in residual_containers]
                 return DeleteCheckResult(
                     can_delete=False,
                     blocking_containers=blocking_names,
