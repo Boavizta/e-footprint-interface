@@ -303,6 +303,12 @@
           <ul>
 
 
+            <li id="f-exit-intent" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/model_tab_strip.html" data-review-source-href="../../../model_builder/templates/model_builder/components/model_tab_strip.html"><code>components/model_tab_strip.html</code></a>,
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html"><code>upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Mark model-switch and other non-replacement exits with <code>data-discards-side-panel</code>; replacement targets need no marker.</small>
+            </li>
             <li id="f-panel-exit-controls" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html"><code>simplified_inputs/timeseries_panel.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
@@ -361,7 +367,7 @@
             <li id="f-feedback-js" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/support.js" data-review-source-href="../../../theme/static/scripts/support.js"><code>support.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
-              <small>Feedback checks the shared gate before busy state and request setup; no deferred action.</small>
+              <small>Feedback relies on the central resolved-target gate; request-side effects start only for an actual request.</small>
             </li>
             <li id="f-simplified-entry-js" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js"><code>simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified</span>
@@ -371,7 +377,7 @@
             <li id="f-model-comparison-js" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_comparison.js" data-review-source-href="../../../theme/static/scripts/model_comparison.js"><code>model_comparison.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
-              <small>Dirty removal stops before the ordinary destructive confirm; remove custom unsaved-message handling.</small>
+              <small>Ordinary confirms respect the earlier target-or-marker gate; remove custom unsaved-message handling.</small>
             </li>
             <li id="f-main-js" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span>
@@ -391,7 +397,7 @@
             <li id="f-js-guard" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/side_panel_switch_guard.test.js" data-review-source-href="../../../js_tests/side_panel_switch_guard.test.js"><code>side_panel_switch_guard.test.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
-              <small>T1 shared helper, HTMX/JS/close entry points, no replay and one prompt per click.</small>
+              <small>T1 target-or-marker eligibility, direct UI exits, no URL registry/replay and one prompt per click.</small>
             </li>
             <li id="f-js-feedback" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/support.test.js" data-review-source-href="../../../js_tests/support.test.js"><code>support.test.js</code></a> <span data-change="modified">Modified</span>
@@ -958,7 +964,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/side-panel-replay-hand-parsing.md" data-review-source-href="diagnostics/side-panel-replay-hand-parsing.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> ·
         <a href="#f-feedback-js">Feedback</a> · <a href="#f-simplified-entry-js">Simplified entry</a> · <a href="#f-model-comparison-js">model navigation/removal</a> ·
-        <a href="#f-main-js">reset confirmations</a> · <a href="#f-unsaved-modal">modal templates</a> and audited close/exit controls ·
+        <a href="#f-main-js">reset confirmations</a> · <a href="#f-exit-intent">exit markers</a> · <a href="#f-unsaved-modal">modal templates</a> and audited close/exit controls ·
         <a href="#d-workspace">workspace/journey docs and follow-up</a> · <a href="#d-rendering">rendering</a> · <a href="#f-js-guard">Jest</a> and
         <a href="#t-e2e-forms">E2E guard flows</a></p>
       <dl>
@@ -973,30 +979,36 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
           sends no interrupted request and performs no interrupted action. The user repeats the action; clean actions run normally.</dd>
         <dt>Implementation</dt>
         <dd>One boolean helper in <code>side_panel_utils.js</code> (for example <code>blockIfSidePanelDirty()</code>) owns the decision and modal.
-          A single <code>htmx:confirm</code> entry point classifies resolved panel replacements and model-exit paths, including inherited targets,
-          boosted links and <code>htmx.ajax</code>. Small JS and close entry points call the same helper before destructive UI changes.
-          Exclude current-form Save, validation and previews from exit classification.
-          Feedback checks before busy state/request setup; Simplified entry checks before panel close, base-view change or read.
-          Remove all three pending-action variables, all <code>proceedWithPending…</code> functions, callback-taking
-          <code>runAfterSidePanelDiscardConfirmation</code>, the beforeRequest listener and loading-bar timeout.
-          Give the modal fixed handlers; no per-action rewiring or callback storage. Successful Save and server-directed cleanup keep their low-level close path.</dd>
+          One <code>htmx:confirm</code> listener checks resolved replacement of <code>#sidePanel</code> or the whole builder
+          (<code>#main-content-block</code>), covering inherited targets, boosted links and <code>htmx.ajax</code> naturally.
+          For exits with another destination or <code>hx-swap="none"</code>, notably model switches, mark the source/control with
+          <code>data-discards-side-panel</code>. Remove <code>PANEL_DISCARDING_PATHS</code>; no endpoint list or per-opener dirty branches.
+          Direct helper calls are only for actions that clear/change the UI without or before a request: Close/Cancel and Simplified entry.</dd>
+        <dt>What stays allowed</dt>
+        <dd>Guard actual replacement, not every canvas update or request. An unmarked <code>hx-swap="none"</code> or OOB canvas update
+          does not imply abandonment. Save, validation/previews, background requests and draft-preserving actions stay usable.
+          Feedback and import use the central resolved-target check, with no own dirty predicate. Remove Feedback's callback wrapper;
+          move busy/request bookkeeping into the actual HTMX request lifecycle so canceled requests have no open/fallback/busy effects.
+          Simplified entry checks directly before close/base-view/read. Remove all three pending-action mechanisms,
+          <code>runAfterSidePanelDiscardConfirmation</code>, beforeRequest cancellation and its timeout.
+          The modal has fixed handlers. Successful Save and server cleanup keep their low-level close path.</dd>
         <dt>Coverage and confirmations</dt>
         <dd>Cover card/add/edit and Data &amp; privacy openers, Feedback, +Add blank/duplicate/import, model switching and cross-slot Compare dismissal,
           Simplified entry/configuration that abandons a side-panel draft, and close/Cancel (including the Simplified timeseries panel).
           Model removal, reset and example loading use the same dirty gate before any native confirmation: dirty first click → shared modal only;
           Discard → close only; repeat → ordinary destructive confirm/action. Remove removal's separate unsaved-message concatenation and the old reset/example exemptions.
-          Coordinate listeners so a blocked dirty exit cannot also show a native confirm. Opening Compare, same-slot return, help and export preserve the draft;
+          Run the central gate before module confirmations (e.g. capture phase, stopping propagation only when blocked), so a dirty exit cannot also show a native confirm. Opening Compare, same-slot return, help and export preserve the draft;
           Configure's own separate draft rules remain as they are.</dd>
         <dt>Tests</dt>
         <dd>Rewrite <a href="#f-js-guard">guard tests</a> and <a href="#f-js-feedback">Feedback</a>, <a href="#f-js-simplified-entry">Simplified</a>,
           <a href="#f-js-model-comparison">comparison</a> and reset-confirm tests: clean/dirty, Keep editing, Discard issues nothing, repeat runs normally,
-          resolved/inherited/programmatic targets, no view/busy/fallback side effects and one prompt per click.
+          resolved/inherited/programmatic replacement targets and arbitrary-URL exit markers, no URL-specific eligibility, no view/busy/fallback side effects and one prompt per click. Unmarked non-replacement/canvas requests pass.
           E2E: rewrite <code>test_pending_request_preserves_hx_vals</code> and the cross-slot Continue-switches test;
           cover Data &amp; privacy, Feedback, Simplified entry, close/Cancel, +Add, removal, reset and examples.
           Check requests/state as well as modal copy; Save/preview and non-destructive Compare/export remain usable.
           Run affected Jest suites, full Jest and local E2E guard flows. These are new-contract tests; no implementation pass is claimed here.</dd>
         <dt>Docs and settled scope · 2026-11-03 user review</dt>
-        <dd>All dirty-side-panel handling now uses discard-and-repeat, superseding the guard-only 2026-10-21 scope.
+        <dd>All dirty-side-panel handling uses discard-and-repeat. Further 2026-11-03 review simplifies eligibility to replacement target or explicit exit marker, with direct checks only before request-free/pre-request UI exits; this replaces per-flow classification.
           Remove the deferred replay row from <code>server-rendered-state-follow-up/kickoff.md</code>; dirty-detection redesign remains separate.
           Update workspace/rendering and build/compare journey docs when implementing. Retain the unrelated Save-path <code>eval</code>
           (<a href="#decision-eval">decision 1</a>); no guard or exit path may store/replay an interrupted action.
@@ -1198,12 +1210,12 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
 
     <aside id="decision-unified-discard" data-note="review">
       <p><strong>4 · Task 1 unifies dirty-side-panel discard-and-repeat — APPLIED</strong></p>
-      <p><strong>User decision, 2026-11-03:</strong> one shared dirty decision and modal, with thin HTMX/JS/close entry points.
+      <p><strong>User decision, 2026-11-03, simplified after further review:</strong> one shared dirty decision and modal; one HTMX listener matches resolved panel/full-builder replacement targets or <code>data-discards-side-panel</code> on other exits. Direct calls are limited to request-free/pre-request UI exits; remove the URL list and per-opener checks.
         Every attempted exit stops; Discard closes the panel without continuing it; the user repeats the action.
         This includes Feedback, model switching/+Add, Simplified entry, close/Cancel and model removal/reset/example loading.
         Ordinary destructive confirmation follows on the repeated clean action, with one prompt per click.</p>
       <p>The 2026-10-21 own-<code>hx-target</code>-only scope is superseded, and deferred replay work moves from the follow-up into Task 1.
-        The “two dialogs” claim did not establish a need for own-attribute matching; unified ownership removes overlapping dirty handlers.
+        The “two dialogs” claim did not establish a need for own-attribute matching. Feedback/import are handled by their resolved target; ordinary confirms run only after the central gate allows the action.
         Save and non-destructive draft-preserving actions remain available. Dirty detection and Save-path recomputation are separate work.</p>
     </aside>
 
