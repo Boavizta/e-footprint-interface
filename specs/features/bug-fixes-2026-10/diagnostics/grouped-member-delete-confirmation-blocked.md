@@ -1,6 +1,7 @@
 # Grouped edge members are blocked before their deletion hook
 
-**Status:** newly observed pre-existing defect, outside Run A; not fixed or assigned to this run.
+**Status:** confirmed pre-existing defect, outside completed Run A; planned as
+[Task 16 in Run B](../plan.html#task-16), not yet fixed. This follow-up does not block the Run A release.
 
 Discovered during Task 11 review on 2026-11-03. The reviewer ran the baseline
 (`8da403d5`) and Task 11 (`47a9f48d`) confirmation implementations against the same
@@ -29,7 +30,7 @@ group as a blocker. However,
 [`EdgeGroupMemberMixin.pre_delete`](../../../../model_builder/domain/entities/web_core/hardware/edge/edge_group_member_mixin.py)
 explicitly removes the object from its parent-group dictionaries.
 
-A future fix needs confirmation semantics that recognize hook-managed group
+A follow-up fix needs confirmation semantics that recognize hook-managed group
 memberships while retaining independent reference blockers. Add a normal
 confirmation-then-execution regression when that fix is approved. Task 11's
 confirmation changes and the existing execution hook remain unchanged for this report.

@@ -1,8 +1,17 @@
 # bug-fixes-2026-10 — tasks
 
-**Status:** Run A implemented and reviewed (2026-11-03); Runs B and C remain planned. Each task links its diagnostic;
-[`plan.html`](plan.html) digests them and orders the runs. Run them in order, each in a fresh
-`feature-implement` session.
+**Status:** Run A implemented and reviewed (2026-11-03); Runs B and C remain planned.
+Completed walkthrough: [`run-a-review.html`](run-a-review.html). Remaining work:
+[`plan.html`](plan.html). Each task keeps its original number and diagnostic below.
+
+| Run | Tasks in execution order | Prerequisites / release boundary |
+|---|---|---|
+| A — complete | 5 → 4 → 6 → 8 → 11 → 3 | Independent release checkpoint: publish the Run A library changes, restore a PyPI pin in the interface, and validate the published package before merging the interface to `main`. No dependency on B/C or Task 16. |
+| B — planned | 9 → 10 → 12 → 2 → 1 → 7 → 16 | Run A implementation; Task 16 is the newly recorded group-member confirmation follow-up. |
+| C — planned | 13 → 14 → 15 | Run B; Task 13 follows Task 16 in the shared deletion use case. |
+
+Use a fresh `feature-implement` session for each remaining run. Release each completed run
+independently using the [Run A checkpoint](run-a-review.html#merge-checkpoint) as the first boundary.
 
 The original intake for Reports 1–3 (parked during `request-lifecycle-simplification`, evidence on
 `dev` at `2eced3c0`) is kept below for traceability; the diagnostics supersede it where they differ.
@@ -62,7 +71,8 @@ The original intake for Reports 1–3 (parked during `request-lifecycle-simplifi
 Task numbers follow arrival order: Tasks 1–3 are parked Reports 1–3, Task 4 is GitHub #151, Task 5
 is GitHub #146, Task 6 was found while diagnosing #151, Task 7 is GitHub #150, Tasks 8–9 were found while
 diagnosing Task 6, Task 10 while diagnosing Task 9, Tasks 11–12 are smell-sweep bugs S1 and S2, and
-Tasks 13–15 are user-approved smell-sweep refactors.
+Tasks 13–15 are user-approved smell-sweep refactors. Task 16 is the pre-existing grouped-member
+confirmation bug discovered during Run A review and planned as a Run B follow-up.
 
 ## Task 1 — One dirty-side-panel guard: discard, close, repeat
 
@@ -264,14 +274,14 @@ wrapper registers on its target when attached and removes itself when detached, 
 already follow. The readers' `is not None` filters go, and the interface needs no filter of its own.
 Fixes GitHub #151, and the latent same-crash after an `edge_device` relink. Settled 2026-11-02: fixed
 in the library, not in `ModelingObjectWeb`
-([decision 3](plan.html#decision-task-4)).
+([decision 3](run-a-review.html#decision-task-4)).
 
 **Diagnostic:** [`diagnostics/recurrent-need-delete-render-error.md`](diagnostics/recurrent-need-delete-render-error.md)
 
 **Repository:** cross-repo. Both parts land in the same run, the library part in `e-footprint` first.
-`dev` carries the committed path dependency on `../e-footprint` until the deployment commit, so it can't
-be pushed to preprod before then. The user publishes the library release at the end of the batch; no
-implementer publishes.
+`dev` carries the committed path dependency on `../e-footprint` until the independent Run A release
+checkpoint. Publish the Run A library changes and restore a published PyPI pin before the interface
+reaches `main` or preprod; Runs B/C need not be complete. No implementer publishes.
 
 **Files touched — library part (`e-footprint`):**
 - `efootprint/abstract_modeling_classes/contextual_modeling_object_attribute.py` — `__init__` (around
@@ -293,7 +303,7 @@ implementer publishes.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 - `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — no change.
 
-**Deployment commit, after the last run:** the user publishes the release, then `pyproject.toml` and
+**Run A release checkpoint, before the interface merges to `main`:** the user publishes the release, then `pyproject.toml` and
 `poetry.lock` pin it, following `RELEASE_PROCESS.md`, and the interface `CHANGELOG.md` entry names the
 upgrade.
 
@@ -381,7 +391,7 @@ retain their editable panels; their saves must also work when they have no canva
 
 **Diagnostic:** [`diagnostics/check-can-delete-keyerror.md`](diagnostics/check-can-delete-keyerror.md)
 — recorded failures remain evidence; its previous fix/copy decisions are superseded by
-[`PLAN-UPDATE-01`](plan.html#plan-update-01).
+[`PLAN-UPDATE-01`](run-a-review.html#plan-update-01).
 
 **Repositories:** `e-footprint` (relationship metadata), `e-footprint-interface` (inspection panel
 and saving editable objects that have no canvas card).
@@ -510,7 +520,7 @@ replaces the old “Delete stays visible” decision and standalone rename/card-
 
 **Diagnostic:** [`diagnostics/edge-component-delete-silent-noop.md`](diagnostics/edge-component-delete-silent-noop.md)
 — the silent-delete evidence remains valid; the previous fix and rename acceptance are superseded
-by [`PLAN-UPDATE-01`](plan.html#plan-update-01).
+by [`PLAN-UPDATE-01`](run-a-review.html#plan-update-01).
 
 **Repository:** `e-footprint-interface` (consumes Task 6's library property).
 
@@ -893,12 +903,54 @@ they are temporary and may be gone, so rebuild from the diagnostics if needed).
 **Implementation:** standard — test-only, but needs crawl and delete harnesses that stay fast and
 deterministic.
 
+## Task 16 — Group-member deletion confirmation recognizes hook-managed memberships
+
+**Status:** planned (Run B); not implemented and not a prerequisite for merging Run A.
+
+**Goal:** A grouped custom edge device or otherwise unreferenced subgroup passes the normal
+deletion confirmation, then deletes through the existing hook with its parent memberships removed.
+Independent references still block confirmation and name their holders. Preserve Task 8's early
+internal-parent guards and Task 11's reference checks.
+
+**Diagnostic:** [`diagnostics/grouped-member-delete-confirmation-blocked.md`](diagnostics/grouped-member-delete-confirmation-blocked.md).
+Confirmed on both the Task 11 baseline and its reviewed implementation; Run A did not introduce it.
+
+**Repository:** `e-footprint-interface`
+
+**Files touched:**
+- `model_builder/application/use_cases/delete_object.py` — distinguish hook-managed parent-group
+  memberships from blocking references during confirmation. Keep those memberships out of generic
+  execution removal targets so the existing hook does not unlink them twice.
+- `model_builder/domain/entities/web_core/hardware/edge/edge_group_member_mixin.py` — existing
+  `handles_own_dict_memberships` / `pre_delete` contract; adjust only if needed to identify actual
+  group memberships. Do not exempt every dict reference to a group member.
+- `tests/unit_tests/application/use_cases/test_delete_object.py` and
+  `tests/unit_tests/adapters/views/test_views_deletion.py` — focused normal-flow regressions.
+- `specs/architecture/forms-and-relationships.html` — document confirmation of hook-owned memberships.
+- `CHANGELOG.md` — consolidated `## [Unreleased]` fix entry when implemented.
+
+**Tests added/changed (planned; not yet committed):**
+- Grouped custom device and empty subgroup: confirm permission, execute, reload, and verify the
+  object and its parent-dictionary entries are absent while siblings survive.
+- Grouped custom device also referenced by a recurrent need: confirmation refuses, names the
+  independent holder, and leaves request-local and saved state unchanged. Do not execute refusal.
+- Confirmation view: grouped device/subgroup offers “Yes, delete”; independently referenced device
+  does not. Reuse programmatic fixtures and existing edge-group deletion suites.
+- Keep Run A's internal-object guards, holder-blocking regressions and allowed-deletion cases passing.
+
+**Acceptance:**
+- Hook-managed parent-group membership alone does not block confirmation.
+- Unrelated references remain blockers; the exemption is relationship-specific.
+- The normal check → execute → reload path removes the object and memberships exactly once.
+- Existing execution hooks and cascades stay unchanged unless an allowed-deletion regression
+  demonstrates a defect. No library, migration or saved-JSON change.
+
+**Depends on:** completed Tasks 8 and 11. Run B ordering after Task 12 is soft for changed card IDs;
+land before Task 13's resolver refactor in the same use case.
+
+**Implementation:** standard — confirmation permission must distinguish hook-owned membership
+from independent references without changing execution ownership. FULL review surface.
+
 ## Execution plan
-
-### New report outside Run A
-
-- [Grouped edge-member deletion confirmation](diagnostics/grouped-member-delete-confirmation-blocked.md):
-  grouped custom devices and nested groups are blocked by their parent before their supported
-  deletion hook can run. Reproduced on the baseline and Task 11; remains unfixed, outside this run.
 
 Runs, ordering, deduplication verdicts and deferred items: [`plan.html#execution-plan`](plan.html#execution-plan).

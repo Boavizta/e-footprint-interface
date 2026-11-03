@@ -68,7 +68,7 @@ The bug is **not deletion-only**. Relinking a server need's `edge_device` to ano
 
 ## Fix approach
 
-Fix the library's bookkeeping so `contextual_modeling_obj_containers` holds exactly the attached wrappers. Settled 2026-11-02: this replaces the interface-side filter this diagnostic first recommended. See [plan decision 3](../plan.html#decision-task-4).
+Fix the library's bookkeeping so `contextual_modeling_obj_containers` holds exactly the attached wrappers. Settled 2026-11-02: this replaces the interface-side filter this diagnostic first recommended. See [plan decision 3](../run-a-review.html#decision-task-4).
 
 The library has two conventions for one list. Dict keys leave it on unlink and return on relink (`e-footprint/efootprint/abstract_modeling_classes/explainable_object_dict.py:110-124`, `:388-414`). Direct and list wrappers stay as dead entries, and every reader filters them. No reader wants them, so the filter belongs nowhere: the entry should not be there.
 
@@ -139,4 +139,4 @@ Interface (`e-footprint-interface`):
 
 ## Decisions
 
-- Settled 2026-11-02: the library fix replaces the interface-side filter ([plan decision 3](../plan.html#decision-task-4)).
+- Settled 2026-11-02: the library fix replaces the interface-side filter ([plan decision 3](../run-a-review.html#decision-task-4)).
