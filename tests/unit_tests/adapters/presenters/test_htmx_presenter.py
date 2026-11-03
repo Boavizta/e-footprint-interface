@@ -44,7 +44,7 @@ def test_successful_crud_presentations_append_one_metadata_status_oob(settings):
         web_id="Server-edited",
         replaces_primary_render=True,
     )
-    deleted = DeleteObjectOutput(deleted_object_name="Deleted", deleted_object_type="Server")
+    deleted = DeleteObjectOutput(deleted_object_name="Deleted", deleted_object_type="Server", web_id="Server-deleted")
 
     with patch.object(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 5):
         responses = [
@@ -56,7 +56,6 @@ def test_successful_crud_presentations_append_one_metadata_status_oob(settings):
     for response in responses:
         assert response.status_code == 200
         _assert_one_storage_status_oob(response)
-    assert responses[-1]["HX-Reswap"] == "none"
 
 
 def test_creation_companion_notice_keeps_authored_name_as_text(minimal_model_web):

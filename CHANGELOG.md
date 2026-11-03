@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Card deletions no longer log console errors; the server response removes top-level cards from the active canvas.
 - Deleting a journey held by a pattern is blocked, naming every holding pattern, instead of silently unlinking it; custom edge components referenced by a need are also blocked.
 - Standalone edits and deletions of internally managed objects are refused with guidance to edit their parent.
 - Automatically managed internal objects open read-only inspection panels with parent links and calculated results; standalone storage edits save successfully without trying to render absent cards.

@@ -36,6 +36,7 @@ class DeleteObjectOutput:
     """Output data from object deletion."""
     deleted_object_name: str
     deleted_object_type: str
+    web_id: str = ""
     was_list_deletion: bool = False
     # For list deletions, we need the edited containers to generate HTML in presenter
     edited_containers: List[Any] = field(default_factory=list)
@@ -226,6 +227,7 @@ class DeleteObjectUseCase:
             if web_class and hasattr(web_class, 'pre_delete'):
                 web_class.pre_delete(web_obj, self.model_web)
 
+            web_id = web_obj.web_id
             web_obj.self_delete()
 
             # Call delete_side_effects after deletion so constraint diff reflects post-deletion state
@@ -233,6 +235,7 @@ class DeleteObjectUseCase:
             return DeleteObjectOutput(
                 deleted_object_name=object_name,
                 deleted_object_type=object_type,
+                web_id=web_id,
                 was_list_deletion=False,
                 oob_regions=oob_regions,
             )

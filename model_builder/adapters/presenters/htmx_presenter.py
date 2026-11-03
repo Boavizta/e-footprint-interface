@@ -329,19 +329,11 @@ class HtmxPresenter:
             return self._build_oob_response(html_updates, toast_and_highlight_data,
                                             extra_settle_triggers=extra_settle)
 
-        if output.oob_regions:
-            # Either canvas_oob (covers all cards) or targeted regions (e.g. edge device lists)
-            return self._build_oob_response(
-                render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data,
-                extra_settle_triggers=extra_settle)
-
-        response = HttpResponse()
-        response["HX-Reswap"] = "none"
-        response["HX-Trigger"] = json.dumps({
-            "resetLeaderLines": "",
-            "displayToastAndHighlightObjects": toast_and_highlight_data
-        })
-        return self._append_workspace_storage_status(response)
+        # Delete before targeted list replacements, which may also remove the card.
+        card_delete = "" if canvas_oob else f'<div id="{output.web_id}" hx-swap-oob="delete"></div>'
+        return self._build_oob_response(
+            card_delete + render_oob_regions(self.model_web, output.oob_regions), toast_and_highlight_data,
+            extra_settle_triggers=extra_settle)
 
     def present_delete_confirmation(
         self, check_result: DeleteCheckResult, web_obj, object_id: str
@@ -379,7 +371,6 @@ class HtmxPresenter:
         context = {
             "obj": web_obj,
             "modal_id": "model-builder-modal",
-            "remove_card_with_hyperscript": True,
         }
 
         context["selected_fields_removed"] = [
@@ -400,7 +391,6 @@ class HtmxPresenter:
             context["sub_message"] = ""
 
         if check_result.is_mirrored:
-            context["remove_card_with_hyperscript"] = False
             context["message"] = (
                 f"This {web_obj.class_as_simple_str} is mirrored {check_result.mirrored_count} times, "
                 f"this action will delete all mirrored {web_obj.class_as_simple_str}s."

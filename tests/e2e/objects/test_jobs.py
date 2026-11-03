@@ -155,7 +155,6 @@ class TestJobs:
 
         assert not step_with_job.has_link_existing_child_button("JobBase")
 
-    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 3")
     def test_deleting_nested_and_top_level_cards_logs_no_console_error(
             self, model_with_two_steps_one_job: ModelBuilderPage):
         """Deleting a nested job card and an unused top-level journey card removes each card without console errors.
