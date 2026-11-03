@@ -670,68 +670,44 @@ Task 11's generic removal-target handling); Tasks 3, 4, 6 (soft; shared `delete_
 **Implementation:** standard — confirmation rules on a full review surface; verify allowed deletions before
 considering any execution-path change.
 
-## Task 12 — Put the system prefix first in every card id
+## Task 12 — Card highlight expands the canonical id within its owning canvas
 
-**Goal:** Every card id has one consistent shape: `sys-{system}-Class-id`, optionally followed
-by `_in_<unprefixed parent containment path>`. A job nested in a step and journey becomes
-`sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-1`. Every appearance of an
-object therefore starts with its canonical id, and the existing `cardButtonsForWebId` matcher
-finds its root and mirrored cards without parsing system prefixes or locating a canvas.
-Creating/editing an editable nested object pulses its cards and scrolls the first into view;
-opening a mirrored object's edit panel marks its mirrors as opened. Root cards retain their ids,
-and the other model's cards remain untouched even when object ids are identical. Task 6's
-inspection-only panels keep their existing behavior.
-
-Review decision 2026-11-03: build an unprefixed containment path in Python, then add
-`_system_web_id_prefix` once at the beginning of `web_id`. This replaces the earlier owner-canvas
-lookup/prefix-stripping proposal. Keep the existing document-wide exact-or-`_in_` highlight
-matcher and the single canonical id in headers (the nginx limit fixed by `0b2f361b`).
+**Goal:** Creating or editing a nested object (job, step, edge function, recurrent need or process,
+edge component) pulses every one of its cards on the active canvas and scrolls the first into view;
+opening a mirrored object's edit panel marks every mirror as opened. Root cards behave as before,
+and nothing on a parked canvas is touched, even for a duplicated model with identical object ids.
+Since `cc9611c3` prefixed root web ids with `sys-{system}-`, the client's `button-<id>_in_…`
+expansion never matches nested ids (`Class-id_in_<parent>`). `cardButtonsForWebId` picks the
+resident canvas whose `sys-${data-system-id}-` prefixes the id (longest wins), strips it to
+`Class-id`, and queries `[id="button-${id}"], [id^="button-${local}_in_"]` inside that canvas only.
+The header stays one canonical id (the nginx limit fixed by `0b2f361b`). Reproduced in a browser.
 
 **Diagnostic:** [`diagnostics/card-highlight-id-mismatch.md`](diagnostics/card-highlight-id-mismatch.md)
 
 **Repository:** `e-footprint-interface`
 
 **Files touched:**
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — a private
-  unprefixed containment-path helper; `web_id` adds the system prefix to the completed path.
-  Update the root-only prefix comments. Preserve `route_id`, equality/hash semantics and mirror enumeration.
-- `tests/e2e/pages/model_builder_page.py` — adapt `card_id_selector` to the uniform system-prefixed
-  shape, matching the card's own class rather than a class embedded in its parent path. Audit
-  remaining literal selectors and ID construction in templates, leader lines, HTMX and E2E helpers;
-  most derive from `web_id` and need no manual rewrite. Update any actual format assumptions found.
-- `specs/architecture/workspace.html` — document the prefix at the beginning of every completed
-  containment path; remove the root-only/inherited-through-parent description.
-- `specs/architecture/rendering.html` — document single-id headers and the exact-or-`_in_`
-  expansion, with the system namespace already present in every matching card's prefix.
+- `theme/static/scripts/model_builder_main.js` — `cardButtonsForWebId` (around lines 200–208):
+  owner-canvas lookup via `[data-model-canvas][data-system-id]`, prefix stripping, scoped query,
+  corrected comment.
+- `model_builder/adapters/views/views_edition.py` (around 38–40) — comment only.
+- `specs/architecture/rendering.html` — one line beside "Toast notifications and tooltips": one
+  canonical `web_id` per highlight, expanded client-side to the owning canvas's root and `_in_`
+  mirrors.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` —
-  update list/dict nested-ID expectations; extend the existing ID tests to cover multiple nesting
-  levels, exactly one leading system prefix, unchanged root ids, and distinct system namespaces.
 - `js_tests/model_builder_main.test.js › pulse and opened highlights cover every card of the object on its own canvas only`
-  — switch the reproduction from `test.failing` to `test` and regenerate its Python-rendered fixture
-  with `npm run jest`. Keep the nested job, mirrored step, `job-2` boundary, root, unknown-system
-  and parked-model cases. Expected mirrors come from Python, not copied old ID strings.
-- Update existing format-sensitive E2E assertions and run the job, journey-step, edge-object and
-  model-comparison flows, checking card targeting, leader lines and HTMX swaps. Manually verify
-  off-screen nested create/edit scrolling; jsdom does not provide real element geometry.
+  — reproduction (`test.failing`, fixture case `render_card_highlight_canvases` in `js_tests/build_fixtures.py`); switch it
+  to `test(` once fixed. No other tests.
 
 **Acceptance:**
-- A nested id starts with its object's canonical id followed by `_in_`; the system prefix appears
-  exactly once at the beginning, including at multiple nesting levels and for list/dict containers.
-- The reproduction passes as a plain `test`; all mirrors on the owning model are highlighted and
-  no sibling object or other model's card is highlighted.
-- Existing exact-or-`_in_` JS matching and single-id header payloads stay unchanged; no canvas lookup,
-  prefix stripping, additional transport field or legacy-ID compatibility branch is introduced.
-- Root IDs, routing, card targeting, leader lines, model switching and Task 3's server-side removal
-  remain correct. Architecture documentation describes the new ID invariant.
+- The reproduction passes as a plain `test(`.
+- As in the goal; the highlight headers stay constant-size.
 
-**Depends on:** no hard prerequisite. Keep Run B ordering after Run A, then before Tasks 13/14:
-Tasks 6, 12, 13 and 14 share `modeling_object_web.py`. Task 3's deletion behavior must remain covered.
+**Depends on:** none (shares only `CHANGELOG.md` with other tasks).
 
-**Implementation:** standard — one ID-construction rule, selector audit and existing-test updates;
-validate Python ID tests, `npm run jest`, non-E2E checks and affected E2E flows.
+**Implementation:** easy — one client function, with a Python-generated fixture pinning the id rule.
 
 ## Task 13 — One web-class resolver and a `has_edit_panel` property (refactor)
 
