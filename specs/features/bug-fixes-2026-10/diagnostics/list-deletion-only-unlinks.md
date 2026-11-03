@@ -1,5 +1,10 @@
 # Confirmed delete of a list/dict-held object only unlinks it: `_delete` relies on the accordion-children cascade, and `check_can_delete` ignores direct references whenever a removal container exists
 
+> **Review amendment — 2026-11-03:** The recorded forced-execution probes below remain diagnostic
+> evidence, not the regression contract. Task 11 now tests blocked confirmation separately from
+> allowed check → execute flows. Keep `_delete` and cascade cleanup unchanged unless an allowed
+> deletion exposes a remaining defect; the shared-tail proposal is dropped.
+
 - **Status:** CONFIRMED
 - **Confidence:** high. Code trace on `dev` at `9dc54426`. Every case was reproduced through the real
   `ask-delete-object` and `delete-object` views (Django client and session), with the persisted session read back
@@ -114,18 +119,22 @@ pattern's results have changed. After Task 3 drops the hyperscript, the card wou
   Unlinking and pattern deletion keep reusable journeys alive, which is correct.
 
 ## Reproduction
-- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
-  — use case (`check_can_delete`, then a forced `execute`); fails on `dev@6a1c10ea`. Parametrized over programmatic
-  systems. The asserted tuple is (`can_delete`, sorted blocking names, "object gone or repository
-  unchanged after the forced delete").
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_check_can_delete_blocks_referenced_objects_naming_every_holder`
+  — updated regression: four blocked-confirmation cases assert refusal, every blocking name, and
+  unchanged request-local and saved state without executing the refused deletion.
+- Allowed-deletion regressions separately detach ordinary/edge journeys, assert permission, execute,
+  and verify saved removal of the journey and unshared children; a component without a need reference
+  similarly checks permission and verifies the existing device cascade.
+- The following failures and debugger watches describe the original combined test on `dev@6a1c10ea`,
+  before the review amendment.
 - Assertion failures (`--runxfail`):
   - `[journey_in_two_journey_pattern]`: `(True, [], False) == (False, ['Pattern'], True)`.
   - `[edge_journey_in_two_journey_edge_pattern]`: `(True, [], False) == (False, ['Edge pattern'], True)`.
   - `[journey_in_two_patterns]` (R2 shape: sole member of "Sole pattern", one of two in "Shared pattern"):
     `(False, ['Sole pattern'], False) == (False, ['Shared pattern', 'Sole pattern'], True)`.
-  - `[edge_component_referenced_by_need]`: `(True, [], False) == (False, ['CPU need'], True)`.
+  - `[edge_component_in_device]`: `(True, [], False) == (False, ['CPU need'], True)`.
   - In every case the forced delete returns normally and the object stays in the saved model, only unlinked.
-- Watch (values from the recorded run; `[edge_component_referenced_by_need]` in brackets):
+- Watch (values from the recorded run; `[edge_component_in_device]` in brackets):
   - `self._container_removal_targets(web_obj, web_class)` at `model_builder/application/use_cases/delete_object.py:89`
     → dict containers `['Pattern']` (`usage_journeys`); edge: list containers `['Edge pattern']`; two patterns:
     `['Shared pattern', 'Sole pattern']` [list containers `['Device']` (`components`)].
@@ -137,8 +146,8 @@ pattern's results have changed. After Task 3 drops the hyperscript, the card wou
     deleted].
   - `input_data.object_id in self.model_web.flat_efootprint_objs_dict` at `delete_object.py:212` (`_delete`'s
     list/dict branch, `:180` → `True`) → `True`; remaining containers `[]` [`['CPU need']`].
-- Debug recipe: break at the test's `data_after = repository.get_system_data()` line, after the forced `execute`.
-  Unmasked run: `poetry run pytest --runxfail "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked"`.
+- Current debug recipe: break at the confirmation assertions; the regression no longer forces execution.
+  Unmasked run: `poetry run pytest --runxfail "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_check_can_delete_blocks_referenced_objects_naming_every_holder"`.
 - Discrimination: passes (4/4, whole file 10/10) with the settled-fix prototype `s1_block_plugin.py` applied via
   `-p` and no other prototype (Tasks 4, 6 and 8 are not needed for these shapes). The rejected delete-everywhere
   prototype `s1_fix_plugin.py` passes only the component case and fails the three journey cases on the blocking
@@ -171,12 +180,11 @@ It is also the leaner change. Steps:
    - with no removal target, `residual` is every container;
    - for `handles_own_dict_memberships` classes, parent groups stay residual;
    - patterns keep `[]`.
-3. **"Gone or error" in `_delete`** (`:158-235`). One tail for both branches. After unlinking, if the object is still
-   in `flat_efootprint_objs_dict`, run `pre_delete` and `web_obj.self_delete()`. The library raises
-   `PermissionError` on any residual reference, so the view shows the error modal and nothing is persisted
-   (`:151-156`). Call `delete_side_effects()` once, at the end. With steps 1 and 2 this tail is only a backstop.
-   Every list/dict deletion left is an owned nested child that the cascade already deletes, so it is the invariant,
-   not a second path.
+3. **Verify existing allowed deletion; leave `_delete` unchanged.** Blocked cases stop at
+   `check_can_delete`. Separate allowed cases assert permission before execution and verify persisted
+   removal: detached ordinary/edge journeys with their unshared children, and a custom component held
+   only by its device. Only change execution if these tests reveal a remaining defect. The earlier
+   shared-tail proposal and requirement to execute after a refused check are superseded.
 4. **S7, folded.** Remove the redundant `mirrored_cards` override. Reword the remaining comments: "the System is
    never a removal or blocking container; `pre_delete` unlinks it"; "patterns reference journeys, they never own
    them".
@@ -202,7 +210,7 @@ re-render covers. Prototyped in `s1_block_plugin.py`: the suite stays green, and
   - ownership-only removal targets (`:61-73`);
   - remove the sole-member block (`:92-103`);
   - residual-reference block (`:105-118`);
-  - single deletion tail with one `delete_side_effects` call (`:177-235`).
+  - leave `_delete` and its existing cascade cleanup unchanged.
 - `e-footprint-interface/model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py`: remove the
   `mirrored_cards` override (`:42-45`) and reword the comments at `:47-60`.
 - `e-footprint-interface/specs/architecture/forms-and-relationships.html:168-181` ("Required pattern-to-journey
@@ -216,9 +224,14 @@ re-render covers. Prototyped in `s1_block_plugin.py`: the suite stays green, and
   blocked instead of silently unlinking it. A custom edge component referenced by a need is blocked.
 
 ## Tests
-- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
-  is the task's only test: remove its expected-failure marker. It covers the journey and edge-journey blocks, every holding pattern named, the need-referenced component, and "deleted or model unchanged" for a forced
-  delete.
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_check_can_delete_blocks_referenced_objects_naming_every_holder`
+  covers four blocked-confirmation shapes, every blocking name, and unchanged request-local and saved
+  state. Do not execute a refused deletion. Remove its expected-failure marker when the fix lands.
+- `test_detached_journey_passes_check_and_deletes_with_unshared_children` covers ordinary and edge
+  journeys: detach while retaining another journey, reload, assert permission, delete, and verify the
+  journey and its unshared steps/functions are absent from saved state while the other journey survives.
+- `test_component_without_need_passes_check_and_deletes_from_device` asserts permission and verifies
+  that the existing cascade removes the component from saved state and device membership.
 - Existing coverage that must keep passing (not new tests): the E2E unused-journey deletions
   (`tests/e2e/objects/test_usage_journeys.py::test_delete_usage_journey`, `test_full_journey.py:143-165`) and the
   existing deletion suites (patterns, grouped edge devices, jobs, steps, needs).

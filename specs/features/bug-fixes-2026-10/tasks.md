@@ -1,6 +1,6 @@
 # bug-fixes-2026-10 — tasks
 
-**Status:** diagnosed and planned 2026-10-21; nothing implemented. Each task links its diagnostic;
+**Status:** Run A implemented and reviewed (2026-11-03); Runs B and C remain planned. Each task links its diagnostic;
 [`plan.html`](plan.html) digests them and orders the runs. Run them in order, each in a fresh
 `feature-implement` session.
 
@@ -162,6 +162,8 @@ affected (its endpoints are posted only from inside the mounted section) and sta
 
 ## Task 3 — The server owns card removal on delete; drop the delete-modal hyperscript
 
+**Status:** complete (Run A).
+
 **Goal:** No card deletion logs hyperscript `'#…' is null` or `htmx:oobErrorNoTarget`, and every
 deleted card leaves the active canvas without a reload. The modal hyperscript is not dead: for a
 plain top-level deletion with no constraint flip (unused journey, non-last usage pattern,
@@ -202,13 +204,15 @@ unreachable `HX-Reswap: none` branch go.
 - Top-level no-flip deletions remove the card from the active canvas only; a parked comparison
   canvas is untouched.
 
-**Depends on:** Task 11 (soft: it rewrites the `_delete` tail this task adds `web_id` to) and Task 4
+**Depends on:** Task 11 (soft: it narrows list/dict deletion to nested-card containers) and Task 4
 (soft: after it, nested-need deletions stop crashing and rely on this removal too). Shares
 `CHANGELOG.md` with both.
 
 **Implementation:** standard — small diff, but an HTMX/OOB transition (full review surface).
 
 ## Task 4 — Deleting a recurrent need: a detached wrapper leaves its target's container list
+
+**Status:** complete (Run A).
 
 **Goal:** Deleting a `RecurrentServerNeed` or any recurrent edge need (e.g. `RecurrentEdgeProcess`)
 re-renders the parent edge usage journey card without the deleted need, with no error modal. The
@@ -280,6 +284,8 @@ bookkeeping across two repositories.
 
 ## Task 5 — Round daily chart emissions to significant figures so totals match the library
 
+**Status:** complete (Run A).
+
 **Goal:** The cumulative results chart ends at the same total as the Sankey and the library
 (`system.total_footprint`), and small categories no longer show 0 in tooltips. Settled 2026-10-21:
 `to_rounded_daily_values` rounds each daily value to 6 significant figures (vectorized NumPy)
@@ -316,49 +322,102 @@ rounding is unchanged. Fixes GitHub #146 (regression from `479e9a7f`) and helps 
 
 **Implementation:** easy — one function, verified cause and settled precision.
 
-## Task 6 — Edit panels for objects held by library-built relationships open instead of erroring
+## Task 6 — Internally held objects open a small read-only inspection panel
 
-**Goal:** Opening the edit panel of an `EdgeStorage`, a recurrent edge process/workload component
-need, or an EcoLogits external API server (reachable from calculated-attribute chart headers and
-ancestor lists) renders the panel with no error modal, and its Delete shows the "referenced by
-<owner>" blocking modal. Two interface-side `KeyError`s cause it: (1)
-`list_containers_and_attr_name_in_list_container` indexes the container's constructor signature
-with relationship attributes the library builds in `after_init` (`ExternalAPI.server`,
-`EdgeComputer.components`, `recurrent_edge_component_needs`); use `.get(attr_name)` and skip
-missing ones, the library's own idiom; (2) `get_corresponding_web_class` lacks an
-`ExternalAPIServer` entry. Settled 2026-10-21: both parts ship in this task. Found while
-diagnosing #151.
+**Status:** complete (Run A).
+
+**Goal:** Calculated-attribute links to internally held objects open one generic inspection panel
+instead of an edit form. Show the object's name, “This object is managed automatically by
+[parent name]. Edit its parent to change its inputs.”, links to its internal containers, and the
+existing calculated-attributes section with formulas and charts. No input form, Save, Delete,
+bookmarks or editable membership controls. Branch before form-context generation, deletion checks
+and mirrored-card highlighting. This covers edge computer CPU/RAM, appliance components,
+recurrent process/workload component needs and external API servers. Settled by user review
+2026-11-03; replaces the 2026-10-21 editable-panel proposal. Objects classified as ordinary
+retain their editable panels; their saves must also work when they have no canvas card.
 
 **Diagnostic:** [`diagnostics/check-can-delete-keyerror.md`](diagnostics/check-can-delete-keyerror.md)
+— recorded failures remain evidence; its previous fix/copy decisions are superseded by
+[`PLAN-UPDATE-01`](plan.html#plan-update-01).
 
-**Repository:** `e-footprint-interface`
+**Repositories:** `e-footprint` (relationship metadata), `e-footprint-interface` (inspection panel
+and saving editable objects that have no canvas card).
 
 **Files touched:**
-- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` —
-  `.get(attr_name)` and skip `None` in `list_containers_and_attr_name_in_list_container` (around lines
-  389–390).
-- `model_builder/domain/efootprint_to_web_mapping.py` — `"ExternalAPIServer": ModelingObjectWeb`
-  (around lines 52–54).
-- `CHANGELOG.md` — `## [Unreleased]` fix entry.
+- Library `efootprint/abstract_modeling_classes/modeling_object.py` — add the derived property
+  `internal_modeling_obj_containers`: distinct live parents that reference the object only through
+  attributes absent from that parent's concrete `__init__` parameters. Group live contextual
+  relationships by parent and inspect their attribute names with `get_init_signature_params`.
+  A constructor-input relationship from that same parent makes the object ordinary relative to
+  that parent, even if an additional non-constructor relationship exists. Constructor relationships
+  from other parents do not cancel internal ownership. Ignore detached wrappers. Thus edge-computer
+  storage remains ordinary through its `storage` input despite also belonging to `components`;
+  CPU/RAM remain internal even when a separate need references them. This is a general rule, not a
+  storage exception, creation-history flag or global library edit ban. No JSON change.
+- `model_builder/adapters/views/views_edition.py` — early inspection branch using that property;
+  retain ordinary editing for objects without internal containers. Supply wrapped parent links and
+  the object for the existing calculated-attributes partial; bypass form generation and card
+  highlighting rather than creating a disabled form.
+- `model_builder/templates/model_builder/side_panels/edit/internal_object_panel.html` — new small
+  generic panel, reusing the existing panel shell and calculated-attributes section.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — retain
+  Task 6's `.get(attr_name)`/skip for non-constructor entries in generic list-container discovery
+  where other callers still need it; no new internal-component placement override.
+- `model_builder/application/use_cases/edit_object.py` and
+  `model_builder/adapters/presenters/htmx_presenter.py` — make the card-refresh path respect actual
+  canvas placement: an editable object with no rendered card supplies no card-refresh targets.
+  Decide this before mirror traversal or card-template lookup, including automatic-repair owners.
+  Preserve persistence, success notifications, constraint OOB regions and result recomputation.
+  Server storage and edge-computer storage have no canvas card; neither their own card nor the
+  parent's card needs rendering on an ordinary storage edit. Do not add a storage-card template,
+  redirect refreshes to the parent, or catch missing-template errors. Preserve refreshes for
+  custom-device components that do have visible cards, including storage components.
+- Library `specs/architecture/relationships.html` and interface
+  `specs/architecture/forms-and-relationships.html` — document internal relationship metadata and
+  the distinction between standalone inspection and parent-owned editing; interface
+  `specs/architecture/rendering.html` records that panel availability and canvas-card presence
+  are independent. Suggest a short pointer in the affected `AGENTS.md` / `CLAUDE.md` when implementing this pattern.
+- Both `CHANGELOG.md` files — consolidated `## [Unreleased]` entries when implemented.
 
 **Tests added/changed:**
-- `tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner`
-  — reproduction; remove its expected-failure marker. No other tests.
-- `tests/unit_tests/domain/test_web_efootprint_wrappers.py::test_make_sure_that_all_canonical_classes_are_mapped` — drop the
-  stale `"ExternalAPIServer"` exclusion.
+- Library `tests/abstract_modeling_classes/test_modeling_object.py` — new public property contract:
+  internal and constructor-held links, same-parent constructor references taking precedence over
+  non-constructor references, separate referencing parents not exempting an internal object,
+  detached wrappers, and the same result after a serialization round-trip.
+- Rewrite the existing Task 6 reproduction in
+  `tests/unit_tests/adapters/views/test_views_edition.py` for the agreed inspection behavior and
+  remove its marker; extend its cases to CPU/RAM and appliance components. Assert parent links,
+  calculated results, no editable controls and no form-context/mirror traversal. Existing formula
+  and chart paths remain usable; Tasks 9/10 retain their separate known fixes.
+- Add a focused direct-storage save regression in the same view-test module for server storage
+  and edge-computer storage: open an editable panel, change a value/name, save without an error
+  modal, reload to verify persistence, and assert no storage/parent-card OOB swap. Retain normal
+  success feedback and result-update behavior. Verify a custom-device storage component still
+  refreshes its visible card when renamed.
+  The user observed the server save modal naming `model_builder/object_cards/storage_card.html`;
+  source inspection confirms the unconditional card-render path, after persistence, and the absent
+  template. The edge-storage reproduction previously demanded a parent-card swap; replace that
+  expectation with a successful save without a card swap.
+- The former `ExternalAPIServer` mapping addition and exclusion-test change are no longer required
+  here: the inspection branch bypasses form resolution. Task 13 still owns resolver consistency.
 
 **Acceptance:**
-- The reproduction passes with its marker removed.
-- Those panels open from their calculated-attribute links on the shipped examples; Delete shows the
-  blocking modal naming the owner and leaves the model unchanged.
-- Jobs, needs, edge devices, CPU/RAM components and usage patterns behave as before.
+- All listed internal panels open from calculation links with no error modal, preserve inspection
+  of results, and direct users to their parent for inputs.
+- Server storage and edge-computer storage retain their own editable panels naturally under the
+  membership rule; standalone saves persist and report success without rendering a nonexistent
+  card or refreshing the parent. Existing result updates remain supported.
+- Ordinary custom-device components retain normal editing and visible-card refreshes. The edge
+  computer's own form still edits its nested storage, including metadata. No global edit ban.
+- No new mirroring or card-refresh machinery is introduced for standalone internal-object edits.
 
-**Depends on:** Task 4 (soft: after it, the property needs no `None`-container guard). Task 8 must
-follow in the same run:
-with Task 6 alone, an `EdgeStorage` edit from its newly openable panel saves but swaps a card id
-not on the canvas, so the edge computer card is not refreshed (Task 8's reproduction covers it).
+**Depends on:** Task 4 (soft ordering: establishes live-wrapper bookkeeping). Ship immediately
+before Task 8 in the same run so the inspection-only UI and direct-request guards land together.
+Task 8 depends on the property added here; the previous wrong-card-refresh dependency is retired.
 
-**Implementation:** easy — two one-line changes with verified causes.
+**Implementation:** standard — one library property and a small generic panel; cross-repository
+contract and cardless-save regression with focused verification. The old editable-panel prototype
+does not validate this design.
 
 ## Task 7 — Recurrent constant editor: show "each hour" after the unit
 
@@ -395,59 +454,65 @@ weekly-pattern editor unchanged. Fixes GitHub #150.
 
 **Implementation:** easy — one template and copy change; decisions settled.
 
-## Task 8 — Library-built edge components are blocked from deletion instead of a silent no-op
+## Task 8 — Internally held objects reject standalone edits and deletion
 
-**Goal:** Deleting an edge computer's CPU or RAM component, or an edge appliance's component, shows
-the "referenced by <device>" blocking modal and leaves the model unchanged. Today it offers "Yes,
-delete" and returns 200, but nothing is deleted: their web overrides declare the library-built
-`components` list a removal target, and the edit silently drops that non-constructor attribute. The
-library treats these components as internal (built in `after_init`, deleted only with their
-device). Component edits keep re-rendering the owning device card through one `mirrored_cards`
-override on `EdgeComponentWeb`; the three internal web classes subclass it and lose their
-list-container overrides. This also places `EdgeStorage` edits (newly reachable after Task 6) under
-the edge computer card. Settled 2026-10-21: the blocking modal, with its existing copy as for
-Task 6, not hiding Delete.
+**Status:** complete (Run A).
+
+**Goal:** Enforce Task 6's inspection-only rule for direct requests as well as the visible UI.
+If `internal_modeling_obj_containers` is nonempty, a standalone edit is rejected before any
+mutation or pre-edit hook; deletion confirmation blocks naming the internal parents, and deletion
+execution rejects before container-removal discovery, unlinking or pre-delete hooks. Leave saved
+state unchanged. The panel itself has no Delete control. Settled by user review 2026-11-03;
+replaces the old “Delete stays visible” decision and standalone rename/card-refresh support.
 
 **Diagnostic:** [`diagnostics/edge-component-delete-silent-noop.md`](diagnostics/edge-component-delete-silent-noop.md)
+— the silent-delete evidence remains valid; the previous fix and rename acceptance are superseded
+by [`PLAN-UPDATE-01`](plan.html#plan-update-01).
 
-**Repository:** `e-footprint-interface`
+**Repository:** `e-footprint-interface` (consumes Task 6's library property).
 
 **Files touched:**
-- `model_builder/domain/entities/web_core/hardware/edge/edge_component_base_web.py` —
-  `mirrored_cards` override placing the component under `edge_device.mirrored_cards`, with a
-  one-line docstring.
-- `model_builder/domain/entities/web_builders/hardware/edge/edge_computer_cpu_component.py`,
-  `edge_computer_ram_component.py`, `edge_appliance_component.py` — subclass `EdgeComponentWeb`;
-  delete the `list_containers_and_attr_name_in_list_container` overrides; drop the unused `typing`
-  import in the appliance file.
-- `specs/architecture/forms-and-relationships.html` (or wherever `mirrored_cards`/list containers
-  are described) — one line: library-built relationships are never removal targets; edge
-  components are placed under their device's cards via `EdgeComponentWeb.mirrored_cards`.
+- `model_builder/application/use_cases/edit_object.py` — reject standalone edits of internally held
+  objects immediately after lookup and before `pre_edit`, mutation or persistence. Use the existing
+  exception-modal path, with wording explaining that the parent manages this object.
+- `model_builder/application/use_cases/delete_object.py` — use the same property in
+  `check_can_delete` before removal-target discovery, returning the internal parents' names; reject
+  at the start of `_delete` before any unlinking or hooks, even without a confirmation request.
+- `specs/architecture/forms-and-relationships.html` — standalone mutation guards apply to internal
+  relationships; parent-owned edits and deletion cascades remain allowed.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device`
-  — reproduction; remove its expected-failure marker. No other tests.
-- Delete `test_list_containers_and_attr_name_in_list_container` from
-  `tests/unit_tests/domain/entities/web_builders/hardware/edge/test_edge_computer_cpu_component_web.py`,
-  `test_edge_computer_ram_component_web.py` and `test_edge_appliance_component_web.py` (they test the deleted overrides);
-  keep their calculated-attribute filter tests.
-- Existing `tests/integration/test_deletion.py` device-cascade tests and the custom-edge-device component E2E
-  (`tests/e2e/objects/test_edge_objects.py`, around line 334) must keep passing.
+- Rewrite the Task 8 reproduction in `tests/unit_tests/adapters/views/test_views_deletion.py`
+  (now `test_internally_managed_objects_reject_standalone_edits_and_deletion`)
+  and remove its marker. Replace the successful rename/card-swap assertion with refusal of a
+  direct edit POST; keep blocked confirmation, refused delete POST and unchanged-state assertions.
+  Cover CPU, RAM and appliance component, plus generated process/workload needs and an external
+  API server using existing programmatic fixtures. Storage is an ordinary editable object under
+  the refined rule; its successful standalone save belongs to Task 6's regression, not this
+  internal-object rejection matrix.
+- Existing device/API/process/workload deletion cascades and the custom-edge-device component flow
+  must keep passing. Verify parent-form storage editing remains allowed, including metadata.
+- Keep the three component wrappers and their existing container-override tests unchanged. There
+  is no base-class swap, new `EdgeComponentWeb.mirrored_cards`, or internal rename/refresh support.
 
 **Acceptance:**
-- The reproduction passes with its marker removed.
-- Delete on a CPU, RAM or appliance component shows the blocking modal naming its device; the model
-  is unchanged.
-- Renaming a CPU, RAM or appliance component, or an edge storage, re-renders the owning device card
-  with no error modal.
-- Deleting an edge computer or appliance still deletes its components; custom edge device
-  components stay deletable and render as before.
+- Direct standalone edit/delete requests cannot mutate an internally held object or persist a
+  partial result; the user sees the existing error modal with the parent-management explanation.
+- Direct deletion confirmation names the internal parents and never offers “Yes, delete”.
+- The internal-object guards do not reject standalone server/edge-computer storage edits. Storage
+  deletion still follows ordinary reference checks while its server/computer references it.
+- Parent-owned storage edits and deletion with the parent still work: guards live at standalone
+  use-case entry points, not in low-level library edits or cascade cleanup.
+- Custom-device components without internal containers retain existing editing/deletion behavior,
+  subject to Task 11's ordinary reference checks.
 
-**Depends on:** Task 6 (hard: without its `.get` skip, removing the overrides raises
-`KeyError 'components'` on panel open). Ship in the same run, right after Task 6.
+**Depends on:** Task 6 (hard: shared library metadata and inspection-panel contract). Ship in the
+same run, immediately after it. Task 11 follows and preserves these guards.
 
-**Implementation:** easy — one override plus three base-class swaps, probe-verified.
+**Implementation:** easy — early guards using Task 6's property and the existing error path;
+rewrite the regression around the newly agreed behavior. Internal-object edits need no rendering
+correction; Task 6 separately fixes successful saves of editable objects with no canvas card.
 
 ## Task 9 — Empty calculated dict entries render "no value" without a chart button; chart views show the error modal
 
@@ -540,23 +605,23 @@ and already used by the dict toggle and `ancestors-formula-and-children-*`).
 
 **Implementation:** easy — template id changes plus E2E selector updates.
 
-## Task 11 — A referenced object is blocked from deletion; a confirmed delete never only unlinks
+## Task 11 — Deletion confirmation blocks every remaining reference
 
-**Goal:** A confirmed delete either removes the object from the saved model or shows the error
-modal with the session unchanged; it never returns 200 while the object survives. Today `_delete`'s
-list/dict branch only unlinks the object and relies on `EditService`'s accordion-children diff to
-delete it, and `check_can_delete` skips the direct-reference block whenever a list/dict container
-exists. A usage journey (or edge usage journey) in a pattern that holds two journeys offers "Yes,
-delete", is only unlinked from its patterns and reappears on reload. A pattern that still holds it
-but has other journeys is left out of the blocking modal. Settled 2026-10-21: (1) a journey is
-blocked while any pattern holds it, and the modal names every holding pattern; the user detaches it
-first with the membership ×. (2) A custom edge-device component referenced by a recurrent component
-need is blocked, naming the need. (3) Copy fixes ("reorient these edge devices" noun, journey
-confirmation wording) are deferred to the copy backlog with smell-sweep S12. Only containers that
-nest their child (`renders_relationship_children_as_nested_cards`) count as removal targets. The
-sole-member block becomes dead and goes. Leftover references block. `_delete` gets one tail:
-if the object is still present after unlinking, `pre_delete` then `self_delete()` (the library
-raises on leftover references). Folds in smell-sweep S7 (the redundant `mirrored_cards` override).
+**Status:** complete (Run A).
+
+**Goal:** Deletion confirmation blocks a journey while any pattern holds it, naming every holding
+pattern; the user detaches it first with the membership ×. A custom edge-device component
+referenced by a recurrent component need is blocked, naming the need. Today every list/dict
+container is a removal target, so `check_can_delete` skips independent references whenever any
+such container exists. Only containers that nest their child
+(`renders_relationship_children_as_nested_cards`) count as removal targets. Remove the redundant
+sole-member check and block references outside those removal targets. Copy fixes remain deferred
+with smell-sweep S12. Folds in S7's redundant `mirrored_cards` override cleanup.
+
+Review decision 2026-11-03: test the normal check → execute flow. Blocked cases test the check
+without forcing execution; allowed cases assert permission before deletion and verify saved state.
+Leave `_delete` and its existing cascade cleanup unchanged unless an allowed-deletion regression
+reveals a defect. The shared deletion tail and execution-without-confirmation requirement are dropped.
 Task 3's OOB-delete rule is unchanged.
 
 **Diagnostic:** [`diagnostics/list-deletion-only-unlinks.md`](diagnostics/list-deletion-only-unlinks.md)
@@ -565,8 +630,8 @@ Task 3's OOB-delete rule is unchanged.
 
 **Files touched:**
 - `model_builder/application/use_cases/delete_object.py` — nesting-only removal targets (around
-  lines 61–73); delete the sole-member block (around 92–103); block on references left after removal
-  (around 105–118); single deletion tail with one `delete_side_effects` call (around 177–235).
+  lines 61–73); delete the sole-member block (around 92–103); block references outside the removal
+  targets (around 105–118). Leave `_delete` unchanged.
 - `model_builder/domain/entities/web_core/usage/usage_pattern_web_base_class.py` — remove the
   redundant `mirrored_cards` override (around 42–45); reword comments (around 47–60).
 - `specs/architecture/forms-and-relationships.html` (around 168–181) — journeys are blocked while any
@@ -576,8 +641,15 @@ Task 3's OOB-delete rule is unchanged.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
-- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked`
-  — reproduction; remove its expected-failure marker. No other tests.
+- `tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_check_can_delete_blocks_referenced_objects_naming_every_holder`
+  — four blocked-confirmation cases; assert refusal, every blocking name, and unchanged request-local
+  and saved state. Remove the expected-failure marker when the fix lands. Do not execute refused deletions.
+- `test_detached_journey_passes_check_and_deletes_with_unshared_children` — ordinary and edge
+  journeys: detach from the pattern while keeping another journey, reload, assert permission, execute,
+  and verify the journey and its unshared steps/functions are absent from saved state. Other journeys survive.
+- `test_component_without_need_passes_check_and_deletes_from_device` — a custom component held
+  only by its device passes the check and is removed from both the saved model and device membership
+  by the existing cascade cleanup.
 - Existing E2E unused-journey deletions (`test_usage_journeys.py::test_delete_usage_journey`, `test_full_journey.py:143-165`)
   and the deletion suites keep passing.
 
@@ -591,61 +663,86 @@ Task 3's OOB-delete rule is unchanged.
   Factory-sensor CPU/RAM become blocked).
 - Pattern, job, step, edge function, need, server and edge-group deletions behave as before.
 
-**Depends on:** Task 8 (hard: otherwise an edge appliance's built-in component gets an error modal
-instead of the blocking modal); Tasks 3, 4, 6 (soft; shared `delete_object.py`,
+**Depends on:** Task 8 (hard: internal-parent confirmation and execution guards must precede
+Task 11's generic removal-target handling); Tasks 3, 4, 6 (soft; shared `delete_object.py`,
 `test_views_deletion.py`, `test_delete_object.py`, `CHANGELOG.md`).
 
-**Implementation:** standard — use-case deletion semantics on a full review surface; settled rule,
-prototype-verified.
+**Implementation:** standard — confirmation rules on a full review surface; verify allowed deletions before
+considering any execution-path change.
 
-## Task 12 — Card highlight expands the canonical id within its owning canvas
+## Task 12 — Put the system prefix first in every card id
 
-**Goal:** Creating or editing a nested object (job, step, edge function, recurrent need or process,
-edge component) pulses every one of its cards on the active canvas and scrolls the first into view;
-opening a mirrored object's edit panel marks every mirror as opened. Root cards behave as before,
-and nothing on a parked canvas is touched, even for a duplicated model with identical object ids.
-Since `cc9611c3` prefixed root web ids with `sys-{system}-`, the client's `button-<id>_in_…`
-expansion never matches nested ids (`Class-id_in_<parent>`). `cardButtonsForWebId` picks the
-resident canvas whose `sys-${data-system-id}-` prefixes the id (longest wins), strips it to
-`Class-id`, and queries `[id="button-${id}"], [id^="button-${local}_in_"]` inside that canvas only.
-The header stays one canonical id (the nginx limit fixed by `0b2f361b`). Reproduced in a browser.
+**Goal:** Every card id has one consistent shape: `sys-{system}-Class-id`, optionally followed
+by `_in_<unprefixed parent containment path>`. A job nested in a step and journey becomes
+`sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-1`. Every appearance of an
+object therefore starts with its canonical id, and the existing `cardButtonsForWebId` matcher
+finds its root and mirrored cards without parsing system prefixes or locating a canvas.
+Creating/editing an editable nested object pulses its cards and scrolls the first into view;
+opening a mirrored object's edit panel marks its mirrors as opened. Root cards retain their ids,
+and the other model's cards remain untouched even when object ids are identical. Task 6's
+inspection-only panels keep their existing behavior.
+
+Review decision 2026-11-03: build an unprefixed containment path in Python, then add
+`_system_web_id_prefix` once at the beginning of `web_id`. This replaces the earlier owner-canvas
+lookup/prefix-stripping proposal. Keep the existing document-wide exact-or-`_in_` highlight
+matcher and the single canonical id in headers (the nginx limit fixed by `0b2f361b`).
 
 **Diagnostic:** [`diagnostics/card-highlight-id-mismatch.md`](diagnostics/card-highlight-id-mismatch.md)
 
 **Repository:** `e-footprint-interface`
 
 **Files touched:**
-- `theme/static/scripts/model_builder_main.js` — `cardButtonsForWebId` (around lines 200–208):
-  owner-canvas lookup via `[data-model-canvas][data-system-id]`, prefix stripping, scoped query,
-  corrected comment.
-- `model_builder/adapters/views/views_edition.py` (around 38–40) — comment only.
-- `specs/architecture/rendering.html` — one line beside "Toast notifications and tooltips": one
-  canonical `web_id` per highlight, expanded client-side to the owning canvas's root and `_in_`
-  mirrors.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — a private
+  unprefixed containment-path helper; `web_id` adds the system prefix to the completed path.
+  Update the root-only prefix comments. Preserve `route_id`, equality/hash semantics and mirror enumeration.
+- `tests/e2e/pages/model_builder_page.py` — adapt `card_id_selector` to the uniform system-prefixed
+  shape, matching the card's own class rather than a class embedded in its parent path. Audit
+  remaining literal selectors and ID construction in templates, leader lines, HTMX and E2E helpers;
+  most derive from `web_id` and need no manual rewrite. Update any actual format assumptions found.
+- `specs/architecture/workspace.html` — document the prefix at the beginning of every completed
+  containment path; remove the root-only/inherited-through-parent description.
+- `specs/architecture/rendering.html` — document single-id headers and the exact-or-`_in_`
+  expansion, with the system namespace already present in every matching card's prefix.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
+- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` —
+  update list/dict nested-ID expectations; extend the existing ID tests to cover multiple nesting
+  levels, exactly one leading system prefix, unchanged root ids, and distinct system namespaces.
 - `js_tests/model_builder_main.test.js › pulse and opened highlights cover every card of the object on its own canvas only`
-  — reproduction (`test.failing`, fixture case `render_card_highlight_canvases` in `js_tests/build_fixtures.py`); switch it
-  to `test(` once fixed. No other tests.
+  — switch the reproduction from `test.failing` to `test` and regenerate its Python-rendered fixture
+  with `npm run jest`. Keep the nested job, mirrored step, `job-2` boundary, root, unknown-system
+  and parked-model cases. Expected mirrors come from Python, not copied old ID strings.
+- Update existing format-sensitive E2E assertions and run the job, journey-step, edge-object and
+  model-comparison flows, checking card targeting, leader lines and HTMX swaps. Manually verify
+  off-screen nested create/edit scrolling; jsdom does not provide real element geometry.
 
 **Acceptance:**
-- The reproduction passes as a plain `test(`.
-- As in the goal; the highlight headers stay constant-size.
+- A nested id starts with its object's canonical id followed by `_in_`; the system prefix appears
+  exactly once at the beginning, including at multiple nesting levels and for list/dict containers.
+- The reproduction passes as a plain `test`; all mirrors on the owning model are highlighted and
+  no sibling object or other model's card is highlighted.
+- Existing exact-or-`_in_` JS matching and single-id header payloads stay unchanged; no canvas lookup,
+  prefix stripping, additional transport field or legacy-ID compatibility branch is introduced.
+- Root IDs, routing, card targeting, leader lines, model switching and Task 3's server-side removal
+  remain correct. Architecture documentation describes the new ID invariant.
 
-**Depends on:** none (shares only `CHANGELOG.md` with other tasks).
+**Depends on:** no hard prerequisite. Keep Run B ordering after Run A, then before Tasks 13/14:
+Tasks 6, 12, 13 and 14 share `modeling_object_web.py`. Task 3's deletion behavior must remain covered.
 
-**Implementation:** easy — one client function, with a Python-generated fixture pinning the id rule.
+**Implementation:** standard — one ID-construction rule, selector audit and existing-test updates;
+validate Python ID tests, `npm run jest`, non-E2E checks and affected E2E flows.
 
 ## Task 13 — One web-class resolver and a `has_edit_panel` property (refactor)
 
 **Goal:** One rule maps a library class to its web class: exact name, else the nearest mapped MRO
 ancestor, else `ModelingObjectWeb`. `wrap_efootprint_object`, form generation and the use cases
 use it (use cases read `type(web_obj)` instead of re-looking up `MAPPING`). Today three lookups
-disagree on 10 concrete classes: after Task 6, `RecurrentEdgeProcess{CPU,RAM,Storage}Need` and
-`RecurrentEdgeWorkloadNeed` get `ModelingObjectWeb` for panel, canvas and deletion but
-`RecurrentEdgeComponentNeedWeb` for forms. A `has_edit_panel` wrapper property derived from the
+disagree on 10 concrete classes: the underlying resolver disagreement affects `RecurrentEdgeProcess{CPU,RAM,Storage}Need` and
+`RecurrentEdgeWorkloadNeed`. Task 6 bypasses form generation for their inspection panels but does
+not remove that disagreement. A `has_edit_panel` wrapper property derived from the
 resolver replaces the hard-coded class-name lists in the calculated-attribute templates (S11).
+Panel-link availability includes Task 6's read-only inspection panels despite the property name.
 Behavior-preserving except that those four need classes now use one wrapper everywhere.
 
 **Diagnostic:** [`smell-sweep.md`](smell-sweep.md) — findings S4 and S11.
@@ -665,14 +762,15 @@ Behavior-preserving except that those four need classes now use one wrapper ever
 **Tests added/changed:**
 - A unit test pinning that, for every concrete library modeling class, the wrapping and form
   resolutions agree.
-- View checks that the four recurrent process/workload need panels open and edit correctly.
+- View checks that the four recurrent process/workload need panels remain read-only, open correctly
+  and retain formulas/charts under Task 6's contract; do not reintroduce standalone edits.
 
 **Acceptance:**
 - No two paths resolve a library class to different web classes; no rendered link points at a
   class without an edit panel.
 - Full non-E2E suite and edge E2E files pass unchanged.
 
-**Depends on:** Task 8 (and therefore Tasks 4 and 6).
+**Depends on:** Task 8 (and therefore Task 6; Task 4 remains soft ordering).
 
 **Implementation:** standard — cross-cutting resolver swap with one deliberate behavior change to
 verify.
@@ -753,5 +851,11 @@ they are temporary and may be gone, so rebuild from the diagnostics if needed).
 deterministic.
 
 ## Execution plan
+
+### New report outside Run A
+
+- [Grouped edge-member deletion confirmation](diagnostics/grouped-member-delete-confirmation-blocked.md):
+  grouped custom devices and nested groups are blocked by their parent before their supported
+  deletion hook can run. Reproduced on the baseline and Task 11; remains unfixed, outside this run.
 
 Runs, ordering, deduplication verdicts and deferred items: [`plan.html#execution-plan`](plan.html#execution-plan).
