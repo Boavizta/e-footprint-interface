@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- Standalone edits and deletions of internally managed objects are refused with guidance to edit their parent.
 - Automatically managed internal objects open read-only inspection panels with parent links and calculated results; standalone storage edits save successfully without trying to render absent cards.
 - Deleting recurrent server and edge needs immediately refreshes their parent card without an error modal (#151).
 - Daily results chart values retain six significant figures, keeping cumulative totals aligned with the library total (#146).

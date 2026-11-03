@@ -90,6 +90,14 @@ class EditObjectUseCase:
         # Get object to edit
         obj_to_edit = self.model_web.get_web_object_from_efootprint_id(input_data.object_id)
 
+        internal_parents = obj_to_edit.modeling_obj.internal_modeling_obj_containers
+        if internal_parents:
+            parent_names = ", ".join(parent.name for parent in internal_parents)
+            raise ValueError(
+                f"{obj_to_edit.name} is managed automatically by {parent_names}. "
+                "Edit its parent to change its inputs."
+            )
+
         # Apply pre_edit hook if defined (e.g., ServerWeb edits storage first)
         if hasattr(obj_to_edit, 'pre_edit'):
             obj_to_edit.pre_edit(input_data.form_data)

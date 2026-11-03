@@ -84,6 +84,12 @@ class DeleteObjectUseCase:
         from model_builder.domain.efootprint_to_web_mapping import EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING
 
         web_obj = self.model_web.get_web_object_from_efootprint_id(object_id)
+        internal_parents = web_obj.modeling_obj.internal_modeling_obj_containers
+        if internal_parents:
+            return DeleteCheckResult(
+                can_delete=False,
+                blocking_containers=sorted({parent.name for parent in internal_parents}),
+            )
         web_class = EFOOTPRINT_CLASS_STR_TO_WEB_CLASS_MAPPING.get(web_obj.class_as_simple_str)
 
         list_containers, _, dict_containers, _ = self._container_removal_targets(web_obj, web_class)
@@ -169,6 +175,13 @@ class DeleteObjectUseCase:
         from efootprint.logger import logger
 
         web_obj = self.model_web.get_web_object_from_efootprint_id(input_data.object_id)
+        internal_parents = web_obj.modeling_obj.internal_modeling_obj_containers
+        if internal_parents:
+            parent_names = ", ".join(parent.name for parent in internal_parents)
+            raise ValueError(
+                f"{web_obj.name} is managed automatically by {parent_names}. "
+                "Edit its parent to change its inputs."
+            )
 
         object_name = web_obj.name
         object_type = web_obj.class_as_simple_str
