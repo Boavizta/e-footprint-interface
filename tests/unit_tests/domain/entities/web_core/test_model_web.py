@@ -90,7 +90,6 @@ class TestModelWeb(unittest.TestCase):
         self.assertListEqual(emissions["values"]["Edge_devices_energy"], [0.3, 0])
         self.assertListEqual(emissions["values"]["Edge_devices_manufacturing"], [3.1, 0])
 
-    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 5")
     def test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period(self):
         start_date = pytz.utc.localize(ciso8601.parse_datetime("2027-01-01 00:00"))
         n_hours = 4748 * 24

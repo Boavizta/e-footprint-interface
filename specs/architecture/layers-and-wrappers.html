@@ -79,6 +79,7 @@
 <li><strong><code>EditService</code></strong> — handles object editing with cascade cleanup.</li>
 <li><strong><code>SystemValidationService</code></strong> — validates system completeness (drives the "Get results" button state).</li>
 <li><strong><code>EmissionsCalculationService</code></strong> — aggregates library footprint series into daily chart values; it does not define footprint formulas.</li>
+<li>Daily chart values retain six significant figures so chart totals stay faithful to the library total.</li>
 <li><strong><code>ComparisonService</code></strong> — thin adapter shaping the library <code>SystemComparison</code> (<code>system_a.compare_to(system_b)</code>) into the comparison dashboard's view model (KPI values, three Chart.js payloads, diff table). Rendering only — no modeling logic, no Django imports.</li>
 </ul>
 <h3 id="web-wrappers">Web wrappers</h3>

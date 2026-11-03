@@ -58,6 +58,6 @@ class TestModelWebUtils:
         """Sum for cumulative units, mean for resource allocation units."""
         arr = values * unit
 
-        result = model_web_utils.to_rounded_daily_values(arr, rounding_depth=1)
+        result = model_web_utils.to_rounded_daily_values(arr)
 
         assert result == expected

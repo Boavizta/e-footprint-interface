@@ -43,7 +43,7 @@ def get_reindexed_array_from_dict(
     return reindex_array(val, global_start, total_hours)
 
 
-def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -> List[float]:
+def to_rounded_daily_values(quantity_arr: u.Quantity, sig_figs: int = 6) -> List[float]:
     """
     Aggregate hourly values into daily values.
 
@@ -53,7 +53,7 @@ def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -
 
     Args:
         quantity_arr: Hourly quantity array to aggregate
-        rounding_depth: Number of decimal places to round to
+        sig_figs: Number of significant figures to retain in each daily value
 
     Returns:
         List of daily aggregated values
@@ -75,4 +75,6 @@ def to_rounded_daily_values(quantity_arr: u.Quantity, rounding_depth: int = 5) -
         # For cumulative metrics (energy, events, data) - sum the values
         daily = np.bincount(day_idx, weights=weights, minlength=n_days)
 
-    return np.round(daily, rounding_depth).tolist()
+    magnitude = np.floor(np.log10(np.abs(daily), where=daily != 0, out=np.zeros_like(daily)))
+    scale = np.power(10.0, sig_figs - 1 - magnitude)
+    return (np.round(daily * scale) / scale).tolist()
