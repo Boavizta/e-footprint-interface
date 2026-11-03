@@ -1,7 +1,7 @@
 # Task 6 — Internal-object inspection and cardless input saves
 
 Repositories and implementation ranges:
-- Library: `318aa090cf4923fec672485d07c80c66611688eb..2540ffad786389aaafe753b7df2c9a3dbd232308`.
+- Library: `318aa090cf4923fec672485d07c80c66611688eb..8793fd7ab101787179a544d9f276551fb28008b4`.
 - Interface: `a7cf3363bf6f4285766691211d6340deb7f5ec00..eac07c0f514d0b5ff4b815d46d3809f9d4fb5228`.
 
 ## Review pointers
