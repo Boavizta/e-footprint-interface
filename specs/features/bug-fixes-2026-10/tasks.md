@@ -64,61 +64,104 @@ is GitHub #146, Task 6 was found while diagnosing #151, Task 7 is GitHub #150, T
 diagnosing Task 6, Task 10 while diagnosing Task 9, Tasks 11–12 are smell-sweep bugs S1 and S2, and
 Tasks 13–15 are user-approved smell-sweep refactors.
 
-## Task 1 — The #sidePanel unsaved-changes guard blocks instead of replaying
+## Task 1 — One dirty-side-panel guard: discard, close, repeat
 
-**Goal:** With unsaved side-panel edits, clicking an element whose own `hx-target` is `#sidePanel`
-shows the unsaved-changes modal; "Discard changes" discards the edits and closes the panel, and
-nothing is issued. The user repeats the click, which then runs exactly as authored. This removes
-the hand-parsed replay (and its `eval`) and fixes a visible defect: the boosted "Data & privacy"
-links have no `hx-get`, so the replay loaded the builder page into `#sidePanel` (shown in jsdom
-with the bundled htmx 2.0.6; confirm in a browser via the new E2E). Applies the mission's
-guards-block rule (`specs/mission.md:26-28`). Settled 2026-10-21: scope is this guard only; the
-navigation guard and `runAfterSidePanelDiscardConfirmation` stay for
-`server-rendered-state-follow-up`. The shared `#unsavedModal` copy names only the discard, so it
-stays true for the guards that still continue: "The open side panel has unsaved changes. Discard
-them?" with "Keep editing" / "Discard changes".
+**Goal:** Every user action that would abandon unsaved side-panel edits uses one discard-and-repeat
+rule. Block the action before its request or destructive UI change, show "The open side panel has
+unsaved changes. Discard them?", and offer "Keep editing" / "Discard changes". Keep editing leaves
+the panel and edits intact. Discard changes closes and clears the panel, issues no interrupted
+request and performs no interrupted action. The user repeats the action, which then runs as authored.
+This fixes the boosted Data & privacy replay misfire and applies the mission's guards-block rule.
+
+Review decision 2026-11-03: unify all dirty-side-panel handling now. This supersedes the 2026-10-21
+scope limited to own-`hx-target="#sidePanel"` elements. Include card/add/edit and Data & privacy
+openers, Feedback, +Add (blank/duplicate/import), model switching (including cross-slot Compare
+dismissal), entry into Simplified inputs, close/cancel, model removal, reset and example loading.
+Opening Compare, returning to the same model, help-drawer use and export preserve the draft and
+need no warning. Save and validation/preview requests must remain usable while dirty. Keep
+Configure's existing separate unsaved-draft rules; this task unifies the side-panel draft only.
 
 **Diagnostic:** [`diagnostics/side-panel-replay-hand-parsing.md`](diagnostics/side-panel-replay-hand-parsing.md)
 
 **Repository:** `e-footprint-interface`
 
 **Files touched:**
-- `theme/static/scripts/side_panel_utils.js` — remove `pendingRequest`, the `htmx:beforeRequest`
-  guard (around lines 127–139, with its `hideLoadingBar` timeout) and `proceedWithPendingRequest()`
-  (around 199–220); add an own-`hx-target="#sidePanel"` branch to the `htmx:confirm` listener (around
-  162–171) wired to `closeWarningModalAndCloseSidePanel()`, never calling `issueRequest`; rewrite the
-  guard comment. Match on the element's own attribute, not `detail.target`, so `htmx.ajax` openers
-  with their own confirmation don't stack two dialogs.
-- `model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html` — Cancel
-  calls `closeWarningModal()` (no `hideLoadingBar`); button labels.
-- `model_builder/templates/model_builder/model_builder_main.html` (around line 84) — modal message.
-- `specs/design/journeys/build-a-model.html` (around 358) and `specs/design/journeys/compare-models.html`
-  (around 638) — quoted strings; build-a-model says discard closes the panel and the user repeats
-  the click.
-- `specs/architecture/workspace.html` (around 41–43) — the same `htmx:confirm` listener blocks
-  `#sidePanel` elements; drop the "older beforeRequest guard" sentence.
-- `specs/features/server-rendered-state-follow-up/kickoff.md` (line 40) — narrow the row to the
-  navigation guard and `runAfterSidePanelDiscardConfirmation`.
-- `CHANGELOG.md` — `## [Unreleased]` fix entry.
+- `theme/static/scripts/side_panel_utils.js` — one boolean blocking helper (for example,
+  `blockIfSidePanelDirty()`: clean → false; dirty → show the shared modal and return true), one
+  `htmx:confirm` entry point for panel replacement/navigation, and thin JS/close entry points.
+  Resolve the actual HTMX destination so inherited targets, boosted links and `htmx.ajax` are
+  covered; also classify full-builder replacements and model exits. Exclude current-form Save,
+  validation and previews from discard actions. Remove `pendingRequest`, `pendingNavRequest`,
+  `pendingSidePanelReplacement`, all three `proceedWithPending…` functions, the callback-taking
+  `runAfterSidePanelDiscardConfirmation`, and the beforeRequest guard/loading-bar timeout.
+  No source element, event detail or callback is stored for later execution.
+- `theme/static/scripts/support.js` — Feedback checks the boolean helper before setting busy state
+  or starting its request; remove the deferred callback wrapper. HTMX guards must not turn a blocked
+  opener into a completed request, fallback navigation or panel-open side effect.
+- `theme/static/scripts/simplified_inputs/workspace.js` — check before closing the panel, changing
+  base view or sending the entry/configure read; Discard alone never enters Simplified inputs.
+- `theme/static/scripts/model_comparison.js` — keep model navigation under the same dirty gate.
+  Model removal must stop at that gate before its destructive confirmation: first click shows only
+  the shared dirty warning; Discard only closes the panel; repeated Remove shows the ordinary
+  destructive confirm. Remove its separate dirty-message concatenation. Retain normal clean-panel
+  destructive confirmation; no interrupted removal is resumed.
+- Audit reset/example-load and any other UI exits that clear the panel: apply the same gate before
+  separate confirms or destructive changes. Include `theme/static/scripts/model_builder_main.js`
+  (the existing `htmx:confirm` reset confirmation), and affected templates such as
+  `onboarding/template_picker.html` / reset controls if intent markup is needed. Coordinate listener
+  ordering explicitly so a prevented dirty exit cannot also open a native confirmation.
+- `model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html` — fixed
+  button handlers: Keep editing closes only the warning; Discard calls
+  `closeWarningModalAndCloseSidePanel()`. No per-opener rewiring or `hideLoadingBar` call.
+- `model_builder/templates/model_builder/model_builder_main.html` — new modal message. Audit close
+  and Cancel controls, including `simplified_inputs/timeseries_panel.html`, so user abandonment
+  goes through the shared gate. Successful Save and server-directed cleanup still use the low-level
+  close function directly; never guard cleanup after a successful operation.
+- `specs/architecture/workspace.html`, `specs/architecture/rendering.html` and the build-a-model /
+  compare-models design journeys — document the shared rule, all entry points and the second click;
+  remove replay language and reset/example/remove special dirty handling.
+- `specs/features/server-rendered-state-follow-up/kickoff.md` — remove the deferred side-panel replay
+  row because Task 1 now owns all of it. Keep the independent dirty-detection improvement deferred.
+- `CHANGELOG.md` — `## [Unreleased]` fix entry covering the unified behavior.
 
 **Tests added/changed:**
-- `js_tests/side_panel_switch_guard.test.js` — `#sidePanel` branch: modified, unmodified, other
-  element, Discard issues nothing, an event matching both branches shows the modal once.
+- `js_tests/side_panel_switch_guard.test.js` — rewrite replay expectations around the shared helper
+  and HTMX entry point: clean/dirty, Keep editing, Discard issues nothing, repeat runs normally,
+  resolved/inherited target and programmatic request, navigation, close/cancel, and one modal per click.
+  Assert no dirty requests reach the request/loading-bar stage; Save/preview and non-destructive
+  actions remain allowed. Cover reset/example/removal ordering with their ordinary confirmations.
+- `js_tests/support.test.js`, `js_tests/simplified_inputs.test.js`, `js_tests/model_comparison.test.js`
+  and existing reset-confirm tests — replace callback/replay mocks and expectations. Blocked Feedback
+  and Simplified entry have no request, fallback, busy-state or base-view changes; Discard alone
+  performs none of these actions. Dirty removal does not show its native confirm or remove a model.
 - `tests/e2e/test_forms.py::test_pending_request_preserves_hx_vals` — rewrite: Discard closes the
-  panel, the next click sends the request with its `hx-vals` and button lock.
-- E2E — dirty panel plus Help → Data & privacy: modal, Discard, repeat click opens Data & privacy
-  correctly; assert the new message and labels once.
+  panel and sends nothing; the repeated click carries the original `hx-vals` and button lock.
+  Add dirty-panel Data & privacy and close/cancel checks; verify the new copy once.
+- `tests/e2e/test_model_comparison.py` — rewrite the cross-slot Continue-switches regression:
+  Discard stays on the current slot; repeating the switch navigates. Keep same-slot/Compare draft
+  preservation; cover +Add and the dirty-then-clean removal sequence.
+- Extend `tests/e2e/test_data_privacy.py` Feedback coverage and Simplified-input entry E2E coverage for Keep editing, Discard-only
+  close and successful repeated action. Cover dirty reset/example-load without stacking confirms.
+  Reuse existing fixtures; assert requests and visible state, not just modal text.
 
 **Acceptance:**
-- No path re-issues an interrupted `#sidePanel` request; the `#sidePanel` guard path contains no `eval`,
-  `pendingRequest` or `htmx:beforeRequest` listener. The Save-path `eval` in
-  `setRecomputationToTrueIfResultPaneIsOpen` stays (out of scope; plan decision 1, 2026-10-21).
-- Dirty panel + Data & privacy never loads the builder page into the side panel.
-- The navigation guard and Simplified-inputs entry keep their current behavior under the new copy.
+- Every supported dirty-panel exit follows the same block → discard/close → repeat contract.
+  No pending request/event/callback state or dirty-action replay remains in these paths.
+- A click produces at most one confirmation. Dirty removal/reset/example loading cannot execute
+  from Discard; ordinary destructive confirmation remains required on the repeated clean action.
+- Actual destinations, not only the source's own `hx-target`, determine panel replacement. All
+  declarative, boosted, inherited-target and JS entry points use the same dirty decision.
+- Save, validation/preview, export, opening Compare and same-slot return preserve their intended
+  behavior. Keep editing retains the draft. Clean-panel actions proceed normally.
+- The guard path has no `eval`, hand-parsed request or `htmx:beforeRequest` listener. The separate
+  Save-path `eval` in `setRecomputationToTrueIfResultPaneIsOpen` remains outside scope (decision 1).
+- No deferred side-panel replay task remains in the follow-up kickoff. Retain the current dirty
+  flag for this task; improving how dirty state is detected is separate work.
 
-**Depends on:** none.
+**Depends on:** none. Run next to Task 2 (shared `side_panel_utils.js`).
 
-**Implementation:** easy — deletions plus one listener branch; behavior and copy are settled.
+**Implementation:** standard — one decision/modal implementation and small entry points; migrate
+all existing callers and their tests. Run affected Jest suites, then full Jest and E2E guard flows.
 
 ## Task 2 — Emit the dict membership-section OOB region only when that section is mounted
 
@@ -670,44 +713,68 @@ Task 11's generic removal-target handling); Tasks 3, 4, 6 (soft; shared `delete_
 **Implementation:** standard — confirmation rules on a full review surface; verify allowed deletions before
 considering any execution-path change.
 
-## Task 12 — Card highlight expands the canonical id within its owning canvas
+## Task 12 — Put the system prefix first in every card id
 
-**Goal:** Creating or editing a nested object (job, step, edge function, recurrent need or process,
-edge component) pulses every one of its cards on the active canvas and scrolls the first into view;
-opening a mirrored object's edit panel marks every mirror as opened. Root cards behave as before,
-and nothing on a parked canvas is touched, even for a duplicated model with identical object ids.
-Since `cc9611c3` prefixed root web ids with `sys-{system}-`, the client's `button-<id>_in_…`
-expansion never matches nested ids (`Class-id_in_<parent>`). `cardButtonsForWebId` picks the
-resident canvas whose `sys-${data-system-id}-` prefixes the id (longest wins), strips it to
-`Class-id`, and queries `[id="button-${id}"], [id^="button-${local}_in_"]` inside that canvas only.
-The header stays one canonical id (the nginx limit fixed by `0b2f361b`). Reproduced in a browser.
+**Goal:** Every card id has one consistent shape: `sys-{system}-Class-id`, optionally followed
+by `_in_<unprefixed parent containment path>`. A job nested in a step and journey becomes
+`sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-1`. Every appearance of an
+object therefore starts with its canonical id, and the existing `cardButtonsForWebId` matcher
+finds its root and mirrored cards without parsing system prefixes or locating a canvas.
+Creating/editing an editable nested object pulses its cards and scrolls the first into view;
+opening a mirrored object's edit panel marks its mirrors as opened. Root cards retain their ids,
+and the other model's cards remain untouched even when object ids are identical. Task 6's
+inspection-only panels keep their existing behavior.
+
+Review decision 2026-11-03: build an unprefixed containment path in Python, then add
+`_system_web_id_prefix` once at the beginning of `web_id`. This replaces the earlier owner-canvas
+lookup/prefix-stripping proposal. Keep the existing document-wide exact-or-`_in_` highlight
+matcher and the single canonical id in headers (the nginx limit fixed by `0b2f361b`).
 
 **Diagnostic:** [`diagnostics/card-highlight-id-mismatch.md`](diagnostics/card-highlight-id-mismatch.md)
 
 **Repository:** `e-footprint-interface`
 
 **Files touched:**
-- `theme/static/scripts/model_builder_main.js` — `cardButtonsForWebId` (around lines 200–208):
-  owner-canvas lookup via `[data-model-canvas][data-system-id]`, prefix stripping, scoped query,
-  corrected comment.
-- `model_builder/adapters/views/views_edition.py` (around 38–40) — comment only.
-- `specs/architecture/rendering.html` — one line beside "Toast notifications and tooltips": one
-  canonical `web_id` per highlight, expanded client-side to the owning canvas's root and `_in_`
-  mirrors.
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — a private
+  unprefixed containment-path helper; `web_id` adds the system prefix to the completed path.
+  Update the root-only prefix comments. Preserve `route_id`, equality/hash semantics and mirror enumeration.
+- `tests/e2e/pages/model_builder_page.py` — adapt `card_id_selector` to the uniform system-prefixed
+  shape, matching the card's own class rather than a class embedded in its parent path. Audit
+  remaining literal selectors and ID construction in templates, leader lines, HTMX and E2E helpers;
+  most derive from `web_id` and need no manual rewrite. Update any actual format assumptions found.
+- `specs/architecture/workspace.html` — document the prefix at the beginning of every completed
+  containment path; remove the root-only/inherited-through-parent description.
+- `specs/architecture/rendering.html` — document single-id headers and the exact-or-`_in_`
+  expansion, with the system namespace already present in every matching card's prefix.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 **Tests added/changed:**
+- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` —
+  update list/dict nested-ID expectations; extend the existing ID tests to cover multiple nesting
+  levels, exactly one leading system prefix, unchanged root ids, and distinct system namespaces.
 - `js_tests/model_builder_main.test.js › pulse and opened highlights cover every card of the object on its own canvas only`
-  — reproduction (`test.failing`, fixture case `render_card_highlight_canvases` in `js_tests/build_fixtures.py`); switch it
-  to `test(` once fixed. No other tests.
+  — switch the reproduction from `test.failing` to `test` and regenerate its Python-rendered fixture
+  with `npm run jest`. Keep the nested job, mirrored step, `job-2` boundary, root, unknown-system
+  and parked-model cases. Expected mirrors come from Python, not copied old ID strings.
+- Update existing format-sensitive E2E assertions and run the job, journey-step, edge-object and
+  model-comparison flows, checking card targeting, leader lines and HTMX swaps. Manually verify
+  off-screen nested create/edit scrolling; jsdom does not provide real element geometry.
 
 **Acceptance:**
-- The reproduction passes as a plain `test(`.
-- As in the goal; the highlight headers stay constant-size.
+- A nested id starts with its object's canonical id followed by `_in_`; the system prefix appears
+  exactly once at the beginning, including at multiple nesting levels and for list/dict containers.
+- The reproduction passes as a plain `test`; all mirrors on the owning model are highlighted and
+  no sibling object or other model's card is highlighted.
+- Existing exact-or-`_in_` JS matching and single-id header payloads stay unchanged; no canvas lookup,
+  prefix stripping, additional transport field or legacy-ID compatibility branch is introduced.
+- Root IDs, routing, card targeting, leader lines, model switching and Task 3's server-side removal
+  remain correct. Architecture documentation describes the new ID invariant.
 
-**Depends on:** none (shares only `CHANGELOG.md` with other tasks).
+**Depends on:** no hard prerequisite. Keep Run B ordering after Run A, then before Tasks 13/14:
+Tasks 6, 12, 13 and 14 share `modeling_object_web.py`. Task 3's deletion behavior must remain covered.
 
-**Implementation:** easy — one client function, with a Python-generated fixture pinning the id rule.
+**Implementation:** standard — one ID-construction rule, selector audit and existing-test updates;
+validate Python ID tests, `npm run jest`, non-E2E checks and affected E2E flows.
 
 ## Task 13 — One web-class resolver and a `has_edit_panel` property (refactor)
 

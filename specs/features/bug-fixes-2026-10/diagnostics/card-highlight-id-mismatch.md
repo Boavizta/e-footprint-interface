@@ -6,8 +6,8 @@
   of the regression.
 - **Reported:** smell sweep S2. Commit `cc9611c3` broke the client's id prefix match, so nested create and edit get no
   pulse or scroll-into-view, mirrored cards lose the "opened" highlight, and no test covers it. The hypothesis holds.
-  The proposed fix (scope matching to a canvas and add a Jest test with real ids) is right in direction. This diagnostic
-  picks which canvas to scope to and where the unprefixed id comes from.
+  The original proposal scoped matching to a canvas. Review on 2026-11-03 instead chose a consistent Python ID
+  format: add the system namespace before the completed unprefixed containment path, preserving the existing matcher.
 
 ## Root cause
 
@@ -102,96 +102,122 @@ or `border-pulse-after-add-edit-object`. The two toast tests in `js_tests/model_
   `test(` and run `npx jest js_tests/model_builder_main.test.js -t "own canvas only"` (it then fails with the diff above;
   `npm run jest -- …` also rebuilds the fixture first). With the marker in place the same command reports the test as
   passing because it fails.
-- Discrimination: against a scratch `model_builder_main.js` with the settled owner-canvas fix the unmasked test passes
+- Historical discrimination (earlier proposal): against a scratch `model_builder_main.js` with an owner-canvas fix the unmasked test passes
   and the marked test reports "Failing test passed even though it was supposed to fail"; an unscoped
   `[id^="button-<local>_in_"]` variant still fails: it pulses and marks opened the parked canvas's two step and two job buttons.
 
 ## Fix approach
 
-Fix only the client expansion and scope it to the canvas that owns the id. The server payload stays as it is: one
-canonical id.
+Review decision 2026-11-03: normalize card IDs in Python. Construct the complete unprefixed containment path,
+then prepend `_system_web_id_prefix` once. Every appearance of an object starts with its canonical ID:
 
-`cardButtonsForWebId(webId)` finds the resident canvas whose `sys-${dataset.systemId}-` prefixes `webId`. If more than
-one matches, it takes the longest system id. It strips that prefix to get the unscoped `Class-id`. Inside that canvas
-only, it returns `[id="button-${webId}"], [id^="button-${localId}_in_"]`. If no canvas matches, it returns an empty
-list. Both listeners (`highlightOpenedObjects`, `displayToastAndHighlightObjects`) keep calling it unchanged. Update the
-stale comment at `model_builder_main.js:200-204` and the matching one at `views_edition.py:38-40`.
+```text
+canonical: sys-system-Job-job
+nested:    sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-1
+mirror:    sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-2
+```
+
+Illustrative implementation in `ModelingObjectWeb`:
+
+```python
+@property
+def _containment_path(self):
+    path = f"{self.class_as_simple_str}-{self._modeling_obj.id}"
+    if self.parent_container is not None:
+        path += f"_in_{self.parent_container._containment_path}"
+    return path
+
+@property
+def web_id(self):
+    return f"{self._system_web_id_prefix}{self._containment_path}"
+```
+
+Keep `cardButtonsForWebId` unchanged: document-wide matching of `button-<canonical>` and
+`button-<canonical>_in_…` now works for root, nested and mirrored cards. No canvas lookup, system-prefix parsing,
+extra header field or old-ID compatibility branch is needed. The header still carries one canonical ID.
 
 Why this rule is safe:
-- The `_in_` delimiter bounds `localId`. Ids `job` and `job-2` give `button-Job-job_in_` and `button-Job-job-2_in_`,
-  which never match each other. A false match needs an efootprint id that itself contains `_in_`. Production ids are
-  `uuid4()[:12]` (hex and dashes, `e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:289`). Only
-  name-as-id mode (examples, tests) could carry `_in_`, and none does.
-- Scoping by owning system rather than by visibility is exact. It does not depend on which canvas is shown, and the
-  parked canvas can never match.
-- The header stays constant-size, so the 502 cannot come back.
+- The system namespace leads every card ID, so duplicated models with the same object IDs remain distinct.
+- The `_in_` delimiter bounds the object's canonical ID: `job` cannot match `job-2`. As before, production IDs
+  use hex and dashes; the shipped name-as-ID examples do not contain `_in_` in object IDs.
+- Root IDs stay unchanged. Nested IDs change once at their shared construction point; derived button, collapse,
+  icon, leader-line and HTMX IDs generally follow `web_id` automatically. Audit explicit format assumptions rather
+  than assuming every selector needs a rewrite.
+- `route_id` and library identities do not change. Preserve mirror enumeration and equality/hash behavior:
+  appearances in different parents remain distinct, and equal object IDs in different systems remain distinct.
 
-Rejected alternatives:
-- **Server sends every mirror's exact DOM id.** This is the pre-`0b2f361b` design and it causes the nginx 502.
-- **Server also sends an unprefixed `local_web_id`, client scopes to the visible canvas.** This keeps the
-  `sys-` format out of JS. But it needs a new `ModelingObjectWeb` property, new fields on `CreateObjectOutput` and
-  `EditObjectOutput` (which tests build positionally), five presenter sites, `views_edition.py`, and a JS rule for the
-  active canvas. That is a larger diff in `htmx_presenter.py`, which Task 3 also edits, and it adds no correctness: the
-  Jest fixture below, rendered from Python, already pins Python and JS to the same id rule. It is acceptable if the
-  reviewer prefers Python to own the stem.
-- **Unscoped prefix `[id^="button-Class-id_in_"]` (the sweep's first suggestion, unscoped form).** This matches the
-  parked canvas when slots share object ids.
-- **Suffix or substring match on `-Class-id`.** This false-matches any object whose id ends in `…-Class-id`.
-- **Prefixing nested ids with `sys-` as well.** This rewrites every derived id, selector, leaderline anchor and the E2E
-  `card_id_selector` for a highlight-only bug.
+Alternatives considered:
+- **Owner-canvas lookup and prefix stripping in JS (earlier proposal, superseded).** Smaller immediate patch,
+  but retains two ID shapes and teaches the client to parse the system namespace. The consistent Python rule is
+  preferred for overall simplicity; the additional selector/test audit is accepted.
+- **Server sends every mirror's exact DOM ID.** Reintroduces the nginx header overflow fixed by `0b2f361b`.
+- **Server sends an extra unprefixed stem.** Adds cross-layer payload plumbing without needing it once ID
+  construction is consistent.
+- **Unscoped `button-Class-id_in_` or substring matching.** Loses system isolation or matches parent identities.
 
 ## Files to touch
 
-- `theme/static/scripts/model_builder_main.js` — `cardButtonsForWebId` (`:200-208`): owner-canvas lookup through
-  `[data-model-canvas][data-system-id]`, prefix stripping, scoped query, and a corrected comment.
-- `model_builder/adapters/views/views_edition.py` — comment only (`:38-40`): the client expands the id within its owning
-  canvas. The code is unchanged.
-- `js_tests/model_builder_main.test.js` — remove the `test.failing` marker and its task comment from the reproduction.
-- `specs/architecture/rendering.html` — one line beside "Toast notifications and tooltips" (`:26`): the toast or opened
-  highlight carries one canonical `web_id`, and `cardButtonsForWebId` expands it to the owning canvas's root and
-  `_in_` mirrors. Constant-size header (nginx).
+- `model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py` — private unprefixed
+  containment-path helper, prefix-at-front `web_id`, updated comments. Keep routing and mirror logic unchanged.
+- `tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py` — update nested
+  list/dict ID expectations and extend the existing ID tests for multiple levels, one leading namespace,
+  unchanged root IDs and distinct systems.
+- `tests/e2e/pages/model_builder_page.py` — adapt `card_id_selector` to identify the card's own class under the
+  uniform prefix without matching a class appearing only in the parent path. Audit other literal selectors,
+  derived-ID construction, leader lines and HTMX targeting; update actual format assumptions found.
+- `js_tests/model_builder_main.test.js` — remove the reproduction's `test.failing` marker and task comment.
+  Regenerate `card_highlight_two_canvases` through `js_tests/build_fixtures.py` using `npm run jest`.
+- `specs/architecture/workspace.html` — replace root-only prefix inheritance with one leading system namespace
+  on the completed containment path.
+- `specs/architecture/rendering.html` — one canonical ID in headers, expanded by exact-or-`_in_` matching;
+  every card starts with its system namespace.
 - `CHANGELOG.md` — `## [Unreleased]` fix entry.
 
 ## Tests
 
-- The reproduction above is the task's only test change: `js_tests/model_builder_main.test.js › pulse and opened
-  highlights cover every card of the object on its own canvas only`, with its fixture `card_highlight_two_canvases`
-  case in `js_tests/build_fixtures.py` (the generated HTML is gitignored and rebuilt by `npm run jest`). The fix removes the `test.failing` marker and
-  the `bug-fixes-2026-10 Task 12` comment; no other tests are added. Scroll-into-view is not asserted (jsdom gives
-  every element a zero rect), and the E2E mirroring assertion once suggested here is dropped.
+- Update/extend the existing Python ID tests for root, list, dict and multiple nesting levels. Check exactly one
+  leading system prefix and isolation across systems. Run the wrapper test module.
+- Keep the Python-rendered Jest reproduction: nested job, mirrored step, prefix-sharing `job-2`, root journey,
+  unknown system and parked-model cases. Turn it into a plain `test` after implementation and run `npm run jest`
+  to rebuild the real fixture. Do not copy old nested ID strings into expectations or modify the client matcher.
+- Run non-E2E checks and affected existing E2E job, journey-step, edge-object and model-comparison flows after
+  updating selectors. Check card targeting, leader-line endpoints, HTMX swaps and Task 3's deletion behavior.
+- Verify off-screen nested create/edit scrolling in the browser. The Jest reproduction cannot assert actual
+  scrolling because jsdom supplies no real geometry.
+- Earlier scratch discrimination above validated the superseded JS patch only. The new Python design still needs
+  implementation-time validation; no passing prototype result is claimed for it.
 
 ## Acceptance criteria
 
-- Creating or editing a nested object (job, step, edge function, recurrent need or process, edge component) pulses
-  every one of its cards on the active canvas, and scrolls the first into view when it is off-screen.
-- Opening the edit panel of a mirrored object marks every mirror on the active canvas as opened.
-- Root cards behave as before.
-- In a two-model workspace (including a duplicated model with identical object ids), no card on the parked canvas
-  is pulsed or marked opened.
-- The highlight headers stay one canonical id (constant size).
+- Every nested ID starts with its canonical ID plus `_in_`, with exactly one system namespace at the beginning.
+- Creating or editing an editable nested object pulses its cards and scrolls the first into view when off-screen.
+  Opening a mirrored object's edit panel marks its mirrors as opened. Task 6's inspection-only panels keep their behavior.
+- Root IDs and behavior remain unchanged. Other models' cards and prefix-sharing sibling objects are untouched.
+- Single-ID highlight headers and the existing document-wide exact-or-`_in_` matcher remain unchanged.
+- Card selectors, leader lines, HTMX targets, model switching and server-side removal still work with the new IDs.
+- Workspace/rendering documentation describes the new invariant; no compatibility shim is introduced.
 
 ## Risks and side effects
 
-- Scroll-into-view now fires for nested creates and edits that silently skipped it since 2026-06-16. This is intended,
-  but users will notice it again.
-- The JS now encodes the `sys-{system id}-` format next to `button-` / `_in_`. The Python-rendered Jest fixture is the
-  guard that keeps the two sides agreeing. If `_system_web_id_prefix` changes, this test must fail.
-- A canonical id whose system matches no canvas (stale response after a model switch) highlights nothing. That is the
-  correct no-op.
+- Nested DOM IDs change. Most derived IDs inherit the change, but explicit selectors and ID expectations must be
+  audited, especially `card_id_selector`, which currently treats nested cards differently from roots.
+- Scroll-into-view resumes for nested creates and edits that silently skipped it since 2026-06-16.
+- The Python-rendered Jest fixture connects the Python ID rule to the unchanged client prefix matcher and checks
+  isolation when two models share object IDs. Root/list/dict/deep Python tests pin the construction invariant.
+- No serialization, migration, library dependency or transport schema change is needed; these are DOM identities.
 
 ## Flags
 
-- `model_builder_main.js` is not on the file lists of Tasks 1 to 3. Tasks 1 and 2 edit `side_panel_utils.js`, not this
-  file. Task 3 edits `htmx_presenter.py` (`present_deleted_object` and `present_delete_confirmation`). This fix leaves
-  the presenter untouched (delete toasts carry no `id`), so there is no shared product file. It shares `CHANGELOG.md`
-  with every task, and `js_tests/build_fixtures.py` with any task that adds fixtures. Ordering is free.
-- The fix is client-only, with no serialization or migration impact and no library dependency.
-- Validation needs `npm run jest`. Its `build:js-test-fixtures` step renders the fixture through Django.
-- Constitution §1.4: the server still decides what to highlight (one canonical id). The client only maps that id to
-  DOM nodes, which the nginx header limit requires.
+- Run B remains after Run A and before Tasks 13/14. Task 12 now shares `modeling_object_web.py` with Tasks 6, 13
+  and 14. It keeps Task 6's read-only panel behavior and Task 3's server-side deletion mechanism.
+- Validation includes Python ID tests, `npm run jest`, non-E2E checks and affected E2E flows. This is broader than
+  the earlier client-only patch because the shared nested ID rule changes.
+- Constitution §1.4: the server still decides what to highlight through one canonical ID; the browser maps it
+  to root and mirrored cards with its existing selector.
 
 ## Decisions
 
-- 2026-10-21: keep the constant-size single-id payload and fix the expansion on the client, scoped to the owning
-  canvas by `data-system-id`. The `local_web_id` variant (the server sends the unprefixed stem) was rejected as a larger
-  cross-layer diff for no extra correctness. It remains acceptable if the reviewer prefers Python to own the stem.
+- 2026-11-03, user review: build the unprefixed containment path first and add `sys-{system}-` at the beginning
+  of every completed card ID. Preserve the existing JS matcher and constant-size header. This supersedes the
+  2026-10-21 owner-canvas/prefix-stripping proposal; accept the selector audit and Python/E2E test updates in return
+  for one consistent ID rule.

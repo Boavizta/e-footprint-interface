@@ -39,101 +39,143 @@ All of those use `hx-get`, so the hand-built GET works for them. Three exception
 - `pendingNavRequest` / `issueRequest(true)` (`side_panel_utils.js:160-181`);
 - `pendingSidePanelReplacement` (`side_panel_utils.js:106-125`).
 
-`specs/features/server-rendered-state-follow-up/kickoff.md` (Group 2, "Deferred side-panel request replay") already plans to make all three block.
+`specs/features/server-rendered-state-follow-up/kickoff.md` originally deferred this cleanup. User review on
+2026-11-03 moved all three paths into Task 1; the separate dirty-detection improvement stays deferred.
 
-## Reproduction
-- none — the settled fix (Decisions, 2026-10-21) replaces the replay contract rather than correcting it: after "Discard changes" nothing is issued and the user repeats the click, as the mission's guards-block rule requires. The boosted-link misfire exists only inside the replay path that the task deletes, so there is no expected behaviour of the current mechanism to assert. The new contract is pinned by the tests listed under Tests (Jest branch cases and the rewritten and new E2E tests), which the task names as its public-contract tests. The misfire was shown in jsdom only; the new Data & privacy E2E confirms it in a browser and is the test to watch fail first if a reviewer wants the defect observed.
+## Reproduction and evidence
+
+The existing hand-parsed replay was probed with the real bundled HTMX in jsdom: a boosted Data & privacy link
+replays the current builder URL into the panel. This is historical evidence of the defect, not a browser pass.
+The new contract removes the replay mechanism entirely. Existing navigation, Feedback and Simplified-entry tests
+currently expect continuation; rewrite them to fail on that behavior and validate discard-and-repeat instead.
+
+The earlier claim that matching `detail.target` would inherently stack two dialogs was not established. Feedback
+clears the dirty flag before its deferred AJAX call, and overlapping branches can return after the first match.
+The own-attribute restriction merely preserved the old scope. It is no longer the selected design.
 
 ## Fix approach
 
-**Recommended: make this guard block, and move it to `htmx:confirm`.**
-1. Delete the `htmx:beforeRequest` listener (`side_panel_utils.js:127-139`), `pendingRequest` (`:2`, resets at `:61`, `:77`) and `proceedWithPendingRequest()` (`:199-220`). This removes the hand parsing, the `eval` and the `hideLoadingBar` timeout.
-2. In the existing `htmx:confirm` listener (`:162-171`), also intercept, while `formModified`, any request whose `detail.elt` has its own `hx-target` of `#sidePanel`. Keep that exact predicate so the scope matches today's. Do not test `detail.target`: that would newly catch the `htmx.ajax` openers that already run through `runAfterSidePanelDiscardConfirmation`, and stack two dialogs. On a match it shows `#unsavedModal`, and the confirm button (relabelled "Discard changes", see below) calls the existing `closeWarningModalAndCloseSidePanel()` (`:222-225`). The edits are discarded, the panel closes, and nothing is issued. The user clicks the card again, and that request runs as authored: verb, url, inherited values, locks.
-3. The cancel button (relabelled "Keep editing") keeps its current meaning. Its `hideLoadingBar()` becomes unnecessary for this path.
+**2026-11-03 user decision: one dirty-side-panel policy everywhere — block, discard/close, repeat.**
 
-This fixes the boosted-link misfire with no special case, because nothing is replayed. The `hx-post` form is handled the same way.
+The first attempted action must stop before its request or destructive UI change. Keep editing closes only the
+warning. Discard changes closes and clears the side panel; it never resumes the attempted action. The user clicks
+again. Clean-panel actions run immediately. There is no stored intent, callback, event detail or HTMX request.
 
-**Scope (decided 2026-10-21: option a).** Convert only the `#sidePanel` guard, as above. The navigation guard (`pendingNavRequest`/`issueRequest(true)`, `side_panel_utils.js:160-181`) and `runAfterSidePanelDiscardConfirmation` (`:106-125`) break the same mission rule but stay for `server-rendered-state-follow-up`. This task narrows that feature's kickoff row to them. Converting all three now (option b) was declined: it changes the switch-model, +Add, Simplified-entry and Support flows and belongs with the follow-up.
+Implement one boolean decision/modal helper in `side_panel_utils.js`, for example `blockIfSidePanelDirty()`:
+clean returns false; dirty shows the shared modal and returns true. Thin entry points use it:
 
-**Modal copy (decided 2026-10-21: discard wording).** `#unsavedModal` is a single instance, included once at `model_builder/templates/model_builder/model_builder_main.html:84` from `modals/warn_before_side_panel_closing_modal.html`. All four paths share it, and each only rewires the Continue `onclick`:
-- the `#sidePanel` guard (this task; blocks after the change);
-- the navigation guard (`:168-169`, still re-fires the request);
-- `runAfterSidePanelDiscardConfirmation` (`:113-115`, still runs the stored action; called from `simplified_inputs/workspace.js:40` and `support.js:42`);
-- `warnBeforeClosingSidePanel` (`:191-193`, closes the panel).
+- One `htmx:confirm` listener classifies actual panel replacements and model exits, including resolved/inherited
+  targets, boosted links and `htmx.ajax` destinations. It prevents a classified dirty exit before loading/locks.
+  Preserve Save and validation/preview operations on the current form; a response target alone is not enough to
+  classify a Save as abandonment. Existing switch/add paths still identify exits targeting elsewhere.
+- JS actions use the same helper before destructive UI changes: Feedback before busy state/request setup;
+  Simplified entry before close/base-view/read; close and Cancel controls before clearing the form.
+- The shared modal has fixed handlers. Keep editing closes the warning; Discard calls
+  `closeWarningModalAndCloseSidePanel()`. That cleanup bypasses the guard and resets dirty state.
+- Successful Save and server-directed cleanup still call the low-level close directly. The guard must not turn
+  cleanup or saving into another discard prompt.
 
-So the copy must stay true whether the action then proceeds or not. Wording that only names the discard does:
+Delete `pendingRequest`, `pendingNavRequest`, `pendingSidePanelReplacement`, their reset plumbing, all three
+`proceedWithPending…` functions, callback-taking `runAfterSidePanelDiscardConfirmation`, the beforeRequest guard
+and the loading-bar timeout. Migrate the Feedback and Simplified callers to boolean checks. Keep the existing
+dirty flag/detection mechanism; replacing it is a separate follow-up. The unrelated Save-path `eval` stays deferred.
 
-| Where | Current | New |
-|---|---|---|
-| `model_builder_main.html:84`, `message` | "The currently opened side panel has pending changes. Would you like to continue and lose them ?" | "The open side panel has unsaved changes. Discard them?" |
-| `warn_before_side_panel_closing_modal.html:12`, `#cancel-unsaved-modal` | "No, Cancel" | "Keep editing" |
-| `warn_before_side_panel_closing_modal.html:20`, `#continue-unsaved-modal` | "Yes, Continue" | "Discard changes" |
+### Covered actions
 
-Every path discards on the confirm button. The replaying paths then also carry on with the switch, add or entry, and nothing in the wording promises otherwise. Labels use initial capital only (`specs/design/writing-style-guide.md:9`). The button ids stay unchanged: tests select `#continue-unsaved-modal`/`#cancel-unsaved-modal`, and no test or JS reads the label text. Two design journey pages quote the old strings verbatim and must follow (style guide `:14`).
+- Card/add/edit openers, rename/import panels, Data & privacy, Feedback, +Add blank/duplicate/import and model
+  switching, including cross-slot dismissal from Compare.
+- Entering Simplified inputs or its configuration when doing so abandons a side-panel draft; retain Configure's
+  own existing separate draft guard.
+- Closing/cancelling an edited panel, including the Simplified timeseries panel.
+- Model removal, reset and example loading: remove the previous dirty-handling exemptions. A dirty first click
+  opens only the shared discard modal and cannot remove/reset/load anything. After Discard closes the panel,
+  the user repeats the action and sees any ordinary destructive confirmation. No click stacks two prompts.
+  Coordinate `htmx:confirm` listeners so native confirmations never run after a dirty exit was blocked.
 
-**Rejected:**
-- *Shrink to `htmx.ajax("GET", hx-get, {source})`* (intake option 1). It still stores the continuation against the mission, and it keeps the boosted-link bug. A `url = hx-get || href` patch would add special cases and still hard-code GET.
-- *`htmx:confirm` + `detail.issueRequest(true)` replay* (intake option 2). This would be the correct mechanism if replay were wanted. It re-issues the exact request, boosted anchors included, and the probe confirmed `htmx:confirm` fires for clicks, boosted anchors, `hx-trigger="load"` and `htmx.ajax` with or without source. But it is still suspend-and-replay. It also keeps a stored request whose source element can be swapped out while the modal is open (for example, the storage-status region refreshes out-of-band). In that case `issueAjaxRequest` silently drops it (htmx.js:4256-4259).
+Opening Compare, returning to the same model, help-drawer actions and export preserve the side-panel draft and
+need no discard warning. Save/validation/preview remain available while dirty. The classification is abandonment
+of the draft, not every request made while a draft exists.
+
+### Modal copy
+
+- Message: "The open side panel has unsaved changes. Discard them?"
+- Buttons: "Keep editing" / "Discard changes".
+- Keep existing modal/button IDs. Give buttons fixed handlers instead of rewiring them per interrupted action.
+
+### Alternatives superseded or rejected
+
+- The 2026-10-21 own-`hx-target`-only scope is superseded: preserving navigation/Feedback/Simplified replay would
+  retain several implementations and contradict the now-approved uniform behavior.
+- Shrinking the replay to `htmx.ajax(url, {source})` or using `detail.issueRequest(true)` still stores/resumes the
+  dirty action. Ordinary clean-panel destructive confirms may use HTMX's normal confirmation mechanism; they
+  must never resume an action interrupted by the dirty guard.
+- A single HTMX hook alone misses JavaScript exits that clear/change the UI before their request. Keep the small
+  JS entry points, with one shared decision and modal implementation.
 
 ## Files to touch
-- `e-footprint-interface/theme/static/scripts/side_panel_utils.js`:
-  - remove `pendingRequest` (`:2`, resets at `:61` and `:77`), the `htmx:beforeRequest` guard (`:127-139`, including the `hideLoadingBar` timeout) and `proceedWithPendingRequest()` (`:199-220`);
-  - extend the `htmx:confirm` listener (`:162-171`). Add a branch that intercepts, while `formModified`, a request whose `detail.elt.getAttribute("hx-target") === "#sidePanel"`. It shows `#unsavedModal` with Continue wired to `closeWarningModalAndCloseSidePanel()` (`:222-225`). It never calls `issueRequest`. The existing `PANEL_DISCARDING_PATHS` branch and `proceedWithPendingNavigation()` stay as they are;
-  - rewrite the guard comment (`:141-154`). It names the old beforeRequest guard; say the `#sidePanel` branch blocks and the path branch still re-fires, pending `server-rendered-state-follow-up`.
-- `e-footprint-interface/model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html`:
-  - `:9`: Cancel `onclick` becomes `closeWarningModal()`. Drop `hideLoadingBar()`: no remaining path opens the modal after `htmx:beforeRequest`. The navigation guard runs on `htmx:confirm`, the discard helper runs before its `htmx.ajax`, and close issues nothing;
-  - `:12`: "No, Cancel" becomes "Keep editing";
-  - `:20`: "Yes, Continue" becomes "Discard changes".
-- `e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:84`: `message="The open side panel has unsaved changes. Discard them?"`.
-- `e-footprint-interface/specs/design/journeys/build-a-model.html:358`: quote the new message. Mention that confirming discards and closes the panel, and that the user repeats the click.
-- `e-footprint-interface/specs/design/journeys/compare-models.html:638`: quote the new message and the labels (**Keep editing** / **Discard changes**). The switch still proceeds after the discard.
-- `e-footprint-interface/specs/architecture/workspace.html:41-43`:
-  - `:41`: keep the navigation guard description ("Continue" re-fires) but use the new label;
-  - `:43`: replace the "older `htmx:beforeRequest` guard" sentence. The same `htmx:confirm` listener also catches elements with their own `hx-target="#sidePanel"`, and those block: Discard closes the panel, nothing is issued, and the user repeats the click.
-- `e-footprint-interface/specs/features/server-rendered-state-follow-up/kickoff.md:40`, "Deferred side-panel request replay" row. Narrow it to the two remaining continuations:
-  - the `htmx:confirm` navigation guard with `proceedWithPendingNavigation()`/`issueRequest(true)`;
-  - `runAfterSidePanelDiscardConfirmation()` with `pendingSidePanelReplacement`/`proceedWithPendingSidePanelReplacement()`.
 
-  Note that the `#sidePanel` guard already blocks (bug-fixes-2026-10). Drop the references to the beforeRequest guard, `proceedWithPendingRequest()`, hand-parsed attributes and `eval`.
+- `theme/static/scripts/side_panel_utils.js` — one boolean helper, HTMX and close entry points; remove all three
+  pending-action mechanisms, beforeRequest cancellation and timeout. Retain dirty detection and Save handling.
+- `theme/static/scripts/support.js` — Feedback checks before request setup, with no retained callback.
+- `theme/static/scripts/simplified_inputs/workspace.js` — gate entry before panel close/base-view/read.
+- `theme/static/scripts/model_comparison.js` — shared gate before removal's ordinary confirm; remove its custom
+  unsaved-message concatenation; retain switch/add behavior after the user repeats the action.
+- `theme/static/scripts/model_builder_main.js` — coordinate reset's existing `htmx:confirm` confirmation with the
+  dirty gate. Audit reset/example controls and other exits; add intent markup only where classification needs it.
+- `model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html` — fixed handlers and
+  labels, no `hideLoadingBar`. `model_builder_main.html` — new message.
+- Audit user close/Cancel controls, notably `simplified_inputs/timeseries_panel.html`, and any affected exit
+  templates. Do not guard successful-save or server-directed low-level cleanup.
+- `js_tests/side_panel_switch_guard.test.js`, `support.test.js`, `simplified_inputs.test.js`,
+  `model_comparison.test.js` and existing reset-confirm tests — migrate continuation expectations/mocks.
+- E2E forms, model comparison and existing Feedback/Simplified entry flows — test the new behavior.
+- `specs/architecture/workspace.html`, `specs/architecture/rendering.html`, build-a-model and compare-models
+  design journeys — document unified behavior, second clicks and non-destructive exceptions when implementing.
+- `specs/features/server-rendered-state-follow-up/kickoff.md` — remove the deferred replay row; retain dirty
+  detection as separate follow-up. `CHANGELOG.md` — production fix entry when implemented.
 
 ## Tests
-- **Jest, extend `js_tests/side_panel_switch_guard.test.js`.** Fire a cancelable `htmx:confirm` whose `detail.elt` carries `hx-target="#sidePanel"`, as `fireNavConfirm` does with a stub `elt`:
-  - modified: the event is default-prevented, the modal is shown, and the Continue `onclick` is `closeWarningModalAndCloseSidePanel()`, not a replay;
-  - unmodified: not intercepted;
-  - an element without its own `hx-target="#sidePanel"`, with a path outside `PANEL_DISCARDING_PATHS`: not intercepted;
-  - after Continue: `formModified` is false, `#sidePanel` is emptied, and nothing is re-issued (the stub `issueRequest` is not called);
-  - an event that matches both branches (own `hx-target="#sidePanel"` and a path in `PANEL_DISCARDING_PATHS`) shows the modal once. The navigation tests (`:43-112`) stay unchanged.
-- **E2E, rewrite `tests/e2e/test_forms.py::TestUnsavedChangesWarning::test_pending_request_preserves_hx_vals` (`:67-114`).** It encodes the replay. New outcome: modified Job form, click Server "add service", modal, `#continue-unsaved-modal` ("Discard changes"). The side panel is closed and no `open-create-object-panel/Service` request is sent. Clicking the button again sends the request with `efootprint_id_of_parent_to_link_to` and disables the button until the response. Suggested name: `test_continue_discards_and_next_click_opens_panel`.
-- **E2E, new: boosted Data & privacy while dirty.** Modified form, Help, Data & privacy, modal, Continue. The panel is closed and no request for `/model_builder/` is sent. Clicking Data & privacy again shows `.data-privacy-card`. Use `tests/e2e/pages/model_builder_page.py:119` (`open_data_privacy_from_help_menu`). Today this test fails: the builder page lands in `#sidePanel`.
-- **E2E copy check:** assert the modal message and both labels once, for example in `test_warns_when_closing_panel_with_unsaved_changes` (`test_forms.py:26-44`).
-- **Keep:**
-  - `test_warns_when_closing_panel_with_unsaved_changes` and `test_warns_when_opening_new_panel_with_unsaved_changes` (`test_forms.py:26-65`), whose Cancel path is unchanged;
-  - the navigation tests in `js_tests/side_panel_switch_guard.test.js` and `tests/e2e/test_model_comparison.py:501-538`;
-  - the `#unsavedModal` checks in `test_simplified_inputs.py`, `test_source_metadata.py`, `test_weekly_pattern_builder.py` and `test_help_drawer_overlay.py`.
 
-  All of them select by id and need no change.
+- Shared helper and HTMX tests: dirty/clean; Keep editing preserves form; Discard closes/clears without requests
+  or callbacks; repeat performs the action. Actual/inherited target and programmatic request coverage; overlapping
+  eligibility paths produce one modal. No request/loading-bar stage occurs on a blocked action.
+- Feedback and Simplified-entry tests: no AJAX, fallback navigation, busy state or view change while blocked;
+  Discard alone does not open the requested panel or enter Simplified inputs. Update callback mocks.
+- Model navigation/removal/reset/example tests: Discard cannot switch, add, remove, reset or load; repeat follows
+  ordinary clean behavior and any destructive confirmation. No native confirm on the first dirty click.
+- Close/Cancel and normal Save/validation/preview coverage. Compare and same-slot return retain drafts; export
+  does not save or discard. Keep the Configure draft rules independent.
+- Rewrite `test_pending_request_preserves_hx_vals` in `tests/e2e/test_forms.py`: no replay after Discard;
+  repeat preserves authored values and locking. Add Data & privacy and close/cancel cases; assert copy once.
+- Rewrite `test_cross_slot_dismiss_warns_over_the_revealed_model_then_continue_switches` in
+  `tests/e2e/test_model_comparison.py` to stay on the current slot after Discard, then switch on repeat.
+  Extend existing Feedback coverage in `tests/e2e/test_data_privacy.py`, Simplified and reset/example coverage. Reuse fixtures and assert requests/state.
+- Run affected Jest suites, full `npm run jest`, and the E2E guard flows with a local server. No new contract pass
+  is claimed by this planning update; existing tests expecting replay must change during implementation.
 
 ## Acceptance criteria
-- A dirty side panel plus a click on any element with `hx-target="#sidePanel"` shows the unsaved modal, and no request is sent (loading bar not started).
-- "Discard changes" discards the edits and closes the side panel, with no request. The next click on the same element opens the requested panel with its own `hx-vals` (ancestor ones included) and its `hx-disabled-elt` lock.
-- "Keep editing" leaves the panel and its edits untouched.
-- The shared modal reads "The open side panel has unsaved changes. Discard them?" with "Keep editing" / "Discard changes" on every path. Switching models, +Add, Simplified entry and Support still proceed after "Discard changes", as today.
-- Help → Data & privacy (and the storage-warning link) with a dirty panel never loads the builder page into `#sidePanel`.
-- `side_panel_utils.js` contains no `eval`, no `pendingRequest` and no `htmx:beforeRequest` listener.
 
-## Risks and side effects
-- **Behavior change (intended, mission-mandated):** after confirming, the user clicks the target again instead of seeing it open. The mission accepts this as a rare path.
-- **Pre-existing, not addressed:** card triggers run hyperscript `on click … add .model-builder-card-opened` even when the request is blocked, so on Cancel the highlight moves to the clicked card while the old panel stays. Continue clears highlights through `closeAndEmptySidePanel()` (`side_panel_utils.js:79`).
-- **Order of listeners:** the `htmx:confirm` listener in `model_comparison.js:262-273` (remove-model) and the one in `model_builder_main.js` (`data-confirm-when-model-not-empty`) match different elements. None of them carries `hx-target="#sidePanel"`, so no dialogs stack.
-- **Two semantics on one modal (accepted with option a):** the `#sidePanel` branch blocks while navigation and the discard helper still carry on. The neutral copy keeps both true. Document it in `workspace.html` until the follow-up lands.
+- Every supported user exit abandoning a dirty side-panel draft uses the shared block/discard-close/repeat rule.
+- Keep editing preserves edits. Discard never performs the interrupted request, navigation, view change or
+  destructive action. Clean actions proceed normally, with one confirmation at most per click.
+- No pending request/event/callback or dirty-action replay remains in the covered paths. The guard contains no
+  hand-parsed request, `eval`, beforeRequest listener or loading-bar timeout. Save-path `eval` remains out of scope.
+- Resolved HTMX destinations and small JS entry points cover all openers; own-attribute matching is not required.
+- Save/preview/validation work while dirty, and non-destructive Compare/same-slot/help/export preserve drafts.
+- The deferred replay row is removed from the follow-up; the dirty-detection improvement remains separate.
 
 ## Flags
-- **Mission invariant:** `specs/mission.md:26-28`, guards block. Constitution §1.4 is unaffected: no server response is softened.
-- **JavaScript convention:** `specs/conventions.md:28,30`. No request continuations. User requests keep their own `hx-disabled-elt`, which a fresh click honors natively.
-- **Overlap:** `specs/features/server-rendered-state-follow-up/kickoff.md:40` keeps the navigation and discard-helper continuations. This task narrows that row.
-- **No migration, serialization or cross-repository change.** Interface-only JavaScript and templates.
-- **Local-only validation:** `npm run jest` and `poetry run pytest tests/e2e -n 4` against a local server. The boosted-link misfire was shown in a jsdom probe with the real htmx; confirm it in the browser as part of the new E2E test.
+
+- Interface-only, no library or persistence schema change. Task 2 shares `side_panel_utils.js`; run adjacent.
+- Standard implementation difficulty: behavior changes now include Feedback, switching, +Add, Simplified entry,
+  close/Cancel, removal, reset and example loading, not just the old attribute-based guard.
+- Architecture/journey updates belong with implementation; their current pages still describe shipped behavior.
+- Modal ordering must be explicit across listeners. A prevented dirty exit cannot open a second native confirm.
 
 ## Decisions
-- 2026-10-21: Scope (a). Convert only the `#sidePanel` `htmx:beforeRequest` guard into a blocking `htmx:confirm` branch. The navigation guard and `runAfterSidePanelDiscardConfirmation` stay for `server-rendered-state-follow-up`, and this task narrows its kickoff row (`kickoff.md:40`).
-- 2026-10-21: Modal copy uses discard wording on the shared `#unsavedModal`: message "The open side panel has unsaved changes. Discard them?", buttons "Keep editing" / "Discard changes". It names only the discard, so it stays true for the paths that still proceed. Button ids are unchanged.
+
+- 2026-11-03, user review: adopt unified discard-and-repeat everywhere a user action abandons dirty side-panel
+  edits. One shared decision/modal helper, thin HTMX/JS/close entry points, no stored continuation. This supersedes
+  the 2026-10-21 guard-only scope and moves the remaining replay work out of the separate follow-up.
+- Keep the separate Save/recomputation `eval` and dirty-detection redesign outside this task. Neither is needed
+  to unify how existing dirty state is handled.

@@ -201,7 +201,7 @@
     <ol>
       <li><a href="#task-3">3.1 · Task 3 — server owns card removal</a></li>
       <li><a href="#task-2">3.2 · Task 2 — membership OOB when mounted</a></li>
-      <li><a href="#task-12">3.3 · Task 12 — highlight within owning canvas</a></li>
+      <li><a href="#task-12">3.3 · Task 12 — one leading system prefix</a></li>
     </ol>
     <p class="cluster"><a href="#cluster-calc">4 · Calculated-attribute panels</a></p>
     <ol>
@@ -211,7 +211,7 @@
     </ol>
     <p class="cluster"><a href="#cluster-guard">5 · Unsaved-changes guard</a></p>
     <ol>
-      <li><a href="#task-1">5.1 · Task 1 — guard blocks</a></li>
+      <li><a href="#task-1">5.1 · Task 1 — unified discard-and-repeat</a></li>
     </ol>
     <p class="cluster"><a href="#cluster-constant">6 · Recurrent constant editor</a></p>
     <ol>
@@ -264,10 +264,10 @@
               <span data-reading-links><a href="#task-13">T13</a></span>
               <small>T13: one resolver replaces both lookup rules; T6 bypasses form resolution for inspection.</small>
             </li>
-            <li id="f-mow" data-steps="task-6 task-13 task-14">
+            <li id="f-mow" data-steps="task-6 task-12 task-13 task-14">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py"><code>entities/web_abstract_modeling_classes/modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
-              <small>T6 on the list-container property; T13 resolver and <code>has_edit_panel</code>; T14 <code>wrap_explainable()</code>.</small>
+              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-12">T12</a> · <a href="#task-13">T13</a> · <a href="#task-14">T14</a></span>
+              <small>T6 on the list-container property; T12 prefixes the completed containment path; T13 resolver and <code>has_edit_panel</code>; T14 <code>wrap_explainable()</code>.</small>
             </li>
             <li id="f-explainable-web" data-steps="task-14">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/explainable_objects_web.py"><code>entities/web_abstract_modeling_classes/explainable_objects_web.py</code></a> <span data-change="modified">Modified</span>
@@ -321,10 +321,10 @@
               <span data-reading-links><a href="#task-9">T9</a></span>
               <small>S5: decorate the remaining fragment views, or record why one is exempt.</small>
             </li>
-            <li id="f-views-edition" data-steps="task-6 task-12">
+            <li id="f-views-edition" data-steps="task-6">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py" data-review-source-href="../../../model_builder/adapters/views/views_edition.py"><code>views/views_edition.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-12">T12</a></span>
-              <small>T6: early read-only panel branch, without form context or mirror highlighting. T12: comment.</small>
+              <span data-reading-links><a href="#task-6">T6</a></span>
+              <small>T6: early read-only panel branch, without form context or mirror highlighting.</small>
             </li>
           </ul>
         </details>
@@ -340,6 +340,11 @@
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/delete_card_modal.html" data-review-source-href="../../../model_builder/templates/model_builder/modals/delete_card_modal.html"><code>modals/delete_card_modal.html</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-3">T3</a></span>
               <small>Client-side card-removal handler removed; modal script remains for panel-result behavior.</small>
+            </li>
+            <li id="f-panel-exit-controls" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html" data-review-source-href="../../../model_builder/templates/model_builder/simplified_inputs/timeseries_panel.html"><code>simplified_inputs/timeseries_panel.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>User Cancel uses the shared dirty gate; successful-save cleanup stays direct. Audit other close/exit controls and reset/example intent markup.</small>
             </li>
             <li id="f-unsaved-modal" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html" data-review-source-href="../../../model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html"><code>modals/warn_before_side_panel_closing_modal.html</code></a>,
@@ -391,15 +396,30 @@
         <details open>
           <summary>theme/static/scripts/</summary>
           <ul>
+            <li id="f-feedback-js" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/support.js" data-review-source-href="../../../theme/static/scripts/support.js"><code>support.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Feedback checks the shared gate before busy state and request setup; no deferred action.</small>
+            </li>
+            <li id="f-simplified-entry-js" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js"><code>simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Gate entry before close, base-view change or entry read.</small>
+            </li>
+            <li id="f-model-comparison-js" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_comparison.js" data-review-source-href="../../../theme/static/scripts/model_comparison.js"><code>model_comparison.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Dirty removal stops before the ordinary destructive confirm; remove custom unsaved-message handling.</small>
+            </li>
+            <li id="f-main-js" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Coordinate reset/example destructive confirmations with the shared dirty gate.</small>
+            </li>
             <li id="f-side-panel-js" data-steps="task-1 task-2">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js"><code>side_panel_utils.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-2">T2</a> · <a href="#task-1">T1</a></span>
-              <small>T2 adds <code>dictMembershipVals</code> beside <code>recomputationVals</code>; T1 replaces the beforeRequest guard. Run back to back.</small>
-            </li>
-            <li id="f-main-js" data-steps="task-12">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js" data-review-source-href="../../../theme/static/scripts/model_builder_main.js"><code>model_builder_main.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-12">T12</a></span>
-              <small><code>cardButtonsForWebId</code> scoped to the owning canvas.</small>
+              <small>T2 adds <code>dictMembershipVals</code>; T1 replaces all dirty-panel replay paths with one blocking helper. Run back to back.</small>
             </li>
           </ul>
         </details>
@@ -409,12 +429,27 @@
             <li id="f-js-guard" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/side_panel_switch_guard.test.js" data-review-source-href="../../../js_tests/side_panel_switch_guard.test.js"><code>side_panel_switch_guard.test.js</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
-              <small>T1 <code>#sidePanel</code> branch cases.</small>
+              <small>T1 shared helper, HTMX/JS/close entry points, no replay and one prompt per click.</small>
             </li>
-            <li id="f-js-main" data-steps="task-12">
+            <li id="f-js-feedback" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/support.test.js" data-review-source-href="../../../js_tests/support.test.js"><code>support.test.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Blocked Feedback sends no request or fallback; repeat opens normally.</small>
+            </li>
+            <li id="f-js-simplified-entry" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/simplified_inputs.test.js" data-review-source-href="../../../js_tests/simplified_inputs.test.js"><code>simplified_inputs.test.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>No base-view/read changes after Discard alone; migrate callback mocks.</small>
+            </li>
+            <li id="f-js-model-comparison" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_comparison.test.js" data-review-source-href="../../../js_tests/model_comparison.test.js"><code>model_comparison.test.js</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Dirty removal produces only the shared modal; repeat uses its ordinary confirm.</small>
+            </li>
+            <li id="f-js-main" data-steps="task-1 task-12">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/model_builder_main.test.js" data-review-source-href="../../../js_tests/model_builder_main.test.js"><code>model_builder_main.test.js</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-12">T12</a></span>
-              <small>T12 reproduction (fixture case in <code>build_fixtures.py</code>); the fix switches <code>test.failing</code> to <code>test</code>.</small>
+              <span data-reading-links><a href="#task-1">T1</a> · <a href="#task-12">T12</a></span>
+              <small>T1 reset-confirm ordering; T12 reproduction (fixture case in <code>build_fixtures.py</code>); the fix switches <code>test.failing</code> to <code>test</code>.</small>
             </li>
           </ul>
         </details>
@@ -450,6 +485,11 @@
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py"><code>application/use_cases/test_delete_object.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-11">T11</a></span>
             </li>
+            <li id="t-card-ids" data-steps="task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py" data-review-source-href="../../../tests/unit_tests/domain/entities/web_abstract_modeling_classes/test_modeling_object_web.py"><code>domain/…/test_modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small>Root, list/dict and deep containment paths; exactly one leading namespace; distinct systems.</small>
+            </li>
             <li id="t-wrappers" data-steps="task-13">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/test_web_efootprint_wrappers.py" data-review-source-href="../../../tests/unit_tests/domain/test_web_efootprint_wrappers.py"><code>test_web_efootprint_wrappers.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-13">T13</a></span>
@@ -475,6 +515,31 @@
         <details open>
           <summary>tests/e2e/</summary>
           <ul>
+            <li id="t-e2e-card-selector" data-steps="task-12">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/pages/model_builder_page.py" data-review-source-href="../../../tests/e2e/pages/model_builder_page.py"><code>pages/model_builder_page.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small>Adapt <code>card_id_selector</code>; audit literal selectors and run job, step, edge-object and comparison flows.</small>
+            </li>
+            <li id="t-e2e-comparison-guard" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_comparison.py" data-review-source-href="../../../tests/e2e/test_model_comparison.py"><code>test_model_comparison.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Discard does not switch/add/remove; second action performs the clean flow.</small>
+            </li>
+            <li id="t-e2e-dirty-entry" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_simplified_inputs.py" data-review-source-href="../../../tests/e2e/test_simplified_inputs.py"><code>test_simplified_inputs.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Entry and timeseries Cancel use the shared dirty-side-panel contract.</small>
+            </li>
+            <li id="t-e2e-feedback-guard" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_data_privacy.py" data-review-source-href="../../../tests/e2e/test_data_privacy.py"><code>test_data_privacy.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Extend existing Feedback/Data &amp; privacy coverage for blocked/discard/repeat behavior.</small>
+            </li>
+            <li id="t-e2e-onboarding-guard" data-steps="task-1">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_onboarding.py" data-review-source-href="../../../tests/e2e/test_onboarding.py"><code>test_onboarding.py</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-1">T1</a></span>
+              <small>Reset/example replacement does not run after Discard; ordinary confirm follows on repeat.</small>
+            </li>
             <li id="t-e2e-forms" data-steps="task-1">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_forms.py" data-review-source-href="../../../tests/e2e/test_forms.py"><code>test_forms.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-1">T1</a></span>
@@ -506,9 +571,14 @@
               <span data-reading-links><a href="#task-8">T8</a> · <a href="#task-11">T11</a> · <a href="#task-6">T6</a></span>
               <small>Internal-object inspection and standalone mutation guards; parent-owned editing/cascades remain allowed; journeys blocked while any pattern holds them.</small>
             </li>
-            <li id="d-rendering" data-steps="task-3 task-6 task-12">
+            <li id="d-rendering" data-steps="task-1 task-3 task-6 task-12">
               <a href="../../architecture/rendering.html#rendering-in-the-web-context" target="_blank" rel="noopener"><code>architecture/rendering.html</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-3">T3</a> · <a href="#task-12">T12</a></span>
+              <span data-reading-links><a href="#task-1">T1</a> · <a href="#task-6">T6</a> · <a href="#task-3">T3</a> · <a href="#task-12">T12</a></span>
+            </li>
+            <li id="d-workspace-ids" data-steps="task-12">
+              <a href="../../architecture/workspace.html#dom-identity-and-oob-targeting" target="_blank" rel="noopener"><code>architecture/workspace.html</code></a> <span data-change="modified">Modified</span>
+              <span data-reading-links><a href="#task-12">T12</a></span>
+              <small>Every completed containment path starts with exactly one system namespace.</small>
             </li>
             <li id="d-workspace" data-steps="task-1">
               <a href="../../architecture/workspace.html#two-resident-canvases-and-dom-identities" target="_blank" rel="noopener"><code>architecture/workspace.html</code></a>,
@@ -619,6 +689,7 @@
     <p><a href="#decision-eval">1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</a></p>
     <p><a href="#decision-s8">2 · Task 14 drops the S8 URL template tag — APPLIED</a></p>
     <p><a href="#decision-task-4">3 · Task 4 moves to the library — APPLIED</a></p>
+    <p><a href="#decision-unified-discard">4 · Task 1 unifies dirty-side-panel discard-and-repeat — APPLIED</a></p>
   </aside>
 
   <section id="walkthrough">
@@ -1096,7 +1167,7 @@ return (np.round(daily * scale) / scale).tolist()</code></pre>
         while a nested card renders <code>Class-id_in_&lt;parent web_id&gt;</code>. Three response paths address the DOM from that id or from a region
         that lives in an optional side panel: the delete modal's former hyperscript removed <code>#&lt;web_id&gt;</code> (Task 3; the server now removes it through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:333:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L333">the OOB delete branch</a>); dict mutations always
         swap a membership section that exists only while the child's panel is open (Task 2); the highlight expansion assumes nested ids start with the
-        canonical id (Task 12). The shared invariant: emit or address only what is mounted, expand the canonical id inside the canvas that owns it, and keep
+        canonical id (Task 12). The shared invariant: emit or address only what is mounted, start every card id with its canonical object id (including the system namespace), and keep
         highlight headers constant-size. Owning page: <a href="../../architecture/rendering.html#rendering-in-the-web-context" target="_blank" rel="noopener">rendering</a>.</p>
     </div>
 
@@ -1210,10 +1281,12 @@ return self._build_oob_response(
     </article>
 
     <article id="task-12" data-step>
-      <h3><a href="#task-12">Task 12 · Card highlight expands the canonical id within its owning canvas</a></h3>
-      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+      <h3><a href="#task-12">Task 12 · Put the system prefix first in every card id</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/card-highlight-id-mismatch.md" data-review-source-href="diagnostics/card-highlight-id-mismatch.md">diagnostic</a> · smell-sweep S2</p>
-      <p data-files><span>Files</span> <a href="#f-main-js"><code>model_builder_main.js</code></a> · <a href="#f-views-edition"><code>views_edition.py</code></a> (comment) · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#f-js-main"><code>model_builder_main.test.js</code></a></p>
+      <p data-files><span>Files</span> <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#t-card-ids">Python ID tests</a> ·
+        <a href="#t-e2e-card-selector"><code>model_builder_page.py</code></a> and audited selectors · <a href="#f-js-main">Jest reproduction</a> ·
+        <a href="#d-workspace-ids"><code>workspace.html</code></a> · <a href="#d-rendering"><code>rendering.html</code></a></p>
       <dl>
         <dt>Symptom</dt>
         <dd>Creating or editing a job, step, edge function, need or edge component gives no pulse and no scroll-into-view; mirrored objects lose the "opened" highlight on every mirror but the clicked one.
@@ -1241,32 +1314,45 @@ return self._build_oob_response(
             <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code> (rebuilds the fixture first).</p>
         </dd>
         <dt>Fix</dt>
-        <dd>Client only; the header stays one canonical id.</dd>
+        <dd>Build an unprefixed containment path in Python, then add <code>_system_web_id_prefix</code> once at the beginning of
+          <code>web_id</code>. Root ids stay unchanged; a nested card becomes
+          <code>sys-system-Job-job_in_UsageJourneyStep-step_in_UsageJourney-journey-1</code>.
+          Keep the existing document-wide exact-or-<code>_in_</code> JS matcher and the single canonical id in headers.</dd>
       </dl>
       <div data-code>
-        <p data-code-file><a href="#f-main-js"><code>theme/static/scripts/model_builder_main.js</code></a>
-          <small>Proposed <code>cardButtonsForWebId</code> (illustrative)</small></p>
-        <pre><code>function cardButtonsForWebId(webId) {
-    const owner = Array.from(document.querySelectorAll("[data-model-canvas][data-system-id]"))
-        .filter(canvas =&gt; webId.startsWith(`sys-${canvas.dataset.systemId}-`))
-        .sort((a, b) =&gt; b.dataset.systemId.length - a.dataset.systemId.length)[0];
-    if (!owner) return [];
-    const localId = webId.slice(`sys-${owner.dataset.systemId}-`.length);
-    return owner.querySelectorAll(`[id="button-${webId}"], [id^="button-${localId}_in_"]`);
-}</code></pre>
+        <p data-code-file><a href="#f-mow"><code>model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py</code></a>
+          <small>Proposed containment-path construction (illustrative)</small></p>
+        <pre><code>@property
+def _containment_path(self):
+    path = f"{self.class_as_simple_str}-{self._modeling_obj.id}"
+    if self.parent_container is not None:
+        path += f"_in_{self.parent_container._containment_path}"
+    return path
+
+@property
+def web_id(self):
+    return f"{self._system_web_id_prefix}{self._containment_path}"</code></pre>
       </div>
       <dl>
-        <dd>Scoping by owning system, not visibility, keeps the parked canvas out even for a duplicated model with identical object ids
-          (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:13:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L13"><code>data-system-id</code></a>). The <code>_in_</code> delimiter bounds <code>localId</code>.
-          Both listeners keep calling it unchanged; the comments at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:201:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L201"><code>model_builder_main.js:201-204</code></a> and
-          <code>views_edition.py:38-40</code> are corrected.</dd>
-        <dt>Tests</dt>
-        <dd>The reproduction is the only test, with its fixture case <code>card_highlight_two_canvases</code> in
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py:460:1" data-review-source-href="../../../js_tests/build_fixtures.py#L460"><code>build_fixtures.py</code></a> (generated fixtures are gitignored and rebuilt by <code>npm run jest</code>).
-          Scrolling is not asserted: jsdom gives every element a zero-size box. Discrimination: the snippet above makes it pass; an unscoped
-          <code>[id^="button-&lt;local&gt;_in_"]</code> variant still fails by marking the parked canvas's cards.</dd>
-        <dt>Settled</dt>
-        <dd>Constant-size single-id payload, client expansion scoped by <code>data-system-id</code>; the server-side <code>local_web_id</code> variant was rejected (2026-10-21).</dd>
+        <dt>ID invariant</dt>
+        <dd>Every appearance starts with <code>sys-{system}-Class-id</code>, followed by <code>_in_</code> and an unprefixed parent path when nested.
+          The namespace distinguishes duplicated models; the <code>_in_</code> boundary keeps <code>job</code> separate from <code>job-2</code>.
+          No canvas lookup, prefix stripping, extra payload field or legacy-id branch is needed.
+          Most button, collapse, icon, leader-line and HTMX ids derive from <code>web_id</code> and follow automatically.
+          Adapt <a href="#t-e2e-card-selector"><code>card_id_selector</code></a> and audit explicit format assumptions, including derived-ID construction.
+          Preserve routing, mirror enumeration, equality/hash behavior, Task 6's inspection-only panels and Task 3's server-side removal.
+          Update the workspace and rendering documentation when implementing.</dd>
+        <dt>Tests and validation</dt>
+        <dd>Update and extend the existing <a href="#t-card-ids">Python ID tests</a> for root, list/dict and deep nesting, exactly one leading namespace,
+          and distinct systems. Turn the Jest reproduction into a plain <code>test</code> and regenerate <code>card_highlight_two_canvases</code> through
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/js_tests/build_fixtures.py:460:1" data-review-source-href="../../../js_tests/build_fixtures.py#L460"><code>build_fixtures.py</code></a>
+          with <code>npm run jest</code>. Keep root, nested, mirrored, prefix-sharing sibling, unknown-system and parked-model cases.
+          Run non-E2E checks and affected job, journey-step, edge-object and model-comparison E2E flows; check card targeting, leader lines and HTMX swaps.
+          Verify off-screen nested create/edit scrolling in the browser because jsdom supplies no real geometry.
+          The earlier scratch pass validated the superseded JS proposal; this Python design needs implementation-time validation.</dd>
+        <dt>Settled · 2026-11-03 user review</dt>
+        <dd>One leading system prefix on every completed containment path, unchanged JS matcher and constant-size single-id payload.
+          This supersedes the 2026-10-21 owner-canvas/prefix-stripping proposal. Accept the selector audit and test updates for a consistent ID rule.</dd>
       </dl>
     </article>
 
@@ -1436,47 +1522,64 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
     </article>
 
     <!-- ============================== Cluster 5 ============================== -->
-    <h2 id="cluster-guard">5 · The unsaved-changes guard that suspends and replays</h2>
+    <h2 id="cluster-guard">5 · One dirty-side-panel rule</h2>
     <div class="cluster-intro">
-      <p>Two listeners in <code>side_panel_utils.js</code> stop requests while the panel is dirty: an
-        <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:127:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L127"><code>htmx:beforeRequest</code> guard</a> for elements whose own
-        <code>hx-target</code> is <code>#sidePanel</code>, and an <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:162:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L162"><code>htmx:confirm</code> guard</a>
-        for panel-discarding paths. Both store the request and continue it after "Yes, Continue", which the mission now forbids
-        (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/mission.md:26:1" data-review-source-href="../../../specs/mission.md#L26">mission.md:26-28</a>). Owning page: <a href="../../architecture/workspace.html#two-resident-canvases-and-dom-identities" target="_blank" rel="noopener">workspace</a>.</p>
+      <p>Panel requests, navigation and JavaScript openers currently use three stored-continuation paths in
+        <code>side_panel_utils.js</code>. User review on 2026-11-03 replaces all of them with one discard-and-repeat policy:
+        a dirty exit stops, Discard closes the panel, and the user repeats the action. The mission's guards-block rule applies
+        to every side-panel exit. Owning pages: <a href="../../architecture/workspace.html#two-resident-canvases-and-dom-identities" target="_blank" rel="noopener">workspace</a>
+        and <a href="../../architecture/rendering.html" target="_blank" rel="noopener">rendering</a>.</p>
     </div>
 
     <article id="task-1" data-step>
-      <h3><a href="#task-1">Task 1 · The <code>#sidePanel</code> unsaved-changes guard blocks instead of replaying</a></h3>
-      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
+      <h3><a href="#task-1">Task 1 · One dirty-side-panel guard: discard, close, repeat</a></h3>
+      <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/side-panel-replay-hand-parsing.md" data-review-source-href="diagnostics/side-panel-replay-hand-parsing.md">diagnostic</a></p>
-      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-unsaved-modal">modal templates</a> · <a href="#d-workspace">four docs</a> · <a href="#f-js-guard">Jest</a> · <a href="#t-e2e-forms"><code>test_forms.py</code></a></p>
+      <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> ·
+        <a href="#f-feedback-js">Feedback</a> · <a href="#f-simplified-entry-js">Simplified entry</a> · <a href="#f-model-comparison-js">model navigation/removal</a> ·
+        <a href="#f-main-js">reset confirmations</a> · <a href="#f-unsaved-modal">modal templates</a> and audited close/exit controls ·
+        <a href="#d-workspace">workspace/journey docs and follow-up</a> · <a href="#d-rendering">rendering</a> · <a href="#f-js-guard">Jest</a> and
+        <a href="#t-e2e-forms">E2E guard flows</a></p>
       <dl>
-        <dt>Symptom</dt>
-        <dd>With a dirty panel, Help → "Data &amp; privacy" then "Yes, Continue" loads the builder page into the side panel (shown in jsdom with the bundled htmx; the new E2E confirms it in a browser).
-          No reproduction: the settled fix replaces the replay contract (Discard closes the panel, nothing is issued) rather than correcting it, so its
-          Jest and E2E tests are new-contract tests; the new Data &amp; privacy E2E is the one to watch fail first.</dd>
-        <dt>Root cause</dt>
-        <dd><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:199:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L199"><code>proceedWithPendingRequest()</code></a> rebuilds the request from
-          <code>hx-get</code>/<code>hx-target</code>/<code>hx-swap</code>/<code>hx-vals</code> (with <code>eval</code>). The boosted anchors in
-          <code>help_menu.html</code> and <code>workspace_storage_status.html</code> have no <code>hx-get</code>, so htmx GETs the current page. The intake's
-          "no visible defect" and its two proposed directions (url + source shrink, <code>issueRequest</code> replay) are disproven or ruled out by the mission.</dd>
-        <dt>Fix</dt>
-        <dd>Delete <code>pendingRequest</code> (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:2:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L2">:2</a>, resets at :61, :77), the beforeRequest guard
-          with its <code>hideLoadingBar</code> timeout, and <code>proceedWithPendingRequest()</code>. In the <code>htmx:confirm</code> listener, before the path check, a
-          dirty request whose <code>detail.elt.getAttribute("hx-target") === "#sidePanel"</code> is prevented and shows <code>#unsavedModal</code> with Continue wired to
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/side_panel_utils.js:222:1" data-review-source-href="../../../theme/static/scripts/side_panel_utils.js#L222"><code>closeWarningModalAndCloseSidePanel()</code></a>; it never calls <code>issueRequest</code>.
-          Matching the element's own attribute (not <code>detail.target</code>) keeps <code>htmx.ajax</code> openers from stacking two dialogs. The guard comment
-          (:141–154) is rewritten. Cancel in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html:9:1" data-review-source-href="../../../model_builder/templates/model_builder/modals/warn_before_side_panel_closing_modal.html#L9"><code>warn_before_side_panel_closing_modal.html</code></a>
-          calls <code>closeWarningModal()</code> only. Copy: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:84:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L84">message</a>
-          "The open side panel has unsaved changes. Discard them?", buttons "Keep editing" / "Discard changes"; the two journey pages, <code>workspace.html:41-43</code> and
-          <code>kickoff.md:40</code> follow.</dd>
+        <dt>Symptom and cause</dt>
+        <dd>With a dirty panel, Help → Data &amp; privacy then Yes, Continue loads the builder page into the side panel:
+          <code>proceedWithPendingRequest()</code> hand-parses <code>hx-get</code> and cannot replay boosted links correctly (shown in jsdom with bundled HTMX).
+          Navigation and Feedback/Simplified entry also retain actions to resume after confirmation. Their differing continuations violate the mission's guards-block rule.</dd>
+        <dt>Unified behavior</dt>
+        <dd>Stop every user action that would abandon unsaved side-panel edits before its request or destructive UI change.
+          Show “The open side panel has unsaved changes. Discard them?” with Keep editing / Discard changes.
+          Keep editing closes only the warning and preserves the draft. Discard changes closes and clears the panel,
+          sends no interrupted request and performs no interrupted action. The user repeats the action; clean actions run normally.</dd>
+        <dt>Implementation</dt>
+        <dd>One boolean helper in <code>side_panel_utils.js</code> (for example <code>blockIfSidePanelDirty()</code>) owns the decision and modal.
+          A single <code>htmx:confirm</code> entry point classifies resolved panel replacements and model-exit paths, including inherited targets,
+          boosted links and <code>htmx.ajax</code>. Small JS and close entry points call the same helper before destructive UI changes.
+          Exclude current-form Save, validation and previews from exit classification.
+          Feedback checks before busy state/request setup; Simplified entry checks before panel close, base-view change or read.
+          Remove all three pending-action variables, all <code>proceedWithPending…</code> functions, callback-taking
+          <code>runAfterSidePanelDiscardConfirmation</code>, the beforeRequest listener and loading-bar timeout.
+          Give the modal fixed handlers; no per-action rewiring or callback storage. Successful Save and server-directed cleanup keep their low-level close path.</dd>
+        <dt>Coverage and confirmations</dt>
+        <dd>Cover card/add/edit and Data &amp; privacy openers, Feedback, +Add blank/duplicate/import, model switching and cross-slot Compare dismissal,
+          Simplified entry/configuration that abandons a side-panel draft, and close/Cancel (including the Simplified timeseries panel).
+          Model removal, reset and example loading use the same dirty gate before any native confirmation: dirty first click → shared modal only;
+          Discard → close only; repeat → ordinary destructive confirm/action. Remove removal's separate unsaved-message concatenation and the old reset/example exemptions.
+          Coordinate listeners so a blocked dirty exit cannot also show a native confirm. Opening Compare, same-slot return, help and export preserve the draft;
+          Configure's own separate draft rules remain as they are.</dd>
         <dt>Tests</dt>
-        <dd>Jest in <code>side_panel_switch_guard.test.js</code>: modified/unmodified/other element, Discard issues nothing, an event matching both branches shows the modal once.
-          E2E: rewrite <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_forms.py:67:1" data-review-source-href="../../../tests/e2e/test_forms.py#L67"><code>test_pending_request_preserves_hx_vals</code></a> (Discard closes; the next click sends <code>hx-vals</code> and locks);
-          new dirty-panel Data &amp; privacy case; assert the new copy once.</dd>
-        <dt>Settled</dt>
-        <dd>Scope (a): this guard only; the navigation guard and <code>runAfterSidePanelDiscardConfirmation</code> stay for <code>server-rendered-state-follow-up</code>. Discard copy (2026-10-21).
-          The <code>eval</code> acceptance covers the guard path only (<a href="#decision-eval">decision 1</a>). Local E2E server required.</dd>
+        <dd>Rewrite <a href="#f-js-guard">guard tests</a> and <a href="#f-js-feedback">Feedback</a>, <a href="#f-js-simplified-entry">Simplified</a>,
+          <a href="#f-js-model-comparison">comparison</a> and reset-confirm tests: clean/dirty, Keep editing, Discard issues nothing, repeat runs normally,
+          resolved/inherited/programmatic targets, no view/busy/fallback side effects and one prompt per click.
+          E2E: rewrite <code>test_pending_request_preserves_hx_vals</code> and the cross-slot Continue-switches test;
+          cover Data &amp; privacy, Feedback, Simplified entry, close/Cancel, +Add, removal, reset and examples.
+          Check requests/state as well as modal copy; Save/preview and non-destructive Compare/export remain usable.
+          Run affected Jest suites, full Jest and local E2E guard flows. These are new-contract tests; no implementation pass is claimed here.</dd>
+        <dt>Docs and settled scope · 2026-11-03 user review</dt>
+        <dd>All dirty-side-panel handling now uses discard-and-repeat, superseding the guard-only 2026-10-21 scope.
+          Remove the deferred replay row from <code>server-rendered-state-follow-up/kickoff.md</code>; dirty-detection redesign remains separate.
+          Update workspace/rendering and build/compare journey docs when implementing. Retain the unrelated Save-path <code>eval</code>
+          (<a href="#decision-eval">decision 1</a>); no guard or exit path may store/replay an interrupted action.
+          <a href="#decision-unified-discard">Review decision 4</a> records the scope change.</dd>
       </dl>
     </article>
 
@@ -1577,12 +1680,13 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
       <li><strong>Run B · contained UI fixes — Tasks 9 → 10 → 12 → 2 → 1 → 7</strong>
         <ul>
           <li>After Run A: Task 6 unblocks the panels the Task 9 and 10 acceptance crawls over the shipped examples must reach. Task 10's reproduction shares Task 9's fixture and test file.</li>
+          <li>Task 12 changes shared nested card ids: update Python ID assertions and the E2E card selector, regenerate the Jest fixture, and verify card targeting, leader lines and HTMX swaps. It follows Task 6 and precedes Tasks 13/14 in the shared <code>modeling_object_web.py</code>.</li>
           <li>Tasks 2 and 1 both edit <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a>: run them back to back.</li>
           <li>Reproductions, unmasked: <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_calculated_attributes.py" "tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value"</code> (Tasks 9, 10, 7);
             <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code> (Task 2, running server);
             Task 12 — switch <code>test.failing(</code> to <code>test(</code>, then <code>npm run jest -- js_tests/model_builder_main.test.js -t "own canvas only"</code>. Task 1 has none.</li>
-          <li>Task 1's E2E confirms the Data &amp; privacy defect in a browser.</li>
-          <li>Validation: <code>npm run jest</code> (12, 1); local E2E server for 1, 2 and Task 10's selector updates.</li>
+          <li>Task 1 unifies dirty-panel behavior across Feedback, switching/+Add, Simplified entry, close/Cancel and destructive model exits. Validate Discard sends nothing or changes no view; repeat performs the normal action. Extend its E2E guard matrix beyond Data &amp; privacy.</li>
+          <li>Validation: Task 12's Python ID tests and non-E2E checks; <code>npm run jest</code> (12, 1); local E2E server for Task 1's forms/Feedback/Simplified/comparison/reset-example guard flows, Task 2, Task 10's selector updates and Task 12's job, step, edge-object and model-comparison flows. Check off-screen nested scrolling manually.</li>
         </ul></li>
       <li><strong>Run C · refactors and invariant tests — Tasks 13 → 14 → 15</strong>
         <ul>
@@ -1661,7 +1765,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
           <tr><td>4 · 6</td><td>Distinct: detached wrappers in the library's raw list vs. non-constructor attribute names in the interface; both needed.</td></tr>
           <tr><td>6 · 8</td><td>Distinct responsibilities using one library property: Task 6 supplies metadata and read-only inspection; Task 8 rejects direct standalone mutation requests.</td></tr>
           <tr><td>8 · 11</td><td>Distinct: Task 8 enforces the internal-parent restriction before any unlinking. Task 11 fixes generic deletion of other referenced objects; it must preserve those guards.</td></tr>
-          <tr><td>3 · 12</td><td>Distinct: both meet root-form ids vs. nested <code>_in_</code> ids, but one is a client remover on delete and the other the highlight expansion; fixes live on different sides.</td></tr>
+          <tr><td>3 · 12</td><td>Distinct: Task 3 replaces client removal with server-rendered removal; Task 12 restores the canonical-prefix invariant in Python. Run Task 3's deletion regression with the new nested ids.</td></tr>
           <tr><td>2 · 3</td><td>Distinct: unconditional OOB region vs. client-side remover; both now respect "address only what is mounted".</td></tr>
           <tr><td>3 · 11</td><td>Distinct: Task 11 decides what is deleted; Task 3 how the card leaves the canvas. Task 3's non-list rule stays valid after Task 11.</td></tr>
           <tr><td>9 · 10</td><td>Distinct: wrong partial for empty values vs. ids keyed by attribute name; Task 10 also de-duplicates the ids Task 9 newly renders.</td></tr>
@@ -1682,7 +1786,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
   <!-- ============================== Decisions ============================== -->
   <section id="decisions">
     <h2>Planning decisions</h2>
-    <p>All are already reflected above and in <code>tasks.md</code>. Decisions 1 and 2 were planning defaults, and reverting either is a local edit; decision 3 was the user's.</p>
+    <p>All are already reflected above and in <code>tasks.md</code>. Decisions 1 and 2 were planning defaults; decisions 3 and 4 were the user's. The reviewed choices are reflected in the affected tasks.</p>
 
     <aside id="decision-eval" data-note="review">
       <p><strong>1 · Task 1's "no eval" acceptance narrowed to the guard path — APPLIED</strong></p>
@@ -1692,9 +1796,20 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
         submit (<a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/side_panel_structure.html:26:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/side_panel_structure.html#L26"><code>side_panel_structure.html:26</code></a>) to merge
         <code>recomputation</code> into the form's <code>hx-vals</code>. The diagnostic never traced it. Removing it means reworking how every <code>#sidePanelForm</code> submit sends
         <code>recomputation</code>, which is Save-path behavior outside this guard.</p>
-      <p><strong>Applied:</strong> Task 1's acceptance now reads "the <code>#sidePanel</code> guard path contains no <code>eval</code>, <code>pendingRequest</code> or
+      <p><strong>Applied:</strong> Task 1's acceptance now reads "dirty-side-panel exit paths contain no <code>eval</code>, pending request/event/callback state or
         <code>htmx:beforeRequest</code> listener"; the Save-path <code>eval</code> is a deferred backlog item. Rejected alternative: widen Task 1 to replace it too,
-        which touches the Save flow in an easy task.</p>
+        which changes Save behavior separately from how dirty exits are handled.</p>
+    </aside>
+
+    <aside id="decision-unified-discard" data-note="review">
+      <p><strong>4 · Task 1 unifies dirty-side-panel discard-and-repeat — APPLIED</strong></p>
+      <p><strong>User decision, 2026-11-03:</strong> one shared dirty decision and modal, with thin HTMX/JS/close entry points.
+        Every attempted exit stops; Discard closes the panel without continuing it; the user repeats the action.
+        This includes Feedback, model switching/+Add, Simplified entry, close/Cancel and model removal/reset/example loading.
+        Ordinary destructive confirmation follows on the repeated clean action, with one prompt per click.</p>
+      <p>The 2026-10-21 own-<code>hx-target</code>-only scope is superseded, and deferred replay work moves from the follow-up into Task 1.
+        The “two dialogs” claim did not establish a need for own-attribute matching; unified ownership removes overlapping dirty handlers.
+        Save and non-destructive draft-preserving actions remain available. Dirty detection and Save-path recomputation are separate work.</p>
     </aside>
 
     <aside id="decision-s8" data-note="review">
