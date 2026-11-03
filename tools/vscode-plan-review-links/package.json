@@ -1,8 +1,8 @@
 {
   "name": "plan-review-links",
   "displayName": "Plan Review Links",
-  "description": "Open a plan's linked source file as a working-tree diff against main.",
-  "version": "0.0.2",
+  "description": "Open plan source links and diffs, or debug a linked pytest or vitest reproduction.",
+  "version": "0.0.8",
   "publisher": "local",
   "license": "Apache-2.0",
   "files": [

@@ -30,7 +30,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
 | LinkedIn post drafts and captioned demo video scripts | `communications/README.md` and `communications/video/README.md` |
 | Active feature work | `specs/features/<feature-name>/` |
-| Feature plan links, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
+| Feature plan links, one-click reproduction debugging, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
 | Final plan review guide (preserved structure, implementation links, consolidated decisions) | `.agents/skills/plan-review-guide/SKILL.md`; delegated at `feature-implement` close-out to the `plan-review-guide` agent, with supervisor-owned decisions |
 | Past investigations and dated decisions | `archives/` |
 

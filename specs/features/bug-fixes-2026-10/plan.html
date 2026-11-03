@@ -62,6 +62,11 @@
   [data-step] { margin: 1.4rem 0 2rem; }
   [data-step] > h3 > a { color: inherit; text-decoration: none; }
   [data-step]:is(:target, :has(:target)) { border-left: 3px solid var(--accent); padding-left: .8rem; }
+  [data-task-actions] { margin: .5rem 0 .8rem; }
+  [data-debug-reproduction] { display: inline-block; padding: .4rem .75rem; border: 1px solid var(--accent);
+    border-radius: .35rem; background: var(--accent); color: white; font-size: .85rem; font-weight: 650; text-decoration: none; }
+  [data-debug-reproduction]:hover { filter: brightness(.9); }
+  [data-debug-reproduction]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   [data-step] dl { margin: .4rem 0; }
   [data-step] dt { font-weight: 650; margin-top: .7rem; }
   [data-step] dd { margin: .15rem 0 0 0; max-width: 76ch; }
@@ -600,6 +605,13 @@
       line 277), and the links below use current lines.</p>
     <p><strong>Reproductions:</strong> every confirmed bug except Task 1 has a committed strict-xfail reproduction (recorded on <code>dev</code> at <code>6a1c10ea</code>–<code>8f8c63a1</code>); it is the task's only test.
       Every bug step now follows the breakpoint-chain shape. Tasks 1, 13, 14 and 15 have none, with the reason in their diagnostic or the smell sweep.</p>
+    <p><strong>One-click debugging:</strong> each Python reproduction below has a <strong>Debug reproduction</strong> link.
+      Set any breakpoints using the source links, then click it to launch that test in VS Code with <code>--runxfail</code>.
+      With no breakpoints, let it finish to read the unmasked failure in the Terminal or Debug Console.
+      The launcher adds no breakpoints; VS Code's exception-breakpoint settings still apply.
+      Requires <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tools/vscode-plan-review-links/README.md" data-review-source-href="../../../tools/vscode-plan-review-links/README.md">Plan Review Links 0.0.8</a> and Python Debugger.
+      The two E2E links open a browser and require Django at <code>http://localhost:8000</code>;
+      Python breakpoints cover the test process, while server and browser code run separately.</p>
   </header>
 
   <aside data-note="review">
@@ -635,6 +647,7 @@
 
     <article id="task-4" data-step>
       <h3><a href="#task-4">Task 4 · Deleting a recurrent need: a detached wrapper leaves its target's container list</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 4" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_deletion.py&amp;test=test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card&amp;line=85" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-need-delete-render-error.md" data-review-source-href="diagnostics/recurrent-need-delete-render-error.md">diagnostic</a> · GitHub #151</p>
       <p data-files><span>Files</span> <a href="#f-lib-contextual"><code>contextual_modeling_object_attribute.py</code></a> · <a href="#f-lib-modeling-object"><code>modeling_object.py</code></a> · <a href="#f-lib-reverse"><code>reverse_relationships.py</code></a> · <a href="#f-lib-relationships"><code>relationships.html</code></a> · <a href="#t-lib-contextual">library tests</a> · <a href="#f-lib-changelog">library <code>CHANGELOG.md</code></a> · <a href="#f-pyproject"><code>pyproject.toml</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#f-changelog"><code>CHANGELOG.md</code></a></p>
@@ -681,7 +694,7 @@
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L389">modeling_object_web.py:389</a> list_containers_and_attr_name_in_list_container
 AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code></pre>
           </div>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:85:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L85"><code>test_views_deletion.py:85</code></a>, right after the POST, or on
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_deletion.py&amp;test=test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card&amp;line=85" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:85:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L85"><code>test_views_deletion.py:85</code></a>, right after the POST, or on
             <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:389:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L389"><code>modeling_object_web.py:389</code></a> with condition <code>container is None</code>;
             <code>RAISE_EXCEPTIONS=1 poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"</code>.</p>
         </dd>
@@ -722,6 +735,7 @@ AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code></pr
 
     <article id="task-6" data-step>
       <h3><a href="#task-6">Task 6 · Edit panels for objects held by library-built relationships open</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 6" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_edition.py&amp;test=TestViewsEdition%3A%3Atest_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner&amp;line=390" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/check-can-delete-keyerror.md" data-review-source-href="diagnostics/check-can-delete-keyerror.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-mow"><code>modeling_object_web.py</code></a> · <a href="#f-mapping"><code>efootprint_to_web_mapping.py</code></a> · <a href="#t-views-edition"><code>test_views_edition.py</code></a> · <a href="#t-wrappers"><code>test_web_efootprint_wrappers.py</code></a></p>
@@ -763,7 +777,7 @@ KeyError: 'components'
 KeyError: 'ExternalAPIServer'</code></pre>
           </div>
           <p>The server then hits part 1 with <code>KeyError: 'server'</code> once part 2 is fixed, so its case needs both parts.</p>
-          <p><strong>Debug:</strong> the decorator swallows the exception, so break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:390:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L390"><code>modeling_object_web.py:390</code></a>
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_edition.py&amp;test=TestViewsEdition%3A%3Atest_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner&amp;line=390" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner">Debug reproduction</a> · the decorator swallows the exception, so break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:390:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L390"><code>modeling_object_web.py:390</code></a>
             or <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/efootprint_to_web_mapping.py:111:1" data-review-source-href="../../../model_builder/domain/efootprint_to_web_mapping.py#L111"><code>efootprint_to_web_mapping.py:111</code></a>, or at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_edition.py:255:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_edition.py#L255"><code>test_views_edition.py:255</code></a> after the panel request;
             <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_edition.py::TestViewsEdition::test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner"</code>.</p>
         </dd>
@@ -790,6 +804,7 @@ KeyError: 'ExternalAPIServer'</code></pre>
 
     <article id="task-8" data-step>
       <h3><a href="#task-8">Task 8 · Library-built edge components are blocked from deletion</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 8" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_deletion.py&amp;test=test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device&amp;line=111" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/edge-component-delete-silent-noop.md" data-review-source-href="diagnostics/edge-component-delete-silent-noop.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-edge-component-web"><code>edge_component_base_web.py</code></a> · <a href="#f-edge-builders">three component web classes</a> · <a href="#d-forms-rel"><code>forms-and-relationships.html</code></a> · <a href="#t-views-deletion"><code>test_views_deletion.py</code></a> · <a href="#t-edge-component">three override tests</a></p>
@@ -820,7 +835,7 @@ KeyError: 'ExternalAPIServer'</code></pre>
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:115:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L115"><code>test_views_deletion.py:115</code></a>, the direct POST (observed in a scratch run, since :111 stops the test first) ·
               <code>deletion.status_code</code> → 200; component id still in the device's <code>components</code> → <code>True</code>.</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:111:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L111"><code>test_views_deletion.py:111</code></a>, after the <code>ask-delete-object</code> call; to step
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_deletion.py&amp;test=test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device&amp;line=111" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:111:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L111"><code>test_views_deletion.py:111</code></a>, after the <code>ask-delete-object</code> call; to step
             through the silent POST, break at <code>delete_object.py:205</code> and <code>object_factory.py:180</code> and evaluate the POST from the debugger.
             <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_deletion.py::test_library_built_edge_component_deletion_is_blocked_and_edits_rerender_its_device"</code>.</p>
         </dd>
@@ -856,6 +871,7 @@ def mirrored_cards(self):
 
     <article id="task-11" data-step>
       <h3><a href="#task-11">Task 11 · A referenced object is blocked; a confirmed delete never only unlinks</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 11" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fapplication%2Fuse_cases%2Ftest_delete_object.py&amp;test=TestDeleteObjectUseCase%3A%3Atest_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked&amp;line=183" data-review-pytest="../../../tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/list-deletion-only-unlinks.md" data-review-source-href="diagnostics/list-deletion-only-unlinks.md">diagnostic</a> · smell-sweep S1, S7</p>
       <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-up-base"><code>usage_pattern_web_base_class.py</code></a> · <a href="#d-forms-rel"><code>forms-and-relationships.html</code></a> · <a href="#t-delete-uc"><code>test_delete_object.py</code></a></p>
@@ -892,7 +908,7 @@ def mirrored_cards(self):
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:212:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L212"><code>delete_object.py:212</code></a> (list/dict branch from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:180:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L180">:180</a>) ·
               <code>input_data.object_id in self.model_web.flat_efootprint_objs_dict</code> → <code>True</code>: the delete returns success with the object alive.</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:183:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L183"><code>test_delete_object.py:183</code></a>, after the forced <code>execute</code>;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fapplication%2Fuse_cases%2Ftest_delete_object.py&amp;test=TestDeleteObjectUseCase%3A%3Atest_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked&amp;line=183" data-review-pytest="../../../tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:183:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L183"><code>test_delete_object.py:183</code></a>, after the forced <code>execute</code>;
             <code>poetry run pytest --runxfail "tests/unit_tests/application/use_cases/test_delete_object.py::TestDeleteObjectUseCase::test_referenced_object_is_blocked_naming_every_holder_and_never_only_unlinked"</code>.</p>
         </dd>
         <dt>Fix</dt>
@@ -984,6 +1000,7 @@ oob_regions = web_obj.delete_side_effects()</code></pre>
 
     <article id="task-5" data-step>
       <h3><a href="#task-5">Task 5 · Round daily chart emissions to significant figures</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 5" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fdomain%2Fentities%2Fweb_core%2Ftest_model_web.py&amp;test=TestModelWeb%3A%3Atest_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period&amp;line=120" data-review-pytest="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/daily-emissions-rounding-drift.md" data-review-source-href="diagnostics/daily-emissions-rounding-drift.md">diagnostic</a> · GitHub #146, helps #106</p>
       <p data-files><span>Files</span> <a href="#f-mw-utils"><code>model_web_utils.py</code></a> · <a href="#t-model-web"><code>test_model_web.py</code>, <code>test_model_web_utils.py</code></a> · <a href="#d-layers"><code>layers-and-wrappers.html</code></a> (optional)</p>
@@ -1007,7 +1024,7 @@ oob_regions = web_obj.delete_side_effects()</code></pre>
               −3.46e-6 kt error repeats every day: ≈16.4 t lost over the period.</li>
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py:122:1" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py#L122"><code>test_model_web.py:122</code></a> · <code>payload_total / library_total</code> → 0.997294973517452.</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py:120:1" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py#L120"><code>test_model_web.py:120</code></a>, after the act at :117;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fdomain%2Fentities%2Fweb_core%2Ftest_model_web.py&amp;test=TestModelWeb%3A%3Atest_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period&amp;line=120" data-review-pytest="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/domain/entities/web_core/test_model_web.py:120:1" data-review-source-href="../../../tests/unit_tests/domain/entities/web_core/test_model_web.py#L120"><code>test_model_web.py:120</code></a>, after the act at :117;
             <code>poetry run pytest --runxfail "tests/unit_tests/domain/entities/web_core/test_model_web.py::TestModelWeb::test_system_emissions_daily_values_sum_to_library_total_over_long_large_unit_period"</code>.</p>
         </dd>
         <dt>Fix</dt>
@@ -1050,6 +1067,7 @@ return (np.round(daily * scale) / scale).tolist()</code></pre>
 
     <article id="task-3" data-step>
       <h3><a href="#task-3">Task 3 · The server owns card removal on delete</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 3" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Fe2e%2Fobjects%2Ftest_jobs.py&amp;test=TestJobs%3A%3Atest_deleting_nested_and_top_level_cards_logs_no_console_error&amp;line=178" data-review-pytest="../../../tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>standard</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/delete-card-modal-hyperscript-null.md" data-review-source-href="diagnostics/delete-card-modal-hyperscript-null.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-delete-object"><code>delete_object.py</code></a> · <a href="#f-presenter"><code>htmx_presenter.py</code></a> · <a href="#f-delete-modal"><code>delete_card_modal.html</code></a> · <a href="#d-rendering"><code>rendering.html</code></a> · <a href="#t-e2e-delete"><code>test_jobs.py</code></a> · <a href="#t-presenter"><code>test_htmx_presenter.py</code></a></p>
@@ -1078,7 +1096,7 @@ return (np.round(daily * scale) / scale).tolist()</code></pre>
             <li>Browser, capture-phase <code>htmx:afterRequest</code> on the button · selector target present → <code>false</code>, the hyperscript throws
               [<code>true</code>, the hyperscript removes the card].</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:178:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L178"><code>test_jobs.py:178</code></a> after the job deletion (or :186 for the journey);
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Fe2e%2Fobjects%2Ftest_jobs.py&amp;test=TestJobs%3A%3Atest_deleting_nested_and_top_level_cards_logs_no_console_error&amp;line=178" data-review-pytest="../../../tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/objects/test_jobs.py:178:1" data-review-source-href="../../../tests/e2e/objects/test_jobs.py#L178"><code>test_jobs.py:178</code></a> after the job deletion (or :186 for the journey);
             <code>poetry run pytest --runxfail "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error" --base-url http://localhost:8000 --headed</code>
             against a running server.</p>
         </dd>
@@ -1114,6 +1132,7 @@ return self._build_oob_response(
 
     <article id="task-2" data-step>
       <h3><a href="#task-2">Task 2 · Emit the dict membership-section region only when that section is mounted</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 2" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Fe2e%2Ftest_model_canva.py&amp;test=TestModelCanvas%3A%3Atest_canvas_dict_count_edits_and_unlinks_log_no_console_error&amp;line=73" data-review-pytest="../../../tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/membership-section-oob-no-target.md" data-review-source-href="diagnostics/membership-section-oob-no-target.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-side-panel-js"><code>side_panel_utils.js</code></a> · <a href="#f-dict-count">two templates</a> · <a href="#f-views-dict"><code>views_dict_mutation.py</code></a> · <a href="#t-e2e-canva"><code>test_model_canva.py</code></a></p>
@@ -1139,7 +1158,7 @@ return self._build_oob_response(
             <li>Browser, in the test's <code>htmx:oobErrorNoTarget</code> listener · <code>document.getElementById("dict-membership-section-&lt;id&gt;")</code> →
               <code>null</code> on six posts.</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:73:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L73"><code>test_model_canva.py:73</code></a>, after the first canvas count edit;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Fe2e%2Ftest_model_canva.py&amp;test=TestModelCanvas%3A%3Atest_canvas_dict_count_edits_and_unlinks_log_no_console_error&amp;line=73" data-review-pytest="../../../tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_model_canva.py:73:1" data-review-source-href="../../../tests/e2e/test_model_canva.py#L73"><code>test_model_canva.py:73</code></a>, after the first canvas count edit;
             <code>poetry run pytest --runxfail "tests/e2e/test_model_canva.py::TestModelCanvas::test_canvas_dict_count_edits_and_unlinks_log_no_console_error" --base-url http://localhost:8000</code>
             against a running server.</p>
         </dd>
@@ -1239,6 +1258,7 @@ return self._build_oob_response(
 
     <article id="task-9" data-step>
       <h3><a href="#task-9">Task 9 · Empty dict entries render "no value"; fragment views show the error modal</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 9" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_calculated_attributes.py&amp;test=test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently&amp;line=62" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/hourly-chart-empty-timeseries-500.md" data-review-source-href="diagnostics/hourly-chart-empty-timeseries-500.md">diagnostic</a> · smell-sweep S5 folded in</p>
       <p data-files><span>Files</span> <a href="#f-calc-dict"><code>explainable_object_dict.html</code></a> · <a href="#f-views"><code>views.py</code></a> · <a href="#f-views-other">deletion, Sankey and help views</a> · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> (new)</p>
@@ -1275,7 +1295,7 @@ return self._build_oob_response(
 <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_core/explainable_timeseries_utils.py:86:1" data-review-source-href="../../../model_builder/domain/entities/web_core/explainable_timeseries_utils.py#L86">explainable_timeseries_utils.py:86</a> prepare_hourly_quantity_data
 AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregation_strategy'</code></pre>
           </div>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:62:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L62"><code>test_views_calculated_attributes.py:62</code></a>, after the panel request;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_calculated_attributes.py&amp;test=test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently&amp;line=62" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:62:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L62"><code>test_views_calculated_attributes.py:62</code></a>, after the panel request;
             <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently"</code>;
             set <code>client.raise_request_exception = True</code> or <code>RAISE_EXCEPTIONS=1</code> to see the view raise.</p>
         </dd>
@@ -1311,6 +1331,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
 
     <article id="task-10" data-step>
       <h3><a href="#task-10">Task 10 · Calculated-attribute explanation ids are scoped per item</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 10" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_calculated_attributes.py&amp;test=test_edit_panel_explanation_buttons_target_their_own_row&amp;line=103" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/calculated-attribute-collapse-id-collision.md" data-review-source-href="diagnostics/calculated-attribute-collapse-id-collision.md">diagnostic</a></p>
       <p data-files><span>Files</span> <a href="#f-calc-ids">four calculated-attribute templates</a> · <a href="#f-calc-section"><code>calculated_attributes_section.html</code></a> (optional) · <a href="#t-views-calc"><code>test_views_calculated_attributes.py</code></a> · <a href="#t-e2e-calc">three E2E files</a></p>
@@ -1336,7 +1357,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L103"><code>test_views_calculated_attributes.py:103</code></a> ·
               <code>panel.count('id="collapse-calculated_attributes-carbon_footprint_manufacturing"')</code> → 3.</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L103"><code>test_views_calculated_attributes.py:103</code></a>, after the panel request;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_calculated_attributes.py&amp;test=test_edit_panel_explanation_buttons_target_their_own_row&amp;line=103" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_calculated_attributes.py:103:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_calculated_attributes.py#L103"><code>test_views_calculated_attributes.py:103</code></a>, after the panel request;
             <code>poetry run pytest --runxfail -vv "tests/unit_tests/adapters/views/test_views_calculated_attributes.py::test_edit_panel_explanation_buttons_target_their_own_row"</code>.</p>
         </dd>
         <dt>Fix</dt>
@@ -1440,6 +1461,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
 
     <article id="task-7" data-step>
       <h3><a href="#task-7">Task 7 · Show "each hour" after the unit</a></h3>
+      <p data-task-actions><a data-debug-reproduction aria-label="Debug reproduction for Task 7" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_addition.py&amp;test=test_recurrent_constant_editor_reads_as_a_per_hour_value&amp;line=138" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value">Debug reproduction</a></p>
       <p><span data-chip>CONFIRMED</span><span data-chip>e-footprint-interface</span><span data-chip>easy</span>
         <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/diagnostics/recurrent-unit-each-hour.md" data-review-source-href="diagnostics/recurrent-unit-each-hour.md">diagnostic</a> · GitHub #150</p>
       <p data-files><span>Files</span> <a href="#f-constant"><code>recurrent_quantities_from_constant.html</code></a> · <a href="#t-views-addition"><code>test_views_addition.py</code></a></p>
@@ -1458,7 +1480,7 @@ AttributeError: 'EmptyExplainableObject' object has no attribute 'plot_aggregati
               between it (closed at :25) and the helper.</li>
             <li><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html:29:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/dynamic_form_fields/recurrent_quantities_from_constant.html#L29"><code>:29</code></a> · helper → "This constant value will be repeated over the entire canonical week (168 hours)."</li>
           </ol>
-          <p><strong>Debug:</strong> break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py:138:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_addition.py#L138"><code>test_views_addition.py:138</code></a>, after the GET;
+          <p><strong>Debug:</strong> <a href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Funit_tests%2Fadapters%2Fviews%2Ftest_views_addition.py&amp;test=test_recurrent_constant_editor_reads_as_a_per_hour_value&amp;line=138" data-review-pytest="../../../tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value">Debug reproduction</a> · break at <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_addition.py:138:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_addition.py#L138"><code>test_views_addition.py:138</code></a>, after the GET;
             <code>poetry run pytest --runxfail "tests/unit_tests/adapters/views/test_views_addition.py::test_recurrent_constant_editor_reads_as_a_per_hour_value"</code>.</p>
         </dd>
         <dt>Fix</dt>
