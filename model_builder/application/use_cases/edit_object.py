@@ -108,15 +108,16 @@ class EditObjectUseCase:
         edit_side_effects = edited_obj.edit_side_effects()
         oob_regions = edit_side_effects.oob_regions
         oob_regions.extend(input_data.extra_oob_regions)
+        refresh_cards = input_data.refresh_cards and not metadata_only_edit and edited_obj.has_canvas_card
         return EditObjectOutput(
             edited_object_id=edited_obj.efootprint_id,
             edited_object_name=edited_obj.name,
             edited_object_type=edited_obj.class_as_simple_str,
             template_name=edited_obj.template_name,
             web_id=edited_obj.web_id,
-            mirrored_cards=list(edited_obj.mirrored_cards),
+            mirrored_cards=list(edited_obj.mirrored_cards) if refresh_cards else [],
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
-            refresh_cards=input_data.refresh_cards and not metadata_only_edit,
+            refresh_cards=refresh_cards,
             input_edit_result=edit_result.input_edit_result,
         )

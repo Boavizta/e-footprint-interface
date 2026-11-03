@@ -13,6 +13,7 @@
 <main id="main">
 <nav class="toc" aria-label="On this page"><strong>On this page</strong><ul><li><a href="#form-adapters">Form adapters</a></li><li><a href="#object-factory">Object factory</a></li><li><a href="#relationship-types">Relationship types</a></li><li><a href="#list-based-children-standard-pattern">List-based children (standard pattern)</a></li><li><a href="#dict-based-relationships-explainableobjectdict">Dict-based relationships (ExplainableObjectDict)</a></li><li><a href="#non-nested-list-backlinks">Non-nested list backlinks</a></li><li><a href="#required-pattern-to-journey-relationships">Required pattern-to-journey relationships</a></li><li><a href="#link-existing-flow">"Link existing" flow</a></li><li><a href="#composite-form-field-metadata">Composite form field metadata</a></li></ul></nav>
 <h2 id="form-adapters">Form adapters</h2>
+<p>Standalone links to objects with library <code>internal_modeling_obj_containers</code> open a generic read-only inspection panel before form, delete or mirror discovery. It shows internal-parent links and existing calculated results; inputs remain editable through the owning parent's form. Constructor-held storage remains independently editable even when it has no canvas card.</p>
 <p>Form strategies expose <code>iter_creation_fields()</code> and <code>iter_edition_fields()</code> owner–field pairs;
 the context builder attaches bookmarks without knowing nested form types. Web wrappers declare
 <code>nested_input_owner_attributes</code> for resolving provisional settings after creation hooks.</p>

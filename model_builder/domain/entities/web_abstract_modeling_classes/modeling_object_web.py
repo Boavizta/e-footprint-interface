@@ -387,7 +387,10 @@ class ModelingObjectWeb:
             attr_name = contextual_container.attr_name_in_mod_obj_container
             container = contextual_container.modeling_obj_container
             container_signature = get_init_signature_params(container.efootprint_class)
-            annotation = container_signature[attr_name].annotation
+            parameter = container_signature.get(attr_name)
+            if parameter is None:
+                continue
+            annotation = parameter.annotation
             if get_origin(annotation) and get_origin(annotation) in (list, List):
                 list_containers.append(self.model_web.get_web_object_from_efootprint_id(container.id))
                 attr_name_in_list_container = attr_name
@@ -407,6 +410,18 @@ class ModelingObjectWeb:
             attr_name_in_dict_container = contextual_container.attr_name_in_mod_obj_container
 
         return dict_containers, attr_name_in_dict_container
+
+    @property
+    def has_canvas_card(self):
+        """Whether the canvas places this object at its root or inside a rendered relationship."""
+        root_types = ("UsagePattern", "EdgeUsagePattern", "UsageJourney", "EdgeUsageJourney",
+                      "ServerBase", "ExternalAPI", "EdgeDevice", "EdgeDeviceGroup")
+        if any(self._modeling_obj.is_subclass_of(name) for name in root_types):
+            return True
+        list_parents, _ = self.list_containers_and_attr_name_in_list_container
+        dict_parents, _ = self.dict_containers_and_attr_name_in_dict_container
+        return any(parent.renders_relationship_children_as_nested_cards and parent.has_canvas_card
+                   for parent in list_parents + dict_parents)
 
     @property
     def mirrored_cards(self):

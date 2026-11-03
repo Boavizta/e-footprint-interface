@@ -1,0 +1,15 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+
+{% block panel_body %}
+    <p>This object is managed automatically by
+        {% for parent in internal_parents %}<a href="/model_builder/open-edit-object-panel/{{ parent.efootprint_id }}/"
+            hx-get="/model_builder/open-edit-object-panel/{{ parent.efootprint_id }}/"
+            hx-target="#sidePanel" hx-swap="innerHTML"
+            hx-disabled-elt="button:not(:disabled)">{{ parent.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.
+        Edit its parent to change its inputs.</p>
+    <div class="accordion my-3" id="accordionAllAttributes">
+        {% include "model_builder/side_panels/edit/calculated_attributes_section.html" %}
+    </div>
+{% endblock %}
+
+{% block save_button %}{% endblock %}

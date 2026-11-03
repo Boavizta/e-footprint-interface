@@ -91,7 +91,7 @@ def test_normal_edit_refreshes_every_affected_owner_and_mirror_once_without_canv
     top_a = SimpleNamespace(web_id="Journey-a", template_name="journey")
     top_b = SimpleNamespace(web_id="Journey-b", template_name="journey")
     cards = [SimpleNamespace(top_parent=top_a), SimpleNamespace(top_parent=top_b)]
-    web_objects = {job.id: SimpleNamespace(mirrored_cards=cards) for job in jobs}
+    web_objects = {job.id: SimpleNamespace(mirrored_cards=cards, has_canvas_card=True) for job in jobs}
     model = MagicMock(constraint_changes=[])
     model.get_web_object_from_efootprint_id.side_effect = web_objects.__getitem__
     model.get_web_objects_from_efootprint_type.return_value = []

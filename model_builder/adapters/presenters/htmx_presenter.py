@@ -217,7 +217,8 @@ class HtmxPresenter:
             affected_owner_ids = {owner.id for owner, _ in output.input_edit_result.affected_inputs}
             for owner_id in affected_owner_ids - {output.edited_object_id}:
                 affected_owner = self.model_web.get_web_object_from_efootprint_id(owner_id)
-                repaired_cards.extend(affected_owner.mirrored_cards)
+                if affected_owner.has_canvas_card:
+                    repaired_cards.extend(affected_owner.mirrored_cards)
 
         if canvas_oob or ((output.replaces_primary_render or not output.refresh_cards) and not repaired_cards):
             # OOB regions cover all relevant cards, or this edit has no card-visible changes.

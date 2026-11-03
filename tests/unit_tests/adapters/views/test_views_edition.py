@@ -1,7 +1,8 @@
 from model_builder.adapters.presenters.simplified_inputs import input_catalog
 import json
+import re
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
@@ -235,14 +236,15 @@ class TestViewsEdition:
         assert ">Floor<" not in subgroup_select_html
         assert ">Room<" in subgroup_select_html
 
-    @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 6")
     @pytest.mark.parametrize(("class_str", "owner_name"), [
-        ("EdgeStorage", "Edge computer"),
+        ("EdgeComputerCPUComponent", "Edge computer"),
+        ("EdgeComputerRAMComponent", "Edge computer"),
+        ("EdgeApplianceComponent", "Edge appliance"),
         ("RecurrentEdgeProcessCPUNeed", "Edge process"),
         ("RecurrentEdgeWorkloadNeed", "Edge workload"),
         ("EcoLogitsGenAIExternalAPIServer", "LLM API"),
     ])
-    def test_library_built_child_panel_opens_and_delete_is_blocked_by_its_owner(
+    def test_library_built_child_panel_shows_read_only_inspection(
         self, client, monkeypatch, class_str, owner_name
     ):
         monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
@@ -250,18 +252,102 @@ class TestViewsEdition:
         _setup_session(client, system_to_json(system, save_computed_state=False))
         object_id = _model_web(client).get_efootprint_objects_from_efootprint_type(class_str)[0].id
 
-        panel_response = client.get(f"/model_builder/open-edit-object-panel/{object_id}/")
+        with patch("model_builder.adapters.views.views_edition.FormContextBuilder.build_edition_context",
+                   side_effect=AssertionError("Inspection must bypass forms")), patch(
+                "model_builder.domain.entities.web_abstract_modeling_classes.modeling_object_web."
+                "ModelingObjectWeb.mirrored_cards",
+                new_callable=PropertyMock, side_effect=AssertionError("Inspection must bypass mirrors")):
+            panel_response = client.get(f"/model_builder/open-edit-object-panel/{object_id}/")
 
         assert panel_response.status_code == 200
-        assert 'id="btn-ask-delete"' in panel_response.content.decode()
+        body = panel_response.content.decode()
+        owner = next(obj for obj in _model_web(client).flat_efootprint_objs_dict.values() if obj.name == owner_name)
+        assert f'/model_builder/open-edit-object-panel/{owner.id}/' in body
+        assert owner_name in body
+        assert "This object is managed automatically by" in body
+        assert "Edit its parent to change its inputs." in body
+        assert "calculated attributes" in body
+        assert 'id="btn-ask-delete"' not in body
+        assert 'id="btn-submit-form"' not in body
+        assert '<form' not in body
+        assert 'bookmark' not in body.lower()
+        assert 'membership-section' not in body
+        assert "highlightOpenedObjects" not in panel_response.headers.get("HX-Trigger-After-Settle", "")
+        if class_str in ("EdgeComputerCPUComponent", "EdgeComputerRAMComponent"):
+            assert client.get(f"/model_builder/get_calculated_attribute_explanation/{object_id}/"
+                              "carbon_footprint_manufacturing/").status_code == 200
+            chart_url = next(url for url in re.findall(r'hx-get="([^"]+)"', body)
+                             if "get_explainable_hourly_quantity_chart_and_explanation" in url)
+            assert client.get(chart_url).status_code == 200
 
-        delete_response = client.get(f"/model_builder/ask-delete-object/{object_id}/")
+    @pytest.mark.parametrize("placement", ["server", "computer", "custom_device"])
+    def test_direct_storage_save_respects_canvas_placement(self, client, minimal_system_data, monkeypatch, placement):
+        monkeypatch.setenv("RAISE_EXCEPTIONS", "1")
+        if placement == "server":
+            _setup_session(client, minimal_system_data)
+            parent = _model_web(client).servers[0]
+            storage = parent.storage
+        else:
+            system_data = system_to_json(_build_system_with_library_built_relationships(), save_computed_state=False)
+            if placement == "custom_device":
+                from efootprint.core.hardware.edge.edge_device import EdgeDevice
+                device = EdgeDevice.from_defaults("Custom device", components=[EdgeStorage.from_defaults("Custom storage")])
+                for class_name, objects in system_to_json(device, save_computed_state=False).items():
+                    if isinstance(objects, dict):
+                        system_data.setdefault(class_name, {}).update(objects)
+            _setup_session(client, system_data)
+            model = _model_web(client)
+            if placement == "computer":
+                parent = model.edge_computers[0]
+                storage = parent.storage
+            else:
+                parent = next(obj for obj in model.edge_devices if obj.name == "Custom device")
+                storage = parent.components[0]
+        storage_id, parent_web_id = storage.efootprint_id, parent.web_id
+        object_type = storage.class_as_simple_str
+        panel = client.get(f"/model_builder/open-edit-object-panel/{storage_id}/")
+        assert panel.status_code == 200
+        assert 'id="btn-submit-form"' in panel.content.decode()
+        assert "managed automatically" not in panel.content.decode()
 
-        delete_body = delete_response.content.decode()
-        assert delete_response.status_code == 200
-        assert "is referenced by" in delete_body
-        assert owner_name in delete_body
-        assert "Yes, delete" not in delete_body
+        recomputation = MagicMock(return_value="<div>Updated results</div>")
+        monkeypatch.setattr("model_builder.adapters.presenters.htmx_presenter.HtmxPresenter._recomputation_html",
+                            recomputation)
+        response = client.post(f"/model_builder/edit-object/{storage_id}/", {
+            f"{object_type}_name": "Renamed storage", "recomputation": "true",
+        })
+        assert response.status_code == 200
+        body = response.content.decode()
+        assert "error-modal" not in body
+        if placement == "custom_device":
+            assert f"hx-swap-oob='outerHTML:#{parent_web_id}'" in body
+            assert "Renamed storage" in body
+        else:
+            assert f"outerHTML:#{parent_web_id}" not in body
+            assert "model-builder-card" not in body
+        triggers = json.loads(response.headers["HX-Trigger-After-Settle"])
+        assert triggers["displayToastAndHighlightObjects"]["action_type"] == "edit_object"
+        assert triggers["triggerResultRendering"] == ""
+        assert 'id="show-results-toolbar-btn"' in body
+        assert "Updated results" in body
+        recomputation.assert_called_once()
+        assert _model_web(client).get_web_object_from_efootprint_id(storage_id).name == "Renamed storage"
+
+        if placement == "computer":
+            nested = {"type_object_available": "EdgeStorage", "EdgeStorage_name": "Parent-edited storage",
+                      "EdgeStorage_storage_capacity_per_unit": "500",
+                      "EdgeStorage_storage_capacity_per_unit__unit": "GB_stored",
+                      "EdgeStorage_storage_capacity_per_unit__comment": "Capacity evidence",
+                      "EdgeStorage_storage_capacity_per_unit__confidence": "high"}
+            parent_response = client.post(f"/model_builder/edit-object/{parent.efootprint_id}/", {
+                "EdgeComputer_name": parent.name, "EdgeStorage_form_data": json.dumps(nested),
+            })
+            assert parent_response.status_code == 200
+            saved_storage = _model_web(client).get_web_object_from_efootprint_id(storage_id).modeling_obj
+            assert saved_storage.name == "Parent-edited storage"
+            assert saved_storage.storage_capacity_per_unit.to(u.GB_stored).magnitude == 500
+            assert saved_storage.storage_capacity_per_unit.comment == "Capacity evidence"
+            assert saved_storage.storage_capacity_per_unit.confidence == "high"
 
     def test_edit_group_refreshes_root_groups_and_ungrouped_devices_lists(self, client, default_system_repository):
         _setup_session(client, default_system_repository.get_system_data())

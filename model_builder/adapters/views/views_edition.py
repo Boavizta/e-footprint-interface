@@ -23,6 +23,16 @@ def open_edit_object_panel(request, object_id):
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     obj_to_edit = model_web.get_web_object_from_efootprint_id(object_id)
 
+    internal_parents = obj_to_edit.modeling_obj.internal_modeling_obj_containers
+    if internal_parents:
+        return render(request, "model_builder/side_panels/edit/internal_object_panel.html", {
+            "header_name": obj_to_edit.name,
+            "object_to_edit": obj_to_edit,
+            "internal_parents": [model_web.get_web_object_from_efootprint_id(parent.id)
+                                 for parent in internal_parents],
+            "object_belongs_to_computable_system": bool(obj_to_edit.systems),
+        })
+
     form_builder = FormContextBuilder(model_web)
     context_data = form_builder.build_edition_context(obj_to_edit)
 
