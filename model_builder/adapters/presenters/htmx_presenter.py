@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 
+from model_builder.adapters.canvas import has_canvas_card
 from model_builder.adapters.presenters.oob_regions import oob_regions_cover_all_cards, render_oob_regions
 from model_builder.adapters.ui_config.constraint_messages import CONSTRAINT_MESSAGES
 from model_builder.adapters.views.data_status import append_workspace_storage_status
@@ -213,24 +214,27 @@ class HtmxPresenter:
         }
 
         repaired_cards = []
+        edited_cards = []
         if not canvas_oob:
             affected_owner_ids = {owner.id for owner, _ in output.input_edit_result.affected_inputs}
             for owner_id in affected_owner_ids - {output.edited_object_id}:
                 affected_owner = self.model_web.get_web_object_from_efootprint_id(owner_id)
-                if affected_owner.has_canvas_card:
+                if has_canvas_card(affected_owner):
                     repaired_cards.extend(affected_owner.mirrored_cards)
+            if output.refresh_cards and not output.replaces_primary_render:
+                edited_obj = self.model_web.get_web_object_from_efootprint_id(output.edited_object_id)
+                if has_canvas_card(edited_obj):
+                    edited_cards = list(edited_obj.mirrored_cards)
 
-        if canvas_oob or ((output.replaces_primary_render or not output.refresh_cards) and not repaired_cards):
+        if canvas_oob or not (edited_cards or repaired_cards):
             # OOB regions cover all relevant cards, or this edit has no card-visible changes.
             html_updates = render_oob_regions(self.model_web, output.oob_regions)
         else:
-            cards_to_refresh = repaired_cards
-            if output.refresh_cards and not output.replaces_primary_render:
-                cards_to_refresh += list(output.mirrored_cards)
+            cards_to_refresh = repaired_cards + edited_cards
             # Include siblings whose "Link existing" button just disappeared
             # (cascade delete during edit reduced linkable_existing_count from 1 to 0)
-            if output.refresh_cards and not output.replaces_primary_render:
-                edited_ids = {card.efootprint_id for card in output.mirrored_cards}
+            if edited_cards:
+                edited_ids = {card.efootprint_id for card in edited_cards}
                 cards_to_refresh += self._link_flipped_sibling_cards(
                     output.edited_object_type, edited_ids, target_count=0)
             html_updates = self._render_top_parent_cards(cards_to_refresh)

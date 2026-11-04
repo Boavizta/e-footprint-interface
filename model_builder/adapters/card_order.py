@@ -1,3 +1,6 @@
+from model_builder.adapters.canvas import canvas_root_lists
+
+
 CARD_ORDER_CONTEXT_NAMES = {
     "up-list": "ordered_usage_patterns",
     "uj-list": "ordered_usage_journeys",
@@ -34,14 +37,7 @@ def ordered_card_lists(model_web):
     if not isinstance(card_order, dict):
         card_order = {}
 
-    current_objects = {
-        "up-list": [*model_web.usage_patterns, *model_web.edge_usage_patterns],
-        "uj-list": [*model_web.usage_journeys, *model_web.edge_usage_journeys],
-        "external-api-list": model_web.external_apis,
-        "server-list": model_web.servers,
-        "edge-device-groups-list": model_web.root_edge_device_groups,
-        "edge-devices-list": model_web.ungrouped_edge_devices,
-    }
+    current_objects = canvas_root_lists(model_web)
     return {
         CARD_ORDER_CONTEXT_NAMES[list_id]: stable_rank_merge(current_objects[list_id], card_order.get(list_id, []))
         for list_id in CARD_ORDER_LIST_IDS

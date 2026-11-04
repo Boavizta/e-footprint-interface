@@ -1,4 +1,5 @@
 from model_builder.adapters.presenters.simplified_inputs import input_catalog
+from model_builder.adapters.canvas import canvas_root_lists, has_canvas_card
 import json
 
 from efootprint.abstract_modeling_classes.source_objects import SourceValue
@@ -61,6 +62,11 @@ def test_edge_group_child_sections_and_edit_rendering_are_deliberate(default_sys
 
     model_web = _model_web(default_system_repository)
     sections = model_web.get_web_object_from_efootprint_id(parent_id).child_sections
+    root_lists = canvas_root_lists(model_web)
+    assert [group.efootprint_id for group in root_lists["edge-device-groups-list"]] == [parent_id]
+    assert root_lists["edge-devices-list"] == []
+    assert all(has_canvas_card(model_web.get_web_object_from_efootprint_id(object_id))
+               for object_id in (parent_id, child_id, device_id))
     assert [(section["attr_name"], section["type_str"]) for section in sections] == [
         ("sub_group_counts", "EdgeDeviceGroup"), ("edge_device_counts", "EdgeDevice")]
     assert [[child.efootprint_id for child in section["children"]] for section in sections] == [

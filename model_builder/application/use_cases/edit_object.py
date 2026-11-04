@@ -53,9 +53,9 @@ class EditObjectOutput:
     edited_object_type: str
     template_name: str
     web_id: str
-    mirrored_cards: List[Any] = field(default_factory=list)  # Web objects for HTML rendering
     replaces_primary_render: bool = False
     oob_regions: List[OobRegion] = field(default_factory=list)
+    # Whether the edit requests a refresh; the presenter resolves actual canvas placement.
     refresh_cards: bool = True
     input_edit_result: InputEditResult = field(default_factory=InputEditResult)
 
@@ -116,14 +116,13 @@ class EditObjectUseCase:
         edit_side_effects = edited_obj.edit_side_effects()
         oob_regions = edit_side_effects.oob_regions
         oob_regions.extend(input_data.extra_oob_regions)
-        refresh_cards = input_data.refresh_cards and not metadata_only_edit and edited_obj.has_canvas_card
+        refresh_cards = input_data.refresh_cards and not metadata_only_edit
         return EditObjectOutput(
             edited_object_id=edited_obj.efootprint_id,
             edited_object_name=edited_obj.name,
             edited_object_type=edited_obj.class_as_simple_str,
             template_name=edited_obj.template_name,
             web_id=edited_obj.web_id,
-            mirrored_cards=list(edited_obj.mirrored_cards) if refresh_cards else [],
             replaces_primary_render=edit_side_effects.replaces_primary_render,
             oob_regions=oob_regions,
             refresh_cards=refresh_cards,

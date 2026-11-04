@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 import pytest
 
@@ -90,7 +90,8 @@ def test_normal_edit_refreshes_every_affected_owner_and_mirror_once_without_canv
     top_a = SimpleNamespace(web_id="Journey-a", template_name="journey")
     top_b = SimpleNamespace(web_id="Journey-b", template_name="journey")
     cards = [SimpleNamespace(top_parent=top_a), SimpleNamespace(top_parent=top_b)]
-    web_objects = {job.id: SimpleNamespace(mirrored_cards=cards, has_canvas_card=True) for job in jobs}
+    web_objects = {job.id: SimpleNamespace(mirrored_cards=cards) for job in jobs}
+    web_objects[api.id] = SimpleNamespace(mirrored_cards=[])
     model = MagicMock(constraint_changes=[])
     model.get_web_object_from_efootprint_id.side_effect = web_objects.__getitem__
     model.get_web_objects_from_efootprint_type.return_value = []
@@ -104,7 +105,8 @@ def test_normal_edit_refreshes_every_affected_owner_and_mirror_once_without_canv
     def render(template, context):
         return render_to_string(template, context) if template.endswith("input_repair_notices.html") else "card"
 
-    with patch("model_builder.adapters.presenters.htmx_presenter.render_to_string", side_effect=render) as render_card:
+    with patch("model_builder.adapters.presenters.htmx_presenter.has_canvas_card", return_value=True), \
+         patch("model_builder.adapters.presenters.htmx_presenter.render_to_string", side_effect=render) as render_card:
         response = presenter.present_edited_object(output)
         assert sum(call.args[0].endswith("_card.html") for call in render_card.call_args_list) == 2
     content = response.content.decode()
@@ -126,6 +128,30 @@ def test_normal_edit_refreshes_every_affected_owner_and_mirror_once_without_canv
     assert "canvas" in response.content.decode()
     assert notices in response.content.decode()
     assert json.loads(response["HX-Trigger-After-Settle"])["displayToastAndHighlightObjects"] == toast
+
+
+@pytest.mark.parametrize("affected_object", ["edited", "repaired"])
+def test_cardless_edit_targets_skip_mirror_discovery(minimal_model_web, affected_object):
+    from model_builder.domain.object_factory import InputEditResult
+
+    server = minimal_model_web.servers[0]
+    storage = server.storage
+    edited_obj = storage if affected_object == "edited" else server
+    output = EditObjectOutput(
+        edited_obj.efootprint_id, edited_obj.name, edited_obj.class_as_simple_str,
+        edited_obj.template_name, edited_obj.web_id,
+        refresh_cards=affected_object == "edited",
+        input_edit_result=InputEditResult(affected_inputs={(storage.modeling_obj, "name")}),
+    )
+    presenter = HtmxPresenter(SimpleNamespace(session=DictSession()), minimal_model_web)
+
+    with patch.object(type(storage), "mirrored_cards", new_callable=PropertyMock,
+                      side_effect=AssertionError("Cardless storage has no mirrors to refresh")), \
+         patch.object(presenter, "_render_top_parent_cards") as render_cards:
+        response = presenter.present_edited_object(output)
+
+    assert response.status_code == 200
+    render_cards.assert_not_called()
 
 
 @pytest.mark.parametrize("editor", ["normal", "simplified"])

@@ -157,6 +157,8 @@ The user separately authorized a small cleanup in `bug-fixes-2026-10` after comm
   component refreshes. Do not refresh a parent solely because its storage has no card.
 - Leave ownership, deletion, mutation hooks and the wrapper hierarchy unchanged in this cleanup.
 
+The cleanup is implemented in the commit introducing `model_builder/adapters/canvas.py`; see
+the Task 6 handoff for review pointers and any outstanding validation. Do not schedule it again.
 This does not eliminate mirror traversal inside existing mutation services; that is broader work
 above. A possible future `card_occurrences(object_id)` operation could unify presence and mirrors,
 but is not required for this small cleanup. Verify the cleanup's actual commit/handoff in the

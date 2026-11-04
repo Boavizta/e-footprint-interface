@@ -231,7 +231,7 @@
             <li id="f-edit-object" data-steps="task-6 task-8">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/edit_object.py" data-review-source-href="../../../model_builder/application/use_cases/edit_object.py"><code>edit_object.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-8">T8</a></span>
-              <small>T6: cardless edits supply no card-refresh targets. T8: reject internal-object edits before hooks or mutation.</small>
+              <small>T6: no edit-response mirror preparation; placement belongs to the presenter. T8: reject internal-object edits before hooks or mutation.</small>
             </li>
             <li id="f-delete-object" data-steps="task-3 task-8 task-11">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py"><code>delete_object.py</code></a> <span data-change="modified">Modified</span>
@@ -267,6 +267,11 @@
         <details open>
           <summary>model_builder/adapters/</summary>
           <ul>
+            <li id="f-canvas" data-steps="task-6">
+              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/canvas.py" data-review-source-href="../../../model_builder/adapters/canvas.py"><code>canvas.py</code></a> <span data-change="new">New</span>
+              <span data-reading-links><a href="#task-6">T6</a></span>
+              <small>Shared root selection and placement predicate, also used by <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/card_order.py" data-review-source-href="../../../model_builder/adapters/card_order.py"><code>card_order.py</code></a>.</small>
+            </li>
             <li id="f-presenter" data-steps="task-3 task-6">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py"><code>presenters/htmx_presenter.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#task-6">T6</a> · <a href="#task-3">T3</a></span>
@@ -446,13 +451,18 @@
     <h1>bug-fixes-2026-10 — Run A — implementation review</h1>
     <p><a href="plan.html" target="_blank" rel="noopener">Remaining plan</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/bug-fixes-2026-10/tasks.md" data-review-source-href="tasks.md">tasks.md</a> · <a href="#modules">Changed files</a> · <a href="#execution-plan">Execution plan</a> · <a href="#decisions">Planning decisions</a></p>
     <p>Completed Tasks 5 → 4 → 6 → 8 → 11 → 3. Their walkthroughs, accepted amendment and verified code/test links have been extracted here for independent review and release.</p>
-    <p>The Debug reproduction buttons below now launch passing regression tests; their expected-failure markers were removed. Historical failures remain under Symptom / Root cause. No additional implementation-decision callouts were needed.</p>
+    <p>The Debug reproduction buttons below now launch passing regression tests; their expected-failure markers were removed. Historical failures remain under Symptom / Root cause. The Task 6 review cleanup records its adapter boundary below.</p>
     <p>Source links open in VS Code; right-click offers the file or its diff against local main. Debug buttons use Plan Review Links and Python Debugger. E2E debugging needs a local Django server at <code>http://localhost:8000</code>; Python breakpoints cover the test process, not the separate server or browser JavaScript.</p>
   </header>
 
   <aside id="plan-updates" data-note="review">
     <p><strong>Plan amendments</strong></p>
     <p><a href="#plan-update-01">[PLAN-UPDATE-01] Internal objects use one read-only inspection panel — ACCEPTED</a></p>
+  </aside>
+
+  <aside id="impl-decisions" data-note="review">
+    <p><strong>Implementation decisions</strong></p>
+    <p><a href="#impl-decision-01">[IMPL-DECISION-01] Task 6 canvas placement and edit refresh planning belong to adapters — APPLIED</a></p>
   </aside>
 
   <aside data-note="review"><p><strong>Planning decision carried into Run A</strong></p><p><a href="#decision-task-4">3 · Task 4 moves to the library — APPLIED</a></p></aside>
@@ -650,12 +660,22 @@ KeyError: 'ExternalAPIServer'</code></pre>
           A constructor reference from a different parent does not exempt an internal object. Ignore detached wrappers.
           Edge-computer storage is therefore ordinary; its CPU/RAM remain internal even when separate needs reference them.
           This is a general membership rule, not a storage exception or a restriction on low-level library edits.</dd>
-        <dd>Server storage and edge-computer storage retain their own editable panels. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:415:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L415"><code>has_canvas_card</code></a> supplies actual placement to
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/edit_object.py:119:1" data-review-source-href="../../../model_builder/application/use_cases/edit_object.py#L119">the edit output</a>, which derives refresh targets from
+        <dd>Server storage and edge-computer storage retain their own editable panels. The adapter's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/canvas.py:16:1" data-review-source-href="../../../model_builder/adapters/canvas.py#L16:1"><code>has_canvas_card</code></a> supplies actual placement to
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/htmx_presenter.py:193:1" data-review-source-href="../../../model_builder/adapters/presenters/htmx_presenter.py#L193:1">the edit presenter</a>, which derives refresh targets from
           actual canvas placement: objects with no rendered card contribute no card-refresh targets, before mirror traversal or
           card-template lookup, including automatic-repair owners. Preserve persistence, notifications, constraint OOB updates
           and result recomputation. Do not create a storage-card template, refresh the parent unnecessarily, or swallow template errors.
           Custom-device components, including storage, retain refreshes for their actual visible cards.</dd>
+        <dd><aside id="impl-decision-01" data-note="review">
+          <p><strong>[IMPL-DECISION-01] — APPLIED</strong></p>
+          <p>User review, 2026-11-04: canvas placement is presentation policy. The adapter's
+            <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/canvas.py:4:1" data-review-source-href="../../../model_builder/adapters/canvas.py#L4:1"><code>canvas_root_lists</code></a>
+            supplies the root collections for both ordering and placement, replacing the duplicated root-type list.
+            The edit presenter discovers refresh mirrors for edited objects and repaired owners after checking placement;
+            the edit use case no longer prepares mirrors. Existing mutation-time mirror traversal, ownership and deletion
+            remain unchanged. Broader work is parked in the
+            <a href="../clean-architecture-refactoring/README.md" target="_blank" rel="noopener">Clean Architecture refactoring kickoff</a>.</p>
+        </aside></dd>
         <dd>Interface: <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_edition.py:26:1" data-review-source-href="../../../model_builder/adapters/views/views_edition.py#L26">the panel-opening view</a> branches before form-context construction,
           deletion checks and mirrored-card highlighting. Render <a href="#f-internal-panel">one small generic inspection template</a>
           with the object's name, internal-parent links, and the existing calculated-attributes section with formulas and charts.

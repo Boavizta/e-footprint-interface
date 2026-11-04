@@ -412,18 +412,6 @@ class ModelingObjectWeb:
         return dict_containers, attr_name_in_dict_container
 
     @property
-    def has_canvas_card(self):
-        """Whether the canvas places this object at its root or inside a rendered relationship."""
-        root_types = ("UsagePattern", "EdgeUsagePattern", "UsageJourney", "EdgeUsageJourney",
-                      "ServerBase", "ExternalAPI", "EdgeDevice", "EdgeDeviceGroup")
-        if any(self._modeling_obj.is_subclass_of(name) for name in root_types):
-            return True
-        list_parents, _ = self.list_containers_and_attr_name_in_list_container
-        dict_parents, _ = self.dict_containers_and_attr_name_in_dict_container
-        return any(parent.renders_relationship_children_as_nested_cards and parent.has_canvas_card
-                   for parent in list_parents + dict_parents)
-
-    @property
     def mirrored_cards(self):
         """Recursively compute all mirrored instances based on rendered parent containers."""
         result = []

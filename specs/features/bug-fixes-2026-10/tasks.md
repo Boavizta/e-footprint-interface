@@ -412,6 +412,11 @@ and saving editable objects that have no canvas card).
   parent's card needs rendering on an ordinary storage edit. Do not add a storage-card template,
   redirect refreshes to the parent, or catch missing-template errors. Preserve refreshes for
   custom-device components that do have visible cards, including storage components.
+- Review cleanup (2026-11-04): `model_builder/adapters/canvas.py` owns root selection shared with
+  card ordering and the placement predicate. The presenter discovers refresh mirrors for edited
+  objects and repaired owners; the edit use case no longer prepares mirrors. Existing mutation-time
+  mirror traversal and lifecycle policies are deferred to
+  [`clean-architecture-refactoring`](../clean-architecture-refactoring/README.md).
 - Library `specs/architecture/relationships.html` and interface
   `specs/architecture/forms-and-relationships.html` — document internal relationship metadata and
   the distinction between standalone inspection and parent-owned editing; interface
