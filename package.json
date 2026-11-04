@@ -15,14 +15,18 @@
         "build:simplified-inputs:dev": "esbuild theme/static/scripts/simplified_inputs/index.js --bundle --format=iife --sourcemap --outfile=theme/static/bundles/simplified_inputs.js",
         "vendor:driver": "cp node_modules/driver.js/dist/driver.js.iife.js theme/static/scripts/external_librairies/driver.iife.js && cp node_modules/driver.js/dist/driver.css theme/static/css/driver.css",
         "build:js-test-fixtures": "poetry run python js_tests/build_fixtures.py",
-        "jest": "npm run build:js-test-fixtures && jest"
+        "jest": "npm run build:js-test-fixtures && jest",
+        "lint:css": "stylelint \"theme/static/scss/**/*.scss\""
     },
     "devDependencies": {
         "@types/node": "^25.9.1",
+        "axe-core": "^4.10.3",
         "esbuild": "^0.28.0",
         "jest-environment-jsdom": "^30.4.1",
         "luxon": "^3.5.0",
+        "postcss-scss": "^4.0.9",
         "sass": "^1.81",
+        "stylelint": "^16.23.1",
         "typescript": "^6.0.3"
     },
     "dependencies": {

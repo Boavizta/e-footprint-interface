@@ -5,7 +5,7 @@ spans). Variable parts are escaped via Django's ``escape`` so the output is
 safe to render with ``|safe``.
 
 Handlers validate ``class:X``, ``param:X.y`` and ``calc:X.y`` targets against
-``ALL_EFOOTPRINT_CLASSES_DICT``. Unknown ``ui`` tokens raise as well; ``doc``
+``ALL_EFOOTPRINT_CLASSES_DICT``. Unknown ``ui`` placeholders raise as well; ``doc``
 slugs are not validated here (mkdocs build is authoritative).
 """
 import inspect
@@ -57,7 +57,7 @@ def _check_calc(class_name: str, attr: str) -> None:
         raise ValueError(f"Unknown calculated attribute {attr!r} for class {class_name!r}")
 
 
-def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Callable[[str], str]]:
+def build_html_handlers(ui_placeholders: dict, mkdocs_base_url: str) -> dict[str, Callable[[str], str]]:
     def handle_class(target: str) -> str:
         _resolve_class(target)
         label = escape(_class_label(target))
@@ -89,12 +89,12 @@ def build_html_handlers(ui_tokens: dict, mkdocs_base_url: str) -> dict[str, Call
         return f'<a href="{url}" target="_blank" rel="noopener">{escape(label)}</a>'
 
     def handle_ui(target: str) -> str:
-        entry = ui_tokens.get(target)
+        entry = ui_placeholders.get(target)
         if entry is None:
-            raise ValueError(f"Unknown UI token: {target!r}")
+            raise ValueError(f"Unknown UI placeholder: {target!r}")
         display = escape(entry["display"])
-        token_safe = escape(target)
-        return f'<span class="ssot-ui-ref" data-ui-token="{token_safe}">{display}</span>'
+        target_safe = escape(target)
+        return f'<span class="ssot-ui-ref" data-ui-placeholder="{target_safe}">{display}</span>'
 
     return {
         "class": handle_class,

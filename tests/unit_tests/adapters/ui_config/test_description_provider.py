@@ -8,7 +8,7 @@ from model_builder.adapters.ui_config.efootprint_description_provider import (
     EfootprintDescriptionProvider,
 )
 from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
-from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
+from model_builder.adapters.ui_config.ui_placeholder_registry import UI_PLACEHOLDERS
 
 
 PLACEHOLDER_RE = re.compile(r"\{(class|param|calc|doc|ui):[^}]+\}")
@@ -19,7 +19,7 @@ SEPARATOR = "<br><br>"
 
 @pytest.fixture
 def provider():
-    return EfootprintDescriptionProvider(build_html_handlers(UI_TOKENS, "https://docs.example/"))
+    return EfootprintDescriptionProvider(build_html_handlers(UI_PLACEHOLDERS, "https://docs.example/"))
 
 
 # ---- field_tooltip merging (drives the four _merge branches end-to-end) ----
@@ -121,7 +121,7 @@ def test_class_doc_link_for_abstract_class_links_to_concrete_docs(provider, clas
 def test_class_description_resolves_placeholders(provider):
     out = provider.class_description("Server")
     assert out is not None
-    assert not PLACEHOLDER_RE.search(out), f"Unresolved tokens in: {out!r}"
+    assert not PLACEHOLDER_RE.search(out), f"Unresolved placeholders in: {out!r}"
 
 
 def test_class_description_strips_docstring_indentation(provider):
@@ -146,7 +146,7 @@ def test_class_description_falls_back_to_json_for_interface_only_abstract_base(p
 def test_class_disambiguation_resolves_placeholders(provider):
     out = provider.class_disambiguation("Server")
     assert out is not None
-    assert not PLACEHOLDER_RE.search(out), f"Unresolved tokens in: {out!r}"
+    assert not PLACEHOLDER_RE.search(out), f"Unresolved placeholders in: {out!r}"
 
 
 def test_class_disambiguation_returns_none_for_interface_only_abstract_base(provider):
@@ -157,23 +157,23 @@ def test_class_disambiguation_returns_none_for_interface_only_abstract_base(prov
 def test_class_pitfalls_resolves_placeholders(provider):
     out = provider.class_pitfalls("Server")
     assert out is not None
-    assert not PLACEHOLDER_RE.search(out), f"Unresolved tokens in: {out!r}"
+    assert not PLACEHOLDER_RE.search(out), f"Unresolved placeholders in: {out!r}"
 
 
 # ---- class_interactions ---------------------------------------------------
 
-def test_class_interactions_resolves_ui_tokens(provider):
+def test_class_interactions_resolves_ui_placeholders(provider):
     out = provider.class_interactions("ServerBase")
     assert out is not None
-    assert "data-ui-token" in out
-    assert not PLACEHOLDER_RE.search(out), f"Unresolved tokens in: {out!r}"
+    assert "data-ui-placeholder" in out
+    assert not PLACEHOLDER_RE.search(out), f"Unresolved placeholders in: {out!r}"
 
 
 def test_concrete_subclass_inherits_interactions_from_abstract_base(provider):
     # `Server` has no `interactions` entry of its own; should walk up to `ServerBase`.
     out = provider.class_interactions("Server")
     assert out is not None
-    assert "data-ui-token" in out
+    assert "data-ui-placeholder" in out
 
 
 def test_class_interactions_returns_none_when_no_entry_anywhere_in_mro(provider):

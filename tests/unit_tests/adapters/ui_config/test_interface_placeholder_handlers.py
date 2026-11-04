@@ -4,17 +4,17 @@ import pytest
 from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
 
 
-UI_TOKENS = {
+UI_PLACEHOLDERS = {
     "infra_panel_add_button": {
         "display": "the Add button in the Infrastructure section",
         "selector": "#add_server",
     },
-    "fancy_token": {
+    "fancy_placeholder": {
         "display": "weird <button> & button",
         "selector": "#fancy",
     },
 }
-HTML = build_html_handlers(UI_TOKENS, mkdocs_base_url="https://docs.example/")
+HTML = build_html_handlers(UI_PLACEHOLDERS, mkdocs_base_url="https://docs.example/")
 
 
 def test_html_class_handler_emits_button_with_label():
@@ -57,12 +57,12 @@ def test_html_doc_handler_can_use_custom_label():
 def test_html_ui_handler_emits_span_with_display_text():
     out = HTML["ui"]("infra_panel_add_button")
     assert '<span class="ssot-ui-ref"' in out
-    assert "data-ui-token=\"infra_panel_add_button\"" in out
+    assert "data-ui-placeholder=\"infra_panel_add_button\"" in out
     assert "the Add button in the Infrastructure section" in out
 
 
 def test_html_handlers_escape_variable_parts():
-    out = HTML["ui"]("fancy_token")
+    out = HTML["ui"]("fancy_placeholder")
     assert "&lt;button&gt;" in out
     assert "&amp;" in out
     assert "<button>" not in out
@@ -85,9 +85,9 @@ def test_unknown_calc_raises():
         HTML["calc"]("Server.not_a_calc")
 
 
-def test_unknown_ui_token_raises():
+def test_unknown_ui_placeholder_raises():
     with pytest.raises(ValueError):
-        HTML["ui"]("not_a_token")
+        HTML["ui"]("not_a_placeholder")
 
 
 def test_unknown_doc_slug_does_not_raise():

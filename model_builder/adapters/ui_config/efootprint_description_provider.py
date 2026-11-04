@@ -3,7 +3,7 @@
 The ``EFOOTPRINT_DESCRIPTION_PROVIDER`` module-level singleton is built at
 import time with HTML-mode handlers. Every method returns a placeholder-resolved
 ``SafeString`` (or ``None``); callers render with ``|safe`` and templates never
-see raw ``{kind:target}`` tokens.
+see raw ``{kind:target}`` placeholders.
 
 Interface-only abstract bases (``CLASS_UI_CONFIG`` keys that are not real
 efootprint classes, e.g. ``EdgeDeviceBase``) are first-class: class-level
@@ -19,7 +19,7 @@ from efootprint.utils.placeholder_resolver import resolve_placeholders
 
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG, FIELD_UI_CONFIG
 from model_builder.adapters.ui_config.interface_placeholder_handlers import build_html_handlers
-from model_builder.adapters.ui_config.ui_token_registry import UI_TOKENS
+from model_builder.adapters.ui_config.ui_placeholder_registry import UI_PLACEHOLDERS
 
 
 class EfootprintDescriptionProvider:
@@ -155,5 +155,5 @@ class EfootprintDescriptionProvider:
 
 
 EFOOTPRINT_DESCRIPTION_PROVIDER = EfootprintDescriptionProvider(
-    build_html_handlers(UI_TOKENS, settings.MKDOCS_BASE_URL)
+    build_html_handlers(UI_PLACEHOLDERS, settings.MKDOCS_BASE_URL)
 )
