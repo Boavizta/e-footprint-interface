@@ -26,6 +26,14 @@ The class-based `builders/timeseries` objects (form-input-driven, editable in th
 
 ## Mid-term horizon
 
+### Clean Architecture refactoring — draft kickoff
+
+[Discussion context and proposed roadmap](features/clean-architecture-refactoring/README.md)
+preserve the distinction between editor-specific lifecycle policies and presentation. Prioritize
+explicit relationship/deletion semantics and mutation results independent of canvas refreshes;
+move remaining web wrappers incrementally. No broader implementation is approved. The separately
+authorized `bug-fixes-2026-10` Task 6 canvas-placement cleanup is recorded there to avoid duplication.
+
 ### Candidate refactor — converge creation-time linking paths
 
 Two creation-time linking mechanisms coexist: edge devices/groups link through the
