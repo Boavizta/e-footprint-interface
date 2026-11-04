@@ -50,6 +50,7 @@ jobs:
               run: |
                   poetry run python manage.py makemigrations
                   poetry run python manage.py migrate
+                  poetry run python manage.py createcachetable
 
             - name: Set up Node.js
               uses: actions/setup-node@v4
