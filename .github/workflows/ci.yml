@@ -51,6 +51,17 @@ jobs:
                   poetry run python manage.py makemigrations
                   poetry run python manage.py migrate
 
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+
+            - name: Build and collect static assets
+              run: |
+                  npm ci
+                  npm run build:js
+                  poetry run python manage.py collectstatic --noinput
+
             - name: Run unit and integration tests
               run: poetry run pytest tests/unit_tests tests/integration
 
