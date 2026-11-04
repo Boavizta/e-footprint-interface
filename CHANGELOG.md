@@ -4,12 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.14.1]
 
 ### Fixed
-- Correct cumulative chart precision (#146) and recurrent-need deletion refreshes (#151). Internally managed objects open read-only inspection panels and reject standalone edits or deletion; editable storage saves without rendering absent cards. Edit refreshes use the same canvas root selection as initial rendering. Journey and component deletion names blocking references, and server responses remove deleted cards without console errors.
+- Correct cumulative chart precision (#146) and recurrent-need deletion refreshes (#151). Internally managed objects open read-only inspection panels and reject standalone edits or deletion; editable storage saves without rendering absent cards. Journey and component deletion names blocking references, and server responses remove deleted cards without console errors.
 - "Open a file" asks for confirmation before replacing a modeling that has content, naming the modeling or both modelings of a comparison.
-- Upgrade to e-footprint 27.0.0: Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed.
+- Upgrade to e-footprint 27: Calculated-attribute explanations of a reloaded model match those shown before the save: formula operands, direct ancestors and direct children are derived when displayed.
 
 ## [V1.14.0] - 2026-10-20
 
