@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-assisted bootstrap — Spec</title>
+<style>
+  :root { color-scheme: light; --ink:#203832; --muted:#60716b; --line:#d8e2dc; --accent:#176751; --soft:#eef5ef; }
+  * { box-sizing:border-box; }
+  body { font:16px/1.6 system-ui,sans-serif; max-width:76rem; margin:2rem auto; padding:0 1.2rem 4rem; color:var(--ink); background:#fafbf8; }
+  h1 { font-size:2.2rem; letter-spacing:-.04em; border-bottom:2px solid var(--line); padding-bottom:.5rem; }
+  h2 { margin-top:2.3rem; font-size:1.35rem; } h3 { font-size:1.05rem; }
+  a { color:var(--accent); } p,li { max-width:85ch; } small { color:var(--muted); }
+  code { background:var(--soft); padding:.1rem .3rem; border-radius:4px; }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  th,td { text-align:left; vertical-align:top; border:1px solid var(--line); padding:.65rem; }
+  th { background:var(--soft); } details { border:1px solid var(--line); border-radius:7px; padding:.6rem .8rem; margin:.6rem 0; }
+  summary { cursor:pointer; } blockquote,aside[data-note] { border-left:3px solid #b98531; background:#fff6e5; margin:1rem 0; padding:.7rem 1rem; }
+  button,textarea,input { font:inherit; } button { cursor:pointer; border:1px solid var(--line); background:white; border-radius:6px; padding:.4rem .7rem; color:var(--ink); }
+  button:hover { border-color:var(--accent); } button:disabled { cursor:default; opacity:.55; }
+  :focus-visible { outline:3px solid #4178a9; outline-offset:3px; } [hidden] { display:none !important; }
+  #prototype { border:1px solid #b8ccc1; border-radius:12px; background:white; margin:1rem 0; overflow:hidden; }
+  #prototype > header { display:flex; align-items:center; justify-content:space-between; padding:.7rem 1rem; background:var(--soft); }
+  #prototype [data-toolbar] { display:flex; align-items:center; gap:.5rem; padding:.65rem 1rem; border-block:1px solid var(--line); flex-wrap:wrap; }
+  #prototype [data-name] { width:10rem; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-weight:650; }
+  #prototype [data-views] { display:flex; gap:0; flex-shrink:0; }
+  #prototype [aria-pressed="true"] { color:white; background:var(--accent); border-color:var(--accent); }
+  #prototype [data-edge] { font-size:.8rem; margin-right:auto; }
+  #prototype [data-menu] { position:relative; padding:0; margin:0; border:0; }
+  #prototype [data-menu] summary { border:1px solid var(--line); border-radius:6px; padding:.4rem .7rem; }
+  #prototype [data-menu-items] { position:absolute; right:0; top:100%; background:white; border:1px solid var(--line); border-radius:6px; padding:.4rem; min-width:16rem; z-index:3; box-shadow:0 8px 24px #20383220; }
+  #prototype [data-menu-items] button { display:block; width:100%; border:0; text-align:left; }
+  #prototype [data-body] { display:grid; grid-template-columns:minmax(15rem,1fr) minmax(22rem,29rem); min-height:39rem; }
+  #prototype [data-canvas] { padding:1.2rem; background:linear-gradient(135deg,#f2f6f2,#fafbf8); }
+  #prototype [data-card] { background:white; border:1px solid var(--line); border-top:3px solid #629785; border-radius:7px; padding:.8rem; margin:.6rem 0; }
+  #prototype aside { border-left:1px solid var(--line); padding:1rem; max-height:48rem; overflow:auto; }
+  #prototype aside > header { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+  #prototype aside h3 { margin:.1rem 0; font-size:1.2rem; }
+  #prototype textarea { width:100%; min-height:11rem; border:1px solid #acbdb4; border-radius:6px; padding:.7rem; }
+  #prototype [data-primary] { color:white; background:var(--accent); border-color:var(--accent); }
+  #prototype [data-beta] { font-size:.7rem; background:#fff0cf; color:#805720; padding:.1rem .4rem; border-radius:4px; }
+  #prototype [data-disclosure] { font-size:.8rem; color:var(--muted); border-top:1px solid var(--line); padding-top:.6rem; }
+  #prototype [data-report] { font-size:.9rem; } #prototype [data-report] dt { font-weight:650; } #prototype [data-report] dd { margin:0 0 .65rem; }
+  #prototype pre { white-space:pre-wrap; overflow-wrap:anywhere; font:inherit; font-size:.85rem; }
+  #prototype dialog { max-width:30rem; border:1px solid var(--line); border-radius:10px; padding:1.3rem; }
+  #prototype dialog::backdrop { background:#18352955; }
+  #prototype [data-notice] { font-size:.83rem; color:var(--muted); padding:.6rem 1rem; border-top:1px solid var(--line); }
+  @media(max-width:850px) { #prototype [data-body] { grid-template-columns:1fr; } #prototype aside { border-left:0; border-top:1px solid var(--line); max-height:none; } }
+</style>
+</head>
+<body>
+<h1>AI-assisted bootstrap</h1>
+<p><small>Status: specification — approved · 2026-11-06 · Interface-owned</small></p>
+<p><a href="plan.html">Draft implementation plan</a> · <a href="../ai-assistance/roadmap.md">AI assistance roadmap</a></p>
+
+<section id="problem">
+  <h2>1. Problem and audience</h2>
+  <p>Creating a first modeling requires translating a service description into usage journeys, volumes and infrastructure before users understand the editor. The PoC made this translation useful enough to pursue a production beta. The primary audience is a product person who knows their service but has little modeling expertise.</p>
+  <p>The first release generates a starting web modeling, then hands refinement to the normal editor. It deliberately removes AI editing: preserving an existing graph, shared relationships and hand-edited values adds substantially more complexity than creating a fresh one. Edge bootstrap comes next, then asynchronous provider I/O.</p>
+  <p>Current usage is low according to the maintainer; frequency and broader user benefit have not been quantified. The maintainer accepts synchronous waits, typically observed around 5–15 seconds, and possible delays to other visitors. Overlap monitoring and concurrency experiments are explicitly excluded. Simplicity is a maintenance choice, not evidence of an environmental saving.</p>
+  <p>Keep one description field and existing manual review controls. The small toolbar change fixes shifting view controls and groups starting actions; a broader toolbar or workspace redesign is deferred.</p>
+</section>
+
+<section id="success">
+  <h2>2. Success criteria</h2>
+  <ol>
+    <li>Users can find “Start with AI…” in the modeling actions menu and “Start from prompt” alongside scratch and file starting options on the Examples page, with a visible Beta label. Both enter the same bootstrap flow for the active modeling. Modeling and Simplified inputs remain in stable positions when the view changes.</li>
+    <li>For a non-empty active modeling, entry warns that its content and unsaved edits will be discarded immediately. Cancel changes nothing. Confirm clears that modeling, selects Modeling, and opens the input panel. The other modeling of a comparison is preserved. Empty modelings need no replacement confirmation.</li>
+    <li>AI bootstrap works independently for the reference modeling and the comparison modeling. Selecting either modeling makes it the target of “Start with AI…”. Confirmation, reset and generation affect only that active modeling; the other modeling and its inputs remain unchanged. Either side may be AI-generated, manually created or imported.</li>
+    <li>The input panel helps users describe usages, volumes per usage journey where applicable, and infrastructure. It explains assumptions and required review, and identifies the model, hosting provider, indicative cost/impact and application logging policy.</li>
+    <li>One submission creates a fresh, valid web modeling with explained AI assumptions and applicable defaults. It fills the canvas and opens the AI generation summary in the side panel. The Results panel stays closed. It does not update an existing modeling through AI.</li>
+    <li>The AI summary side panel gives the request-specific estimated API cost and the unscaled EcoLogits estimate for the parent model, with uncertainty and proxy disclosure. It guides review in this order: time per usage journey step, usage-pattern volumes, infrastructure.</li>
+    <li>The result contains the initial prompt in a collapsed, read-only, copyable section and advises users to save it themselves before closing the panel. Its only explicit dismissal control is the close cross in the top-right corner, beside a clear notice that the generation details will be lost. It offers no “Review on the canvas” button, continuation, editing prompt, regeneration button or summary-reopening action.</li>
+    <li>The summary is shown only in the successful generation response. Closing or replacing the side panel, or reloading the page, discards it without changing the generated modeling. The prompt and summary are not saved for later access or included in modeling exports.</li>
+    <li>During inference, existing request locking prevents duplicate submission. On provider, validation or construction failure, no partial generated modeling is saved; the input panel retains the description for an explicit retry. Because entry already reset the modeling, failure or closing the input panel leaves it empty.</li>
+    <li>Prompts, raw AI responses and generated modeling contents are absent from application AI logs, including failure paths. Latency and cost metadata may be logged. The disclosure does not promise that Mistral performs no processing or retention.</li>
+    <li>The production beta replaces the PoC UI and AI edit path. Useful generation evaluation tooling remains; removed experiment code remains recoverable through Git. PoC close-out happens after delivery and required checks, not merely on specification approval.</li>
+  </ol>
+</section>
+
+<section id="scope">
+  <h2>3. Scope</h2>
+  <details open><summary>In scope</summary>
+    <ul>
+      <li>Fresh web bootstrap: usage patterns, journeys and steps, server/GenAI workloads and their supported infrastructure. The result remains fully editable with existing controls.</li>
+      <li>The same bootstrap flow is available for either active modeling in a comparison, independently of how the other modeling was created. Use the existing modeling selection and comparison workflow.</li>
+      <li>A guided input side panel and an AI summary side panel, using the same existing side-panel surface. This is separate from the Results panel.</li>
+      <li>One bootstrap operation, reached through “Start with AI…” in the toolbar or “Start from prompt” in the example picker. Both use the same active-model confirmation/reset and input panel. A temporary summary appears after generation; users save their own prompt if they want to keep it.</li>
+      <li>A narrow toolbar cleanup: stable Modeling/Simplified inputs view selection, with starting/reset/import actions grouped rather than adding another permanent toolbar button. Keep the edge toggle's meaning and the existing help, export and comparison capabilities.</li>
+      <li>One configured model hosted by Mistral, beta disclosure, useful prompt guidance, cost and impact disclosure, manual review instructions, feedback and contribution invitation.</li>
+      <li>Synchronous inference, ordinary loading/error feedback, bounded provider waiting, and explicit retries by the user.</li>
+      <li>Production generation extraction and retirement of the experimental editing experience and prompt/response logging.</li>
+    </ul>
+  </details>
+  <details><summary>Out of scope</summary>
+    <ul>
+      <li>Edge or mixed-model bootstrap: <a href="../ai-assistance/roadmap.md">roadmap follow-up 1</a>. An existing edge modeling may be discarded through the same explicit start-over confirmation; this does not extend generation to edge.</li>
+      <li>Asynchronous I/O, background jobs, streaming, progress prediction, overlap monitoring and concurrency experiments: <a href="../ai-assistance/roadmap.md">follow-up 2</a>.</li>
+      <li>AI modifications of an existing modeling, conversations, provider/model selection, classifier routing, automated questions, web research and automatic repair/retry loops.</li>
+      <li>A wider toolbar/navigation redesign, onboarding changes beyond the prompt entry and its integration, or the broad Clean Architecture refactoring.</li>
+      <li>Summary reopening or retention, conversation/report history, prompt export/import, and restoring the discarded modeling after a confirmed restart.</li>
+    </ul>
+  </details>
+  <p>Scope review: these are five connected interactions—entry/reset, description, generation/failure, immediate summary review, and view switching—on the existing canvas and side panel. The user approved the small toolbar cleanup and deferred the broader redesign. The later simplification removes summary reopening and all report retention; users save their own prompt.</p>
+</section>
+
+<section id="ux">
+  <h2>4. UX / interface</h2>
+  <p>The side panel keeps the generated canvas visible while explaining what to review. The toolbar separates view selection from modeling actions. “Start with AI…” always means a fresh start. The AI summary side panel is shown once after generation, not saved or reopenable; it is separate from the Results panel.</p>
+  <table>
+    <thead><tr><th>State / action</th><th>Saved modeling and panel outcome</th></tr></thead>
+    <tbody>
+      <tr><td>Start with AI, current modeling has content</td><td>Confirm discard before any reset. Cancel preserves the modeling. Confirm clears only the active modeling and opens the description panel.</td></tr>
+      <tr><td>Start with AI, current modeling empty</td><td>Open the description panel without the discard warning.</td></tr>
+      <tr><td>Examples → Start from prompt</td><td>Use the same bootstrap operation as the toolbar. On accepted entry, dismiss the picker and show the AI input side panel. Canceling replacement leaves the current modeling and picker unchanged. The guided tour must not obscure the AI input or summary.</td></tr>
+      <tr><td>Bootstrap the reference or comparison modeling</td><td>Select that modeling first, then Start with AI. Only the selected modeling is reset/generated. A non-empty other modeling does not trigger a warning when the selected one is empty.</td></tr>
+      <tr><td>Close description before generating</td><td>Return to the empty canvas. No AI call, no restoration of the modeling discarded on entry.</td></tr>
+      <tr><td>Generate</td><td>Lock existing controls while waiting. Success installs the complete result and shows the report; failure leaves the empty modeling and preserves the description in the input panel.</td></tr>
+      <tr><td>Close the summary / replace it with an input panel</td><td>Discard the generation details and prompt. The generated modeling stays saved and editable. Advise users to save their own description before leaving the summary.</td></tr>
+      <tr><td>Start again, reset, import/replace, or remove this modeling</td><td>Use the relevant existing discard flow. A new temporary AI summary is shown only after a successful new generation.</td></tr>
+    </tbody>
+  </table>
+  <figure aria-label="Examples page starting options">
+    <figcaption>Examples page: add one starting option beside the existing scratch and file choices.</figcaption>
+    <svg viewBox="0 0 900 130" role="img" aria-label="Start from scratch, start from file, or start from prompt beta" style="display:block;width:100%;height:auto;margin-top:.7rem">
+      <rect x="1" y="1" width="288" height="120" rx="8" fill="#fff" stroke="#d8e2dc"/><text x="20" y="41" font-size="19" fill="#203832">Start from scratch</text><text x="20" y="77" font-size="14" fill="#60716b">Build an empty modeling by hand.</text>
+      <rect x="305" y="1" width="288" height="120" rx="8" fill="#fff" stroke="#d8e2dc"/><text x="324" y="41" font-size="19" fill="#203832">Start from file</text><text x="324" y="77" font-size="14" fill="#60716b">Open an exported modeling.</text>
+      <rect x="609" y="1" width="288" height="120" rx="8" fill="#eef5ef" stroke="#176751"/><text x="628" y="41" font-size="19" fill="#176751">Start from prompt · Beta</text><text x="628" y="77" font-size="14" fill="#60716b">Describe your service to AI.</text>
+    </svg>
+  </figure>
+  <p><strong>Copy direction.</strong> “What are your system's usages? How often do they occur? What infrastructure supports them?” Ask for visits or occurrences per month/year, or user counts together with frequency; users alone do not define the volume. Specify volumes by usage where applicable, distinguishing each usage journey (for example, browsing recipes versus uploading photos) rather than giving only a system-wide total. Encourage session/step duration and background tasks where known. Explain that missing information becomes assumptions or defaults and must be reviewed.</p>
+  <p><strong>AI and beta disclosure.</strong> “Beta — a first version, built to improve with your feedback and contributions while keeping strong ecodesign principles.” State that <code>zai-glm-5-3-flash</code> runs on Mistral infrastructure. The upfront disclosure gives a cost of about 0.1 US cent (USD 0.001) and an estimated impact typically below 1 g CO2-eq, based on the parent-model EcoLogits estimate. These are indicative expectations, not caps or measurements. After inference, report the call-specific cost estimate and the qualified parent-model impact estimate. Direct feedback to the existing Feedback button in the top right.</p>
+  <aside data-note="review"><strong>Impact wording.</strong> The user chose the unscaled parent-model estimate instead of price scaling. Flash is expected to have a lower impact, but that comparison is unverified for this deployment. Do not call the estimate exact, measured, a guaranteed upper bound, or a result produced by Flash-specific EcoLogits support. The agreed upfront wording is “typically below 1 g CO2-eq”; it describes an expectation based on the parent-model estimates observed by the maintainer, not a guaranteed ceiling.</aside>
+  <p><strong>Logging wording.</strong> “We do not log your prompt or the generated response. Latency and estimated cost may be logged. Save your description if you want to keep it. These generation details won’t be available after closing this panel.” The provider disclosure separately makes clear that the description is sent to Mistral.</p>
+  <p><small>Interactive concept below. No network calls or real inference. The figures and canvas contents are illustrative. Use Modeling actions → Start with AI… to try the confirmed destructive entry, then generate, close the temporary summary, switch views or simulate a failure.</small></p>
+  <div id="prototype" aria-label="Interactive bootstrap concept">
+    <header><strong>e-footprint</strong><button type="button" data-feedback>Feedback ↗</button></header>
+    <div data-toolbar>
+      <span data-name>Recipe service</span>
+      <div data-views aria-label="Modeling view"><button type="button" data-view="modeling" aria-pressed="true">Modeling</button><button type="button" data-view="simplified" aria-pressed="false">Simplified inputs</button></div>
+      <span data-edge><label><input type="checkbox"> Edge modeling</label></span>
+      <details data-menu><summary>Modeling actions ▾</summary><div data-menu-items>
+        <button type="button" data-start>Start with AI… <span data-beta>Beta</span></button>
+        <button type="button" data-file>Open a file…</button><button type="button" data-reset>Reset modeling</button>
+      </div></details>
+      <button type="button" data-export>Export</button><button type="button" data-help>Help</button>
+    </div>
+    <div data-body>
+      <div data-canvas aria-live="polite"><h3 data-canvas-title>Your modeling</h3><div data-cards><article data-card><strong>Existing recipe service</strong><p>Hand-entered usages, volumes and infrastructure.</p></article></div></div>
+      <aside data-panel hidden aria-label="AI bootstrap side panel">
+        <header><h3 data-panel-title>Start with AI <span data-beta>Beta</span></h3><button type="button" data-close aria-label="Close AI panel">×</button></header>
+        <form data-form>
+          <p>Describe your digital service. Include as much information as you have.</p>
+          <ol><li><strong>Usages:</strong> what do people do? Include background tasks and time spent where known.</li><li><strong>Volumes:</strong> specify volumes by usage where applicable, separating each usage journey. Give visits per month or year, or users and how often they perform each usage. Distinguish users from visits.</li><li><strong>Infrastructure:</strong> servers, cloud services, storage and AI APIs, with sizes and locations if known.</li></ol>
+          <label for="mock-prompt"><strong>Your description</strong></label>
+          <textarea id="mock-prompt" required placeholder="A recipe service with 50,000 monthly active users. Browsing: each user visits 4 times a month and spends 5 minutes per visit. Photo uploads: 5,000 per month. It runs on two small cloud instances in France…"></textarea>
+          <p><small>AI will make assumptions where needed and use defaults for other missing inputs. You must review the generated modeling.</small></p>
+          <p data-disclosure>Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: ~0.1 US cent (USD 0.001). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. A request-specific estimate will be shown after generation.</p>
+          <p data-disclosure>We do not log prompts or generated responses. Latency and estimated cost may be logged. Save your own description if you want to keep it after closing the summary. This beta welcomes feedback and contributions, with strong ecodesign principles. Use Feedback in the top right.</p>
+          <p data-error role="alert" hidden>Generation failed. Your description is retained; the modeling is still empty. You can retry.</p>
+          <button type="submit" data-primary data-generate>Build my modeling</button>
+          <p><label><input type="checkbox" data-fail> Simulate a failure (mockup only)</label></p>
+        </form>
+        <section data-report hidden>
+          <p><strong>Your starting modeling is ready.</strong> Review the assumptions using the normal editor.</p><p data-save-prompt><strong>Save your description if you want to keep it.</strong> These generation details won’t be available after closing this panel.</p>
+          <dl><dt>Estimated API cost</dt><dd>USD 0.0012 (0.12 US cent)</dd><dt>Estimated inference impact — parent model</dt><dd>100 mg CO2-eq · EcoLogits reference: zai-glm-5-3 on Mistral, unscaled.</dd></dl>
+          <p><small>EcoLogits has no Flash-specific estimate here. Its impact is expected to be lower; this has not been verified for this deployment. This parent-model estimate is not a measurement or guaranteed upper bound. Example figures only.</small></p>
+          <h3>Review your modeling</h3><ol><li><strong>Time spent:</strong> check durations in usage journey steps.</li><li><strong>Volumes:</strong> check the usage-pattern column for each usage journey, including visits per user and the time period.</li><li><strong>Infrastructure:</strong> check servers, resources, locations, APIs and assumed sizes.</li></ol>
+          <p>Open the normal input panels to refine assumptions. This version creates a starting modeling; it cannot make further AI edits.</p>
+          <details><summary>Initial description (read-only)</summary><pre data-initial-prompt></pre></details>
+          <p data-disclosure>Beta — a first version, improving with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+        </section>
+      </aside>
+    </div>
+    <p data-notice aria-live="polite">Mockup starts with a non-empty modeling to demonstrate confirmation.</p>
+    <dialog data-confirm><h3>Start a new modeling with AI?</h3><p>This will discard “Recipe service” and its unsaved edits now. Closing the AI panel or a failed generation will leave an empty modeling. Export first if you want to keep it. The other modeling, if any, is preserved.</p><button type="button" data-cancel>Cancel</button> <button type="button" data-discard data-primary>Discard and start</button></dialog>
+  </div>
+  <script>
+  (() => {
+    const root = document.getElementById('prototype');
+    const get = selector => root.querySelector(selector);
+    let hasContent = true, view = 'modeling';
+    function notice(text) { get('[data-notice]').textContent = text; }
+    function showView(next) {
+      view = next;
+      root.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+      get('[data-edge]').style.visibility = view === 'simplified' ? 'hidden' : 'visible';
+      get('[data-canvas-title]').textContent = view === 'simplified' ? 'Simplified inputs' : 'Your modeling';
+    }
+    function showPanel(result) {
+      get('[data-panel]').hidden = false; get('[data-form]').hidden = result; get('[data-report]').hidden = !result;
+      get('[data-panel-title]').firstChild.textContent = result ? 'AI generation summary ' : 'Start with AI ';
+      get('[data-menu]').open = false;
+    }
+    function begin() {
+      hasContent = false; get('[data-initial-prompt]').textContent = '';
+      get('[data-cards]').textContent = 'Empty modeling — ready for your description.';
+      get('[data-form]').reset(); get('[data-error]').hidden = true; showView('modeling'); showPanel(false);
+      notice('The previous modeling was discarded on entry. No AI request has been made.');
+    }
+    get('[data-start]').onclick = () => { get('[data-menu]').open = false; if (hasContent) get('[data-confirm]').showModal(); else begin(); };
+    get('[data-cancel]').onclick = () => get('[data-confirm]').close();
+    get('[data-discard]').onclick = () => { get('[data-confirm]').close(); begin(); };
+    function closePanel() {
+      get('[data-panel]').hidden = true; get('[data-report]').hidden = true;
+      get('[data-initial-prompt]').textContent = ''; get('#mock-prompt').value = '';
+      notice(hasContent ? 'Continue editing manually. The generation summary has been discarded; your modeling stays saved.' : 'The modeling remains empty. Start with AI… opens a fresh description.');
+    }
+    get('[data-close]').onclick = closePanel;
+    root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { if (!get('[data-report]').hidden) closePanel(); showView(b.dataset.view); });
+    get('[data-form]').onsubmit = event => {
+      event.preventDefault(); if (!get('#mock-prompt').reportValidity()) return;
+      if (get('[data-fail]').checked) { get('[data-error]').hidden = false; notice('Simulated failure. The same description remains editable for an explicit retry.'); return; }
+      get('[data-initial-prompt]').textContent = get('#mock-prompt').value; get('#mock-prompt').value = ''; hasContent = true;
+      get('[data-cards]').innerHTML = '<article data-card><strong>Usage patterns</strong><p>Recipe browsing · 200,000 visits/month</p></article><article data-card><strong>Usage journey steps</strong><p>Browse recipes · 5 minutes<br>Upload a photo · assumed frequency</p></article><article data-card><strong>Infrastructure</strong><p>Cloud application instances · France</p></article>';
+      showPanel(true); notice('Illustrative generation complete. Review assumptions using the normal editor.');
+    };
+    get('[data-reset]').onclick = () => { notice('The production reset keeps its existing confirmation and clears the modeling. Use Start with AI… to test that lifecycle here.'); get('[data-menu]').open = false; };
+    ['file','export','help','feedback'].forEach(name => get('[data-'+name+']').onclick = () => notice('This existing '+name+' action is outside the interactive mockup.'));
+  })();
+  </script>
+</section>
+
+<section id="constraints">
+  <h2>5. Constraints</h2>
+  <ul>
+    <li>Respect the <a href="../../constitution.md">constitution</a> and <a href="../../mission.md">mission</a>: library modeling truth, existing persistence/recovery rules, HTMX-first interactions, lean implementation and honest environmental claims.</li>
+    <li>Use the existing side panel, request lock and normal manual editing. A dirty Simplified-input configuration blocks navigation through its existing exit guard; after resolving it, users repeat the desired action. No new remembered-intent mechanism is required.</li>
+    <li>Production inference uses <code>zai-glm-5-3-flash</code> on Mistral. Waiting is synchronous in this release. Keep bounded provider waiting and ordinary failure handling; tolerate contention without adding overlap monitoring.</li>
+    <li>Cost is a request-specific estimate using reported token usage and dated provider prices, not an invoice. Impact is an unscaled EcoLogits estimate for <code>zai-glm-5-3</code>, identified as the parent-model reference; show uncertainty where available. Failure to estimate impact must not discard a valid generated modeling or display zero as a substitute.</li>
+    <li>The prompt and generation metrics are rendered in the successful response only; no report is saved server-side or retained separately in the browser. Users save their own description if needed. The generated modeling is persisted normally. No promises about provider retention/training are inferred from the application's logging choice.</li>
+    <li>Keep the PoC until production replacement and required verification are complete. Git history is the archive; do not retain disabled AI edit code or create an old-code directory.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>6. Open questions</h2>
+  <p>None open at this stage. The upfront impact wording is resolved as “typically below 1 g CO2-eq”, with the parent-model basis and uncertainty disclosed.</p>
+  <p>Resolved during specification: feature name; small toolbar cleanup only; reset on confirmed entry; a temporary summary shown once, with users saving their own prompt; no separate summary action or report retention; unscaled parent estimate instead of price scaling. The expectation of lower Flash impact must remain explicitly qualified.</p>
+</section>
+
+<section id="resume">
+  <h2>7. Resuming from cold context</h2>
+  <ol>
+    <li>Read this approved spec and its interaction mockup. Specification approval does not authorize implementation before planning and task review.</li>
+    <li>Refine the <a href="plan.html">draft plan</a> in a fresh spec-plan session. The spec was approved on 2026-11-06; the plan still needs review and approval. It preserves technical decisions from the kickoff.</li>
+    <li>Use the <a href="../ai-assistance/roadmap.md">roadmap</a> for follow-ups and PoC retirement; earlier exploration and PoC decisions do not override this scope.</li>
+    <li>Start code exploration at the <a href="../../architecture/index.html">architecture index</a>; follow workspace, rendering, onboarding and persistence as needed, plus <a href="../../design/writing-style-guide.md">copy conventions</a>.</li>
+  </ol>
+  <details><summary>External evidence checked 2026-11-06</summary>
+    <p><a href="https://docs.mistral.ai/models/zai-glm-5-3-flash">Mistral's Flash model page</a> identifies the model and deployment offering. <a href="https://docs.mistral.ai/inference/pricing">Mistral pricing</a> provides per-token rates; prices are not environmental factors.</p>
+    <p><a href="https://ecologits.ai/latest/methodology/">EcoLogits methodology</a> describes inference impact estimates and their limitations. Installed EcoLogits 0.11.3 has the parent entry and lacks the Flash entry, as checked locally. Future catalog changes must be considered when implementing the chosen method.</p>
+  </details>
+</section>
+</body>
+</html>

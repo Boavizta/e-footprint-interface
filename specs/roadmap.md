@@ -4,6 +4,16 @@ This file tracks active workstreams and the near/mid/far horizon. Detailed plans
 
 ## Active streams
 
+### AI-assisted bootstrap — specification approved, planning pending
+
+[First production feature](features/ai-assisted-bootstrap/spec.html): guided web-modeling bootstrap
+with one model, synchronous inference, manual refinement and a small toolbar cleanup. The spec was
+approved on 2026-11-06; the draft plan awaits a fresh spec-plan session and review. The production
+feature replaces the experimental UI and AI editing path; PoC close-out follows delivery.
+[AI assistance roadmap](features/ai-assistance/roadmap.md) orders the next steps: edge bootstrap,
+then asynchronous AI provider I/O, then Boavizta-owned API credentials and provider-contract clarification. General AI editing and the broader architecture refactoring are
+outside this first feature.
+
 ### Public modeling sharing — specification reviewed, implementation pending
 
 The [reviewed spec](features/public-model-sharing/spec.html) and

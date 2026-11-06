@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI-assisted bootstrap — Draft plan</title><style>
+  :root { color-scheme: light; --ink: #21312f; --muted: #5e706e; --line: #dbe4df;
+    --paper: #fff; --bg: #f5f7f3; --accent: #176751; --soft: #eaf3ed;
+    --blue: #285e91; --blue-bg: #edf4fb; --amber: #835219; --amber-bg: #fff5e5; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+  body { margin: 0; font: 16px/1.6 system-ui, -apple-system, sans-serif;
+    color: var(--ink); background: var(--bg); }
+  a { color: var(--accent); text-underline-offset: .18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  :is(a, summary):focus-visible { outline: 3px solid #3974b3; outline-offset: 4px; }
+  #review-link-menu { position: fixed; z-index: 20; min-width: 12rem; padding: .3rem;
+    border: 1px solid var(--line); border-radius: .5rem; background: var(--paper);
+    box-shadow: 0 .5rem 1.5rem #21312f30; font-size: .85rem; }
+  #review-link-menu[hidden] { display: none; }
+  #review-link-menu a { display: block; padding: .35rem .55rem; border-radius: .3rem; text-decoration: none; }
+  #review-link-menu a:hover, #review-link-menu a:focus { background: var(--soft); }
+  body > a { position: absolute; left: 1rem; top: -5rem; z-index: 5;
+    background: var(--paper); padding: .7rem; }
+  body > a:focus { top: 1rem; }
+  #layout { display: grid; grid-template-columns: 22rem minmax(0, 64rem); gap: 2rem;
+    max-width: 92rem; margin: auto; padding: 2rem 1.5rem 5rem; }
+  #layout:has(#sidebar:not([open])) { grid-template-columns: 2.75rem minmax(0, 64rem); }
+  #sidebar { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem);
+    overflow: auto; overscroll-behavior: contain; padding: 0 .5rem 0 0;
+    border: 0; border-radius: 0; background: transparent; margin: 0; }
+  #sidebar:not([open]) { overflow: visible; padding-right: 0; }
+  #sidebar > summary { position: sticky; top: 0; z-index: 2; list-style: none; display: flex;
+    align-items: center; gap: .4rem; width: max-content; max-width: 100%; margin: 0 0 .7rem;
+    padding: .3rem .55rem; border: 1px solid var(--line); border-radius: .4rem;
+    background: var(--paper); color: var(--accent); font-size: .8rem; }
+  #sidebar > summary::-webkit-details-marker { display: none; }
+  #sidebar > summary::before { content: "☰"; font-size: 1.1rem; line-height: 1; }
+  #sidebar:not([open]) > summary { width: 2.75rem; height: 2.75rem; justify-content: center;
+    margin-bottom: 0; padding: 0; }
+  #sidebar:not([open]) > summary span { position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #navigation { font-size: .85rem; padding-bottom: .6rem; }
+  #navigation > p:first-child { text-transform: uppercase; letter-spacing: .1em;
+    font-size: .72rem; font-weight: 700; color: var(--accent); }
+  #navigation ol { list-style: none; padding: 0; }
+  #navigation li a { display: block; padding: .35rem .5rem; border-radius: .3rem; }
+  #navigation li a:hover { background: var(--soft); }
+  main { min-width: 0; }
+  header > p:first-child, small, figcaption, [data-reading-note] { color: var(--muted); }
+  h1 { font-size: clamp(1.8rem, 3vw, 2.4rem); line-height: 1.2; letter-spacing: -.03em; }
+  h2 { font-size: 1.4rem; line-height: 1.3; }
+  h3 { font-size: 1.08rem; margin: 1.5rem 0 .4rem; }
+  p, ul, ol { margin: .6rem 0 1rem; }
+  li { margin: .3rem 0; }
+  main > section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  main p { max-width: 76ch; }
+  [data-reading-note], [data-files] { font-size: .83rem; }
+  [data-files] > span { color: var(--muted); }
+  [data-step] > h3 > a { color: inherit; text-decoration: none; }
+  [data-step]:is(:target, :has(:target)) { border-left: 3px solid var(--accent); padding-left: .8rem; }
+  [data-task-actions] { margin: .5rem 0 .8rem; }
+  [data-debug-reproduction] { display: inline-block; padding: .4rem .75rem; border: 1px solid var(--accent);
+    border-radius: .35rem; background: var(--accent); color: white; font-size: .85rem; font-weight: 650; text-decoration: none; }
+  [data-debug-reproduction]:hover { filter: brightness(.9); }
+  [data-debug-reproduction]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  code { background: #eef2ef; padding: .08rem .25rem; border-radius: 3px;
+    font: .86em/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+  pre { overflow: auto; padding: 1rem; border: 1px solid var(--line); border-radius: .5rem;
+    background: #f8faf7; font: .86rem/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  pre code { background: none; padding: 0; font: inherit; overflow-wrap: normal; }
+  [data-code] { margin: 1rem 0; }
+  [data-code-file] { display: flex; flex-wrap: wrap; gap: .2rem .8rem; align-items: baseline;
+    margin: 0; max-width: none; padding: .45rem .8rem; border: 1px solid var(--line); border-bottom: 0;
+    border-radius: .5rem .5rem 0 0; background: #eef2ef; font-size: .8rem; }
+  [data-code-file] code { background: none; padding: 0; font-size: 1em; }
+  [data-code] pre { margin: 0; border-radius: 0 0 .5rem .5rem; }
+  [data-comparison] { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  [data-comparison] > * { min-width: 0; }
+  details { border: 1px solid var(--line); border-radius: .5rem; padding: .7rem 1rem;
+    background: var(--paper); margin: .7rem 0; }
+  summary { cursor: pointer; font-weight: 650; }
+  #modules h2 { font-size: 1.05rem; }
+  #modules > p { font-size: .76rem; color: var(--muted); }
+  #change-tree { padding: .7rem; border: 1px solid var(--line); border-radius: .6rem;
+    background: var(--paper); font-size: .8rem; }
+  #change-tree details { border: 0; background: none; padding: .2rem 0 .2rem .6rem; margin: .25rem 0; }
+  #change-tree > details { padding-left: 0; }
+  #change-tree ul { list-style: none; border-left: 1px solid var(--line); margin: .25rem 0 .25rem .35rem;
+    padding: 0 0 0 .7rem; }
+  #change-tree li { padding: .3rem; border-radius: .3rem; }
+  #change-tree li:target { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #change-tree li > small { display: block; margin-top: .2rem; }
+  [data-change] { font-size: .65rem; font-weight: 700; text-transform: uppercase;
+    border-radius: .25rem; padding: .1rem .3rem; background: #eef2ef; color: var(--muted); }
+  [data-change="new"] { color: var(--accent); background: var(--soft); }
+  [data-change="renamed"] { color: #285e91; background: #edf4fb; }
+  [data-change="removed"] { color: #963939; background: #fff0ed; }
+  [data-reading-links] { margin-left: .3rem; font-size: .7rem; }
+  [data-chip] { display: inline-block; font-size: .7rem; font-weight: 600; border-radius: .25rem;
+    padding: .05rem .4rem; margin-right: .3rem; background: #eef2ef; color: var(--muted); }
+  [data-chip="review"] { color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] { border-left: 3px solid var(--blue); background: var(--blue-bg);
+    padding: .8rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; font-size: .92rem; }
+  aside[data-note="review"] { border-color: var(--amber); background: var(--amber-bg); }
+  aside[data-note] p { margin: .3rem 0; }
+  figure { margin: 1rem 0; padding: 1rem; background: var(--paper); border: 1px solid var(--line); }
+  figure > div, [data-table-scroll] { overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; }
+  figcaption { font-size: .82rem; margin-top: .6rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: .65rem; }
+  th { background: var(--soft); }
+  #phases { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  #phases li { margin: 0; padding: .9rem; background: var(--paper); border: 1px solid var(--line); border-radius: .5rem; }
+  #phases strong, #phases small { display: block; }
+
+  body:has(#entry:target, #entry :target, #change-tree :target[data-steps~="entry"])
+    #change-tree li[data-steps~="entry"] { background: var(--soft); }
+  body:has(#entry:target, #entry :target, #change-tree :target[data-steps~="entry"])
+    #navigation a[href="#entry"] { background: var(--soft); font-weight: 700; }
+  body:has(#generate:target, #generate :target, #change-tree :target[data-steps~="generate"])
+    #change-tree li[data-steps~="generate"] { background: var(--soft); }
+  body:has(#generate:target, #generate :target, #change-tree :target[data-steps~="generate"])
+    #navigation a[href="#generate"] { background: var(--soft); font-weight: 700; }
+
+  @media (max-width: 1100px) {
+    #layout { grid-template-columns: 18rem minmax(0, 1fr); gap: 1.2rem; }
+    [data-comparison] { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 850px) {
+    #layout { display: flex; flex-direction: column; padding: 1rem; }
+    #sidebar { position: static; max-height: min(45vh, 24rem); padding: 0; width: 100%; }
+    #sidebar:not([open]) { width: 2.75rem; }
+    #navigation ol { display: flex; flex-wrap: wrap; gap: .25rem; }
+    #phases { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media print {
+    #review-link-menu { display: none; }
+    body { background: white; font-size: 10pt; }
+    #layout { display: flex; flex-direction: column; padding: 0; }
+    #sidebar, #sidebar:not([open]) { order: 1; position: static; width: 100%; max-height: none; overflow: visible; }
+    #navigation, body > a, #sidebar > summary { display: none; }
+    main { order: 0; }
+    #modules { break-before: page; }
+    details::details-content { content-visibility: visible; display: block; }
+    [data-code], figure, tr { break-inside: avoid; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    figure > div, [data-table-scroll] { overflow: visible; }
+  }
+
+body:has(#report:target, #report :target, #change-tree :target[data-steps~="report"]) #change-tree li[data-steps~="report"] { background:var(--soft); }
+body:has(#report:target, #report :target, #change-tree :target[data-steps~="report"]) #navigation a[href="#report"] { background:var(--soft); font-weight:700; }
+body:has(#retire:target, #retire :target, #change-tree :target[data-steps~="retire"]) #change-tree li[data-steps~="retire"] { background:var(--soft); }
+body:has(#retire:target, #retire :target, #change-tree :target[data-steps~="retire"]) #navigation a[href="#retire"] { background:var(--soft); font-weight:700; }</style></head><body>
+<a href="#main">Skip to plan</a><div id="layout">
+<details id="sidebar" aria-label="Reading order and changed files" open>
+<summary title="Show or hide navigation and changed files"><span>Navigation and changed files</span></summary>
+<nav id="navigation" aria-label="Reading order"><p>Reading order</p><ol>
+<li><a href="#entry">1 · Start or switch views</a></li>
+<li><a href="#generate">2 · Generate a fresh modeling</a></li><li><a href="#report">3 · Review the temporary summary</a></li>
+<li><a href="#retire">4 · Retire the PoC</a></li></ol><p><a href="#delivery">Delivery &amp; verification</a></p></nav>
+<section id="modules"><h2>Anticipated changes</h2><p>Draft footprint, not an exhaustive implementation task list. Click a source file to open VS Code; right-click for a diff against main. Select a reading step to highlight its files.</p><div id="change-tree"><details open><summary>e-footprint-interface / existing files</summary><ul><li id="file-toolbar" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L1:1"><code>model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html</code></a> <span data-change="modified">Modified</span><small>Stable view group; group Start/import/reset; no summary-reopening action.</small></li>
+<li id="file-picker" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/onboarding/template_picker.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/onboarding/template_picker.html#L1:1"><code>model_builder/templates/model_builder/onboarding/template_picker.html</code></a> <span data-change="modified">Modified</span><small>Add Start from prompt beside scratch/file, calling the shared start operation.</small></li>
+<li id="file-picker-presenter" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/example_picker_presenter.py:1:1" data-review-source-href="../../../model_builder/adapters/presenters/example_picker_presenter.py#L1:1"><code>model_builder/adapters/presenters/example_picker_presenter.py</code></a> <span data-change="modified">Modified</span><small>Expose the prompt action with the same availability as the toolbar.</small></li>
+<li id="file-first-run" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/onboarding_first_run.js:1:1" data-review-source-href="../../../theme/static/scripts/onboarding_first_run.js#L1:1"><code>theme/static/scripts/onboarding_first_run.js</code></a> <span data-change="modified">Modified</span><small>Keep the automatic tour from obscuring the AI input or summary.</small></li>
+<li id="file-views" data-steps="entry generate report"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a> · <a href="#report">3</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:1:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L1:1"><code>model_builder/adapters/views/views_ai_assistant.py</code></a> <span data-change="renamed">Renamed</span><small>Replace experimental branch selection with start and generate endpoints.</small></li>
+<li id="file-workspace-js" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:1:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L1:1"><code>theme/static/scripts/simplified_inputs/workspace.js</code></a> <span data-change="modified">Modified</span><small>Stable Modeling/Simplified inputs controls; preserve existing dirty exit behavior.</small></li>
+<li id="file-view-scss" data-steps="entry"><span data-reading-links><a href="#entry">1</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/_simplified_inputs.scss:1:1" data-review-source-href="../../../theme/static/scss/_simplified_inputs.scss#L1:1"><code>theme/static/scss/_simplified_inputs.scss</code></a> <span data-change="modified">Modified</span><small>Context controls must not move view selection.</small></li>
+<li id="file-builder-main" data-steps="entry generate retire"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/model_builder_main.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/model_builder_main.html#L1:1"><code>model_builder/templates/model_builder/model_builder_main.html</code></a> <span data-change="modified">Modified</span><small>Remove floating experiment box; show generation/report in the existing side panel.</small></li>
+<li id="file-load" data-steps="entry generate"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:1:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L1:1"><code>model_builder/adapters/views/views.py</code></a> <span data-change="modified">Modified</span><small>Reuse the existing reset/import path; no report persistence or invalidation.</small></li>
+<li id="file-settings" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/e_footprint_interface/settings.py:1:1" data-review-source-href="../../../e_footprint_interface/settings.py#L1:1"><code>e_footprint_interface/settings.py</code></a> <span data-change="modified">Modified</span><small>Production feature configuration and provider credentials; remove experimental context wiring.</small></li>
+<li id="file-context" data-steps="entry retire"><span data-reading-links><a href="#entry">1</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:1:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L1:1"><code>model_builder/adapters/context_processors.py</code></a> <span data-change="modified">Modified</span><small>Remove model selector; expose only bootstrap availability.</small></li>
+<li id="file-urls" data-steps="entry generate"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/urls.py:1:1" data-review-source-href="../../../model_builder/urls.py#L1:1"><code>model_builder/urls.py</code></a> <span data-change="modified">Modified</span><small>Register the distinct operations; eliminate the editing endpoint behavior.</small></li>
+<li id="file-deps" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/pyproject.toml:1:1" data-review-source-href="../../../pyproject.toml#L1:1"><code>pyproject.toml</code></a> <span data-change="modified">Modified</span><small>One production SDK; keep sandbox comparison dependencies only where still used.</small></li>
+<li id="file-lock" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/poetry.lock:1:1" data-review-source-href="../../../poetry.lock#L1:1"><code>poetry.lock</code></a> <span data-change="modified">Modified</span><small>Lock the corresponding dependency changes without unrelated upgrades.</small></li>
+<li id="file-tests" data-steps="entry generate report retire"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a> · <a href="#report">3</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:1:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L1:1"><code>tests/integration/test_ai_assistant.py</code></a> <span data-change="modified">Modified</span><small>Retarget generation tests and remove only edit-specific cases.</small></li>
+<li id="file-sandbox" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:1:1" data-review-source-href="../../../ai_sandbox/dsl.py#L1:1"><code>ai_sandbox/dsl.py</code></a> <span data-change="modified">Modified</span><small>Extract reusable schema/builders; benchmark tools import production generation.</small></li>
+<li id="file-catalogs" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/catalogs.py:1:1" data-review-source-href="../../../ai_sandbox/catalogs.py#L1:1"><code>ai_sandbox/catalogs.py</code></a> <span data-change="modified">Modified</span><small>Extract deterministic catalog resolution with its required data asset.</small></li>
+<li id="file-providers" data-steps="generate retire"><span data-reading-links><a href="#generate">2</a> · <a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:1:1" data-review-source-href="../../../ai_sandbox/providers.py#L1:1"><code>ai_sandbox/providers.py</code></a> <span data-change="modified">Modified</span><small>Benchmark providers may remain development-only; production uses one adapter.</small></li>
+<li id="file-edit" data-steps="retire"><span data-reading-links><a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:1:1" data-review-source-href="../../../ai_sandbox/edit.py#L1:1"><code>ai_sandbox/edit.py</code></a> <span data-change="removed">Removed</span><small>Remove read-back and AI edit implementation; recover through Git.</small></li>
+<li id="file-edit-prompt" data-steps="retire"><span data-reading-links><a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/prompts/edit_prompt.md:1:1" data-review-source-href="../../../ai_sandbox/prompts/edit_prompt.md#L1:1"><code>ai_sandbox/prompts/edit_prompt.md</code></a> <span data-change="removed">Removed</span><small>No production editing prompt or chat continuation.</small></li>
+<li id="file-experiment-box" data-steps="retire"><span data-reading-links><a href="#retire">4</a></span><a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/components/ai_assistant.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/components/ai_assistant.html#L1:1"><code>model_builder/templates/model_builder/components/ai_assistant.html</code></a> <span data-change="removed">Removed</span><small>Replace floating experimental box with side-panel templates.</small></li>
+</ul></details><details open><summary>Proposed files / names to refine in spec-plan</summary><ul><li id="file-application" data-steps="generate"><span data-reading-links><a href="#generate">2</a></span><code>model_builder/application/ai_bootstrap/</code> <span data-change="new">New</span><small>Generation schema, library construction and workflow, extracted from the sandbox.</small></li>
+<li id="file-provider" data-steps="generate"><span data-reading-links><a href="#generate">2</a></span><code>model_builder/adapters/ai_provider.py</code> <span data-change="new">New</span><small>Single configured Mistral call, bounded wait, usage and latency result.</small></li>
+<li id="file-panels" data-steps="entry generate report"><span data-reading-links><a href="#entry">1</a> · <a href="#generate">2</a> · <a href="#report">3</a></span><code>model_builder/templates/model_builder/side_panels/ai_bootstrap*.html</code> <span data-change="new">New</span><small>Input and read-only AI summary side panels, using the existing shell.</small></li>
+</ul></details></div></section>
+</details>
+<main id="main"><header><p>Draft plan · kickoff capture · 2026-11-06</p><h1>AI-assisted bootstrap</h1>
+<p><a href="spec.html" target="_blank" rel="noopener">Approved specification</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/ai-assistance/roadmap.md" data-review-source-href="../ai-assistance/roadmap.md">Roadmap</a></p>
+<p>The specification was approved on 2026-11-06. This draft preserves design-rich kickoff decisions and remains unapproved. Resume with a fresh spec-plan pass; this draft is not implementation authorization. Paths refer to this interface repository; no companion-library change is currently proposed.</p>
+<aside data-note="review"><p><strong>Confirmed scope.</strong> Fresh web bootstrap; one Mistral-hosted Flash model; synchronous execution; no overlap monitoring; a small toolbar cleanup; one destructive Start action; unscaled parent-model EcoLogits estimate; temporary summary only, with a reminder to save the prompt. No AI editing or general architecture refactoring.</p></aside>
+</header>
+
+<section id="entry" data-step><h2>1. Start a fresh modeling or switch views</h2>
+<p>Today <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html:110:1" data-review-source-href="../../../model_builder/templates/model_builder/upload_download_reboot_model_tooltips.html#L110:1"><code>the toolbar</code></a> places a single text-changing view button beside the edge toggle. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:22:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L22:1"><code>setBaseView()</code></a> changes its label, while <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scss/_simplified_inputs.scss:114:1" data-review-source-href="../../../theme/static/scss/_simplified_inputs.scss#L114:1"><code>the Simplified-input CSS</code></a> removes the neighboring toggle from layout. Replace that arrangement with stable Modeling/Simplified inputs choices, positioned independently of context controls. Group Start with AI, Open a file and Reset modeling in the same small actions menu. The current Help, export and comparison capabilities remain available. Add a single prompt entry to the existing example picker; no broader onboarding redesign is planned.</p>
+<p>Use the existing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/side_panels/side_panel_structure.html:1:1" data-review-source-href="../../../model_builder/templates/model_builder/side_panels/side_panel_structure.html#L1:1"><code>side-panel shell</code></a> for guidance and the report. The startup operation is a POST because it resets saved state. Reuse the behavior of <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:259:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L259:1"><code>reset_model()</code></a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:46:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L46:1"><code>load_system_into_session()</code></a>, but return an empty Modeling canvas with the AI input panel rather than automatically opening the example picker.</p>
+<p>Expose the same start operation through “Start from prompt” beside the existing scratch/file choices in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/templates/model_builder/onboarding/template_picker.html:26:1" data-review-source-href="../../../model_builder/templates/model_builder/onboarding/template_picker.html#L26:1"><code>the example picker</code></a>. Add the presentational entry through <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/presenters/example_picker_presenter.py:46:1" data-review-source-href="../../../model_builder/adapters/presenters/example_picker_presenter.py#L46:1"><code>build_picker_groups()</code></a> and the template, rather than treating it as a serialized example or creating a second generation handler. Accepted start renders the empty active canvas and AI input panel with the picker gone; canceled confirmation preserves the picker and modeling. Use the same availability condition as the toolbar.</p>
+<p>Check <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/onboarding_first_run.js:34:1" data-review-source-href="../../../theme/static/scripts/onboarding_first_run.js#L34:1"><code>the first-run tour trigger</code></a> when dismissing the picker: its current guard waits only for the picker to disappear, so the tour must not open over the AI description or summary. Reuse its existing first-run state; do not introduce remembered tour intent or a new onboarding workflow. The Help menu remains the manual replay entry.</p>
+<p>The replacement warning precedes this operation. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/model_builder_main.js:370:1" data-review-source-href="../../../theme/static/scripts/model_builder_main.js#L370:1"><code>the conditional replacement confirmation</code></a> currently checks for cards across the document; with resident slots this is not proof that the active modeling is non-empty. Ground the new action's decision in the active modeling, not a parked comparison canvas. Preserve the existing dirty Configure guard in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/theme/static/scripts/simplified_inputs/workspace.js:65:1" data-review-source-href="../../../theme/static/scripts/simplified_inputs/workspace.js#L65:1"><code>registerWorkspace()</code></a>; it blocks and the user repeats the action after resolving the draft. Do not add intent replay.</p>
+<p>Confirmed behavior differs deliberately from <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:275:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L275:1"><code>open_import_json_panel()</code></a>: the import panel opens without replacing state, whereas AI Start clears on confirmed entry. Canceling that warning preserves everything. Closing the AI input panel later does not restore the discarded modeling. Starting AI from an edge modeling is permitted only as this explicit fresh web start; it must not reuse the old edge objects or the PoC's edge-based hiding rule.</p>
+<p>Apply the same start and generation operations to either the active reference modeling or the active comparison modeling through the existing workspace repository resolution. Do not hardcode the reference slot as the destination or create a separate comparison-generation path. Confirmation, reset, installation and the resulting canvas/side panel belong to the selected modeling; preserve the other modeling and its saved inputs. The existing comparison workflow then compares the independently created results.</p>
+<p>The <a href="#file-panels">input side-panel guidance</a> asks for volumes per usage where applicable: separate each usage journey’s visits/occurrences per period, or its users and frequency, instead of applying a single system-wide user total to every journey. Use an example with distinct browsing and photo-upload volumes.</p>
+<p>Start is the only AI entry action. There is no summary endpoint, conditional report action or report-invalidation path. The successful response opens the temporary summary; ordinary side-panel replacement discards it.</p>
+</section>
+
+<section id="generate" data-step><h2>2. Generate and install one fresh web modeling</h2>
+<p data-task-actions><a data-debug-reproduction aria-label="Debug the current generation baseline" href="vscode://local.plan-review-links/debug-pytest?path=%2FUsers%2Fvinville%2Fdev%2Fe-footprint-full%2Fe-footprint-interface%2Ftests%2Fintegration%2Ftest_ai_assistant.py&amp;test=test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback&amp;line=65" data-review-pytest="../../../tests/integration/test_ai_assistant.py::test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback">Debug current generation baseline</a></p>
+<p data-reading-note>This runs the existing PoC test with a fake provider, not the proposed production flow. Set a breakpoint first if useful. No separate Django server or paid inference is needed.</p>
+<p>Replace the mixed handler <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:59:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L59:1"><code>ai_assistant()</code></a> with a thin generation view that invokes a small application operation. The operation accepts the description and an injected provider callable/port, parses and validates its answer, and constructs a library System. It does not import a Django view, HTTP request, presenter or concrete repository adapter.</p>
+<p>Extract the useful schema and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/dsl.py:369:1" data-review-source-href="../../../ai_sandbox/dsl.py#L369:1"><code>build_system()</code></a> construction path, the prompt, and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/catalogs.py:86:1" data-review-source-href="../../../ai_sandbox/catalogs.py#L86:1"><code>catalog resolution</code></a> into the proposed <a href="#file-application">application package</a>. Keep deterministic catalog selection and per-value reasoning. Reuse the library's constructors/defaults; do not duplicate modeling invariants, route whole-System construction through form-shaped object operations, or refactor unrelated editor policies. Ensure the cached catalog asset follows the extracted resolver. The sandbox runner should consume this same implementation instead of keeping a divergent copy.</p>
+<p>Introduce the single <a href="#file-provider">Mistral adapter</a> at the application's provider call. It returns raw text plus the minimal usage/latency data needed for cost and impact estimates. Configure the one model server-side, with an explicit timeout and bounded request behavior; no automatic model fallback, clarification round or repair loop. The production SDK must be installed at runtime; remove the multi-provider selector in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/context_processors.py:18:1" data-review-source-href="../../../model_builder/adapters/context_processors.py#L18:1"><code>ai_assistant()</code></a> and the sandbox-path import trick in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:26:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L26:1"><code>the experiment view</code></a>.</p>
+<div data-code><p data-code-file><a href="#file-application"><code>model_builder/application/ai_bootstrap/</code></a><small>Proposed operation contract, not implemented symbols</small></p>
+<pre><code>generate(description, provider) -&gt; complete_system, usage, latency, resolutions
+# No saved-state writes during provider/parsing/build stages.
+# The caller installs the complete system through the existing import boundary.
+# Render the prompt and metrics in the successful response only; do not save a report.</code></pre></div>
+<p>At successful construction, feed the inputs-only library serialization into the existing import path used by <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views.py:46:1" data-review-source-href="../../../model_builder/adapters/views/views.py#L46:1"><code>load_system_into_session()</code></a>. This preserves import validation, recomputation and sibling-ID separation. Render the new canvas and the AI summary side panel together; keep the separate Results panel closed. Expose relevant catalog substitutions in the review text; the current generation handler discards its returned resolutions. Include the prompt and call metrics in this response only, without adding report storage.</p>
+<p>The generation endpoint enforces the fresh-model operation; it never silently selects the old editing branch. Planning should use the existing request lock and normal saved-state checks, without introducing a second lock, task queue, revision protocol or graph snapshot. Since entry resets first, provider/schema/build failures leave an empty modeling and return the original description for an explicit user retry. Do not save a partially built graph.</p>
+<p>Synchronous provider waiting occupies the current worker. The user accepts this for the first release and explicitly excludes overlap monitoring or concurrency experiments. The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/gunicorn.conf.py:13:1" data-review-source-href="../../../gunicorn.conf.py#L13:1"><code>current one-worker deployment</code></a> and provider timeout still need compatible bounds; this is configuration, not a prerequisite asynchronous project.</p>
+<h3 id="metrics">Cost, impact and logging at this call</h3>
+<p>Refactor the experiment's <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:41:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L41:1"><code>call_metrics()</code></a> rather than reporting the nearest catalog match as if it were Flash. Local check on 2026-11-06: installed EcoLogits 0.11.3 resolves the Mistral parent identifier and does not resolve Flash. Use the unscaled parent estimate and disclose its identity. Retain an interval if returned rather than silently labeling a midpoint as exact. Failure of this estimate leaves a valid generated modeling usable, with an unavailable message instead of a fabricated zero.</p>
+<p>For API cost, calculate a dated estimate from the provider's reported usage and documented rates. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/providers.py:120:1" data-review-source-href="../../../ai_sandbox/providers.py#L120:1"><code>the existing Mistral adapter</code></a> currently returns usage and elapsed time; audit which cache/reasoning fields it reports before treating the bill estimate as exact. Runtime figures must be reproducible from their rate card, but no new provider comparison framework is needed.</p>
+<table><thead><tr><th>Provider evidence, 2026-11-06</th><th>USD per million tokens</th></tr></thead><tbody><tr><td>Flash input / cached input / output</td><td>0.15 / 0.03 / 0.50</td></tr><tr><td>Parent input / cached input / output</td><td>1.40 / 0.14 / 4.40</td></tr></tbody></table>
+<p>Source: <a href="https://docs.mistral.ai/inference/pricing" target="_blank" rel="noopener">Mistral pricing</a>. Neither rate differences nor latency establish an emissions ratio. The chosen method has no price scaling. The agreed upfront copy gives an indicative cost of about 0.1 US cent and an estimated impact “typically below 1 g CO2-eq”, based on the parent-model reference. The impact expectation follows the maintainer’s observations, not a measured Flash result or guaranteed ceiling.</p>
+<p>Delete the full prompt/answer log in <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/adapters/views/views_ai_assistant.py:100:1" data-review-source-href="../../../model_builder/adapters/views/views_ai_assistant.py#L100:1"><code>the current logger call</code></a>. Keep latency and estimated cost metadata only as requested; token counts may be consumed transiently for calculation without being added to logs. Audit error paths for provider/body echoes. Render the submitted prompt in the immediate summary, with a reminder for the user to save it. Do not save the prompt/report server-side, cache it separately in the browser, or include it in logs, benchmark artifacts or modeling exports. No blanket promise about Mistral's own retention is justified by this application change.</p>
+</section>
+
+<section id="report" data-step><h2>3. Review the temporary summary</h2>
+<p>On generation success the <a href="#file-panels">AI summary side-panel template</a> replaces the description side panel and shows cost, the qualified parent impact estimate and the review order: usage-step durations, usage-pattern volumes, infrastructure. The initial prompt is escaped, collapsed, read-only and copyable. The summary has only the top-right close cross as an explicit dismissal control; omit the shared panel footer/action button and any “Review on the canvas” button. Keep the notice that closing discards the generation details. The separate Results panel stays closed.</p>
+<p>Include the notice: “Save your description if you want to keep it. These generation details won’t be available after closing this panel.” There is no summary-reopening action, report store, browser-retained fragment, conversation history, or automatic prompt export.</p>
+<p>Keep the prompt and call metrics only in the response context used to render this panel. The generated modeling follows normal persistence. Closing or replacing the panel, including opening an ordinary edit panel, discards the summary without changing the modeling. A reload does not reconstruct it. Use the existing side-panel lifecycle; do not add state retention or replacement/reset invalidation hooks.</p>
+</section>
+
+<section id="retire" data-step><h2>4. Close the experiment after production replacement</h2>
+<p>Remove <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/edit.py:1:1" data-review-source-href="../../../ai_sandbox/edit.py#L1:1"><code>the AI edit/read-back module</code></a> and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/prompts/edit_prompt.md:1:1" data-review-source-href="../../../ai_sandbox/prompts/edit_prompt.md#L1:1"><code>the edit prompt</code></a> from the delivered tree. Remove the old non-empty-model branch, multi-provider floating UI, edit-only tests and stale active requirements. Keep independent editor regressions such as sequential deletion: they protect the ordinary editor and library integration.</p>
+<p>Retain generation cases, replay/evaluation tools and developer-only provider comparisons where still useful; update them to call the extracted generation code. Review <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/ai_sandbox/README.md:1:1" data-review-source-href="../../../ai_sandbox/README.md#L1:1"><code>the sandbox guide</code></a> so it describes the remaining tool, not removed edits. Do not preserve a disabled editing implementation or an old-code directory. Git history preserves the experiment; record the final relevant revision before archiving.</p>
+<p>At delivery, consolidate the production changelog and update owning architecture/copy documentation. Then use the explicit feature-archive workflow for the PoC, promoting only durable lessons and removing its working set after the release/checks are complete. Do not perform that archive during this specification stage.</p>
+<p>The <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/ai-assistance/roadmap.md" data-review-source-href="../ai-assistance/roadmap.md">AI assistance roadmap</a> now records the ordered next features: edge bootstrap, then asynchronous provider I/O. Broader AI editing remains uncommitted direction, informed by the existing lifecycle and mutation-policy discussion.</p>
+</section>
+
+<section id="delivery"><h2>Delivery sequence and verification to refine</h2>
+<ol><li>Start from the approved spec and prototype; refine the draft in a fresh spec-plan session. Preserve the agreed indicative-impact copy and its parent-model qualification.</li><li>Extract the generation implementation and single-provider boundary, preserving generation fixtures and replay behavior.</li><li>Implement the small toolbar and start/generate lifecycle, rendering the temporary summary in the response only.</li><li>Retire the experiment's editing code and UI, run the required checks, update durable documentation, then close the PoC after delivery.</li></ol>
+<table><thead><tr><th>User behavior / risk</th><th>Verification approach</th></tr></thead><tbody>
+<tr><td>Fresh generation succeeds; invalid answers and provider failures retain the description and save no partial result</td><td>Fake-provider integration tests reusing <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/integration/test_ai_assistant.py:1:1" data-review-source-href="../../../tests/integration/test_ai_assistant.py#L1:1"><code>existing generation cases</code></a>; no paid inference in the test suite.</td></tr>
+<tr><td>Cancel/confirm/start scope for both reference and comparison targets; empty active slot with a non-empty sibling; edge-to-fresh-web start</td><td>Parameterize view/session assertions over both target slots, checking the other modeling remains unchanged; focused browser coverage for the destructive transition.</td></tr>
+<tr><td>Show the summary once with a save-your-description notice; closing/replacing the panel discards it while preserving the modeling</td><td>Response assertions and a focused side-panel browser path; no report-reopening endpoint or storage tests.</td></tr>
+<tr><td>Examples → Start from prompt reaches the shared flow, cancels safely, and opens the AI panel without a tour overlay</td><td>Extend <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/e2e/test_onboarding.py:19:1" data-review-source-href="../../../tests/e2e/test_onboarding.py#L19:1"><code>the picker browser coverage</code></a> and the picker presentation assertions; no separate generation test suite.</td></tr>
+<tr><td>View controls stay in place, dirty Configure blocks exits, existing request lock prevents duplicates</td><td>JS fixtures and focused browser checks using actual shared templates.</td></tr>
+<tr><td>Parent proxy identity, uncertainty, units, cache-aware billing where available, no prompt/answer logging</td><td>Deterministic metric tests and captured logs with sentinel content on success/failure. No live benchmark or concurrency experiment.</td></tr>
+</tbody></table>
+<p>The existing baseline can also be run with <code>poetry run pytest --runxfail tests/integration/test_ai_assistant.py::test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback</code>. Implementation still runs repository-required Python, E2E and Jest gates and relevant asset builds. This session changes documentation only; none of those planned application tests is claimed to have run. This outline is not a tasks.md breakdown.</p>
+<h3>Planning references</h3><p><a href="../../architecture/workspace.html" target="_blank" rel="noopener">Workspace</a> · <a href="../../architecture/persistence.html" target="_blank" rel="noopener">Persistence</a> · <a href="../../architecture/rendering.html" target="_blank" rel="noopener">Rendering</a> · <a href="../../architecture/onboarding.html" target="_blank" rel="noopener">Onboarding</a> · <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/specs/features/clean-architecture-refactoring/README.md" target="_blank" rel="noopener" data-review-source-href="../clean-architecture-refactoring/README.md">Refactoring context</a></p>
+<p><a href="https://ecologits.ai/latest/methodology/" target="_blank" rel="noopener">EcoLogits methodology</a> explains uncertainty and inference scope; <a href="https://docs.mistral.ai/models/zai-glm-5-3-flash" target="_blank" rel="noopener">Mistral's model description</a> identifies the hosted Flash model. Use qualified expectations, not an asserted physical saving or guaranteed upper bound.</p>
+</section></main></div>
+<script src="../../review-links.js" defer></script>
+</body></html>

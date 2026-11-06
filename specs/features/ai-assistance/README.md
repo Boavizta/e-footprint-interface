@@ -1,5 +1,10 @@
 # AI assistance exploration and session handoff
 
+> Historical exploration. As of 2026-11-06, the production direction is
+> [AI-assisted bootstrap](../ai-assisted-bootstrap/spec.html), with ordered extensions in
+> [roadmap.md](roadmap.md). The discussion and historical status below describe the earlier exploration;
+> they do not supersede the production specification or authorize additional work.
+
 Context saved on 2026-10-27 from a discussion begun on 2026-09-24. This folder belongs to the interface repository because the proposed feature is driven by the interface, even if later experiments or implementation require library changes.
 
 **Status: exploratory discussion.** The user authorized creating this folder and preserving the conversation. No AI sandbox, benchmark runs, production integration, formal feature specification, or HTML mockups have been implemented or approved in this conversation. The proposals below are hypotheses to examine, not settled design decisions.
