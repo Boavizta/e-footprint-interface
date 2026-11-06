@@ -240,11 +240,6 @@
               <span data-reading-links><a href="#box">1.2</a></span>
               <small>Includes the box after the results band when the flag is on and the model has no edge objects.</small>
             </li>
-            <li id="file-object-web" data-steps="">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379:1"><code>domain/entities/web_abstract_modeling_classes/modeling_object_web.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
-              <small>Skips detached contextual containers in the container properties.</small>
-            </li>
           </ul>
         </details>
         <details open>
@@ -273,19 +268,14 @@
             <li id="file-unit-tests" data-steps="">
               <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>application/use_cases/test_delete_object.py</code></a> <span data-change="modified">Modified</span>
               <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
-              <small>Regression: a referrer deleted in the same model does not block its server.</small>
-            </li>
-            <li id="file-views-deletion" data-steps="">
-              <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:72:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L72:1"><code>adapters/views/test_views_deletion.py</code></a> <span data-change="modified">Modified</span>
-              <span data-reading-links><a href="#impl-decision-02">IMPL-DECISION-02</a></span>
-              <small>Expected-failure marker of the bug-batch reproduction removed.</small>
+              <small>Regression retained after removing the obsolete interface workaround: a referrer deleted in the same model does not block its server.</small>
             </li>
           </ul>
         </details>
         <ul>
           <li id="file-changelog" data-steps="feedback">
             <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:7:1" data-review-source-href="../../../CHANGELOG.md#L7:1"><code>CHANGELOG.md</code></a> <span data-change="modified">Modified</span>
-            <small>Unreleased · Added: experimental, dev-only AI assistant behind <code>AI_ASSISTANT_ENABLED</code>. Fixed: the detached-container line of <a href="#impl-decision-02">IMPL-DECISION-02</a>.</small>
+            <small>Added: experimental, dev-only AI assistant behind <code>AI_ASSISTANT_ENABLED</code>. The detached-container fix is already on <code>main</code>.</small>
           </li>
         </ul>
       </details>
@@ -313,7 +303,7 @@
     <aside id="impl-decisions" data-note="review">
       <p><strong>Implementation decisions</strong></p>
       <p><a href="#impl-decision-01">[IMPL-DECISION-01] Read-back converts a copy of each value, not the live quantity — APPLIED</a></p>
-      <p><a href="#impl-decision-02">[IMPL-DECISION-02] Pre-existing defect: detached contextual containers crashed a delete after a referrer was deleted in the same ModelWeb — APPLIED</a></p>
+      <p><a href="#impl-decision-02">[IMPL-DECISION-02] Detached-container workaround superseded by the library fix on main — OBSOLETE, REMOVED</a></p>
       <p><a href="#impl-decision-03">[IMPL-DECISION-03] The edit path persists through persist_structural_change, not persist_to_cache — APPLIED</a></p>
       <p><a href="#impl-decision-04">[IMPL-DECISION-04] Re-lists cascade-delete orphaned children and echoed fields are ignored — APPLIED</a></p>
       <p><a href="#impl-decision-05">[IMPL-DECISION-05] User request: the box only on the modeling view, collapsible and open by default — APPLIED</a></p>
@@ -737,22 +727,21 @@ feedback["note"] = data.get("note", "")</code></pre>
           setting a provider and its resolved instance type together and failing visibly if the library refuses the pair.</p>
       </aside>
       <aside id="impl-decision-02" data-note="review">
-        <p><strong>[IMPL-DECISION-02] — APPLIED</strong> · newly discovered pre-existing defect, task 3 review (commit <code>0ac6b40c</code>)</p>
-        <p>An answer removing a job and then its server (or API) failed with
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>AttributeError: 'NoneType' object has no attribute 'efootprint_class'</code></a>. Deleting the job leaves a
-          detached contextual wrapper on the server whose <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py:49:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/object_linked_to_modeling_obj.py#L49:1"><code>modeling_obj_container</code></a> is <code>None</code>; the
-          library's own <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint/efootprint/abstract_modeling_classes/modeling_object.py:460:1" data-review-source-href="../../../../e-footprint/efootprint/abstract_modeling_classes/modeling_object.py#L460:1"><code>modeling_obj_containers</code></a> skips such entries, but the interface's
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:379:1" data-review-source-href="../../../model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py#L379:1"><code>ModelingObjectWeb.efootprint_contextual_modeling_obj_containers</code></a>
-          did not, so the list and dict container properties built on it crashed, and with them
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/model_builder/application/use_cases/delete_object.py:75:1" data-review-source-href="../../../model_builder/application/use_cases/delete_object.py#L75:1"><code>DeleteObjectUseCase.check_can_delete()</code></a>
-          on the server. The same crash is the bug-fixes-2026-10 task 4 report (GitHub #151, a recurrent need's
-          delete re-render); that task is now marked shipped by this commit and <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/adapters/views/test_views_deletion.py:72:1" data-review-source-href="../../../tests/unit_tests/adapters/views/test_views_deletion.py#L72:1">its reproduction's expected-failure
-          marker is removed</a>.</p>
-        <p>Fix: the property filters out detached entries, matching the library's rule in the one place both derived
-          properties read. Regression:
-          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:126:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L126:1"><code>test_check_can_delete_ignores_a_referrer_deleted_in_the_same_model</code></a>.
-          List-held referrers (a pattern holding a journey) never had the problem. <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/CHANGELOG.md:13:1" data-review-source-href="../../../CHANGELOG.md#L13:1">The CHANGELOG carries the fix line</a>
-          the bug batch called for.</p>
+        <p><strong>[IMPL-DECISION-02] — OBSOLETE, REMOVED</strong> · superseded after rebasing onto <code>main</code> (2026-11-06)</p>
+        <p>During task 3 review, removing a job and then its server or API in the same <code>ModelWeb</code>
+          crashed because a detached contextual wrapper remained in the target's reverse links. Commit
+          <code>0ac6b40c</code> originally worked around this by filtering detached entries in the interface.</p>
+        <p><code>main</code> now uses <code>efootprint 27.0.1</code>, which fixes the cause: attaching a wrapper
+          registers it on the target, and detaching removes it by identity. See the library's
+          <a href="../../../../e-footprint/specs/architecture/relationships.html#relationship-types" target="_blank" rel="noopener">relationship invariant</a>
+          and <a href="../bug-fixes-2026-10/run-a-review.html#decision-task-4" target="_blank" rel="noopener">bug-fixes-2026-10 task 4</a>.
+          The interface filter has been removed; <code>ModelingObjectWeb.efootprint_contextual_modeling_obj_containers</code>
+          delegates directly to the library, as it does on <code>main</code>. The recurrent-need deletion fix and
+          its passing reproduction also already belong to <code>main</code>.</p>
+        <p>The regression test
+          <a href="vscode://file//Users/vinville/dev/e-footprint-full/e-footprint-interface/tests/unit_tests/application/use_cases/test_delete_object.py:132:1" data-review-source-href="../../../tests/unit_tests/application/use_cases/test_delete_object.py#L132:1"><code>test_check_can_delete_ignores_a_referrer_deleted_in_the_same_model</code></a>
+          remains to verify sequential deletion without re-hydrating the model. It passes with the published
+          library and no interface workaround.</p>
       </aside>
       <aside id="impl-decision-03" data-note="review">
         <p><strong>[IMPL-DECISION-03] — APPLIED</strong> · material plan difference, task 3 review</p>

@@ -68,9 +68,10 @@ out in the plan; the read-back needs ordinary judgment on web wrappers versus li
 Goal: on a non-empty model, the request is sent with the current model's DSL, the answer's changed, added and removed
 objects are applied to the live library model, and the session is persisted once at the end; any failure leaves the
 model untouched.
-Status: done — reviewed range `2a5a7862..20aac1a0` (includes the pre-existing defect fix `0ac6b40c`, see
-[IMPL-DECISION-02](plan.html#impl-decision-02); edit semantics in [IMPL-DECISION-03](plan.html#impl-decision-03) and
-[IMPL-DECISION-04](plan.html#impl-decision-04))
+Status: done — reviewed range `2a5a7862..20aac1a0`. After rebasing onto `main`, the pre-existing defect workaround
+from `0ac6b40c` is obsolete and removed: efootprint 27.0.1 owns the fix (see
+[IMPL-DECISION-02](plan.html#impl-decision-02)). Edit semantics in [IMPL-DECISION-03](plan.html#impl-decision-03) and
+[IMPL-DECISION-04](plan.html#impl-decision-04).
 Brief: [briefs/task-3.md]
 Supervisor decisions from the task 2 review (leads in [handoffs/task-2.md](handoffs/task-2.md)): never read live values through
 `ExplainableQuantity.to()` (in-place conversion); a volume edit keeps the current `start_date` and modeling duration; a step

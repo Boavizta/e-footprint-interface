@@ -22,12 +22,8 @@ Repositories and implementation ranges: e-footprint-interface `2a5a7862..270e560
 - When only `cloud_provider` changes, the current instance name is snapped to the new provider's catalog instead of
   re-sizing on default cores and RAM.
 
-## Open concerns
-- Pre-existing, outside the owned files: `ModelingObjectWeb.list_containers_and_attr_name_in_list_container` and
-  `dict_containers_and_attr_name_in_dict_container` (`model_builder/domain/entities/web_abstract_modeling_classes/modeling_object_web.py:383`)
-  iterate `contextual_modeling_obj_containers` without skipping entries whose `modeling_obj_container` is `None`,
-  which the library's own `modeling_obj_containers` does. A direct-attribute referrer deleted earlier in the same
-  `ModelWeb` leaves such an entry, so an answer removing a job and then its server (or an API) in one request fails
-  with `AttributeError: 'NoneType' object has no attribute 'efootprint_class'`; the model stays untouched and two
-  requests work. The form path never hits it because each request re-hydrates. One `continue` on a `None`
-  container fixes it.
+## Resolved concern after rebase onto main
+- Removing a job and then its server or API in the same `ModelWeb` originally crashed because detached contextual
+  wrappers remained in the target's reverse links. The interface filter added during review is now obsolete:
+  `main` uses efootprint 27.0.1, which unregisters wrappers when detached. The filter is removed; the same-model
+  deletion regression test remains. See [IMPL-DECISION-02](../plan.html#impl-decision-02).
