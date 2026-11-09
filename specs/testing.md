@@ -142,7 +142,7 @@ and E2E tests operate visible controls. Mutate hidden transport fields only in a
 `tests/e2e/test_ai_bootstrap.py` is deliberately self-contained: the module uses a transactional test database and
 pytest-django's `live_server`, launches synchronous Playwright inside the database fixture lifetime, assigns unique
 in-memory caches, and replaces the provider with a local fake. It uses a dummy key and never calls a paid inference
-service. Its module-scoped `base_url` points to that isolated server; do not run these flows against the shared
+service. Its module-local `base_url` override points to that isolated server; do not run these flows against the shared
 development server. The rest of the E2E suite still uses the ordinary local server and can run with `-n 4` after the
 AI module has completed.
 

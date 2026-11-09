@@ -18,9 +18,10 @@ shared application package, is `18d2659eca43eb8beb1baf81a30cd301c524b138`. Inspe
 
 ## How it works
 
-1. `model_builder/application/ai_bootstrap/service.py` owns the shared system prompt, JSON parsing, schema validation and
-   construction of a real `System` with `from_defaults`; omitted values use library defaults. The application service
-   is shared by production generation and the offline/development evaluator.
+1. `model_builder/application/ai_bootstrap/` owns the shared `system_prompt.md`, `dsl.py` schema/builders and
+   `catalogs.py` resolvers. Its `service.py` entry point parses and validates answers and constructs a real `System`
+   with `from_defaults`; omitted values use library defaults. Production generation and the offline/development
+   evaluator share that service.
 2. `cases/*.json` hold a realistic product-person prompt, facts available if asked (for later clarification
    experiments), expected properties for expert review, and machine checks.
 3. `providers.py` calls Anthropic, OpenAI or Mistral for development comparisons and records tokens, latency and cost
@@ -81,8 +82,9 @@ record with:
   local development data. Alternatively, import the exported `.e-f.json` through the builder's normal **Open file** action.
 
 `--max-cost-usd` (default 3) stops launching calls past that total. `--effort` maps to
-`output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral); omitted means
-the provider default, which is recorded in `request_params`.
+`output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral). The Flash entry always
+uses the production adapter's fixed low effort, 16,000-token limit, 45-second timeout and no SDK retries, regardless
+of `--effort`. Other entries use their configured default when effort is omitted and record it in `request_params`.
 
 ## Models
 
@@ -102,23 +104,24 @@ the provider default, which is recorded in `request_params`.
 
 The first full run (`runs/20261028-164221`, 3 cases x 7 models x 2 reps) narrowed the default to Haiku and Luna:
 Sonnet and Large 4 cost 10x for no structural gain, Medium and Small take the user count as the journey volume.
-The three open-weight models were added afterwards through the Mistral platform (one key, same adapter); GLM
-reasoning cannot be switched off, so they run at effort `low` unless `--effort` says otherwise. They joined the
-default run on 2026-10-29.
+The three open-weight models joined the default run on 2026-10-29 through the Mistral platform. The GLM entries
+default to effort `low` because reasoning cannot be switched off. Flash keeps that fixed through the production
+adapter; the other CLI entries accept an `--effort` override.
 
 ## Design choices worth challenging
 
 - **Structure DSL, not library JSON.** The library format for the e-commerce example is 26 KB; its authoring
   script is 5.7 KB. The DSL is smaller still and lets the model omit any number. The cost is a builder to
-  maintain (`dsl.py`, about 250 lines) and a vocabulary that is not the library's.
+  maintain (`model_builder/application/ai_bootstrap/dsl.py`) and a vocabulary that is not the library's.
 - **No provider-side schema enforcement.** All providers get the same "JSON only" instruction (plus JSON mode
   where it is free: OpenAI and Mistral). Validity is checked locally so results are comparable. Strict
   structured outputs are a separate knob to test later.
-- **One year horizon, constant volumes.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in `dsl.py`. Fine
+- **One year horizon, constant volumes.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in the shared `dsl.py`. Fine
   for structure comparison, not for final numbers.
-- **Catalog choices are resolved in code, not in the prompt.** `catalogs.py` snaps a GenAI `provider`/`model_name`
+- **Catalog choices are resolved in code, not in the prompt.** The shared application `catalogs.py` snaps a GenAI `provider`/`model_name`
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
-  specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python -m ai_sandbox.catalogs refresh`).
+  specs cached in `model_builder/application/ai_bootstrap/catalogs/boavizta_instance_specs.json`, refreshed only by
+  the developer command `poetry run python -m ai_sandbox.catalogs refresh`).
   Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
 - **Every CPU server is a cloud instance.** A server with no `cloud_provider` is sized on `DEFAULT_CLOUD_PROVIDER`
   (aws) in `catalogs.py`. The library's plain `Server` default is a whole physical machine, 30-40x the footprint of
