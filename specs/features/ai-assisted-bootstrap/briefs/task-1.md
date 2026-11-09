@@ -2,7 +2,7 @@
 
 Written 2026-11-09 against e-footprint-interface `1b2ea43740f76b1edcf7f345ed922582d2142bc4`; library reference `afc60887fa05c34d18d5969a45276bb08d3dace0`.
 Plan: [generation](../plan.html#generation-call), [provider](../plan.html#mistral-call), [metrics](../plan.html#metrics), [CLI](../plan.html#retire). Task: [1](../tasks.md#task-1--extract-shared-generation-provider-and-metrics).
-Status: under review.
+Status: approved for Run A on 2026-11-09.
 
 ## Start here
 

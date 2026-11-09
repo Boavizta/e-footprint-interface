@@ -1,13 +1,13 @@
 # AI-assisted bootstrap — tasks
 
 Spec: [spec.html](spec.html) · Plan: [plan.html](plan.html)
-Status: under review. Planning only; implementation has not started.
+Status: Run A complete on 2026-11-09. Implementation, per-task and cumulative reviews, and plan consolidation are complete; no implementation blocker remains.
 
 ## Implementation runs
 
 | Run | Delivered milestone | Tasks in execution order | Prerequisites |
 |---|---|---|---|
-| A | Production fresh web bootstrap for either active modeling, stable view controls, and retired PoC UI/editing | [1](#task-1--extract-shared-generation-provider-and-metrics), [2](#task-2--install-the-fresh-start-and-generation-lifecycle), [3](#task-3--connect-entry-points-and-stable-view-controls), [4](#task-4--retire-the-poc-and-complete-delivery) | Approval of this task breakdown and briefs; fresh implementation session. No live inference or concurrency experiment required. |
+| A | Production fresh web bootstrap for either active modeling, stable view controls, and retired PoC UI/editing | [1](#task-1--extract-shared-generation-provider-and-metrics), [2](#task-2--install-the-fresh-start-and-generation-lifecycle), [3](#task-3--connect-entry-points-and-stable-view-controls), [4](#task-4--retire-the-poc-and-complete-delivery) | Authorized on 2026-11-09. No live inference or concurrency experiment required. |
 
 ## Overview
 
@@ -22,7 +22,7 @@ Status: under review. Planning only; implementation has not started.
 
 Goal: Establish the generation boundary with its first consumers and tests, preserving the useful evaluation workflow.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-1.md](briefs/task-1.md)
 
@@ -56,7 +56,7 @@ Implementation: standard — the builders and provider call already exist; the r
 
 Goal: Deliver the backend operation and both side panels, with active-slot isolation and preparation before persistence.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-2.md](briefs/task-2.md)
 
@@ -89,7 +89,7 @@ Implementation: standard — preparation and save already have established owner
 
 Goal: Make the flow discoverable from both entry points and verify the actual HTMX/browser lifecycle.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-3.md](briefs/task-3.md)
 
@@ -122,7 +122,7 @@ Implementation: standard — reuse delegated confirmation, workspace guards and 
 
 Goal: Remove the superseded experiment, document the delivered boundaries, and finish required verification.
 
-Status: under review
+Status: complete
 
 Brief: [briefs/task-4.md](briefs/task-4.md)
 
@@ -144,23 +144,21 @@ Acceptance:
 - Production requests never import sandbox tooling or mutate `sys.path`; no old route, UI, model-selector state writes or AI edit/read-back code remains. Other-provider evaluation remains developer-only.
 - Record the final relevant pre-removal PoC Git revision in the existing sandbox guide; Git is the recovery mechanism, without copied/disabled old code. Do not archive feature documents during implementation.
 - Durable docs describe ownership, active-slot replacement, transient summary and explicit view choices; installation documents default-off flag/key/fixed model/timeout without publishing secrets. The changelog covers production behavior only.
-- Required gates pass against the intended library build; unresolved failures or genuinely missing environment evidence remain visible and classified below. Preserve independent ordinary-editor regressions, including sequential job deletion.
+- Required gates pass against the intended library build; unresolved failures or genuinely missing environment evidence remain visible and classified below. Preserve independent ordinary-editor regressions, including nested-job then top-level-journey deletion.
 
 Depends on: Tasks 1–3 and their focused checks; remove obsolete edit tests only after retaining generation/manual-edit coverage.
 
 Implementation: easy — replacement behavior and tests are delivered by predecessors; the remaining changes are mapped removals, documentation updates and established delivery checks.
 
-## Gates and prerequisites
+## Outstanding follow-up prerequisites
+
+No implementation or review blocker remains. These actions are outside Run A.
 
 | Check | Classification | Environment / required evidence |
 |---|---|---|
-| Task/brief approval | Blocks implementation | This complete working set; implement in a fresh session after approval. No plan changes proposed. |
-| Generation, provider, metric and view checks | Blocks completion of dependent implementation tasks | Interface Poetry Python 3.12 environment; fake provider/stub SDK; real handwritten fixture and intended efootprint build. Task briefs give focused commands. No real key required. |
-| Critical browser flow | Blocks run completion | Rebuilt JS/SCSS, installed Playwright browser; module-local pytest-django `live_server`, transactional test-session DB and isolated caches, dummy key + fake provider. Do not run against the ordinary development server. |
-| Full repository gates | Blocks run completion | `poetry run pytest tests --ignore=tests/e2e`, `npm run jest`, and `poetry run pytest tests/e2e -n 4` with a local development server for existing E2E modules; the new AI module overrides its base URL. Run stateful suites sequentially. |
-| Publishable dependency | Blocks merge to main / deployment | At baseline, both dependency files use published efootprint 27.0.1. Preserve local changes, verify the intended installed build and inspect parsed pyproject/lock sources after locking; no editable/path source may reach main. No library change or migration planned. |
-| Runtime-only imports | Blocks run completion | Isolated production dependency installation proves SDK/prompt/snapshot imports without development SDKs/sandbox imports; stub the SDK, with no credentials or paid call. |
 | Deployment configuration | Blocks deployment only | Enable `AI_BOOTSTRAP_ENABLED` and server Mistral key through the normal deployment process. Actual deployment/enablement is outside this run. |
 | PoC archive | After delivery, separate explicit action | Delivery and required checks must exist first. Preserve the PoC working set until the archive workflow is explicitly invoked; follow-ups stay edge bootstrap, then async I/O. |
 
 Preparation baseline (2026-11-09): interface `1b2ea43740f76b1edcf7f345ed922582d2142bc4`; companion library `afc60887fa05c34d18d5969a45276bb08d3dace0` (reference only, no edits planned). Code pointers and predecessor contracts checked; product code, shared application state and the approved plan remain unchanged. Application tests, builds and inference have not been run during task preparation.
+
+Implementation baseline (2026-11-09): interface `497fe2c77209e03877c7a0a5a62f3fa6db8c429a`; companion library `afc60887fa05c34d18d5969a45276bb08d3dace0`. Both repositories were clean when Run A began.

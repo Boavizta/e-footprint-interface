@@ -2,7 +2,7 @@
 
 Written 2026-11-09 against e-footprint-interface `1b2ea43740f76b1edcf7f345ed922582d2142bc4`; library reference `afc60887fa05c34d18d5969a45276bb08d3dace0`.
 Plan: [entry/views](../plan.html#entry), [browser verification](../plan.html#delivery). Task: [3](../tasks.md#task-3--connect-entry-points-and-stable-view-controls).
-Status: under review.
+Status: approved for Run A on 2026-11-09.
 
 ## Start here
 

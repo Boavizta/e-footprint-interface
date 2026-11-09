@@ -2,7 +2,7 @@
 
 Written 2026-11-09 against e-footprint-interface `1b2ea43740f76b1edcf7f345ed922582d2142bc4`; library reference `afc60887fa05c34d18d5969a45276bb08d3dace0`.
 Plan: [retirement](../plan.html#retire), [delivery](../plan.html#delivery). Task: [4](../tasks.md#task-4--retire-the-poc-and-complete-delivery).
-Status: under review.
+Status: approved for Run A on 2026-11-09.
 
 ## Start here
 
@@ -25,7 +25,7 @@ Task 1 has moved generation/catalog/prompt ownership and adapted CLI imports/Fla
 
 ## Reuse
 
-Use existing release/dependency process, library serialization and normal editor tests. [Sequential deletion coverage](../../../../tests/e2e/objects/test_jobs.py) exercises two job removals; preserve it independently of removing AI edit tests. Existing `tests/integration/test_ai_bootstrap.py` owns shared generation/manual-edit round trips; new adapter tests own HTTP/session checks.
+Use existing release/dependency process, library serialization and normal editor tests. [Sequential deletion coverage](../../../../tests/e2e/objects/test_jobs.py) removes a nested job and then a top-level journey; preserve it independently of removing AI edit tests. Existing `tests/integration/test_ai_bootstrap.py` owns shared generation/manual-edit round trips; new adapter tests own HTTP/session checks.
 
 ## Invariants and traps
 
