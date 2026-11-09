@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [V1.14.1]
+## [Unreleased]
 
 ### Added
-- Experimental, dev-only AI assistant that builds or edits the model from a description, behind `AI_ASSISTANT_ENABLED`.
+- AI-assisted bootstrap (Beta) creates a fresh, editable modeling from a description and shows a temporary review summary when enabled by the server configuration.
+
+## [V1.14.1]
 
 ### Fixed
 - Correct cumulative chart precision (#146) and recurrent-need deletion refreshes (#151). Internally managed objects open read-only inspection panels and reject standalone edits or deletion; editable storage saves without rendering absent cards. Journey and component deletion names blocking references, and server responses remove deleted cards without console errors.

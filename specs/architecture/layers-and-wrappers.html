@@ -72,6 +72,8 @@
 <li><strong><code>EditObjectUseCase</code></strong> — object editing with <code>pre_edit</code> hook.</li>
 <li><strong><code>DeleteObjectUseCase</code></strong> — object deletion with <code>can_delete</code>, <code>pre_delete</code> hooks.</li>
 </ul>
+<h3 id="ai-bootstrap">AI bootstrap</h3>
+<p><a class="source" href="../../model_builder/application/ai_bootstrap/service.py"><code>application/ai_bootstrap/service.py</code></a> owns the shared system prompt, answer parsing, validation and construction of a fresh library <code>System</code>. It has no Django, adapter or sandbox imports. The HTTP adapter <a class="source" href="../../model_builder/adapters/views/views_ai_bootstrap.py"><code>views_ai_bootstrap.py</code></a> gates both POST operations, resets only the active workspace slot through the normal load helper, validates and saves the generated graph once, and puts the description and summary metrics only in the response context. The shared <a class="source" href="../../model_builder/adapters/ai_provider.py"><code>ai_provider.py</code></a> makes one bounded request to <code>zai-glm-5-3-flash</code> through Mistral; <a class="source" href="../../model_builder/application/ai_bootstrap/metrics.py"><code>application/ai_bootstrap/metrics.py</code></a> provides optional call estimates. Developer evaluation and replay reuse the application service through <code>ai_sandbox</code>; that package is not imported by production requests.</p>
 <h3 id="domain-services">Domain services</h3>
 <p><a class="source" href="../../model_builder/domain/services"><code>model_builder/domain/services/</code></a>:</p>
 <ul>

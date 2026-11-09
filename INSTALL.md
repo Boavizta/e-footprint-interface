@@ -158,6 +158,21 @@ poetry run python manage.py runserver
 
 Open your browser to: `http://localhost:8000`
 
+### Optional AI bootstrap (local development)
+
+AI bootstrap is hidden unless both `AI_BOOTSTRAP_ENABLED` and `MISTRAL_API_KEY` are configured. To enable it for a
+local run, add these settings to the local environment (keep the real key in an untracked secret file or secret
+manager; never commit it):
+
+```dotenv
+AI_BOOTSTRAP_ENABLED=true
+MISTRAL_API_KEY=<your Mistral API key>
+```
+
+The interface always uses `zai-glm-5-3-flash` through Mistral with JSON output, low reasoning effort, a 16,000-token
+limit, a 45-second request timeout and no SDK retries. The feature is off by default. Local CLI evaluation has separate
+developer-provider and retry options; see [`ai_sandbox/README.md`](ai_sandbox/README.md).
+
 ---
 
 ## Hybrid Local Development (Option 2)

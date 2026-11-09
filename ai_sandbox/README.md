@@ -7,33 +7,34 @@ Local experiment runner for the AI-assistance exploration described in
 Scope is web modeling only (usage journeys, servers, GenAI APIs), as if the interface's edge toggle were off. Edge
 modeling was removed on 2026-10-29 to keep the prompt and DSL small: it is a different problem (device counts and
 ratios, embodied footprints), and the two serious semantic errors of the last run that had it were both edge
-mistakes. If it returns, it is a separate assistant reusing the server and job vocabulary.
+mistakes. Edge bootstrap remains a separately scoped follow-up after this web bootstrap.
 
 Nothing here is part of the Django application. Run outputs under `runs/` are git-ignored.
 
+The retired edit/read-back proof of concept remains recoverable from Git history. The original experiment is at
+`1b2ea43740f76b1edcf7f345ed922582d2142bc4`; the last relevant pre-removal revision, after imports were moved into the
+shared application package, is `18d2659eca43eb8beb1baf81a30cd301c524b138`. Inspect a file without restoring old code with
+`git show <revision>:<path>`.
+
 ## How it works
 
-1. `prompts/system_prompt.md` teaches the model the e-footprint mental model and a compact JSON DSL
-   (objects, relationships, optional numbers, a `comments` sentence per stated number that becomes the value's comment in the model).
+1. `model_builder/application/ai_bootstrap/service.py` owns the shared system prompt, JSON parsing, schema validation and
+   construction of a real `System` with `from_defaults`; omitted values use library defaults. The application service
+   is shared by production generation and the offline/development evaluator.
 2. `cases/*.json` hold a realistic product-person prompt, facts available if asked (for later clarification
    experiments), expected properties for expert review, and machine checks.
-3. `providers.py` calls Anthropic, OpenAI or Mistral with the same system prompt and user prompt, and records
-   tokens, latency, cost (prices captured 2026-10-27, see the module docstring).
-4. `dsl.py` validates the output against the DSL (pydantic) and builds a real `System` with `from_defaults`,
-   so every unstated value falls back to the library default.
+3. `providers.py` calls Anthropic, OpenAI or Mistral for development comparisons and records tokens, latency and cost
+   (prices captured 2026-10-27, see the module docstring). The Flash entry delegates to the same bounded production
+   Mistral adapter; the other providers are development-only.
+4. The shared application DSL validates the answer against the model contract and resolves catalog choices.
 5. `run.py` computes the system, exports it to the interface JSON format (`*.e-f.json`, importable through
    *Open file* in the interface or the report's *Open in interface* link), reloads it to prove it round-trips, runs the
    structural checks, and writes one record per call. `report.py` turns a run dir into `summary.md` and `summary.html`.
 
-The interface's experimental assistant (`AI_ASSISTANT_ENABLED`, dev app only) imports this folder: on an empty model
-it runs the same stages and loads the built system; on a non-empty model `edit.py` reads the model back into the DSL
-(`system_to_dsl`), the request is sent with `prompts/edit_prompt.md` appended to the system prompt, and the answer's
-changed, added and removed objects are applied to the live model through the same builders and field tables
-(`apply_edits`), with the session persisted once at the end. Removals are the interface's delete use case; a step or
-job that a re-listed journey or step leaves out is deleted the same way once nothing uses it. A field echoed with its
-read-back value and no new comment is ignored; a null, or a new value for a field the DSL shows but cannot change (a
-server's `kind`, a job's `server`/`genai_api`, a pattern's `journey`, `device`, `network`, `country`),
-fails the request.
+The production interface has a separate, default-off fresh-start flow. Its HTTP adapter calls the shared application
+service and bounded Mistral adapter, prepares the generated graph before saving, and exposes a response-only summary.
+Production requests do not import this sandbox. No edit/read-back workflow lives here; normal interface editing uses
+the existing model editors after generation.
 
 Stages recorded per call: JSON parse (first attempt vs repaired) → schema valid → build → compute → export.
 A failure at any stage is recorded with the error, never raised. When parse, schema, build or compute fails, the
@@ -46,16 +47,17 @@ and the earlier attempts under `attempts`; the reports show tries per record and
 
 ```bash
 # free: check keys and model ids
-poetry run python ai_sandbox/providers.py
+poetry run python -m ai_sandbox.providers
 
 # pipeline check without an LLM
-poetry run python ai_sandbox/run.py --dry-run ai_sandbox/cases/_handwritten_01_recipe_app.json
+poetry run python -m ai_sandbox.run --dry-run ai_sandbox/cases/_handwritten_01_recipe_app.json
 
 # experiments (ANTHROPIC_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY read from .env)
-poetry run python ai_sandbox/run.py --cases 01 --models claude-haiku-5-5 mistral-small-latest --reps 1
-poetry run python ai_sandbox/run.py --reps 2 --effort medium         # all cases x DEFAULT_MODELS
-poetry run python ai_sandbox/run.py --replay ai_sandbox/runs/<dir>    # re-evaluate recorded outputs, no API call
-poetry run python ai_sandbox/report.py ai_sandbox/runs/<dir>
+poetry run python -m ai_sandbox.run --cases 01 --models claude-haiku-5-5 mistral-small-latest --reps 1
+poetry run python -m ai_sandbox.run --reps 2 --effort medium         # all cases x DEFAULT_MODELS
+poetry run python -m ai_sandbox.run --replay ai_sandbox/runs/<dir>   # re-evaluate recorded outputs, no API call
+poetry run python -m ai_sandbox.report ai_sandbox/runs/<dir>
+poetry run python -m ai_sandbox.catalogs refresh                    # developer-only Boavizta snapshot refresh
 ```
 
 ## Browsing results
@@ -75,8 +77,8 @@ record with:
 - an **Open in interface** link. It targets `/dev/load-file/?path=<export path>` on a locally running interface
   (`poetry run python manage.py runserver`, `http://localhost:8000` by default, override with
   `EFOOTPRINT_INTERFACE_URL`). That route exists only when Django `DEBUG` is true, only opens files under
-  `ai_sandbox/runs/`, and replaces the active model in the browser session without confirmation, exactly like the docs'
-  "Load this scenario" deep link.
+  `ai_sandbox/runs/`, and replaces the active model in the browser session without confirmation; use it only with
+  local development data. Alternatively, import the exported `.e-f.json` through the builder's normal **Open file** action.
 
 `--max-cost-usd` (default 3) stops launching calls past that total. `--effort` maps to
 `output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral); omitted means
@@ -116,7 +118,7 @@ default run on 2026-10-29.
   for structure comparison, not for final numbers.
 - **Catalog choices are resolved in code, not in the prompt.** `catalogs.py` snaps a GenAI `provider`/`model_name`
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
-  specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python ai_sandbox/catalogs.py refresh`).
+  specs cached in `catalogs/boavizta_instance_specs.json`, refresh with `poetry run python -m ai_sandbox.catalogs refresh`).
   Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
 - **Every CPU server is a cloud instance.** A server with no `cloud_provider` is sized on `DEFAULT_CLOUD_PROVIDER`
   (aws) in `catalogs.py`. The library's plain `Server` default is a whole physical machine, 30-40x the footprint of

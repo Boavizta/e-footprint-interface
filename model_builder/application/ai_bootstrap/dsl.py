@@ -168,7 +168,7 @@ class _Comments:
             self.resolutions.append(Resolution("comment", f"{self.obj.name}.{field}", text, "unattached"))
 
 
-# DSL field -> (library attribute, unit). Read by the builders below and by edit.py.
+# DSL field -> (library attribute, unit). Read by the builders below and the development evaluator.
 SERVER_FIELDS = {"carbon_intensity_g_per_kwh": ("average_carbon_intensity", u.g / u.kWh),
                  "gpus": ("compute", u.gpu)}  # gpu servers only
 STORAGE_FIELDS = {"storage_gb": ("base_storage_need", u.GB_stored)}  # on server.storage
