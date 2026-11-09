@@ -1,6 +1,6 @@
 # Task 2 — Fresh-start and generation lifecycle
 
-Repository and implementation range: `e-footprint-interface`, `406f21b0..992d1767`.
+Repository and implementation range: `e-footprint-interface`, `406f21b0..781beeae`.
 Companion library reference: `e-footprint` at `afc60887`, unchanged.
 
 ## Review pointers
