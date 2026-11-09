@@ -91,7 +91,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "model_builder.adapters.context_processors.edge_modeling_doc_url",
-                "model_builder.adapters.context_processors.ai_assistant",
+                "model_builder.adapters.context_processors.ai_bootstrap",
             ],
         },
     },
@@ -194,8 +194,9 @@ MKDOCS_BASE_URL = os.getenv("MKDOCS_BASE_URL", "https://boavizta.github.io/e-foo
 EDGE_MODELING_DOC_URL = os.getenv(
     "EDGE_MODELING_DOC_URL", f"{MKDOCS_BASE_URL}/web_vs_edge/")
 
-# Experimental AI assistant box on the builder (dev app only). Provider keys come from the process environment.
-AI_ASSISTANT_ENABLED = env.bool("AI_ASSISTANT_ENABLED", default=False)
+# Fresh web modeling from a server-owned Mistral model.
+AI_BOOTSTRAP_ENABLED = env.bool("AI_BOOTSTRAP_ENABLED", default=False)
+MISTRAL_API_KEY = env("MISTRAL_API_KEY", default="")
 
 # ============================================================================
 # ENVIRONMENT-SPECIFIC CONFIGURATION

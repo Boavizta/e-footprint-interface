@@ -1,4 +1,4 @@
-"""The experimental AI assistant box, its generate and edit paths, with the provider call replaced by a fake."""
+"""Remaining developer-only AI edit/read-back checks, pending retirement."""
 import json
 from pathlib import Path
 
@@ -8,49 +8,12 @@ from efootprint.abstract_modeling_classes.source_objects import Source, SourceVa
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.constants.units import u
 
-from model_builder.adapters.repositories import InMemorySystemRepository, SessionSystemRepository
-from model_builder.adapters.views import views_ai_assistant
+from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.application.ai_bootstrap.dsl import build_system, validate_tolerating_extras
 from ai_sandbox.edit import apply_edits, system_to_dsl
-from ai_sandbox.providers import Completion
 
 HANDWRITTEN_CASE = Path(django_settings.BASE_DIR) / "ai_sandbox" / "cases" / "_handwritten_01_recipe_app.json"
-URL = "/model_builder/ai-assistant/"
-EDIT_ANSWER = {
-    "changed": {
-        "usage_patterns": [{"name": "Browsing", "volume": {"value": 5200000, "per": "month"},
-                            "comments": {"volume": "Doubled as asked."}}],
-        "jobs": [{"name": "Push notification", "server": "API server", "data_transferred_kb": 2}],
-        "journeys": [{"name": "Browse recipes", "steps": [
-            {"name": "Open feed", "jobs": ["Recipe list", "Recipe query", "Recipe thumbnails", "Push notification"]}]}]},
-    "removed": {"jobs": ["Photo upload"]},
-    "note": "Doubled the browsing volume, added the push job, removed the photo upload.",
-}
-
-
-def _fake_complete(text, calls, usage=True):
-    def fake(model, system, prompt):
-        calls.append((model, prompt))
-        return Completion(text=text, input_tokens=5000 if usage else None,
-                          output_tokens=800 if usage else None, latency_s=12.5)
-    return fake
-
-
-def _system_name(system_data):
-    return next(iter(system_data["System"].values()))["name"]
-
-
-@pytest.fixture
-def assistant_on(settings):
-    settings.AI_ASSISTANT_ENABLED = True
-
-
-def _generate_recipe_app(client, monkeypatch):
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), []))
-    client.get("/model_builder/")  # starts the session with the empty model
-    assert client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"}).status_code == 200
-    return ModelWeb(SessionSystemRepository(client.session))
 
 
 def _named(objects, name):
@@ -59,157 +22,6 @@ def _named(objects, name):
 
 def _steps(system):
     return {step.name: step for journey in system.usage_journeys for step in journey.uj_steps}
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize("usage", [True, False])
-def test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback(client, assistant_on, monkeypatch, usage):
-    calls = []
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), calls, usage))
-    page = client.get("/model_builder/")
-    assert b'id="ai-assistant"' in page.content
-    assert b'<option value="zai-glm-5-3-flash"' in page.content.split(b'name="model"')[1].split(b"</option>")[0]
-
-    response = client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"})
-
-    assert response.status_code == 200
-    assert calls == [("zai-glm-5-3-flash", "A recipe app")]
-    assert _system_name(SessionSystemRepository(client.session).get_system_data()) == "Recipe app"
-    assert client.session["ai_assistant_model"] == "zai-glm-5-3-flash"
-    canvas, assistant_box = response.content.decode().split('id="ai-assistant"')
-    assert "Recipe app" in canvas  # the re-rendered builder shows the loaded model, not only the echoed answer
-    assert "USD" in assistant_box
-    assert "Values set from the description carry a comment" in assistant_box
-    assert "Raw answer" in assistant_box
-    assert 'id="example-picker"' not in canvas + assistant_box
-
-
-@pytest.mark.django_db
-def test_unparseable_answer_leaves_the_model_untouched(client, assistant_on, monkeypatch):
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete("I would build a nice model.", []))
-    client.get("/model_builder/")
-    before = SessionSystemRepository(client.session).get_system_data()
-
-    response = client.post(URL, {"prompt": "A recipe app", "model": "claude-haiku-5-5"})
-
-    assert response.status_code == 200
-    assert SessionSystemRepository(client.session).get_system_data() == before
-    assert "The answer is not JSON" in response.content.decode()
-
-
-@pytest.mark.django_db
-def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
-    model_web = _generate_recipe_app(client, monkeypatch)
-    system = model_web.system.modeling_obj
-    _named(system.servers, "API server").lifespan = SourceValue(7 * u.year, comment="Hand-set, outside the DSL.")
-    photo_upload_id = _named(system.jobs, "Photo upload").id
-    model_web.repository.interface_config = {"simplified_inputs": {"fields": {
-        photo_upload_id: {"data_transferred": {"included": True, "help": ""}}}}}
-    model_web.persist_to_cache()
-    ids_before = set(model_web.flat_efootprint_objs_dict)
-    calls = []
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(EDIT_ANSWER), calls))
-
-    response = client.post(URL, {"prompt": "Double the browsing volume", "model": "zai-glm-5-3-flash"})
-
-    assert response.status_code == 200
-    assert calls[0][1].startswith("Current model:\n{") and calls[0][1].endswith("Request: Double the browsing volume")
-    edited = ModelWeb(SessionSystemRepository(client.session))
-    system = edited.system.modeling_obj
-    browsing = _named(system.usage_patterns, "Browsing").hourly_occurrences
-    assert browsing.form_inputs["initial_volume"] == 5200000 and browsing.form_inputs["start_date"] == "2027-01-01"
-    steps = _steps(system)
-    assert [job.name for job in steps["Open feed"].jobs] == ["Recipe list", "Recipe query", "Recipe thumbnails",
-                                                             "Push notification"]
-    assert _named(system.jobs, "Push notification").data_transferred.value == 2 * u.kB
-    assert list(steps["Upload photo"].jobs) == []
-    assert "Photo upload" not in {job.name for job in system.jobs}
-    assert photo_upload_id not in edited.flat_efootprint_objs_dict
-    lifespan = _named(system.servers, "API server").lifespan
-    assert lifespan.value == 7 * u.year and lifespan.comment == "Hand-set, outside the DSL."
-    assert ids_before - {photo_upload_id} <= set(edited.flat_efootprint_objs_dict)
-    assert edited.repository.interface_config["simplified_inputs"]["fields"] == {}  # the removed job's input is dropped
-    assistant_box = response.content.decode().split('id="ai-assistant"')[1]
-    assert "Doubled the browsing volume, added the push job" in assistant_box
-    for line in ("set Browsing.volume to 5,200,000 per month", "added job Push notification on API server",
-                 "set Open feed.jobs to Recipe list, Recipe query, Recipe thumbnails, Push notification",
-                 "removed job Photo upload"):
-        assert f"<li>{line}</li>" in assistant_box
-
-
-@pytest.mark.django_db
-def test_edit_on_a_loaded_example_keeps_its_horizon_ids_and_bookmarks(client, assistant_on, monkeypatch):
-    assert client.post("/model_builder/load-example/ecommerce/").status_code == 200
-    model_web = ModelWeb(SessionSystemRepository(client.session))
-    model_web.repository.interface_config = {"simplified_inputs": {"fields": {
-        job_id: {"data_transferred": {"included": True, "help": ""}} for job_id in ("Update-cart", "Submit-order")}}}
-    model_web.persist_to_cache()
-    exported_before = system_to_json(model_web.system.modeling_obj, save_computed_state=False)
-    answer = {"changed": {
-        "usage_patterns": [{"name": "Daily shoppers in France", "volume": {"value": 3600000, "per": "year"}}],
-        "jobs": [{"name": "push_notification", "server": "Web application server", "data_transferred_kb": 2}],
-        "journeys": [{"name": "Shopping journey", "steps": [
-            {"name": "Browse the catalog", "jobs": ["Serve catalog page", "Read product catalog", "push_notification"]},
-            {"name": "Add an item to the cart", "jobs": ["Update cart", "Write cart row"]},
-            {"name": "Check out", "jobs": ["Submit order", "Write order row"]}]}]},
-        "removed": {"jobs": ["Update cart"]}}
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(answer), []))
-
-    client.post(URL, {"prompt": "Double the French shoppers and add a push job", "model": "zai-glm-5-3-flash"})
-
-    edited = ModelWeb(SessionSystemRepository(client.session))
-    exported = system_to_json(edited.system.modeling_obj, save_computed_state=False)
-    assert exported["UsagePattern"]["Daily-shoppers-in-France"]["hourly_occurrences"]["form_inputs"] == {
-        "start_date": "2025-01-01", "modeling_duration_value": 3, "modeling_duration_unit": "year",
-        "initial_volume": 3600000.0, "initial_volume_timespan": "year", "net_growth_rate_in_percentage": 8.0,
-        "net_growth_rate_timespan": "year"}
-    assert exported["UsagePattern"]["Daily-shoppers-in-the-US"] == exported_before["UsagePattern"]["Daily-shoppers-in-the-US"]
-    steps = _steps(edited.system.modeling_obj)
-    assert [job.name for job in steps["Browse the catalog"].jobs] == [
-        "Serve catalog page", "Read product catalog", "Push notification"]
-    assert [job.name for job in steps["Add an item to the cart"].jobs] == ["Write cart row"]
-    assert set(exported_before["Job"]) - {"Update-cart"} <= set(exported["Job"])
-    assert edited.repository.interface_config["simplified_inputs"]["fields"] == {
-        "Submit-order": {"data_transferred": {"included": True, "help": ""}}}
-
-
-@pytest.mark.django_db
-def test_edit_answer_naming_an_unknown_job_leaves_the_model_untouched(client, assistant_on, monkeypatch):
-    _generate_recipe_app(client, monkeypatch)
-    before = SessionSystemRepository(client.session).get_system_data()
-    answer = {"changed": {**EDIT_ANSWER["changed"], "journeys": [{"name": "Browse recipes", "steps": [
-        {"name": "Open feed", "jobs": ["Recipe list", "Nightly digest"]}]}]}}  # the volume is doubled before this fails
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(json.dumps(answer), []))
-
-    response = client.post(URL, {"prompt": "Add a nightly digest", "model": "zai-glm-5-3-flash"})
-
-    assert response.status_code == 200
-    assert SessionSystemRepository(client.session).get_system_data() == before
-    assistant_box = response.content.decode().split('id="ai-assistant"')[1]
-    assert "Unknown job" in assistant_box and "Nightly digest" in assistant_box
-    assert "<li>" not in assistant_box
-
-
-@pytest.mark.django_db
-def test_edge_model_is_refused_without_a_provider_call(client, assistant_on, monkeypatch):
-    calls = []
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), calls))
-    assert client.post("/model_builder/load-example/iot_industrial/").status_code == 200
-    before = SessionSystemRepository(client.session).get_system_data()
-
-    response = client.post(URL, {"prompt": "Add a sensor", "model": "zai-glm-5-3-flash"})
-
-    assert response.status_code == 200
-    assert calls == []
-    assert SessionSystemRepository(client.session).get_system_data() == before
-    assert "edge objects" in response.content.decode()
-
-
-@pytest.mark.django_db
-def test_flag_off_hides_the_box_and_404s_the_route(client, settings):
-    settings.AI_ASSISTANT_ENABLED = False  # independent of a developer's .env turning the flag on
-    assert client.post(URL, {"prompt": "A recipe app", "model": "zai-glm-5-3-flash"}).status_code == 404
-    assert b'id="ai-assistant"' not in client.get("/model_builder/").content
 
 
 def test_reading_a_built_model_back_rebuilds_the_same_footprint():

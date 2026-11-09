@@ -43,8 +43,8 @@ from model_builder.domain.services import (
 from utils import htmx_render, sanitize_filename, smart_truncate
 
 
-def load_system_into_session(repository, raw_system_data, workspace=None):
-    """Upgrade, recompute, wrap and persist a raw system dict into a workspace slot.
+def prepare_system_for_session(repository, raw_system_data, workspace=None):
+    """Upgrade, recompute and wrap a raw system dict without publishing it.
 
     Shared by reboot, example loading, and the empty-model initialization — the one place that
     turns a serialized System into the session-backed current model. ``repository`` targets a slot
@@ -58,7 +58,12 @@ def load_system_into_session(repository, raw_system_data, workspace=None):
     system_data = import_service.import_system(system_data)
     if workspace is not None:
         system_data = workspace.distinctify_against_siblings(system_data, repository.slot)
-    model_web = ModelWeb(repository, system_data)
+    return ModelWeb(repository, system_data)
+
+
+def load_system_into_session(repository, raw_system_data, workspace=None):
+    """Prepare a raw system and publish it through the normal persistence boundary."""
+    model_web = prepare_system_for_session(repository, raw_system_data, workspace=workspace)
     model_web.persist_to_cache()
     return model_web
 

@@ -14,6 +14,7 @@ def sdk(monkeypatch, content='{"system_name":"Example"}', usage=NS(prompt_tokens
     constructor = MagicMock(return_value=client)
     monkeypatch.setattr("mistralai.client.Mistral", constructor)
     monkeypatch.setenv("MISTRAL_API_KEY", "dummy")
+    monkeypatch.setattr("django.conf.settings.MISTRAL_API_KEY", "dummy")
     return client, constructor
 
 
@@ -59,9 +60,10 @@ def test_provider_error_is_content_free_and_never_retried(monkeypatch):
 
 def test_availability_requires_flag_and_key(settings, monkeypatch):
     settings.AI_BOOTSTRAP_ENABLED = True
-    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
+    settings.MISTRAL_API_KEY = ""
+    monkeypatch.setenv("MISTRAL_API_KEY", "ignored-process-key")
     assert not is_available()
-    monkeypatch.setenv("MISTRAL_API_KEY", "dummy")
+    settings.MISTRAL_API_KEY = "dummy"
     assert is_available()
     settings.AI_BOOTSTRAP_ENABLED = False
     assert not is_available()

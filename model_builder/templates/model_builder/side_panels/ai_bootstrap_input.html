@@ -1,0 +1,22 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+{% block panel_body %}
+<div data-ai-bootstrap-panel="input">
+    <p>Beta — a first version, built to improve with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+    <p>What are your system's usages? How often do they occur? What infrastructure supports them?</p>
+    <p>Give volumes for each usage journey: for example, 50,000 monthly users browsing four times each per month, separately from 5,000 photo uploads per month. Distinguish users from visits. Include session or step durations, servers, locations, APIs and background work where known.</p>
+    <p>Missing consequential inputs become explained assumptions; other omitted fields use library defaults. Review the generated modeling.</p>
+    <form id="sidePanelForm" hx-post="{% url 'generate-ai-bootstrap' %}" hx-target="#main-content-block"
+          hx-swap="innerHTML" hx-disabled-elt="button:not(:disabled)">
+        <label for="ai-description" class="form-label">Describe your system</label>
+        <textarea id="ai-description" name="description" class="form-control" rows="10" required>{{ ai_prompt }}</textarea>
+        {% if ai_error %}<p role="alert" class="text-danger mt-2">{{ ai_error }}</p>{% endif %}
+    </form>
+    <p class="small mt-3">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.1 US cent (USD 0.001). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
+    <p class="small">We do not log your prompt or the generated response. Latency and estimated cost may be logged. Save your description if you want to keep it. These generation details won’t be available after closing this panel.</p>
+</div>
+{% endblock %}
+{% block save_button %}
+<div class="mb-3">
+    <button id="btn-submit-form" class="btn btn-primary rounded-pill w-100" type="submit" form="sidePanelForm">Build my modeling</button>
+</div>
+{% endblock %}

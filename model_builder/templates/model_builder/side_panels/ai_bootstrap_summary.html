@@ -1,0 +1,32 @@
+{% extends "model_builder/side_panels/side_panel_structure.html" %}
+{% block panel_body %}
+<div data-ai-bootstrap-panel="summary">
+    <p>Your starting modeling is ready. Review its assumptions using the normal editor. Values set from the description carry a comment; other omitted values use library defaults.</p>
+    <p><strong>Save your description if you want to keep it. These generation details won’t be available after closing this panel.</strong></p>
+    <h6>Review your modeling</h6>
+    <ol>
+        <li><strong>Time spent:</strong> check durations in usage journey steps.</li>
+        <li><strong>Volumes:</strong> check usage patterns for each journey, including visits per user and the time period.</li>
+        <li><strong>Infrastructure:</strong> check servers, resources, locations, APIs and assumed sizes.</li>
+    </ol>
+    <dl>
+        <dt>Estimated API cost</dt>
+        <dd>{% if ai_metrics.cost_usd != None %}USD {{ ai_metrics.cost_usd|floatformat:6 }} (rate card {{ ai_metrics.rate_card_date }}){% else %}Cost estimate unavailable{% endif %}
+            {% if ai_metrics.cache_discount_unknown %}<br>Cached-input discounts not accounted for; this may overestimate the bill.{% endif %}</dd>
+        <dt>Estimated inference impact — parent model</dt>
+        <dd>{{ ai_impact|default:"Impact estimate unavailable" }}</dd>
+    </dl>
+    <p class="small">EcoLogits reference: mistralai / zai-glm-5-3, unscaled. This uncertain parent-model estimate is not a measured Flash result or a guaranteed ceiling. The upfront expectation is typically below 1 g CO2-eq.</p>
+    {% if ai_resolutions %}
+    <h6>Catalog substitutions</h6>
+    <ul>{% for item in ai_resolutions %}<li>{{ item.kind }}: {{ item.requested }} → {{ item.resolved }} ({{ item.how }})</li>{% endfor %}</ul>
+    {% endif %}
+    {% if ai_ignored_fields %}
+    <h6>Ignored answer fields</h6>
+    <ul>{% for field in ai_ignored_fields %}<li>{{ field }}</li>{% endfor %}</ul>
+    {% endif %}
+    <details><summary>Your description</summary><pre class="text-wrap user-select-text">{{ ai_prompt }}</pre></details>
+    <p class="small mt-3">Beta — a first version, improving with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+</div>
+{% endblock %}
+{% block save_button %}{% endblock %}

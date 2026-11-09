@@ -27,16 +27,19 @@ pattern — tab strip, then the active tab's toolbar beneath it).
     spirit as the tab-strip/+Add fix in custom.scss. Still above leader-lines (z-0) and the in-flow canvas;
     the mobile/tablet media queries re-raise #sidePanel to a fixed-overlay z-index regardless.
     {% endcomment %}
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel"></div>
+    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel">
+        {% if ai_panel == "input" %}
+            {% include "model_builder/side_panels/ai_bootstrap_input.html" with header_name="Start with AI · Beta" %}
+        {% elif ai_panel == "summary" %}
+            {% include "model_builder/side_panels/ai_bootstrap_summary.html" with header_name="Your starting modeling is ready" %}
+        {% endif %}
+    </div>
     <div class="d-none transition-width pb-3 overflow-y-auto bg-white position-absolute top-0 end-0 h-100" id="helpDrawer"
          hx-disabled-elt="button:not(:disabled)"></div>
     <div class="position-absolute bottom-0 start-0 w-100 bg-transparent text-start border-0 z-3 p-0" id="panel-result-btn" data-tour-target="results">
         {% include 'model_builder/components/results_bar_button.html' %}
         <div id="result-block" class="bg-transparent overflow-y-auto overflow-x-hidden pt-1"></div>
     </div>
-    {% if AI_ASSISTANT_ENABLED and not model_web.has_edge_objects %}
-        {% include 'model_builder/components/ai_assistant.html' %}
-    {% endif %}
     {% if show_example_picker %}
         {% include 'model_builder/onboarding/template_picker.html' %}
     {% endif %}

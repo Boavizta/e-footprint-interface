@@ -11,9 +11,16 @@ class ProviderError(Exception):
     """Fixed, content-free failure suitable for response handling."""
 
 
+def _api_key() -> str:
+    from django.conf import settings
+    if settings.configured:
+        return getattr(settings, "MISTRAL_API_KEY", "")
+    return os.environ.get("MISTRAL_API_KEY", "")
+
+
 def is_available() -> bool:
     from django.conf import settings
-    return bool(getattr(settings, "AI_BOOTSTRAP_ENABLED", False) and os.environ.get("MISTRAL_API_KEY"))
+    return bool(getattr(settings, "AI_BOOTSTRAP_ENABLED", False) and _api_key())
 
 
 def complete_mistral(system_prompt: str, description: str) -> Completion:
@@ -22,7 +29,7 @@ def complete_mistral(system_prompt: str, description: str) -> Completion:
 
     try:
         start = time.perf_counter()
-        with Mistral(api_key=os.environ["MISTRAL_API_KEY"], debug_logger=NoOpLogger()) as client:
+        with Mistral(api_key=_api_key(), debug_logger=NoOpLogger()) as client:
             response = client.chat.complete(
                 model=MODEL, max_tokens=16000, response_format={"type": "json_object"}, reasoning_effort="low",
                 messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": description}],
