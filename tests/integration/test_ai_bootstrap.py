@@ -1,5 +1,7 @@
 """Handwritten generation through library computation, persistence and ordinary editing."""
 import json
+import subprocess
+import sys
 
 import pytest
 from pathlib import Path
@@ -67,3 +69,5 @@ def test_offline_evaluation_and_replay_keep_reports_and_exports(tmp_path):
     assert replayed["export_ok"] and replayed["counts"]["jobs"] == 5
     assert (tmp_path / "summary.md").exists() and (tmp_path / "summary.html").exists()
     assert "unavailable" in (tmp_path / "summary.md").read_text()
+    completed = subprocess.run([sys.executable, "-m", "ai_sandbox.report", str(tmp_path)], capture_output=True, text=True)
+    assert completed.returncode == 0, completed.stderr

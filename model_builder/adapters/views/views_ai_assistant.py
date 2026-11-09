@@ -98,6 +98,6 @@ def ai_assistant(request):
         logger.info(
             f"AI assistant call: model={model} latency={completion.latency_s:.1f}s "
             f"input_tokens={completion.input_tokens} output_tokens={completion.output_tokens} "
-            f"cost_usd={feedback['cost_usd']:.4f} prompt={prompt!r} answer={completion.text!r}")
+            f"cost_usd={feedback['cost_usd']} prompt={prompt!r} answer={completion.text!r}")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
                                 extra_context={"ai_feedback": feedback})

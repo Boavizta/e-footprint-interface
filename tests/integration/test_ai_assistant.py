@@ -29,10 +29,11 @@ EDIT_ANSWER = {
 }
 
 
-def _fake_complete(text, calls):
+def _fake_complete(text, calls, usage=True):
     def fake(model, system, prompt):
         calls.append((model, prompt))
-        return Completion(text=text, input_tokens=5000, output_tokens=800, latency_s=12.5)
+        return Completion(text=text, input_tokens=5000 if usage else None,
+                          output_tokens=800 if usage else None, latency_s=12.5)
     return fake
 
 
@@ -61,9 +62,10 @@ def _steps(system):
 
 
 @pytest.mark.django_db
-def test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback(client, assistant_on, monkeypatch):
+@pytest.mark.parametrize("usage", [True, False])
+def test_generate_on_empty_model_loads_the_answer_and_shows_the_feedback(client, assistant_on, monkeypatch, usage):
     calls = []
-    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), calls))
+    monkeypatch.setattr(views_ai_assistant, "complete", _fake_complete(HANDWRITTEN_CASE.read_text(), calls, usage))
     page = client.get("/model_builder/")
     assert b'id="ai-assistant"' in page.content
     assert b'<option value="zai-glm-5-3-flash"' in page.content.split(b'name="model"')[1].split(b"</option>")[0]
