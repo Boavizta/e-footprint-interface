@@ -10,7 +10,9 @@ import pytest
 from django.conf import settings as django_settings
 from efootprint.api_utils.system_to_json import system_to_json
 
+from e_footprint_interface.json_payload_utils import compute_json_size
 from model_builder.adapters.repositories import SessionWorkspaceRepository, SessionSystemRepository
+from model_builder.adapters.repositories.cache_backend import CacheBackend
 from model_builder.adapters.repositories.workspace_base import system_id_of
 from model_builder.adapters.views import views_ai_bootstrap as views
 from model_builder.application.ai_bootstrap.service import Completion, build_answer
@@ -201,6 +203,55 @@ def test_estimator_failure_does_not_reject_saved_model(client, provider, monkeyp
     assert response.status_code == 200 and not is_empty_model(saved(client))
     assert "Cost estimate unavailable" in response.content.decode()
     assert "Impact estimate unavailable" in response.content.decode()
+
+
+@pytest.mark.parametrize("slot", [0, 1])
+def test_shared_budget_rejection_at_save_preserves_both_slots_and_settings(client, provider, monkeypatch, slot):
+    client.get("/model_builder/")
+    client.post("/model_builder/add-model/", {"source": "blank"})
+    sibling = 1 - slot
+    raw = system_to_json(build_answer(ANSWER).system, save_computed_state=False)
+    seed(client, sibling, raw, {"sankey": {"sibling-setting": True}})
+    client.post("/model_builder/switch-model/", {"slot": slot})
+    client.post(START)
+    repo = repository(client)
+    repo.interface_config = {"sankey": {"keep-setting": True}}
+    repo.save_interface_config()
+    repo.session.save()
+    workspace = SessionWorkspaceRepository(client.session)
+    before = {index: deepcopy(workspace.repository_for(index).get_system_data()) for index in workspace.list_slots()}
+    saved_settings = deepcopy(client.session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY])
+
+    repo.interface_config = {}
+    prepared = views.prepare_system_for_session(repo, raw, workspace=workspace)
+    candidate_size = compute_json_size(prepared.to_json()).size_bytes
+    sizes = repo._index.slot_sizes()
+    combined_size = candidate_size + sizes[sibling]
+    # Keep preparation and the saved workspace valid; only the replacement's combined weight must fail.
+    budget_bytes = (max(sum(sizes.values()), candidate_size) + combined_size) // 2
+    assert candidate_size < budget_bytes < combined_size
+    assert sum(sizes.values()) < budget_bytes
+    monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", budget_bytes / (1024 * 1024))
+    attempts = []
+    original_save = SessionSystemRepository.save_data
+
+    def save(target, data, recovery_data=None):
+        attempts.append(target.slot)
+        return original_save(target, data, recovery_data=recovery_data)
+
+    monkeypatch.setattr(SessionSystemRepository, "save_data", save)
+    writes = Mock(side_effect=AssertionError("rejected graph must not reach either backend"))
+    monkeypatch.setattr(CacheBackend, "set", writes)
+
+    response = client.post(GENERATE, {"description": "A recipe app"})
+
+    assert response.status_code == 200
+    assert "exceeds this workspace&#x27;s size limit" in response.content.decode()
+    assert attempts == [slot]
+    writes.assert_not_called()
+    workspace = SessionWorkspaceRepository(client.session)
+    assert {index: workspace.repository_for(index).get_system_data() for index in workspace.list_slots()} == before
+    assert client.session[SessionSystemRepository.INTERFACE_CONFIG_SESSION_KEY] == saved_settings
 
 
 def test_empty_description_and_nonempty_saved_model_do_not_call_provider(client, provider):
