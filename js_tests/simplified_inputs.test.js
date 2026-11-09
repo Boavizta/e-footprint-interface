@@ -107,7 +107,14 @@ test("configuration transport is one snapshot taken when HTMX sends the form", (
     expect(form.getAttribute("hx-params")).toBe("csrfmiddlewaretoken");
 });
 
-function toolbarControl(html = '<button type="button" data-action="simplified-mode" data-workspace-control>Simplified inputs</button>') {
+function toolbarControl(html) {
+    if (!html) {
+        const holder = document.createElement("div");
+        holder.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/toolbar_ai.html"), "utf8");
+        const controls = holder.querySelector('[aria-label="Modeling view"]');
+        document.body.prepend(controls);
+        return controls.querySelector('[data-action="simplified-view"]');
+    }
     const holder = document.createElement("div");
     holder.innerHTML = html;
     const control = holder.firstElementChild;
@@ -201,12 +208,12 @@ test("each slot restores its own view and an empty Simplified slot is never re-r
     strip.id = "model-tab-strip";
     strip.dataset.activeSlot = "0";
     document.body.prepend(strip);
-    const toggle = toolbarControl();
+    toolbarControl();
     first.dataset.view = "simplified";
     initialize();
     expect(document.body.dataset.baseView).toBe("simplified");
     expect(first.classList.contains("d-none")).toBe(false);
-    toggle.click();
+    document.querySelector('[data-action="modeling-view"]').click();
     expect(first.dataset.view).toBe("modeling");
     strip.dataset.activeSlot = "1";
     document.body.dispatchEvent(new CustomEvent("switchModelCanvas"));
@@ -373,4 +380,54 @@ test.each(CONFIGURE_EXPORT_FIXTURES)("%s %s blocks dirty Configure before docume
     } finally {
         document.removeEventListener("click", captured, true);
     }
+});
+
+test("explicit view buttons keep labels and pressed states and reselecting the current view does nothing", () => {
+    mount("simplified_saved");
+    const simplified = toolbarControl();
+    const modeling = document.querySelector('[data-action="modeling-view"]');
+    initialize();
+    modeling.click();
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
+    simplified.click();
+    expect(simplified.getAttribute("aria-pressed")).toBe("true");
+    expect(modeling.getAttribute("aria-pressed")).toBe("false");
+    simplified.click();
+    expect(window.htmx.ajax).toHaveBeenCalledTimes(1);
+    modeling.click();
+    expect(modeling.getAttribute("aria-pressed")).toBe("true");
+    expect(simplified.getAttribute("aria-pressed")).toBe("false");
+    expect(modeling.textContent).toBe("Modeling");
+    expect(simplified.textContent).toBe("Simplified inputs");
+});
+
+test("Configure blocks AI Start until the user resolves the draft and repeats the action", () => {
+    mount();
+    include("lifespan");
+    const holder = document.createElement("div");
+    holder.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/toolbar_ai.html"), "utf8");
+    const start = holder.querySelector('[data-ai-bootstrap-entry="toolbar"]');
+    document.body.prepend(start);
+    const reached = jest.fn();
+    start.addEventListener("click", reached);
+    activate(start);
+    expect(reached).not.toHaveBeenCalled();
+    expect(document.querySelector("dialog").showModal).toHaveBeenCalledTimes(1);
+    document.querySelector('[data-action="simplified-exit-discard"]').click();
+    expect(reached).not.toHaveBeenCalled();
+    // The saved-view response removes Configure; the original intent was not replayed.
+    document.querySelector("[data-configure-form]").remove();
+    activate(start);
+    expect(reached).toHaveBeenCalledTimes(1);
+});
+
+test("reselecting Simplified inputs in dirty Configure is also a no-op", () => {
+    mount();
+    const simplified = toolbarControl();
+    document.querySelector("[data-simplified-target]").dataset.view = "simplified";
+    initialize();
+    include("lifespan");
+    simplified.click();
+    expect(document.querySelector("dialog").showModal).not.toHaveBeenCalled();
+    expect(window.htmx.ajax).not.toHaveBeenCalled();
 });

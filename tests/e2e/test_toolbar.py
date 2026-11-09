@@ -54,6 +54,7 @@ class TestToolbarFeatures:
             dialog.accept()
 
         page.on("dialog", accept)
+        model_builder.open_modeling_actions()
         click_and_wait_for_htmx(page, page.locator("#btn-reboot-modeling"))
 
         assert dialogs, "Reboot should ask for confirmation once the model has content"
@@ -70,6 +71,7 @@ class TestToolbarFeatures:
             dialog.accept()
 
         page.on("dialog", accept)
+        model_builder.open_modeling_actions()
         click_and_wait_for_htmx(page, page.locator("#btn-reboot-modeling"))
 
         assert not dialogs, "Rebooting an empty model should not prompt for confirmation"

@@ -107,7 +107,12 @@
                     </li>
                 {% endif %}
                 <li class="nav-item d-lg-none"><hr class="dropdown-divider my-1"></li>
-                <li class="nav-item"><button type="button" class="btn btn-outline-primary mx-2" data-action="simplified-mode" data-workspace-control>Simplified inputs</button></li>
+                <li class="nav-item flex-shrink-0 mx-2">
+                    <div class="btn-group flex-nowrap" role="group" aria-label="Modeling view">
+                        <button type="button" class="btn btn-outline-primary active" data-action="modeling-view" data-workspace-control aria-pressed="true">Modeling</button>
+                        <button type="button" class="btn btn-outline-primary" data-action="simplified-view" data-workspace-control aria-pressed="false">Simplified inputs</button>
+                    </div>
+                </li>
                 {% include 'model_builder/components/edge_modeling_toggle.html' %}
                 {% include 'model_builder/components/help_menu.html' %}
                 {% comment %}
@@ -117,23 +122,46 @@
                 (this model / whole workspace) only once a second model exists; a single-model session has
                 only one model to export, so it keeps the plain `download-json/` link (and its E2E selector).
                 {% endcomment %}
-                <li class="nav-item">
-                    <button hx-get="{% url 'open-import-json-panel' %}"
-                            hx-target="#sidePanel"
-                            hx-swap="innerHTML"
-                            hx-disabled-elt="button:not(:disabled)"
-                            class="nav-link d-flex flex-row gap-2 mx-2"
-                            data-bs-toggle="tooltip"
-                            data-bs-title="Open a file"
-                            data-bs-custom-class="custom-tooltip"
-                            data-location="upload_download_reboot_model_tooltips"
-                            _="on click call collapseNavbarIfShown()"
-                    >
-                        <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
-                        <p class="d-block d-lg-none">
-                            Open a file
-                        </p>
-                    </button>
+                <li class="nav-item dropdown">
+                    <button type="button" id="modeling-actions-toggle" class="nav-link dropdown-toggle text-nowrap mx-2"
+                            data-workspace-control data-bs-toggle="dropdown" aria-expanded="false">Modeling actions</button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="modeling-actions-toggle">
+                        {% if AI_BOOTSTRAP_AVAILABLE %}
+                        <li><button type="button" class="dropdown-item" data-ai-bootstrap-entry="toolbar"
+                                    hx-post="{% url 'start-ai-bootstrap' %}" hx-target="#main-content-block"
+                                    hx-swap="innerHTML" hx-disabled-elt="button:not(:disabled)"
+                                    data-confirm-when-model-not-empty="This will discard your current modeling and start a new one with AI. Continue?"
+                                    _="on click call collapseNavbarIfShown()">Start with AI <span class="badge text-bg-light border">Beta</span></button></li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <button hx-get="{% url 'open-import-json-panel' %}"
+                                    hx-target="#sidePanel"
+                                    hx-swap="innerHTML"
+                                    hx-disabled-elt="button:not(:disabled)"
+                                    class="dropdown-item d-flex align-items-center gap-2"
+                                    data-location="upload_download_reboot_model_tooltips"
+                                    _="on click call collapseNavbarIfShown()"
+                            >
+                                <img src="{% static "icons/tooltip/upload.svg" %}" width="24px" height="24px" alt="import_icon">
+                                <span>Open a file</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" id="btn-reboot-modeling"
+                                    hx-post="{% url 'reset-model' %}"
+                                    hx-target="#main-content-block"
+                                    hx-swap="innerHTML"
+                                    hx-disabled-elt="button:not(:disabled)"
+                                    data-confirm-when-model-not-empty="This will discard your current modeling and reset to an empty one. Continue?"
+                                    class="dropdown-item d-flex align-items-center gap-2"
+                                    data-location="upload_download_reboot_model_tooltips"
+                                    _="on click call collapseNavbarIfShown()"
+                            >
+                                <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
+                                <span>Reset</span>
+                            </button>
+                        </li>
+                    </ul>
                 </li>
                 {% if workspace_slots|length > 1 %}
                 <li class="nav-item dropdown">
@@ -166,27 +194,6 @@
                     </a>
                 </li>
                 {% endif %}
-                <li class="nav-item">
-                    <button type="button"
-                       id="btn-reboot-modeling"
-                           hx-post="{% url 'reset-model' %}"
-                           hx-target="#main-content-block"
-                           hx-swap="innerHTML"
-                           hx-disabled-elt="button:not(:disabled)"
-                           data-confirm-when-model-not-empty="This will discard your current modeling and reset to an empty one. Continue?"
-                           class="nav-link d-flex flex-row gap-2 mx-2"
-                           data-bs-title="Reset to default modeling"
-                           data-bs-placement="bottom"
-                           data-bs-custom-class="custom-tooltip"
-                           data-location="upload_download_reboot_model_tooltips"
-                            _="on click call collapseNavbarIfShown()"
-                    >
-                        <img src="{% static "icons/tooltip/reboot.svg" %}" width="24px" height="24px" alt="reboot_icon">
-                        <p class="d-block d-lg-none">
-                            Reset to default modeling
-                        </p>
-                    </button>
-                </li>
                 <!-- Global links (visible in hamburger on mobile, hidden on desktop where the navbar has them) -->
                 <li class="nav-item d-lg-none">
                     <a href="{{ MKDOCS_BASE_URL }}" target="_blank" rel="noopener noreferrer"

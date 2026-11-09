@@ -10,6 +10,7 @@ the domain.
 from django.conf import settings
 from efootprint.utils.placeholder_resolver import resolve_placeholders
 
+from model_builder.adapters.ai_provider import is_available
 from model_builder.adapters.ui_config import CLASS_UI_CONFIG
 from model_builder.domain.reference_data.modeling_examples import CONCEPTS
 from model_builder.domain.services import build_example_catalog
@@ -59,5 +60,9 @@ def build_picker_groups() -> list[dict]:
                 "guides": [{"name": guide.name, "doc_url": _doc_url(guide.doc_path)}
                            for guide in entry.related_guides],
             })
+        if group.id == "scratch" and is_available():
+            entries.append({"id": "ai", "name": "Start from prompt (Beta)",
+                            "description": "Describe your system and review an AI-generated starting modeling.",
+                            "icon": "✦", "category": "ai", "chips": [], "guides": []})
         groups.append({"id": group.id, "title": group.title, "entries": entries})
     return groups

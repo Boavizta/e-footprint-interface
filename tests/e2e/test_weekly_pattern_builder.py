@@ -248,7 +248,7 @@ def test_focused_timeseries_restores_rejected_provenance_and_discards_failed_sav
     expect(selected.locator("[data-current-value]")).to_have_text(before)
     page.get_by_role("button", name="Go back", exact=True).click()
     page.unroute("**/edit-simplified-input/**")
-    page.locator('[data-action="simplified-mode"]').click()
+    page.locator('[data-action="modeling-view"]').click()
     expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
     open_simplified(page)
     click_and_wait_for_htmx(page, selected.get_by_role("button", name="Edit timeseries"))

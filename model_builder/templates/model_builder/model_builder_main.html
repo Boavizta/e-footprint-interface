@@ -8,7 +8,7 @@ pattern — tab strip, then the active tab's toolbar beneath it).
 {% include 'model_builder/upload_download_reboot_model_tooltips.html' %}
 {% include 'model_builder/components/workspace_storage_status.html' %}
 <div class="position-relative mx-0 d-flex flex-row overflow-hidden w-100" id="model-builder-page">
-    <div class="scrollable-area w-100 overflow-x-auto" id="model-canva-scrollable-area">
+    <div class="scrollable-area {% if ai_panel %}side-panel-open{% else %}w-100{% endif %} overflow-x-auto" id="model-canva-scrollable-area">
         {% for slot_entry in workspace_slots %}
         <div class="d-flex flex-row {% if not slot_entry.is_active %}d-none{% endif %}" id="model-canva-{{ slot_entry.slot }}" data-model-canvas="{{ slot_entry.slot }}" data-system-id="{{ slot_entry.model_web.system.efootprint_id }}">
             {% include 'model_builder/components/model_canvas_content.html' with model_web=slot_entry.model_web slot_suffix=slot_entry.suffix is_active_canvas=slot_entry.is_active %}
@@ -26,8 +26,10 @@ pattern — tab strip, then the active tab's toolbar beneath it).
     e.g. the Help menu — paint on top instead of being trapped behind the panel at an equal z-index. Same
     spirit as the tab-strip/+Add fix in custom.scss. Still above leader-lines (z-0) and the in-flow canvas;
     the mobile/tablet media queries re-raise #sidePanel to a fixed-overlay z-index regardless.
+    Whole-builder AI responses render the open panel and its canvas/Results-button widths directly:
+    HTMX settling restores response classes after the side-panel shell's openSidePanel() runs.
     {% endcomment %}
-    <div class="d-none transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel">
+    <div class="{% if not ai_panel %}d-none {% endif %}transition-width pb-3 overflow-y-auto bg-white overflow-y-auto z-2" id="sidePanel">
         {% if ai_panel == "input" %}
             {% include "model_builder/side_panels/ai_bootstrap_input.html" with header_name="Start with AI · Beta" %}
         {% elif ai_panel == "summary" %}

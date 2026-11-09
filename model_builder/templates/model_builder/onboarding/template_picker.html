@@ -6,7 +6,7 @@ whole builder into #main-content-block; the dashed "Start from scratch" card loa
 baseline. Closing the overlay just reveals the canvas behind it.
 {% endcomment %}
 <div id="example-picker"
-     class="position-absolute top-0 start-0 w-100 h-100 overflow-y-auto bg-white bg-opacity-75 z-3 p-3 p-lg-4">
+     class="position-absolute top-0 start-0 w-100 h-100 overflow-y-auto bg-white bg-opacity-75 z-2 p-3 p-lg-4">
     <div class="bg-white rounded-3 shadow-sm border mx-auto p-3 p-lg-4" style="max-width: 60rem;">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="text-start">
@@ -28,8 +28,14 @@ baseline. Closing the overlay just reveals the canvas behind it.
                     <div class="card h-100">
                         <button type="button"
                                 class="btn text-start card-body d-flex flex-column gap-1 h-100 border-0
-                                       {% if entry.category == 'scratch' or entry.category == 'upload' %}border-2 border-dashed{% endif %}"
-                                {% if entry.category == 'upload' %}
+                                       {% if entry.category == 'scratch' or entry.category == 'upload' or entry.category == 'ai' %}border-2 border-dashed{% endif %}"
+                                {% if entry.category == 'ai' %}
+                                data-ai-bootstrap-entry="picker"
+                                hx-post="{% url 'start-ai-bootstrap' %}"
+                                hx-target="#main-content-block" hx-swap="innerHTML"
+                                hx-disabled-elt="button:not(:disabled)"
+                                data-confirm-when-model-not-empty="This will discard your current modeling and start a new one with AI. Continue?"
+                                {% elif entry.category == 'upload' %}
                                 hx-get="{% url 'open-import-json-panel' %}"
                                 hx-target="#sidePanel"
                                 hx-swap="innerHTML"

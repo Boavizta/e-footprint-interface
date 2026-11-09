@@ -49,7 +49,7 @@ class ModelBuilderPage:
         return self.page.locator("[data-simplified-workspace]:visible")
 
     def open_simplified_inputs(self):
-        click_and_wait_for_htmx(self.page, self.page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(self.page, self.page.locator('[data-action="simplified-view"]'))
         expect(self.simplified_workspace).to_have_attribute("data-mode", "simplified")
         return self
 
@@ -112,7 +112,7 @@ class ModelBuilderPage:
     def open_example_picker_from_help_menu(self):
         """Open Help ▸ Open examples from the toolbar."""
         self.page.locator("#help-menu-toggle").click()
-        click_and_wait_for_htmx(self.page, self.page.locator(".dropdown-item[hx-get]"))
+        click_and_wait_for_htmx(self.page, self.page.locator("#help-menu-toggle + .dropdown-menu [hx-get]"))
         self.example_picker.wait_for(state="visible")
         return self
 
@@ -172,6 +172,31 @@ class ModelBuilderPage:
         self.canvas.wait_for(state="visible")
         return self
 
+    def open_modeling_actions(self):
+        toggle = self.page.locator("#modeling-actions-toggle")
+        if toggle.get_attribute("aria-expanded") != "true":
+            toggle.click()
+        return self
+
+    def start_ai_bootstrap(self, entry="toolbar"):
+        if entry == "toolbar":
+            self.open_modeling_actions()
+        click_and_wait_for_htmx(self.page, self.page.locator(f'[data-ai-bootstrap-entry="{entry}"]'))
+        self.page.locator('[data-ai-bootstrap-panel="input"]').wait_for(state="visible")
+        return self
+
+    def generate_ai_modeling(self, description):
+        self.page.locator("#ai-description").fill(description)
+        with self.page.expect_response("**/generate-ai-bootstrap/"):
+            self.page.locator("#btn-submit-form").click()
+        self.ai_bootstrap_summary.wait_for(state="visible")
+        wait_for_htmx_idle(self.page)
+        return self
+
+    @property
+    def ai_bootstrap_summary(self):
+        return self.page.locator('[data-ai-bootstrap-panel="summary"]')
+
     def reset_to_default(self):
         """Reset the model via the toolbar button, confirming the discard, then dismiss the picker.
 
@@ -179,6 +204,7 @@ class ModelBuilderPage:
         confirms first when the current model is non-empty (the callers here always reset a
         populated model), so accept that dialog. Leaves a blank, usable canvas.
         """
+        self.open_modeling_actions()
         self.page.once("dialog", lambda dialog: dialog.accept())
         click_and_wait_for_htmx(self.page, self.page.locator("#btn-reboot-modeling"))
         self.example_picker.wait_for(state="visible")
@@ -441,6 +467,7 @@ class ModelBuilderPage:
         """Open the JSON import panel."""
         # Scope to the toolbar button: the empty-model example picker also carries an
         # open-import-json-panel card ("Load a json file"), so an unscoped selector is ambiguous.
+        self.open_modeling_actions()
         toolbar_import_button = self.page.locator(
             "button[data-location='upload_download_reboot_model_tooltips'][hx-get*='open-import-json-panel']")
         click_and_wait_for_htmx(self.page, toolbar_import_button)

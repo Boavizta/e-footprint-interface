@@ -9,7 +9,7 @@ from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 
 def open_simplified(page):
-    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-view"]'))
     expect(page.locator('[data-simplified-workspace]:visible')).to_have_attribute("data-mode", "simplified")
 
 
@@ -82,12 +82,12 @@ class TestSimplifiedInputs:
         with page.expect_response("**/edit-simplified-input/**"):
             number.press("Enter")
         expect(count.locator("[data-simplified-save-status]")).to_have_text("Saved")
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
         click_and_wait_for_htmx(page, edit)
         expect(page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")).not_to_be_checked()
         expect(page.locator("#sidePanel #Server_fixed_nb_of_instances")).to_have_value("2000")
         page.locator("#sidePanel #Server_fixed_nb_of_instances__empty").check()
-        page.locator('[data-action="simplified-mode"]').click()
+        page.locator('[data-action="simplified-view"]').click()
         expect(page.locator("#unsavedModal")).to_be_visible()
         page.locator("#cancel-unsaved-modal").click()
         expect(page.locator("#sidePanel #Server_fixed_nb_of_instances__empty")).to_be_checked()
@@ -176,11 +176,12 @@ class TestSimplifiedInputs:
         page = builder.page
         builder.add_model_by_duplication()
         open_simplified(page)
-        toggle = page.locator('[data-action="simplified-mode"]')
+        toggle = page.locator('[data-action="modeling-view"]')
         toggle.click()
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         pending = []
         page.route("**/simplified-inputs/", lambda route: pending.append(route))
+        toggle = page.locator('[data-action="simplified-view"]')
         with page.expect_request("**/simplified-inputs/"):
             toggle.click()
         slot = page.locator('[data-simplified-target="1"]')
@@ -212,7 +213,7 @@ class TestSimplifiedInputs:
         expect(workspace).to_have_attribute("data-mode", "simplified")
         expect(workspace.get_by_text("Keep My Capitals", exact=True)).to_be_visible()
         expect(workspace.locator("[data-field-address]")).to_have_count(1)
-        expect(page.locator("#edge-modeling-toggle-wrapper")).not_to_be_visible()
+        expect(page.locator("#edge-modeling-toggle")).not_to_be_visible()
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Configure", exact=True))
         expect(workspace).to_have_attribute("data-mode", "configure")
         workspace.locator("[data-selected-object-filter]").check()
@@ -247,7 +248,7 @@ class TestSimplifiedInputs:
             route.fulfill(response=route.fetch(post_data=urlencode(data)))
 
         page.route("**/save-simplified-inputs/", reject_definition)
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
         with page.expect_response("**/save-simplified-inputs/") as response_info:
             page.get_by_role("button", name="Save", exact=True).click()
         assert response_info.value.status == 422
@@ -257,7 +258,7 @@ class TestSimplifiedInputs:
         expect(field(workspace, "lifespan").locator("[data-include-input]")).to_be_checked()
         page.get_by_role("button", name="Go back", exact=True).click()
         expect(workspace.get_by_role("button", name="Cancel", exact=True)).to_be_enabled()
-        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
+        expect(page.locator('[data-action="simplified-view"]')).to_be_enabled()
         downloads, requests = [], []
         page.on("download", lambda download: downloads.append(download))
         page.on("request", lambda request: requests.append(request.url))
@@ -269,12 +270,12 @@ class TestSimplifiedInputs:
         expect(workspace).to_have_attribute("data-mode", "configure")
         assert downloads == [] and requests == []
         page.unroute("**/save-simplified-inputs/")
-        page.locator('[data-action="simplified-mode"]').click()
+        page.locator('[data-action="modeling-view"]').click()
         with page.expect_response("**/save-simplified-inputs/"):
             page.get_by_role("button", name="Save", exact=True).click()
         expect(workspace).to_have_attribute("data-mode", "simplified")
         expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
-        page.locator('[data-action="simplified-mode"]').click()
+        page.locator('[data-action="modeling-view"]').click()
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         expect(page.locator("[data-simplified-target]:visible")).to_have_count(0)
 
@@ -335,11 +336,11 @@ class TestSimplifiedInputs:
         click_and_wait_for_htmx(page, workspace.get_by_role("button", name="Save and return"))
         filename = str(tmp_path / "selected.e-f.json")
         builder.download_active_model(filename)
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         builder.import_json_file(filename)
         expect(page.locator("body")).to_have_attribute("data-base-view", "simplified")
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
         modeling_value = page.locator('#sidePanel #Server_lifespan')
         accepted_value = modeling_value.input_value()
@@ -351,7 +352,7 @@ class TestSimplifiedInputs:
         expect(modeling_value).to_have_value("7")
         expect(page.locator("#unsavedModal")).not_to_be_visible()
         builder.side_panel.submit_and_wait_for_close()
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-view"]'))
         expect(workspace.locator('input[type="number"]')).to_have_value("7")
 
     def test_mode_change_uses_existing_unsaved_panel_warning(self, minimal_complete_model_builder):
@@ -359,7 +360,7 @@ class TestSimplifiedInputs:
         page = builder.page
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
         page.locator('#sidePanel #Server_lifespan').fill("7")
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-view"]'))
         expect(page.locator("#unsavedModal")).to_be_visible()
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         page.locator("#cancel-unsaved-modal").click()
@@ -368,7 +369,7 @@ class TestSimplifiedInputs:
         expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
         page.locator('#sidePanel #Server_lifespan').fill("8")
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-view"]'))
         page.locator("#continue-unsaved-modal").click()
         expect(page.locator("[data-simplified-workspace]:visible")).to_have_attribute("data-mode", "simplified")
         expect(page.locator("#sidePanel")).not_to_be_visible()
@@ -390,7 +391,7 @@ class TestSimplifiedInputs:
         page.route("**/save-simplified-inputs/", lambda route: pending.append(route))
         workspace.get_by_role("button", name="Save and return").click()
         page.wait_for_function("() => document.querySelector('[data-configure-form].htmx-request') !== null")
-        toggle = page.locator('[data-action="simplified-mode"]')
+        toggle = page.locator('[data-action="simplified-view"]')
         expect(toggle).to_be_disabled()
         expect(workspace.get_by_role("button", name="Cancel", exact=True)).to_be_disabled()
         expect(page.locator('[data-action="simplified-exit-discard"]')).to_be_disabled()
@@ -417,7 +418,7 @@ class TestSimplifiedInputs:
             builder.add_model_by_duplication()
         workspace = open_configure(page)
         field(workspace, "lifespan").locator("[data-include-input]").check()
-        triggers = {"results": "#show-results-toolbar-btn", "file": "button[hx-get*='open-import-json-panel']",
+        triggers = {"results": "#show-results-toolbar-btn", "file": "#modeling-actions-toggle",
                     "compare": "#compare-tab", "model": "#model-tab-0"}
         requests = []
         page.on("request", lambda request: requests.append(request.url))
@@ -440,6 +441,7 @@ class TestSimplifiedInputs:
             click_and_wait_for_htmx(page, page.locator("button[hx-get*='source-table']:visible"))
             expect(page.locator("#source-block")).not_to_be_empty()
         elif destination == "file":
+            click_and_wait_for_htmx(page, page.locator("button[hx-get*='open-import-json-panel']"))
             expect(page.locator("#sidePanel input[type='file']")).to_be_visible()
         elif destination == "compare":
             expect(page.locator("#comparison-view")).to_be_visible()
@@ -797,7 +799,7 @@ class TestInlineBookmarks:
         expect(status).not_to_have_class(re.compile(r"\bhtmx-request\b"))
         expect(value).to_be_enabled()
         expect(builder.simplified_field("power").locator('input[type="number"]')).to_be_enabled()
-        expect(page.locator('[data-action="simplified-mode"]')).to_be_enabled()
+        expect(page.locator('[data-action="simplified-view"]')).to_be_enabled()
         expect(page.locator("#compare-tab")).to_be_disabled()
         expect(page.locator(".htmx-request")).to_have_count(0)
         expect(value).to_have_value(original_value if outcome == "rejected" else "8")
@@ -951,7 +953,7 @@ class TestInlineBookmarks:
         expect(lifespan.locator("[data-simplified-save-status]")).to_have_text("Saved")
         expect(lifespan.get_by_role("link", name="Reviewed report", exact=True)).to_have_attribute(
             "href", "https://example.com/report")
-        click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+        click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
         prior = totals.nth(0).text_content()
         click_and_wait_for_htmx(page, page.locator("#server-list button[hx-get*='open-edit-object-panel']").first)
         page.locator('#sidePanel #Server_lifespan').fill("12")
@@ -1143,7 +1145,7 @@ def test_workspace_export_uses_accepted_state_after_other_model_rejection(
     wait_for_htmx_idle(page)
     builder.download_active_model(str(tmp_path / "active.e-f.json"))
     expect(page.locator('[data-simplified-target="1"] [data-simplified-save-status]')).to_have_text("Saved")
-    page.locator('[data-action="simplified-mode"]').click()
+    page.locator('[data-action="modeling-view"]').click()
     expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
     filename = str(tmp_path / "both.e-f.json")
     builder.download_workspace(filename)
@@ -1282,7 +1284,7 @@ def test_rejected_edit_allows_view_model_and_example_navigation(minimal_complete
     page = builder.page
     workspace = reject_lifespan_edit(builder)
     accepted_value = field(workspace, "lifespan").locator('input[type="number"]').input_value()
-    click_and_wait_for_htmx(page, page.locator('[data-action="simplified-mode"]'))
+    click_and_wait_for_htmx(page, page.locator('[data-action="modeling-view"]'))
     expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
     open_simplified(page)
     click_and_wait_for_htmx(page, page.locator('[data-action="simplified-configure"]:visible').first)
@@ -1295,7 +1297,7 @@ def test_rejected_edit_allows_view_model_and_example_navigation(minimal_complete
     builder.add_model_by_duplication()
     expect(page.locator("[data-model-tab]")).to_have_count(2)
     page.locator("#help-menu-toggle").click()
-    page.locator(".dropdown-item[hx-get]").click()
+    page.locator("#help-menu-toggle + .dropdown-menu [hx-get]").click()
     expect(builder.example_picker).to_be_visible()
 
 
@@ -1326,6 +1328,7 @@ def test_reset_uses_ordinary_destructive_confirmation_after_rejected_edit(minima
     accepted_value = field(workspace, "lifespan").locator('input[type="number"]').input_value()
     dialogs = []
     page.once("dialog", lambda dialog: (dialogs.append(dialog.message), dialog.dismiss()))
+    builder.open_modeling_actions()
     page.locator("#btn-reboot-modeling").click()
     expect(field(workspace, "lifespan").locator('input[type="number"]')).to_have_value(accepted_value)
     assert "unsaved Simplified input edits" not in dialogs[0]

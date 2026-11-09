@@ -24199,7 +24199,14 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   background: rgba(0, 0, 0, 0.35);
 }
 
-body[data-base-view=simplified] #edge-modeling-toggle-wrapper, body[data-base-view=simplified] #model-scroll-to-left, body[data-base-view=simplified] #model-scroll-to-right {
+#edge-modeling-toggle-wrapper {
+  flex-shrink: 0;
+}
+
+body[data-base-view=simplified] #edge-modeling-toggle-wrapper > * {
+  visibility: hidden;
+}
+body[data-base-view=simplified] #model-scroll-to-left, body[data-base-view=simplified] #model-scroll-to-right {
   display: none !important;
 }
 

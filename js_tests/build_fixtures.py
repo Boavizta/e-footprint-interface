@@ -763,7 +763,14 @@ def render_optional_quantity(field):
     return f"<form>{controller}{quantity}</form>"
 
 
+def render_toolbar(case):
+    return render_to_string("model_builder/upload_download_reboot_model_tooltips.html", {
+        "model_web": {"creation_constraints": {"__results__": {"enabled": True}}}, **case})
+
+
 GROUPS = [
+    ({"toolbar_ai": {"AI_BOOTSTRAP_AVAILABLE": True}, "toolbar_without_ai": {},
+      "toolbar_workspace": {"AI_BOOTSTRAP_AVAILABLE": True, "workspace_slots": [{}, {}]}}, render_toolbar),
     ({"input_repair_notices": {"notice_text": "Job A: Resolution changed to 480p. — "
         "Job B: <script>unsafe()</script> & resolution changed to 480p."}},
      lambda context: render_to_string("model_builder/components/input_repair_notices.html", context)),

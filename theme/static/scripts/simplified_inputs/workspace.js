@@ -29,8 +29,11 @@ function createWorkspace() {
         document.querySelectorAll("[data-simplified-target]").forEach(item => {
             item.classList.toggle("d-none", item !== target || mode !== "simplified");
         });
-        const button = document.querySelector('[data-action="simplified-mode"]');
-        if (button) button.textContent = mode === "simplified" ? "Modeling" : "Simplified inputs";
+        document.querySelectorAll('[data-action="modeling-view"], [data-action="simplified-view"]').forEach(button => {
+            const active = button.dataset.action === `${mode}-view`;
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+        });
         if (mode === "simplified" && typeof window.removeAllLines === "function") window.removeAllLines();
         if (mode === "modeling" && previousMode === "simplified" && typeof window.initModelBuilderMain === "function") window.initModelBuilderMain();
     }
@@ -69,6 +72,7 @@ function createWorkspace() {
             if (!element || element.closest("[data-workspace-export], [data-simplified-workspace], "
                 + "#simplified-exit-dialog, #modal-container")) return;
             if (!element.matches("a[href], [hx-get], [hx-post], [data-workspace-control], [data-action]")) return;
+            if (element.dataset.action === `${document.body.dataset.baseView}-view`) return;
             blockWhileDirty(event);
         }, true);
         // Covers programmatic HTMX entry points as well as ordinary clicks.
@@ -80,11 +84,15 @@ function createWorkspace() {
             const button = event.target.closest("[data-action]");
             if (!button) return;
             switch (button.dataset.action) {
-            case "simplified-mode":
+            case "modeling-view":
+            case "simplified-view": {
+                const mode = button.dataset.action === "modeling-view" ? "modeling" : "simplified";
+                if (document.body.dataset.baseView === mode) break;
                 if (typeof window.collapseNavbarIfShown === "function") window.collapseNavbarIfShown();
-                if (document.body.dataset.baseView === "simplified") setBaseView("modeling");
+                if (mode === "modeling") setBaseView(mode);
                 else loadView(false);
                 break;
+            }
             case "simplified-configure": loadView(true); break;
             case "simplified-cancel":
                 if (configureForm()?.dataset.dirty === "true") dialog().showModal();

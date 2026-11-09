@@ -370,7 +370,9 @@ document.body.addEventListener("htmx:afterSettle", function (event) {
 document.body.addEventListener("htmx:confirm", function (evt) {
     const elt = evt.target.closest("[data-confirm-when-model-not-empty]");
     if (!elt) return; // not a guarded action — let HTMX proceed normally
-    if (!document.querySelector(".model-builder-card")) return; // empty model — nothing to discard
+    const slot = document.getElementById("model-tab-strip")?.dataset.activeSlot;
+    const canvas = document.querySelector(`[data-model-canvas="${slot}"]`);
+    if (!canvas?.querySelector(".model-builder-card")) return; // empty active model — nothing to discard
     evt.preventDefault();
     const message = elt.getAttribute("data-confirm-when-model-not-empty");
     if (window.confirm(message)) {

@@ -27,6 +27,10 @@
     function handleBuilderEntry() {
         if (!document.getElementById("model-builder-page")) return;
         if (onboardingSeen()) return;
+        if (document.querySelector("[data-ai-bootstrap-panel]")) {
+            markOnboardingSeen();
+            return;
+        }
         // While the example picker overlays the canvas, the user hasn't chosen a starting
         // point yet. The guided tour orients them on a *loaded* canvas (or the empty "Start
         // from scratch" baseline), so defer the once-ever first-run signal until the picker

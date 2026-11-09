@@ -88,3 +88,16 @@ describe("handleBuilderEntry", () => {
         expect(handler).not.toHaveBeenCalled();
     });
 });
+
+test.each(["input", "summary"])("AI %s consumes first-run without emitting or deferring a tour", panel => {
+    renderBuilder();
+    document.querySelector("#model-builder-page").innerHTML = `<div data-ai-bootstrap-panel="${panel}"></div>`;
+    const handler = jest.fn();
+    document.body.addEventListener("onboarding:first-run", handler);
+    handleBuilderEntry();
+    expect(onboardingSeen()).toBe(true);
+    expect(handler).not.toHaveBeenCalled();
+    document.querySelector("[data-ai-bootstrap-panel]").remove();
+    handleBuilderEntry();
+    expect(handler).not.toHaveBeenCalled();
+});

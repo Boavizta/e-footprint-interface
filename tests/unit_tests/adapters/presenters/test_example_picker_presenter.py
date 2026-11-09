@@ -63,3 +63,32 @@ def test_build_picker_groups_resolves_chips_and_guide_urls():
 
     # An example with no how-to page surfaces no guide link.
     assert entries["ai_chatbot"]["guides"] == []
+
+
+@override_settings(AI_BOOTSTRAP_ENABLED=True, MISTRAL_API_KEY="offline-test-key")
+def test_ai_card_is_presentational_and_in_scratch_group():
+    from model_builder.domain.services import build_example_catalog
+
+    group = next(group for group in build_picker_groups() if group["id"] == "scratch")
+    assert [entry["category"] for entry in group["entries"]] == ["scratch", "upload", "ai"]
+    assert all(entry.category != "ai" for group in build_example_catalog() for entry in group.entries)
+
+
+@override_settings(AI_BOOTSTRAP_ENABLED=True, MISTRAL_API_KEY="")
+def test_ai_card_requires_configured_provider():
+    assert all(entry["category"] != "ai" for group in build_picker_groups() for entry in group["entries"])
+
+
+@override_settings(AI_BOOTSTRAP_ENABLED=True, MISTRAL_API_KEY="offline-test-key")
+def test_prompt_card_posts_start_without_becoming_a_loadable_example():
+    from django.template.loader import render_to_string
+
+    body = render_to_string("model_builder/onboarding/template_picker.html", {
+        "example_picker_groups": build_picker_groups()})
+    action = body.split('data-ai-bootstrap-entry="picker"')[1].split(">", 1)[0]
+    assert 'hx-post="/model_builder/start-ai-bootstrap/"' in action
+    assert 'hx-target="#main-content-block"' in action
+    assert 'hx-disabled-elt="button:not(:disabled)"' in action
+    assert 'data-confirm-when-model-not-empty=' in action
+    assert 'data-example-id=' not in action
+    assert 'after-request=' not in action

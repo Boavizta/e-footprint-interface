@@ -131,7 +131,8 @@ test("a rejected card-order response does not refresh storage metadata", async (
 
 test("model replacement keeps its ordinary destructive confirmation", () => {
     document.body.innerHTML = `
-        <div class="model-builder-card">Current modeling</div>
+        <div id="model-tab-strip" data-active-slot="0"></div>
+        <div data-model-canvas="0"><div class="model-builder-card">Current modeling</div></div>
         <button data-confirm-when-model-not-empty="Start blank?">Start blank</button>
     `;
     loadModule();
@@ -264,4 +265,45 @@ test.failing("pulse and opened highlights cover every card of the object on its 
     delete global.bootstrap;
 
     expect(received).toEqual(expected);
+});
+
+test.each(["0", "1"])("replacement confirms only active canvas %s even when hidden", slot => {
+    loadModule();
+    document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/toolbar_ai.html"), "utf8");
+    const strip = document.createElement("div");
+    strip.id = "model-tab-strip";
+    strip.dataset.activeSlot = slot;
+    document.body.appendChild(strip);
+    const canvases = ["0", "1"].map(id => {
+        const canvas = document.createElement("div");
+        canvas.dataset.modelCanvas = id;
+        canvas.className = "d-none";
+        canvas.innerHTML = '<div class="model-builder-card"></div>';
+        document.body.appendChild(canvas);
+        return canvas;
+    });
+    const confirm = jest.spyOn(window, "confirm").mockReturnValue(false);
+    const button = document.querySelector('[data-ai-bootstrap-entry="toolbar"]');
+    const issueRequest = jest.fn();
+    const send = () => requestEvent("htmx:confirm", {issueRequest}, button);
+    expect(send().defaultPrevented).toBe(true);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(issueRequest).not.toHaveBeenCalled();
+    canvases[Number(slot)].innerHTML = "";
+    expect(send().defaultPrevented).toBe(false);
+    expect(confirm).toHaveBeenCalledTimes(1);
+    confirm.mockRestore();
+});
+
+test("toolbar exposes stable view destinations and availability-gated Start", () => {
+    document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/toolbar_ai.html"), "utf8");
+    const start = document.querySelector('[data-ai-bootstrap-entry="toolbar"]');
+    expect(start.closest("ul").getAttribute("aria-labelledby")).toBe("modeling-actions-toggle");
+    expect(start.getAttribute("hx-post")).toBe("/model_builder/start-ai-bootstrap/");
+    expect(start.getAttribute("hx-target")).toBe("#main-content-block");
+    expect(start.getAttribute("hx-disabled-elt")).toBe("button:not(:disabled)");
+    expect(document.querySelector('[data-action="modeling-view"]').textContent).toBe("Modeling");
+    expect(document.querySelector('[data-action="simplified-view"]').textContent).toBe("Simplified inputs");
+    document.body.innerHTML = fs.readFileSync(path.join(__dirname, "fixtures/toolbar_without_ai.html"), "utf8");
+    expect(document.querySelector("[data-ai-bootstrap-entry]")).toBeNull();
 });
