@@ -1,6 +1,6 @@
 # Task 1 — Shared generation, provider and metrics
 
-Repository and implementation range: `e-footprint-interface`, `497fe2c77209e03877c7a0a5a62f3fa6db8c429a..73b07951`.
+Repository and implementation range: `e-footprint-interface`, `497fe2c77209e03877c7a0a5a62f3fa6db8c429a..69bf2e76`.
 Companion library reference: `e-footprint` at `afc60887fa05c34d18d5969a45276bb08d3dace0`, unchanged.
 
 ## Review pointers
