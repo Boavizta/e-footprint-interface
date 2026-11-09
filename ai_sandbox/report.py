@@ -6,12 +6,18 @@ and "Open in interface" links.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+from . import report_html
 
-import report_html  # noqa: E402
+
+def number(value, precision=4):
+    return f"{value:.{precision}f}" if value is not None else "unavailable"
+
+
+def mean(records, key):
+    values = [r.get(key) for r in records]
+    return sum(values) / len(values) if values and all(v is not None for v in values) else None
 
 
 def load_records(run_dir: Path) -> list[dict]:
@@ -41,7 +47,7 @@ def write_summary(run_dir: Path):
             f"| {r['case']} | {r['model']} | {r['rep']} | {ok('json_ok')}{'' if r.get('json_first_attempt_ok') else ' (repaired)'} "
             f"| {ok('schema_ok')} | {ok('build_ok')} | {ok('compute_ok')} | {ok('export_ok')} | {len(r.get('attempts', [])) + 1} | {checks_str} "
             f"| {r.get('input_tokens')} | {r.get('output_tokens')} | {r.get('reasoning_tokens') or ''} "
-            f"| {r.get('latency_s')} | {r.get('cost_usd', 0):.4f} | {r.get('total_kg_co2e_over_horizon', '')} |")
+            f"| {r.get('latency_s')} | {number(r.get('cost_usd'))} | {r.get('total_kg_co2e_over_horizon', '')} |")
         by_model.setdefault(r["model"], []).append(r)
     lines += ["", "## Per model", "", "| model | runs | ok first try | export ok | checks passed | mean out tok | mean latency s | mean cost USD |",
               "|---|---:|---:|---:|---:|---:|---:|---:|"]
@@ -52,8 +58,8 @@ def write_summary(run_dir: Path):
         checks_passed = sum(sum(1 for v in r.get("checks", {}).values() if v) for r in rs)
         first_try = sum(1 for r in rs if r.get("first_try_ok", r.get("export_ok")))
         lines.append(f"| {model} | {n} | {first_try}/{n} | {exported}/{n} | {checks_passed}/{checks_total} "
-                     f"| {sum(r.get('output_tokens', 0) for r in rs) / n:.0f} | {sum(r.get('latency_s', 0) for r in rs) / n:.1f} "
-                     f"| {sum(r.get('cost_usd', 0) for r in rs) / n:.4f} |")
+                     f"| {number(mean(rs, 'output_tokens'), 0)} | {sum(r.get('latency_s', 0) for r in rs) / n:.1f} "
+                     f"| {number(mean(rs, 'cost_usd'))} |")
     lines += ["", "## Details", ""]
     for r in records:
         lines += [f"### {r['case']} / {r['model']} / r{r['rep']}", ""]

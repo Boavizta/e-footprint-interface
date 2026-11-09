@@ -24,8 +24,8 @@ from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.application.use_cases import DeleteObjectInput, DeleteObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 
-from catalogs import resolve_cloud_instance, resolve_genai
-from dsl import (
+from model_builder.application.ai_bootstrap.catalogs import resolve_cloud_instance, resolve_genai
+from model_builder.application.ai_bootstrap.dsl import (
     JOB_FIELDS, SERVER_FIELDS, SERVER_JOB_FIELDS, STEP_FIELDS, STORAGE_FIELDS, GenAIApiSpec, JobSpec, JourneySpec,
     ServerSpec, StepSpec, UsagePatternSpec, VolumeSpec, _Shared, _label, _volume_timeseries, build_genai_api, build_job,
     build_journey, build_server, build_step, build_usage_pattern)

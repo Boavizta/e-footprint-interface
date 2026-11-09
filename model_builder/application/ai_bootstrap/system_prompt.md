@@ -39,3 +39,5 @@ Field notes:
 - `cloud_provider` is optional. The tool picks a real general-purpose instance that fits `cores` and `ram_gb` on that cloud, or on a default cloud when it is unset; set it only when the description names a cloud, and `instance_type` only if the description states it.
 - `model_name` for GenAI APIs is matched against the EcoLogits catalog; if the exact name is unknown the tool picks the closest one, and if the description does not say which model, omit it and the tool picks the provider's default. Common names: openai `gpt-5`, `gpt-5-mini`, `gpt-5-nano`; anthropic `claude-sonnet-5-5`, `claude-haiku-5-5`; mistralai `mistral-small-latest`, `mistral-medium-latest`; google_genai `gemini-2.5-flash`.
 - Names are short labels the user reads in a diagram: words with spaces and a capital, like "Recipe search", never identifiers with underscores or dashes.
+
+Volumes refer to each named journey independently: do not combine different journeys into one volume.

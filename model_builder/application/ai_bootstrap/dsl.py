@@ -31,9 +31,9 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
-from catalogs import Resolution, resolve_cloud_instance, resolve_genai
+from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 
-MODELING_START_DATE = "2026-01-01"
+MODELING_START_DATE = "2027-01-01"
 MODELING_DURATION_YEARS = 1
 
 
@@ -189,13 +189,13 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-SANDBOX_HORIZON = {"start_date": MODELING_START_DATE, "modeling_duration_value": MODELING_DURATION_YEARS,
+MODELING_HORIZON = {"start_date": MODELING_START_DATE, "modeling_duration_value": MODELING_DURATION_YEARS,
                    "modeling_duration_unit": "year"}
 
 
 def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None,
-                       horizon: dict = SANDBOX_HORIZON):
-    """Hourly volume from the DSL period, over the sandbox horizon unless an existing series' start and duration are given."""
+                       horizon: dict = MODELING_HORIZON):
+    """Hourly volume from the DSL period, over the generation horizon unless an existing series' start and duration are given."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -368,6 +368,10 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
 
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
+    for section in (spec.servers, spec.genai_apis, spec.jobs, spec.journeys):
+        names = [obj.name for obj in section]
+        if len(names) != len(set(names)):
+            raise ValueError("Duplicate declaration names")
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
     servers = {s.name: build_server(s, resolutions) for s in spec.servers}

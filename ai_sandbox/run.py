@@ -1,10 +1,10 @@
 """Run cases x models x repetitions, validate, build, compute, export, and record everything.
 
 Usage (from the interface repo root):
-    poetry run python ai_sandbox/run.py --cases 01 --models claude-haiku-5-5 --reps 1
-    poetry run python ai_sandbox/run.py                      # all cases, DEFAULT_MODELS, 1 rep
-    poetry run python ai_sandbox/run.py --replay runs/<run_dir>   # re-validate recorded outputs, no API call
-    poetry run python ai_sandbox/run.py --dry-run cases/_handwritten_01_recipe_app.json   # pipeline check without an LLM
+    poetry run python -m ai_sandbox.run --cases 01 --models claude-haiku-5-5 --reps 1
+    poetry run python -m ai_sandbox.run                      # all cases, DEFAULT_MODELS, 1 rep
+    poetry run python -m ai_sandbox.run --replay runs/<run_dir>   # re-validate recorded outputs, no API call
+    poetry run python -m ai_sandbox.run --dry-run cases/_handwritten_01_recipe_app.json   # pipeline check without an LLM
 
 Each run writes ai_sandbox/runs/<timestamp>/<case>__<model>__r<rep>.json plus the exported model
 <...>.e-f.json when the build succeeds. summary.md, summary.html and runs/index.html are produced by report.py.
@@ -17,24 +17,22 @@ import argparse
 import itertools
 import json
 import re
-import sys
 import time
 import traceback
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+from pydantic import ValidationError
 
-from pydantic import ValidationError  # noqa: E402
-
-import providers  # noqa: E402
-import report  # noqa: E402
-from dsl import ModelSpec, build_system, parse_json, validate_tolerating_extras  # noqa: E402
+from . import providers
+from . import report
+from model_builder.application.ai_bootstrap.dsl import ModelSpec, parse_json, validate_tolerating_extras
+from model_builder.application.ai_bootstrap.service import build_answer, system_prompt
 
 SANDBOX = Path(__file__).parent
 CASES_DIR = SANDBOX / "cases"
 RUNS_DIR = SANDBOX / "runs"
-SYSTEM_PROMPT = (SANDBOX / "prompts" / "system_prompt.md").read_text()
+SYSTEM_PROMPT = system_prompt()
 
 
 # --- Checks ----------------------------------------------------------------------------------
@@ -98,7 +96,8 @@ def evaluate(data: dict, case: dict, export_path: Path | None) -> dict:
             for obj in section)}
     try:
         start = time.perf_counter()
-        system, resolutions = build_system(spec)
+        generated = build_answer(json.dumps(data))
+        system, resolutions = generated.system, generated.resolutions
         result["build_ok"] = True
         result["catalog_resolutions"] = [res.as_dict() for res in resolutions]
         total = system.total_footprint.sum()
@@ -156,11 +155,12 @@ def model_error(result: dict) -> str | None:
 
 def attempt(case: dict, model: str, prompt: str, effort: str | None, export_path: Path) -> dict:
     completion = providers.complete(model, SYSTEM_PROMPT, prompt, effort)
+    cost = completion.cost_usd(model)
     result = {
         "raw_output": completion.text, "input_tokens": completion.input_tokens,
         "output_tokens": completion.output_tokens, "cached_input_tokens": completion.cached_input_tokens,
         "cache_write_tokens": completion.cache_write_tokens, "reasoning_tokens": completion.reasoning_tokens,
-        "latency_s": round(completion.latency_s, 2), "cost_usd": round(completion.cost_usd(model), 6),
+        "latency_s": round(completion.latency_s, 2), "cost_usd": round(cost, 6) if cost is not None else None,
         "stop_reason": completion.stop_reason, "request_params": completion.request_params}
     data, first_ok, parse_error = parse_json(completion.text)
     result.update({"json_first_attempt_ok": first_ok, "json_ok": data is not None, "json_error": parse_error})
@@ -190,7 +190,7 @@ def run_one(case: dict, model: str, rep: int, effort: str | None, retries: int, 
         record.update(attempts[-1])
         for key in SUMMED_KEYS:
             values = [a[key] for a in attempts if a.get(key) is not None]
-            record[key] = round(sum(values), 6) if values else None
+            record[key] = round(sum(values), 6) if len(values) == len(attempts) else None
         record["first_try_ok"] = bool(attempts[0].get("export_ok"))
         record["attempts"] = [{k: v for k, v in a.items() if k != "request_params"} for a in attempts[:-1]]
     (run_dir / f"{stem}.json").write_text(json.dumps(record, indent=2))
@@ -222,7 +222,7 @@ def summary_line(r: dict) -> str:
     checks = r.get("checks", {})
     passed = sum(1 for v in checks.values() if v)
     return (f"{stages} checks={passed}/{len(checks)} out_tok={r.get('output_tokens')} "
-            f"cost=${r.get('cost_usd', 0):.4f} {r.get('latency_s')}s total={r.get('total_kg_co2e_over_horizon')}kg")
+            f"cost={r.get('cost_usd')} USD {r.get('latency_s')}s total={r.get('total_kg_co2e_over_horizon')}kg")
 
 
 def main():
@@ -260,14 +260,23 @@ def main():
          "retries": args.retries,
          "system_prompt": SYSTEM_PROMPT}, indent=2))
     total_cost = 0.0
+    unknown_cost = False
     for case, model, rep in itertools.product(cases, args.models, range(1, args.reps + 1)):
         if total_cost >= args.max_cost_usd:
             print(f"Budget {args.max_cost_usd} USD reached, stopping.")
             break
         record = run_one(case, model, rep, args.effort, args.retries, run_dir)
-        total_cost += record.get("cost_usd", 0)
+        cost = record.get("cost_usd")
+        if cost is None:
+            unknown_cost = True
+        else:
+            total_cost += cost
         print(f"{case['id']:32} {model:24} r{rep}  {summary_line(record)}")
-    print(f"\nRun dir: {run_dir}\nTotal cost: ${total_cost:.4f}")
+        if unknown_cost:
+            print("Call cost unavailable; stopping because the budget cannot be checked.")
+            break
+    cost_label = "Known cost subtotal (incomplete)" if unknown_cost else "Total cost"
+    print(f"\nRun dir: {run_dir}\n{cost_label}: ${total_cost:.4f}")
     report.write_summary(run_dir)
 
 

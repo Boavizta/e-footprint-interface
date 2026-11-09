@@ -12,6 +12,21 @@ import os
 from pathlib import Path
 from urllib.parse import urlencode
 
+
+def number(value, precision=4):
+    return f"{value:.{precision}f}" if value is not None else "unavailable"
+
+
+def total(records, key):
+    values = [r.get(key) for r in records]
+    return sum(values) if all(v is not None for v in values) else None
+
+
+def mean(records, key):
+    value = total(records, key)
+    return value / len(records) if value is not None and records else None
+
+
 INTERFACE_URL = os.environ.get("EFOOTPRINT_INTERFACE_URL", "http://localhost:8000").rstrip("/")
 
 STAGES = ("json_ok", "schema_ok", "build_ok", "compute_ok", "export_ok")
@@ -201,7 +216,7 @@ def stats_block(record: dict, case: dict) -> str:
             f'{esc(c.get("resolved"))} ({esc(c.get("how"))})</li>' for c in record["catalog_resolutions"]) + "</ul></dd>")
     parts.append(f"<dt>Cost</dt><dd>{record.get('input_tokens')} in / {record.get('output_tokens')} out"
                  f"{' / ' + str(record['reasoning_tokens']) + ' reasoning' if record.get('reasoning_tokens') else ''} tokens, "
-                 f"{record.get('latency_s')} s, ${record.get('cost_usd', 0):.4f}, stop={esc(record.get('stop_reason'))}</dd>")
+                 f"{record.get('latency_s')} s, ${number(record.get('cost_usd'))}, stop={esc(record.get('stop_reason'))}</dd>")
     if case.get("facts_if_asked"):
         parts.append("<dt>Facts the user could have given</dt><dd><details><summary>show</summary><ul>" + "".join(
             f"<li><strong>{esc(k)}</strong>: {esc(v)}</li>" for k, v in case["facts_if_asked"].items()) + "</ul></details></dd>")
@@ -246,7 +261,7 @@ def overview_table(records: list[dict]) -> str:
                     f'<td>{esc(r["model"])}</td><td>{r["rep"]}</td>{stages}<td class="num">{len(r.get("attempts", [])) + 1}</td><td>{checks_str}</td>'
                     f'<td class="num">{r.get("input_tokens", "")}</td><td class="num">{r.get("output_tokens", "")}</td>'
                     f'<td class="num">{r.get("reasoning_tokens") or ""}</td><td class="num">{r.get("latency_s", "")}</td>'
-                    f'<td class="num">{r.get("cost_usd", 0):.4f}</td><td class="num">{r.get("total_kg_co2e_over_horizon", "")}</td>'
+                    f'<td class="num">{number(r.get("cost_usd"))}</td><td class="num">{r.get("total_kg_co2e_over_horizon", "")}</td>'
                     f'<td>{open_link(r)}</td></tr>')
     return f'<table class="sortable">{head}<tbody>{"".join(rows)}</tbody></table>'
 
@@ -264,9 +279,9 @@ def per_model_table(records: list[dict]) -> str:
         first_try = sum(1 for r in rs if r.get("first_try_ok", r.get("export_ok")))
         rows.append(f'<tr><td>{esc(model)}</td><td class="num">{n}</td><td class="num">{first_try}/{n}</td><td class="num">{exported}/{n}</td>'
                     f'<td class="num">{checks_passed}/{checks_total}</td>'
-                    f'<td class="num">{sum(r.get("output_tokens", 0) for r in rs) / n:.0f}</td>'
+                    f'<td class="num">{number(mean(rs, "output_tokens"), 0)}</td>'
                     f'<td class="num">{sum(r.get("latency_s", 0) for r in rs) / n:.1f}</td>'
-                    f'<td class="num">{sum(r.get("cost_usd", 0) for r in rs) / n:.4f}</td></tr>')
+                    f'<td class="num">{number(mean(rs, "cost_usd"))}</td></tr>')
     return ('<table class="sortable"><thead><tr><th>model</th><th class="num">runs</th><th class="num">ok first try</th><th class="num">export ok</th>'
             '<th class="num">checks passed</th><th class="num">mean out tok</th><th class="num">mean latency s</th>'
             f'<th class="num">mean cost USD</th></tr></thead><tbody>{"".join(rows)}</tbody></table>')
@@ -289,7 +304,7 @@ def write_html(run_dir: Path, records: list[dict], cases: dict[str, dict]) -> Pa
     body = (
         f'<p><a href="../index.html">← all runs</a></p><h1>Run {esc(run_dir.name)}</h1>'
         f'<p class="muted">models: {esc(", ".join(config.get("models", [])))} · reps: {esc(config.get("reps", ""))} · '
-        f'effort: {esc(config.get("effort") or "provider default")} · total cost: ${sum(r.get("cost_usd", 0) for r in records):.4f}</p>'
+        f'effort: {esc(config.get("effort") or "provider default")} · total cost: ${number(total(records, "cost_usd"))}</p>'
         f'<p class="muted">Trees show the structure the model wrote, not the effective values after library defaults filled the gaps. '
         f'When a number looks off, open the model in the interface (needs a local interface running with DEBUG at {esc(INTERFACE_URL)}).</p>'
         f'<div class="controls"><label>case <select id="f-case"><option value="">all</option>{options("case")}</select></label>'
@@ -312,7 +327,7 @@ def write_index(runs_dir: Path) -> Path:
         rows.append(f"<tr><td>{link}</td><td>{esc(', '.join(config.get('cases', [])))}</td><td>{esc(', '.join(config.get('models', [])))}</td>"
                     f"<td class=\"num\">{esc(config.get('reps', ''))}</td><td>{esc(config.get('effort') or 'default')}</td>"
                     f'<td class="num">{len(records)}</td><td class="num">{exported}/{len(records)}</td>'
-                    f'<td class="num">{sum(r.get("cost_usd", 0) for r in records):.4f}</td></tr>')
+                    f'<td class="num">{number(total(records, "cost_usd"))}</td></tr>')
     body = ("<h1>AI sandbox runs</h1><table><thead><tr><th>run</th><th>cases</th><th>models</th><th class=\"num\">reps</th>"
             "<th>effort</th><th class=\"num\">records</th><th class=\"num\">exported</th><th class=\"num\">cost USD</th></tr></thead>"
             f"<tbody>{''.join(rows)}</tbody></table>")

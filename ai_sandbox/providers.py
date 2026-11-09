@@ -11,8 +11,11 @@ from __future__ import annotations
 
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
+
+from model_builder.application.ai_bootstrap.service import Completion as GenerationCompletion
+from model_builder.application.ai_bootstrap.metrics import estimate_call
 
 SANDBOX_DIR = Path(__file__).parent
 
@@ -52,22 +55,21 @@ DEFAULT_MODELS = ["zai-glm-5-3-flash", "claude-haiku-5-5", "gpt-6-luna", "deepse
 
 
 @dataclass
-class Completion:
-    text: str
-    input_tokens: int
-    output_tokens: int
-    cached_input_tokens: int = 0
-    cache_write_tokens: int = 0
-    reasoning_tokens: int | None = None  # included in output_tokens when the provider reports it
-    latency_s: float = 0.0
-    stop_reason: str | None = None
+class Completion(GenerationCompletion):
+    cache_write_tokens: int | None = None
+    reasoning_tokens: int | None = None
     request_params: dict = field(default_factory=dict)
 
-    def cost_usd(self, model: str) -> float:
+    def cost_usd(self, model: str) -> float | None:
+        if model == "zai-glm-5-3-flash":
+            return estimate_call(self)["cost_usd"]
+        if self.input_tokens is None or self.output_tokens is None:
+            return None
         _, price_in, price_out = MODELS[model]
-        uncached = self.input_tokens - self.cached_input_tokens - self.cache_write_tokens
-        return (uncached * price_in + self.cached_input_tokens * price_in * 0.1
-                + self.cache_write_tokens * price_in * 1.25 + self.output_tokens * price_out) / 1e6
+        cached, written = self.cached_input_tokens or 0, self.cache_write_tokens or 0
+        uncached = self.input_tokens - cached - written
+        return (uncached * price_in + cached * price_in * 0.1
+                + written * price_in * 1.25 + self.output_tokens * price_out) / 1e6
 
 
 MAX_OUTPUT_TOKENS = 16000  # reasoning models spend most of it thinking; 8000 cut mistral-large-4 off
@@ -147,6 +149,9 @@ ADAPTERS = {"anthropic": _anthropic, "openai": _openai, "mistral": _mistral}
 
 
 def complete(model: str, system: str, prompt: str, effort: str | None = None) -> Completion:
+    if model == "zai-glm-5-3-flash":
+        from model_builder.adapters.ai_provider import complete_mistral
+        return Completion(**asdict(complete_mistral(system, prompt)))
     provider = MODELS[model][0]
     effort = effort or DEFAULT_EFFORT.get(model)
     return ADAPTERS[provider](model, system, prompt, effort)

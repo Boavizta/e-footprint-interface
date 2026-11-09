@@ -11,10 +11,9 @@ from efootprint.constants.units import u
 from model_builder.adapters.repositories import InMemorySystemRepository, SessionSystemRepository
 from model_builder.adapters.views import views_ai_assistant
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-# importable once views_ai_assistant has put ai_sandbox on sys.path
-from dsl import build_system, validate_tolerating_extras
-from edit import apply_edits, system_to_dsl
-from providers import Completion
+from model_builder.application.ai_bootstrap.dsl import build_system, validate_tolerating_extras
+from ai_sandbox.edit import apply_edits, system_to_dsl
+from ai_sandbox.providers import Completion
 
 HANDWRITTEN_CASE = Path(django_settings.BASE_DIR) / "ai_sandbox" / "cases" / "_handwritten_01_recipe_app.json"
 URL = "/model_builder/ai-assistant/"
@@ -116,7 +115,7 @@ def test_edit_changes_only_what_is_asked(client, assistant_on, monkeypatch):
     edited = ModelWeb(SessionSystemRepository(client.session))
     system = edited.system.modeling_obj
     browsing = _named(system.usage_patterns, "Browsing").hourly_occurrences
-    assert browsing.form_inputs["initial_volume"] == 5200000 and browsing.form_inputs["start_date"] == "2026-01-01"
+    assert browsing.form_inputs["initial_volume"] == 5200000 and browsing.form_inputs["start_date"] == "2027-01-01"
     steps = _steps(system)
     assert [job.name for job in steps["Open feed"].jobs] == ["Recipe list", "Recipe query", "Recipe thumbnails",
                                                              "Push notification"]

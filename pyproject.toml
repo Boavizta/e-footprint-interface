@@ -51,6 +51,7 @@ gunicorn = "^23"
 psutil = "^7"
 redis = "^5.0"
 orjson = "^3.11"
+mistralai = "^3.5.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
@@ -64,7 +65,6 @@ pytest-django = "^4.11.1"
 pytest-xdist = "^3.8.0"
 anthropic = "^2.3.0"
 openai = "^3.40.0"
-mistralai = "^3.5.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

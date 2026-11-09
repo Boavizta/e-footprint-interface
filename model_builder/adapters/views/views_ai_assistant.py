@@ -7,7 +7,6 @@ end. Any failure is rendered in the assistant box with the model left untouched.
 the view 404s unless AI_ASSISTANT_ENABLED.
 """
 import json
-import sys
 
 from django.conf import settings
 from django.http import Http404
@@ -22,15 +21,14 @@ from model_builder.application.use_cases.simplified_inputs import persist_struct
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import is_empty_model
 
-# The sandbox is a folder of scripts, not a package: import its modules by their top-level names, as its CLI does.
-sys.path.insert(0, str(settings.BASE_DIR / "ai_sandbox"))
-from catalogs import GENAI_PROVIDER_ALIASES, resolve_genai  # noqa: E402
-from dsl import build_system, parse_json, validate_tolerating_extras  # noqa: E402
-from edit import apply_edits, system_to_dsl  # noqa: E402
-from providers import DEFAULT_MODELS, MODELS, complete  # noqa: E402
+from model_builder.application.ai_bootstrap.catalogs import GENAI_PROVIDER_ALIASES, resolve_genai
+from model_builder.application.ai_bootstrap.dsl import build_system, parse_json, validate_tolerating_extras
+from model_builder.application.ai_bootstrap.service import system_prompt
+from ai_sandbox.edit import apply_edits, system_to_dsl
+from ai_sandbox.providers import DEFAULT_MODELS, MODELS, complete
 
 PROMPTS = settings.BASE_DIR / "ai_sandbox" / "prompts"
-SYSTEM_PROMPT = (PROMPTS / "system_prompt.md").read_text()
+SYSTEM_PROMPT = system_prompt()
 EDIT_PROMPT = SYSTEM_PROMPT + "\n\n" + (PROMPTS / "edit_prompt.md").read_text()
 
 
