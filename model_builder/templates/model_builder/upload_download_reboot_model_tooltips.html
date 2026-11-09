@@ -130,7 +130,7 @@
                         <li><button type="button" class="dropdown-item" data-ai-bootstrap-entry="toolbar"
                                     hx-post="{% url 'start-ai-bootstrap' %}" hx-target="#main-content-block"
                                     hx-swap="innerHTML" hx-disabled-elt="button:not(:disabled)"
-                                    data-confirm-when-model-not-empty="This will discard your current modeling and start a new one with AI. Continue?"
+                                    data-confirm-when-model-not-empty="This will discard your current modeling and its unsaved edits now. Closing the AI panel or a failed generation will leave an empty modeling. Export first if you want to keep it. The other modeling, if any, will be preserved. Continue?"
                                     _="on click call collapseNavbarIfShown()">Start with AI <span class="badge text-bg-light border">Beta</span></button></li>
                         {% endif %}
                         <li class="nav-item">

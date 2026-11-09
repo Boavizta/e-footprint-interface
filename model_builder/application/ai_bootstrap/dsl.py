@@ -189,13 +189,8 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-MODELING_HORIZON = {"start_date": MODELING_START_DATE, "modeling_duration_value": MODELING_DURATION_YEARS,
-                   "modeling_duration_unit": "year"}
-
-
-def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None,
-                       horizon: dict = MODELING_HORIZON):
-    """Hourly volume from the DSL period, over the generation horizon unless an existing series' start and duration are given."""
+def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
+    """Hourly volume from the DSL period over the fixed generation horizon."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -204,7 +199,9 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comme
     elif per == "week":
         value, per = value / 7, "day"
     return ExplainableHourlyQuantitiesFromFormInputs({
-        **horizon,
+        "start_date": MODELING_START_DATE,
+        "modeling_duration_value": MODELING_DURATION_YEARS,
+        "modeling_duration_unit": "year",
         "initial_volume": value,
         "initial_volume_timespan": per,
         "net_growth_rate_in_percentage": growth_pct_per_year,
@@ -237,15 +234,10 @@ def _label(name: str, resolutions: list[Resolution]) -> str:
 
 
 class _Shared:
-    """One instance per device archetype, network and country, shared across patterns.
+    """One instance per device archetype, network and country, shared across patterns."""
 
-    Seeding it with a model's existing instances (keyed by archetype, network kind and country key) makes new
-    patterns reuse them instead of adding a second "Default smartphone".
-    """
-
-    def __init__(self, resolutions: list[Resolution], devices: dict = None, networks: dict = None,
-                 countries: dict = None):
-        self.devices, self.networks, self.countries = dict(devices or {}), dict(networks or {}), dict(countries or {})
+    def __init__(self, resolutions: list[Resolution]):
+        self.devices, self.networks, self.countries = {}, {}, {}
         self.resolutions = resolutions
 
     def devices_for(self, kind: str | None) -> list:
@@ -278,11 +270,10 @@ class _Shared:
 
 
 def _lookup(mapping: dict, name: str, kind: str):
-    """By the name as written, else as the builders label it (an edit's lookups are keyed by the model's names)."""
-    for key in (name, _label(name, [])):
-        if key in mapping:
-            return mapping[key]
-    raise ValueError(f"Unknown {kind} '{name}' (known: {sorted(mapping)})")
+    """Resolve a reference by its declared name before display labels are humanized."""
+    if name not in mapping:
+        raise ValueError(f"Unknown {kind} '{name}' (known: {sorted(mapping)})")
+    return mapping[name]
 
 
 def build_server(s: ServerSpec, resolutions: list[Resolution]) -> ServerBase:
