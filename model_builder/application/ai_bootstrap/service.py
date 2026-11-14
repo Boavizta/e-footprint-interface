@@ -5,6 +5,8 @@ from typing import Callable
 
 from efootprint.core.system import System
 
+from model_builder.narrate import narrate
+
 from .catalogs import Resolution
 from .dsl import build_system, parse_json, validate_tolerating_extras
 
@@ -35,10 +37,15 @@ def build_answer(text: str) -> GeneratedModel:
     if data is None:
         raise ValueError("Invalid JSON answer")
     spec, ignored = validate_tolerating_extras(data)
+    narrate("The answer is read as JSON and **held to the bootstrap schema** by `validate_tolerating_extras`: a "
+            "field the schema does not know is dropped and listed, anything else wrong refuses the answer.",
+            lambda: {"ignored_fields": ignored})
     system, resolutions = build_system(spec)
     return GeneratedModel(system, resolutions, ignored)
 
 
 def generate(description: str, complete: Callable[[str, str], Completion]) -> tuple[GeneratedModel, Completion]:
+    narrate("**One request** carries the shared `system_prompt` and the description to the provider.",
+            lambda: {"description_characters": len(description)})
     completion = complete(system_prompt(), description)
     return build_answer(completion.text), completion

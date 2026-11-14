@@ -15,6 +15,7 @@ from model_builder.application.ai_bootstrap.service import generate
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded, PayloadSizeLimitExceeded
 from model_builder.domain.services import SCRATCH_ID, SystemValidationService, get_example_system_data, is_empty_model
+from model_builder.narrate import event, narrate
 
 
 def _input_response(request, workspace, description="", error=""):
@@ -26,12 +27,16 @@ def _input_response(request, workspace, description="", error=""):
 
 @require_POST
 def start_ai_bootstrap(request):
+    event("The user chooses to start a modeling with AI.")
     if not is_available():
         raise Http404
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
     repository.interface_config = {}
+    narrate("The active slot **restarts from an empty modeling**, loaded by `load_system_into_session` like any "
+            "other, its interface settings dropped. The other slot keeps its own.", lambda: {"slot": repository.slot})
     model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID), workspace=workspace)
+    narrate("The builder comes back with **the description panel open and empty**, and no example picker.")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
                                 extra_context={"ai_panel": "input", "ai_prompt": ""})
 
@@ -49,11 +54,15 @@ def _impact_label(value):
 
 @require_POST
 def generate_ai_bootstrap(request):
+    event("The user submits the description of their system.")
     if not is_available():
         raise Http404
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
     description = request.POST.get("description", "").strip()
+    narrate("A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active "
+            "slot's saved modeling as empty, and with a description to send.",
+            lambda: {"slot": repository.slot, "description_characters": len(description)})
     if not is_empty_model(repository.get_system_data()):
         return _input_response(request, workspace, description, "Start with AI again to replace this modeling.")
     if not description:
@@ -73,7 +82,11 @@ def generate_ai_bootstrap(request):
     try:
         raw = system_to_json(generated.system, save_computed_state=False)
         repository.interface_config = {}
+        narrate("The graph is serialized without its computed state and **prepared as any imported modeling is**, by "
+                "`prepare_system_for_session`: upgraded, recomputed, its id kept distinct from the other slot's.")
         prepared = prepare_system_for_session(repository, raw, workspace=workspace)
+        narrate("`SystemValidationService` says whether the modeling **is complete enough to compute**. An incomplete "
+                "one is refused, and nothing is saved.", lambda: {"system": prepared.system.name})
         valid = SystemValidationService().validate_for_computation(prepared).is_valid
     except PayloadSizeLimitExceeded:
         return _input_response(request, workspace, description,
@@ -87,6 +100,8 @@ def generate_ai_bootstrap(request):
                                "The generated modeling is incomplete. "
                                "Describe its usages and infrastructure, then try again.")
     try:
+        narrate("`ModelWeb` **saves the modeling once**, through the normal persistence boundary. Until this line the "
+                "slot still held the empty one.")
         prepared.persist_to_cache()
     except PayloadSizeLimitExceeded:
         return _input_response(request, workspace, description,
@@ -101,6 +116,12 @@ def generate_ai_bootstrap(request):
         impact = _impact_label(metrics["impact_kg"])
     except Exception:
         metrics, impact = {}, None
+    narrate("The call's cost and impact are estimated by `estimate_call` **after the save**: an estimate that fails "
+            "rejects nothing.", lambda: {"cost_usd": metrics.get("cost_usd"), "impact": impact})
+    narrate("The response alone carries the description and the summary panel: **nothing of the generation is "
+            "stored**, in the session or in the saved modeling.",
+            lambda: {"resolutions_shown": sum(item.how != "exact" for item in generated.resolutions),
+                     "ignored_fields": generated.ignored_fields})
     return render_model_builder(request, prepared, show_example_picker=False, workspace=workspace, extra_context={
         "ai_panel": "summary", "ai_prompt": description, "ai_metrics": metrics, "ai_impact": impact,
         "ai_resolutions": [item for item in generated.resolutions if item.how != "exact"],

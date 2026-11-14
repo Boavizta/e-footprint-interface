@@ -31,6 +31,8 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from model_builder.narrate import narrate
+
 from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 
 MODELING_START_DATE = "2027-01-01"
@@ -365,6 +367,11 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
             raise ValueError("Duplicate declaration names")
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
+    narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
+            "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "
+            "snapped to an entry the library knows, and each snap kept as a `Resolution`.",
+            lambda: {"servers": len(spec.servers), "genai_apis": len(spec.genai_apis), "jobs": len(spec.jobs),
+                     "journeys": len(spec.journeys), "usage_patterns": len(spec.usage_patterns)})
     servers = {s.name: build_server(s, resolutions) for s in spec.servers}
     apis = {a.name: build_genai_api(a, resolutions) for a in spec.genai_apis}
     jobs = {j.name: build_job(j, servers, apis, resolutions) for j in spec.jobs}
