@@ -72,6 +72,7 @@
         { "name": "total", "line": 9, "column": 9 },
         { "name": "self", "line": 9, "column": 15 },
         { "name": "subtotal", "line": 10, "column": 9 },
+        { "name": "line", "line": 10, "column": 39 },
         { "name": "basket", "line": 15, "column": 9 },
         { "name": "amount", "line": 17, "column": 5 },
         { "name": "amount", "line": 22, "column": 12 },

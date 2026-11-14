@@ -439,17 +439,11 @@ function srcLink(file: string, line: number, column: number, text: string, extra
   return `<a class="src"${extra} href="vscode://file/${abs}:${line}:${column}" data-review-source-href="${sourceHref({ file, line, column })}"${alts}>${esc(text)}</a>`;
 }
 
-/** Where the test file declares the case: the line of `it('<name>'`, or 1. */
+/** Where the test file declares the case: the line the stack's title reader gives the test of that title, or 1. */
 function testLine(file: string, test: string): number {
   const abs = join(ROOT, file);
   if (!existsSync(abs)) return 1;
-  const src = readFileSync(abs, 'utf8');
-  const needles = [`'${test.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`, `"${test}"`, `\`${test}\``];
-  for (const needle of needles) {
-    const at = src.indexOf(needle);
-    if (at >= 0) return src.slice(0, at).split('\n').length;
-  }
-  return 1;
+  return titles.read(file, readFileSync(abs, 'utf8')).tests.find((t) => t.title === test)?.line ?? 1;
 }
 
 function testLink(story: Story, extra = ''): string {
@@ -1906,7 +1900,7 @@ ${ridesOnHtml(products, narratives, index, PRODUCT_LINKS)}
 <h2 id="narratives">Narratives</h2>
 ${products.map((n) => narrativeHtml(n, stories, narratives, index, PRODUCT_LINKS, backlinks)).join('\n')}
 `;
-  const crumb = `comprehension · narratives / review · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt}`;
+  const crumb = `comprehension · narratives / ${esc(config.productPage)} · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt}`;
   return pageHtml(title, crumb, body, 'skeleton (title, lede) hand-written; the narratives from the tests that declare them; every step, link, chip, stop and value from the run, every symbol link from the source index, every "rides on" from the mechanisms\' own stories, every debt / rule / convention marker from the pages that name the code.');
 }
 
