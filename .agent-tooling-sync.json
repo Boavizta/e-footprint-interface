@@ -40,6 +40,7 @@
       "comprehension-harness/source-index.ts",
       "comprehension-harness/stack.md",
       "comprehension-harness/stack.ts",
+      "comprehension-harness/tests/backlinks.test.ts",
       "comprehension-harness/tests/commits.test.ts",
       "comprehension-harness/tests/fixtures/shop/README.md",
       "comprehension-harness/tests/fixtures/shop/shop/checkout.py",

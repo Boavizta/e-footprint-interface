@@ -76,8 +76,10 @@ export interface BacklinkIndex {
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
-/** What `--check` holds a token to: a token shaped like a declared symbol (PascalCase or camelCase, ≥ 3 chars). */
-export const LOOKS_DECLARED = /^(?:[A-Z][A-Za-z0-9]{2,}|[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*)$/;
+/** What `--check` holds a token to: a token shaped like a declared symbol, in whichever style the code is
+ *  written. PascalCase or camelCase (≥ 3 chars), or words joined by an underscore: snake_case, with the
+ *  underscores a private name opens with, and CONSTANT_CASE. One lowercase word is shaped like any word. */
+export const LOOKS_DECLARED = /^(?:[A-Z][A-Za-z0-9]{2,}|[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*|_*[a-z][a-z0-9]*(?:_[a-z0-9]+)+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)$/;
 
 // ── Splitting ──────────────────────────────────────────────────────────────────
 
@@ -233,7 +235,7 @@ export function markersFor(index: BacklinkIndex, step: StepKeys): Marker[] {
 // ── `--check` ──────────────────────────────────────────────────────────────────
 
 const CODE_FOLDERS = config.source.words;
-const CODE_EXT = /\.(?:[cm]?[jt]sx?|sql|json|toml|css|html|md)$/;
+const CODE_EXT = /\.(?:[cm]?[jt]sx?|py|sql|json|toml|css|html|md)$/;
 
 /** Every identifier-shaped word in the code folders, with the top folders it appears in — so a token
  *  that resolves to nothing can be told apart: absent from the code altogether (stale), or present but
