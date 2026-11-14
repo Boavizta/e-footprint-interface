@@ -32,14 +32,14 @@ write, and `npm run map` has no source index to read. A feature in flight on `pl
 `tasks.md` is finished by hand or ported once the stack exists; a bug batch keeps its own form
 (`bug-fixes`, `bug-fixes-plan`).
 
-What the stack will be, as `comprehension-harness/stack.ts` asks it and
+What the stack will be, as its contract asks it (`comprehension-harness/stack.md`) and
 `comprehension.config.json` already names it:
 
 | The method says | Here |
 |---|---|
 | The three calls | `narrate`, `event`, `planned`, importable from `model_builder/` and inert in production. To write |
 | A place that changes, a place that goes, a shell | The `planned` call and its two variants. To write with the calls |
-| A planned test | To decide: how pytest spells a test that has a title and no body (a marker carrying the tag and the title) |
+| A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` on a test function with an empty body. To write |
 | A narrative, its reference case | A pytest file under `tests/narratives/`, a marker for the narrative and one for its reference case, and a pytest plugin that writes what each test crossed. To write |
 | The source index, the test titles, the watch | `scripts/comprehension_python/source_index.py`, `titles.py` and `watch.py`: the three commands of the configuration. To write |
 | A journey | Not drawn from a run here: a feature's spec is its `spec.md`, and what changes on screen is described against the hand-drawn journey under `specs/design/journeys/` |

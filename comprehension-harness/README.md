@@ -6,7 +6,8 @@ both. This package builds and maintains that layer. It is copied into a project 
 there; nothing is installed from a registry.
 
 The method it serves is `specs/workflow.md`; the forms it holds a feature's files to are
-`specs/workflow-formats.md`; what a stack must give it is `stack.ts`.
+`specs/workflow-formats.md`; what a stack must give it is [`stack.md`](stack.md), and as types
+`stack.ts`.
 
 ## What is copied
 
@@ -41,7 +42,7 @@ They are written for any project. What a project is to them is the three things 
    since the local app stops when it exits. A runner with no watch mode needs a small loop of
    the stack's own.
 
-3. **The stack**, which gives the tools four things (`stack.ts`):
+3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
    - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production;
    - a collector that writes what each test crossed as a story file under `<cache>/stories/`;
    - the source index and the test titles: a module for a stack that runs in Node, or two
