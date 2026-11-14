@@ -74,9 +74,10 @@ what each is for and who approves what.
 4. **Implement** — one lot a run: built, checked against the approved plan, reviewed. Skills: `feature-implement`, `task-implement`, `task-review`.
 5. **Archive** — durable facts promoted to the reference docs, the feature folder deleted. Skill: `feature-archive`.
 
-Stages 2 to 4 need the Python stack of the comprehension tools, which is not written yet
-(`.agents/repository.md` § "The stack"). Until it is, a feature in flight on `plan.html` and
-`tasks.md` is finished by hand.
+Stages 2 to 4 run on the Python stack of the comprehension tools: the `narrate`, `event` and
+`planned` calls of `model_builder/narrate.py`, the declarations of `tests/declare.py` and the three
+commands under `scripts/comprehension_python/` (`.agents/repository.md` § "The stack" says how each
+is spelled). A feature in flight on `plan.html` and `tasks.md` is finished by hand.
 
 Investigations and ad-hoc design work are exempt; the staged flow is for features that ship.
 Conversational bug batches use `bug-fixes` (diagnostics plus `tasks.md`), then `bug-fixes-plan` (`plan.html` grouping the bugs and ordering the runs), followed by the implement, review and archive stages.

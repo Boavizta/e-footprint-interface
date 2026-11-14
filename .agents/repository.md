@@ -26,22 +26,22 @@ is particular to this one here. `AGENTS.md` stays the entry point and wins where
 
 ## The stack
 
-**The Python stack of the comprehension harness is not written yet.** Until it is, no narrative
-page renders here and a feature cannot be planned in pieces: `spec-plan` has no `planned` call to
-write, and `npm run map` has no source index to read. A feature in flight on `plan.html` and
-`tasks.md` is finished by hand or ported once the stack exists; a bug batch keeps its own form
-(`bug-fixes`, `bug-fixes-plan`).
-
-What the stack will be, as its contract asks it (`comprehension-harness/stack.md`) and
-`comprehension.config.json` already names it:
+The Python stack of the comprehension harness is written to its contract
+(`comprehension-harness/stack.md`), and `comprehension.config.json` names its commands. One flow
+is narrated, the AI-assisted bootstrap (`tests/narratives/test_ai_bootstrap.py`); the others
+have no narrative yet. A feature in flight on `plan.html` and `tasks.md` is finished by hand or
+ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 
 | The method says | Here |
 |---|---|
-| The three calls | `narrate`, `event`, `planned`, importable from `model_builder/` and inert in production. To write |
-| A place that changes, a place that goes, a shell | The `planned` call and its two variants. To write with the calls |
-| A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` on a test function with an empty body. To write |
-| A narrative, its reference case | A pytest file under `tests/narratives/`, a marker for the narrative and one for its reference case, and a pytest plugin that writes what each test crossed. To write |
-| The source index, the test titles, the watch | `scripts/comprehension_python/source_index.py`, `titles.py` and `watch.py`: the three commands of the configuration. To write |
+| The three calls | `from model_builder.narrate import narrate, event, planned`, always by name. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The watch is a function: `narrate("…", lambda: {"count": n})` |
+| A place that changes, a place that goes, a shell | `planned("<feature>#<slug>", "<sentence>")` on existing code; `planned.remove(…)` in a function that goes; a shell is a new function whose whole body, under an optional docstring, is the `planned` call then `raise NotImplementedError("planned: <feature>#<slug>")`. One call a line |
+| A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `tests/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
+| A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |
+| A narrative, its reference case | A test class under `@narrative("<title>")` of `tests/declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
+| What each test crossed | `tests/narrate_collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension-harness/stories/` |
+| The source index, the test titles, the watch | `scripts/comprehension_python/source_index.py`, `titles.py` and `watch.py`: the three commands of the configuration, standard library only, run by `python3`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
+| A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class |
 | A journey | Not drawn from a run here: a feature's spec is its `spec.md`, and what changes on screen is described against the hand-drawn journey under `specs/design/journeys/` |
 | The tier of a test | Where its file stands: narrative under `tests/narratives/`, browser under `tests/e2e/`, unit otherwise (`tests/unit_tests/`, `tests/integration/`, `js_tests/`) |
 | Product code | `model_builder/`, `e_footprint_interface/`, `theme/` |
@@ -61,6 +61,8 @@ What the stack will be, as its contract asks it (`comprehension-harness/stack.md
 | The browser tests | `poetry run pytest tests/e2e -n 4`, against `poetry run python manage.py runserver` on `http://localhost:8000`. `tests/e2e/test_ai_bootstrap.py` starts its own server and runs before the rest (`specs/testing.md` § "AI bootstrap browser harness") |
 | The JavaScript tests | `npm run jest`; `npm run build:js:dev` first after an edit under `theme/static/scripts/` |
 | The comprehension tools' own tests | `npx vitest run comprehension-harness` |
+| The Python stack's tests | `poetry run pytest tests/unit_tests/comprehension_python` |
+| The narrative tests | `poetry run pytest tests/narratives` |
 | The review-link extension's routes | `node --test tools/vscode-plan-review-links/extension.test.js` |
 | The links of a `plan.html` | `python3 .agents/skills/feature-implement/scripts/vscode_review_links.py <plan.html> --in-place` |
 | The ledger | `python3 ai-usage/usage.py collect`, then `python3 ai-usage/usage.py report --owner e-footprint-interface --feature <feature> [--run <x>]` |

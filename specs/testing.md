@@ -10,6 +10,7 @@ This is the canonical testing guide. `tests/AGENTS.md`, `tests/integration/AGENT
 | Python unit | `tests/unit_tests/` | pytest | Single-class behaviour: entity hooks, form parsing, view parameter mapping, UI config providers |
 | Integration | `tests/integration/` | pytest | Cross-layer workflows without a browser: create/edit/delete round-trips, cascade deletion, calculated attributes |
 | E2E | `tests/e2e/` | Playwright + pytest | Full user workflows in a real browser; anything involving HTMX swaps, JS interactions, or rendered output |
+| Narrative | `tests/narratives/` | pytest | One flow crossed in order through its `narrate` calls, to draw its page; see [Narrative tests](#narrative-tests-testsnarratives) |
 
 ## Running tests
 
@@ -30,6 +31,10 @@ node --test tools/vscode-plan-review-links/extension.test.js
 
 # Comprehension tools (vitest, on inputs built by hand; always with the folder, jest owns js_tests/)
 npx vitest run comprehension-harness
+
+# Their Python stack (the source index, the title reader, the collector) and the narratives it records
+poetry run pytest tests/unit_tests/comprehension_python
+poetry run pytest tests/narratives
 
 # Shared-file synchronization script
 python3 scripts/test_sync_agent_tooling.py
@@ -124,6 +129,28 @@ Two patterns are load-bearing and must be preserved when extending:
 ### Coverage rule for new efootprint API consumption
 
 When a feature reaches into a new public efootprint API (a method/property/dict-attr on a `ModelingObject` subclass that no existing interface test path was already exercising), add either an integration assertion (Clean Architecture layer) or an entry in `test_results_views_smoke.py` (new archetype or endpoint) that exercises the new call site. The library covers `cached_property` automatically via `run_test_materialize_all_cached_properties`, but plain `@property`, methods, and dict lookups need an explicit interface-side touch. The `task-review` skill flags this as a checklist item.
+
+## Narrative tests (`tests/narratives/`)
+
+A narrative test crosses one flow in order so that its page can be drawn
+(`npm run comprehension:render`, then `specs/comprehension-harness/narratives/modeling.html`). The flow tells
+itself: `narrate` at each step and `event` at its cause, imported from `model_builder/narrate.py`
+and inert outside a test run. The test declares the narrative with `tests/declare.py`:
+
+- `@narrative("<title>")` on a test class; the first paragraph of its docstring is the summary.
+- Its first test is the reference case, the one the page tells step by step, unless another is
+  marked `@canonical`. The other tests are variants: a refusal, a failure.
+- Assert what the flow gives, as any test does. The steps are recorded, not asserted.
+
+`tests/narrate_collector.py` is loaded for every pytest run and writes what each test crossed
+under `node_modules/.cache/comprehension-harness/stories/`, one file a test file; a test that
+crosses no call costs nothing. `npx tsx comprehension-harness/render.ts --check` holds a narrative
+to its form: every step after a cause, every sentence within its budget, every symbol it names
+found. How each declaration is spelled: `.agents/repository.md` § "The stack".
+
+The stack's own tests are `tests/unit_tests/comprehension_python/`. They run its commands as the
+tools do, on small projects written to a temporary folder: a fixture kept as a file under `tests/`
+would be read by the render as a test or a plan of this project.
 
 ## E2E tests (`tests/e2e/`)
 
