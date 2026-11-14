@@ -1,12 +1,15 @@
 {
   "name": "plan-review-links",
   "displayName": "Plan Review Links",
-  "description": "Open plan source links and diffs, or debug a linked pytest or vitest reproduction.",
-  "version": "0.0.8",
+  "description": "Open a plan's linked source file or its diff against main, or debug the vitest or pytest case a link names, unmasked — from a page opened as a file or served.",
+  "version": "0.0.11",
   "publisher": "local",
   "license": "Apache-2.0",
   "files": [
     "extension.js",
+    "vitest-run.js",
+    "pytest-run.js",
+    "package.json",
     "README.md",
     "LICENSE"
   ],

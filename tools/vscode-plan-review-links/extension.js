@@ -4,6 +4,8 @@ const { promisify } = require("node:util");
 const { execFile } = require("node:child_process");
 const fs = require("node:fs/promises");
 const vscode = require("vscode");
+const { testNameAt, vitestArgs } = require("./vitest-run");
+const { TEST_ID, isPytestFile, pytestIdAt, pytestArgs } = require("./pytest-run");
 
 const git = promisify(execFile);
 const originalScheme = "plan-main";
@@ -104,29 +106,19 @@ async function handleDiff(uri) {
   );
 }
 
-/** The `it(` / `test(` / `describe(` call at or just after `line`, as vitest's -t wants it. */
-function testNameAt(source, line) {
-  const lines = source.split(/\r?\n/);
-  const call = /^\s*(?:it|test|describe)(?:\.(?:only|skip|each|skipIf|runIf)(?:\([^)]*\))?)?\s*\(\s*(['"`])((?:\\.|(?!\1).)*)\1/;
-  for (let i = line - 1; i < Math.min(lines.length, line + 2); i += 1) {
-    const match = lines[i]?.match(call);
-    if (match) return match[2].replace(/\\(['"`])/g, "$1");
-  }
-  return null;
-}
-
-/** Which vitest config runs a test file: the db and migrations suites have their own. */
-function configFor(relativePath) {
-  if (relativePath.startsWith("tests/db/")) return ["--config", "vitest.db.config.ts"];
-  if (relativePath.startsWith("tests/migrations/")) return ["--config", "vitest.migrations.config.ts"];
-  return [];
-}
-
+/** One link shape for every stack, a test file and a line: the file says which runner the line
+ *  belongs to. */
 async function handleDebugTest(uri) {
   if (uri.path !== "/debug-test") return false;
 
   const query = new URLSearchParams(uri.query);
   const filePath = await fileFromQuery(query);
+  const line = Number(query.get("line"));
+  const lineGiven = Number.isInteger(line) && line > 0;
+  if (filePath.endsWith(".py")) {
+    await debugPytest(query, async (file) => (lineGiven ? pytestIdAt(await fs.readFile(file, "utf8"), line) : null));
+    return true;
+  }
   const file = vscode.Uri.file(filePath);
   const folder = vscode.workspace.getWorkspaceFolder(file);
   if (!folder) throw new Error("Open the repository in VS Code first.");
@@ -134,68 +126,54 @@ async function handleDebugTest(uri) {
   const { stdout } = await git("git", ["-C", path.dirname(filePath), "rev-parse", "--show-toplevel"]);
   const repoRoot = stdout.trim();
   const relativePath = path.relative(repoRoot, filePath).split(path.sep).join("/");
-  const line = Number(query.get("line"));
   const source = await fs.readFile(filePath, "utf8");
-  const name = Number.isInteger(line) && line > 0 ? testNameAt(source, line) : null;
-
-  const args = ["run", ...configFor(relativePath), relativePath];
-  if (name) args.push("-t", name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-
-  // `break=<path>:<line>|<path>:<line>` — the narrative's watch points, absolute from a page
-  // opened as a file, from the repository root from a served one.
-  // Each becomes a source breakpoint unless one is already set on that line, so
-  // the debugger stops where the narrative says to look; the ones added here go
-  // when the run ends, so they never catch an unrelated debugging session.
-  const wanted = (query.get("break") || "").split("|").filter(Boolean).map((entry) => {
-    const match = entry.match(/^(.*):(\d+)$/);
-    if (!match) throw new Error(`Bad breakpoint "${entry}".`);
-    const breakPath = path.isAbsolute(match[1]) ? match[1] : path.join(repoRoot, match[1]);
-    return { file: vscode.Uri.file(breakPath), line: Number(match[2]) };
-  });
-  const existing = new Set(vscode.debug.breakpoints
-    .filter((b) => b instanceof vscode.SourceBreakpoint)
-    .map((b) => `${b.location.uri.fsPath}:${b.location.range.start.line + 1}`));
-  const added = wanted
-    .filter(({ file, line }) => !existing.has(`${file.fsPath}:${line}`))
-    .map(({ file, line }) => new vscode.SourceBreakpoint(new vscode.Location(file, new vscode.Position(line - 1, 0))));
-  if (added.length > 0) vscode.debug.addBreakpoints(added);
+  const name = lineGiven ? testNameAt(source, line) : null;
+  const args = vitestArgs(relativePath, name);
 
   await vscode.window.showTextDocument(file, {
     selection: name ? new vscode.Range(line - 1, 0, line - 1, 0) : undefined,
     preserveFocus: true,
   });
-  const run = `plan-review-links-${Date.now()}`;
-  const ended = vscode.debug.onDidTerminateDebugSession((session) => {
-    if (session.configuration.planReviewRun !== run) return;
-    ended.dispose();
-    vscode.debug.removeBreakpoints(added);
-  });
+  // Breakpoints are the reader's own: the route sets none.
   const started = await vscode.debug.startDebugging(folder, {
-    planReviewRun: run,
     type: "node",
     request: "launch",
     name: name ? `vitest · ${name}` : `vitest · ${relativePath}`,
     program: path.join(repoRoot, "node_modules", "vitest", "vitest.mjs"),
     args,
     cwd: repoRoot,
+    // A bug-fixes reproduction runs as `it.fails` until its fix: unmasked, the debug run ends on
+    // the real assertion or stack instead of an expected-failure pass. No effect on other tests.
+    env: { REPRO_UNMASK: "1" },
     console: "integratedTerminal",
     autoAttachChildProcesses: true,
     smartStep: true,
     skipFiles: ["<node_internals>/**", "**/node_modules/**"],
   });
-  if (!started) {
-    ended.dispose();
-    vscode.debug.removeBreakpoints(added);
-  }
+  if (!started) throw new Error("VS Code could not start the debugger.");
   return true;
 }
 
-// A separate route keeps the existing vitest links working unchanged.
+/** A link that names its pytest test itself (`test=`), as a plan's Debug reproduction button
+ *  does. `/debug-test` reaches the same run from a line. */
 async function handleDebugPytest(uri) {
   if (uri.path !== "/debug-pytest") return false;
-  if (!vscode.workspace.isTrusted) throw new Error("Trust the workspace before running a reproduction.");
-
   const query = new URLSearchParams(uri.query);
+  await debugPytest(query, () => {
+    const test = query.get("test");
+    if (!test || !TEST_ID.test(test)) {
+      throw new Error("The link must name its pytest test id, as `test_name` or `TestClass::test_name`.");
+    }
+    return test;
+  });
+  return true;
+}
+
+/** Starts pytest under the Python debugger on the file a query names: on the test `testOf`
+ *  answers for it, or on the whole file when it answers null. */
+async function debugPytest(query, testOf) {
+  if (!vscode.workspace.isTrusted) throw new Error("Trust the workspace before running a test.");
+
   const filePath = await fs.realpath(await fileFromQuery(query));
   const file = vscode.Uri.file(filePath);
   const { stdout } = await git("git", ["-C", path.dirname(filePath), "rev-parse", "--show-toplevel"]);
@@ -204,11 +182,8 @@ async function handleDebugPytest(uri) {
     throw new Error("Open e-footprint-interface, e-footprint, or their shared workspace in VS Code first.");
   }
   const relativePath = path.relative(repoRoot, filePath).split(path.sep).join("/");
-  const test = query.get("test");
-  if (!relativePath.startsWith("tests/") || !relativePath.endsWith(".py")
-      || !test || !/^(?:Test\w*::)?test_\w+(?:\[[^\r\n]+\])?$/.test(test)) {
-    throw new Error("The link must name a Python test under tests/ and its pytest test id.");
-  }
+  if (!isPytestFile(relativePath)) throw new Error("The link must name a Python test file under tests/.");
+  const test = await testOf(filePath);
   const debuggerExtension = vscode.extensions.getExtension("ms-python.debugpy");
   if (!debuggerExtension) throw new Error("Install the Python Debugger extension (ms-python.debugpy) first.");
   await debuggerExtension.activate();
@@ -222,16 +197,14 @@ async function handleDebugPytest(uri) {
   const python = environment.stdout.trim();
   if (!path.isAbsolute(python)) throw new Error("No Poetry environment found; run poetry install in the repository first.");
 
-  const args = ["--runxfail", "--no-cov", "-o", "addopts=", "-s", "-vv", "--tb=long", "-x", `${relativePath}::${test}`];
-  if (relativePath.startsWith("tests/e2e/")) args.push("--base-url", "http://localhost:8000", "--headed");
   await vscode.window.showTextDocument(file, { selection: selectionAt(query), preserveFocus: true });
   const started = await vscode.debug.startDebugging(vscode.workspace.getWorkspaceFolder(file), {
     type: "debugpy",
     request: "launch",
-    name: `Reproduction · ${test}`,
+    name: `pytest · ${test || relativePath}`,
     python,
     module: "pytest",
-    args,
+    args: pytestArgs(relativePath, test),
     cwd: repoRoot,
     envFile: path.join(repoRoot, ".env"),
     env: { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "" },
@@ -241,7 +214,6 @@ async function handleDebugPytest(uri) {
     stopOnEntry: false,
   });
   if (!started) throw new Error("VS Code could not start the Python debugger.");
-  return true;
 }
 
 function activate(context) {

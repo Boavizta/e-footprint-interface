@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const Module = require("node:module");
 const fs = require("node:fs/promises");
+const os = require("node:os");
 const path = require("node:path");
 const { test } = require("node:test");
 
@@ -135,9 +136,15 @@ test("new file is compared with empty content", async () => {
 });
 
 test("paths outside the open workspace are rejected", async () => {
-  await openDiff(path.join(workspaceRoot, "e-footprint-interface-worktree/AGENTS.md"));
-  assert.equal(calls.length, 0);
-  assert.match(errors[0], /Open e-footprint-interface/);
+  // A repository of its own, outside the workspace and not one of the two sibling checkouts.
+  const directory = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "review-links-test-")));
+  try {
+    await promisify(childProcess.execFile)("git", ["-C", directory, "init", "-q"]);
+    await fs.writeFile(path.join(directory, "AGENTS.md"), "elsewhere\n");
+    await openDiff(path.join(directory, "AGENTS.md"));
+    assert.equal(calls.length, 0);
+    assert.match(errors[0], /Open e-footprint-interface/);
+  } finally { await fs.rm(directory, { recursive: true }); }
 });
 
 async function debugPytest(overrides = {}) {
@@ -183,6 +190,43 @@ test("browser reproduction launches headed with the documented server URL", asyn
   });
   assert.deepEqual(errors, []);
   assert.deepEqual(debugRuns[0].configuration.args.slice(-3), ["--base-url", "http://localhost:8000", "--headed"]);
+});
+
+async function debugTestAt(file, find, offset = 0) {
+  debugRuns.length = 0;
+  errors.length = 0;
+  const filePath = path.join(interfaceRoot, file);
+  const query = new URLSearchParams({ path: filePath });
+  if (find) {
+    const lines = (await fs.readFile(filePath, "utf8")).split("\n");
+    query.set("line", String(lines.findIndex((text) => text.includes(find)) + 1 + offset));
+  }
+  await handler.handleUri({ path: "/debug-test", query: query.toString() });
+}
+
+test("a line of a pytest file runs the test it is in, with its class, through the same launcher", async () => {
+  await debugTestAt("tests/unit_tests/adapters/views/test_views_deletion.py", "def test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card", 2);
+  assert.deepEqual(errors, []);
+  assert.equal(debugRuns[0].configuration.type, "debugpy");
+  assert.deepEqual(debugRuns[0].configuration.env, { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "" });
+  assert.ok(debugRuns[0].configuration.args.includes("tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"));
+
+  await debugTestAt("tests/e2e/objects/test_jobs.py", "def test_deleting_nested_and_top_level_cards_logs_no_console_error");
+  assert.deepEqual(errors, []);
+  assert.deepEqual(debugRuns[0].configuration.args.slice(-4), [
+    "tests/e2e/objects/test_jobs.py::TestJobs::test_deleting_nested_and_top_level_cards_logs_no_console_error",
+    "--base-url", "http://localhost:8000", "--headed",
+  ]);
+});
+
+test("a pytest file linked with no line runs whole, and a Python file outside tests/ does not run", async () => {
+  await debugTestAt("tests/unit_tests/adapters/views/test_views_deletion.py");
+  assert.deepEqual(errors, []);
+  assert.equal(debugRuns[0].configuration.args.at(-1), "tests/unit_tests/adapters/views/test_views_deletion.py");
+
+  await debugTestAt("model_builder/urls.py", "urlpatterns");
+  assert.equal(debugRuns.length, 0);
+  assert.match(errors[0], /Python test file under tests/);
 });
 
 test("links cannot launch a non-test file or a test outside the allowed workspace", async () => {
