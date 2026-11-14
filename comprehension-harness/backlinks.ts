@@ -5,8 +5,8 @@
  * its line, and nobody should write that link. The three pages already name the code they are
  * about in backticks; this module reads them, splits each into entries, resolves every
  * backticked token the way a sentence's symbols are resolved — with no step scope: a top-level
- * declaration of a `src/` file the same entry names, else one unique across `src/`; a `src/…`
- * path (or a unique basename) to the file — and builds a map from symbol or file to the entries
+ * declaration of a source file the same entry names, else one unique across the source; a source
+ * file's path (or a unique basename) to the file — and builds a map from symbol or file to the entries
  * that name it. The renderer marks a step whose function, file, or linked sentence symbol the
  * map names, and `--check` prints the two informative lists.
  *
@@ -40,9 +40,9 @@ export type { Location };
 
 /** What the index asks of the source (`SourceIndex` answers it). */
 export interface UnscopedResolver {
-  /** Rules 2 and 3 with no step scope: a top-level declaration in one of `files`, else one unique across `src/`. */
+  /** Rules 2 and 3 with no step scope: a top-level declaration in one of `files`, else one unique across the source. */
   resolveUnscoped(name: string, files: readonly string[]): Location | null;
-  /** The `src/` file a path or a unique basename names; null for a folder, a glob or a file outside the program. */
+  /** The source file a path or a unique basename names; null for a folder, a glob or a file outside the program. */
   sourceFile(token: string): string | null;
 }
 
@@ -150,14 +150,19 @@ function leadOf(e: RawEntry): string {
 
 // ── Tokens ─────────────────────────────────────────────────────────────────────
 
+/** A token written like a file, with the line or the lines that may follow it (`:12`, `:12-20`): a path from
+ *  the root, or a file's name with its extension. Which folders hold the source and in which languages is not
+ *  read here: the stack says whether the token names a source file (`sourceFile`), and one that names none
+ *  (a folder, a unit like `km/h`, `object.field`) resolves to nothing. */
+const PATH_TOKEN = /^(\w[\w.-]*\/[\w./-]*?)(?::\d+(?:-\d+)?)?$/;
+const BASENAME_TOKEN = /^(\w[\w.-]*\.[A-Za-z]\w*)(?::\d+(?:-\d+)?)?$/;
+
 function tokenShape(raw: string): { name: string | null; shape: PageToken['shape'] } {
   let t = raw.trim();
   const call = /^([A-Za-z_$][\w$]*)\([^)]*\)$/.exec(t);
   if (call) t = call[1];
-  const path = /^(src\/[\w./-]*?)(?::\d+(?:-\d+)?)?$/.exec(t);
-  if (path) return { name: path[1], shape: 'file' };
-  const base = /^([\w-]+\.(?:tsx?|css))(?::\d+(?:-\d+)?)?$/.exec(t);
-  if (base) return { name: base[1], shape: 'file' };
+  const file = PATH_TOKEN.exec(t) ?? BASENAME_TOKEN.exec(t);
+  if (file) return { name: file[1], shape: 'file' };
   if (IDENTIFIER.test(t)) return { name: t, shape: 'symbol' };
   return { name: null, shape: 'other' };
 }
@@ -239,7 +244,7 @@ const CODE_EXT = /\.(?:[cm]?[jt]sx?|py|sql|json|toml|css|html|md)$/;
 
 /** Every identifier-shaped word in the code folders, with the top folders it appears in — so a token
  *  that resolves to nothing can be told apart: absent from the code altogether (stale), or present but
- *  not as a top-level declaration under `src/` (a local, a property, a column, declared elsewhere). */
+ *  not as a top-level declaration of the source (a local, a property, a column, declared elsewhere). */
 function codeWords(root: string): Map<string, Set<string>> {
   const words = new Map<string, Set<string>>();
   const walk = (dir: string, top: string): void => {
