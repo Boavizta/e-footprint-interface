@@ -73,3 +73,14 @@ ai-usage/.local/
 !ai-usage/config.json
 !ai-usage/prices.json
 !.claude/settings.json
+
+# The comprehension harness (comprehension-harness/README.md): the pages are generated from the code and
+# a test run, never committed; a page's hand-written head (*.skeleton.html) is.
+specs/comprehension-harness/narratives/*.html
+specs/comprehension-harness/mechanisms/*.html
+!specs/comprehension-harness/**/*.skeleton.html
+specs/comprehension-harness/plans/
+specs/design/journeys-generated/
+specs/features/*/plan-feedback.json
+# Where the map logs each call, on this machine only.
+ai-usage/.state/

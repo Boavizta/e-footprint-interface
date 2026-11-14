@@ -25,15 +25,16 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Testing patterns (unit / integration / E2E layers, fixtures) | `specs/testing.md` |
 | Tech stack and version bounds | `specs/tech_stack.md` |
 | What's planned and in flight | `specs/roadmap.md` |
-| The spec-driven workflow (specify → plan → tasks → implement) | `specs/workflow.md` |
+| The spec-driven workflow (specify → plan → tasks → implement → archive) and the forms of a feature's files | `specs/workflow.md`, `specs/workflow-formats.md` |
+| The comprehension tools (the narrative and plan pages, the map), how they are installed, and what this project gives them | [`comprehension-harness/README.md`](comprehension-harness/README.md), `comprehension.config.json`, `.agents/repository.md` § "The stack" |
 | Shared workflow, agent roles, and usage tooling | [`specs/agent-tooling.md`](specs/agent-tooling.md) |
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
 | UI and design-document copy conventions | `specs/design/writing-style-guide.md` |
 | LinkedIn post drafts and captioned demo video scripts | `communications/README.md` and `communications/video/README.md` |
 | Active feature work | `specs/features/<feature-name>/` |
-| Feature plan links, one-click reproduction debugging, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
-| Final plan review guide (preserved structure, implementation links, consolidated decisions) | `.agents/skills/plan-review-guide/SKILL.md`; delegated at `feature-implement` close-out to the `plan-review-guide` agent, with supervisor-owned decisions |
+| A bug batch's `plan.html`: source links, one-click reproduction debugging, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
+| A bug batch's final plan review guide (preserved structure, implementation links, consolidated decisions) | `.agents/skills/plan-review-guide/SKILL.md`; delegated at `feature-implement` close-out to the `plan-review-guide` agent, with supervisor-owned decisions |
 | Past investigations and dated decisions | `archives/` |
 
 In feature plans, HTML documentation links open in a new browser tab; production source links (including HTML templates) open in VS Code. See the plan-link convention above.
@@ -64,17 +65,21 @@ For full setup options (full local / hybrid / Docker), see [`INSTALL.md`](INSTAL
 
 ## Spec-driven workflow at a glance
 
-Feature work follows four stages. Review the spec, plan and tasks before implementation;
-an authorized `feature-implement` run then completes implementation and reviews autonomously,
-recording only consequential decisions in context in the plan.
+Feature work follows five stages, with a person approving between them. `specs/workflow.md` says
+what each is for and who approves what.
 
-1. **Specify** — write `specs/features/<name>/spec.html` (problem, scope, success criteria). Skill: `spec-specify`.
-2. **Plan** — write `plan.html` (approach, affected modules, risks); surface code-grounded spec simplifications for review. Skill: `spec-plan`.
-3. **Tasks** — write `tasks.md` (ordered, independently-shippable steps). Skill: `spec-tasks`.
-4. **Implement** — execute one task at a time, respecting constitution gates. Skill: `task-implement`.
+1. **Specify** — `specs/features/<name>/spec.md`: the problem, the change, the rules no screen shows. Skill: `spec-specify`.
+2. **Plan** — the plan is written into the code as pieces (planned calls, planned tests) and a short `plan.md`; the reviewer reads the plan page generated from them and approves it. Skill: `spec-plan`.
+3. **Tasks** — the delivery: the pieces cut into lots, with the unit tests of each. Skill: `spec-tasks`.
+4. **Implement** — one lot a run: built, checked against the approved plan, reviewed. Skills: `feature-implement`, `task-implement`, `task-review`.
+5. **Archive** — durable facts promoted to the reference docs, the feature folder deleted. Skill: `feature-archive`.
 
-Investigations and ad-hoc design work are exempt; the four-stage flow is for features that ship.
-Conversational bug batches use `bug-fixes` (diagnostics plus `tasks.md`), then `bug-fixes-plan` (`plan.html` grouping the bugs and ordering the runs), followed by the normal implement/review/archive stages.
+Stages 2 to 4 need the Python stack of the comprehension tools, which is not written yet
+(`.agents/repository.md` § "The stack"). Until it is, a feature in flight on `plan.html` and
+`tasks.md` is finished by hand.
+
+Investigations and ad-hoc design work are exempt; the staged flow is for features that ship.
+Conversational bug batches use `bug-fixes` (diagnostics plus `tasks.md`), then `bug-fixes-plan` (`plan.html` grouping the bugs and ordering the runs), followed by the implement, review and archive stages.
 
 ## Documentation upkeep
 

@@ -29,7 +29,7 @@ One HTML doc per core usage journey. Each captures:
 - **Key states** — empty, disabled-with-reason, loading, error, edge cases that change the screen materially. Each state sits next to the screen it changes.
 - **Decisions taken** — the design calls made, with one-line rationale and the why-not-X notes, **each citing the real file**.
 
-Journeys slot into the four-stage SDD workflow ([`../workflow.md`](../workflow.md)) between `spec.html` and `plan.html` for feature work. Spec says *what the product does*; journey says *how the user moves through it*; plan says *how code delivers it*.
+Journeys slot into the SDD workflow ([`../workflow.md`](../workflow.md)) between the spec and the plan for feature work. Spec says *what the product does*; journey says *how the user moves through it*; plan says *how code delivers it*.
 
 **Authoring one:** follow [`journey-authoring.md`](journey-authoring.md) — the method (ground every screen in the real templates/views, not just the spec), the shared HTML/CSS template (copy [`journeys/build-a-model.html`](journeys/build-a-model.html)'s `<style>` block), and the conventions. The journey set — **all authored** (build-a-model is the reference; the rest were built against it):
 

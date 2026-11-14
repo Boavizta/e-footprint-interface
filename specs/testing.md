@@ -27,6 +27,12 @@ npm run jest
 
 # VS Code review-link extension (Node's own runner, separate from js_tests/)
 node --test tools/vscode-plan-review-links/extension.test.js
+
+# Comprehension tools (vitest, on inputs built by hand; always with the folder, jest owns js_tests/)
+npx vitest run comprehension-harness
+
+# Shared-file synchronization script
+python3 scripts/test_sync_agent_tooling.py
 ```
 
 ## Key shared fixtures — `tests/fixtures/system_builders.py`

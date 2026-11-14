@@ -1,0 +1,46 @@
+{
+  "name": "e-footprint interface",
+  "stack": {
+    "sourceIndex": ["python3", "scripts/comprehension_python/source_index.py"],
+    "titles": ["python3", "scripts/comprehension_python/titles.py"]
+  },
+  "cache": "node_modules/.cache/comprehension-harness",
+  "docs": "specs",
+  "hub": { "label": "architecture index", "page": "specs/architecture/index.html" },
+  "productPage": "modeling",
+  "actor": "user",
+  "source": {
+    "scan": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "specs"],
+    "app": ["model_builder/", "e_footprint_interface/", "theme/"],
+    "product": ["model_builder/", "e_footprint_interface/", "theme/"],
+    "words": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "scripts", "comprehension-harness", "tools", "ai-usage"],
+    "mechanisms": [],
+    "chips": [
+      ["model_builder/templates", "ui", "template"],
+      ["theme", "ui", "UI"],
+      ["model_builder/adapters", "adp", "adapter"],
+      ["model_builder/application", "app", "application"],
+      ["model_builder/domain", "dom", "domain"],
+      ["e_footprint_interface", "adp", "django"]
+    ]
+  },
+  "tests": {
+    "roots": ["tests/", "js_tests/"],
+    "files": "^tests/(?:.*/)?test_[^/]*\\.py$",
+    "narrative": ["tests/narratives/"],
+    "browser": ["tests/e2e/", "tests/e2e_perf/"],
+    "journeys": "^tests/e2e/journeys/.*\\.py$",
+    "server": null
+  },
+  "pagesNamingCode": [
+    { "page": "specs/constitution.md", "kind": "rule", "split": "heading" },
+    { "page": "specs/conventions.md", "kind": "convention", "split": "heading" }
+  ],
+  "commands": {
+    "tool": ["npx", "tsx"],
+    "tests": ["poetry", "run", "pytest"],
+    "watch": ["python3", "scripts/comprehension_python/watch.py"],
+    "journeys": ["poetry", "run", "pytest", "tests/e2e/journeys", "--base-url", "http://localhost:8000"]
+  },
+  "planDiff": null
+}
