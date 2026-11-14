@@ -86,7 +86,7 @@ These map into `parsed[attr]["confidence"]`, `parsed[attr]["comment"]`, and `par
 
 See `testing.md` for the full testing guide. Highlights:
 
-- Use `create_mod_obj_mock` from `tests.utils` instead of raw `MagicMock` when mocking `ModelingObject` subclasses; prefer real `ExplainableObject` / `ExplainableQuantity` instances when possible.
+- When mocking a `ModelingObject` subclass, give the mock its class (`MagicMock(spec=<efootprint class>)`) instead of a raw `MagicMock`; prefer real `ExplainableObject` / `ExplainableQuantity` instances when possible. The library's mock helper lives in its own test suite and cannot be imported here.
 - Build E2E fixtures with efootprint classes and `from_defaults()`, not JSON files.
 - Use `click_and_wait_for_htmx()` for HTMX-triggered E2E clicks; don't write raw Playwright clicks for HTMX flows.
 - Form data parsing happens in `adapters/forms/`, never in domain. The domain receives parsed dicts.
