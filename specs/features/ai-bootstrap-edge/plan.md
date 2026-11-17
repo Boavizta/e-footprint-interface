@@ -43,9 +43,7 @@ Calls reach jobs by name in the one jobs section, so a server that devices and p
 
 The answer gives each device's idle power, reserved RAM and reserved storage; one it omits is derived from the stated hardware, as the sandbox's builder does.
 
-On cases 03 and 04 (12 calls), the AI set all three on every gateway and controller, within the device's power, RAM and storage, and every answer built. The derived idle power runs a 5 W controller at full power, doubling case 04's device use. A call costs about a fifth more.
-
-To confirm: **Drop the on-device data fields: the reserved storage the answer states covers the data a device keeps.** In the 12 runs, the AI always described a rolling buffer of 0.004 to 0.4 GB beside 2 to 8 GB of reserved storage, and the overflow fit never fired. Kept: two fields per function and the fit.
+In 12 runs on cases 03 and 04, the AI set all three on every gateway and controller, within the device's limits, and every answer built; the derived idle power doubles case 04's device use. No weekly data fields: their buffers were 0.004 to 0.4 GB beside 2 to 8 GB reserved.
 
 ## #device-groups
 
@@ -71,5 +69,5 @@ Today RecurrentServerNeed scales its volume by deployments only, against its own
 
 ## Rules no test holds
 
-- **one-request** To confirm: The service calls the provider once on every path, and the scope only picks the instructions and the schema it sends; the existing service test of no retry holds the single call.
-- **nothing-stored** To confirm: The scope is a request field handed to the service and the response context; the saved modeling is the library graph's JSON, which has no place for it, and no new line writes the session.
+- **one-request** The service calls the provider once on every path, and the scope only picks the instructions and the schema it sends; the existing service test of no retry holds the single call.
+- **nothing-stored** The scope is a request field handed to the service and the response context; the saved modeling is the library graph's JSON, which has no place for it, and no new line writes the session.
