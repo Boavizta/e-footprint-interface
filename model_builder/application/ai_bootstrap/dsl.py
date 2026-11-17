@@ -139,7 +139,7 @@ class EdgeDeviceGroupSpec(Strict):
 
 
 class ServerCallSpec(Strict):
-    job: str
+    jobs: list[str]  # every job one call triggers, the database write included
     times_per_hour: float
     comment: Optional[str] = None
 
@@ -440,7 +440,7 @@ def build_edge_groups(spec: "WebEdgeSpec", devices: dict, resolutions: list[Reso
 
 def build_edge_function(f: "EdgeFunctionSpec", devices: dict, jobs: dict, resolutions: list[Resolution]):
     """What a device runs, and its server calls."""
-    planned("ai-bootstrap-edge#edge-builder", "Each server call becomes a server need on a job of the web builder, so devices and people share one server.")
+    planned("ai-bootstrap-edge#edge-builder", "Each server call becomes one server need on the web builder's jobs it lists, so devices and people share one server.")
     raise NotImplementedError("planned: ai-bootstrap-edge#edge-builder")
 
 
@@ -471,7 +471,3 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     usage_patterns = [build_usage_pattern(p, journeys, shared, resolutions) for p in spec.usage_patterns]
     planned("ai-bootstrap-edge#edge-builder", "A WebEdgeSpec's edge sections follow: `build_edge_device`, `build_edge_groups`, `build_edge_function` on the web jobs, `build_edge_deployment`.")
     return System(_label(spec.system_name, resolutions), usage_patterns, []), resolutions
-
-
-def json_schema() -> dict:
-    return ModelSpec.model_json_schema()

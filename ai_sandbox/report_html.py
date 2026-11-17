@@ -131,10 +131,10 @@ def structural_warnings(data: dict) -> list[str]:
         if fn.get("device") not in devices:
             warnings.append(f"edge function '{fn.get('name')}' → unknown edge device '{fn.get('device')}'")
         used_devices.add(fn.get("device"))
-        for call in fn.get("server_calls", []):
-            if call.get("job") not in jobs:
-                warnings.append(f"edge function '{fn.get('name')}' → unknown job '{call.get('job')}'")
-            used_jobs.add(call.get("job"))
+        for job in (job for call in fn.get("server_calls", []) for job in call.get("jobs", [])):
+            if job not in jobs:
+                warnings.append(f"edge function '{fn.get('name')}' → unknown job '{job}'")
+            used_jobs.add(job)
     for journey in data.get("edge_journeys", []):
         for fn in journey.get("functions", []):
             if fn not in functions:
@@ -193,8 +193,8 @@ def render_tree(data: dict) -> str:
             return f'<li><span class="kind">function</span><span class="fail">{esc(name)} (unknown)</span></li>'
         nums = ", ".join(f"{k.replace('_', ' ')}={fn[k]}" for k in ("cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week",
                                                                     "storage_retention_weeks", "workload_fraction") if fn.get(k) is not None)
-        calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(c.get("job"))[4:]
-                        for c in fn.get("server_calls", []))
+        calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(job)[4:]
+                        for c in fn.get("server_calls", []) for job in c.get("jobs", []))
         return (f'<li><span class="kind">function</span>{esc(name)} on <span class="kind">device</span>{esc(fn.get("device"))} '
                 f'<span class="muted">{esc(nums)}</span>{_comments(fn)}<ul>{calls}</ul></li>')
 

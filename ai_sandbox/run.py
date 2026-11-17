@@ -76,7 +76,7 @@ def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
     pattern_journeys = {p.journey for p in spec.usage_patterns}
     edge_functions = getattr(spec, "edge_functions", [])
     edge_deployments = getattr(spec, "edge_deployments", [])
-    edge_servers = {job_server.get(call.job) for f in edge_functions for call in f.server_calls} - {None}
+    edge_servers = {job_server.get(job) for f in edge_functions for call in f.server_calls for job in call.jobs} - {None}
     low_volume = any(
         (p.volume.per == "year" and p.volume.value <= 400) or (p.volume.per == "month" and p.volume.value <= 5000)
         for p in spec.usage_patterns)

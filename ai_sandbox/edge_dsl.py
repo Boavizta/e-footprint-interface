@@ -58,7 +58,7 @@ class EdgeDeviceGroupSpec(Strict):
 
 
 class ServerCallSpec(Strict):
-    job: str
+    jobs: list[str]
     times_per_hour: float
     comment: Optional[str] = None
 
@@ -217,9 +217,9 @@ def build_edge_function(f: EdgeFunctionSpec, devices: dict, jobs: dict, retentio
             kwargs["recurrent_storage_needed"] = _weekly(per_hour, "GB_stored", comment)
         need = RecurrentEdgeProcess.from_defaults(f"{name} process", **kwargs)
     server_needs = [
-        RecurrentServerNeed(f"{name}: {_label(call.job, resolutions)}", edge_device=device,
+        RecurrentServerNeed(f"{name}: {', '.join(_label(job, resolutions) for job in call.jobs)}", edge_device=device,
                             recurrent_volume_per_edge_device=_weekly(call.times_per_hour, "occurrence", call.comment),
-                            jobs={_lookup(jobs, call.job, "job"): 1})
+                            jobs={_lookup(jobs, job, "job"): 1 for job in call.jobs})
         for call in f.server_calls]
     function = EdgeFunction(name, [need], server_needs)
     c.close()
