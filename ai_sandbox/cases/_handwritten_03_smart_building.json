@@ -1,0 +1,54 @@
+{
+  "system_name": "Smart building energy monitoring",
+  "servers": [
+    {"name": "Ingestion API", "kind": "cpu"},
+    {"name": "Time-series DB", "kind": "cpu", "cores": 8, "ram_gb": 32, "storage_gb": 500},
+    {"name": "Report worker", "kind": "cpu"}
+  ],
+  "jobs": [
+    {"name": "Ingest telemetry batch", "server": "Ingestion API", "data_transferred_kb": 20},
+    {"name": "Write telemetry", "server": "Time-series DB", "data_stored_kb": 20},
+    {"name": "Load dashboard", "server": "Ingestion API", "data_transferred_kb": 800},
+    {"name": "Query charts", "server": "Time-series DB", "data_transferred_kb": 200},
+    {"name": "Render PDF report", "server": "Report worker", "request_duration_s": 20, "cpu_cores": 1},
+    {"name": "Read month of data", "server": "Time-series DB", "data_transferred_kb": 2000}
+  ],
+  "journeys": [
+    {"name": "Facility manager checks dashboard", "steps": [
+      {"name": "Open dashboard", "user_time_spent_min": 3, "jobs": ["Load dashboard", "Query charts"]}]},
+    {"name": "Monthly report batch", "steps": [
+      {"name": "Generate one building report", "user_time_spent_min": 0.5, "jobs": ["Read month of data", "Render PDF report"]}]}
+  ],
+  "usage_patterns": [
+    {"name": "Managers in France", "journey": "Facility manager checks dashboard", "device": "laptop", "network": "wifi",
+     "country": "FRANCE", "volume": {"value": 36000, "per": "month"}, "comments": {"volume": "3,000 users x 3 visits a week"}},
+    {"name": "Monthly reports", "journey": "Monthly report batch", "device": "none", "network": "wifi",
+     "country": "FRANCE", "volume": {"value": 1500, "per": "month"}, "comments": {"volume": "One report per equipped building"}}
+  ],
+  "edge_devices": [
+    {"name": "Gateway", "kind": "computer", "cores": 4, "ram_gb": 4, "storage_gb": 32, "power_w": 6, "embodied_kg": 15,
+     "lifespan_years": 5, "comments": {"power_w": "Small ARM Linux board", "embodied_kg": "Single-board computer with case and power supply"}},
+    {"name": "Wireless sensor", "kind": "appliance", "power_w": 0.05, "embodied_kg": 1, "lifespan_years": 7,
+     "comments": {"power_w": "Battery-powered sensor reporting every minute"}}
+  ],
+  "edge_device_groups": [
+    {"name": "Equipped building", "device_counts": {"Gateway": 1, "Wireless sensor": 40},
+     "comments": {"Wireless sensor": "Around 40 sensors per building"}}
+  ],
+  "edge_functions": [
+    {"name": "Aggregate and upload telemetry", "device": "Gateway", "cpu_cores_avg": 0.3, "ram_gb_avg": 1,
+     "storage_gb_per_week": 0.05, "storage_retention_weeks": 4,
+     "server_calls": [{"job": "Ingest telemetry batch", "times_per_hour": 6, "comment": "One batch every 10 minutes"},
+                      {"job": "Write telemetry", "times_per_hour": 6}],
+     "comments": {"storage_retention_weeks": "Local buffer in case the connection drops"}},
+    {"name": "Sense every minute", "device": "Wireless sensor", "workload_fraction": 1}
+  ],
+  "edge_journeys": [
+    {"name": "Building monitoring", "functions": ["Aggregate and upload telemetry", "Sense every minute"]}
+  ],
+  "edge_deployments": [
+    {"name": "Equipped buildings", "journey": "Building monitoring", "country": "FRANCE", "network": "mobile",
+     "new_units": {"value": 60, "per": "month"}, "existing_units": 1500, "usage_span_years": 5,
+     "comments": {"existing_units": "1,500 buildings already equipped", "new_units": "About 60 new buildings a month"}}
+  ]
+}

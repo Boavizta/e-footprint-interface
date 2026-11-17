@@ -117,8 +117,36 @@ def structural_warnings(data: dict) -> list[str]:
         if up.get("journey") not in journeys:
             warnings.append(f"usage pattern '{up.get('name')}' → unknown journey '{up.get('journey')}'")
         used_journeys.add(up.get("journey"))
+    devices, groups = _names(data.get("edge_devices", [])), _names(data.get("edge_device_groups", []))
+    functions, edge_journeys = _names(data.get("edge_functions", [])), _names(data.get("edge_journeys", []))
+    used_devices, used_functions, used_edge_journeys = set(), set(), set()
+    for group in data.get("edge_device_groups", []):
+        for name in group.get("device_counts", {}):
+            if name not in devices:
+                warnings.append(f"group '{group.get('name')}' → unknown edge device '{name}'")
+        for name in group.get("sub_group_counts", {}):
+            if name not in groups:
+                warnings.append(f"group '{group.get('name')}' → unknown group '{name}'")
+    for fn in data.get("edge_functions", []):
+        if fn.get("device") not in devices:
+            warnings.append(f"edge function '{fn.get('name')}' → unknown edge device '{fn.get('device')}'")
+        used_devices.add(fn.get("device"))
+        for call in fn.get("server_calls", []):
+            if call.get("job") not in jobs:
+                warnings.append(f"edge function '{fn.get('name')}' → unknown job '{call.get('job')}'")
+            used_jobs.add(call.get("job"))
+    for journey in data.get("edge_journeys", []):
+        for fn in journey.get("functions", []):
+            if fn not in functions:
+                warnings.append(f"edge journey '{journey.get('name')}' → unknown edge function '{fn}'")
+            used_functions.add(fn)
+    for dep in data.get("edge_deployments", []):
+        if dep.get("journey") not in edge_journeys:
+            warnings.append(f"edge deployment '{dep.get('name')}' → unknown edge journey '{dep.get('journey')}'")
+        used_edge_journeys.add(dep.get("journey"))
     for label, declared, used in (("server", servers, used_servers), ("GenAI API", apis, used_apis), ("job", jobs, used_jobs),
-                                  ("journey", journeys, used_journeys)):
+                                  ("journey", journeys, used_journeys), ("edge device", devices, used_devices),
+                                  ("edge function", functions, used_functions), ("edge journey", edge_journeys, used_edge_journeys)):
         for name in sorted(declared - used):
             warnings.append(f"unused {label} '{name}'")
     return warnings
@@ -156,6 +184,37 @@ def render_tree(data: dict) -> str:
             f'<li><span class="kind">usage</span>{esc(up.get("name"))} <span class="muted">{esc(up.get("device"))} · '
             f'{esc(up.get("network"))} · {esc(up.get("country"))} · {_volume(up.get("volume"))}{growth}</span>'
             f'{_comments(up)}{journey_ul(up.get("journey"))}</li>')
+    functions = {f["name"]: f for f in data.get("edge_functions", []) if isinstance(f, dict) and f.get("name")}
+    edge_journeys = {j["name"]: j for j in data.get("edge_journeys", []) if isinstance(j, dict) and j.get("name")}
+
+    def function_li(name: str) -> str:
+        fn = functions.get(name)
+        if fn is None:
+            return f'<li><span class="kind">function</span><span class="fail">{esc(name)} (unknown)</span></li>'
+        nums = ", ".join(f"{k.replace('_', ' ')}={fn[k]}" for k in ("cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week",
+                                                                    "storage_retention_weeks", "workload_fraction") if fn.get(k) is not None)
+        calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(c.get("job"))[4:]
+                        for c in fn.get("server_calls", []))
+        return (f'<li><span class="kind">function</span>{esc(name)} on <span class="kind">device</span>{esc(fn.get("device"))} '
+                f'<span class="muted">{esc(nums)}</span>{_comments(fn)}<ul>{calls}</ul></li>')
+
+    for dep in data.get("edge_deployments", []):
+        journey = edge_journeys.get(dep.get("journey"))
+        fns = ("".join(function_li(f) for f in journey.get("functions", [])) if journey
+               else f'<li><span class="fail">{esc(dep.get("journey"))} (unknown)</span></li>')
+        base = f" + {dep['existing_units']} existing" if dep.get("existing_units") else ""
+        span = f", {dep['usage_span_years']} yrs" if dep.get("usage_span_years") else ""
+        parts.append(f'<li><span class="kind">edge</span>{esc(dep.get("name"))} <span class="muted">{esc(dep.get("country"))} · '
+                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_units"))} new units{base}{span}</span>{_comments(dep)}'
+                     f'<ul><li><span class="kind">edge journey</span>{esc(dep.get("journey"))}<ul>{fns}</ul></li></ul></li>')
+    for g in data.get("edge_device_groups", []):
+        counts = ", ".join(f"{n} ×{c}" for n, c in {**g.get("sub_group_counts", {}), **g.get("device_counts", {})}.items())
+        parts.append(f'<li><span class="kind">group</span>{esc(g.get("name"))} <span class="muted">{esc(counts)}</span>{_comments(g)}</li>')
+    for d in data.get("edge_devices", []):
+        specs = ", ".join(f"{k.replace('_', ' ')}={d[k]}" for k in ("cores", "ram_gb", "storage_gb", "power_w", "embodied_kg",
+                                                                     "lifespan_years") if d.get(k) is not None)
+        parts.append(f'<li><span class="kind">{esc(d.get("kind", "computer"))}</span>{esc(d.get("name"))} '
+                     f'<span class="muted">{esc(specs)}</span>{_comments(d)}</li>')
     for s in data.get("servers", []):
         specs = ", ".join(f"{k.replace('_', ' ')}={s[k]}" for k in ("cores", "ram_gb", "gpus", "storage_gb", "cloud_provider",
                                                                      "instance_type", "carbon_intensity_g_per_kwh") if s.get(k) is not None)
@@ -203,6 +262,8 @@ def stats_block(record: dict, case: dict) -> str:
                      f'<details><summary>attempt {n} output</summary><pre>{esc((earlier.get("raw_output") or "")[:20000])}</pre></details></dd>')
     if record.get("counts"):
         parts.append(f"<dt>Counts</dt><dd>{esc(_kv_list(record['counts']))}</dd>")
+    if record.get("device_totals"):
+        parts.append(f"<dt>Edge devices in service at the start</dt><dd>{esc(_kv_list(record['device_totals']))}</dd>")
     if record.get("total_kg_co2e_over_horizon") is not None:
         parts.append(f"<dt>Total over horizon</dt><dd>{record['total_kg_co2e_over_horizon']} kg CO2e</dd>")
         parts.append(f"<dt>Use by category (kg)</dt><dd>{esc(_kv_list(record.get('use_by_category_kg', {})))}</dd>")
@@ -303,7 +364,7 @@ def write_html(run_dir: Path, records: list[dict], cases: dict[str, dict]) -> Pa
                        + "".join(record_section(r, cases.get(case_id, {}), rs) for r in rs) for case_id, rs in by_case.items())
     body = (
         f'<p><a href="../index.html">← all runs</a></p><h1>Run {esc(run_dir.name)}</h1>'
-        f'<p class="muted">models: {esc(", ".join(config.get("models", [])))} · reps: {esc(config.get("reps", ""))} · '
+        f'<p class="muted">scope: {esc(config.get("scope", "web"))} · models: {esc(", ".join(config.get("models", [])))} · reps: {esc(config.get("reps", ""))} · '
         f'effort: {esc(config.get("effort") or "provider default")} · total cost: ${number(total(records, "cost_usd"))}</p>'
         f'<p class="muted">Trees show the structure the model wrote, not the effective values after library defaults filled the gaps. '
         f'When a number looks off, open the model in the interface (needs a local interface running with DEBUG at {esc(INTERFACE_URL)}).</p>'
@@ -325,11 +386,12 @@ def write_index(runs_dir: Path) -> Path:
         exported = sum(1 for r in records if r.get("export_ok"))
         link = f'<a href="{esc(run_dir.name)}/summary.html">{esc(run_dir.name)}</a>' if (run_dir / "summary.html").exists() else esc(run_dir.name)
         rows.append(f"<tr><td>{link}</td><td>{esc(', '.join(config.get('cases', [])))}</td><td>{esc(', '.join(config.get('models', [])))}</td>"
-                    f"<td class=\"num\">{esc(config.get('reps', ''))}</td><td>{esc(config.get('effort') or 'default')}</td>"
+                    f"<td class=\"num\">{esc(config.get('reps', ''))}</td><td>{esc(config.get('scope', 'web'))}</td>"
+                    f"<td>{esc(config.get('effort') or 'default')}</td>"
                     f'<td class="num">{len(records)}</td><td class="num">{exported}/{len(records)}</td>'
                     f'<td class="num">{number(total(records, "cost_usd"))}</td></tr>')
     body = ("<h1>AI sandbox runs</h1><table><thead><tr><th>run</th><th>cases</th><th>models</th><th class=\"num\">reps</th>"
-            "<th>effort</th><th class=\"num\">records</th><th class=\"num\">exported</th><th class=\"num\">cost USD</th></tr></thead>"
+            "<th>scope</th><th>effort</th><th class=\"num\">records</th><th class=\"num\">exported</th><th class=\"num\">cost USD</th></tr></thead>"
             f"<tbody>{''.join(rows)}</tbody></table>")
     out = runs_dir / "index.html"
     out.write_text(_page("AI sandbox runs", body))

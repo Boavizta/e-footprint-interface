@@ -1,0 +1,49 @@
+{
+  "system_name": "Public EV charging network",
+  "servers": [
+    {"name": "OCPP backend", "kind": "cpu", "cores": 4, "ram_gb": 16, "cloud_provider": "aws",
+     "comments": {"cores": "Two VMs folded into one server of their combined size"}},
+    {"name": "Postgres database", "kind": "cpu", "cores": 4, "ram_gb": 16, "storage_gb": 500, "cloud_provider": "aws"}
+  ],
+  "jobs": [
+    {"name": "Receive heartbeat", "server": "OCPP backend", "data_transferred_kb": 1, "request_duration_s": 0.05},
+    {"name": "Write station status", "server": "Postgres database", "data_stored_kb": 1},
+    {"name": "Receive session record", "server": "OCPP backend", "data_transferred_kb": 5, "request_duration_s": 0.1},
+    {"name": "Write session record", "server": "Postgres database", "data_stored_kb": 5},
+    {"name": "Load dashboard", "server": "OCPP backend", "data_transferred_kb": 1500},
+    {"name": "Query station status", "server": "Postgres database", "data_transferred_kb": 50}
+  ],
+  "journeys": [
+    {"name": "Operator watches stations", "steps": [
+      {"name": "Open dashboard", "user_time_spent_min": 1, "jobs": ["Load dashboard"]},
+      {"name": "Follow station status", "user_time_spent_min": 30, "jobs": ["Query station status"]}]}
+  ],
+  "usage_patterns": [
+    {"name": "Operations team", "journey": "Operator watches stations", "device": "laptop", "network": "wifi",
+     "country": "GERMANY", "volume": {"value": 13000, "per": "month"},
+     "comments": {"volume": "60 people x 10 sessions x about 21.7 working days"}}
+  ],
+  "edge_devices": [
+    {"name": "Station controller", "kind": "computer", "cores": 4, "ram_gb": 2, "storage_gb": 16, "power_w": 8,
+     "embodied_kg": 20, "lifespan_years": 8, "comments": {"power_w": "Embedded Linux board with a 4G modem"}}
+  ],
+  "edge_functions": [
+    {"name": "Report status and sessions", "device": "Station controller", "cpu_cores_avg": 0.1, "ram_gb_avg": 0.3,
+     "storage_gb_per_week": 0.01, "storage_retention_weeks": 4,
+     "server_calls": [
+       {"job": "Receive heartbeat", "times_per_hour": 12, "comment": "One heartbeat every 5 minutes"},
+       {"job": "Write station status", "times_per_hour": 12},
+       {"job": "Receive session record", "times_per_hour": 0.33, "comment": "8 sessions a day"},
+       {"job": "Write session record", "times_per_hour": 0.33}],
+     "comments": {"storage_retention_weeks": "Last few weeks of session logs kept locally"}}
+  ],
+  "edge_journeys": [
+    {"name": "Station operation", "functions": ["Report status and sessions"]}
+  ],
+  "edge_deployments": [
+    {"name": "Stations in Germany", "journey": "Station operation", "country": "GERMANY", "network": "mobile",
+     "new_units": {"value": 80, "per": "month"}, "existing_units": 2700, "usage_span_years": 8},
+    {"name": "Stations in the Netherlands", "journey": "Station operation", "country": "NETHERLANDS", "network": "mobile",
+     "new_units": {"value": 0, "per": "month"}, "existing_units": 1500, "usage_span_years": 8}
+  ]
+}

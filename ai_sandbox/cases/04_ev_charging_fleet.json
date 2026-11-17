@@ -1,0 +1,30 @@
+{
+  "id": "04_ev_charging_fleet",
+  "title": "Public EV charging network described by fleet totals, with an operator dashboard",
+  "scope": "web_edge",
+  "user_prompt": "We run a network of public EV charging stations: about 4,200 stations today, 2,700 in Germany and 1,500 in the Netherlands, and we install around 80 new ones a month, all in Germany. Each station has its own embedded controller (a small Linux board) that talks to our cloud over 4G using OCPP: a status heartbeat every 5 minutes, and a session record at the end of each charge, about 8 charging sessions per station per day. The controller keeps the last few weeks of session logs locally. In the cloud we have a central management system: an OCPP backend that receives everything and a Postgres database. About 60 people in our operations team use a web dashboard all day to watch station status and handle faults, roughly 10 dashboard sessions each per working day. We want to know whether the footprint is mostly the station electronics, the 4G traffic or the cloud. Do not count the electricity delivered to cars.",
+  "facts_if_asked": {
+    "controller": "Quad-core ARM, 2 GB RAM, 16 GB eMMC, about 8 W, expected life 8 years.",
+    "messages": "Heartbeat about 1 kB, session record about 5 kB, both written to Postgres.",
+    "dashboard": "Dashboard page about 1.5 MB, then a status query every minute or so.",
+    "backend": "OCPP backend on 2 VMs, managed Postgres, on AWS Frankfurt."
+  },
+  "expected_properties": [
+    "A station controller edge device of kind computer; no device group, since the description gives fleet totals only (one controller per station).",
+    "Edge deployments totalling about 4,200 controllers at the start: 2,700 in GERMANY and 1,500 in NETHERLANDS (or one deployment with an explicit assumption), with about 80 new per month in GERMANY.",
+    "An edge function on the controller with server_calls to a heartbeat job at 12 per hour and a session job at about 8 per day (about 0.33 per hour).",
+    "The OCPP backend and Postgres servers serve both the station calls and the operator dashboard; no duplicate database.",
+    "A dashboard journey on laptop with a usage pattern of about 600 sessions per working day.",
+    "Mobile network for the stations' deployments.",
+    "No charging electricity modeled, no end-user phone modeled as an edge device."
+  ],
+  "checks": {
+    "min_journeys": 1,
+    "requires_edge_usage_pattern": true,
+    "requires_edge_server_call": true,
+    "requires_server_shared_by_web_and_edge": true,
+    "countries_must_include": ["GERMANY", "NETHERLANDS"],
+    "requires_device_group": false,
+    "device_totals": {"controller|station|charg": 4200}
+  }
+}

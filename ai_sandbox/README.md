@@ -4,10 +4,15 @@ Local experiment runner for the AI-assistance exploration described in
 [`specs/features/ai-assistance/README.md`](../specs/features/ai-assistance/README.md). It tests one facet only:
 **from a complete user description, can an LLM produce a useful e-footprint model structure, at what cost?**
 
-Scope is web modeling only (usage journeys, servers, GenAI APIs), as if the interface's edge toggle were off. Edge
-modeling was removed on 2026-10-29 to keep the prompt and DSL small: it is a different problem (device counts and
-ratios, embodied footprints), and the two serious semantic errors of the last run that had it were both edge
-mistakes. Edge bootstrap remains a separately scoped follow-up after this web bootstrap.
+`--scope` picks what is generated. `web` (the default) is the production bootstrap: usage journeys, servers, GenAI
+APIs, as if the interface's edge toggle were off. `web_edge` evaluates the Web + edge bootstrap of
+[`specs/features/ai-bootstrap-edge/`](../specs/features/ai-bootstrap-edge/) before production has it: its prompt is
+`prompts/system_prompt_web_edge.md` (the production web prompt plus the edge paradigm, format and field notes) and
+`edge_dsl.py` extends the production DSL with edge devices, optional device groups, edge functions and their server
+calls, edge journeys and edge deployments, built with the production web builders and the library's `from_defaults`.
+Cases carry their `scope` (03 and 04 are `web_edge`); without `--cases` a run takes the cases of its scope. Edge
+checks: an edge deployment exists, a device calls a server, a server is shared by web journeys and devices, a device
+group is used or not as the case expects, and the devices in service at the start match the case's totals within 20 %.
 
 Nothing here is part of the Django application. Run outputs under `runs/` are git-ignored.
 
@@ -52,10 +57,13 @@ poetry run python -m ai_sandbox.providers
 
 # pipeline check without an LLM
 poetry run python -m ai_sandbox.run --dry-run ai_sandbox/cases/_handwritten_01_recipe_app.json
+poetry run python -m ai_sandbox.run --scope web_edge --dry-run ai_sandbox/cases/_handwritten_03_smart_building.json
+poetry run python -m ai_sandbox.run --scope web_edge --dry-run ai_sandbox/cases/_handwritten_04_ev_charging.json
 
 # experiments (ANTHROPIC_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY read from .env)
 poetry run python -m ai_sandbox.run --cases 01 --models claude-haiku-5-5 mistral-small-latest --reps 1
-poetry run python -m ai_sandbox.run --reps 2 --effort medium         # all cases x DEFAULT_MODELS
+poetry run python -m ai_sandbox.run --reps 2 --effort medium         # all web cases x DEFAULT_MODELS
+poetry run python -m ai_sandbox.run --scope web_edge --cases 03 04 --models zai-glm-5-3-flash --effort high
 poetry run python -m ai_sandbox.run --replay ai_sandbox/runs/<dir>   # re-evaluate recorded outputs, no API call
 poetry run python -m ai_sandbox.report ai_sandbox/runs/<dir>
 poetry run python -m ai_sandbox.catalogs refresh                    # developer-only Boavizta snapshot refresh
