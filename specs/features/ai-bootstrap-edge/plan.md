@@ -15,11 +15,15 @@ The scope travels with the generate request to the service, back on a refusal, a
 
 Like the description, it lives in the request and the response alone. An unknown value gets no guard: the scope table's lookup fails inside the generation, which is refused like a bad answer, and only a hand-crafted request sends one.
 
+Changed: **The summary's checklist lives in its template, which no place names.** The view only hands it the scope; the four edge checks are written in the summary template, after the web ones.
+
 ## #scope-selects-format
 
 A scope table in the service pairs each scope with its instructions and its schema; one request is made whichever is chosen.
 
 Web only keeps today's flow. A second service per scope was refused: everything after the answer (build, prepare, validate, save) is the same for both scopes.
+
+Changed: **The Web + edge prompt is a product file no place names.** It is the sandbox's measured prompt, moved beside the web one as #edge-instructions says; the plan pointed at the function that reads it, not at the file.
 
 ## #edge-instructions
 
@@ -33,11 +37,15 @@ WebEdgeSpec adds edge devices, optional groups, edge functions with server calls
 
 No installed-base field: the sandbox schema refused an installed base with no growth, and a past start date says the same within the Growth projection inputs. One schema for both scopes was refused: a Web only answer could then build edge objects.
 
+Changed: **The fix that gave a server call its list of jobs also edits the Web + edge prompt.** One commit holds the schema field and the prompt line that names it, so the prompt file shows under this piece.
+
 ## #edge-builder
 
-The builder makes the edge sections after the web ones, from the sandbox's builder on today's library; each server call targets a job the web builder made.
+The builder makes the edge sections after the web ones, from the sandbox's builder on today's library; each server call targets the jobs it lists, made by the web builder.
 
 Calls reach jobs by name in the one jobs section, so a server that devices and people share is built once. The edge builders join the bootstrap DSL module rather than one of their own: they use its private helpers, and a second module would import them back.
+
+Changed: **A server call lists every job it triggers.** The measured runs lost the database write behind an ingestion call, so devices and the dashboard shared no server; one server need now holds all the call's jobs.
 
 ## #edge-device-sizing
 

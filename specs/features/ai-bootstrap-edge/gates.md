@@ -63,6 +63,34 @@
   bootstrap builds every object before the system, so it is not reached here; whether the
   interface's own "add a group" path reaches it was not checked.
 
+### scope-and-format
+
+- Two `Scope` dataclasses: the service's (prompt file, schema) and the sandbox's in
+  `ai_sandbox/run.py` (system prompt, validate, build), whose `_production` reaches into the
+  service's table.
+- The scope strings `"web"` and `"web_edge"` are literals in the view, the summary template, the
+  tests and the sandbox; the scope-choice radio adds one more place.
+- The view defaults an absent scope to `"web"`. Once the radio always posts the field, that
+  default guards a request nothing real sends, against the plan's "no guard": settled in the lot
+  `scope-choice`.
+- Sandbox code with no caller until `edge-builder` deletes the module: `edge_dsl`'s
+  `validate_tolerating_extras`, `build_edge_device`, `build_system` and `build_answer`;
+  `edge_dsl_hw.validate_tolerating_extras` duplicates the production one; `report_html.py` still
+  reads `existing_units` and `storage_gb_per_week` (around lines 194 and 205).
+- `specs/architecture/layers-and-wrappers.html` says the response context carries "the
+  description and summary metrics"; it now carries the scope too.
+- `validate_tolerating_extras` changes the dict it is given (predates the run), and
+  `ai_sandbox/run.py` depends on that before it builds.
+- Misses seen in the measured sandbox runs (`ai_sandbox/runs/20261117-224245`, local and
+  git-ignored) that the plan's record does not name, so the prompt was not edited for them: a
+  group used as a country fleet (case 04, 17.7 million controllers), sensors running no edge
+  function and so never deployed (case 03), a journey with no usage pattern (case 04). The paid
+  runs of `edge-builder` read whether the shipped prompt still makes them.
+- A replay of a run recorded under the removed sandbox scope `web_edge_hw` now raises `KeyError`.
+  Local runs only.
+- The map's `help` verb crashes (`comprehension-harness/map.mjs:571`: `fileURLToPath` is called
+  with no import from `node:url`). Tooling, outside the feature, not fixed.
+
 ## End-of-run gate
 
 Known red before the run's first product commit, and left as found:
