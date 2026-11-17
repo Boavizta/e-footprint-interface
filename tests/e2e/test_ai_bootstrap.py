@@ -10,6 +10,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from model_builder.adapters.views import views_ai_bootstrap
 from model_builder.application.ai_bootstrap.service import Completion
+from tests.declare import planned_test
 from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True)]
@@ -180,3 +181,9 @@ def test_view_buttons_stay_in_place_and_hidden_canvas_still_confirms(minimal_com
     builder.start_ai_bootstrap()
     expect(page.locator("body")).to_have_attribute("data-base-view", "modeling")
     expect(buttons[0]).to_have_attribute("aria-pressed", "true")
+
+
+@planned_test("ai-bootstrap-edge#scope-choice: checking Web + edge shows its guidance, model, cost and impact, and keeps the "
+              "description typed [scope-disclosed]")
+def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
+    pass

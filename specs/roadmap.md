@@ -31,7 +31,7 @@ outside this first feature.
 [`features/ai-bootstrap-edge/spec.md`](features/ai-bootstrap-edge/spec.md): a Web only / Web + edge
 scope choice in the description panel, with instructions, guidance and review checklist per scope,
 and optional edge device groups. First step of the [AI assistance roadmap](features/ai-assistance/roadmap.md)'s
-follow-ups. Spec approved on 2026-11-17; next: `spec-plan`.
+follow-ups. Spec approved on 2026-11-17; plan written, under review.
 
 ### Public modeling sharing — specification reviewed, implementation pending
 

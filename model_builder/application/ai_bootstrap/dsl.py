@@ -31,7 +31,7 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
-from model_builder.narrate import narrate
+from model_builder.narrate import narrate, planned
 
 from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 
@@ -105,6 +105,8 @@ class UsagePatternSpec(Strict):
     comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
 
 
+# @planned ai-bootstrap-edge#edge-format WebEdgeSpec extends ModelSpec with edge devices, optional device groups, edge functions
+# and their server calls, edge journeys and edge deployments; Web only keeps ModelSpec.
 class ModelSpec(Strict):
     system_name: str
     servers: list[ServerSpec] = Field(default_factory=list)
@@ -132,6 +134,7 @@ def parse_json(text: str) -> tuple[dict | None, bool, str | None]:
 
 def validate_tolerating_extras(data: dict) -> tuple[ModelSpec, list[str]]:
     """Strict validation, except that unknown fields are stripped and reported instead of failing the run."""
+    planned("ai-bootstrap-edge#edge-format", "Validates against the schema it is given, so a Web only answer's edge sections are dropped as unknown fields.")
     try:
         return ModelSpec.model_validate(data), []
     except ValidationError as error:
@@ -359,6 +362,30 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
     return pattern
 
 
+def build_edge_device(d: "EdgeDeviceSpec", resolutions: list[Resolution]):
+    """A gateway, sensor or controller, the library defaults sized for a PC capped to what the device holds."""
+    planned("ai-bootstrap-edge#edge-device-sizing", "The device is built from the stated hardware, the PC-sized library defaults capped to it.")
+    raise NotImplementedError("planned: ai-bootstrap-edge#edge-device-sizing")
+
+
+def build_edge_groups(spec: "WebEdgeSpec", devices: dict, resolutions: list[Resolution]) -> dict:
+    """The optional groups, children first, each holding its devices and sub-groups with their counts."""
+    planned("ai-bootstrap-edge#device-groups", "Each group holds its devices and sub-groups with the counts per group the answer gives.")
+    raise NotImplementedError("planned: ai-bootstrap-edge#device-groups")
+
+
+def build_edge_function(f: "EdgeFunctionSpec", devices: dict, jobs: dict, resolutions: list[Resolution]):
+    """What a device runs, and its server calls."""
+    planned("ai-bootstrap-edge#edge-builder", "Each server call becomes a server need on a job of the web builder, so devices and people share one server.")
+    raise NotImplementedError("planned: ai-bootstrap-edge#edge-builder")
+
+
+def build_edge_deployment(dep: "EdgeDeploymentSpec", journeys: dict, shared: _Shared, resolutions: list[Resolution]):
+    """Deployments per period from their start date to the end of the web horizon, and their usage span."""
+    planned("ai-bootstrap-edge#deployments-over-time", "Deployment starts are growth-projection inputs from the stated start, past or not, to the end of the web horizon.")
+    raise NotImplementedError("planned: ai-bootstrap-edge#deployments-over-time")
+
+
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
     for section in (spec.servers, spec.genai_apis, spec.jobs, spec.journeys):
@@ -377,6 +404,7 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     jobs = {j.name: build_job(j, servers, apis, resolutions) for j in spec.jobs}
     journeys = {jo.name: build_journey(jo, jobs, resolutions) for jo in spec.journeys}
     usage_patterns = [build_usage_pattern(p, journeys, shared, resolutions) for p in spec.usage_patterns]
+    planned("ai-bootstrap-edge#edge-builder", "A WebEdgeSpec's edge sections follow: `build_edge_device`, `build_edge_groups`, `build_edge_function` on the web jobs, `build_edge_deployment`.")
     return System(_label(spec.system_name, resolutions), usage_patterns, []), resolutions
 
 

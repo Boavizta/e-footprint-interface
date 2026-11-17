@@ -15,12 +15,13 @@ from model_builder.application.ai_bootstrap.service import generate
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded, PayloadSizeLimitExceeded
 from model_builder.domain.services import SCRATCH_ID, SystemValidationService, get_example_system_data, is_empty_model
-from model_builder.narrate import event, narrate
+from model_builder.narrate import event, narrate, planned
 
 
 def _input_response(request, workspace, description="", error=""):
     # A failed preparation may have replaced request-local settings; recover only saved settings.
     model_web = ModelWeb(workspace.active_repository())
+    planned("ai-bootstrap-edge#scope-in-request", "A refused generation renders the scope the user had chosen, with the description.")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
                                 extra_context={"ai_panel": "input", "ai_prompt": description, "ai_error": error})
 
@@ -37,6 +38,7 @@ def start_ai_bootstrap(request):
             "other, its interface settings dropped. The other slot keeps its own.", lambda: {"slot": repository.slot})
     model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID), workspace=workspace)
     narrate("The builder comes back with **the description panel open and empty**, and no example picker.")
+    planned("ai-bootstrap-edge#scope-choice", "The panel opens on Web only; the guidance and disclosure of the checked scope alone show, by stylesheet.")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
                                 extra_context={"ai_panel": "input", "ai_prompt": ""})
 
@@ -60,6 +62,7 @@ def generate_ai_bootstrap(request):
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
     description = request.POST.get("description", "").strip()
+    planned("ai-bootstrap-edge#scope-in-request", "The posted scope is read beside the description and passed to `generate`.")
     narrate("A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active "
             "slot's saved modeling as empty, and with a description to send.",
             lambda: {"slot": repository.slot, "description_characters": len(description)})
@@ -122,6 +125,7 @@ def generate_ai_bootstrap(request):
             "stored**, in the session or in the saved modeling.",
             lambda: {"resolutions_shown": sum(item.how != "exact" for item in generated.resolutions),
                      "ignored_fields": generated.ignored_fields})
+    planned("ai-bootstrap-edge#scope-in-request", "The summary receives the scope; for Web + edge its checklist adds the edge checks after the web ones.")
     return render_model_builder(request, prepared, show_example_picker=False, workspace=workspace, extra_context={
         "ai_panel": "summary", "ai_prompt": description, "ai_metrics": metrics, "ai_impact": impact,
         "ai_resolutions": [item for item in generated.resolutions if item.how != "exact"],

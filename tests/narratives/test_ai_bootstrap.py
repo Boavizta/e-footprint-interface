@@ -13,7 +13,7 @@ from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views import views_ai_bootstrap as views
 from model_builder.application.ai_bootstrap.service import Completion
 from model_builder.domain.services import is_empty_model
-from tests.declare import narrative
+from tests.declare import narrative, planned_test
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"
@@ -78,3 +78,43 @@ class TestAiBootstrap:
 
         assert 'data-ai-bootstrap-panel="input"' in refused.content.decode()
         assert is_empty_model(saved_modeling(client))
+
+    @planned_test("ai-bootstrap-edge#edge-builder: a Web + edge description becomes a modeling with its devices, what they run, "
+                  "their deployments and usage spans [edge-scope-builds-edge]")
+    def test_a_web_edge_description_becomes_an_edge_modeling(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#edge-builder: devices' server calls and the dashboard journey land on one shared server "
+                  "[edge-calls-reach-servers]")
+    def test_devices_and_people_share_one_server(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#device-groups: devices deployed per building hold their counts per group in each "
+                  "deployment [groups-when-relevant]")
+    def test_devices_deployed_together_are_grouped(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#deployments-over-time: a fleet in service, deployed from a past start, is counted in the "
+                  "web year [fleet-as-deployments]")
+    def test_a_fleet_in_service_is_deployed_from_the_past(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#deployments-over-time: generated web and edge usage patterns open with their inputs, and an "
+                  "unchanged save keeps them [generated-values-editable]")
+    def test_generated_usage_patterns_stay_editable(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#server-calls-scale: a server receives a device's calls once per device deployed, grouped or "
+                  "fleet total [calls-scale-with-devices]")
+    def test_server_calls_scale_with_deployed_devices(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#edge-format: a Web only answer holding edge sections builds no edge object "
+                  "[web-only-stays-web]")
+    def test_a_web_only_answer_builds_no_edge_object(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "
+                  "[web-by-default]")
+    def test_start_opens_on_web_only(self, client, provider):
+        pass
