@@ -41,9 +41,9 @@ Calls reach jobs by name in the one jobs section, so a server that devices and p
 
 ## #edge-device-sizing
 
-PC-sized library defaults are capped to the stated device: idle power to its power, base RAM to a quarter of its RAM, base storage to its stated data buffer.
+Library defaults sized for a PC are lowered to fit the device: idle power to at most its power, reserved RAM to a quarter, reserved storage to its data buffer.
 
-Uncapped, a gateway or a sensor fails the library's capacity checks and the generation is refused, as the sandbox showed.
+The library's edge defaults are an industrial PC's: 5 W idle, 1 GB of RAM and 30 GB of storage reserved for the system. A 2 W sensor would then idle above its own power, and a 16 GB gateway could not hold its reserved storage: the library refuses the computation, so the generation fails, as the sandbox showed.
 
 To confirm: **A fixed data buffer per device, with no weekly write.** The sandbox lets a function write storage each week and fits a rolling buffer when that overflows the device: two fields, a fitting rule and a resolution. Kept, a device keeping all its data for life stays expressible; dropped, the user edits that in.
 
