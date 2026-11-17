@@ -53,6 +53,8 @@ The answer gives each device's idle power, reserved RAM and reserved storage; on
 
 In 12 runs on cases 03 and 04, the AI set all three on every gateway and controller, within the device's limits, and every answer built; the derived idle power doubles case 04's device use. No weekly data fields: their buffers were 0.004 to 0.4 GB beside 2 to 8 GB reserved.
 
+Changed: **An omitted reserved storage is a quarter of the device's storage, the library default at most.** The sandbox fitted it to weekly buffers, which the format dropped; the test's title now names storage.
+
 ## #device-groups
 
 Devices described as deployed together become an optional group with counts per group and sub-groups; a deployment then counts one group, each device as many times as it holds.
@@ -61,9 +63,17 @@ Grouping stays the AI's choice: the sandbox's group-required check remains infor
 
 ## #deployments-over-time
 
-Web usage runs from the earliest stated start (1 January 2027 by default) until the last device retires; deployments end with 2027; each may start later.
+Web usage runs from the earliest stated start (1 January 2027 by default) until the last device retires; deployments end with 2027; each may start later or end earlier.
 
 Growth projection inputs are what the only hourly editor prefills; a raw series opens empty. A fleet in service since 2022 deploys from 2022, and its dashboard is counted for as long as devices report to it. The usage span defaults to the shortest device lifespan, six years at most; the sandbox's noon-of-day-one spike goes.
+
+Changed: **A usage pattern may state its own start date.** The clause needs the usage's own start date and no place added the field; the Web + edge prompt alone offers it. → code "system_prompt_web_edge.md"
+
+Changed: **The hourly editor's limit goes from 10 to 20 years, in one place.** Case 04 needs 12, and the editor silently cut a longer generated period on opening. Beyond 20, web usage is cut and listed; a deployment is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"
+
+Changed: **A deployment may state an end date.** Case 04's Dutch fleet no longer grows, and deploying it through 2027 put it a third too high; stated, the end date closes that deployment's period. → statement "end earlier"
+
+To confirm: **Is 20 years the right limit for the hourly editor?** A 20-year variant of case 04 peaks near 375 MB and saves 4.9 MB; 30 years would cover devices kept 15 years from an older start, near 520 MB.
 
 ## #server-calls-scale
 

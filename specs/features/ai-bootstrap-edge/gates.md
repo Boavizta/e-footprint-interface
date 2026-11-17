@@ -73,10 +73,6 @@
 - The view defaults an absent scope to `"web"`. Once the radio always posts the field, that
   default guards a request nothing real sends, against the plan's "no guard": settled in the lot
   `scope-choice`.
-- Sandbox code with no caller until `edge-builder` deletes the module: `edge_dsl`'s
-  `validate_tolerating_extras`, `build_edge_device`, `build_system` and `build_answer`;
-  `edge_dsl_hw.validate_tolerating_extras` duplicates the production one; `report_html.py` still
-  reads `existing_units` and `storage_gb_per_week` (around lines 194 and 205).
 - `specs/architecture/layers-and-wrappers.html` says the response context carries "the
   description and summary metrics"; it now carries the scope too.
 - `validate_tolerating_extras` changes the dict it is given (predates the run), and
@@ -90,6 +86,31 @@
   Local runs only.
 - The map's `help` verb crashes (`comprehension-harness/map.mjs:571`: `fileURLToPath` is called
   with no import from `node:url`). Tooling, outside the feature, not fixed.
+
+### edge-builder
+
+- The hourly editor's duration limit was written in three places (the template's `max`, the
+  script `usage_pattern_timeseries.js`, the preview view); the lot's review fix gives it one
+  source. Check that no fourth literal is left.
+- When the hourly editor opens on a stored duration above its limit, the script rewrites the
+  value to the limit and shows an error, so a save that looks unchanged stores the cut value. The
+  builder no longer emits such a period; a hand-imported one still meets it. Predates the run,
+  left as found.
+- A save from the hourly editor rewrites the form inputs as strings (`'38'`, `'60.0'`), so an
+  unchanged save is a real change that recomputes. Predates the run.
+- New private helpers in the bootstrap DSL module: `_weekly`, `_duration`, `_reserve`,
+  `_deployment_spans`. New public constants: `WEB_YEAR_START`, `WEB_YEAR_END`,
+  `MAX_DEFAULT_SPAN_YEARS`; the sandbox reads `WEB_YEAR_START`.
+- Test helpers `HourlyEditorInputs`, `as_numbers` and `at_web_year_start` live in the narrative
+  test file; the browser tests of `scope-choice` may want them.
+- The Web only schema accepts a `start_date` on a usage pattern, which its prompt never offers.
+- The shared start is the earliest date of anything dated: a dated usage pattern earlier than
+  every deployment pulls the undated deployments with it. It matches the plan's clause and the
+  prompt; the spec's rule speaks of "the earliest deployment start".
+- With fleet totals and no group (case 04), the summary's "Devices per group" check points at
+  nothing the user can open.
+- A replay of a sandbox run recorded before the format moved drops the removed fields and fails
+  the device totals. Local, git-ignored runs only.
 
 ## End-of-run gate
 
