@@ -4,6 +4,7 @@ The provider is a local fake: no inference is made. The pages drawn from these t
 `specs/comprehension-harness/narratives/modeling.html` (`npm run comprehension:render`).
 """
 import json
+import re
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
@@ -18,7 +19,7 @@ from model_builder.adapters.views import views_ai_bootstrap as views
 from model_builder.application.ai_bootstrap.service import Completion
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import is_empty_model
-from tests.declare import narrative, planned_test, titled
+from tests.declare import narrative, titled
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"
@@ -101,6 +102,11 @@ def provider(monkeypatch):
     return fake
 
 
+def checked_scopes(body: str) -> list[str]:
+    """The scopes the description panel's radio opens checked."""
+    return re.findall(r'name="scope" id="[^"]+" value="([^"]+)" checked', body)
+
+
 def saved_modeling(client):
     return SessionWorkspaceRepository(client.session).active_repository().get_system_data()
 
@@ -121,34 +127,31 @@ class TestAiBootstrap:
         assert 'data-ai-bootstrap-panel="input"' in started.content.decode()
         assert is_empty_model(saved_modeling(client))
 
-        generated = client.post(GENERATE, {"description": DESCRIPTION})
+        generated = client.post(GENERATE, {"description": DESCRIPTION, "scope": "web"})
 
         assert provider.call_count == 1 and provider.call_args.args[1] == DESCRIPTION
         assert 'data-ai-bootstrap-panel="summary"' in generated.content.decode()
         assert not is_empty_model(saved_modeling(client))
         assert "data-ai-bootstrap-panel" not in client.get("/model_builder/").content.decode()
 
+    @titled("ai-bootstrap-edge#scope-choice: a refused Web + edge generation comes back with Web + edge checked "
+            "beside the description")
     def test_a_provider_failure_keeps_the_empty_modeling_and_the_description(self, client, provider):
         provider.side_effect = views.ProviderError("unavailable")
         client.post(START)
 
-        refused = client.post(GENERATE, {"description": DESCRIPTION})
+        refused = client.post(GENERATE, {"description": DESCRIPTION, "scope": "web_edge"})
 
         body = refused.content.decode()
         assert 'data-ai-bootstrap-panel="input"' in body and DESCRIPTION in body
+        assert checked_scopes(body) == ["web_edge"]
         assert is_empty_model(saved_modeling(client))
-
-    # Extends test_a_provider_failure_keeps_the_empty_modeling_and_the_description, posting Web + edge; no case is added.
-    @planned_test("ai-bootstrap-edge#scope-choice: a refused Web + edge generation comes back with Web + edge checked "
-                  "beside the description")
-    def test_a_refused_generation_keeps_the_scope(self, client, provider):
-        pass
 
     def test_an_answer_outside_the_schema_saves_nothing(self, client, provider):
         provider.return_value = Completion('{"servers": "not a list"}')
         client.post(START)
 
-        refused = client.post(GENERATE, {"description": DESCRIPTION})
+        refused = client.post(GENERATE, {"description": DESCRIPTION, "scope": "web"})
 
         assert 'data-ai-bootstrap-panel="input"' in refused.content.decode()
         assert is_empty_model(saved_modeling(client))
@@ -292,7 +295,12 @@ class TestAiBootstrap:
         assert "Server calls:" not in body and "Deployments:" not in body
         assert not any(class_name.startswith("Edge") for class_name in saved_modeling(client))
 
-    @planned_test("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "
-                  "[web-by-default]")
+    @titled("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "
+            "[web-by-default]")
     def test_start_opens_on_web_only(self, client, provider):
-        pass
+        generate_web_edge(client, provider, BUILDING_ANSWER)
+
+        started = client.post(START).content.decode()
+
+        assert 'data-ai-bootstrap-panel="input"' in started
+        assert checked_scopes(started) == ["web"]

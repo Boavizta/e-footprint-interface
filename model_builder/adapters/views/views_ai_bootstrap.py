@@ -15,15 +15,14 @@ from model_builder.application.ai_bootstrap.service import generate
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded, PayloadSizeLimitExceeded
 from model_builder.domain.services import SCRATCH_ID, SystemValidationService, get_example_system_data, is_empty_model
-from model_builder.narrate import event, narrate, planned
+from model_builder.narrate import event, narrate
 
 
-def _input_response(request, workspace, description="", error=""):
+def _input_response(request, workspace, description, scope, error):
     # A failed preparation may have replaced request-local settings; recover only saved settings.
     model_web = ModelWeb(workspace.active_repository())
-    planned("ai-bootstrap-edge#scope-choice", "A refused generation renders the scope the user had chosen, with the description.")
-    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
-                                extra_context={"ai_panel": "input", "ai_prompt": description, "ai_error": error})
+    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace, extra_context={
+        "ai_panel": "input", "ai_prompt": description, "ai_scope": scope, "ai_error": error})
 
 
 @require_POST
@@ -37,10 +36,9 @@ def start_ai_bootstrap(request):
     narrate("The active slot **restarts from an empty modeling**, loaded by `load_system_into_session` like any "
             "other, its interface settings dropped. The other slot keeps its own.", lambda: {"slot": repository.slot})
     model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID), workspace=workspace)
-    narrate("The builder comes back with **the description panel open and empty**, and no example picker.")
-    planned("ai-bootstrap-edge#scope-choice", "The panel opens on Web only; the guidance and disclosure of the checked scope alone show, by stylesheet.")
+    narrate("The builder comes back with **the description panel open and empty, on Web only**, and no example picker.")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
-                                extra_context={"ai_panel": "input", "ai_prompt": ""})
+                                extra_context={"ai_panel": "input", "ai_prompt": "", "ai_scope": "web"})
 
 
 def _impact_label(value):
@@ -62,23 +60,24 @@ def generate_ai_bootstrap(request):
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
     description = request.POST.get("description", "").strip()
-    scope = request.POST.get("scope", "web")
+    scope = request.POST.get("scope")
     narrate("A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active "
             "slot's saved modeling as empty, and with a description to send and the scope it is asked in.",
             lambda: {"slot": repository.slot, "scope": scope, "description_characters": len(description)})
     if not is_empty_model(repository.get_system_data()):
-        return _input_response(request, workspace, description, "Start with AI again to replace this modeling.")
+        return _input_response(request, workspace, description, scope, "Start with AI again to replace this modeling.")
     if not description:
-        return _input_response(request, workspace, description, "Describe your system before building your modeling.")
+        return _input_response(request, workspace, description, scope,
+                               "Describe your system before building your modeling.")
     try:
         generated, completion = generate(description, scope, complete_mistral)
     except ProviderError:
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The AI provider could not complete the request. You can try again.")
     except (ValueError, TypeError, KeyError, ArithmeticError, AssertionError,
             InsufficientCapacityError, ComputationMemoryLimitExceeded):
         # Parsing, schema and library construction errors can contain generated text.
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The AI answer could not be built into a modeling. "
                                "Review your description and try again.")
 
@@ -92,14 +91,14 @@ def generate_ai_bootstrap(request):
                 "one is refused, and nothing is saved.", lambda: {"system": prepared.system.name})
         valid = SystemValidationService().validate_for_computation(prepared).is_valid
     except PayloadSizeLimitExceeded:
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The generated modeling exceeds this workspace's size limit. Try a smaller description.")
     except (ValueError, TypeError, KeyError, ArithmeticError, AssertionError,
             InsufficientCapacityError, ComputationMemoryLimitExceeded):
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The generated modeling could not be computed. Review your description and try again.")
     if not valid:
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The generated modeling is incomplete. "
                                "Describe its usages and infrastructure, then try again.")
     try:
@@ -107,10 +106,10 @@ def generate_ai_bootstrap(request):
                 "slot still held the empty one.")
         prepared.persist_to_cache()
     except PayloadSizeLimitExceeded:
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The generated modeling exceeds this workspace's size limit. Try a smaller description.")
     except ComputationMemoryLimitExceeded:
-        return _input_response(request, workspace, description,
+        return _input_response(request, workspace, description, scope,
                                "The generated modeling could not be computed within this instance's memory limit.")
 
     # Estimation is optional and happens after publication; it cannot invalidate a saved graph.

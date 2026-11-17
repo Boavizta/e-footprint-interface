@@ -125,7 +125,7 @@ def test_generation_saves_once_preserves_sibling_and_has_transient_summary(clien
 
     monkeypatch.setattr(SessionSystemRepository, "save_data", save)
     prompt = "  PROMPT_SENTINEL <script>alert('private')</script>  "
-    response = client.post(GENERATE, {"description": prompt, "model": "untrusted-selection"})
+    response = client.post(GENERATE, {"description": prompt, "model": "untrusted-selection", "scope": "web"})
 
     assert response.status_code == 200
     assert writes == [slot]
@@ -163,7 +163,7 @@ def test_bad_answers_leave_saved_scratch_and_settings_intact(client, provider, a
     save = Mock(side_effect=AssertionError("must not save"))
     monkeypatch.setattr(SessionSystemRepository, "save_data", save)
 
-    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL <b>private</b>"})
+    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL <b>private</b>", "scope": "web"})
 
     assert response.status_code == 200
     assert saved(client) == before
@@ -188,7 +188,7 @@ def test_stage_rejections_preserve_saved_scratch_without_sensitive_errors(client
     else:
         monkeypatch.setattr(SessionSystemRepository, "MAX_PAYLOAD_SIZE_MB", 0.00001)
 
-    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL"})
+    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL", "scope": "web"})
 
     assert response.status_code == 200
     assert saved(client) == before
@@ -200,7 +200,7 @@ def test_stage_rejections_preserve_saved_scratch_without_sensitive_errors(client
 def test_estimator_failure_does_not_reject_saved_model(client, provider, monkeypatch):
     client.post(START)
     monkeypatch.setattr(views, "estimate_call", Mock(side_effect=RuntimeError("private metrics")))
-    response = client.post(GENERATE, {"description": "A recipe app"})
+    response = client.post(GENERATE, {"description": "A recipe app", "scope": "web"})
     assert response.status_code == 200 and not is_empty_model(saved(client))
     assert "Cost estimate unavailable" in response.content.decode()
     assert "Impact estimate unavailable" in response.content.decode()
@@ -244,7 +244,7 @@ def test_shared_budget_rejection_at_save_preserves_both_slots_and_settings(clien
     writes = Mock(side_effect=AssertionError("rejected graph must not reach either backend"))
     monkeypatch.setattr(CacheBackend, "set", writes)
 
-    response = client.post(GENERATE, {"description": "A recipe app"})
+    response = client.post(GENERATE, {"description": "A recipe app", "scope": "web"})
 
     assert response.status_code == 200
     assert "exceeds this workspace&#x27;s size limit" in response.content.decode()
@@ -258,11 +258,11 @@ def test_shared_budget_rejection_at_save_preserves_both_slots_and_settings(clien
 def test_empty_description_and_nonempty_saved_model_do_not_call_provider(client, provider):
     client.post(START)
     before = saved(client)
-    response = client.post(GENERATE, {"description": " \n "})
+    response = client.post(GENERATE, {"description": " \n ", "scope": "web"})
     assert response.status_code == 200 and saved(client) == before
     client.post("/model_builder/load-example/ecommerce/")
     before = saved(client)
-    response = client.post(GENERATE, {"description": "Replace silently?"})
+    response = client.post(GENERATE, {"description": "Replace silently?", "scope": "web"})
     assert "Start with AI again" in response.content.decode() and saved(client) == before
     provider.assert_not_called()
 
@@ -303,7 +303,7 @@ def test_unexpected_storage_failure_propagates(client, provider, monkeypatch, st
     else:
         monkeypatch.setattr(SessionSystemRepository, "save_data", Mock(side_effect=OSError("cache unavailable")))
     with pytest.raises(OSError, match="cache unavailable"):
-        client.post(GENERATE, {"description": "A recipe app"})
+        client.post(GENERATE, {"description": "A recipe app", "scope": "web"})
 
 
 def test_summary_shows_escaped_substitutions_and_ignored_fields(client, provider, monkeypatch):
@@ -313,7 +313,7 @@ def test_summary_shows_escaped_substitutions_and_ignored_fields(client, provider
     generated.resolutions = [Resolution("cloud_instance", "<requested>", "<resolved>", "fallback")]
     generated.ignored_fields = ["<ignored>"]
     monkeypatch.setattr(views, "generate", lambda description, scope, complete: (generated, Completion(ANSWER)))
-    response = client.post(GENERATE, {"description": "A recipe app"})
+    response = client.post(GENERATE, {"description": "A recipe app", "scope": "web"})
     body = response.content.decode()
     assert "&lt;requested&gt; → &lt;resolved&gt;" in body and "&lt;ignored&gt;" in body
     assert "<requested>" not in body
@@ -325,7 +325,7 @@ def test_success_logs_no_prompt_raw_answer_or_model_content(client, provider, ca
     answer = json.loads(ANSWER)
     answer["system_name"] = "MODEL_CONTENT_SENTINEL"
     provider.return_value = Completion(json.dumps({**answer, "RAW_ANSWER_SENTINEL": "ignored"}), 100, 100)
-    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL"})
+    response = client.post(GENERATE, {"description": "PROMPT_SENTINEL", "scope": "web"})
     assert response.status_code == 200
     for value in ["PROMPT_SENTINEL", "RAW_ANSWER_SENTINEL", "MODEL_CONTENT_SENTINEL"]:
         assert value not in caplog.text

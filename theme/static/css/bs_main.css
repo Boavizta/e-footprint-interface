@@ -23525,6 +23525,11 @@ body.edge-modeling-off [data-model-canvas] [data-modeling-paradigm=edge] {
   box-shadow: 0 0 0 0.25rem rgba(123, 93, 199, 0.25);
 }
 
+[data-ai-bootstrap-panel=input]:has(#ai-scope-web:checked) [data-ai-scope=web_edge],
+[data-ai-bootstrap-panel=input]:has(#ai-scope-web-edge:checked) [data-ai-scope=web] {
+  display: none;
+}
+
 .sankey-section {
   padding: 0 4px 16px;
 }

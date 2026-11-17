@@ -10,10 +10,11 @@ from playwright.sync_api import expect, sync_playwright
 
 from model_builder.adapters.views import views_ai_bootstrap
 from model_builder.application.ai_bootstrap.service import Completion
-from tests.declare import planned_test
+from tests.declare import titled
 from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True)]
+EDGE_ANSWER = (Path(django_settings.BASE_DIR) / "ai_sandbox/cases/_handwritten_04_ev_charging.json").read_text()
 DESCRIPTION = 'Recipe service <script>alert("prompt")</script> & monthly users'
 
 
@@ -183,7 +184,54 @@ def test_view_buttons_stay_in_place_and_hidden_canvas_still_confirms(minimal_com
     expect(buttons[0]).to_have_attribute("aria-pressed", "true")
 
 
-@planned_test("ai-bootstrap-edge#scope-choice: checking Web + edge shows its guidance, model, cost and impact, and keeps the "
-              "description typed [scope-disclosed]")
+@titled("ai-bootstrap-edge#scope-choice: checking Web + edge shows its guidance, model, cost and impact, and keeps the "
+        "description typed [scope-disclosed]")
 def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
-    pass
+    builder = empty_model_builder
+    page = builder.page
+    builder.start_ai_bootstrap()
+    panel = page.locator('[data-ai-bootstrap-panel="input"]')
+    web, web_edge = panel.locator('[data-ai-scope="web"]'), panel.locator('[data-ai-scope="web_edge"]')
+    expect(page.get_by_label("Web only")).to_be_checked()
+    expect(web.last).to_contain_text("USD 0.001")
+    for index in range(web.count()):
+        expect(web.nth(index)).to_be_visible()
+        expect(web_edge.nth(index)).to_be_hidden()
+    page.locator("#ai-description").fill(DESCRIPTION)
+
+    page.get_by_label("Web + edge").check()
+
+    for index in range(web.count()):
+        expect(web.nth(index)).to_be_hidden()
+        expect(web_edge.nth(index)).to_be_visible()
+    expect(web_edge.first).to_contain_text("Which devices does your system deploy")
+    for disclosed in ("zai-glm-5-3-flash", "USD 0.002", "below 1 g CO2-eq"):
+        expect(web_edge.last).to_contain_text(disclosed)
+    expect(page.locator("#ai-description")).to_have_value(DESCRIPTION)
+
+
+@titled("ai-bootstrap-edge#scope-choice: a generated Web + edge modeling shows its edge objects, and a 12-year web "
+        "usage saved unchanged keeps its period")
+def test_web_edge_generation_keeps_a_long_web_usage_period(empty_model_builder, isolated_bootstrap):
+    builder = empty_model_builder
+    page = builder.page
+    isolated_bootstrap.return_value = Completion(EDGE_ANSWER, 5000, 2000, latency_s=15)
+    builder.start_ai_bootstrap()
+    page.get_by_label("Web + edge").check()
+
+    builder.generate_ai_modeling(DESCRIPTION)
+
+    checks = builder.ai_bootstrap_summary.locator("ol").inner_text()
+    assert checks.index("Infrastructure:") < checks.index("Deployments:") < checks.index("Server calls:")
+    expect(page.locator("#edge-modeling-toggle")).to_be_checked()
+    expect(page.locator("#edge-devices-list").get_by_text("Station controller")).to_be_visible()
+    builder.close_side_panel()
+    period = {"start_date": "2024-01-01", "modeling_duration_value": "12", "modeling_duration_unit": "year"}
+
+    def opened_period():
+        click_and_wait_for_htmx(page, page.locator("#up-list button[hx-get*='open-edit-object-panel']").first)
+        return {key: page.locator(f"#UsagePattern_hourly_occurrences__{key}").input_value() for key in period}
+
+    assert opened_period() == period
+    builder.side_panel.submit_and_wait_for_close()
+    assert opened_period() == period

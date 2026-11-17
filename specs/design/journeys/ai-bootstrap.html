@@ -451,8 +451,6 @@
   <span class="tag">B · Describe your system</span><span class="conn">the description panel · one request, the page locked while it runs</span><span class="rule"></span>
 </div>
 
-<!-- @planned ai-bootstrap-edge#scope-choice The scope choice above the description; screens 5 and 6 carry the scope and the edge checks. -->
-
 <!-- screen 3 — description panel -->
 <div class="screen">
   <div class="mock-col">
@@ -471,6 +469,8 @@
         <div class="panel" style="width:72%">
           <div class="phead"><b>Start with AI · Beta</b><span class="x">×</span></div>
           <p class="ptext">Beta — a first version, built to improve with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+          <div class="ftitle">What does your system run on?</div>
+          <p class="ptext">◉ Web only &nbsp; ○ Web + edge</p>
           <p class="ptext">What are your system's usages? How often do they occur? What infrastructure supports them?</p>
           <p class="ptext">Give volumes for each usage journey: for example, 50,000 monthly users browsing four times each per month, separately from 5,000 photo uploads per month. Distinguish users from visits. Include session or step durations, servers, locations, APIs and background work where known.</p>
           <p class="ptext">Missing consequential inputs become explained assumptions; other omitted fields use library defaults. Review the generated modeling.</p>
@@ -483,7 +483,7 @@
         <div class="resultsbar locked" style="position:absolute;left:0;bottom:0;width:28%"><span class="rb">Results</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The builder comes back with the <b>Start with AI · Beta</b> panel docked over the now-empty canvas, and no example picker. The panel says what to describe, then the <b>Describe your system</b> field, then the provider, the indicative cost and impact, and what is not logged. One commit: <b>Build my modeling</b>.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The builder comes back with the <b>Start with AI · Beta</b> panel docked over the now-empty canvas, and no example picker. The panel opens on <b>Web only</b> in the scope choice, says what to describe for that scope, then the <b>Describe your system</b> field, then the provider, the indicative cost and impact, and what is not logged. One commit: <b>Build my modeling</b>.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">3</span><h3>The description panel</h3></div>
@@ -493,6 +493,7 @@
        impact are announced up front, with a call-specific estimate promised after generation.</p>
     <div class="states">
       <div class="state"><span class="k">Empty modeling behind</span><span class="v">The active slot already holds an empty modeling named <em>"My system"</em>. The Results bar is locked, as for any empty modeling.</span></div>
+      <div class="state"><span class="k">Web + edge</span><span class="v">Checking <b>Web + edge</b> swaps the guidance for the devices and their hardware, how many are deployed per period and for how long, what runs on each device, how often it reaches a server, and the web usages; the disclosure reads its own indicative cost, <em>"about 0.2 US cent (USD 0.002)"</em>, with the same model and impact wording. The typed description stays; switching sends nothing. Each Start with AI opens on Web only.</span></div>
       <div class="state"><span class="k">Required field</span><span class="v">The browser refuses to submit an empty field. A description of only spaces reaches the server and is refused (screen 5).</span></div>
       <div class="state"><span class="k">Closing the panel</span><span class="v">The <b>×</b> closes it at once, with no pending-changes warning: the typed description is lost and the empty modeling stays — as the confirmation warned.</span></div>
       <div class="state"><span class="k">Nothing stored</span><span class="v">The description is kept only in the page. Reloading shows the empty modeling without the panel.</span></div>
@@ -570,7 +571,7 @@
         </div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>A refused generation brings the same panel back, <b>the description still in the field</b> and one red message under it saying what went wrong. The canvas behind is still the empty modeling. <b>Build my modeling</b> is live again to retry.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>A refused generation brings the same panel back, <b>the description still in the field and the scope still checked</b>, and one red message under it saying what went wrong. The canvas behind is still the empty modeling. <b>Build my modeling</b> is live again to retry.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">5</span><h3>Refused — the panel, the description kept, one message</h3></div>
@@ -642,6 +643,7 @@
        app changed in the AI's answer to make it fit.</p>
     <div class="states">
       <div class="state"><span class="k">Call estimate</span><span class="v">The cost comes in US dollars with the date of its rate card, plus the cached-input caveat. The impact is the parent model's EcoLogits estimate, often a range. Either reads <em>"Cost estimate unavailable"</em> / <em>"Impact estimate unavailable"</em> when it cannot be computed — the modeling is kept anyway.</span></div>
+      <div class="state"><span class="k">Web + edge checks</span><span class="v">After a Web + edge generation, four checks follow the web ones: <b>Deployments</b>, <b>Devices per group</b>, <b>Device characteristics</b> and <b>Server calls</b>. The canvas shows the edge devices, groups and usage patterns, with Edge modeling on.</span></div>
       <div class="state"><span class="k">Catalog substitutions</span><span class="v">Each value the app replaced to match its catalogs — a network, a device, a provider, a cloud instance, an AI model, an object name, a comment it could not attach — as <em>kind: requested → used (how)</em>. Shown only when there is one.</span></div>
       <div class="state"><span class="k">Ignored answer fields</span><span class="v">Fields of the AI's answer the app does not know, dropped rather than failing the run. Shown only when there is one.</span></div>
       <div class="state"><span class="k">Your description</span><span class="v">Folded by default; opened, it shows the text exactly as sent, selectable so it can be copied and kept.</span></div>
