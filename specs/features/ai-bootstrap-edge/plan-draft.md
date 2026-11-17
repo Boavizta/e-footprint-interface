@@ -21,3 +21,18 @@
   (devices deployed together per site, vehicle or building), and never requires it.
 - The scope travels with the generate request and is re-rendered on a refused generation; nothing
   of it is persisted.
+- The sandbox's Web + edge evaluator is `ai_sandbox/edge_dsl.py` and `--scope web_edge` of
+  `ai_sandbox/run.py` (commit `65c5f108`), with cases 03 (groups relevant) and 04 (fleet totals
+  only). It is the starting point of the production edge format; its `requires_device_group` check
+  is informative only, `device_totals` is the correctness check.
+- Cross-repository prerequisite, a library lot before the interface's: a `RecurrentServerNeed`'s
+  volume is scaled by deployments but not by `EdgeDevice.total_nb_of_units`
+  (`RecurrentServerNeed.unitary_hourly_volume_per_usage_pattern`, `Job.hourly_occurrences_per_usage_pattern`),
+  against its own parameter description. Fix it in e-footprint; no interface guard.
+- An installed base cannot be stated on an `EdgeUsagePattern`: the sandbox adds it to one hour of
+  `hourly_deployment_starts`, at noon of day 1, because `convert_to_utc` rolls hour 0 east of UTC to
+  the end of the period. Production either keeps that workaround or gets a library parameter.
+- Library edge defaults are sized for a PC (30 GB base storage, 1 GB base RAM, 5 W idle) and fail
+  capacity checks on gateways and sensors; the sandbox builder caps them and fits a rolling storage
+  buffer, and defaults the usage span to the shortest device lifespan (6 years at most).
+- The Web + edge prompt is 8,570 characters against 5,157 for Web only.

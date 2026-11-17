@@ -49,12 +49,15 @@ The design page of today's flow is
   bootstrap.
 - **web-only-stays-web** A Web only generation creates no edge object.
 - **edge-scope-builds-edge** A Web + edge description of deployed devices produces a modeling with
-  those devices, what runs on them and how many are deployed.
+  those devices, what runs on them, how many are already in service and how many are added each
+  period.
 - **groups-when-relevant** Devices described as deployed together, per site or per vehicle, may be
   grouped with their counts per unit; a fleet described by its total alone needs no group. Either
   way, the total number of each device in the modeling matches the description.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job
   on that server, and the server appears once whether devices, people or both use it.
+- **calls-scale-with-devices** A server receives a device's calls once for every such device
+  deployed, whether the devices are grouped or counted as a fleet total.
 - **one-request** Each generation makes one request to the AI provider, whatever the scope.
 - **scope-disclosed** Before submitting, the user reads the model and the indicative cost and impact
   of the scope selected; the summary states those of the call made.
