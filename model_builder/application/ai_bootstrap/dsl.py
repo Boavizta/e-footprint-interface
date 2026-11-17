@@ -633,11 +633,10 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     periods = _deployment_periods(spec, start) if edge else {}
     web_end = max([WEB_YEAR_END] + [_end(*periods[name]) + timedelta(days=round(365 * span))
                                     for name, span in spans.items()])
-    narrate("**One period for people and devices**: web usage runs from the earliest start date the answer gives, the "
-            "web year's first day without one, until the last deployed device retires, the web year's end without "
-            "devices; a usage longer than the editor accepts is cut at its limit. Deployments run to their end date, "
-            "the web year's end without one, so a fleet in service since a past date is counted from it. A usage "
-            "dated on its own starts when it says.",
+    narrate("**One period for people and devices**: web usage runs from the earliest start date given, the web year's "
+            "first day without one, until the last device retires, the web year's end without devices, within the "
+            "editor's limit; a dated usage starts when it says. Deployments run from their start date to their end date, "
+            "the web year's end without one.",
             lambda: {"start": start.isoformat(), "web_end": web_end.isoformat(), "spans_years": spans})
     narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
             "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "
