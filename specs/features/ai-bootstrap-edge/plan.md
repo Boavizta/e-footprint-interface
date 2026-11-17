@@ -45,7 +45,7 @@ The answer gives each device's idle power, reserved RAM and reserved storage; on
 
 On cases 03 and 04 (12 calls), the AI set all three on every gateway and controller, within the device's power, RAM and storage, and every answer built. The derived idle power runs a 5 W controller at full power, doubling case 04's device use. A call costs about a fifth more.
 
-To confirm: **No weekly write: the reserved storage the answer states holds the device's data.** The sandbox also lets a function write storage each week and fits a rolling buffer when that overflows: two fields, a fitting rule and a resolution. Dropped, a device keeping all its data for life is edited in by the user.
+To confirm: **Drop the on-device data fields: the reserved storage the answer states covers the data a device keeps.** In the 12 runs, the AI always described a rolling buffer of 0.004 to 0.4 GB beside 2 to 8 GB of reserved storage, and the overflow fit never fired. Kept: two fields per function and the fit.
 
 ## #device-groups
 
@@ -55,11 +55,9 @@ Grouping stays the AI's choice: the sandbox's group-required check remains infor
 
 ## #deployments-over-time
 
-Web usage and deployments share one period, from the earliest start the answer states (1 January 2027 by default) to the end of 2027; each may start later.
+Web usage runs from the earliest stated start (1 January 2027 by default) until the last device retires; deployments end with 2027; each may start later.
 
-Growth projection inputs are what the only hourly editor prefills; a raw series opens empty. A fleet in service since 2022 deploys from 2022, its dashboard too, so neither part covers years the other lacks. The usage span defaults to the shortest device lifespan, six years at most; the sandbox's noon-of-day-one spike goes.
-
-To confirm: **Web usage ends with 2027, while the last devices deployed stay in service for their usage span.** Results then show a few edge-only years after 2027, the fleet retiring. The alternative runs web usage until the last retirement, so a dashboard is counted as long as devices report to it, at the cost of longer web series.
+Growth projection inputs are what the only hourly editor prefills; a raw series opens empty. A fleet in service since 2022 deploys from 2022, and its dashboard is counted for as long as devices report to it. The usage span defaults to the shortest device lifespan, six years at most; the sandbox's noon-of-day-one spike goes.
 
 ## #server-calls-scale
 

@@ -99,8 +99,8 @@ class TestAiBootstrap:
     def test_a_fleet_in_service_is_deployed_from_the_past(self, client, provider):
         pass
 
-    @planned_test("ai-bootstrap-edge#deployments-over-time: web usage runs from the earliest deployment start unless the answer "
-                  "dates it [shared-period]")
+    @planned_test("ai-bootstrap-edge#deployments-over-time: web usage runs from the earliest deployment start, unless dated, until "
+                  "the last device retires [shared-period]")
     def test_web_usage_shares_the_deployments_period(self, client, provider):
         pass
 
