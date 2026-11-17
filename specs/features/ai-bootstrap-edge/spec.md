@@ -21,16 +21,17 @@ choice: an edge system almost always reports to servers, and the people using it
 to add.
 
 The guidance under the choice says what to describe for the selected scope: for Web + edge, the
-devices and their hardware, the fleet size and deployment rate, what runs on each device, how often
+devices and their hardware, how many are deployed per period and for how long, what runs on each
+device, how often
 it reaches a server, and the web usages. The AI receives instructions written for that scope. When
 the description gives devices deployed together, such as one gateway and 40 sensors per building, the
 AI may group them with their counts per building instead of multiplying the totals. The summary's
-checklist after generation follows the scope too: for Web + edge it adds the fleet counts, the
+checklist after generation follows the scope too: for Web + edge it adds the deployments, the
 devices per group, the device characteristics and the calls to servers.
 
-A Web + edge description is longer to answer, so it may use more reasoning from the same AI model.
-The disclosure under the description states the model, the indicative cost and impact of the
-selected scope; the summary states the estimate of the call actually made.
+Both scopes use the same AI model with the same reasoning effort as today. The Web + edge
+instructions are longer, so the disclosure under the description states the indicative cost and
+impact of the selected scope; the summary states the estimate of the call actually made.
 
 The design page of today's flow is
 [Start a modeling with AI](../../design/journeys/ai-bootstrap.html). The changes, screen by screen:
@@ -49,11 +50,16 @@ The design page of today's flow is
   bootstrap.
 - **web-only-stays-web** A Web only generation creates no edge object.
 - **edge-scope-builds-edge** A Web + edge description of deployed devices produces a modeling with
-  those devices, what runs on them, how many are already in service and how many are added each
-  period.
+  those devices, what runs on them, how many are deployed each period and how long they stay in
+  service.
 - **groups-when-relevant** Devices described as deployed together, per site or per vehicle, may be
   grouped with their counts per unit; a fleet described by its total alone needs no group. Either
-  way, the total number of each device in the modeling matches the description.
+  way, each deployment holds the number of each device the description gives.
+- **fleet-as-deployments** A fleet is modeled by its deployments per period and how long each stays
+  in service. A fleet size the description states is turned into deployments, and the value's
+  comment says how.
+- **generated-values-editable** Each generated usage pattern, web or edge, opens in its edit panel
+  with the values the AI set, and saving it unchanged keeps them.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job
   on that server, and the server appears once whether devices, people or both use it.
 - **calls-scale-with-devices** A server receives a device's calls once for every such device
@@ -68,6 +74,9 @@ The design page of today's flow is
 
 - An edge-only scope: Web + edge covers a fleet with no web usage.
 - Reading the scope from the description, or from the Edge modeling toggle.
-- A different AI model for Web + edge: the reasoning effort may differ by scope, the model does not.
+- A different AI model or reasoning effort for Web + edge: on the sandbox cases, more reasoning
+  brought no gain for a slower, costlier call.
+- An installed base: devices already in service are described as deployments over time.
+- Deployment timeseries other than the Growth projection inputs.
 - Adding edge objects to an existing modeling: bootstrap still starts from an empty one.
 - Remembering the scope between bootstraps.
