@@ -9,23 +9,17 @@ Above the description, a Web only / Web + edge radio, Web only checked; a styles
 
 A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions.
 
-Changed: **a narrative case checks that a refused Web + edge generation keeps its scope.** It extends today's provider-failure case, which posts no scope: a refusal reverting to Web only would pass it.
-
 ## #scope-in-request
 
 The scope travels with the generate request to the service, back on a refusal, and to the summary, whose checklist adds deployments, devices per group, device characteristics and server calls.
 
 Like the description, it lives in the request and the response alone. An unknown value gets no guard: the scope table's lookup fails inside the generation, which is refused like a bad answer, and only a hand-crafted request sends one.
 
-Changed: **two narrative cases read the summary's checklist**: the edge checks after the web ones for Web + edge, none for Web only. Without these reads, edge checks shown after every generation would pass every case.
-
 ## #scope-selects-format
 
 A scope table in the service pairs each scope with its instructions and its schema; one request is made whichever is chosen.
 
 Web only keeps today's flow. A second service per scope was refused: everything after the answer (build, prepare, validate, save) is the same for both scopes.
-
-Changed: **the Web + edge narrative case reads which instructions the provider received.** Its edge objects prove the schema followed the scope, but a Web + edge request sending the Web only instructions would pass.
 
 ## #edge-instructions
 
@@ -50,8 +44,6 @@ Calls reach jobs by name in the one jobs section, so a server that devices and p
 The answer gives each device's idle power, reserved RAM and reserved storage; one it omits is derived from the stated hardware, as the sandbox's builder does.
 
 In 12 runs on cases 03 and 04, the AI set all three on every gateway and controller, within the device's limits, and every answer built; the derived idle power doubles case 04's device use. No weekly data fields: their buffers were 0.004 to 0.4 GB beside 2 to 8 GB reserved.
-
-Changed: **the Web + edge narrative case reads the gateway's idle power, reserved RAM and reserved storage.** Answers 03 and 04 state all three; without this read, a builder deriving its own would still pass.
 
 ## #device-groups
 

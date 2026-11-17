@@ -1,6 +1,6 @@
 {
   "feature": "ai-bootstrap-edge",
-  "base": "e7dc16a00cad56343cf03b3adcf5fa0e87f123ff",
+  "base": "f65a0e64898e21686e3595abfbe15fd633f00b50",
   "approvedOn": "2026-11-17",
   "units": [
     {
@@ -14,6 +14,7 @@
           "A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions."
         ],
         "sites": [
+          "changed model_builder/adapters/views/views_ai_bootstrap.py in _input_response — A refused generation renders the scope the user had chosen, with the description.",
           "changed model_builder/adapters/views/views_ai_bootstrap.py in start_ai_bootstrap — The panel opens on Web only; the guidance and disclosure of the checked scope alone show, by stylesheet."
         ],
         "comments": [
@@ -21,6 +22,7 @@
         ],
         "tests": [
           "unit tests/e2e/test_ai_bootstrap.py — checking Web + edge shows its guidance, model, cost and impact, and keeps the description typed [scope-disclosed]",
+          "narrative tests/narratives/test_ai_bootstrap.py — a refused Web + edge generation comes back with Web + edge checked beside the description",
           "narrative tests/narratives/test_ai_bootstrap.py — Start with AI after a Web + edge generation opens on Web only [web-by-default]"
         ],
         "question": [],
@@ -38,12 +40,16 @@
           "Like the description, it lives in the request and the response alone. An unknown value gets no guard: the scope table's lookup fails inside the generation, which is refused like a bad answer, and only a hand-crafted request sends one."
         ],
         "sites": [
-          "changed model_builder/adapters/views/views_ai_bootstrap.py in _input_response — A refused generation renders the scope the user had chosen, with the description.",
           "changed model_builder/adapters/views/views_ai_bootstrap.py in generate_ai_bootstrap — The posted scope is read beside the description and passed to `generate`.",
           "changed model_builder/adapters/views/views_ai_bootstrap.py in generate_ai_bootstrap — The summary receives the scope; for Web + edge its checklist adds the edge checks after the web ones."
         ],
-        "comments": [],
-        "tests": [],
+        "comments": [
+          "changes tests/narratives/test_ai_bootstrap.py — Reads that the summary lists the edge checks after the web ones.",
+          "changes tests/narratives/test_ai_bootstrap.py — Reads that the summary lists no edge check."
+        ],
+        "tests": [
+          "unit tests/unit_tests/adapters/views/test_views_ai_bootstrap.py — an unknown posted scope is refused like an unbuildable answer, before any provider call"
+        ],
         "question": [],
         "notes": []
       }
@@ -63,7 +69,17 @@
           "changed model_builder/application/ai_bootstrap/service.py in generate — The scope picks the instructions and the schema; its callers and tests pass it."
         ],
         "comments": [
-          "changes specs/architecture/layers-and-wrappers.html — The service picks the instructions and schema of the scope, Web only or Web + edge; the sandbox's edge scope reads the production ones."
+          "changes specs/architecture/layers-and-wrappers.html — The service picks the instructions and schema of the scope, Web only or Web + edge; the sandbox's edge scope reads the production ones.",
+          "changes tests/integration/test_ai_bootstrap.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/narratives/test_ai_bootstrap.py — Reads that the provider received the Web + edge instructions.",
+          "changes tests/unit_tests/adapters/views/test_views_ai_bootstrap.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/adapters/views/test_views_ai_bootstrap.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/adapters/views/test_views_ai_bootstrap.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — Passes the Web only scope to `generate`; the web prompt stays asserted.",
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — Passes the Web only scope to `build_answer`.",
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — Passes the Web only scope to `generate`."
         ],
         "tests": [],
         "question": [],
@@ -131,7 +147,8 @@
         "tests": [
           "narrative tests/narratives/test_ai_bootstrap.py — a fleet in service since a past date is deployed from it, its devices counted from that date [fleet-as-deployments]",
           "narrative tests/narratives/test_ai_bootstrap.py — web usage runs from the earliest deployment start, unless dated, until the last device retires [shared-period]",
-          "narrative tests/narratives/test_ai_bootstrap.py — generated web and edge usage patterns open with their inputs, and an unchanged save keeps them [generated-values-editable]"
+          "narrative tests/narratives/test_ai_bootstrap.py — generated web and edge usage patterns open with their inputs, and an unchanged save keeps them [generated-values-editable]",
+          "unit tests/unit_tests/application/test_ai_bootstrap_service.py — a deployment's usage span is its stated one, else its devices' shortest lifespan, six years at most"
         ],
         "question": [],
         "notes": []
@@ -151,10 +168,15 @@
           "added model_builder/application/ai_bootstrap/dsl.py in build_edge_function — Each server call becomes a server need on a job of the web builder, so devices and people share one server.",
           "changed model_builder/application/ai_bootstrap/dsl.py in build_system — A WebEdgeSpec's edge sections follow: `build_edge_device`, `build_edge_groups`, `build_edge_function` on the web jobs, `build_edge_deployment`."
         ],
-        "comments": [],
+        "comments": [
+          "changes tests/unit_tests/application/test_ai_bootstrap_service.py — The edge sections join the table, built under the Web + edge scope."
+        ],
         "tests": [
+          "unit tests/integration/test_ai_bootstrap.py — the sandbox's Web + edge scope builds answers 03 and 04, counting devices in service during the web year",
           "narrative tests/narratives/test_ai_bootstrap.py — a Web + edge description becomes a modeling with its devices, what they run, their deployments and usage spans [edge-scope-builds-edge]",
-          "narrative tests/narratives/test_ai_bootstrap.py — devices' server calls and the dashboard journey land on one shared server [edge-calls-reach-servers]"
+          "narrative tests/narratives/test_ai_bootstrap.py — devices' server calls and the dashboard journey land on one shared server [edge-calls-reach-servers]",
+          "narrative tests/narratives/test_ai_bootstrap.py — devices deployed per building hold their counts per group in each deployment [groups-when-relevant]",
+          "narrative tests/narratives/test_ai_bootstrap.py — a server receives a device's calls once per device deployed, grouped or fleet total [calls-scale-with-devices]"
         ],
         "question": [],
         "notes": []
@@ -173,8 +195,12 @@
         "sites": [
           "added model_builder/application/ai_bootstrap/dsl.py in build_edge_device — The device takes the answer's hardware, idle power, reserved RAM and reserved storage, deriving from its hardware any the answer omits."
         ],
-        "comments": [],
-        "tests": [],
+        "comments": [
+          "changes tests/narratives/test_ai_bootstrap.py — Reads that the gateway keeps the idle power, reserved RAM and reserved storage the answer states."
+        ],
+        "tests": [
+          "unit tests/unit_tests/application/test_ai_bootstrap_service.py — an omitted idle power, reserved RAM or reserved storage is derived from the device's stated power and RAM"
+        ],
         "question": [],
         "notes": []
       }
@@ -194,7 +220,8 @@
         ],
         "comments": [],
         "tests": [
-          "narrative tests/narratives/test_ai_bootstrap.py — devices deployed per building hold their counts per group in each deployment [groups-when-relevant]"
+          "unit tests/unit_tests/application/test_ai_bootstrap_service.py — a group of sub-groups is built after them, and a device counts once per unit of every group around it",
+          "unit tests/unit_tests/application/test_ai_bootstrap_service.py — a sub-group no group declares, or a cycle of sub-groups, refuses the answer"
         ],
         "question": [],
         "notes": []
@@ -212,11 +239,7 @@
         ],
         "sites": [],
         "comments": [],
-        "tests": [
-          "narrative tests/narratives/test_ai_bootstrap.py — a server receives a device's calls once per device deployed, grouped or fleet total [calls-scale-with-devices]"
-        ],
-        "question": [],
-        "notes": []
+        "tests": []
       }
     },
     {
@@ -235,6 +258,18 @@
         "waivers": [
           "one-request — The service calls the provider once on every path, and the scope only picks the instructions and the schema it sends; the existing service test of no retry holds the single call.",
           "nothing-stored — The scope is a request field handed to the service and the response context; the saved modeling is the library graph's JSON, which has no place for it, and no new line writes the session."
+        ]
+      }
+    },
+    {
+      "kind": "delivery",
+      "name": "Delivery",
+      "facets": {
+        "lots": [
+          "library-server-calls (easy) #server-calls-scale — In e-footprint, its own commits and tests, before every lot here. It has no site in this repository, so its narrative case moved to #edge-builder and the map reads this lot as delivered from the start.",
+          "scope-and-format #edge-format #scope-selects-format #edge-instructions #scope-in-request — The scope carried to the schema, with no screen. #scope-selects-format and #edge-instructions are one commit: the table names the prompt file. That commit points the sandbox's Web + edge scope at production. No paid call.",
+          "edge-builder (hard) #edge-device-sizing #device-groups #deployments-over-time #edge-builder — Hard: one period for web usage and deployments, from a past start to the last device's retirement, in the editor's fields. The last two pieces are one commit. Gate: paid runs of cases 03 and 04, on the user's word.",
+          "scope-choice #scope-choice — Last: its disclosure states the cost and impact the gated runs measured, and its radio opens the Web + edge flow the earlier lots finished. The browser tests of the AI bootstrap run."
         ]
       }
     },
