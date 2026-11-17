@@ -21,7 +21,7 @@ from model_builder.narrate import event, narrate, planned
 def _input_response(request, workspace, description="", error=""):
     # A failed preparation may have replaced request-local settings; recover only saved settings.
     model_web = ModelWeb(workspace.active_repository())
-    planned("ai-bootstrap-edge#scope-in-request", "A refused generation renders the scope the user had chosen, with the description.")
+    planned("ai-bootstrap-edge#scope-choice", "A refused generation renders the scope the user had chosen, with the description.")
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
                                 extra_context={"ai_panel": "input", "ai_prompt": description, "ai_error": error})
 

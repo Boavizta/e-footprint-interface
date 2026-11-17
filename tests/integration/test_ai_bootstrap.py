@@ -17,6 +17,7 @@ from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.application.ai_bootstrap.service import build_answer
 from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from tests.declare import planned_test
 
 ANSWER = Path(__file__).parents[2] / "ai_sandbox/cases/_handwritten_01_recipe_app.json"
 
@@ -26,6 +27,7 @@ def offline_boavizta(monkeypatch):
     monkeypatch.setenv("USE_BOAVIZTAPI_PACKAGE", "1")
 
 
+# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 def test_handwritten_answer_computes_roundtrips_and_remains_editable():
     generated = build_answer(ANSWER.read_text())
     system = generated.system
@@ -71,3 +73,9 @@ def test_offline_evaluation_and_replay_keep_reports_and_exports(tmp_path):
     assert "unavailable" in (tmp_path / "summary.md").read_text()
     completed = subprocess.run([sys.executable, "-m", "ai_sandbox.report", str(tmp_path)], capture_output=True, text=True)
     assert completed.returncode == 0, completed.stderr
+
+
+@planned_test("ai-bootstrap-edge#edge-builder: the sandbox's Web + edge scope builds answers 03 and 04, counting "
+              "devices in service during the web year")
+def test_sandbox_evaluates_handwritten_edge_answers(tmp_path):
+    pass

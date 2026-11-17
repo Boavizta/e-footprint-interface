@@ -19,6 +19,7 @@ from model_builder.application.ai_bootstrap.service import Completion, build_ans
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.services import get_example_system_data, is_empty_model
+from tests.declare import planned_test
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"
@@ -104,6 +105,7 @@ def test_reference_role_after_remove_and_readd_preserves_actual_sibling(client):
     assert SessionWorkspaceRepository(client.session).repository_for(1).get_system_data() == before
 
 
+# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 @pytest.mark.parametrize("slot", [0, 1])
 def test_generation_saves_once_preserves_sibling_and_has_transient_summary(client, provider, monkeypatch, slot):
     client.get("/model_builder/")
@@ -205,6 +207,7 @@ def test_estimator_failure_does_not_reject_saved_model(client, provider, monkeyp
     assert "Impact estimate unavailable" in response.content.decode()
 
 
+# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 @pytest.mark.parametrize("slot", [0, 1])
 def test_shared_budget_rejection_at_save_preserves_both_slots_and_settings(client, provider, monkeypatch, slot):
     client.get("/model_builder/")
@@ -266,6 +269,12 @@ def test_empty_description_and_nonempty_saved_model_do_not_call_provider(client,
     provider.assert_not_called()
 
 
+@planned_test("ai-bootstrap-edge#scope-in-request: an unknown posted scope is refused like an unbuildable answer, "
+              "before any provider call")
+def test_unknown_scope_is_refused_without_a_provider_call(client, provider):
+    pass
+
+
 @pytest.mark.parametrize("url", [START, GENERATE])
 @pytest.mark.parametrize("enabled,key", [(False, "dummy"), (True, "")])
 def test_unavailable_endpoints_are_not_found(client, settings, url, enabled, key):
@@ -293,6 +302,7 @@ def test_unexpected_storage_failure_propagates(client, provider, monkeypatch, st
         client.post(GENERATE, {"description": "A recipe app"})
 
 
+# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 def test_summary_shows_escaped_substitutions_and_ignored_fields(client, provider, monkeypatch):
     from model_builder.application.ai_bootstrap.catalogs import Resolution
     client.post(START)

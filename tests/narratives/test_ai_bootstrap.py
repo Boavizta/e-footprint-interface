@@ -70,6 +70,12 @@ class TestAiBootstrap:
         assert 'data-ai-bootstrap-panel="input"' in body and DESCRIPTION in body
         assert is_empty_model(saved_modeling(client))
 
+    # Extends test_a_provider_failure_keeps_the_empty_modeling_and_the_description, posting Web + edge; no case is added.
+    @planned_test("ai-bootstrap-edge#scope-choice: a refused Web + edge generation comes back with Web + edge checked "
+                  "beside the description")
+    def test_a_refused_generation_keeps_the_scope(self, client, provider):
+        pass
+
     def test_an_answer_outside_the_schema_saves_nothing(self, client, provider):
         provider.return_value = Completion('{"servers": "not a list"}')
         client.post(START)
@@ -79,6 +85,10 @@ class TestAiBootstrap:
         assert 'data-ai-bootstrap-panel="input"' in refused.content.decode()
         assert is_empty_model(saved_modeling(client))
 
+    # @planned ai-bootstrap-edge#scope-selects-format Reads that the provider received the Web + edge instructions.
+    # @planned ai-bootstrap-edge#scope-in-request Reads that the summary lists the edge checks after the web ones.
+    # @planned ai-bootstrap-edge#edge-device-sizing Reads that the gateway keeps the idle power, reserved RAM and
+    # reserved storage the answer states.
     @planned_test("ai-bootstrap-edge#edge-builder: a Web + edge description becomes a modeling with its devices, what they run, "
                   "their deployments and usage spans [edge-scope-builds-edge]")
     def test_a_web_edge_description_becomes_an_edge_modeling(self, client, provider):
@@ -89,7 +99,7 @@ class TestAiBootstrap:
     def test_devices_and_people_share_one_server(self, client, provider):
         pass
 
-    @planned_test("ai-bootstrap-edge#device-groups: devices deployed per building hold their counts per group in each "
+    @planned_test("ai-bootstrap-edge#edge-builder: devices deployed per building hold their counts per group in each "
                   "deployment [groups-when-relevant]")
     def test_devices_deployed_together_are_grouped(self, client, provider):
         pass
@@ -109,11 +119,12 @@ class TestAiBootstrap:
     def test_generated_usage_patterns_stay_editable(self, client, provider):
         pass
 
-    @planned_test("ai-bootstrap-edge#server-calls-scale: a server receives a device's calls once per device deployed, grouped or "
+    @planned_test("ai-bootstrap-edge#edge-builder: a server receives a device's calls once per device deployed, grouped or "
                   "fleet total [calls-scale-with-devices]")
     def test_server_calls_scale_with_deployed_devices(self, client, provider):
         pass
 
+    # @planned ai-bootstrap-edge#scope-in-request Reads that the summary lists no edge check.
     @planned_test("ai-bootstrap-edge#edge-format: a Web only answer holding edge sections builds no edge object "
                   "[web-only-stays-web]")
     def test_a_web_only_answer_builds_no_edge_object(self, client, provider):
