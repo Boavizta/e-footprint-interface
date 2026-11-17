@@ -14,6 +14,7 @@ def test_generate_calls_once_and_reports_ignored_wrapped_fields():
     complete.assert_called_once()
     assert complete.call_args.args[1] == "A service"
     assert "each named journey independently" in complete.call_args.args[0]
+    assert "edge_devices" not in complete.call_args.args[0]
     assert generated.ignored_fields == ["extra"]
     assert completion is complete.return_value
 
