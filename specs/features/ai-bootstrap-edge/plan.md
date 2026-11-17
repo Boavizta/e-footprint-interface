@@ -55,11 +55,11 @@ Grouping stays the AI's choice: the sandbox's group-required check remains infor
 
 ## #deployments-over-time
 
-Each deployment is a Growth projection, editable as any usage pattern, that ends with the web year; its usage span defaults to the shortest device lifespan, six years at most.
+Web usage and deployments share one period, from the earliest start the answer states (1 January 2027 by default) to the end of 2027; each may start later.
 
-These inputs are what the only hourly editor prefills; a raw series opens empty. Ending with the web year keeps a fleet in service renewed through it: 1,500 buildings over five years deploy 300 a year from 2022. The sandbox's noon-of-day-one spike goes.
+Growth projection inputs are what the only hourly editor prefills; a raw series opens empty. A fleet in service since 2022 deploys from 2022, its dashboard too, so neither part covers years the other lacks. The usage span defaults to the shortest device lifespan, six years at most; the sandbox's noon-of-day-one spike goes.
 
-To confirm: **Results then run from the past start to the last retirement, with web usage in 2027 alone.** A 2022 start and a five-year span show edge years 2022 to 2032 around one web year. The alternative stretches the web patterns over the same years, at the cost of hourly series several times longer for every web object.
+To confirm: **Web usage ends with 2027, while the last devices deployed stay in service for their usage span.** Results then show a few edge-only years after 2027, the fleet retiring. The alternative runs web usage until the last retirement, so a dashboard is counted as long as devices report to it, at the cost of longer web series.
 
 ## #server-calls-scale
 

@@ -25,7 +25,9 @@ devices and their hardware, how many are deployed per period and for how long, w
 device, how often
 it reaches a server, and the web usages. The AI receives instructions written for that scope. When
 the description gives devices deployed together, such as one gateway and 40 sensors per building, the
-AI may group them with their counts per building instead of multiplying the totals. The summary's
+AI may group them with their counts per building instead of multiplying the totals. Web usage and
+deployments share one period, which starts with the earliest deployment, in the past for a fleet
+already in service, unless the description dates a usage otherwise. The summary's
 checklist after generation follows the scope too: for Web + edge it adds the deployments, the
 devices per group, the device characteristics and the calls to servers.
 
@@ -59,6 +61,9 @@ The design page of today's flow is
   in service. A fleet already in service is deployed from a start date in the past, so the
   modeling counts it; a fleet size the description states is turned into deployments, and the
   value's comment says how.
+- **shared-period** Web usage runs over the same period as the deployments, from the earliest
+  deployment start until the modeling ends; a usage the description dates otherwise starts when it
+  says.
 - **generated-values-editable** Each generated usage pattern, web or edge, opens in its edit panel
   with the values the AI set, and saving it unchanged keeps them.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job

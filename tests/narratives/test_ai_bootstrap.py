@@ -94,9 +94,14 @@ class TestAiBootstrap:
     def test_devices_deployed_together_are_grouped(self, client, provider):
         pass
 
-    @planned_test("ai-bootstrap-edge#deployments-over-time: a fleet in service, deployed from a past start, is counted in the "
-                  "web year [fleet-as-deployments]")
+    @planned_test("ai-bootstrap-edge#deployments-over-time: a fleet in service since a past date is deployed from it, its "
+                  "devices counted from that date [fleet-as-deployments]")
     def test_a_fleet_in_service_is_deployed_from_the_past(self, client, provider):
+        pass
+
+    @planned_test("ai-bootstrap-edge#deployments-over-time: web usage runs from the earliest deployment start unless the answer "
+                  "dates it [shared-period]")
+    def test_web_usage_shares_the_deployments_period(self, client, provider):
         pass
 
     @planned_test("ai-bootstrap-edge#deployments-over-time: generated web and edge usage patterns open with their inputs, and an "

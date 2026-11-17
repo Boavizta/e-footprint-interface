@@ -196,6 +196,7 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
 
 def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
     """Hourly volume from the DSL period over the fixed generation horizon."""
+    planned("ai-bootstrap-edge#deployments-over-time", "The series runs from the usage's own start date, else the shared period's start, to the end of 2027.")
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -381,8 +382,8 @@ def build_edge_function(f: "EdgeFunctionSpec", devices: dict, jobs: dict, resolu
 
 
 def build_edge_deployment(dep: "EdgeDeploymentSpec", journeys: dict, shared: _Shared, resolutions: list[Resolution]):
-    """Deployments per period from their start date to the end of the web horizon, and their usage span."""
-    planned("ai-bootstrap-edge#deployments-over-time", "Deployment starts are growth-projection inputs from the stated start, past or not, to the end of the web horizon.")
+    """Deployments per period over the shared period, and their usage span."""
+    planned("ai-bootstrap-edge#deployments-over-time", "Deployment starts are Growth projection inputs over the shared period, from the deployment's own start date when it states one.")
     raise NotImplementedError("planned: ai-bootstrap-edge#deployments-over-time")
 
 
@@ -394,6 +395,7 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
             raise ValueError("Duplicate declaration names")
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
+    planned("ai-bootstrap-edge#deployments-over-time", "The shared period starts at the earliest start date the answer gives a usage pattern or a deployment.")
     narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
             "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "
             "snapped to an entry the library knows, and each snap kept as a `Resolution`.",
