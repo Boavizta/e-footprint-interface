@@ -64,7 +64,7 @@ def generate_ai_bootstrap(request):
     description = request.POST.get("description", "").strip()
     scope = request.POST.get("scope", "web")
     narrate("A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active "
-            "slot's saved modeling as empty, and with a description to send.",
+            "slot's saved modeling as empty, and with a description to send and the scope it is asked in.",
             lambda: {"slot": repository.slot, "scope": scope, "description_characters": len(description)})
     if not is_empty_model(repository.get_system_data()):
         return _input_response(request, workspace, description, "Start with AI again to replace this modeling.")
