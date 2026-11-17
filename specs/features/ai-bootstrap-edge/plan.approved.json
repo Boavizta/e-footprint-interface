@@ -1,0 +1,261 @@
+{
+  "feature": "ai-bootstrap-edge",
+  "base": "e7dc16a00cad56343cf03b3adcf5fa0e87f123ff",
+  "approvedOn": "2026-11-17",
+  "units": [
+    {
+      "kind": "piece",
+      "name": "#scope-choice",
+      "facets": {
+        "statement": [
+          "Above the description, a Web only / Web + edge radio, Web only checked; a stylesheet rule shows the checked scope's guidance and disclosure alone, keeping the typed text."
+        ],
+        "reason": [
+          "A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions."
+        ],
+        "sites": [
+          "changed model_builder/adapters/views/views_ai_bootstrap.py in start_ai_bootstrap — The panel opens on Web only; the guidance and disclosure of the checked scope alone show, by stylesheet."
+        ],
+        "comments": [
+          "changes specs/design/journeys/ai-bootstrap.html — The scope choice above the description; screens 5 and 6 carry the scope and the edge checks."
+        ],
+        "tests": [
+          "unit tests/e2e/test_ai_bootstrap.py — checking Web + edge shows its guidance, model, cost and impact, and keeps the description typed [scope-disclosed]",
+          "narrative tests/narratives/test_ai_bootstrap.py — Start with AI after a Web + edge generation opens on Web only [web-by-default]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#scope-in-request",
+      "facets": {
+        "statement": [
+          "The scope travels with the generate request to the service, back on a refusal, and to the summary, whose checklist adds deployments, devices per group, device characteristics and server calls."
+        ],
+        "reason": [
+          "Like the description, it lives in the request and the response alone. An unknown value gets no guard: the scope table's lookup fails inside the generation, which is refused like a bad answer, and only a hand-crafted request sends one."
+        ],
+        "sites": [
+          "changed model_builder/adapters/views/views_ai_bootstrap.py in _input_response — A refused generation renders the scope the user had chosen, with the description.",
+          "changed model_builder/adapters/views/views_ai_bootstrap.py in generate_ai_bootstrap — The posted scope is read beside the description and passed to `generate`.",
+          "changed model_builder/adapters/views/views_ai_bootstrap.py in generate_ai_bootstrap — The summary receives the scope; for Web + edge its checklist adds the edge checks after the web ones."
+        ],
+        "comments": [],
+        "tests": [],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#scope-selects-format",
+      "facets": {
+        "statement": [
+          "A scope table in the service pairs each scope with its instructions and its schema; one request is made whichever is chosen."
+        ],
+        "reason": [
+          "Web only keeps today's flow. A second service per scope was refused: everything after the answer (build, prepare, validate, save) is the same for both scopes."
+        ],
+        "sites": [
+          "changed model_builder/application/ai_bootstrap/service.py in build_answer — The answer is held to the schema of the scope it was asked in.",
+          "changed model_builder/application/ai_bootstrap/service.py in generate — The scope picks the instructions and the schema; its callers and tests pass it."
+        ],
+        "comments": [
+          "changes specs/architecture/layers-and-wrappers.html — The service picks the instructions and schema of the scope, Web only or Web + edge; the sandbox's edge scope reads the production ones."
+        ],
+        "tests": [],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#edge-instructions",
+      "facets": {
+        "statement": [
+          "Web + edge gets its own whole prompt: the sandbox's measured one, edited only for the new format and for what cases 03 and 04 missed."
+        ],
+        "reason": [
+          "Its edge material runs through the web text, from the paradigms to the field notes, so an addendum would leave the web framing contradicting it. The cost is a copy of the web rules, which a web edit mirrors. Cases 03 and 04 re-run at low effort, each paid run on the user's word; the disclosure's figures come from them."
+        ],
+        "sites": [
+          "changed model_builder/application/ai_bootstrap/service.py in system_prompt — For Web + edge, its own prompt file is read: the sandbox's, moved here and edited for the new format."
+        ],
+        "comments": [],
+        "tests": [],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#edge-format",
+      "facets": {
+        "statement": [
+          "WebEdgeSpec adds edge devices, optional groups, edge functions with server calls, edge journeys and deployments with a start date; a Web only answer's edge sections are dropped as unknown."
+        ],
+        "reason": [
+          "No installed-base field: the sandbox schema refused an installed base with no growth, and a past start date says the same within the Growth projection inputs. One schema for both scopes was refused: a Web only answer could then build edge objects."
+        ],
+        "sites": [
+          "changed model_builder/application/ai_bootstrap/dsl.py in validate_tolerating_extras — Validates against the schema it is given, so a Web only answer's edge sections are dropped as unknown fields."
+        ],
+        "comments": [
+          "changes model_builder/application/ai_bootstrap/dsl.py — WebEdgeSpec extends ModelSpec with edge devices, optional device groups, edge functions and their server calls, edge journeys and edge deployments; Web only keeps ModelSpec."
+        ],
+        "tests": [
+          "narrative tests/narratives/test_ai_bootstrap.py — a Web only answer holding edge sections builds no edge object [web-only-stays-web]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#deployments-over-time",
+      "facets": {
+        "statement": [
+          "Web usage runs from the earliest stated start (1 January 2027 by default) until the last device retires; deployments end with 2027; each may start later."
+        ],
+        "reason": [
+          "Growth projection inputs are what the only hourly editor prefills; a raw series opens empty. A fleet in service since 2022 deploys from 2022, and its dashboard is counted for as long as devices report to it. The usage span defaults to the shortest device lifespan, six years at most; the sandbox's noon-of-day-one spike goes."
+        ],
+        "sites": [
+          "changed model_builder/application/ai_bootstrap/dsl.py in _volume_timeseries — The series runs from the usage's own start date, else the shared start, until the last device retires; to 2027's end without devices.",
+          "added model_builder/application/ai_bootstrap/dsl.py in build_edge_deployment — Deployment starts are Growth projection inputs from the shared start, or the deployment's own start date, to the end of 2027.",
+          "changed model_builder/application/ai_bootstrap/dsl.py in build_system — The shared start is the earliest start date of a usage pattern or a deployment; web usage ends as the last device retires."
+        ],
+        "comments": [],
+        "tests": [
+          "narrative tests/narratives/test_ai_bootstrap.py — a fleet in service since a past date is deployed from it, its devices counted from that date [fleet-as-deployments]",
+          "narrative tests/narratives/test_ai_bootstrap.py — web usage runs from the earliest deployment start, unless dated, until the last device retires [shared-period]",
+          "narrative tests/narratives/test_ai_bootstrap.py — generated web and edge usage patterns open with their inputs, and an unchanged save keeps them [generated-values-editable]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#edge-builder",
+      "facets": {
+        "statement": [
+          "The builder makes the edge sections after the web ones, from the sandbox's builder on today's library; each server call targets a job the web builder made."
+        ],
+        "reason": [
+          "Calls reach jobs by name in the one jobs section, so a server that devices and people share is built once. The edge builders join the bootstrap DSL module rather than one of their own: they use its private helpers, and a second module would import them back."
+        ],
+        "sites": [
+          "added model_builder/application/ai_bootstrap/dsl.py in build_edge_function — Each server call becomes a server need on a job of the web builder, so devices and people share one server.",
+          "changed model_builder/application/ai_bootstrap/dsl.py in build_system — A WebEdgeSpec's edge sections follow: `build_edge_device`, `build_edge_groups`, `build_edge_function` on the web jobs, `build_edge_deployment`."
+        ],
+        "comments": [],
+        "tests": [
+          "narrative tests/narratives/test_ai_bootstrap.py — a Web + edge description becomes a modeling with its devices, what they run, their deployments and usage spans [edge-scope-builds-edge]",
+          "narrative tests/narratives/test_ai_bootstrap.py — devices' server calls and the dashboard journey land on one shared server [edge-calls-reach-servers]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#edge-device-sizing",
+      "facets": {
+        "statement": [
+          "The answer gives each device's idle power, reserved RAM and reserved storage; one it omits is derived from the stated hardware, as the sandbox's builder does."
+        ],
+        "reason": [
+          "In 12 runs on cases 03 and 04, the AI set all three on every gateway and controller, within the device's limits, and every answer built; the derived idle power doubles case 04's device use. No weekly data fields: their buffers were 0.004 to 0.4 GB beside 2 to 8 GB reserved."
+        ],
+        "sites": [
+          "added model_builder/application/ai_bootstrap/dsl.py in build_edge_device — The device takes the answer's hardware, idle power, reserved RAM and reserved storage, deriving from its hardware any the answer omits."
+        ],
+        "comments": [],
+        "tests": [],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#device-groups",
+      "facets": {
+        "statement": [
+          "Devices described as deployed together become an optional group with counts per group and sub-groups; a deployment then counts one group, each device as many times as it holds."
+        ],
+        "reason": [
+          "Grouping stays the AI's choice: the sandbox's group-required check remains informative, and device totals are the correctness check. Groups are built children first, since a group takes its sub-groups at construction."
+        ],
+        "sites": [
+          "added model_builder/application/ai_bootstrap/dsl.py in build_edge_groups — Each group holds its devices and sub-groups with the counts per group the answer gives."
+        ],
+        "comments": [],
+        "tests": [
+          "narrative tests/narratives/test_ai_bootstrap.py — devices deployed per building hold their counts per group in each deployment [groups-when-relevant]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#server-calls-scale",
+      "facets": {
+        "statement": [
+          "In the library, a server call's volume is multiplied by its device's total number of units, so calls scale with every device deployed, grouped or not."
+        ],
+        "reason": [
+          "Today RecurrentServerNeed scales its volume by deployments only, against its own parameter description. Fixed in e-footprint with its own commit range before the interface's lots, tested against the local checkout; no guard here. The interface's narrative case proves it across both."
+        ],
+        "sites": [],
+        "comments": [],
+        "tests": [
+          "narrative tests/narratives/test_ai_bootstrap.py — a server receives a device's calls once per device deployed, grouped or fleet total [calls-scale-with-devices]"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "decision",
+      "name": "The sandbox measures what ships",
+      "facets": {
+        "text": [
+          "#scope-selects-format, #edge-instructions and #edge-builder: the sandbox's Web + edge scope reads the production instructions, schema and builder. Its own edge module goes but for its device-total check, redefined on devices in service during the web year. Handwritten answers 03 and 04 move to start dates; the narrative cases read them."
+        ]
+      }
+    },
+    {
+      "kind": "waivers",
+      "name": "Rules no test holds",
+      "facets": {
+        "waivers": [
+          "one-request — The service calls the provider once on every path, and the scope only picks the instructions and the schema it sends; the existing service test of no retry holds the single call.",
+          "nothing-stored — The scope is a request field handed to the service and the response context; the saved modeling is the library graph's JSON, which has no place for it, and no new line writes the session."
+        ]
+      }
+    },
+    {
+      "kind": "story",
+      "name": "The user bootstraps a modeling from a description",
+      "facets": {
+        "steps": [
+          "start_ai_bootstrap#2 — The active slot **restarts from an empty modeling**, loaded by `load_system_into_session` like any other, its interface settings dropped. The other slot keeps its own.",
+          "start_ai_bootstrap#3 — The builder comes back with **the description panel open and empty**, and no example picker.",
+          "generate_ai_bootstrap#2 — A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active slot's saved modeling as empty, and with a description to send.",
+          "generate — **One request** carries the shared `system_prompt` and the description to the provider.",
+          "build_answer — The answer is read as JSON and **held to the bootstrap schema** by `validate_tolerating_extras`: a field the schema does not know is dropped and listed, anything else wrong refuses the answer.",
+          "build_system — A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is snapped to an entry the library knows, and each snap kept as a `Resolution`.",
+          "generate_ai_bootstrap#3 — The graph is serialized without its computed state and **prepared as any imported modeling is**, by `prepare_system_for_session`: upgraded, recomputed, its id kept distinct from the other slot's.",
+          "generate_ai_bootstrap#4 — `SystemValidationService` says whether the modeling **is complete enough to compute**. An incomplete one is refused, and nothing is saved.",
+          "generate_ai_bootstrap#5 — `ModelWeb` **saves the modeling once**, through the normal persistence boundary. Until this line the slot still held the empty one.",
+          "generate_ai_bootstrap#6 — The call's cost and impact are estimated by `estimate_call` **after the save**: an estimate that fails rejects nothing.",
+          "generate_ai_bootstrap#7 — The response alone carries the description and the summary panel: **nothing of the generation is stored**, in the session or in the saved modeling."
+        ]
+      }
+    }
+  ]
+}
