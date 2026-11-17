@@ -149,7 +149,7 @@ ADAPTERS = {"anthropic": _anthropic, "openai": _openai, "mistral": _mistral}
 
 
 def complete(model: str, system: str, prompt: str, effort: str | None = None) -> Completion:
-    if model == "zai-glm-5-3-flash":
+    if model == "zai-glm-5-3-flash" and not effort:  # an explicit effort compares efforts, past the production pin
         from model_builder.adapters.ai_provider import complete_mistral
         return Completion(**asdict(complete_mistral(system, prompt)))
     provider = MODELS[model][0]
