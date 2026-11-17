@@ -26,12 +26,12 @@ feature replaces the experimental UI and AI editing path; PoC close-out follows 
 then asynchronous AI provider I/O, then Boavizta-owned API credentials and provider-contract clarification. General AI editing and the broader architecture refactoring are
 outside this first feature.
 
-### AI bootstrap for edge systems — specification in review
+### AI bootstrap for edge systems — specification approved, planning pending
 
 [`features/ai-bootstrap-edge/spec.md`](features/ai-bootstrap-edge/spec.md): a Web only / Web + edge
 scope choice in the description panel, with instructions, guidance and review checklist per scope,
 and optional edge device groups. First step of the [AI assistance roadmap](features/ai-assistance/roadmap.md)'s
-follow-ups. Next: spec review, then `spec-plan` in a fresh session.
+follow-ups. Spec approved on 2026-11-17; next: `spec-plan`.
 
 ### Public modeling sharing — specification reviewed, implementation pending
 
