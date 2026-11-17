@@ -29,7 +29,7 @@ class GeneratedModel:
 
 
 def system_prompt() -> str:
-    planned("ai-bootstrap-edge#edge-instructions", "For Web + edge, the edge instructions of their own file are appended to the web ones.")
+    planned("ai-bootstrap-edge#edge-instructions", "For Web + edge, its own prompt file is read: the sandbox's, moved here and edited for the new format.")
     return Path(__file__).with_name("system_prompt.md").read_text()
 
 

@@ -23,9 +23,9 @@ Web only keeps today's flow. A second service per scope was refused: everything 
 
 ## #edge-instructions
 
-Web + edge instructions append an edge addendum to the web ones: devices, optional groups, a fleet size as deployments from a past start, server calls listing every job.
+Web + edge gets its own whole prompt: the sandbox's measured one, edited only for the new format and for what cases 03 and 04 missed.
 
-A second whole prompt would duplicate the web rules and drift from them, and the sandbox prompt is rewritten anyway since its format changes. Before the lot closes, cases 03 and 04 run at low effort, each paid run on the user's word; the disclosure's figures come from them.
+Its edge material runs through the web text, from the paradigms to the field notes, so an addendum would leave the web framing contradicting it. The cost is a copy of the web rules, which a web edit mirrors. Cases 03 and 04 re-run at low effort, each paid run on the user's word; the disclosure's figures come from them.
 
 ## #edge-format
 
