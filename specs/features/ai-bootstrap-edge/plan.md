@@ -43,7 +43,7 @@ Calls reach jobs by name in the one jobs section, so a server that devices and p
 
 Three values the answer omits are set from the device's hardware: idle power up to its power, reserved RAM up to a quarter of its RAM, reserved storage its buffer.
 
-The format does not ask for them, and the library defaults are an industrial PC's: 5 W idle, 1 GB of RAM and 30 GB of storage reserved. A 2 W sensor would idle above its power; a 16 GB gateway could not hold its reserved storage, and the computation is refused. Refused: three more fields per device for the AI to estimate.
+The format does not ask for them, and the library defaults are an industrial PC's: 5 W idle, 1 GB of RAM and 30 GB of storage reserved. A 2 W sensor would idle above its power; a 16 GB gateway could not hold its reserved storage, and computation fails. Refused: three more fields per device for the AI.
 
 To confirm: **A fixed data buffer per device, with no weekly write.** The sandbox lets a function write storage each week and fits a rolling buffer when that overflows the device: two fields, a fitting rule and a resolution. Kept, a device keeping all its data for life stays expressible; dropped, the user edits that in.
 
