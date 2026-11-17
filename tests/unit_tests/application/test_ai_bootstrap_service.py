@@ -52,10 +52,10 @@ def test_generate_does_not_retry_invalid_answer():
     complete.assert_called_once()
 
 
-# The answers of the narrative cases state all three values; the derivation is the sandbox's, kept for an answer that
-# omits one.
+# The answers of the narrative cases state all three values; the derivation, kept for an answer that omits one, is the
+# sandbox's for the power and the RAM, and a quarter of the stated storage for the storage.
 @titled("ai-bootstrap-edge#edge-device-sizing: an omitted idle power, reserved RAM or reserved storage is "
-        "derived from the device's stated power and RAM")
+        "derived from the device's stated power, RAM or storage")
 def test_omitted_device_reserves_are_derived():
     gateway = build_edge_device(EdgeDeviceSpec(name="Gateway", power_w=6, ram_gb=2, storage_gb=32), [])
     sensor = build_edge_device(EdgeDeviceSpec(name="Sensor", kind="appliance", power_w=0.05), [])
@@ -64,8 +64,12 @@ def test_omitted_device_reserves_are_derived():
     unstated = build_edge_device(EdgeDeviceSpec(name="Unstated"), [])
 
     assert gateway.idle_power.value == 5 * u.W  # the library default, below the stated power
+    assert gateway.idle_power.comment == "The library default, within the device's power"
     assert gateway.base_ram_consumption.value == 0.5 * u.GB_ram
+    assert gateway.base_ram_consumption.comment == "A quarter of the device's RAM, the library default being more"
     assert gateway.storage.base_storage_need.value == 8 * u.GB_stored
+    assert gateway.storage.base_storage_need.comment == (
+        "A quarter of the device's storage, the library default being more")
     assert sensor.idle_power.value == 0.05 * u.W
     assert (stated.idle_power.value, stated.base_ram_consumption.value, stated.storage.base_storage_need.value) == (
         3 * u.W, 1 * u.GB_ram, 10 * u.GB_stored)

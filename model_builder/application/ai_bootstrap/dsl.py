@@ -466,13 +466,17 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
     return pattern
 
 
-def _reserve(kwargs: dict, attr: str, stated, capacity, share: float, cls, comment: str):
-    """A reserve the answer omits is the library default, at most `share` of the stated capacity: the default idle
-    power (5 W) exceeds a sensor's whole power, the default base RAM (1 GB) all of a small gateway's, the default
-    base storage (30 GB) a gateway's flash. Without a stated capacity the library default stands."""
+def _reserve(kwargs: dict, attr: str, stated, capacity, share: float, cls, bound: str):
+    """A reserve the answer omits is the library default, at most `bound` (`share` of the stated capacity): the
+    default idle power (5 W) exceeds a sensor's whole power, the default base RAM (1 GB) all of a small gateway's,
+    the default base storage (30 GB) a gateway's flash. Its comment says which applied. Without a stated capacity
+    the library default stands."""
     if stated is None and capacity is not None:
         default = cls.default_values[attr].value
-        kwargs[attr] = SourceValue(min(default, capacity * share * default.units), comment=comment)
+        cap = capacity * share * default.units
+        comment = (f"The library default, within {bound}" if default <= cap
+                   else f"{bound[0].upper()}{bound[1:]}, the library default being more")
+        kwargs[attr] = SourceValue(min(default, cap), comment=comment)
 
 
 def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
@@ -482,16 +486,16 @@ def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
     cls = EdgeAppliance if d.kind == "appliance" else EdgeComputer
     kwargs = {}
     _apply_fields(kwargs, c, EDGE_DEVICE_FIELDS, ("power_w", "idle_power_w", "embodied_kg", "lifespan_years"))
-    _reserve(kwargs, "idle_power", d.idle_power_w, d.power_w, 1, cls, "At most the device's power")
+    _reserve(kwargs, "idle_power", d.idle_power_w, d.power_w, 1, cls, "the device's power")
     if cls is EdgeComputer:
         storage_kwargs = {}
         _apply_fields(storage_kwargs, c, EDGE_STORAGE_FIELDS)
         _reserve(storage_kwargs, "base_storage_need", d.base_storage_gb, d.storage_gb, 0.25, EdgeStorage,
-                 "A quarter of the device's storage at most")
+                 "a quarter of the device's storage")
         kwargs["storage"] = EdgeStorage.from_defaults(f"{name} storage", **storage_kwargs)
         _apply_fields(kwargs, c, EDGE_DEVICE_FIELDS, ("cores", "ram_gb", "base_ram_gb"))
         _reserve(kwargs, "base_ram_consumption", d.base_ram_gb, d.ram_gb, 0.25, cls,
-                 "A quarter of the device's RAM at most")
+                 "a quarter of the device's RAM")
     device = cls.from_defaults(name, **kwargs)
     c.close()
     return device
