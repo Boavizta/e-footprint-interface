@@ -63,6 +63,8 @@ In the library, a server call's volume is multiplied by its device's total numbe
 
 Today RecurrentServerNeed scales its volume by deployments only, against its own parameter description. Fixed in e-footprint with its own commit range before the interface's lots, tested against the local checkout; no guard here. The interface's narrative case proves it across both.
 
+Note: **The server need now owns the whole volume.** Renamed to hourly_volume_per_usage_pattern, it multiplies by the device's units per deployment and by deployments in parallel; a device in no group counts one unit, so a fleet total scales through deployments.
+
 ## The sandbox measures what ships
 
 #scope-selects-format, #edge-instructions and #edge-builder: the sandbox's Web + edge scope reads the production instructions, schema and builder. Its own edge module goes but for its device-total check, redefined on devices in service during the web year. Handwritten answers 03 and 04 move to start dates; the narrative cases read them.
