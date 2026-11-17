@@ -6,8 +6,10 @@
   high, max).
 - The effort for each scope is chosen from sandbox runs (`ai_sandbox/`) restricted to
   `zai-glm-5-3-flash`. Paid runs need the user's word for each run. Web only, 2026-11-17 (cases 01
-  and 02, no retry): low 6/6 first-try success, 18–28 s, about USD 0.0012 a call; high 3/3 on case
-  01, 22–41 s, about USD 0.0020 a call, close to the production adapter's 45 s timeout.
+  and 02, no retry): low 6/6 first-try success, 18–28 s, about USD 0.0012 a call; high 6/6, 22–44 s,
+  about USD 0.0020–0.0025 a call (about twice the output tokens), at the production adapter's 45 s
+  timeout; one further high call lost its connection before answering. The checks pass at both
+  efforts, so on these cases high buys no measured gain for Web only.
 - The sandbox gets its edge material back from git history: commit `6671a149` removed the edge
   paradigm section of `system_prompt.md`, the `edge_devices` / `edge_functions` / `edge_deployments`
   format and field notes, the edge part of the DSL builder in `dsl.py`, the edge checks and reports,
