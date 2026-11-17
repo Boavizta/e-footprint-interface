@@ -77,12 +77,12 @@ def test_offline_evaluation_and_replay_keep_reports_and_exports(tmp_path):
 
 @titled("ai-bootstrap-edge#edge-builder: the sandbox's Web + edge scope builds answers 03 and 04, counting "
         "devices in service during the web year")
-@pytest.mark.parametrize("answer, fleet", [
-    ("_handwritten_03_smart_building", {"gateway": 1500, "sensor": 60000}),  # 60 buildings a month since December 2024
-    ("_handwritten_04_ev_charging", {"controller": 4200}),  # 2,700 German and 1,500 Dutch stations since January 2024
+@pytest.mark.parametrize("case_id, answer, fleet", [
+    ("03", "_handwritten_03_smart_building", {"gateway": 1500, "sensor": 60000}),  # 60 buildings a month since December 2024
+    ("04", "_handwritten_04_ev_charging", {"controller": 4200}),  # 2,700 German and 1,500 Dutch stations since January 2024
 ])
-def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, answer, fleet):
-    case = run.load_cases([answer[13:15]])[0]
+def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, case_id, answer, fleet):
+    case = run.load_cases([case_id])[0]
 
     result = run.evaluate(json.loads((CASES / f"{answer}.json").read_text()), case, tmp_path / f"{answer}.e-f.json",
                           run.SCOPES["web_edge"])

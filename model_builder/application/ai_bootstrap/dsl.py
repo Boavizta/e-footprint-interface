@@ -583,7 +583,8 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     edge = isinstance(spec, WebEdgeSpec)
     sections = [spec.servers, spec.genai_apis, spec.jobs, spec.journeys]
     if edge:
-        sections += [spec.edge_devices, spec.edge_device_groups, spec.edge_functions, spec.edge_journeys]
+        sections += [spec.edge_devices, spec.edge_device_groups, spec.edge_functions, spec.edge_journeys,
+                     spec.edge_deployments]
     for section in sections:
         names = [obj.name for obj in section]
         if len(names) != len(set(names)):

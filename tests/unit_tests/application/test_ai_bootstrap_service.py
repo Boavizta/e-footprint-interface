@@ -29,7 +29,8 @@ def test_invalid_answers_fail_locally(answer):
 
 
 NAMED_SECTIONS = {"servers": {}, "genai_apis": {}, "jobs": {}, "journeys": {"steps": []}, "edge_devices": {},
-                  "edge_device_groups": {}, "edge_functions": {"device": "Same"}, "edge_journeys": {"functions": []}}
+                  "edge_device_groups": {}, "edge_functions": {"device": "Same"}, "edge_journeys": {"functions": []},
+                  "edge_deployments": {"journey": "Same", "new_units": {"value": 1, "per": "month"}}}
 
 
 @pytest.mark.parametrize("section", list(NAMED_SECTIONS))
