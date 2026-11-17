@@ -126,7 +126,6 @@ class TestAiBootstrap:
     def test_server_calls_scale_with_deployed_devices(self, client, provider):
         pass
 
-    # @planned ai-bootstrap-edge#scope-in-request Reads that the summary lists no edge check.
     @titled("ai-bootstrap-edge#edge-format: a Web only answer holding edge sections builds no edge object "
             "[web-only-stays-web]")
     def test_a_web_only_answer_builds_no_edge_object(self, client, provider):
@@ -139,6 +138,7 @@ class TestAiBootstrap:
         body = generated.content.decode()
         assert 'data-ai-bootstrap-panel="summary"' in body
         assert all(f"<li>{section}</li>" in body for section in edge_sections)
+        assert "Server calls:" not in body and "Deployments:" not in body
         assert not any(class_name.startswith("Edge") for class_name in saved_modeling(client))
 
     @planned_test("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "

@@ -62,16 +62,16 @@ def generate_ai_bootstrap(request):
     workspace = SessionWorkspaceRepository(request.session)
     repository = workspace.active_repository()
     description = request.POST.get("description", "").strip()
-    planned("ai-bootstrap-edge#scope-in-request", "The posted scope is read beside the description and passed to `generate`.")
+    scope = request.POST.get("scope", "web")
     narrate("A generation **never overwrites work**: it goes on only while `is_empty_model` still reads the active "
             "slot's saved modeling as empty, and with a description to send.",
-            lambda: {"slot": repository.slot, "description_characters": len(description)})
+            lambda: {"slot": repository.slot, "scope": scope, "description_characters": len(description)})
     if not is_empty_model(repository.get_system_data()):
         return _input_response(request, workspace, description, "Start with AI again to replace this modeling.")
     if not description:
         return _input_response(request, workspace, description, "Describe your system before building your modeling.")
     try:
-        generated, completion = generate(description, "web", complete_mistral)
+        generated, completion = generate(description, scope, complete_mistral)
     except ProviderError:
         return _input_response(request, workspace, description,
                                "The AI provider could not complete the request. You can try again.")
@@ -121,13 +121,12 @@ def generate_ai_bootstrap(request):
         metrics, impact = {}, None
     narrate("The call's cost and impact are estimated by `estimate_call` **after the save**: an estimate that fails "
             "rejects nothing.", lambda: {"cost_usd": metrics.get("cost_usd"), "impact": impact})
-    narrate("The response alone carries the description and the summary panel: **nothing of the generation is "
-            "stored**, in the session or in the saved modeling.",
+    narrate("The response alone carries the description, the scope and the summary panel, whose checklist follows "
+            "the scope: **nothing of the generation is stored**, in the session or in the saved modeling.",
             lambda: {"resolutions_shown": sum(item.how != "exact" for item in generated.resolutions),
                      "ignored_fields": generated.ignored_fields})
-    planned("ai-bootstrap-edge#scope-in-request", "The summary receives the scope; for Web + edge its checklist adds the edge checks after the web ones.")
     return render_model_builder(request, prepared, show_example_picker=False, workspace=workspace, extra_context={
-        "ai_panel": "summary", "ai_prompt": description, "ai_metrics": metrics, "ai_impact": impact,
+        "ai_panel": "summary", "ai_prompt": description, "ai_scope": scope, "ai_metrics": metrics, "ai_impact": impact,
         "ai_resolutions": [item for item in generated.resolutions if item.how != "exact"],
         "ai_ignored_fields": generated.ignored_fields,
     })

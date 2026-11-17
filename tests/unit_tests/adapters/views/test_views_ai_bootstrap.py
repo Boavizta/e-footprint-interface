@@ -19,7 +19,7 @@ from model_builder.application.ai_bootstrap.service import Completion, build_ans
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.services import get_example_system_data, is_empty_model
-from tests.declare import planned_test
+from tests.declare import titled
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"
@@ -267,10 +267,16 @@ def test_empty_description_and_nonempty_saved_model_do_not_call_provider(client,
     provider.assert_not_called()
 
 
-@planned_test("ai-bootstrap-edge#scope-in-request: an unknown posted scope is refused like an unbuildable answer, "
-              "before any provider call")
+@titled("ai-bootstrap-edge#scope-in-request: an unknown posted scope is refused like an unbuildable answer, "
+        "before any provider call")
 def test_unknown_scope_is_refused_without_a_provider_call(client, provider):
-    pass
+    client.post(START)
+    before = saved(client)
+    response = client.post(GENERATE, {"description": "A recipe app", "scope": "edge_only"})
+    body = response.content.decode()
+    assert 'data-ai-bootstrap-panel="input"' in body and "could not be built into a modeling" in body
+    assert saved(client) == before
+    provider.assert_not_called()
 
 
 @pytest.mark.parametrize("url", [START, GENERATE])

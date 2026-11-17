@@ -8,6 +8,12 @@
         <li><strong>Time spent:</strong> check durations in usage journey steps.</li>
         <li><strong>Volumes:</strong> check usage patterns for each journey, including visits per user and the time period.</li>
         <li><strong>Infrastructure:</strong> check servers, resources, locations, APIs and assumed sizes.</li>
+        {% if ai_scope == "web_edge" %}
+        <li><strong>Deployments:</strong> check how many units each edge usage pattern puts into service per period, from which date, and for how long.</li>
+        <li><strong>Devices per group:</strong> check the number of each device in every edge device group.</li>
+        <li><strong>Device characteristics:</strong> check each edge device's power, idle power, compute, RAM, storage and lifespan.</li>
+        <li><strong>Server calls:</strong> check which jobs each edge function calls, and how often.</li>
+        {% endif %}
     </ol>
     <dl>
         <dt>Estimated API cost</dt>
