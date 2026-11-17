@@ -56,8 +56,9 @@ The design page of today's flow is
   grouped with their counts per unit; a fleet described by its total alone needs no group. Either
   way, each deployment holds the number of each device the description gives.
 - **fleet-as-deployments** A fleet is modeled by its deployments per period and how long each stays
-  in service. A fleet size the description states is turned into deployments, and the value's
-  comment says how.
+  in service. A fleet already in service is deployed from a start date in the past, so the
+  modeling counts it; a fleet size the description states is turned into deployments, and the
+  value's comment says how.
 - **generated-values-editable** Each generated usage pattern, web or edge, opens in its edit panel
   with the values the AI set, and saving it unchanged keeps them.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job

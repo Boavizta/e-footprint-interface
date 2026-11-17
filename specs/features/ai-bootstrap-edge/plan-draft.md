@@ -33,8 +33,10 @@
   (`timeseries_builder_registry.py`), so a raw series opens empty and a save loses it. The sandbox's
   `existing_units` and its noon-of-day-1 spike in `edge_dsl.py` go, and its `device_totals` check,
   read in the first week, must be redefined against deployments per period and usage span. A stated
-  fleet size becomes a deployment rate (and, where the plan finds it sound, a start date in the past
-  through the same form inputs), its derivation in the value's comment.
+  fleet size becomes a deployment rate and, for a fleet already in service, a `start_date` in the
+  past in the same form inputs, its derivation in the value's comment. The AI sets that start date;
+  the plan settles how a past start lines up with the web usage patterns' fixed start and the
+  modeling duration.
 - Library edge defaults are sized for a PC (30 GB base storage, 1 GB base RAM, 5 W idle) and fail
   capacity checks on gateways and sensors; the sandbox builder caps them and fits a rolling storage
   buffer, and defaults the usage span to the shortest device lifespan (6 years at most).
