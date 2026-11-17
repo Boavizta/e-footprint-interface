@@ -128,7 +128,8 @@ adapter; the other CLI entries accept an `--effort` override.
   where it is free: OpenAI and Mistral). Validity is checked locally so results are comparable. Strict
   structured outputs are a separate knob to test later.
 - **One period for people and devices.** Web usage runs from the earliest start date the answer gives (`WEB_YEAR_START`,
-  2027-01-01, without one) until the last deployed device retires; deployments run to `WEB_YEAR_END`. Both in the
+  2027-01-01, without one) until the last deployed device retires; deployments run to their `end_date`, `WEB_YEAR_END`
+  without one. Both in the
   shared `dsl.py`. Fine for structure comparison, not for final numbers.
 - **Catalog choices are resolved in code, not in the prompt.** The shared application `catalogs.py` snaps a GenAI `provider`/`model_name`
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,

@@ -43,7 +43,8 @@
      "new_units": {"value": 75, "per": "month"}, "start_date": "2024-01-01", "usage_span_years": 8,
      "comments": {"new_units": "2,700 stations in service by 2027 at 75 a month since January 2024, close to the 80 a month added today"}},
     {"name": "Stations in the Netherlands", "journey": "Station operation", "country": "NETHERLANDS", "network": "mobile",
-     "new_units": {"value": 42, "per": "month"}, "start_date": "2024-01-01", "usage_span_years": 8,
-     "comments": {"new_units": "1,500 stations in service by 2027 at 42 a month since January 2024; the rollout has stopped, which the format cannot say"}}
+     "new_units": {"value": 42, "per": "month"}, "start_date": "2024-01-01", "end_date": "2026-12-31", "usage_span_years": 8,
+     "comments": {"new_units": "1,500 stations in service by 2027 at 42 a month since January 2024",
+                  "end_date": "New stations are all in Germany: the Dutch rollout has stopped"}}
   ]
 }

@@ -203,6 +203,7 @@ def render_tree(data: dict) -> str:
         fns = ("".join(function_li(f) for f in journey.get("functions", [])) if journey
                else f'<li><span class="fail">{esc(dep.get("journey"))} (unknown)</span></li>')
         since = f" from {esc(dep['start_date'])}" if dep.get("start_date") else ""
+        since += f" to {esc(dep['end_date'])}" if dep.get("end_date") else ""
         span = f", {dep['usage_span_years']} yrs" if dep.get("usage_span_years") else ""
         parts.append(f'<li><span class="kind">edge</span>{esc(dep.get("name"))} <span class="muted">{esc(dep.get("country"))} · '
                      f'{esc(dep.get("network"))} · {_volume(dep.get("new_units"))} new units{since}{span}</span>{_comments(dep)}'

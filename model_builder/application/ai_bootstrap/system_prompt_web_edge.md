@@ -39,7 +39,7 @@ Return only the JSON object, no prose, no code fence. All numeric fields are opt
   "edge_device_groups": [{"name", "device_counts": {<edge device name>: number}, "sub_group_counts": {<group name>: number}, "comments": {<device or group name>: string}}],
   "edge_functions": [{"name", "device": <edge device name>, "cpu_cores_avg", "ram_gb_avg", "workload_fraction", "server_calls": [{"jobs": [<job names>], "times_per_hour", "comment"}], "comments": {<field name>: string}}],
   "edge_journeys": [{"name", "functions": [<edge function names>]}],
-  "edge_deployments": [{"name", "journey": <edge journey name>, "country", "network": "wifi"|"mobile", "new_units": {"value", "per"}, "start_date": "YYYY-MM-DD", "usage_span_years", "comments": {<field name>: string}}]
+  "edge_deployments": [{"name", "journey": <edge journey name>, "country", "network": "wifi"|"mobile", "new_units": {"value", "per"}, "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "usage_span_years", "comments": {<field name>: string}}]
 }
 
 Field notes:
@@ -47,6 +47,7 @@ Field notes:
 - Batch or background journeys with no human have `"device": "none"`.
 - A usage pattern runs from the earliest `start_date` of the answer until the last deployed device retires. Set its own `start_date` only when the description dates that usage otherwise, such as a dashboard launched after the fleet.
 - `new_units` on an edge deployment is the number of units put into service per period (required), from its `start_date` until the end of 2027; without a `start_date` they start with the earliest `start_date` of the answer, else on 2027-01-01. A unit is one device of each kind its journey runs on, unless those devices are in a group: then a unit is one group (a building, a vehicle) and each device counts as many times as the group holds it.
+- Set `end_date` on an edge deployment only for a fleet that no longer grows: the date of its last installation, after which no unit is added.
 - Use `edge_device_groups` when the description gives devices deployed together per site, building or vehicle ("one gateway and 40 sensors per building"): counts are per group, and a group can hold sub-groups (floors of a building). When the description gives only fleet totals, use no group; split a fleet into several deployments when its parts differ by country or network. Either way, the number of each device in service must match the description.
 - Each edge function runs on one device. `kind: "computer"` devices (gateways, controllers, PCs) take `cpu_cores_avg` and `ram_gb_avg`; `kind: "appliance"` devices (sealed sensors) take a `workload_fraction` between 0 and 1.
 - `idle_power_w`, `base_ram_gb` and `base_storage_gb` are part of the device's own hardware budget: the power it draws when idle, and the RAM and storage its operating system and firmware keep for themselves, before any edge function runs. Estimate them from the hardware class the description implies (a sealed sensor, a gateway, an industrial PC); they cannot exceed the device's `power_w`, `ram_gb` and `storage_gb`. `base_ram_gb` and `base_storage_gb` apply to `kind: "computer"` only.

@@ -7,6 +7,7 @@ real `System` that can be computed and exported to the interface JSON format.
 from __future__ import annotations
 
 import json
+import math
 import re
 from datetime import date, timedelta
 from typing import Literal, Optional
@@ -44,11 +45,12 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import GROWTH_DURATION_LIMITS
 from model_builder.narrate import narrate
 
 from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 
-# The web year: usage and deployments the answer does not date start here, and deployments end with it.
+# The web year: usage and deployments the answer does not date start here, and deployments end with it by default.
 WEB_YEAR_START = date(2027, 1, 1)
 WEB_YEAR_END = date(2027, 12, 31)
 MAX_DEFAULT_SPAN_YEARS = 6  # the library's own default usage span
@@ -181,6 +183,7 @@ class EdgeDeploymentSpec(Strict):
     network: str = "wifi"
     new_units: VolumeSpec
     start_date: Optional[date] = None  # a fleet already in service starts in the past
+    end_date: Optional[date] = None    # the last installation of a fleet that no longer grows
     usage_span_years: Optional[float] = None
     comments: dict[str, str] = Field(default_factory=dict)
 
@@ -278,20 +281,32 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-def _duration(start: date, end: date) -> tuple[int, str]:
-    """`start` to `end` inclusive as the editor's duration: whole years when it is one (the library's year being
-    365 days), else whole months of 30 days."""
+DAYS_PER_UNIT = {"month": 30, "year": 365}  # the library's Growth projection units
+
+
+def _duration(start: date, end: date, round_up: bool = False) -> tuple[int, str]:
+    """`start` to `end` inclusive as the editor's duration: whole years when it is one within 15 days, else whole
+    months, rounded to the nearest or, with `round_up`, so that the period reaches `end`. A start after the end
+    refuses the answer."""
     days = (end - start).days + 1
+    if days <= 0:
+        raise ValueError(f"A start date ({start}) falls after the end of its period ({end})")
     years = round(days / 365)
-    if years and abs(days - 365 * years) <= 15:
+    if years and abs(days - 365 * years) <= 15 and not (round_up and days > 365 * years):
         return years, "year"
-    return max(1, round(days / 30)), "month"
+    return max(1, math.ceil(days / 30) if round_up else round(days / 30)), "month"
 
 
-def _volume_timeseries(volume: VolumeSpec, period: tuple[date, date], growth_pct_per_year: float = 0,
+def _end(start: date, duration: tuple[int, str]) -> date:
+    """The last day a Growth projection period starting on `start` covers."""
+    value, unit = duration
+    return start + timedelta(days=value * DAYS_PER_UNIT[unit] - 1)
+
+
+def _volume_timeseries(volume: VolumeSpec, start: date, duration: tuple[int, str], growth_pct_per_year: float = 0,
                        comment: Optional[str] = None):
-    """Hourly volume from the DSL period over `period`, as the Growth projection inputs the hourly editor prefills:
-    a raw series would open empty."""
+    """Hourly volume from the DSL period over `duration` from `start`, as the Growth projection inputs the hourly
+    editor prefills: a raw series would open empty."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -299,11 +314,10 @@ def _volume_timeseries(volume: VolumeSpec, period: tuple[date, date], growth_pct
         value, per = value * 24, "day"
     elif per == "week":
         value, per = value / 7, "day"
-    duration, unit = _duration(*period)
     return ExplainableHourlyQuantitiesFromFormInputs({
-        "start_date": period[0].isoformat(),
-        "modeling_duration_value": duration,
-        "modeling_duration_unit": unit,
+        "start_date": start.isoformat(),
+        "modeling_duration_value": duration[0],
+        "modeling_duration_unit": duration[1],
         "initial_volume": value,
         "initial_volume_timespan": per,
         "net_growth_rate_in_percentage": growth_pct_per_year,
@@ -455,13 +469,21 @@ def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) ->
 
 def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, period: tuple[date, date],
                         resolutions: list[Resolution]) -> UsagePattern:
-    """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start."""
+    """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start,
+    until the period's end. A usage longer than the editor accepts is cut at its limit, and the cut listed."""
     c = _Comments(p, resolutions)
     volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date")))) or None
+    start = p.start_date or period[0]
+    duration = _duration(start, period[1], round_up=True)
+    limit = GROWTH_DURATION_LIMITS[duration[1]]
+    if duration[0] > limit:
+        resolutions.append(Resolution("usage period", f"{p.name}: {duration[0]} {duration[1]}s from {start}",
+                                      f"{limit} {duration[1]}s", "cut at the editor's limit"))
+        duration = (limit, duration[1])
     pattern = UsagePattern(
         _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
         shared.network(p.network), shared.country(p.country),
-        _volume_timeseries(p.volume, (p.start_date or period[0], period[1]), p.growth_pct_per_year, volume_comment))
+        _volume_timeseries(p.volume, start, duration, p.growth_pct_per_year, volume_comment))
     c.close()
     return pattern
 
@@ -564,15 +586,29 @@ def _deployment_spans(spec: WebEdgeSpec) -> dict[str, float]:
     return spans
 
 
-def build_edge_deployment(dep: EdgeDeploymentSpec, journeys: dict, shared: _Shared, start: date, span_years: float,
+def _deployment_periods(spec: WebEdgeSpec, start: date) -> dict[str, tuple[date, tuple[int, str]]]:
+    """Each deployment's start, its own else the shared `start`, and its duration to its end date, the web year's
+    end without one. A deployment longer than the editor accepts refuses the answer: cutting it would change the
+    fleet."""
+    periods = {}
+    for dep in spec.edge_deployments:
+        dep_start = dep.start_date or start
+        duration = _duration(dep_start, dep.end_date or WEB_YEAR_END)
+        if duration[0] > GROWTH_DURATION_LIMITS[duration[1]]:
+            raise ValueError(f"Deployment {dep.name} lasts {duration[0]} {duration[1]}s, more than the editor accepts")
+        periods[dep.name] = dep_start, duration
+    return periods
+
+
+def build_edge_deployment(dep: EdgeDeploymentSpec, journeys: dict, shared: _Shared,
+                          period: tuple[date, tuple[int, str]], span_years: float,
                           resolutions: list[Resolution]) -> EdgeUsagePattern:
-    """Deployments per period from the deployment's own start date, else the shared `start`, until the end of the
-    web year, and their usage span."""
+    """Deployments per period over `period` (its start and duration), and their usage span."""
     c = _Comments(dep, resolutions)
-    comment = " ".join(filter(None, (c.take("new_units"), c.take("start_date")))) or None
+    comment = " ".join(filter(None, (c.take("new_units"), c.take("start_date"), c.take("end_date")))) or None
     pattern = EdgeUsagePattern(
         _label(dep.name, resolutions), [_lookup(journeys, dep.journey, "edge journey")], shared.network(dep.network),
-        shared.country(dep.country), _volume_timeseries(dep.new_units, (dep.start_date or start, WEB_YEAR_END), 0, comment),
+        shared.country(dep.country), _volume_timeseries(dep.new_units, *period, 0, comment),
         usage_span=SourceValue(span_years * u.year, comment=c.take("usage_span_years")))
     c.close()
     return pattern
@@ -591,14 +627,18 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
             raise ValueError("Duplicate declaration names")
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
-    spans = _deployment_spans(spec) if edge else {}
     dated = [p.start_date for p in spec.usage_patterns] + ([d.start_date for d in spec.edge_deployments] if edge else [])
     start = min([d for d in dated if d] or [WEB_YEAR_START])
-    web_end = max([WEB_YEAR_END] + [WEB_YEAR_END + timedelta(days=round(365 * span)) for span in spans.values()])
+    spans = _deployment_spans(spec) if edge else {}
+    periods = _deployment_periods(spec, start) if edge else {}
+    web_end = max([WEB_YEAR_END] + [_end(*periods[name]) + timedelta(days=round(365 * span))
+                                    for name, span in spans.items()])
     narrate("**One period for people and devices**: web usage runs from the earliest start date the answer gives, the "
-            "web year's first day without one, until the last deployed device retires; deployments run to the web "
-            "year's end, so a fleet in service since a past date is counted from it. A usage dated on its own starts "
-            "when it says.", lambda: {"start": start.isoformat(), "web_end": web_end.isoformat(), "spans_years": spans})
+            "web year's first day without one, until the last deployed device retires, the web year's end without "
+            "devices; a usage longer than the editor accepts is cut at its limit. Deployments run to their end date, "
+            "the web year's end without one, so a fleet in service since a past date is counted from it. A usage "
+            "dated on its own starts when it says.",
+            lambda: {"start": start.isoformat(), "web_end": web_end.isoformat(), "spans_years": spans})
     narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
             "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "
             "snapped to an entry the library knows, and each snap kept as a `Resolution`.",
@@ -622,6 +662,6 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
         edge_journeys = {j.name: EdgeUsageJourney(_label(j.name, resolutions),
                                                   [_lookup(functions, n, "edge function") for n in j.functions])
                          for j in spec.edge_journeys}
-        edge_patterns = [build_edge_deployment(dep, edge_journeys, shared, start, spans[dep.name], resolutions)
+        edge_patterns = [build_edge_deployment(dep, edge_journeys, shared, periods[dep.name], spans[dep.name], resolutions)
                          for dep in spec.edge_deployments]
     return System(_label(spec.system_name, resolutions), usage_patterns, edge_patterns), resolutions
