@@ -364,8 +364,8 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
 
 
 def build_edge_device(d: "EdgeDeviceSpec", resolutions: list[Resolution]):
-    """A gateway, sensor or controller, built from the hardware the answer states."""
-    planned("ai-bootstrap-edge#edge-device-sizing", "The device takes the answer's hardware, and from it the idle power, reserved RAM and reserved storage the answer omits.")
+    """A gateway, sensor or controller, built from the hardware and the reserved resources the answer states."""
+    planned("ai-bootstrap-edge#edge-device-sizing", "The device takes the answer's hardware, idle power, reserved RAM and reserved storage, deriving from its hardware any the answer omits.")
     raise NotImplementedError("planned: ai-bootstrap-edge#edge-device-sizing")
 
 

@@ -41,11 +41,11 @@ Calls reach jobs by name in the one jobs section, so a server that devices and p
 
 ## #edge-device-sizing
 
-Three values the answer omits are set from the device's hardware: idle power up to its power, reserved RAM up to a quarter of its RAM, reserved storage its buffer.
+The answer gives each device's idle power, reserved RAM and reserved storage; one it omits is derived from the stated hardware, as the sandbox's builder does.
 
-The library defaults are an industrial PC's (5 W idle, 1 GB of RAM and 30 GB of storage reserved), so a 2 W sensor or a 16 GB gateway fails computation. Not asked of the AI: a description rarely states these values, and the measured runs had no such fields.
+On cases 03 and 04 (12 calls), the AI set all three on every gateway and controller, within the device's power, RAM and storage, and every answer built. The derived idle power runs a 5 W controller at full power, doubling case 04's device use. A call costs about a fifth more.
 
-To confirm: **A fixed data buffer per device, with no weekly write.** The sandbox lets a function write storage each week and fits a rolling buffer when that overflows the device: two fields, a fitting rule and a resolution. Kept, a device keeping all its data for life stays expressible; dropped, the user edits that in.
+To confirm: **No weekly write: the reserved storage the answer states holds the device's data.** The sandbox also lets a function write storage each week and fits a rolling buffer when that overflows: two fields, a fitting rule and a resolution. Dropped, a device keeping all its data for life is edited in by the user.
 
 ## #device-groups
 
