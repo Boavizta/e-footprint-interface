@@ -26,6 +26,8 @@ django.setup()
 
 from django.template.loader import render_to_string  # noqa: E402
 
+from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import GROWTH_DURATION_LIMITS  # noqa: E402
+
 OUT_DIR = REPO_ROOT / "js_tests" / "fixtures"
 
 
@@ -583,6 +585,7 @@ HOURLY_PREVIEW_CASES = {
             "net_growth_rate_timespan": "year",
         },
         "subfields_ui_config": {"initial_volume": {"label": "Initial volume", "tooltip": None}},
+        "duration_limits": GROWTH_DURATION_LIMITS,
     }
 }
 

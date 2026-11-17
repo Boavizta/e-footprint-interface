@@ -20,6 +20,7 @@ from model_builder.adapters.ui_config.efootprint_description_provider import EFO
 from model_builder.adapters.ui_config.field_ui_config_provider import FieldUIConfigProvider
 from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
 from model_builder.domain.efootprint_to_web_mapping import get_corresponding_web_class
+from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import GROWTH_DURATION_LIMITS
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 from model_builder.domain.services.simplified_inputs import FieldAddress, input_eligibility, normalize_definition
 from model_builder.adapters.forms.simplified_input_context import included_requirement
@@ -362,6 +363,7 @@ def generate_dynamic_form(
                         {
                             "input_type": only_builder["template_name"].removesuffix(".html"),
                             "default": deepcopy(only_builder["default"]),
+                            "duration_limits": GROWTH_DURATION_LIMITS,
                         }
                     )
                     structure_field["subfields_ui_config"] = (

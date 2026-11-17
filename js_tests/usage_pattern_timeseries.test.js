@@ -63,12 +63,12 @@ test("duration validation preserves month and year limits", () => {
     const unit = root.querySelector('[id$="modeling_duration_unit"]');
     const error = root.querySelector("[data-modeling-duration-error]");
 
-    expect(durationMaximum("year")).toBe(10);
-    expect(durationMaximum("month")).toBe(120);
-    duration.value = "15";
+    expect(durationMaximum(duration, "year")).toBe(20);
+    expect(durationMaximum(duration, "month")).toBe(240);
+    duration.value = "25";
     validateDuration(root);
-    expect(duration.value).toBe("10");
-    expect(error.textContent).toContain("less than or equal to 10");
+    expect(duration.value).toBe("20");
+    expect(error.textContent).toContain("less than or equal to 20");
 
     unit.value = "month";
     duration.value = "0";

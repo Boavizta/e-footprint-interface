@@ -3,8 +3,8 @@
 
     const PREVIEW_DEBOUNCE_MS = 300;
 
-    function durationMaximum(unit) {
-        return unit === "month" ? 120 : 10;
+    function durationMaximum(duration, unit) {
+        return Number(unit === "month" ? duration.dataset.durationLimitMonth : duration.dataset.durationLimitYear);
     }
 
     function controls(root) {
@@ -21,7 +21,7 @@
 
     function validateDuration(root) {
         const fields = controls(root);
-        const maximum = durationMaximum(fields.durationUnit.value);
+        const maximum = durationMaximum(fields.duration, fields.durationUnit.value);
         const value = Number.parseInt(fields.duration.value, 10);
         const error = root.querySelector("[data-modeling-duration-error]");
         fields.duration.max = String(maximum);

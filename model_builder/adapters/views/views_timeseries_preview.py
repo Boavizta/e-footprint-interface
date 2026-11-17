@@ -21,6 +21,7 @@ from model_builder.domain.entities.web_core.explainable_timeseries_utils import 
     prepare_recurrent_quantity_data,
     weekly_hour_labels,
 )
+from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import GROWTH_DURATION_LIMITS
 from model_builder.domain.type_annotation_utils import resolve_optional_annotation
 
 
@@ -30,7 +31,6 @@ EDGE_COMPONENT_NEED_UNIT_FAMILY = (
     u.bit_stored,
     u.concurrent,
 )
-HOURLY_DURATION_LIMITS = {"month": 120, "year": 10}
 
 
 def _error(path: str, code: str, message: str) -> dict[str, str]:
@@ -93,7 +93,7 @@ def _negative_value_errors(form_inputs: dict) -> list[dict[str, str]]:
 def _hourly_input_errors(form_inputs: dict) -> list[dict[str, str]]:
     errors = []
     duration_unit = form_inputs.get("modeling_duration_unit")
-    duration_limit = HOURLY_DURATION_LIMITS.get(duration_unit)
+    duration_limit = GROWTH_DURATION_LIMITS.get(duration_unit)
     try:
         duration = float(form_inputs.get("modeling_duration_value"))
     except (TypeError, ValueError):

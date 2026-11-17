@@ -10,6 +10,10 @@ if TYPE_CHECKING:
     from model_builder.domain.entities.web_core.model_web import ModelWeb
 
 
+# The longest Growth projection period, per duration unit: what the editor, its preview and the AI bootstrap accept.
+GROWTH_DURATION_LIMITS = {"month": 240, "year": 20}
+
+
 def default_modeling_start_date() -> str:
     """Default modeling start date: January 1st of the current year."""
     return f"{datetime.now().year}-01-01"
