@@ -30,6 +30,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from . import edge_dsl
+from . import edge_dsl_hw
 from . import providers
 from . import report
 from model_builder.application.ai_bootstrap import dsl, service
@@ -50,6 +51,7 @@ class Scope:
 SCOPES = {
     "web": Scope(service.system_prompt(), dsl.validate_tolerating_extras, service.build_answer),
     "web_edge": Scope(edge_dsl.system_prompt(), edge_dsl.validate_tolerating_extras, edge_dsl.build_answer),
+    "web_edge_hw": Scope(edge_dsl_hw.system_prompt(), edge_dsl_hw.validate_tolerating_extras, edge_dsl_hw.build_answer),
 }
 DEVICE_TOTAL_TOLERANCE = 0.2  # "about 1,500 buildings", "around 40 sensors"
 
