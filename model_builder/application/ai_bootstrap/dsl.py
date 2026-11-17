@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import date
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -105,15 +106,77 @@ class UsagePatternSpec(Strict):
     comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
 
 
-# @planned ai-bootstrap-edge#edge-format WebEdgeSpec extends ModelSpec with edge devices, optional device groups, edge functions
-# and their server calls, edge journeys and edge deployments; Web only keeps ModelSpec.
 class ModelSpec(Strict):
+    """The Web only schema."""
     system_name: str
     servers: list[ServerSpec] = Field(default_factory=list)
     genai_apis: list[GenAIApiSpec] = Field(default_factory=list)
     jobs: list[JobSpec] = Field(default_factory=list)
     journeys: list[JourneySpec] = Field(default_factory=list)
     usage_patterns: list[UsagePatternSpec] = Field(default_factory=list)
+
+
+class EdgeDeviceSpec(Strict):
+    name: str
+    kind: Literal["computer", "appliance"] = "computer"
+    cores: Optional[float] = None
+    ram_gb: Optional[float] = None
+    storage_gb: Optional[float] = None
+    power_w: Optional[float] = None
+    idle_power_w: Optional[float] = None
+    base_ram_gb: Optional[float] = None      # computer only
+    base_storage_gb: Optional[float] = None  # computer only
+    embodied_kg: Optional[float] = None
+    lifespan_years: Optional[float] = None
+    comments: dict[str, str] = Field(default_factory=dict)
+
+
+class EdgeDeviceGroupSpec(Strict):
+    name: str
+    device_counts: dict[str, float] = Field(default_factory=dict)     # edge device name -> count per group
+    sub_group_counts: dict[str, float] = Field(default_factory=dict)  # group name -> count per group
+    comments: dict[str, str] = Field(default_factory=dict)            # device or group name -> why that count
+
+
+class ServerCallSpec(Strict):
+    job: str
+    times_per_hour: float
+    comment: Optional[str] = None
+
+
+class EdgeFunctionSpec(Strict):
+    name: str
+    device: str
+    cpu_cores_avg: Optional[float] = None
+    ram_gb_avg: Optional[float] = None
+    workload_fraction: Optional[float] = None  # appliance only
+    server_calls: list[ServerCallSpec] = Field(default_factory=list)
+    comments: dict[str, str] = Field(default_factory=dict)
+
+
+class EdgeJourneySpec(Strict):
+    name: str
+    functions: list[str]
+
+
+class EdgeDeploymentSpec(Strict):
+    name: str
+    journey: str
+    country: str = "FRANCE"
+    network: str = "wifi"
+    new_units: VolumeSpec
+    start_date: Optional[date] = None  # a fleet already in service starts in the past
+    usage_span_years: Optional[float] = None
+    comments: dict[str, str] = Field(default_factory=dict)
+
+
+class WebEdgeSpec(ModelSpec):
+    """The Web + edge schema: the web sections, then the devices, what they run and how many are deployed."""
+    edge_devices: list[EdgeDeviceSpec] = Field(default_factory=list)
+    edge_device_groups: list[EdgeDeviceGroupSpec] = Field(default_factory=list)
+    edge_functions: list[EdgeFunctionSpec] = Field(default_factory=list)
+    edge_journeys: list[EdgeJourneySpec] = Field(default_factory=list)
+    edge_deployments: list[EdgeDeploymentSpec] = Field(default_factory=list)
 
 
 # --- Parsing ---------------------------------------------------------------------------------------
@@ -132,11 +195,11 @@ def parse_json(text: str) -> tuple[dict | None, bool, str | None]:
         return None, False, str(first_error)
 
 
-def validate_tolerating_extras(data: dict) -> tuple[ModelSpec, list[str]]:
-    """Strict validation, except that unknown fields are stripped and reported instead of failing the run."""
-    planned("ai-bootstrap-edge#edge-format", "Validates against the schema it is given, so a Web only answer's edge sections are dropped as unknown fields.")
+def validate_tolerating_extras(data: dict, schema: type[ModelSpec]) -> tuple[ModelSpec, list[str]]:
+    """Strict validation against `schema`, except that unknown fields are stripped and reported instead of failing
+    the run: a Web only answer's edge sections are dropped this way."""
     try:
-        return ModelSpec.model_validate(data), []
+        return schema.model_validate(data), []
     except ValidationError as error:
         extras = [e["loc"] for e in error.errors() if e["type"] == "extra_forbidden"]
         if not extras or len(extras) != len(error.errors()):
@@ -146,7 +209,7 @@ def validate_tolerating_extras(data: dict) -> tuple[ModelSpec, list[str]]:
         for key in loc[:-1]:
             node = node[key]
         del node[loc[-1]]
-    return ModelSpec.model_validate(data), [".".join(str(k) for k in loc) for loc in extras]
+    return schema.model_validate(data), [".".join(str(k) for k in loc) for loc in extras]
 
 
 # --- Builder -------------------------------------------------------------------------------------

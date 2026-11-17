@@ -3,6 +3,7 @@
 The provider is a local fake: no inference is made. The pages drawn from these tests are
 `specs/comprehension-harness/narratives/modeling.html` (`npm run comprehension:render`).
 """
+import json
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -13,12 +14,13 @@ from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views import views_ai_bootstrap as views
 from model_builder.application.ai_bootstrap.service import Completion
 from model_builder.domain.services import is_empty_model
-from tests.declare import narrative, planned_test
+from tests.declare import narrative, planned_test, titled
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"
 GENERATE = "/model_builder/generate-ai-bootstrap/"
 ANSWER = (Path(django_settings.BASE_DIR) / "ai_sandbox/cases/_handwritten_01_recipe_app.json").read_text()
+EDGE_ANSWER = (Path(django_settings.BASE_DIR) / "ai_sandbox/cases/_handwritten_04_ev_charging.json").read_text()
 DESCRIPTION = "A recipe app: 200,000 monthly users browse recipes three times a week."
 
 
@@ -125,10 +127,19 @@ class TestAiBootstrap:
         pass
 
     # @planned ai-bootstrap-edge#scope-in-request Reads that the summary lists no edge check.
-    @planned_test("ai-bootstrap-edge#edge-format: a Web only answer holding edge sections builds no edge object "
-                  "[web-only-stays-web]")
+    @titled("ai-bootstrap-edge#edge-format: a Web only answer holding edge sections builds no edge object "
+            "[web-only-stays-web]")
     def test_a_web_only_answer_builds_no_edge_object(self, client, provider):
-        pass
+        edge_sections = {key: value for key, value in json.loads(EDGE_ANSWER).items() if key.startswith("edge_")}
+        provider.return_value = Completion(json.dumps({**json.loads(ANSWER), **edge_sections}))
+        client.post(START)
+
+        generated = client.post(GENERATE, {"description": DESCRIPTION, "scope": "web"})
+
+        body = generated.content.decode()
+        assert 'data-ai-bootstrap-panel="summary"' in body
+        assert all(f"<li>{section}</li>" in body for section in edge_sections)
+        assert not any(class_name.startswith("Edge") for class_name in saved_modeling(client))
 
     @planned_test("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "
                   "[web-by-default]")

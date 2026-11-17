@@ -49,7 +49,7 @@ class Scope:
 
 
 SCOPES = {
-    "web": Scope(service.system_prompt(), dsl.validate_tolerating_extras, service.build_answer),
+    "web": Scope(service.system_prompt(), lambda data: dsl.validate_tolerating_extras(data, ModelSpec), service.build_answer),
     "web_edge": Scope(edge_dsl.system_prompt(), edge_dsl.validate_tolerating_extras, edge_dsl.build_answer),
     "web_edge_hw": Scope(edge_dsl_hw.system_prompt(), edge_dsl_hw.validate_tolerating_extras, edge_dsl_hw.build_answer),
 }

@@ -8,7 +8,7 @@ from efootprint.core.system import System
 from model_builder.narrate import narrate, planned
 
 from .catalogs import Resolution
-from .dsl import build_system, parse_json, validate_tolerating_extras
+from .dsl import ModelSpec, build_system, parse_json, validate_tolerating_extras
 
 
 @dataclass
@@ -38,7 +38,7 @@ def build_answer(text: str) -> GeneratedModel:
     if data is None:
         raise ValueError("Invalid JSON answer")
     planned("ai-bootstrap-edge#scope-selects-format", "The answer is held to the schema of the scope it was asked in.")
-    spec, ignored = validate_tolerating_extras(data)
+    spec, ignored = validate_tolerating_extras(data, ModelSpec)
     narrate("The answer is read as JSON and **held to the bootstrap schema** by `validate_tolerating_extras`: a "
             "field the schema does not know is dropped and listed, anything else wrong refuses the answer.",
             lambda: {"ignored_fields": ignored})
