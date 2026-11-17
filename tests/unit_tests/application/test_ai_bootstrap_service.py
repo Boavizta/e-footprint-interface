@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from efootprint.constants.units import u
 
-from model_builder.application.ai_bootstrap.dsl import EdgeDeviceSpec, build_edge_device
+from model_builder.application.ai_bootstrap.dsl import EdgeDeviceSpec, WebEdgeSpec, build_edge_device, build_edge_groups
 from model_builder.application.ai_bootstrap.service import Completion, build_answer, generate
 from tests.declare import planned_test, titled
 
@@ -72,15 +72,35 @@ def test_omitted_device_reserves_are_derived():
     assert unstated.storage.base_storage_need.value == 30 * u.GB_stored
 
 
-@planned_test("ai-bootstrap-edge#device-groups: a group of sub-groups is built after them, and a device counts once per "
-              "unit of every group around it")
+def edge_groups_spec(*groups):
+    return WebEdgeSpec(system_name="X", edge_devices=[{"name": "Gateway"}, {"name": "Sensor", "kind": "appliance"}],
+                       edge_device_groups=list(groups))
+
+
+@titled("ai-bootstrap-edge#device-groups: a group of sub-groups is built after them, and a device counts once per "
+        "unit of every group around it")
 def test_nested_groups_multiply_device_counts():
-    pass
+    spec = edge_groups_spec({"name": "Building", "device_counts": {"Gateway": 1}, "sub_group_counts": {"Floor": 4}},
+                            {"name": "Floor", "device_counts": {"Sensor": 10}, "comments": {"Sensor": "Ten a floor"}})
+    devices = {d.name: build_edge_device(d, []) for d in spec.edge_devices}
+
+    groups = build_edge_groups(spec, devices, [])
+
+    assert groups["Building"].sub_group_counts[groups["Floor"]].value == 4 * u.dimensionless
+    assert groups["Floor"].edge_device_counts[devices["Sensor"]].comment == "Ten a floor"
+    assert devices["Sensor"].total_nb_of_units.value == 40 * u.dimensionless
+    assert devices["Gateway"].total_nb_of_units.value == 1 * u.dimensionless
 
 
-@planned_test("ai-bootstrap-edge#device-groups: a sub-group no group declares, or a cycle of sub-groups, refuses the answer")
-def test_unknown_or_cyclic_sub_groups_refuse_the_answer():
-    pass
+@titled("ai-bootstrap-edge#device-groups: a sub-group no group declares, or a cycle of sub-groups, refuses the answer")
+@pytest.mark.parametrize("groups", [
+    [{"name": "Building", "sub_group_counts": {"Wing": 2}}],
+    [{"name": "Building", "sub_group_counts": {"Floor": 4}}, {"name": "Floor", "sub_group_counts": {"Building": 1}}],
+])
+def test_unknown_or_cyclic_sub_groups_refuse_the_answer(groups):
+    spec = edge_groups_spec(*groups)
+    with pytest.raises(ValueError, match="Unknown or cyclic edge device groups"):
+        build_edge_groups(spec, {d.name: build_edge_device(d, []) for d in spec.edge_devices}, [])
 
 
 @planned_test("ai-bootstrap-edge#deployments-over-time: a deployment's usage span is its stated one, else its devices' "

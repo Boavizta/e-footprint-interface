@@ -24,6 +24,7 @@ from efootprint.constants.countries import Countries
 from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
+from efootprint.core.hardware.edge.edge_device_group import EdgeDeviceGroup
 from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.network import Network
@@ -466,10 +467,25 @@ def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
     return device
 
 
-def build_edge_groups(spec: "WebEdgeSpec", devices: dict, resolutions: list[Resolution]) -> dict:
+def build_edge_groups(spec: WebEdgeSpec, devices: dict, resolutions: list[Resolution]) -> dict:
     """The optional groups, children first, each holding its devices and sub-groups with their counts."""
-    planned("ai-bootstrap-edge#device-groups", "Each group holds its devices and sub-groups with the counts per group the answer gives.")
-    raise NotImplementedError("planned: ai-bootstrap-edge#device-groups")
+    pending, groups = {g.name: g for g in spec.edge_device_groups}, {}
+    while pending:
+        ready = [g for g in pending.values() if all(sub in groups for sub in g.sub_group_counts)]
+        if not ready:
+            missing = {sub for g in pending.values() for sub in g.sub_group_counts if sub not in groups}
+            raise ValueError(f"Unknown or cyclic edge device groups: {sorted(missing)}")
+        for g in ready:
+            c = _Comments(g, resolutions)
+            groups[g.name] = EdgeDeviceGroup(
+                _label(g.name, resolutions),
+                sub_group_counts={groups[n]: SourceValue(v * u.dimensionless, comment=c.take(n))
+                                  for n, v in g.sub_group_counts.items()},
+                edge_device_counts={_lookup(devices, n, "edge device"): SourceValue(v * u.dimensionless, comment=c.take(n))
+                                    for n, v in g.device_counts.items()})
+            c.close()
+            del pending[g.name]
+    return groups
 
 
 def build_edge_function(f: "EdgeFunctionSpec", devices: dict, jobs: dict, resolutions: list[Resolution]):
