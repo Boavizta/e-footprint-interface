@@ -17,6 +17,13 @@
 - **The `efootprint` dependency.** `pyproject.toml` and `poetry.lock` already pointed at the local
   checkout (`../e-footprint`, editable) before the run, uncommitted. The run leaves both files as
   it found them and commits neither.
+- **Not built, for the user to decide: a stated web volume is applied at the usage's start, not
+  at the web year.** A usage pattern's volume is the first value of its Growth projection inputs.
+  With a fleet in service since a past date, web usage starts on that date with today's stated
+  volume, so a stated growth rate compounds from too high a base (first run, case 03 rep 2: 40 %
+  a year from 2022-12 gave 203 t of user-device manufacturing against about 10 t elsewhere).
+  Without a stated growth nothing is off. The fix would discount the volume back from 2027-01-01
+  to the start, and the editor would then open on a figure the user did not write.
 - **Supervisor model.** The supervisor ran on `claude-fable-5-2`; `implementer-hard` pins
   `claude-fable-5-1[1m]`.
 
@@ -37,6 +44,58 @@
    the stored state and recomputes. Only local sessions on the editable checkout are concerned.
 
 ## Evidence
+
+### Paid runs of cases 03 and 04 (lot `edge-builder`)
+
+Made by the run on the user's word given at the invocation. Command, from the repository root:
+`poetry run python -m ai_sandbox.run --scope web_edge --cases 03 04 --models zai-glm-5-3-flash --effort low --reps 3 --max-cost-usd 0.5`.
+The raw readings are local and git-ignored, under `ai_sandbox/runs/<run>/` (`summary.md`, one json
+a call).
+
+**Run `20261118-003854`**, on the build at `e8949fc1` (the lot as reviewed, before the prompt edit
+that follows). Total cost USD 0.0096.
+
+| Case | Rep | Built first try | Checks | In tok | Out tok | Reasoning tok | Latency s | Cost USD | Total kg CO2e | Devices in service as 2027 opens |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| 03 | 1 | yes | 10/10 | 2,678 | 2,158 | 5 | 10.47 | 0.0015 | 704,008 | 1,474 gateways, 58,960 sensors |
+| 03 | 2 | yes | 8/10 | 2,678 | 2,571 | 453 | 16.11 | 0.0017 | 542,569 | 2,998 gateways, 119,920 sensors |
+| 03 | 3 | yes | 8/10 | 2,678 | 2,430 | 492 | 14.63 | 0.0016 | 258,352 | 2,206 gateways, 88,240 sensors |
+| 04 | 1 | yes | 7/8 | 2,704 | 2,696 | 565 | 18.76 | 0.0018 | 1,826,819 | 5,240 controllers |
+| 04 | 2 | yes | 7/8 | 2,704 | 2,462 | 536 | 19.56 | 0.0016 | 1,087,527 | 6,224 controllers |
+| 04 | 3 | yes | 8/8 | 2,704 | 1,980 | 240 | 12.83 | 0.0014 | 828,182 | 4,434 controllers |
+
+Stated fleets: 1,500 gateways and 60,000 sensors (03), 4,200 controllers (04). The six failed
+checks are the device totals of four calls; every other check passed on every call (a server
+shared by devices and people, groups, a usage pattern for every journey, server calls). What the
+four answers wrote: a fleet that reaches its stated size at the end of 2024, on 2025-01-01 or on
+2026-01-01, then the stated growth from that date to the end of 2027. Three of the six answers
+also dated a usage pattern the description does not date.
+
+**Run `20261118-004330`**, on the build at `4224af9b` (the prompt now dates the description's
+present to 2027-01-01 and tells the answer to leave a usage pattern's start date out unless the
+description gives one). Total cost USD 0.0091. This is the build the lot `scope-choice` discloses.
+
+| Case | Rep | Built first try | Checks | In tok | Out tok | Reasoning tok | Latency s | Cost USD | Total kg CO2e | Devices in service as 2027 opens |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|---|
+| 03 | 1 | yes | 8/10 | 2,825 | 2,226 | 281 | 20.25 | 0.0015 | 148,768 | 1,536 gateways, 61,440 sensors |
+| 03 | 2 | yes | 9/10 | 2,825 | 1,838 | 282 | 10.30 | 0.0013 | 471,299 | 1,536 gateways, 61,440 sensors |
+| 03 | 3 | yes | 10/10 | 2,825 | 2,513 | 530 | 15.14 | 0.0017 | 213,818 | 1,536 gateways, 61,440 sensors |
+| 04 | 1 | yes | 8/8 | 2,851 | 1,854 | 419 | 12.38 | 0.0014 | 704,500 | 4,293 controllers |
+| 04 | 2 | yes | 8/8 | 2,851 | 2,529 | 598 | 31.05 | 0.0017 | 661,000 | 4,275 controllers |
+| 04 | 3 | yes | 7/8 | 2,851 | 2,167 | 181 | 17.19 | 0.0015 | 1,314,876 | 5,293 controllers |
+
+Failed checks: 03 rep 1, the number of journeys and the low-volume journey (the answer holds
+placeholder keys such as `journeys_2_placeholder`, dropped as unknown, and one journey); 03 rep 2,
+the server shared by devices and people; 04 rep 3, the device total (108 a month from 2024-09-01
+and 75 a month from 2024-07-01, both to 2026-12-31, then 80 a month from 2027-01-01). No answer
+dates a usage pattern. The prompt was not edited again.
+
+What the two runs do not settle, read by the lot's reviewer on the raw answers of the first run:
+the computed totals spread threefold on each case with the checks passing. On case 03 device
+manufacturing dominates and the sensor's manufacturing footprint ranges from 0.1 to 5 kg (the
+case's facts: 30 g of electronics), the gateway's from 25 to 60 kg. On case 04 station
+electricity dominates and the controller's power ranges from 5 to 15 W (the facts: 8 W). Lifespans
+and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizon.
 
 ## Watch in normal use
 
@@ -107,6 +166,8 @@
 - The shared start is the earliest date of anything dated: a dated usage pattern earlier than
   every deployment pulls the undated deployments with it. It matches the plan's clause and the
   prompt; the spec's rule speaks of "the earliest deployment start".
+- Handwritten answer 04 deploys Germany at 75 a month from 2024-01-01; the prompt's rule now gives
+  80 a month, the stated rate, from about 2024-03-09. The fleet narrative case asserts the 75.
 - With fleet totals and no group (case 04), the summary's "Devices per group" check points at
   nothing the user can open.
 - A replay of a sandbox run recorded before the format moved drops the removed fields and fails

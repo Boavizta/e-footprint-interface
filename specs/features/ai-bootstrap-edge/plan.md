@@ -31,6 +31,8 @@ Web + edge gets its own whole prompt: the sandbox's measured one, edited only fo
 
 Its edge material runs through the web text, from the paradigms to the field notes, so an addendum would leave the web framing contradicting it. The cost is a copy of the web rules, which a web edit mirrors. Cases 03 and 04 re-run at low effort, each paid run on the user's word; the disclosure's figures come from them.
 
+Changed: **The prompt dates the description's present to 2027-01-01.** In the first paid run four of six answers put today in 2024 to 2026, up to doubling the fleet; after the edit five of six count it right.
+
 ## #edge-format
 
 WebEdgeSpec adds edge devices, optional groups, edge functions with server calls, edge journeys and deployments with a start date; a Web only answer's edge sections are dropped as unknown.
