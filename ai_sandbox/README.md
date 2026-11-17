@@ -6,13 +6,16 @@ Local experiment runner for the AI-assistance exploration described in
 
 `--scope` picks what is generated. `web` (the default) is the production bootstrap: usage journeys, servers, GenAI
 APIs, as if the interface's edge toggle were off. `web_edge` evaluates the Web + edge bootstrap of
-[`specs/features/ai-bootstrap-edge/`](../specs/features/ai-bootstrap-edge/): it reads the production Web + edge
-instructions (`system_prompt_web_edge.md`) and schema (`WebEdgeSpec`), and until production builds the edge sections,
-`edge_dsl_hw.py` (on `edge_dsl.py`) builds edge devices, optional device groups, edge functions and their server calls,
-edge journeys and edge deployments with the production web builders and the library's `from_defaults`.
+[`specs/features/ai-bootstrap-edge/`](../specs/features/ai-bootstrap-edge/): the production Web + edge instructions
+(`system_prompt_web_edge.md`), schema (`WebEdgeSpec`) and builder, which adds edge devices, optional device groups,
+edge functions and their server calls, edge journeys and edge deployments to the web sections. The sandbox measures
+what ships: it has no edge builder of its own.
 Cases carry their `scope` (03 and 04 are `web_edge`); without `--cases` a run takes the cases of its scope. Edge
 checks: an edge deployment exists, a device calls a server, a server is shared by web journeys and devices, a device
-group is used or not as the case expects, and the devices in service at the start match the case's totals within 20 %.
+group is used or not as the case expects, and the devices in service as the web year opens (the most deployments in
+parallel over the first week of 2027, times each device's units per deployment: `run.device_totals`) match the case's
+totals within 20 %. A fleet already in service is deployed from a past `start_date`, so its devices are counted by
+then.
 
 Nothing here is part of the Django application. Run outputs under `runs/` are git-ignored.
 
@@ -124,8 +127,9 @@ adapter; the other CLI entries accept an `--effort` override.
 - **No provider-side schema enforcement.** All providers get the same "JSON only" instruction (plus JSON mode
   where it is free: OpenAI and Mistral). Validity is checked locally so results are comparable. Strict
   structured outputs are a separate knob to test later.
-- **One year horizon, constant volumes.** `MODELING_START_DATE` and `MODELING_DURATION_YEARS` in the shared `dsl.py`. Fine
-  for structure comparison, not for final numbers.
+- **One period for people and devices.** Web usage runs from the earliest start date the answer gives (`WEB_YEAR_START`,
+  2027-01-01, without one) until the last deployed device retires; deployments run to `WEB_YEAR_END`. Both in the
+  shared `dsl.py`. Fine for structure comparison, not for final numbers.
 - **Catalog choices are resolved in code, not in the prompt.** The shared application `catalogs.py` snaps a GenAI `provider`/`model_name`
   to the EcoLogits catalog and a `cloud_provider`/size to a real Boavizta instance (general-purpose families only,
   specs cached in `model_builder/application/ai_bootstrap/catalogs/boavizta_instance_specs.json`, refreshed only by

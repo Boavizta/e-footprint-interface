@@ -7,8 +7,8 @@ Usage (from the interface repo root):
     poetry run python -m ai_sandbox.run --dry-run cases/_handwritten_01_recipe_app.json   # pipeline check without an LLM
     poetry run python -m ai_sandbox.run --scope web_edge --cases 03 04 --models zai-glm-5-3-flash --effort low
 
---scope picks the prompt and the builder: web (default) is the production bootstrap, web_edge its Web + edge
-instructions and schema, built by the sandbox's edge_dsl_hw.py. Without --cases, the cases of that scope run.
+--scope picks the production scope: web (default) or web_edge, each with its instructions, schema and builder.
+Without --cases, the cases of that scope run.
 
 Each run writes ai_sandbox/runs/<timestamp>/<case>__<model>__r<rep>.json plus the exported model
 <...>.e-f.json when the build succeeds. summary.md, summary.html and runs/index.html are produced by report.py.
@@ -24,13 +24,13 @@ import re
 import time
 import traceback
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import numpy as np
+from efootprint.core.system import System
 from pydantic import ValidationError
 
-from . import edge_dsl
-from . import edge_dsl_hw
 from . import providers
 from . import report
 from model_builder.application.ai_bootstrap import dsl, service
@@ -48,18 +48,16 @@ class Scope:
     build: object     # answer text -> GeneratedModel
 
 
-def _production(name: str, build) -> Scope:
-    """A production scope's instructions and schema, with the given builder."""
+def _production(name: str) -> Scope:
+    """A production scope's instructions, schema and builder."""
     return Scope(service.system_prompt(name),
-                 lambda data: dsl.validate_tolerating_extras(data, service.SCOPES[name].schema), build)
+                 lambda data: dsl.validate_tolerating_extras(data, service.SCOPES[name].schema),
+                 lambda text: service.build_answer(text, name))
 
 
-SCOPES = {
-    "web": _production("web", lambda text: service.build_answer(text, "web")),
-    # The edge builder is still the sandbox's until production builds the edge sections.
-    "web_edge": _production("web_edge", edge_dsl_hw.build_answer),
-}
+SCOPES = {name: _production(name) for name in service.SCOPES}
 DEVICE_TOTAL_TOLERANCE = 0.2  # "about 1,500 buildings", "around 40 sensors"
+WEB_YEAR_START = datetime.combine(dsl.WEB_YEAR_START, datetime.min.time(), tzinfo=timezone.utc)
 
 
 # --- Checks ----------------------------------------------------------------------------------
@@ -115,9 +113,25 @@ def device_total_key(pattern: str) -> str:
     return f"device_total_{pattern.split('|')[0]}"
 
 
+def device_totals(system: System) -> dict[str, float]:
+    """Devices in service per edge device name as the web year opens: the most deployments in parallel over its first
+    week (2027-01-01 to 2027-01-07, the "today" of the case descriptions) x the device's units per deployment. A
+    deployment that starts later is read over its own first week."""
+    totals = {}
+    for device in system.edge_devices:
+        units = float(device.total_nb_of_units.value.magnitude)
+        in_service = 0.0
+        for pattern in device.edge_usage_patterns:
+            parallel = pattern.nb_deployments_in_parallel
+            first = max(0, int((WEB_YEAR_START - parallel.start_date) / timedelta(hours=1)))
+            in_service += float(np.max(parallel.value.magnitude[first:first + 168]))
+        totals[device.name] = units * in_service
+    return totals
+
+
 def device_total_checks(totals: dict[str, float], expected: dict[str, float]) -> dict[str, bool]:
-    """Per expected device ("a|b" matches a device name containing a or b), the devices in service at the start
-    sum to the expected total within DEVICE_TOTAL_TOLERANCE."""
+    """Per expected device ("a|b" matches a device name containing a or b), the devices in service as the web year
+    opens sum to the expected total within DEVICE_TOTAL_TOLERANCE."""
     results = {}
     for pattern, target in expected.items():
         words = pattern.lower().split("|")
@@ -157,7 +171,7 @@ def evaluate(data: dict, case: dict, export_path: Path | None, scope: Scope = SC
         system, resolutions = generated.system, generated.resolutions
         result["build_ok"] = True
         if system.edge_usage_patterns:
-            result["device_totals"] = {k: round(v) for k, v in edge_dsl.device_totals(system).items()}
+            result["device_totals"] = {k: round(v) for k, v in device_totals(system).items()}
             result["checks"].update(device_total_checks(result["device_totals"], case.get("checks", {}).get("device_totals", {})))
         result["catalog_resolutions"] = [res.as_dict() for res in resolutions]
         total = system.total_footprint.sum()

@@ -75,7 +75,7 @@ def write_summary(run_dir: Path):
             lines += ["- catalog resolutions: " + "; ".join(
                 f"{c['kind']} {c['requested']} → {c['resolved']} ({c['how']})" for c in r["catalog_resolutions"])]
         if r.get("device_totals"):
-            lines += ["- edge devices in service at the start: " + ", ".join(f"{k}={v}" for k, v in r["device_totals"].items())]
+            lines += ["- edge devices in service as the web year opens: " + ", ".join(f"{k}={v}" for k, v in r["device_totals"].items())]
         if r.get("counts"):
             lines += ["- counts: " + ", ".join(f"{k}={v}" for k, v in r["counts"].items() if v)]
         if r.get("use_by_category_kg"):

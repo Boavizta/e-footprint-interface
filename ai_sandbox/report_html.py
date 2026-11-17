@@ -191,8 +191,8 @@ def render_tree(data: dict) -> str:
         fn = functions.get(name)
         if fn is None:
             return f'<li><span class="kind">function</span><span class="fail">{esc(name)} (unknown)</span></li>'
-        nums = ", ".join(f"{k.replace('_', ' ')}={fn[k]}" for k in ("cpu_cores_avg", "ram_gb_avg", "storage_gb_per_week",
-                                                                    "storage_retention_weeks", "workload_fraction") if fn.get(k) is not None)
+        nums = ", ".join(f"{k.replace('_', ' ')}={fn[k]}" for k in ("cpu_cores_avg", "ram_gb_avg", "workload_fraction")
+                         if fn.get(k) is not None)
         calls = "".join(f'<li><span class="kind">calls</span>{esc(c.get("times_per_hour"))}/h → ' + job_li(job)[4:]
                         for c in fn.get("server_calls", []) for job in c.get("jobs", []))
         return (f'<li><span class="kind">function</span>{esc(name)} on <span class="kind">device</span>{esc(fn.get("device"))} '
@@ -202,17 +202,18 @@ def render_tree(data: dict) -> str:
         journey = edge_journeys.get(dep.get("journey"))
         fns = ("".join(function_li(f) for f in journey.get("functions", [])) if journey
                else f'<li><span class="fail">{esc(dep.get("journey"))} (unknown)</span></li>')
-        base = f" + {dep['existing_units']} existing" if dep.get("existing_units") else ""
+        since = f" from {esc(dep['start_date'])}" if dep.get("start_date") else ""
         span = f", {dep['usage_span_years']} yrs" if dep.get("usage_span_years") else ""
         parts.append(f'<li><span class="kind">edge</span>{esc(dep.get("name"))} <span class="muted">{esc(dep.get("country"))} · '
-                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_units"))} new units{base}{span}</span>{_comments(dep)}'
+                     f'{esc(dep.get("network"))} · {_volume(dep.get("new_units"))} new units{since}{span}</span>{_comments(dep)}'
                      f'<ul><li><span class="kind">edge journey</span>{esc(dep.get("journey"))}<ul>{fns}</ul></li></ul></li>')
     for g in data.get("edge_device_groups", []):
         counts = ", ".join(f"{n} ×{c}" for n, c in {**g.get("sub_group_counts", {}), **g.get("device_counts", {})}.items())
         parts.append(f'<li><span class="kind">group</span>{esc(g.get("name"))} <span class="muted">{esc(counts)}</span>{_comments(g)}</li>')
     for d in data.get("edge_devices", []):
-        specs = ", ".join(f"{k.replace('_', ' ')}={d[k]}" for k in ("cores", "ram_gb", "storage_gb", "power_w", "embodied_kg",
-                                                                     "lifespan_years") if d.get(k) is not None)
+        specs = ", ".join(f"{k.replace('_', ' ')}={d[k]}" for k in ("cores", "ram_gb", "base_ram_gb", "storage_gb", "base_storage_gb",
+                                                                     "power_w", "idle_power_w", "embodied_kg", "lifespan_years")
+                          if d.get(k) is not None)
         parts.append(f'<li><span class="kind">{esc(d.get("kind", "computer"))}</span>{esc(d.get("name"))} '
                      f'<span class="muted">{esc(specs)}</span>{_comments(d)}</li>')
     for s in data.get("servers", []):
@@ -263,7 +264,7 @@ def stats_block(record: dict, case: dict) -> str:
     if record.get("counts"):
         parts.append(f"<dt>Counts</dt><dd>{esc(_kv_list(record['counts']))}</dd>")
     if record.get("device_totals"):
-        parts.append(f"<dt>Edge devices in service at the start</dt><dd>{esc(_kv_list(record['device_totals']))}</dd>")
+        parts.append(f"<dt>Edge devices in service as the web year opens</dt><dd>{esc(_kv_list(record['device_totals']))}</dd>")
     if record.get("total_kg_co2e_over_horizon") is not None:
         parts.append(f"<dt>Total over horizon</dt><dd>{record['total_kg_co2e_over_horizon']} kg CO2e</dd>")
         parts.append(f"<dt>Use by category (kg)</dt><dd>{esc(_kv_list(record.get('use_by_category_kg', {})))}</dd>")

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -20,6 +20,10 @@ from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServ
 from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
+from efootprint.builders.timeseries.explainable_recurrent_quantities_from_constant import (
+    ExplainableRecurrentQuantitiesFromConstant)
+from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
+from efootprint.builders.usage.edge.recurrent_edge_workload import RecurrentEdgeWorkload
 from efootprint.constants.countries import Countries
 from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
@@ -31,17 +35,23 @@ from efootprint.core.hardware.network import Network
 from efootprint.core.hardware.server_base import ServerBase
 from efootprint.core.hardware.storage import Storage
 from efootprint.core.system import System
+from efootprint.core.usage.edge.edge_function import EdgeFunction
+from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
+from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
+from efootprint.core.usage.edge.recurrent_server_need import RecurrentServerNeed
 from efootprint.core.usage.job import GPUJob, Job, JobBase
 from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
-from model_builder.narrate import narrate, planned
+from model_builder.narrate import narrate
 
 from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 
-MODELING_START_DATE = "2027-01-01"
-MODELING_DURATION_YEARS = 1
+# The web year: usage and deployments the answer does not date start here, and deployments end with it.
+WEB_YEAR_START = date(2027, 1, 1)
+WEB_YEAR_END = date(2027, 12, 31)
+MAX_DEFAULT_SPAN_YEARS = 6  # the library's own default usage span
 
 
 class Strict(BaseModel):
@@ -107,6 +117,7 @@ class UsagePatternSpec(Strict):
     country: str = "FRANCE"
     volume: VolumeSpec
     growth_pct_per_year: float = 0
+    start_date: Optional[date] = None  # a usage the description dates otherwise than the shared start
     comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
 
 
@@ -267,9 +278,20 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comment: Optional[str] = None):
-    """Hourly volume from the DSL period over the fixed generation horizon."""
-    planned("ai-bootstrap-edge#deployments-over-time", "The series runs from the usage's own start date, else the shared start, until the last device retires; to 2027's end without devices.")
+def _duration(start: date, end: date) -> tuple[int, str]:
+    """`start` to `end` inclusive as the editor's duration: whole years when it is one (the library's year being
+    365 days), else whole months of 30 days."""
+    days = (end - start).days + 1
+    years = round(days / 365)
+    if years and abs(days - 365 * years) <= 15:
+        return years, "year"
+    return max(1, round(days / 30)), "month"
+
+
+def _volume_timeseries(volume: VolumeSpec, period: tuple[date, date], growth_pct_per_year: float = 0,
+                       comment: Optional[str] = None):
+    """Hourly volume from the DSL period over `period`, as the Growth projection inputs the hourly editor prefills:
+    a raw series would open empty."""
     value, per = volume.value, volume.per
     if per == "minute":
         value, per = value * 60 * 24, "day"
@@ -277,15 +299,22 @@ def _volume_timeseries(volume: VolumeSpec, growth_pct_per_year: float = 0, comme
         value, per = value * 24, "day"
     elif per == "week":
         value, per = value / 7, "day"
+    duration, unit = _duration(*period)
     return ExplainableHourlyQuantitiesFromFormInputs({
-        "start_date": MODELING_START_DATE,
-        "modeling_duration_value": MODELING_DURATION_YEARS,
-        "modeling_duration_unit": "year",
+        "start_date": period[0].isoformat(),
+        "modeling_duration_value": duration,
+        "modeling_duration_unit": unit,
         "initial_volume": value,
         "initial_volume_timespan": per,
         "net_growth_rate_in_percentage": growth_pct_per_year,
         "net_growth_rate_timespan": "year",
     }, source=Sources.USER_DATA, comment=comment)
+
+
+def _weekly(value: float, unit: str, comment: Optional[str] = None):
+    """A constant need over the typical week, as the inputs the weekly editor prefills."""
+    return ExplainableRecurrentQuantitiesFromConstant(
+        {"constant_value": value, "constant_unit": unit}, source=Sources.USER_DATA, comment=comment)
 
 
 DEVICE_ARCHETYPES = ("smartphone", "laptop", "screen", "box")
@@ -424,14 +453,15 @@ def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) ->
     return UsageJourney(_label(jo.name, resolutions), uj_steps=steps)
 
 
-def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
+def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, period: tuple[date, date],
                         resolutions: list[Resolution]) -> UsagePattern:
+    """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start."""
     c = _Comments(p, resolutions)
-    volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year")))) or None
+    volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date")))) or None
     pattern = UsagePattern(
         _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
         shared.network(p.network), shared.country(p.country),
-        _volume_timeseries(p.volume, p.growth_pct_per_year, volume_comment))
+        _volume_timeseries(p.volume, (p.start_date or period[0], period[1]), p.growth_pct_per_year, volume_comment))
     c.close()
     return pattern
 
@@ -488,27 +518,82 @@ def build_edge_groups(spec: WebEdgeSpec, devices: dict, resolutions: list[Resolu
     return groups
 
 
-def build_edge_function(f: "EdgeFunctionSpec", devices: dict, jobs: dict, resolutions: list[Resolution]):
-    """What a device runs, and its server calls."""
-    planned("ai-bootstrap-edge#edge-builder", "Each server call becomes one server need on the web builder's jobs it lists, so devices and people share one server.")
-    raise NotImplementedError("planned: ai-bootstrap-edge#edge-builder")
+def build_edge_function(f: EdgeFunctionSpec, devices: dict, jobs: dict, resolutions: list[Resolution]) -> EdgeFunction:
+    """What a device runs, and its server calls: each call is one server need on the web builder's jobs it lists,
+    so a server devices and people share is built once."""
+    c = _Comments(f, resolutions)
+    name = _label(f.name, resolutions)
+    device = _lookup(devices, f.device, "edge device")
+    kwargs = {"edge_device": device}
+    if isinstance(device, EdgeAppliance):
+        if f.workload_fraction is not None:
+            kwargs["recurrent_workload"] = _weekly(f.workload_fraction, "concurrent", c.take("workload_fraction"))
+        need = RecurrentEdgeWorkload.from_defaults(f"{name} workload", **kwargs)
+    else:
+        if f.cpu_cores_avg is not None:
+            kwargs["recurrent_compute_needed"] = _weekly(f.cpu_cores_avg, "cpu_core", c.take("cpu_cores_avg"))
+        if f.ram_gb_avg is not None:
+            kwargs["recurrent_ram_needed"] = _weekly(f.ram_gb_avg, "GB_ram", c.take("ram_gb_avg"))
+        need = RecurrentEdgeProcess.from_defaults(f"{name} process", **kwargs)
+    server_needs = []
+    for call in f.server_calls:
+        called = {_lookup(jobs, job, "job"): 1 for job in call.jobs}
+        server_needs.append(RecurrentServerNeed(
+            f"{name}: {', '.join(job.name for job in called)}", edge_device=device,
+            recurrent_volume_per_edge_device=_weekly(call.times_per_hour, "occurrence", call.comment), jobs=called))
+    function = EdgeFunction(name, [need], server_needs)
+    c.close()
+    return function
 
 
-def build_edge_deployment(dep: "EdgeDeploymentSpec", journeys: dict, shared: _Shared, resolutions: list[Resolution]):
-    """Deployments per period until the end of 2027, and their usage span."""
-    planned("ai-bootstrap-edge#deployments-over-time", "Deployment starts are Growth projection inputs from the shared start, or the deployment's own start date, to the end of 2027.")
-    raise NotImplementedError("planned: ai-bootstrap-edge#deployments-over-time")
+def _deployment_spans(spec: WebEdgeSpec) -> dict[str, float]:
+    """Years each deployment's units stay in service: as stated, else the shortest lifespan of the devices its
+    journey runs on, six years at most."""
+    devices = {d.name: d for d in spec.edge_devices}
+    device_of = {f.name: f.device for f in spec.edge_functions}
+    functions_of = {j.name: j.functions for j in spec.edge_journeys}
+    spans = {}
+    for dep in spec.edge_deployments:  # an unknown name is refused by the builders, not here
+        lifespans = [devices[device_of[f]].lifespan_years for f in functions_of.get(dep.journey, [])
+                     if device_of.get(f) in devices]
+        spans[dep.name] = dep.usage_span_years or min([MAX_DEFAULT_SPAN_YEARS] + [years for years in lifespans if years])
+    return spans
+
+
+def build_edge_deployment(dep: EdgeDeploymentSpec, journeys: dict, shared: _Shared, start: date, span_years: float,
+                          resolutions: list[Resolution]) -> EdgeUsagePattern:
+    """Deployments per period from the deployment's own start date, else the shared `start`, until the end of the
+    web year, and their usage span."""
+    c = _Comments(dep, resolutions)
+    comment = " ".join(filter(None, (c.take("new_units"), c.take("start_date")))) or None
+    pattern = EdgeUsagePattern(
+        _label(dep.name, resolutions), [_lookup(journeys, dep.journey, "edge journey")], shared.network(dep.network),
+        shared.country(dep.country), _volume_timeseries(dep.new_units, (dep.start_date or start, WEB_YEAR_END), 0, comment),
+        usage_span=SourceValue(span_years * u.year, comment=c.take("usage_span_years")))
+    c.close()
+    return pattern
 
 
 def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     """Returns the system and the catalog resolutions made on the way (see catalogs.py)."""
-    for section in (spec.servers, spec.genai_apis, spec.jobs, spec.journeys):
+    edge = isinstance(spec, WebEdgeSpec)
+    sections = [spec.servers, spec.genai_apis, spec.jobs, spec.journeys]
+    if edge:
+        sections += [spec.edge_devices, spec.edge_device_groups, spec.edge_functions, spec.edge_journeys]
+    for section in sections:
         names = [obj.name for obj in section]
         if len(names) != len(set(names)):
             raise ValueError("Duplicate declaration names")
     resolutions: list[Resolution] = []
     shared = _Shared(resolutions)
-    planned("ai-bootstrap-edge#deployments-over-time", "The shared start is the earliest start date of a usage pattern or a deployment; web usage ends as the last device retires.")
+    spans = _deployment_spans(spec) if edge else {}
+    dated = [p.start_date for p in spec.usage_patterns] + ([d.start_date for d in spec.edge_deployments] if edge else [])
+    start = min([d for d in dated if d] or [WEB_YEAR_START])
+    web_end = max([WEB_YEAR_END] + [WEB_YEAR_END + timedelta(days=round(365 * span)) for span in spans.values()])
+    narrate("**One period for people and devices**: web usage runs from the earliest start date the answer gives, the "
+            "web year's first day without one, until the last deployed device retires; deployments run to the web "
+            "year's end, so a fleet in service since a past date is counted from it. A usage dated on its own starts "
+            "when it says.", lambda: {"start": start.isoformat(), "web_end": web_end.isoformat(), "spans_years": spans})
     narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
             "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "
             "snapped to an entry the library knows, and each snap kept as a `Resolution`.",
@@ -518,6 +603,20 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     apis = {a.name: build_genai_api(a, resolutions) for a in spec.genai_apis}
     jobs = {j.name: build_job(j, servers, apis, resolutions) for j in spec.jobs}
     journeys = {jo.name: build_journey(jo, jobs, resolutions) for jo in spec.journeys}
-    usage_patterns = [build_usage_pattern(p, journeys, shared, resolutions) for p in spec.usage_patterns]
-    planned("ai-bootstrap-edge#edge-builder", "A WebEdgeSpec's edge sections follow: `build_edge_device`, `build_edge_groups`, `build_edge_function` on the web jobs, `build_edge_deployment`.")
-    return System(_label(spec.system_name, resolutions), usage_patterns, []), resolutions
+    usage_patterns = [build_usage_pattern(p, journeys, shared, (start, web_end), resolutions) for p in spec.usage_patterns]
+    edge_patterns = []
+    if edge:
+        narrate("A Web + edge answer's **edge sections follow, on the web jobs**: the devices and their optional groups, "
+                "what each device runs with its server calls to the jobs it lists, the edge journeys, the deployments. "
+                "A server devices and people share is built once.",
+                lambda: {"edge_devices": len(spec.edge_devices), "edge_device_groups": len(spec.edge_device_groups),
+                         "edge_functions": len(spec.edge_functions), "edge_deployments": len(spec.edge_deployments)})
+        devices = {d.name: build_edge_device(d, resolutions) for d in spec.edge_devices}
+        build_edge_groups(spec, devices, resolutions)
+        functions = {f.name: build_edge_function(f, devices, jobs, resolutions) for f in spec.edge_functions}
+        edge_journeys = {j.name: EdgeUsageJourney(_label(j.name, resolutions),
+                                                  [_lookup(functions, n, "edge function") for n in j.functions])
+                         for j in spec.edge_journeys}
+        edge_patterns = [build_edge_deployment(dep, edge_journeys, shared, start, spans[dep.name], resolutions)
+                         for dep in spec.edge_deployments]
+    return System(_label(spec.system_name, resolutions), usage_patterns, edge_patterns), resolutions

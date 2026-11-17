@@ -24,26 +24,26 @@
      "comments": {"volume": "60 people x 10 sessions x about 21.7 working days"}}
   ],
   "edge_devices": [
-    {"name": "Station controller", "kind": "computer", "cores": 4, "ram_gb": 2, "storage_gb": 16, "power_w": 8,
-     "embodied_kg": 20, "lifespan_years": 8, "comments": {"power_w": "Embedded Linux board with a 4G modem"}}
+    {"name": "Station controller", "kind": "computer", "cores": 4, "ram_gb": 2, "storage_gb": 16, "power_w": 8, "idle_power_w": 4,
+     "base_ram_gb": 0.5, "base_storage_gb": 4, "embodied_kg": 20, "lifespan_years": 8,
+     "comments": {"power_w": "Embedded Linux board with a 4G modem", "idle_power_w": "The modem and the board between messages",
+                  "base_ram_gb": "Linux and the OCPP client", "base_storage_gb": "OS image plus a few weeks of session logs"}}
   ],
   "edge_functions": [
     {"name": "Report status and sessions", "device": "Station controller", "cpu_cores_avg": 0.1, "ram_gb_avg": 0.3,
-     "storage_gb_per_week": 0.01, "storage_retention_weeks": 4,
      "server_calls": [
-       {"job": "Receive heartbeat", "times_per_hour": 12, "comment": "One heartbeat every 5 minutes"},
-       {"job": "Write station status", "times_per_hour": 12},
-       {"job": "Receive session record", "times_per_hour": 0.33, "comment": "8 sessions a day"},
-       {"job": "Write session record", "times_per_hour": 0.33}],
-     "comments": {"storage_retention_weeks": "Last few weeks of session logs kept locally"}}
+       {"jobs": ["Receive heartbeat", "Write station status"], "times_per_hour": 12, "comment": "One heartbeat every 5 minutes, written to Postgres"},
+       {"jobs": ["Receive session record", "Write session record"], "times_per_hour": 0.33, "comment": "8 sessions a day, each written to Postgres"}]}
   ],
   "edge_journeys": [
     {"name": "Station operation", "functions": ["Report status and sessions"]}
   ],
   "edge_deployments": [
     {"name": "Stations in Germany", "journey": "Station operation", "country": "GERMANY", "network": "mobile",
-     "new_units": {"value": 80, "per": "month"}, "existing_units": 2700, "usage_span_years": 8},
+     "new_units": {"value": 75, "per": "month"}, "start_date": "2024-01-01", "usage_span_years": 8,
+     "comments": {"new_units": "2,700 stations in service by 2027 at 75 a month since January 2024, close to the 80 a month added today"}},
     {"name": "Stations in the Netherlands", "journey": "Station operation", "country": "NETHERLANDS", "network": "mobile",
-     "new_units": {"value": 0, "per": "month"}, "existing_units": 1500, "usage_span_years": 8}
+     "new_units": {"value": 42, "per": "month"}, "start_date": "2024-01-01", "usage_span_years": 8,
+     "comments": {"new_units": "1,500 stations in service by 2027 at 42 a month since January 2024; the rollout has stopped, which the format cannot say"}}
   ]
 }

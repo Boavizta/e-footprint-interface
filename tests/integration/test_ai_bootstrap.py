@@ -17,9 +17,10 @@ from model_builder.adapters.repositories import InMemorySystemRepository
 from model_builder.application.ai_bootstrap.service import build_answer
 from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from tests.declare import planned_test
+from tests.declare import titled
 
-ANSWER = Path(__file__).parents[2] / "ai_sandbox/cases/_handwritten_01_recipe_app.json"
+CASES = Path(__file__).parents[2] / "ai_sandbox/cases"
+ANSWER = CASES / "_handwritten_01_recipe_app.json"
 
 
 @pytest.fixture(autouse=True)
@@ -74,7 +75,19 @@ def test_offline_evaluation_and_replay_keep_reports_and_exports(tmp_path):
     assert completed.returncode == 0, completed.stderr
 
 
-@planned_test("ai-bootstrap-edge#edge-builder: the sandbox's Web + edge scope builds answers 03 and 04, counting "
-              "devices in service during the web year")
-def test_sandbox_evaluates_handwritten_edge_answers(tmp_path):
-    pass
+@titled("ai-bootstrap-edge#edge-builder: the sandbox's Web + edge scope builds answers 03 and 04, counting "
+        "devices in service during the web year")
+@pytest.mark.parametrize("answer, fleet", [
+    ("_handwritten_03_smart_building", {"gateway": 1500, "sensor": 60000}),  # 60 buildings a month since December 2024
+    ("_handwritten_04_ev_charging", {"controller": 4200}),  # 2,700 German and 1,500 Dutch stations since January 2024
+])
+def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, answer, fleet):
+    case = run.load_cases([answer[13:15]])[0]
+
+    result = run.evaluate(json.loads((CASES / f"{answer}.json").read_text()), case, tmp_path / f"{answer}.e-f.json",
+                          run.SCOPES["web_edge"])
+
+    assert all(result[k] for k in ("schema_ok", "build_ok", "compute_ok", "export_ok")), result
+    assert all(result["checks"].values()), result["checks"]
+    for word, stated in fleet.items():
+        assert sum(n for name, n in result["device_totals"].items() if word in name.lower()) == pytest.approx(stated, rel=0.05)

@@ -26,10 +26,13 @@
      "country": "FRANCE", "volume": {"value": 1500, "per": "month"}, "comments": {"volume": "One report per equipped building"}}
   ],
   "edge_devices": [
-    {"name": "Gateway", "kind": "computer", "cores": 4, "ram_gb": 4, "storage_gb": 32, "power_w": 6, "embodied_kg": 15,
-     "lifespan_years": 5, "comments": {"power_w": "Small ARM Linux board", "embodied_kg": "Single-board computer with case and power supply"}},
-    {"name": "Wireless sensor", "kind": "appliance", "power_w": 0.05, "embodied_kg": 1, "lifespan_years": 7,
-     "comments": {"power_w": "Battery-powered sensor reporting every minute"}}
+    {"name": "Gateway", "kind": "computer", "cores": 4, "ram_gb": 4, "storage_gb": 32, "power_w": 6, "idle_power_w": 3,
+     "base_ram_gb": 1, "base_storage_gb": 8, "embodied_kg": 15, "lifespan_years": 5,
+     "comments": {"power_w": "Small ARM Linux board", "idle_power_w": "Half the board's power when idle",
+                  "base_ram_gb": "Linux and the gateway software", "base_storage_gb": "OS image and the local telemetry buffer",
+                  "embodied_kg": "Single-board computer with case and power supply"}},
+    {"name": "Wireless sensor", "kind": "appliance", "power_w": 0.05, "idle_power_w": 0.02, "embodied_kg": 1, "lifespan_years": 7,
+     "comments": {"power_w": "Battery-powered sensor reporting every minute", "idle_power_w": "Radio asleep between readings"}}
   ],
   "edge_device_groups": [
     {"name": "Equipped building", "device_counts": {"Gateway": 1, "Wireless sensor": 40},
@@ -37,10 +40,8 @@
   ],
   "edge_functions": [
     {"name": "Aggregate and upload telemetry", "device": "Gateway", "cpu_cores_avg": 0.3, "ram_gb_avg": 1,
-     "storage_gb_per_week": 0.05, "storage_retention_weeks": 4,
-     "server_calls": [{"job": "Ingest telemetry batch", "times_per_hour": 6, "comment": "One batch every 10 minutes"},
-                      {"job": "Write telemetry", "times_per_hour": 6}],
-     "comments": {"storage_retention_weeks": "Local buffer in case the connection drops"}},
+     "server_calls": [{"jobs": ["Ingest telemetry batch", "Write telemetry"], "times_per_hour": 6,
+                       "comment": "One batch every 10 minutes, written to the time-series database"}]},
     {"name": "Sense every minute", "device": "Wireless sensor", "workload_fraction": 1}
   ],
   "edge_journeys": [
@@ -48,7 +49,7 @@
   ],
   "edge_deployments": [
     {"name": "Equipped buildings", "journey": "Building monitoring", "country": "FRANCE", "network": "mobile",
-     "new_units": {"value": 60, "per": "month"}, "existing_units": 1500, "usage_span_years": 5,
-     "comments": {"existing_units": "1,500 buildings already equipped", "new_units": "About 60 new buildings a month"}}
+     "new_units": {"value": 60, "per": "month"}, "start_date": "2024-12-01", "usage_span_years": 5,
+     "comments": {"new_units": "About 60 new buildings a month; 1,500 equipped by 2027 at that rate since December 2024"}}
   ]
 }

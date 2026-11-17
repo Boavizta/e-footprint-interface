@@ -28,14 +28,15 @@ def test_invalid_answers_fail_locally(answer):
         build_answer(answer, "web")
 
 
-# @planned ai-bootstrap-edge#edge-builder The edge sections join the table, built under the Web + edge scope.
-@pytest.mark.parametrize("section", ["servers", "genai_apis", "jobs", "journeys"])
+NAMED_SECTIONS = {"servers": {}, "genai_apis": {}, "jobs": {}, "journeys": {"steps": []}, "edge_devices": {},
+                  "edge_device_groups": {}, "edge_functions": {"device": "Same"}, "edge_journeys": {"functions": []}}
+
+
+@pytest.mark.parametrize("section", list(NAMED_SECTIONS))
 def test_duplicate_declarations_fail_before_construction(section):
-    obj = {"name": "Same"}
-    if section == "journeys":
-        obj["steps"] = []
+    obj = {"name": "Same", **NAMED_SECTIONS[section]}
     with pytest.raises(ValueError, match="Duplicate declaration"):
-        build_answer(json.dumps({"system_name": "X", section: [obj, obj]}), "web")
+        build_answer(json.dumps({"system_name": "X", section: [obj, obj]}), "web_edge" if "edge" in section else "web")
 
 
 def test_bad_reference_is_rejected():
@@ -103,7 +104,21 @@ def test_unknown_or_cyclic_sub_groups_refuse_the_answer(groups):
         build_edge_groups(spec, {d.name: build_edge_device(d, []) for d in spec.edge_devices}, [])
 
 
-@planned_test("ai-bootstrap-edge#deployments-over-time: a deployment's usage span is its stated one, else its devices' "
-              "shortest lifespan, six years at most")
+@titled("ai-bootstrap-edge#deployments-over-time: a deployment's usage span is its stated one, else its devices' "
+        "shortest lifespan, six years at most")
 def test_usage_span_defaults_to_the_shortest_lifespan():
-    pass
+    monthly = {"value": 1, "per": "month"}
+    answer = {"system_name": "X",
+              "edge_devices": [{"name": "Gateway", "lifespan_years": 5}, {"name": "Sensor", "kind": "appliance", "lifespan_years": 7},
+                               {"name": "Kiosk", "lifespan_years": 10}],
+              "edge_functions": [{"name": "Upload", "device": "Gateway"}, {"name": "Sense", "device": "Sensor"},
+                                 {"name": "Show", "device": "Kiosk"}],
+              "edge_journeys": [{"name": "Building", "functions": ["Upload", "Sense"]}, {"name": "Mall", "functions": ["Show"]}],
+              "edge_deployments": [{"name": "Buildings", "journey": "Building", "new_units": monthly},
+                                   {"name": "Malls", "journey": "Mall", "new_units": monthly},
+                                   {"name": "Stated", "journey": "Mall", "new_units": monthly, "usage_span_years": 8}]}
+
+    system = build_answer(json.dumps(answer), "web_edge").system
+
+    assert {p.name: p.usage_span.value.to(u.year).magnitude for p in system.edge_usage_patterns} == {
+        "Buildings": 5, "Malls": 6, "Stated": 8}
