@@ -27,9 +27,8 @@ def offline_boavizta(monkeypatch):
     monkeypatch.setenv("USE_BOAVIZTAPI_PACKAGE", "1")
 
 
-# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 def test_handwritten_answer_computes_roundtrips_and_remains_editable():
-    generated = build_answer(ANSWER.read_text())
+    generated = build_answer(ANSWER.read_text(), "web")
     system = generated.system
     assert system.total_footprint.sum().value.to(u.kg).magnitude > 0
     patterns = list(system.usage_patterns)

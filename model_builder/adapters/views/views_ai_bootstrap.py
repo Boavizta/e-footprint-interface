@@ -71,7 +71,7 @@ def generate_ai_bootstrap(request):
     if not description:
         return _input_response(request, workspace, description, "Describe your system before building your modeling.")
     try:
-        generated, completion = generate(description, complete_mistral)
+        generated, completion = generate(description, "web", complete_mistral)
     except ProviderError:
         return _input_response(request, workspace, description,
                                "The AI provider could not complete the request. You can try again.")

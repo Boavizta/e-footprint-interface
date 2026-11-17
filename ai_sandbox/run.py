@@ -7,8 +7,8 @@ Usage (from the interface repo root):
     poetry run python -m ai_sandbox.run --dry-run cases/_handwritten_01_recipe_app.json   # pipeline check without an LLM
     poetry run python -m ai_sandbox.run --scope web_edge --cases 03 04 --models zai-glm-5-3-flash --effort low
 
---scope picks the prompt and the builder: web (default) is the production bootstrap, web_edge the sandbox's
-edge_dsl.py on top of it. Without --cases, the cases of that scope run.
+--scope picks the prompt and the builder: web (default) is the production bootstrap, web_edge its Web + edge
+instructions and schema, built by the sandbox's edge_dsl_hw.py. Without --cases, the cases of that scope run.
 
 Each run writes ai_sandbox/runs/<timestamp>/<case>__<model>__r<rep>.json plus the exported model
 <...>.e-f.json when the build succeeds. summary.md, summary.html and runs/index.html are produced by report.py.
@@ -48,10 +48,16 @@ class Scope:
     build: object     # answer text -> GeneratedModel
 
 
+def _production(name: str, build) -> Scope:
+    """A production scope's instructions and schema, with the given builder."""
+    return Scope(service.system_prompt(name),
+                 lambda data: dsl.validate_tolerating_extras(data, service.SCOPES[name].schema), build)
+
+
 SCOPES = {
-    "web": Scope(service.system_prompt(), lambda data: dsl.validate_tolerating_extras(data, ModelSpec), service.build_answer),
-    "web_edge": Scope(edge_dsl.system_prompt(), edge_dsl.validate_tolerating_extras, edge_dsl.build_answer),
-    "web_edge_hw": Scope(edge_dsl_hw.system_prompt(), edge_dsl_hw.validate_tolerating_extras, edge_dsl_hw.build_answer),
+    "web": _production("web", lambda text: service.build_answer(text, "web")),
+    # The edge builder is still the sandbox's until production builds the edge sections.
+    "web_edge": _production("web_edge", edge_dsl_hw.build_answer),
 }
 DEVICE_TOTAL_TOLERANCE = 0.2  # "about 1,500 buildings", "around 40 sensors"
 

@@ -6,7 +6,6 @@ builders of `model_builder.application.ai_bootstrap.dsl`; this module adds the e
 """
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Literal, Optional
 
 import numpy as np
@@ -36,7 +35,6 @@ from model_builder.application.ai_bootstrap.dsl import (
     build_job, build_journey, build_server, build_usage_pattern, parse_json)
 from model_builder.application.ai_bootstrap.service import GeneratedModel
 
-PROMPT_PATH = Path(__file__).parent / "prompts" / "system_prompt_web_edge.md"
 DEFAULT_SPAN_YEARS = 6
 
 
@@ -99,10 +97,6 @@ class WebEdgeSpec(ModelSpec):
     edge_functions: list[EdgeFunctionSpec] = Field(default_factory=list)
     edge_journeys: list[EdgeJourneySpec] = Field(default_factory=list)
     edge_deployments: list[EdgeDeploymentSpec] = Field(default_factory=list)
-
-
-def system_prompt() -> str:
-    return PROMPT_PATH.read_text()
 
 
 def validate_tolerating_extras(data: dict) -> tuple[WebEdgeSpec, list[str]]:

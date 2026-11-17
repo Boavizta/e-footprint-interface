@@ -5,7 +5,6 @@ of edge_dsl.build_edge_device; an unstated one falls back to it. Everything else
 """
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Optional
 
 from pydantic import Field, ValidationError
@@ -29,8 +28,6 @@ from .edge_dsl import (
     EdgeDeviceSpec, WebEdgeSpec, _deployment_spans, _set, _storage_buffers, build_edge_deployment, build_edge_function,
     build_edge_groups)
 
-PROMPT_PATH = Path(__file__).parent / "prompts" / "system_prompt_web_edge_hw.md"
-
 
 class EdgeDeviceSpecHW(EdgeDeviceSpec):
     idle_power_w: Optional[float] = None
@@ -40,10 +37,6 @@ class EdgeDeviceSpecHW(EdgeDeviceSpec):
 
 class WebEdgeSpecHW(WebEdgeSpec):
     edge_devices: list[EdgeDeviceSpecHW] = Field(default_factory=list)
-
-
-def system_prompt() -> str:
-    return PROMPT_PATH.read_text()
 
 
 def validate_tolerating_extras(data: dict) -> tuple[WebEdgeSpecHW, list[str]]:

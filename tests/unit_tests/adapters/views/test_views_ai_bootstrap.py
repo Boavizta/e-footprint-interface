@@ -105,14 +105,13 @@ def test_reference_role_after_remove_and_readd_preserves_actual_sibling(client):
     assert SessionWorkspaceRepository(client.session).repository_for(1).get_system_data() == before
 
 
-# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 @pytest.mark.parametrize("slot", [0, 1])
 def test_generation_saves_once_preserves_sibling_and_has_transient_summary(client, provider, monkeypatch, slot):
     client.get("/model_builder/")
     client.post("/model_builder/add-model/", {"source": "blank"})
     # A generated System collision must use the same distinctification as ordinary imports.
     sibling = 1 - slot
-    seed(client, sibling, system_to_json(build_answer(ANSWER).system, save_computed_state=False),
+    seed(client, sibling, system_to_json(build_answer(ANSWER, "web").system, save_computed_state=False),
          {"sankey": {"sibling-setting": True}})
     client.post("/model_builder/switch-model/", {"slot": slot})
     client.post(START)
@@ -207,13 +206,12 @@ def test_estimator_failure_does_not_reject_saved_model(client, provider, monkeyp
     assert "Impact estimate unavailable" in response.content.decode()
 
 
-# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 @pytest.mark.parametrize("slot", [0, 1])
 def test_shared_budget_rejection_at_save_preserves_both_slots_and_settings(client, provider, monkeypatch, slot):
     client.get("/model_builder/")
     client.post("/model_builder/add-model/", {"source": "blank"})
     sibling = 1 - slot
-    raw = system_to_json(build_answer(ANSWER).system, save_computed_state=False)
+    raw = system_to_json(build_answer(ANSWER, "web").system, save_computed_state=False)
     seed(client, sibling, raw, {"sankey": {"sibling-setting": True}})
     client.post("/model_builder/switch-model/", {"slot": slot})
     client.post(START)
@@ -302,14 +300,13 @@ def test_unexpected_storage_failure_propagates(client, provider, monkeypatch, st
         client.post(GENERATE, {"description": "A recipe app"})
 
 
-# @planned ai-bootstrap-edge#scope-selects-format Passes the Web only scope to `build_answer`.
 def test_summary_shows_escaped_substitutions_and_ignored_fields(client, provider, monkeypatch):
     from model_builder.application.ai_bootstrap.catalogs import Resolution
     client.post(START)
-    generated = build_answer(ANSWER)
+    generated = build_answer(ANSWER, "web")
     generated.resolutions = [Resolution("cloud_instance", "<requested>", "<resolved>", "fallback")]
     generated.ignored_fields = ["<ignored>"]
-    monkeypatch.setattr(views, "generate", lambda description, complete: (generated, Completion(ANSWER)))
+    monkeypatch.setattr(views, "generate", lambda description, scope, complete: (generated, Completion(ANSWER)))
     response = client.post(GENERATE, {"description": "A recipe app"})
     body = response.content.decode()
     assert "&lt;requested&gt; → &lt;resolved&gt;" in body and "&lt;ignored&gt;" in body

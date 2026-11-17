@@ -6,10 +6,10 @@ Local experiment runner for the AI-assistance exploration described in
 
 `--scope` picks what is generated. `web` (the default) is the production bootstrap: usage journeys, servers, GenAI
 APIs, as if the interface's edge toggle were off. `web_edge` evaluates the Web + edge bootstrap of
-[`specs/features/ai-bootstrap-edge/`](../specs/features/ai-bootstrap-edge/) before production has it: its prompt is
-`prompts/system_prompt_web_edge.md` (the production web prompt plus the edge paradigm, format and field notes) and
-`edge_dsl.py` extends the production DSL with edge devices, optional device groups, edge functions and their server
-calls, edge journeys and edge deployments, built with the production web builders and the library's `from_defaults`.
+[`specs/features/ai-bootstrap-edge/`](../specs/features/ai-bootstrap-edge/): it reads the production Web + edge
+instructions (`system_prompt_web_edge.md`) and schema (`WebEdgeSpec`), and until production builds the edge sections,
+`edge_dsl_hw.py` (on `edge_dsl.py`) builds edge devices, optional device groups, edge functions and their server calls,
+edge journeys and edge deployments with the production web builders and the library's `from_defaults`.
 Cases carry their `scope` (03 and 04 are `web_edge`); without `--cases` a run takes the cases of its scope. Edge
 checks: an edge deployment exists, a device calls a server, a server is shared by web journeys and devices, a device
 group is used or not as the case expects, and the devices in service at the start match the case's totals within 20 %.
@@ -23,7 +23,7 @@ shared application package, is `18d2659eca43eb8beb1baf81a30cd301c524b138`. Inspe
 
 ## How it works
 
-1. `model_builder/application/ai_bootstrap/` owns the shared `system_prompt.md`, `dsl.py` schema/builders and
+1. `model_builder/application/ai_bootstrap/` owns the prompts of each scope (`system_prompt.md`, `system_prompt_web_edge.md`), `dsl.py` schemas/builders and
    `catalogs.py` resolvers. Its `service.py` entry point parses and validates answers and constructs a real `System`
    with `from_defaults`; omitted values use library defaults. Production generation and the offline/development
    evaluator share that service.
