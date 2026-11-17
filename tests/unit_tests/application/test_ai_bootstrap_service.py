@@ -4,8 +4,11 @@ from unittest.mock import Mock
 import pytest
 from pydantic import ValidationError
 
+from efootprint.constants.units import u
+
+from model_builder.application.ai_bootstrap.dsl import EdgeDeviceSpec, build_edge_device
 from model_builder.application.ai_bootstrap.service import Completion, build_answer, generate
-from tests.declare import planned_test
+from tests.declare import planned_test, titled
 
 
 def test_generate_calls_once_and_reports_ignored_wrapped_fields():
@@ -50,10 +53,23 @@ def test_generate_does_not_retry_invalid_answer():
 
 # The answers of the narrative cases state all three values; the derivation is the sandbox's, kept for an answer that
 # omits one.
-@planned_test("ai-bootstrap-edge#edge-device-sizing: an omitted idle power, reserved RAM or reserved storage is "
-              "derived from the device's stated power and RAM")
+@titled("ai-bootstrap-edge#edge-device-sizing: an omitted idle power, reserved RAM or reserved storage is "
+        "derived from the device's stated power and RAM")
 def test_omitted_device_reserves_are_derived():
-    pass
+    gateway = build_edge_device(EdgeDeviceSpec(name="Gateway", power_w=6, ram_gb=2, storage_gb=32), [])
+    sensor = build_edge_device(EdgeDeviceSpec(name="Sensor", kind="appliance", power_w=0.05), [])
+    stated = build_edge_device(EdgeDeviceSpec(name="Stated", power_w=6, idle_power_w=3, ram_gb=2, base_ram_gb=1,
+                                              storage_gb=32, base_storage_gb=10), [])
+    unstated = build_edge_device(EdgeDeviceSpec(name="Unstated"), [])
+
+    assert gateway.idle_power.value == 5 * u.W  # the library default, below the stated power
+    assert gateway.base_ram_consumption.value == 0.5 * u.GB_ram
+    assert gateway.storage.base_storage_need.value == 8 * u.GB_stored
+    assert sensor.idle_power.value == 0.05 * u.W
+    assert (stated.idle_power.value, stated.base_ram_consumption.value, stated.storage.base_storage_need.value) == (
+        3 * u.W, 1 * u.GB_ram, 10 * u.GB_stored)
+    assert (unstated.idle_power.value, unstated.base_ram_consumption.value) == (5 * u.W, 1 * u.GB_ram)
+    assert unstated.storage.base_storage_need.value == 30 * u.GB_stored
 
 
 @planned_test("ai-bootstrap-edge#device-groups: a group of sub-groups is built after them, and a device counts once per "

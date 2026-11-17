@@ -17,11 +17,14 @@ from efootprint.abstract_modeling_classes.source_objects import SourceObject, So
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
     EcoLogitsGenAIExternalAPI, EcoLogitsGenAIExternalAPIJob)
 from efootprint.builders.hardware.boavizta_cloud_server import BoaviztaCloudServer
+from efootprint.builders.hardware.edge.edge_appliance import EdgeAppliance
+from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.timeseries import ExplainableHourlyQuantitiesFromFormInputs
 from efootprint.constants.countries import Countries
 from efootprint.constants.sources import Sources
 from efootprint.constants.units import u
 from efootprint.core.hardware.device import Device
+from efootprint.core.hardware.edge.edge_storage import EdgeStorage
 from efootprint.core.hardware.gpu_server import GPUServer
 from efootprint.core.hardware.network import Network
 from efootprint.core.hardware.server_base import ServerBase
@@ -246,6 +249,12 @@ JOB_FIELDS = {"data_transferred_kb": ("data_transferred", u.kB), "data_stored_kb
               "output_tokens": ("output_token_count", u.dimensionless)}
 STEP_FIELDS = {"user_time_spent_min": ("user_time_spent", u.min)}
 SERVER_JOB_FIELDS = ("data_transferred_kb", "data_stored_kb", "request_duration_s", "ram_mb")  # + cpu_cores or gpus
+EDGE_DEVICE_FIELDS = {"power_w": ("power", u.W), "idle_power_w": ("idle_power", u.W),
+                      "embodied_kg": ("carbon_footprint_manufacturing", u.kg), "lifespan_years": ("lifespan", u.year),
+                      "cores": ("compute", u.cpu_core), "ram_gb": ("ram", u.GB_ram),
+                      "base_ram_gb": ("base_ram_consumption", u.GB_ram)}  # the last three: computers only
+EDGE_STORAGE_FIELDS = {"storage_gb": ("storage_capacity_per_unit", u.GB_stored),
+                       "base_storage_gb": ("base_storage_need", u.GB_stored)}  # on computer.storage
 
 
 def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
@@ -426,10 +435,35 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared,
     return pattern
 
 
-def build_edge_device(d: "EdgeDeviceSpec", resolutions: list[Resolution]):
+def _reserve(kwargs: dict, attr: str, stated, capacity, share: float, cls, comment: str):
+    """A reserve the answer omits is the library default, at most `share` of the stated capacity: the default idle
+    power (5 W) exceeds a sensor's whole power, the default base RAM (1 GB) all of a small gateway's, the default
+    base storage (30 GB) a gateway's flash. Without a stated capacity the library default stands."""
+    if stated is None and capacity is not None:
+        default = cls.default_values[attr].value
+        kwargs[attr] = SourceValue(min(default, capacity * share * default.units), comment=comment)
+
+
+def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
     """A gateway, sensor or controller, built from the hardware and the reserved resources the answer states."""
-    planned("ai-bootstrap-edge#edge-device-sizing", "The device takes the answer's hardware, idle power, reserved RAM and reserved storage, deriving from its hardware any the answer omits.")
-    raise NotImplementedError("planned: ai-bootstrap-edge#edge-device-sizing")
+    c = _Comments(d, resolutions)
+    name = _label(d.name, resolutions)
+    cls = EdgeAppliance if d.kind == "appliance" else EdgeComputer
+    kwargs = {}
+    _apply_fields(kwargs, c, EDGE_DEVICE_FIELDS, ("power_w", "idle_power_w", "embodied_kg", "lifespan_years"))
+    _reserve(kwargs, "idle_power", d.idle_power_w, d.power_w, 1, cls, "At most the device's power")
+    if cls is EdgeComputer:
+        storage_kwargs = {}
+        _apply_fields(storage_kwargs, c, EDGE_STORAGE_FIELDS)
+        _reserve(storage_kwargs, "base_storage_need", d.base_storage_gb, d.storage_gb, 0.25, EdgeStorage,
+                 "A quarter of the device's storage at most")
+        kwargs["storage"] = EdgeStorage.from_defaults(f"{name} storage", **storage_kwargs)
+        _apply_fields(kwargs, c, EDGE_DEVICE_FIELDS, ("cores", "ram_gb", "base_ram_gb"))
+        _reserve(kwargs, "base_ram_consumption", d.base_ram_gb, d.ram_gb, 0.25, cls,
+                 "A quarter of the device's RAM at most")
+    device = cls.from_defaults(name, **kwargs)
+    c.close()
+    return device
 
 
 def build_edge_groups(spec: "WebEdgeSpec", devices: dict, resolutions: list[Resolution]) -> dict:
