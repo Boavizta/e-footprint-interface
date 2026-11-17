@@ -36,3 +36,15 @@
   capacity checks on gateways and sensors; the sandbox builder caps them and fits a rolling storage
   buffer, and defaults the usage span to the shortest device lifespan (6 years at most).
 - The Web + edge prompt is 8,570 characters against 5,157 for Web only.
+- Web + edge, 2026-11-17 (cases 03 and 04, 3 repetitions, no retry): low 5/6 built on the first
+  try, 8–27 s, about USD 0.0013 a call; high 6/6 built, 19–42 s, about USD 0.0021 a call. Checks:
+  low missed the monthly report journey once (03) and the shared server once (04); high passed 03
+  three times and missed the shared server on 04 three times. High buys no clear gain here either.
+- What failed was the format and the prompt, not the effort. The schema refused an answer whose
+  deployment stated an installed base and no growth: the number added per period must be optional,
+  zero by default. On case 04 the stations' server call reached the OCPP backend but not the
+  database write behind it, so devices and the dashboard shared no server: the prompt must say that
+  a server call lists every job it triggers, the database write included.
+- Case 03's computed totals vary eightfold between repetitions (0.25 to 2.0 kt CO2-eq) with all
+  checks passing: device-footprint assumptions are the next thing to inspect in the reports, after
+  the library fix of server-call volumes.
