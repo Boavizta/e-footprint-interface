@@ -176,6 +176,10 @@
                     "initial_volume": null,
                     "initial_volume_timespan": "month"
                 },
+                "duration_limits": {
+                    "month": 240,
+                    "year": 20
+                },
                 "subfields_ui_config": {
                     "initial_volume": {
                         "label": "Initial number of edge devices put in service",
