@@ -4,10 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.15.0] - 2026-11-17
 
 ### Added
 - AI-assisted bootstrap (Beta) creates a fresh, editable modeling from a description and shows a temporary review summary when enabled by the server configuration.
+
+### Changed
+- Button configuration in the toolbar.
 
 ## [V1.14.1]
 
