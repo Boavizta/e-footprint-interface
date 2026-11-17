@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey — Start a modeling with AI (Beta)</title>
+<style>
+  /* ============================================================================
+     SHARED CSS TOOLKIT — copy this whole <style> block verbatim into a new
+     journey (see ../journey-authoring.md). Palette mirrors the deployed app:
+     navy --primary #2D4675, light-primary #e8eaf4, edge accent #7B5DC7,
+     Tailwind-ish grays. Mock unit is a desktop BROWSER WINDOW (.win), not a phone.
+     ============================================================================ */
+  :root { --ink:#111928; --muted:#4B5563; --faint:#6B7280; --line:#E5E7EB; --bg:#F9FAFB; --card:#fff;
+          --primary:#2D4675; --primary-700:#22345a; --lp:#e8eaf4; --newlight:#F4FAFB;
+          --g50:#F9FAFB; --g100:#F3F4F6; --g200:#E5E7EB; --g300:#D1D5DB; --g350:#9CA3AF; --g400:#6B7280; --g500:#4B5563;
+          --edge:#7B5DC7; --edge-bg:#f3effb; --edge-line:#e0d7f3;
+          --danger:#dc2626; --danger-bg:#fef2f2; --ok:#15803d; --ok-bg:#ecfdf3; --amber-bg:#fffbeb; --amber:#92400e;
+          --accent:var(--primary); }
+  * { box-sizing: border-box; }
+  body { font-family: "Inter", system-ui, -apple-system, sans-serif; line-height: 1.6; color: var(--ink);
+         background: var(--bg); margin: 0 auto; max-width: 70rem; padding: 2.2rem 1.25rem 5rem; }
+  a { color: var(--primary); text-decoration: none; } a:hover { text-decoration: underline; }
+  .crumb { color: var(--faint); font-size: .85rem; margin: 0 0 1.2rem; }
+  .crumb a { color: var(--accent); }
+  h1 { font-size: 1.9rem; margin: 0 0 .3rem; display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .role { font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+          padding: .16rem .5rem; border-radius: 999px; background: var(--lp); color: var(--primary); }
+  .role.edge { background: var(--edge-bg); color: var(--edge); }
+  .lede { color: var(--muted); } .lede b { color: var(--ink); }
+  .note { color: var(--faint); font-size: .85rem; margin: .6rem 0 0; }
+  .note code, .lede code { background: var(--g100); padding: .08rem .3rem; border-radius: 4px; font-size: .85em; }
+
+  /* phase dividers */
+  .phase { display: flex; align-items: center; gap: .8rem; margin: 2.6rem 0 .4rem; }
+  .phase h2 { font-size: 1.05rem; margin: 0; }
+  .phase .tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .16rem .55rem; border-radius: 6px; }
+  .phase.alt .tag { background: var(--faint); }
+  .phase .conn { font-size: .78rem; color: var(--faint); }
+  .phase .rule { flex: 1; height: 1px; background: var(--line); }
+
+  /* the per-screen blended unit: mock on the left, narrative + states on the right */
+  .screen { display: flex; gap: clamp(1.2rem, 3vw, 2.4rem); align-items: flex-start;
+            padding: 1.7rem 0; border-bottom: 1px dashed var(--line); }
+  .screen:last-of-type { border-bottom: none; }
+  .mock-col { flex: 0 0 430px; }
+  .info-col { flex: 1 1 auto; min-width: 16rem; }
+  .step { display: flex; align-items: baseline; gap: .55rem; margin: 0 0 .3rem; }
+  .step .n { width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--accent); color: #fff;
+        font-size: .78rem; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+  .step .n.alt { background: var(--faint); }
+  .step h3 { font-size: 1.12rem; margin: 0; }
+  .info-col p { margin: .45rem 0 .8rem; }
+  .states { display: grid; gap: .5rem; }
+  .state { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+  .state .k { flex: 0 0 9.5rem; font-weight: 600; font-size: .76rem; text-transform: uppercase;
+        letter-spacing: .03em; color: var(--accent); padding-top: .05rem; }
+  .state .v { color: var(--muted); } .state .v b { color: var(--ink); }
+  .state.variant .k { color: var(--edge); }
+  .state.deferred .k { color: var(--faint); }
+
+  .mock-help { width: 430px; margin-top: .7rem; font-size: .74rem; line-height: 1.45; color: var(--muted);
+        background: #fff; border: 1px solid var(--line); border-left: 3px solid var(--accent);
+        border-radius: 8px; padding: .5rem .65rem; }
+  .mock-help.edge { border-left-color: var(--edge); }
+  .mock-help .lbl { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: .15rem; }
+  .mock-help.edge .lbl { color: var(--edge); }
+  .mock-help b { color: var(--ink); }
+
+  /* ---------- browser-window mock (app-faithful) ---------- */
+  .win { width: 430px; border: 1px solid var(--g300); border-radius: 12px; overflow: hidden;
+         background: var(--bg); box-shadow: 0 6px 22px rgba(17,25,40,.10); }
+  .win .titlebar { background: #eceef3; border-bottom: 1px solid var(--g300); padding: .4rem .6rem;
+         display: flex; align-items: center; gap: .45rem; }
+  .win .dots { display: flex; gap: .28rem; } .win .dots i { width: .55rem; height: .55rem; border-radius: 50%; background: #cfd3da; display: block; }
+  .win .url { flex: 1; background: #fff; border: 1px solid var(--g300); border-radius: 6px; font-size: .62rem;
+         color: var(--faint); padding: .1rem .5rem; }
+
+  /* app chrome: model tab strip + per-model toolbar */
+  .appbar { background: #fff; border-bottom: 1px solid var(--line); padding: .4rem .55rem;
+            display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .tabs { display: flex; align-items: flex-end; gap: .25rem; }
+  .tab { font-size: .66rem; padding: .26rem .55rem; border: 1px solid var(--line); border-bottom: none;
+         border-radius: 7px 7px 0 0; color: var(--faint); background: var(--g100); white-space: nowrap; }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; border-color: var(--g300); }
+  .tab.add, .tab.compare { background: transparent; border: none; color: var(--primary); }
+  .tab.compare.disabled { color: var(--g350); }
+  .toolbar { display: flex; align-items: center; gap: .3rem; }
+  .tbtn { width: 1.45rem; height: 1.45rem; border: 1px solid var(--g300); border-radius: 6px; background: #fff;
+          display: grid; place-items: center; font-size: .68rem; color: var(--muted); }
+  .edgetoggle { display: flex; align-items: center; gap: .3rem; font-size: .6rem; color: var(--edge);
+          border: 1px solid var(--edge-line); background: var(--edge-bg); border-radius: 999px; padding: .08rem .4rem; }
+  .edgetoggle .sw { width: 1.3rem; height: .72rem; border-radius: 999px; background: #d8cdf0; position: relative; }
+  .edgetoggle .sw i { position: absolute; top: .08rem; left: .1rem; width: .56rem; height: .56rem; border-radius: 50%; background: #fff; }
+  .edgetoggle.on .sw { background: var(--edge); } .edgetoggle.on .sw i { left: auto; right: .1rem; }
+
+  /* the workspace stage (canvas, with a right-docked side panel when open) */
+  .stage { position: relative; }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; padding: .5rem; min-height: 300px; }
+  .canvas.dim { filter: saturate(.55); opacity: .45; }
+  .col { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: .6rem .55rem .5rem; }
+  .col h5 { font-size: .76rem; margin: 0 0 .5rem; } .col h5 b { color: var(--ink); }
+  .col.edgecol { background: var(--edge-bg); border-color: var(--edge-line); }
+
+  .addbtn { display: flex; align-items: center; gap: .4rem; width: 100%; background: #fff;
+            border: 2px dotted var(--g350); border-radius: 8px; padding: .32rem .45rem; font-size: .66rem;
+            color: var(--primary); margin-bottom: .3rem; }
+  .addbtn .plus { font-weight: 700; } .addbtn .q { margin-left: auto; color: var(--g350); border: 1px solid var(--g300);
+            border-radius: 50%; width: .9rem; height: .9rem; display: grid; place-items: center; font-size: .58rem; flex: 0 0 auto; }
+  .addbtn.locked { color: var(--g400); border-color: var(--g300); background: var(--g50); }
+  .addbtn.edge { color: var(--edge); border-color: var(--edge-line); }
+  .lock-tip { font-size: .58rem; color: var(--faint); background: var(--g100); border-radius: 6px;
+            padding: .2rem .4rem; margin: -.15rem 0 .35rem; border-left: 2px solid var(--g350); }
+
+  .ocard { display: flex; align-items: center; gap: .4rem; background: #fff; border: 1px solid var(--line);
+           border-radius: 8px; padding: .35rem .45rem; font-size: .68rem; margin-bottom: .3rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ocard .ic { width: 1.05rem; height: 1.05rem; border-radius: 5px; background: var(--lp); display: grid;
+           place-items: center; font-size: .58rem; color: var(--primary); flex: 0 0 auto; }
+  .ocard .ic.edge { background: #e7defa; color: var(--edge); }
+  .ocard .pencil { margin-left: auto; color: var(--g350); font-size: .62rem; }
+  .ocard.opened { border-color: var(--primary); box-shadow: 0 0 0 2px var(--lp); }
+  .ocard.fresh { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok-bg); }
+
+  /* right-docked side panel (forms for add / edit) */
+  .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: #fff;
+           border-left: 1px solid var(--g300); box-shadow: -10px 0 26px rgba(0,0,0,.10); padding: .7rem .75rem; overflow: auto; }
+  .phead { display: flex; align-items: center; justify-content: space-between; gap: .4rem; margin-bottom: .55rem; }
+  .phead b { font-size: .82rem; } .phead .x { color: var(--faint); cursor: default; }
+  .phead .trash { border: 2px solid var(--g200); border-radius: 6px; padding: .12rem .3rem; color: var(--muted); font-size: .66rem; margin-left: auto; }
+  .field { margin-bottom: .45rem; }
+  .field label { display: block; font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .12rem; }
+  .field .inp { display: block; width: 100%; border: 1px solid var(--g300); border-radius: 7px; padding: .28rem .45rem; font-size: .7rem; color: var(--ink); background: #fff; }
+  .field.qty .row { display: flex; gap: .3rem; align-items: center; } .field.qty .inp { flex: 1 1 auto; } .field.qty .unit { flex: 0 0 4.5rem; text-align: center; color: var(--muted); }
+  .accsec { border: 1px solid var(--line); border-radius: 8px; margin-bottom: .4rem; }
+  .accsec > .h { padding: .35rem .5rem; font-size: .66rem; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; }
+  .accsec > .b { padding: 0 .5rem .45rem; }
+  .advtoggle { font-size: .64rem; color: var(--primary); margin: .15rem 0 .45rem; }
+  .helptxt { font-size: .64rem; color: var(--faint); margin: .15rem 0 .4rem; }
+  .savebtn { display: block; width: 100%; text-align: center; background: var(--primary); color: #fff; border: none;
+             border-radius: 999px; padding: .42rem; font-weight: 600; font-size: .72rem; margin-top: .5rem; }
+  .dictsec { background: var(--g50); border: 1px solid var(--line); border-radius: 8px; padding: .4rem .5rem; font-size: .64rem; color: var(--muted); margin-bottom: .45rem; }
+  .dictsec .row { display: flex; align-items: center; gap: .4rem; margin-top: .25rem; }
+  .dictsec .cnt { width: 2.3rem; border: 1px solid var(--g300); border-radius: 5px; padding: .05rem .25rem; text-align: center; font-size: .64rem; }
+  .calcsec { border: 1px solid var(--line); border-radius: 8px; padding: .35rem .5rem; font-size: .64rem; color: var(--faint); }
+
+  /* delete / can't-delete dialog */
+  .modal-mock { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 12px; width: 70%; padding: 1rem .9rem; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+  .dialog .warn { font-size: 1.5rem; } .dialog .msg { font-size: .78rem; color: var(--ink); margin: .35rem 0 .15rem; }
+  .dialog .sub { font-size: .66rem; color: var(--faint); }
+  .dialog .acts { display: flex; gap: .45rem; justify-content: center; margin-top: .65rem; }
+  .dialog .acts button { border-radius: 7px; padding: .35rem .8rem; font-size: .7rem; font-weight: 600; border: 1px solid transparent; }
+  .dialog .acts .del { background: var(--danger); color: #fff; } .dialog .acts .back { background: #fff; border-color: var(--g300); color: var(--ink); font-weight: 400; }
+  .dialog .acts .ok { background: var(--primary); color: #fff; border-radius: 999px; padding: .35rem 1.1rem; }
+
+  /* bottom results bar */
+  .resultsbar { background: #fff; border-top: 1px solid var(--line); padding: .35rem .6rem; display: flex; align-items: center; gap: .45rem; }
+  .resultsbar .rb { font-weight: 600; font-size: .74rem; color: var(--ink); } .resultsbar .chev { margin-left: auto; color: var(--muted); }
+  .resultsbar.locked { opacity: .5; }
+
+  /* transient toast */
+  .toast-mock { position: absolute; bottom: .6rem; left: 50%; transform: translateX(-50%); background: var(--ink);
+            color: #fff; border-radius: 8px; padding: .3rem .65rem; font-size: .64rem; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+  /* relationship widgets (list link / weighted dict / nested edge group) — shared UX */
+  .cmp { display: flex; gap: 1.1rem; flex-wrap: wrap; margin: .5rem 0 1.1rem; }
+  .cmp > .cmpcol { flex: 1 1 320px; min-width: 18rem; }
+  .cmp .cmpcol .mock-help { width: auto; margin-top: .6rem; }
+  .cmp .ttl { font-size: .82rem; font-weight: 600; margin: 0 0 .4rem; } .cmp .ttl .kind { color: var(--faint); font-weight: 400; }
+  .pcard { background: #fff; border: 1px solid var(--g300); border-radius: 12px; padding: .65rem .7rem; box-shadow: 0 4px 14px rgba(17,25,40,.06); }
+  .pcard .phead { margin-bottom: .45rem; } .pcard .phead b { font-size: .76rem; }
+  .flabel { font-size: .6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+  .flabel .w { color: var(--edge); } .flabel .w.web { color: var(--primary); }
+  .hint { font-size: .58rem; color: var(--faint); margin: .1rem 0 .25rem; }
+  .selrow { display: flex; gap: .35rem; } .selrow .inp { flex: 1 1 auto; }
+  .plus-btn { flex: 0 0 auto; border: 1px solid var(--g400); border-radius: 6px; width: 1.55rem; display: grid; place-items: center; color: var(--primary); font-weight: 700; font-size: .8rem; }
+  .btn-mini { flex: 0 0 auto; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-weight: 600; font-size: .64rem; padding: .28rem .6rem; }
+  .dicttable { background: var(--g50); border: 1px solid var(--line); border-radius: 7px; padding: .25rem .3rem; margin-bottom: .25rem; }
+  .drow { display: flex; align-items: center; gap: .4rem; font-size: .64rem; padding: .2rem .15rem; }
+  .drow + .drow { border-top: 1px dashed var(--g200); }
+  .drow .nm { flex: 1 1 auto; }
+  .drow .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; flex: 0 0 auto; }
+  .drow .sort { color: var(--g350); font-size: .6rem; letter-spacing: -.08em; flex: 0 0 auto; }
+  .drow .rm { color: var(--g400); font-size: .82rem; line-height: 1; flex: 0 0 auto; }
+  .drow.sub { padding-left: .9rem; } .drow.sub .nm::before { content: "↳ "; color: var(--edge); }
+  /* inline weight edit on the canvas (× n on nested step / job / device cards) */
+  .ocard.nested { margin-left: .9rem; }
+  .icnt { margin-left: auto; display: flex; align-items: center; gap: .25rem; flex: 0 0 auto; }
+  .icnt .mult { color: var(--primary); font-weight: 700; }
+  .icnt .cnt { width: 2.4rem; border: 1px solid var(--g300); border-radius: 5px; padding: .04rem .2rem; text-align: center; font-size: .62rem; }
+  .icnt .rm { color: var(--g400); font-size: .82rem; line-height: 1; }
+  /* real dropdowns (unit / type / object pickers) */
+  select.dd { font: inherit; font-size: .7rem; color: var(--ink); background-color: #fff; border: 1px solid var(--g300);
+        border-radius: 7px; padding: .26rem 1.15rem .26rem .45rem; max-width: 100%;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right .42rem center; background-size: .5rem; }
+  .field > select.dd { display: block; width: 100%; }
+  .field.qty select.dd.unit { flex: 0 0 5.5rem; }
+  .selrow select.dd { flex: 1 1 auto; min-width: 0; }
+  .designnote { background: var(--amber-bg); border: 1px solid #fde68a; border-left: 3px solid #d97706;
+        border-radius: 8px; padding: .55rem .75rem; font-size: .88rem; color: var(--muted); margin: 1.1rem 0; max-width: 54rem; }
+  .designnote b.h { color: var(--amber); } .designnote ul { margin: .3rem 0 0; padding-left: 1.1rem; } .designnote li { margin: .18rem 0; }
+  .designnote code { background: #fef3c7; }
+
+  /* collapsible folds */
+  details.fold { border: 1px solid var(--line); border-radius: 12px; background: #fff; margin: 1.6rem 0; }
+  details.fold > summary { cursor: pointer; list-style: none; padding: .75rem 1rem; font-weight: 600;
+        display: flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .96rem; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::before { content: '▸'; color: var(--accent); font-size: .72rem; }
+  details.fold[open] > summary::before { content: '▾'; }
+  details.fold > summary .s-tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+        color: #fff; background: var(--accent); padding: .12rem .45rem; border-radius: 5px; }
+  details.fold > summary .s-tag.alt { background: var(--faint); }
+  details.fold > summary .s-tag.danger { background: var(--danger); }
+  details.fold > summary .s-sub { font-weight: 400; color: var(--faint); font-size: .82rem; }
+  details.fold > .fold-body { padding: 0 1.2rem 1.2rem; }
+  details.fold.zoomfold[open] { width: min(94vw, 76rem); margin-left: calc(50% - min(47vw, 38rem)); }
+  details.fold > .fold-body .screen { border-bottom: none; padding: .5rem 0 0; }
+
+  /* low-emphasis "for agents" pointer fold — code-level detail kept out of the way */
+  details.ptr { border: 1px dashed var(--g300); border-radius: 8px; background: var(--g50); margin: 1.4rem 0; }
+  details.ptr > summary { cursor: pointer; list-style: none; padding: .55rem .85rem; font-size: .82rem;
+        font-weight: 600; color: var(--faint); display: flex; align-items: center; gap: .5rem; }
+  details.ptr > summary::-webkit-details-marker { display: none; }
+  details.ptr > summary::before { content: '⌗'; color: var(--g350); }
+  details.ptr > summary .a-tag { font-size: .58rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+        color: var(--g400); background: var(--g200); padding: .08rem .4rem; border-radius: 5px; }
+  details.ptr[open] > summary { color: var(--muted); }
+  details.ptr .pbody { padding: 0 .85rem .85rem; font-size: .82rem; color: var(--muted); }
+  details.ptr .pbody code { background: var(--g100); padding: .04rem .28rem; border-radius: 3px; font-size: .9em; }
+  details.ptr .pbody dt { font-weight: 700; color: var(--ink); font-size: .76rem; margin-top: .7rem; }
+  details.ptr .pbody dd { margin: .15rem 0 0; line-height: 1.55; }
+  details.ptr .pbody table { font-size: .78rem; margin-top: .5rem; }
+
+  h2.sec { font-size: 1rem; text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+           margin: 2.8rem 0 .8rem; font-weight: 600; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: var(--g100); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  td b { color: var(--ink); } td code { background: var(--g100); padding: .05rem .25rem; border-radius: 3px; font-size: .85em; }
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem; }
+  footer a { color: var(--accent); }
+
+  /* ---- ai-bootstrap only: toolbar row, Modeling actions menu, native confirm, the two AI panels ---- */
+  .role.beta { background: var(--amber-bg); color: var(--amber); }
+  .toolrow { background: #fff; border-bottom: 1px solid var(--line); padding: .3rem .55rem; display: flex; align-items: center; gap: .45rem; }
+  .toolrow .sysname { font-size: .68rem; font-weight: 600; color: var(--ink); margin-right: auto; white-space: nowrap; }
+  .vtoggle { display: flex; }
+  .vtoggle span { font-size: .52rem; border: 1px solid var(--primary); color: var(--primary); padding: .05rem .32rem; background: #fff; }
+  .vtoggle span:first-child { border-radius: 5px 0 0 5px; } .vtoggle span:last-child { border-radius: 0 5px 5px 0; border-left: none; }
+  .vtoggle span.on { background: var(--primary); color: #fff; }
+  .actbtn { font-size: .56rem; color: var(--primary); white-space: nowrap; }
+  .actbtn.open { color: var(--ink); font-weight: 600; }
+  .locked-ui { opacity: .45; }
+  .badge-beta { font-size: .46rem; border: 1px solid var(--g300); border-radius: 4px; padding: 0 .25rem; color: var(--muted); background: var(--g50); margin-left: .2rem; }
+  /* dropdown menu (same shape as save-and-load's) */
+  .menu { position: absolute; z-index: 6; background: #fff; border: 1px solid var(--g300); border-radius: 9px;
+          box-shadow: 0 10px 26px rgba(17,25,40,.16); padding: .3rem; width: 10.5rem; }
+  .menu .mi { display: flex; align-items: center; gap: .4rem; font-size: .64rem; color: var(--ink); padding: .3rem .45rem; border-radius: 6px; }
+  .menu .mi + .mi { border-top: 1px solid var(--g100); }
+  .menu .mi.hl { background: var(--lp); }
+  .menu .mi .g { width: 1rem; text-align: center; color: var(--primary); flex: 0 0 auto; }
+  /* the browser's own confirm() dialog */
+  .nconfirm { background: #fff; border-radius: 10px; width: 82%; padding: .7rem .8rem; text-align: left; box-shadow: 0 14px 34px rgba(0,0,0,.25); align-self: start; margin-top: .4rem; }
+  .nconfirm .origin { font-size: .62rem; font-weight: 700; color: var(--ink); margin-bottom: .25rem; }
+  .nconfirm .msg { font-size: .58rem; color: var(--muted); line-height: 1.45; margin: 0; }
+  .nconfirm .acts { display: flex; justify-content: flex-end; gap: .35rem; margin-top: .55rem; }
+  .nconfirm .acts span { font-size: .56rem; border-radius: 6px; padding: .18rem .6rem; border: 1px solid var(--g300); color: var(--ink); background: #fff; }
+  .nconfirm .acts span.okb { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+  /* AI panel content */
+  .ptext { font-size: .54rem; color: var(--muted); line-height: 1.45; margin: 0 0 .32rem; }
+  .ptext b { color: var(--ink); }
+  .ptext.sm { font-size: .48rem; color: var(--faint); }
+  .ftitle { font-size: .58rem; color: var(--ink); margin: .3rem 0 .15rem; }
+  .tarea { border: 1px solid var(--g300); border-radius: 7px; background: #fff; font-size: .54rem; color: var(--ink);
+           padding: .3rem .4rem; min-height: 4.6rem; line-height: 1.45; }
+  .tarea.empty { color: var(--g350); }
+  .tarea.off { background: var(--g100); color: var(--faint); }
+  .errtxt { color: var(--danger); font-size: .56rem; margin: .25rem 0 .25rem; }
+  .savebtn.off { opacity: .5; }
+  .ph6 { font-size: .58rem; font-weight: 700; color: var(--ink); margin: .4rem 0 .12rem; }
+  .plist { font-size: .52rem; color: var(--muted); margin: 0 0 .3rem; padding-left: 1rem; line-height: 1.45; }
+  .plist b { color: var(--ink); }
+  .pdl { margin: .3rem 0; } .pdl dt { font-size: .52rem; font-weight: 700; color: var(--ink); }
+  .pdl dd { margin: 0 0 .22rem; font-size: .52rem; color: var(--muted); line-height: 1.4; }
+  .pdisc { font-size: .54rem; color: var(--primary); border-top: 1px solid var(--g100); padding-top: .25rem; margin: .3rem 0; }
+  .pdisc::before { content: '▸ '; }
+  /* example picker overlay (same shape as onboarding's) */
+  .picker { position: absolute; inset: 0; background: rgba(17,25,40,.35); display: flex; align-items: flex-start; justify-content: center; padding: .6rem; overflow: auto; }
+  .pwrap { background: #fff; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.25); width: 100%; padding: .7rem .75rem; }
+  .pwrap .ph { display: flex; align-items: center; gap: .4rem; }
+  .pwrap .ph b { font-size: .82rem; color: var(--ink); } .pwrap .ph .x { margin-left: auto; color: var(--faint); }
+  .pwrap .psub { font-size: .58rem; color: var(--faint); margin: .12rem 0 .5rem; }
+  .pgh { font-size: .54rem; text-transform: uppercase; letter-spacing: .04em; color: var(--faint); font-weight: 700; margin: .45rem 0 .25rem; }
+  .pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .pcardx { border: 1px solid var(--g300); border-radius: 9px; padding: .42rem .48rem; background: #fff; }
+  .pcardx.dash { border-style: dashed; }
+  .pcardx .pn { font-size: .62rem; font-weight: 600; color: var(--ink); }
+  .pcardx .pd { font-size: .5rem; color: var(--muted); margin: .12rem 0 .22rem; line-height: 1.4; }
+  .pchips { display: flex; flex-wrap: wrap; gap: .2rem; }
+  .pchip { font-size: .46rem; border: 1px solid var(--g200); border-radius: 999px; padding: .03rem .32rem; color: var(--faint); }
+  .pguide { font-size: .48rem; color: var(--primary); margin-top: .25rem; }
+</style>
+</head>
+<body>
+
+<p class="crumb"><a href="../index.html">← Design hub</a> · journeys</p>
+<h1>Start a modeling with AI <span class="role">Web</span><span class="role beta">Beta</span></h1>
+<p class="lede">A <b>fresh start from a description</b>. Instead of picking an example or an empty canvas, the user writes what
+  their digital service does — its usages, their volumes, the infrastructure behind them — and gets back a <b>complete,
+  computable web modeling</b> in the active slot, built from one AI request. Success isn't "the AI answered": it's an
+  <b>ordinary modeling the user goes on to review and edit</b> with the normal editor, the generation's details shown once
+  and then gone. The feature is <b>Beta</b> and only exists on instances configured for it.</p>
+<p class="note">Today's shipped behaviour, faithful to the deployed app. Drawn from the two AI side panels, the Modeling
+  actions menu and the example picker, the two AI views (start and generate) and the browser and narrative tests of the
+  bootstrap. Code-level pointers are collected for agents in <a href="#pointers">Implementation pointers</a> at the foot of
+  the page. The modeling the user then edits is the <a href="build-a-model.html">build-a-model</a> loop.</p>
+
+<!-- ============ PHASE A — START WITH AI ============ -->
+<div class="phase">
+  <span class="tag">A · Start with AI</span><span class="conn">two entry points · one confirmation · the active slot restarts empty</span><span class="rule"></span>
+</div>
+
+<!-- screen 1 — Modeling actions entry -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">Online shop</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn open">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas" style="min-height:230px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◷</span> Daily shoppers</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey</div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server</div></div>
+        </div>
+        <div class="menu" style="top:.15rem; right:1.6rem">
+          <div class="mi hl"><span class="g">✦</span> Start with AI <span class="badge-beta">Beta</span></div>
+          <div class="mi"><span class="g">↥</span> Open a file</div>
+          <div class="mi"><span class="g">⟳</span> Reset</div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The toolbar's <b>Modeling actions</b> menu lists <b>Start with AI</b> with a <b>Beta</b> badge first, above <b>Open a file</b> and <b>Reset</b>. It acts on the <b>active</b> modeling only — here the Reference modeling, which already holds work.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">1</span><h3>Choose Start with AI</h3></div>
+    <p>The entry sits with the other actions that replace the active modeling — opening a file, resetting. It is reachable
+       whatever the user is looking at: from the Modeling canvas or from Simplified inputs. Choosing it never adds a
+       modeling; it restarts the one in the active tab.</p>
+    <div class="states">
+      <div class="state"><span class="k">Only where enabled</span><span class="v">The entry exists only on an instance configured for the AI bootstrap. Elsewhere it is <b>absent</b>, not greyed — there is no step the user could take to unlock it.</span></div>
+      <div class="state"><span class="k">From Simplified inputs</span><span class="v">Starting from the Simplified inputs view brings the builder back to <b>Modeling</b>, with the description panel open.</span></div>
+      <div class="state"><span class="k">Active slot only</span><span class="v">With two modelings open, only the active tab's modeling is replaced. The other tab keeps its modeling and its settings.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- picker entry fold -->
+<details class="fold">
+  <summary><span class="s-tag alt">↩ Alt</span> From the Examples picker — <em>Start from prompt (Beta)</em> <span class="s-sub">— the same operation, offered beside the empty start</span></summary>
+  <div class="fold-body">
+    <div class="screen">
+      <div class="mock-col">
+        <div class="win">
+          <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+          <div class="stage" style="min-height:300px">
+            <div class="canvas dim" style="min-height:300px"><div class="col"></div><div class="col"></div><div class="col"></div></div>
+            <div class="picker">
+              <div class="pwrap">
+                <div class="ph"><b>Welcome to e-footprint</b><span class="x">×</span></div>
+                <div class="psub">Pick a starting point. You can change everything once it loads.</div>
+                <div class="pgh">Examples</div>
+                <div class="pgrid">
+                  <div class="pcardx"><div class="pn">🛒 Classical e-commerce</div><div class="pd">A shopping journey served by a web app server calling a database server.</div></div>
+                  <div class="pcardx"><div class="pn">🤖 AI chatbot</div><div class="pd">A chatbot routing simple and complex prompts to small and large LLM APIs.</div></div>
+                </div>
+                <div class="pgh">Or</div>
+                <div class="pgrid">
+                  <div class="pcardx dash"><div class="pn">+ Start from scratch</div><div class="pd">An empty model. We'll show you where to begin.</div></div>
+                  <div class="pcardx dash"><div class="pn">↥ Load a json file</div><div class="pd">Open an existing model exported as .e-f.json.</div></div>
+                  <div class="pcardx dash" style="border-color:var(--primary)"><div class="pn">✦ Start from prompt (Beta)</div><div class="pd">Describe your system and review an AI-generated starting modeling.</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-help"><span class="lbl">On this screen</span>Where the bootstrap is enabled, the picker's <b>Or</b> group gains a third dashed card, <b>✦ Start from prompt (Beta)</b> — <em>"Describe your system and review an AI-generated starting modeling."</em> — beside <b>Start from scratch</b> and <b>Load a json file</b>.</div>
+      </div>
+      <div class="info-col">
+        <p>The picker card runs exactly the same start as the menu entry and closes the picker. On a first visit the picker
+           opens over an empty modeling, so nothing is asked; reopened later from <b>Help ▸ Open examples</b> over existing
+           work, the card asks the same replacement question as the menu (screen 2).</p>
+        <div class="states">
+          <div class="state"><span class="k">Different label</span><span class="v">The card reads <em>"Start from prompt (Beta)"</em>; the menu entry and the panel header read <em>"Start with AI"</em>. Both lead to the same panel.</span></div>
+          <div class="state"><span class="k">No first-run tour</span><span class="v">Starting this way counts as the first run: the guided tour does not open over either AI panel, and is not offered later on its own. It stays available from <b>Help</b>.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- screen 2 — confirm replacement -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">Online shop</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:230px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◷</span> Daily shoppers</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Purchase journey</div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> Web server</div></div>
+        </div>
+        <div class="modal-mock">
+          <div class="nconfirm">
+            <div class="origin">e-footprint.boavizta.org says</div>
+            <p class="msg">This will discard your current modeling and its unsaved edits now. Closing the AI panel or a failed generation will leave an empty modeling. Export first if you want to keep it. The other modeling, if any, will be preserved. Continue?</p>
+            <div class="acts"><span>Cancel</span><span class="okb">OK</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>Because the active canvas holds objects, the <b>browser's own confirm dialog</b> asks before anything is sent. It says what is lost <b>now</b>, that <b>closing the panel or a failed generation leaves an empty modeling</b>, and that the other modeling is kept. <b>Cancel</b> leaves everything as it was.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">2</span><h3>Confirm replacing the active modeling</h3></div>
+    <p>Starting with AI discards the active modeling <em>immediately</em>, not when a generation succeeds — so the question
+       spells out the consequence of every later exit. It is the same guard as the app's other replacing actions (Reset,
+       picking an example, opening a file), with its own wording.</p>
+    <div class="states">
+      <div class="state"><span class="k">Asked only if needed</span><span class="v">The question appears only when the active canvas holds at least one object. Starting over an empty modeling goes straight to screen 3.</span></div>
+      <div class="state"><span class="k">Cancel</span><span class="v">Nothing is sent: the modeling, its canvas and the current view stay exactly as they were.</span></div>
+      <div class="state"><span class="k">OK</span><span class="v">The active modeling is replaced by an empty one, its interface settings dropped. The other modeling is untouched.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE B — DESCRIBE ============ -->
+<div class="phase">
+  <span class="tag">B · Describe your system</span><span class="conn">the description panel · one request, the page locked while it runs</span><span class="rule"></span>
+</div>
+
+<!-- screen 3 — description panel -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">My system</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:560px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="addbtn locked"><span class="plus">＋</span> Add usage pattern</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="addbtn"><span class="plus">＋</span> Add usage journey</div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="addbtn"><span class="plus">＋</span> Add server</div></div>
+        </div>
+        <div class="panel" style="width:72%">
+          <div class="phead"><b>Start with AI · Beta</b><span class="x">×</span></div>
+          <p class="ptext">Beta — a first version, built to improve with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+          <p class="ptext">What are your system's usages? How often do they occur? What infrastructure supports them?</p>
+          <p class="ptext">Give volumes for each usage journey: for example, 50,000 monthly users browsing four times each per month, separately from 5,000 photo uploads per month. Distinguish users from visits. Include session or step durations, servers, locations, APIs and background work where known.</p>
+          <p class="ptext">Missing consequential inputs become explained assumptions; other omitted fields use library defaults. Review the generated modeling.</p>
+          <div class="ftitle">Describe your system</div>
+          <div class="tarea">A recipe app: 200,000 monthly users browse recipes three times a week…</div>
+          <p class="ptext sm" style="margin-top:.4rem">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.1 US cent (USD 0.001). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
+          <p class="ptext sm">We do not log your prompt or the generated response. Latency and estimated cost may be logged. Save your description if you want to keep it. These generation details won’t be available after closing this panel.</p>
+          <button class="savebtn">Build my modeling</button>
+        </div>
+        <div class="resultsbar locked" style="position:absolute;left:0;bottom:0;width:28%"><span class="rb">Results</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The builder comes back with the <b>Start with AI · Beta</b> panel docked over the now-empty canvas, and no example picker. The panel says what to describe, then the <b>Describe your system</b> field, then the provider, the indicative cost and impact, and what is not logged. One commit: <b>Build my modeling</b>.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">3</span><h3>The description panel</h3></div>
+    <p>The guidance asks for the three things a modeling needs — usages, how often they happen, the infrastructure — and for
+       volumes per usage journey, users kept apart from visits. It sets expectations before anything is sent: what is
+       missing becomes an explained assumption or a library default, the description goes to Mistral, and the call's cost and
+       impact are announced up front, with a call-specific estimate promised after generation.</p>
+    <div class="states">
+      <div class="state"><span class="k">Empty modeling behind</span><span class="v">The active slot already holds an empty modeling named <em>"My system"</em>. The Results bar is locked, as for any empty modeling.</span></div>
+      <div class="state"><span class="k">Required field</span><span class="v">The browser refuses to submit an empty field. A description of only spaces reaches the server and is refused (screen 5).</span></div>
+      <div class="state"><span class="k">Closing the panel</span><span class="v">The <b>×</b> closes it at once, with no pending-changes warning: the typed description is lost and the empty modeling stays — as the confirmation warned.</span></div>
+      <div class="state"><span class="k">Nothing stored</span><span class="v">The description is kept only in the page. Reloading shows the empty modeling without the panel.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- screen 4 — building -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar locked-ui">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">My system</span><span class="vtoggle locked-ui"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn locked-ui">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:260px">
+          <div class="col"><h5><b>Usage patterns</b></h5></div>
+          <div class="col"><h5><b>Usage journeys</b></h5></div>
+          <div class="col"><h5><b>Infrastructure</b></h5></div>
+        </div>
+        <div class="panel" style="width:72%">
+          <div class="phead"><b>Start with AI · Beta</b><span class="x locked-ui">×</span></div>
+          <p class="ptext" style="color:var(--g350)">Beta — a first version, built to improve with your feedback… · What are your system's usages? …</p>
+          <div class="ftitle">Describe your system</div>
+          <div class="tarea">A recipe app: 200,000 monthly users browse recipes three times a week. 50,000 dish photos are uploaded each month…</div>
+          <button class="savebtn off">Build my modeling</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>After <b>Build my modeling</b>, the button greys out — and so does <b>every button on the page</b> that was enabled: the panel's <b>×</b>, <b>Modeling actions</b>, the <b>Modeling / Simplified inputs</b> switch, the tabs. There is no spinner: the page simply waits for the answer.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">4</span><h3>Build my modeling — one request</h3></div>
+    <p>Submitting sends one request to the AI provider, with the description and nothing else. While it runs, the page offers
+       no other action: a second click cannot send a second request, and the user cannot close the panel or switch modeling
+       halfway. The wait ends in one of two screens: the panel again with an error (screen 5), or the generated modeling with
+       its summary (screen 6).</p>
+    <div class="states">
+      <div class="state"><span class="k">Locked page</span><span class="v">Every enabled button is disabled until the answer arrives, then restored. Buttons that were already disabled stay so.</span></div>
+      <div class="state"><span class="k">Nothing saved yet</span><span class="v">The slot still holds the empty modeling. It is replaced only once the generated modeling has been built, prepared like an imported file and found computable — in one save.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE C — THE OUTCOME ============ -->
+<div class="phase">
+  <span class="tag">C · The outcome</span><span class="conn">refused in the panel · or a generated modeling and its summary</span><span class="rule"></span>
+</div>
+
+<!-- screen 5 — refused -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">My system</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:300px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="addbtn locked"><span class="plus">＋</span> Add usage pattern</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="addbtn"><span class="plus">＋</span> Add usage journey</div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="addbtn"><span class="plus">＋</span> Add server</div></div>
+        </div>
+        <div class="panel" style="width:72%">
+          <div class="phead"><b>Start with AI · Beta</b><span class="x">×</span></div>
+          <p class="ptext" style="color:var(--g350)">Beta — a first version, built to improve with your feedback… · What are your system's usages? …</p>
+          <div class="ftitle">Describe your system</div>
+          <div class="tarea">A recipe app: 200,000 monthly users browse recipes three times a week. 50,000 dish photos are uploaded each month…</div>
+          <p class="errtxt">The generated modeling is incomplete. Describe its usages and infrastructure, then try again.</p>
+          <p class="ptext sm" style="color:var(--g350)">Uses zai-glm-5-3-flash on Mistral infrastructure; … · We do not log your prompt …</p>
+          <button class="savebtn">Build my modeling</button>
+        </div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>A refused generation brings the same panel back, <b>the description still in the field</b> and one red message under it saying what went wrong. The canvas behind is still the empty modeling. <b>Build my modeling</b> is live again to retry.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">5</span><h3>Refused — the panel, the description kept, one message</h3></div>
+    <p>Whatever fails, nothing reaches the modeling: the slot keeps the empty one, and the user's text is never thrown away,
+       so editing the description and retrying is one click. The message names the kind of failure, not its technical
+       detail — an answer the AI got wrong can contain generated text, which is never shown.</p>
+    <div class="states">
+      <div class="state"><span class="k">Provider failure</span><span class="v"><em>"The AI provider could not complete the request. You can try again."</em> — unreachable, timed out, or an unfinished answer.</span></div>
+      <div class="state"><span class="k">Unbuildable answer</span><span class="v"><em>"The AI answer could not be built into a modeling. Review your description and try again."</em></span></div>
+      <div class="state"><span class="k">Not computable</span><span class="v"><em>"The generated modeling could not be computed. Review your description and try again."</em></span></div>
+      <div class="state"><span class="k">Memory limit</span><span class="v"><em>"The generated modeling could not be computed within this instance's memory limit."</em> — when the final save's computation runs out of memory.</span></div>
+      <div class="state"><span class="k">Incomplete</span><span class="v"><em>"The generated modeling is incomplete. Describe its usages and infrastructure, then try again."</em> — it built, but is not complete enough to compute results.</span></div>
+      <div class="state"><span class="k">Size limit</span><span class="v"><em>"The generated modeling exceeds this workspace's size limit. Try a smaller description."</em></span></div>
+      <div class="state"><span class="k">Slot no longer empty</span><span class="v"><em>"Start with AI again to replace this modeling."</em> — the active modeling gained content since Start with AI; a generation never overwrites work. No request is sent.</span></div>
+      <div class="state"><span class="k">Blank description</span><span class="v"><em>"Describe your system before building your modeling."</em> — only spaces were submitted. No request is sent.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- screen 6 — the summary -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">Recipe app</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas dim" style="min-height:620px">
+          <div class="col"><h5><b>Usage patterns</b></h5><div class="ocard"><span class="ic">◷</span> Browsing</div><div class="ocard"><span class="ic">◷</span> Photo uploads</div></div>
+          <div class="col"><h5><b>Usage journeys</b></h5><div class="ocard"><span class="ic">⤳</span> Browse recipes</div><div class="ocard"><span class="ic">⤳</span> Upload dish photo</div></div>
+          <div class="col"><h5><b>Infrastructure</b></h5><div class="ocard"><span class="ic">▤</span> API server</div><div class="ocard"><span class="ic">▤</span> Photo store</div></div>
+        </div>
+        <div class="panel" style="width:72%">
+          <div class="phead"><b>Your starting modeling is ready</b><span class="x">×</span></div>
+          <p class="ptext">Your starting modeling is ready. Review its assumptions using the normal editor. Values set from the description carry a comment; other omitted values use library defaults.</p>
+          <p class="ptext"><b>Save your description if you want to keep it. These generation details won’t be available after closing this panel.</b></p>
+          <div class="ph6">Review your modeling</div>
+          <ol class="plist">
+            <li><b>Time spent:</b> check durations in usage journey steps.</li>
+            <li><b>Volumes:</b> check usage patterns for each journey, including visits per user and the time period.</li>
+            <li><b>Infrastructure:</b> check servers, resources, locations, APIs and assumed sizes.</li>
+          </ol>
+          <dl class="pdl">
+            <dt>Estimated API cost</dt>
+            <dd>USD 0.001150 (rate card 2026-11-09)<br>Cached-input discounts not accounted for; this may overestimate the bill.</dd>
+            <dt>Estimated inference impact — parent model</dt>
+            <dd>310 mg – 920 mg CO2-eq</dd>
+          </dl>
+          <p class="ptext sm">EcoLogits reference: mistralai / zai-glm-5-3, unscaled. This uncertain parent-model estimate is not a measured Flash result or a guaranteed ceiling. The upfront expectation is typically below 1 g CO2-eq.</p>
+          <div class="ph6">Catalog substitutions</div>
+          <ul class="plist"><li>network: 4G → mobile (normalized)</li><li>device: tablet → laptop (fallback)</li></ul>
+          <div class="ph6">Ignored answer fields</div>
+          <ul class="plist"><li>servers.0.region</li></ul>
+          <div class="pdisc">Your description</div>
+          <p class="ptext sm">Beta — a first version, improving with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
+        </div>
+        <div class="resultsbar" style="position:absolute;left:0;bottom:0;width:28%"><span class="rb">Results</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The generated <b>Recipe app</b> fills the canvas behind a read-only panel, <b>Your starting modeling is ready</b>: what to do next, a three-point <b>Review your modeling</b> checklist, the call's <b>estimated cost</b> and <b>impact</b>, any <b>catalog substitutions</b> and <b>ignored answer fields</b>, and the description folded under <b>Your description</b>. No Save button.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">6</span><h3>The generated modeling and its summary</h3></div>
+    <p>The modeling is already saved in the active slot: complete, computable, the Results bar available. The summary is a
+       one-time read: it tells the user the modeling is a <b>starting point to review</b>, points at the three places where a
+       description is most often wrong — time spent, volumes, infrastructure — and reports what the call cost and what the
+       app changed in the AI's answer to make it fit.</p>
+    <div class="states">
+      <div class="state"><span class="k">Call estimate</span><span class="v">The cost comes in US dollars with the date of its rate card, plus the cached-input caveat. The impact is the parent model's EcoLogits estimate, often a range. Either reads <em>"Cost estimate unavailable"</em> / <em>"Impact estimate unavailable"</em> when it cannot be computed — the modeling is kept anyway.</span></div>
+      <div class="state"><span class="k">Catalog substitutions</span><span class="v">Each value the app replaced to match its catalogs — a network, a device, a provider, a cloud instance, an AI model, an object name, a comment it could not attach — as <em>kind: requested → used (how)</em>. Shown only when there is one.</span></div>
+      <div class="state"><span class="k">Ignored answer fields</span><span class="v">Fields of the AI's answer the app does not know, dropped rather than failing the run. Shown only when there is one.</span></div>
+      <div class="state"><span class="k">Your description</span><span class="v">Folded by default; opened, it shows the text exactly as sent, selectable so it can be copied and kept.</span></div>
+      <div class="state"><span class="k">Comments on values</span><span class="v">Values the AI set from the description carry a comment, visible in the ordinary edit panels; everything else is a library default.</span></div>
+      <div class="state"><span class="k">Results closed</span><span class="v">The Results panel is not opened for the user; the bar is available once they want it.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE D — AN ORDINARY MODELING ============ -->
+<div class="phase">
+  <span class="tag">D · An ordinary modeling</span><span class="conn">close the summary · it does not come back</span><span class="rule"></span>
+</div>
+
+<!-- screen 7 — after close -->
+<div class="screen">
+  <div class="mock-col">
+    <div class="win">
+      <div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span class="url">e-footprint.boavizta.org/model_builder/</span></div>
+      <div class="appbar">
+        <div class="tabs"><span class="tab active">Reference modeling</span><span class="tab add">＋ Add ▾</span><span class="tab compare disabled">⇄ Compare</span></div>
+      </div>
+      <div class="toolrow"><span class="sysname">Recipe app</span><span class="vtoggle"><span class="on">Modeling</span><span>Simplified inputs</span></span><span class="actbtn">Modeling actions ▾</span><span class="tbtn">⬇</span></div>
+      <div class="stage">
+        <div class="canvas">
+          <div class="col">
+            <h5><b>Usage patterns</b></h5>
+            <div class="addbtn"><span class="plus">＋</span> Add usage pattern <span class="q">?</span></div>
+            <div class="ocard"><span class="ic">◷</span> Browsing <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">◷</span> Photo uploads <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">◷</span> Chef sessions <span class="pencil">✎</span></div>
+          </div>
+          <div class="col">
+            <h5><b>Usage journeys</b></h5>
+            <div class="addbtn"><span class="plus">＋</span> Add usage journey <span class="q">?</span></div>
+            <div class="ocard"><span class="ic">⤳</span> Browse recipes <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">⤳</span> Upload dish photo <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">⤳</span> Ask the chef <span class="pencil">✎</span></div>
+          </div>
+          <div class="col">
+            <h5><b>Infrastructure</b></h5>
+            <div class="addbtn"><span class="plus">＋</span> Add server <span class="q">?</span></div>
+            <div class="ocard"><span class="ic">▤</span> API server <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">▤</span> Postgres database <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">▤</span> Photo store <span class="pencil">✎</span></div>
+            <div class="ocard"><span class="ic">⇆</span> OpenAI <span class="pencil">✎</span></div>
+          </div>
+        </div>
+        <div class="resultsbar"><span class="rb">Results</span><span class="chev">︿</span></div>
+      </div>
+    </div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The <b>×</b> closes the summary and the canvas takes the full width: the <b>Recipe app</b> modeling with its usage patterns, journeys, servers and external API, every card editable, the <b>Results</b> bar ready. Nothing on screen says it was generated.</div>
+  </div>
+  <div class="info-col">
+    <div class="step"><span class="n">7</span><h3>Close — an ordinary modeling</h3></div>
+    <p>From here the user is on the <a href="build-a-model.html">build-a-model</a> loop: open a card, check the assumptions the
+       checklist pointed at, edit, look at results, export. The generated modeling has no special status — it is saved,
+       exported and compared like any other.</p>
+    <div class="states">
+      <div class="state"><span class="k">Summary gone for good</span><span class="v">There is no way to reopen the summary. Opening an edit panel replaces it, and reloading the page drops it too.</span></div>
+      <div class="state"><span class="k">Not saved with the modeling</span><span class="v">Neither the description nor the estimates are kept in the session, the saved modeling or an exported file — hence the panel's advice to save the description.</span></div>
+      <div class="state"><span class="k">Other modeling untouched</span><span class="v">With two modelings open, the other tab's modeling is exactly as it was before Start with AI.</span></div>
+      <div class="state"><span class="k">Start again</span><span class="v">Start with AI again replaces this modeling, through the same confirmation (screen 2).</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DECISIONS ============ -->
+<h2 class="sec">Decisions taken</h2>
+<table>
+  <tr><th>Decision</th><th>Why / why-not-X</th></tr>
+  <tr><td><b>The AI starts a modeling; it never edits one.</b></td><td>Start with AI replaces the active modeling with an empty one, and a generation goes on only while that modeling is still empty. Why-not-merge into existing work: a generated graph mixed with the user's objects would be impossible to review, and a generation must never overwrite work.</td></tr>
+  <tr><td><b>The active modeling is emptied at the start, and the confirmation says so.</b></td><td>The question names every later exit — closing the panel, a failed generation — so the user decides once, knowing the outcome. It asks only when there is something to lose, like the app's other replacing actions.</td></tr>
+  <tr><td><b>Only a complete, computable modeling is installed; anything else is refused in the panel.</b></td><td>A half-built or uncomputable modeling would be a worse start than the empty canvas. The refusal keeps the description, so retrying costs one edit and one click; the message names the kind of failure, never generated text.</td></tr>
+  <tr><td><b>One request, the whole page locked while it runs.</b></td><td>Each call has a cost and an impact the panel announces; a double click must not pay twice, and the modeling must not change under a running generation.</td></tr>
+  <tr><td><b>Cost and impact are stated before and after the call.</b></td><td>The panel gives the indicative cost and impact up front, the summary the call's own estimate — consistent with the app's purpose of making digital impact visible, including its own.</td></tr>
+  <tr><td><b>The summary is shown once and kept nowhere.</b></td><td>The description and the answer are not logged or stored, in the session, the saved modeling or an export. The panel tells the user to save the description if they want it, rather than the app keeping it for them.</td></tr>
+  <tr><td><b>The result is an ordinary modeling, reviewed in the normal editor.</b></td><td>Why-not-a-special-review-mode: the editor already shows every value with its source and comment. The checklist points at the inputs most worth checking; comments on values say what came from the description.</td></tr>
+  <tr><td><b>The entry is absent, not disabled, where the feature is not configured.</b></td><td>The app's disabled-with-a-reason rule guides the user toward an unblocking step. Here there is none — it depends on the instance, not on the modeling — so the entry is simply not offered.</td></tr>
+</table>
+
+<!-- ============ IMPLEMENTATION POINTERS (for agents) ============ -->
+<details class="ptr" id="pointers">
+  <summary>⌗ Implementation pointers <span class="a-tag">for agents</span> <span style="font-weight:400;color:var(--faint);font-size:.8rem;">— routes, views, templates, the confirmation and the tests</span></summary>
+  <div class="pbody">
+    <p>Where the functionality above lives in code. Start with <a href="../../architecture/layers-and-wrappers.html#ai-bootstrap">AI bootstrap</a> · <a href="../../architecture/workspace.html#ai-bootstrap-slot">Fresh AI bootstrap and active slot</a> · <a href="../../architecture/onboarding.html">Examples and onboarding</a>.</p>
+    <dl>
+      <dt>Availability</dt>
+      <dd><code>adapters/ai_provider.py::is_available</code> — <code>AI_BOOTSTRAP_ENABLED</code> and a <code>MISTRAL_API_KEY</code>. Exposed to templates as <code>AI_BOOTSTRAP_AVAILABLE</code> by <code>adapters/context_processors.py::ai_bootstrap</code>; the picker card is appended by <code>adapters/presenters/example_picker_presenter.py::build_picker_groups</code> to the <code>scratch</code> group. Both views raise 404 when unavailable.</dd>
+      <dt>Entry points and confirmation (Phase A)</dt>
+      <dd>Menu: <code>upload_download_reboot_model_tooltips.html</code> (<code>data-ai-bootstrap-entry="toolbar"</code>); picker: <code>onboarding/template_picker.html</code> (<code>data-ai-bootstrap-entry="picker"</code>). Both <code>hx-post start-ai-bootstrap/</code> → <code>#main-content-block</code> and carry <code>data-confirm-when-model-not-empty</code>, read by the body-level <code>htmx:confirm</code> listener in <code>theme/static/scripts/model_builder_main.js</code> (native <code>window.confirm</code>, only when the active canvas has a <code>.model-builder-card</code>). First-run tour suppression: <code>theme/static/scripts/onboarding_first_run.js</code> (<code>[data-ai-bootstrap-panel]</code>).</dd>
+      <dt>Start (screen 3)</dt>
+      <dd><code>adapters/views/views_ai_bootstrap.py::start_ai_bootstrap</code> — empties <code>interface_config</code> of the active repository, loads <code>get_example_system_data(SCRATCH_ID)</code> through <code>load_system_into_session</code>, renders the builder with <code>ai_panel="input"</code> and <code>show_example_picker=False</code>. <code>model_builder_main.html</code> includes <code>side_panels/ai_bootstrap_input.html</code> (header <em>"Start with AI · Beta"</em>) into <code>#sidePanel</code> already open; both AI panels extend <code>side_panel_structure.html</code> (close: <code>warnBeforeClosingSidePanel()</code> → <code>closeAndEmptySidePanel()</code>; the textarea never sets <code>formModified</code>).</dd>
+      <dt>Generate (screens 4–6)</dt>
+      <dd><code>views_ai_bootstrap.py::generate_ai_bootstrap</code>: <code>is_empty_model</code> guard → blank guard → <code>application/ai_bootstrap/service.py::generate</code> with <code>complete_mistral</code> (one call, <code>ProviderError</code> on any failure) → <code>system_to_json</code> → <code>prepare_system_for_session</code> → <code>SystemValidationService.validate_for_computation</code> → <code>persist_to_cache</code> (the one save) → <code>application/ai_bootstrap/metrics.py::estimate_call</code> (optional, after the save). Every refusal goes through <code>_input_response</code> (<code>ai_error</code>, <code>ai_prompt</code>). The form's <code>hx-disabled-elt="button:not(:disabled)"</code> is what locks the page. Summary: <code>side_panels/ai_bootstrap_summary.html</code> (header <em>"Your starting modeling is ready"</em>, no save button); substitutions are <code>Resolution</code>s with <code>how != "exact"</code> (<code>catalogs.py</code>, <code>dsl.py</code>), ignored fields from <code>dsl.py::validate_tolerating_extras</code>.</dd>
+      <dt>Tests</dt>
+      <dd>Narrative: <code>tests/narratives/test_ai_bootstrap.py</code>. Browser: <code>tests/e2e/test_ai_bootstrap.py</code> (cancel sends nothing, the lock during the request, the summary gone after close / edit / reload, picker entry and tour suppression, return to Modeling from Simplified inputs).</dd>
+    </dl>
+  </div>
+</details>
+
+<footer>
+  Journey · Start a modeling with AI (Beta) · today's shipped behaviour · faithful to the deployed app. Style block copied from
+  <a href="build-a-model.html">build-a-model</a> (see <a href="../journey-authoring.md">journey-authoring.md</a>).
+  Hub: <a href="../index.html">design/index.html</a>.
+</footer>
+
+</body>
+</html>
