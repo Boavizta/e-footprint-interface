@@ -34,7 +34,12 @@
   divisible by 7, in 28 of 96 recorded answers; a workload of 0.05; a call 0.33 times an hour),
   against the rule `generated-values-editable`, whose test posts the form and never met the
   browser. The inputs' `step` is now `any`, for every user of these editors; an imported modeling
-  with such values was blocked the same way.
+  with such values was blocked the same way. **Refused by the user on 2026-11-18** ("the change in
+  input steps should be undone, and rather round AI inputs in the builder"): the hourly editor's
+  whole-number step is back, and the builder rounds a volume to a whole number per day, month or
+  year, the shortest within 0.5 % (1 a week is 52 a year), and a growth to a whole percent. Asked
+  in the conversation, the user chose a 0.01 step for the recurrent editors, for every user, a
+  generated weekly need rounded to it, over 0.1, which made a call once a day 0.
 - **Answered in the conversation on 2026-11-18: a deployment longer than 10 years is cut, the cut
   listed** ("deployments for more than 10 years can be simply cut by the builder"). Decided by
   the supervisor with it, after a review (commits `9e27826b`, `7115943b`): a deployment keeps the 10

@@ -95,7 +95,7 @@ Changed: **A stated web volume is that of 2027-01-01, discounted to an earlier s
 
 Changed: **A usage span above its devices' shortest lifespan is cut to it and listed.** The library refuses such a span, which refused the whole answer: three of eight at high effort. → test "usage span above its devices"
 
-Changed: **The growth and recurrent editors accept any decimal.** A generated weekly volume, or a workload of 0.05, opened on a value the browser refused to save unchanged: 28 of 96 recorded answers. This changes these editors for every user. → code "recurrent_quantities_from_constant.html"; code "recurrent_quantities_from_weekly_pattern.html"; code "weekly_pattern_builder.js"
+Changed: **The builder rounds generated values to the editors' steps.** A generated weekly volume, or a workload of 0.05, opened on a value the browser refused to save unchanged: 28 of 96 recorded answers. The hourly editor keeps its whole-number step: a volume is whole per day, month or year, the shortest that rounding moves by 0.5 % at most (1 a week is 52 a year), and a growth a whole percent. The recurrent editors' step goes from 0.1 to 0.01, for every user, and a weekly need is rounded to it (a call once a day, 0.04 an hour, stays above 0). → code "dsl.py"; code "recurrent_quantities_from_constant.html"; code "recurrent_quantities_from_weekly_pattern.html"; code "weekly_pattern_builder.js"; test "open on the editors' steps"
 
 ## #server-calls-scale
 

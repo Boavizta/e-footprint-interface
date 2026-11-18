@@ -68,7 +68,7 @@ The design page of today's flow is
   description dates otherwise starts when it says. A start too early for those 10 years to reach the
   end of 2027 is moved later, and a deployment longer than 10 years keeps the 10 nearest 2027.
 - **generated-values-editable** Each generated usage pattern, web or edge, opens in its edit panel
-  with the values the AI set, and saving it unchanged keeps them.
+  with the values the AI set, rounded to the editors' steps, and saving it unchanged keeps them.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job
   on that server, and the server appears once whether devices, people or both use it.
 - **calls-scale-with-devices** A server receives a device's calls once for every such device
