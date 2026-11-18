@@ -229,14 +229,14 @@ typing-extensions = {version = ">=4.2", markers = "python_version < \"3.13\""}
 
 [[package]]
 name = "annotated-doc"
-version = "0.0.6"
+version = "0.0.7"
 description = "Document parameters, class attributes, return types, and variables inline, with Annotated."
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "annotated_doc-0.0.6-py3-none-any.whl", hash = "sha256:361ca0950cc7082f53fa69e9328409f40a62c61e57e0a47e1825a08078a58a53"},
-    {file = "annotated_doc-0.0.6.tar.gz", hash = "sha256:7969bb69912085b2285849c0dcac0b4b374fd180c13cf10a87f284ffcf347bbf"},
+    {file = "annotated_doc-0.0.7-py3-none-any.whl", hash = "sha256:6bc31bbbec6dfaaedc1676dbc11dbda96fe22a2b5c400e9ebad113fec44a9dc6"},
+    {file = "annotated_doc-0.0.7.tar.gz", hash = "sha256:0a30ef8f5322a4173720ae6712dc9a5e58f5a19868f3f167b4b5778db066c2b5"},
 ]
 
 [[package]]
@@ -253,14 +253,14 @@ files = [
 
 [[package]]
 name = "anthropic"
-version = "2.9.0"
+version = "2.10.0"
 description = "The official Python library for the anthropic API"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "anthropic-2.9.0-py3-none-any.whl", hash = "sha256:410281f4b9fa6422ccc465e5e531a00d69c6f589c743134e77c23fefc3e5cb4f"},
-    {file = "anthropic-2.9.0.tar.gz", hash = "sha256:0a3379add94953db2dc736839bbafb0c624f6bec69caf13e44353d906c253981"},
+    {file = "anthropic-2.10.0-py3-none-any.whl", hash = "sha256:1b91b2b4aa2bab44db8712e8a9053454bcff6daa3e6f5f11d85dc38b37d0a2a3"},
+    {file = "anthropic-2.10.0.tar.gz", hash = "sha256:6f3ffbdc6eb0a09a197be2eabdc62b8395a13d692710b8cdfa0393a80b355585"},
 ]
 
 [package.dependencies]
@@ -1280,14 +1280,14 @@ opentelemetry = ["opentelemetry-api (>=1.32.1,<2.0.0)", "opentelemetry-exporter-
 
 [[package]]
 name = "efootprint"
-version = "27.0.1"
+version = "27.0.2"
 description = "Digital service environmental footprint model"
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "efootprint-27.0.1-py3-none-any.whl", hash = "sha256:763bd5e61fcc8a1f098551ab3de9b36ebf72ecea04d398b1257a950635f28e39"},
-    {file = "efootprint-27.0.1.tar.gz", hash = "sha256:130b515d2d8fc22d8f93ffcd026dbf98c10e08d7171dad4da280e25acefbf4ab"},
+    {file = "efootprint-27.0.2-py3-none-any.whl", hash = "sha256:f46cfca041eea43ff84316e7d42bc92f6e9a7c9dd4c4c4f873d33aa693ba1ca5"},
+    {file = "efootprint-27.0.2.tar.gz", hash = "sha256:dfef67c22933a47f989241be4a4cbe8eb84b326f12cc0616abcb902f5a43b4da"},
 ]
 
 [package.dependencies]
@@ -2955,14 +2955,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "3.52.0"
+version = "3.55.1"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "openai-3.52.0-py3-none-any.whl", hash = "sha256:fc220b5f06d354e8f48ab38a64410ec1537957a47d6e584b77cee8c21b7cb84e"},
-    {file = "openai-3.52.0.tar.gz", hash = "sha256:258a4fec3e40b412c58672526ed33f20738c2e4ea27601792e73843af62466af"},
+    {file = "openai-3.55.1-py3-none-any.whl", hash = "sha256:9136b1a760401aa150d084b0a673a4eca5b434917f3afe0378321cf544d5bdc2"},
+    {file = "openai-3.55.1.tar.gz", hash = "sha256:db5a9ae65d21e5a51ef7fa395e5418942b04120cc73f2ab25bd2fc22db101ecd"},
 ]
 
 [package.dependencies]
@@ -3390,14 +3390,14 @@ xarray = ["xarray"]
 
 [[package]]
 name = "platformdirs"
-version = "4.14.5"
+version = "4.14.7"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.11"
 groups = ["main", "dev"]
 files = [
-    {file = "platformdirs-4.14.5-py3-none-any.whl", hash = "sha256:8e778c6fa421516f4d3369449f8df3b0e1b72c0e0005fe88e3ec772d0a14e750"},
-    {file = "platformdirs-4.14.5.tar.gz", hash = "sha256:32e9921db7385aa8169bee4fe9501923e5715ba9fb7ea3b9c69b0d8e0639f7a1"},
+    {file = "platformdirs-4.14.7-py3-none-any.whl", hash = "sha256:391513b74707c42335fff3ea17eaac657a7ee9ffcadd809634d34ea594d0122c"},
+    {file = "platformdirs-4.14.7.tar.gz", hash = "sha256:5472257c1cf97a14658af52997011c7e59e4aebf3a24950b973c11b579e1b074"},
 ]
 
 [[package]]
@@ -5236,4 +5236,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "95d6cfff22f7b249c6e83203bacafc40bcab30fa7b41af3f3870610fa283d585"
+content-hash = "e4feb02386b88a5c75dba92528d121e3eb41de33e273e59405573ab1161d495e"

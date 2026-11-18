@@ -4,13 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [V1.16.0]
 
 ### Added
 - Start with AI offers a Web only or Web + edge scope above the description, Web only by default or Web + edge when Edge modeling is on; the guidance and the indicative cost and impact follow the scope chosen. A Web + edge generation builds edge devices, optional device groups, edge functions with their server calls, edge usage journeys and deployments with optional start and end dates; web usage runs until the last deployed device retires, within the 10 years the hourly editor holds and never cut before the end of 2027, and a deployment longer than 10 years keeps the 10 nearest 2027, the installations outside them left out; the summary adds deployment, device and server-call checks. In both scopes, a dated web usage too early for those 10 years to reach the end of 2027 starts later, and a stated web volume is the one of 2027-01-01, or of the usage's own start date when later: a growing usage that starts earlier starts from it discounted by its growth, its comment giving both volumes, and a negative growth is set to 0 and listed. Generated values open on the editors' steps: a volume a whole number per day, month or year, whichever keeps it within 0.5 %, a growth a whole percent, and a device's weekly need to the hundredth. The summary's list of changes made to the AI answer (formerly "Catalog substitutions") also names a web usage or deployment cut to those 10 years, a web usage start moved, a deployment's usage span cut to its devices' shortest lifespan, a device written as a sub-group, counted as that device, and any device no deployment runs, left out of the footprint.
 
 ### Fixed
 - Start with AI reads a comment the answer writes as a number as its text, instead of refusing the answer.
+
+### Changed
 - The recurrent editors' constant and weekly schedule values accept hundredths, instead of tenths.
 
 ## [V1.15.0] - 2026-11-17
