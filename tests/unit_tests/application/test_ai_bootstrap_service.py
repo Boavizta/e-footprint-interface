@@ -112,6 +112,22 @@ def test_unknown_or_cyclic_sub_groups_refuse_the_answer(groups):
         build_edge_groups(spec, {d.name: build_edge_device(d, []) for d in spec.edge_devices}, [])
 
 
+@titled("ai-bootstrap-edge#device-groups: a declared device written as a sub-group counts as that device, "
+        "unless the group also lists it")
+def test_device_written_as_sub_group_counts_as_that_device():
+    spec = edge_groups_spec({"name": "Floor", "device_counts": {"Gateway": 1}, "sub_group_counts": {"Sensor": 5}})
+    devices = {d.name: build_edge_device(d, []) for d in spec.edge_devices}
+    resolutions = []
+
+    groups = build_edge_groups(spec, devices, resolutions)
+
+    assert groups["Floor"].edge_device_counts[devices["Sensor"]].value == 5 * u.dimensionless
+    assert [(r.requested, r.resolved, r.how) for r in resolutions] == [("Floor sub-group Sensor", "device Sensor", "moved")]
+    ambiguous = edge_groups_spec({"name": "Floor", "device_counts": {"Sensor": 1}, "sub_group_counts": {"Sensor": 5}})
+    with pytest.raises(ValueError, match="both a device and a sub-group"):
+        build_edge_groups(ambiguous, devices, [])
+
+
 @titled("ai-bootstrap-edge#deployments-over-time: a deployment's usage span is its stated one, else its devices' "
         "shortest lifespan, six years at most")
 def test_usage_span_defaults_to_the_shortest_lifespan():

@@ -524,21 +524,32 @@ def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
 
 
 def build_edge_groups(spec: WebEdgeSpec, devices: dict, resolutions: list[Resolution]) -> dict:
-    """The optional groups, children first, each holding its devices and sub-groups with their counts."""
-    pending, groups = {g.name: g for g in spec.edge_device_groups}, {}
+    """The optional groups, children first, each holding its devices and sub-groups with their counts. A declared
+    device written as a sub-group, and named by no group, is counted as that device in the group."""
+    declared = {g.name for g in spec.edge_device_groups}
+    pending, groups, held = {g.name: g for g in spec.edge_device_groups}, {}, {}
+    for g in spec.edge_device_groups:
+        slips = {n: v for n, v in g.sub_group_counts.items() if n in devices and n not in declared}
+        if set(slips) & set(g.device_counts):
+            raise ValueError(f"Edge device group {g.name} names {sorted(set(slips) & set(g.device_counts))} as both "
+                             f"a device and a sub-group")
+        held[g.name] = ({n: v for n, v in g.sub_group_counts.items() if n not in slips}, {**g.device_counts, **slips})
+        resolutions.extend(Resolution("edge device group", f"{g.name} sub-group {n}", f"device {n}", "moved")
+                           for n in slips)
     while pending:
-        ready = [g for g in pending.values() if all(sub in groups for sub in g.sub_group_counts)]
+        ready = [g for g in pending.values() if all(sub in groups for sub in held[g.name][0])]
         if not ready:
-            missing = {sub for g in pending.values() for sub in g.sub_group_counts if sub not in groups}
+            missing = {sub for g in pending.values() for sub in held[g.name][0] if sub not in groups}
             raise ValueError(f"Unknown or cyclic edge device groups: {sorted(missing)}")
         for g in ready:
             c = _Comments(g, resolutions)
+            sub_group_counts, device_counts = held[g.name]
             groups[g.name] = EdgeDeviceGroup(
                 _label(g.name, resolutions),
                 sub_group_counts={groups[n]: SourceValue(v * u.dimensionless, comment=c.take(n))
-                                  for n, v in g.sub_group_counts.items()},
+                                  for n, v in sub_group_counts.items()},
                 edge_device_counts={_lookup(devices, n, "edge device"): SourceValue(v * u.dimensionless, comment=c.take(n))
-                                    for n, v in g.device_counts.items()})
+                                    for n, v in device_counts.items()})
             c.close()
             del pending[g.name]
     return groups
@@ -658,6 +669,9 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
         devices = {d.name: build_edge_device(d, resolutions) for d in spec.edge_devices}
         build_edge_groups(spec, devices, resolutions)
         functions = {f.name: build_edge_function(f, devices, jobs, resolutions) for f in spec.edge_functions}
+        run = {f.device for f in spec.edge_functions}
+        resolutions.extend(Resolution("edge device", d.name, "not counted", "no edge function runs on it")
+                           for d in spec.edge_devices if d.name not in run)
         edge_journeys = {j.name: EdgeUsageJourney(_label(j.name, resolutions),
                                                   [_lookup(functions, n, "edge function") for n in j.functions])
                          for j in spec.edge_journeys}
