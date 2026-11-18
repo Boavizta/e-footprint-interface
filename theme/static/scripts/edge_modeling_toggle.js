@@ -23,7 +23,7 @@
         }
         fieldset.removeAttribute(AI_SCOPE_MARKER);
         if (edgeModelingOn) {
-            document.getElementById("ai-scope-web-edge").checked = true;
+            fieldset.querySelector('input[value="web_edge"]').checked = true;
         }
     }
 

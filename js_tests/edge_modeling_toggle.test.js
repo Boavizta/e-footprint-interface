@@ -120,7 +120,8 @@ function checkedScope() {
 }
 
 test("ai-bootstrap-edge#scope-choice: a fresh panel with Edge modeling on selects Web + edge once, then keeps the user's choice", () => {
-    renderLatchedToggle();
+    renderUnlatchedToggle();  // after Start with AI the slot is empty: only the stored preference turns it on
+    localStorage.setItem(EDGE_MODELING_STORAGE_KEY, "on");
     renderAiScopeChoice({ marked: true });
 
     applyEdgeModelingState();

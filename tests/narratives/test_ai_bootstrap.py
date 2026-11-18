@@ -145,6 +145,7 @@ class TestAiBootstrap:
         body = refused.content.decode()
         assert 'data-ai-bootstrap-panel="input"' in body and DESCRIPTION in body
         assert checked_scopes(body) == ["web_edge"]
+        assert "data-ai-scope-follows-edge-modeling" not in body  # the browser leaves the posted scope as it is
         assert is_empty_model(saved_modeling(client))
 
     def test_an_answer_outside_the_schema_saves_nothing(self, client, provider):
@@ -305,3 +306,4 @@ class TestAiBootstrap:
 
         assert 'data-ai-bootstrap-panel="input"' in started
         assert checked_scopes(started) == ["web"]
+        assert "data-ai-scope-follows-edge-modeling" in started  # a fresh panel, for the browser to preselect once

@@ -211,7 +211,7 @@ def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
 
 
 @titled("ai-bootstrap-edge#scope-choice: with Edge modeling on, Start with AI opens on Web + edge, showing its "
-        "guidance and disclosure alone")
+        "guidance and disclosure alone [edge-modeling-preselects]")
 def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled):
     builder = edge_modeling_enabled
     page = builder.page
