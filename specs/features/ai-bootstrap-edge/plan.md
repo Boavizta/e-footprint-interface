@@ -7,13 +7,13 @@ gains the edge sections; the library scales server calls with every device deplo
 
 Above the description, a Web only / Web + edge radio, Web only checked unless Edge modeling is on; a stylesheet rule shows the checked scope's guidance and disclosure alone.
 
-A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions.
+A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. Each disclosure states its scope's indicative cost, to two significant figures, and its impact, from the sandbox runs of #edge-instructions.
 
 Changed: **The panel opens on Web + edge when Edge modeling is on.** Asked by the user after trying it. The toggle's script checks the radio once on a fresh panel; a refused panel keeps the posted scope. → statement "unless Edge modeling is on"; test "opens on Web + edge"; code "edge_modeling_toggle.js"
 
-Changed: **One browser test and five files beyond the plan.** The test alone sees the editor keep a 12-year period on reopening. The radio lives in the input template and its stylesheet; the changelog and the architecture page follow the feature. → test "12-year web usage saved unchanged"; test "test_a_provider_failure_keeps"; code "ai_bootstrap_input.html"; code "bs_main.css"; code "bs_main.css.map"; code "custom.scss"
+Changed: **One browser test and five files beyond the plan.** The test alone sees the editor keep a cut period on reopening. The radio lives in the input template and its stylesheet; the changelog and the architecture page follow the feature. → test "a web usage cut to 10 years"; test "test_a_provider_failure_keeps"; code "ai_bootstrap_input.html"; code "bs_main.css"; code "bs_main.css.map"; code "custom.scss"
 
-To confirm: **Should both cost lines carry two significant figures?** Rounded to one like Web only, Web + edge reads about 0.2 US cent against 0.1, twice the cost; measured, it is 0.15 against 0.12. Two figures would change the approved Web only line.
+Changed: **Both cost lines carry two significant figures.** At one, Web + edge read twice the cost of Web only; measured, it is 0.15 US cent against 0.12. The approved Web only line changes. → reason "two significant figures"
 
 ## #scope-in-request
 
@@ -47,7 +47,9 @@ WebEdgeSpec adds edge devices, optional groups, edge functions with server calls
 
 No installed-base field: the sandbox schema refused an installed base with no growth, and a past start date says the same within the Growth projection inputs. One schema for both scopes was refused: a Web only answer could then build edge objects.
 
-Changed: **The fix that gave a server call its list of jobs also edits the Web + edge prompt.** One commit holds the schema field and the prompt line that names it, so the prompt file shows under this piece.
+Changed: **The fix that gave a server call its list of jobs also edits the Web + edge prompt.** One commit holds the schema field and the prompt line that names it, so the prompt file shows under this piece. → code "system_prompt_web_edge.md"
+
+Changed: **A comment written as a number is read as its text.** One answer of eight on case 03 was refused for a comment given as 2500. Both scopes share the comment type, so Web only follows. → test "comment written as a number"
 
 ## #edge-builder
 
@@ -85,11 +87,17 @@ Growth projection inputs are what the only hourly editor prefills; a raw series 
 
 Changed: **A usage pattern may state its own start date.** The clause needs the usage's own start date and no place added the field; the Web + edge prompt alone offers it. → code "system_prompt_web_edge.md"
 
-Changed: **The hourly editor's limit goes from 10 to 20 years, in one place.** Case 04 needs 12, and the editor silently cut a longer generated period on opening. Beyond 20, web usage is cut and listed; a deployment is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"; test "beyond the editor's limit"
+Changed: **Beyond the hourly editor's 10 years, web usage is cut and listed.** The editor silently cut a longer generated period on opening. Its limit now lives in one place, unchanged; a deployment longer than it is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"; test "beyond the editor's limit"; test "until the last device retires, within the editor's limit"; test "until the last device retires [shared-period]"
 
 Changed: **A deployment may state an end date.** Case 04's Dutch fleet no longer grows, and deploying it through 2027 put it a third too high; stated, the end date closes that deployment's period. → statement "end earlier"; test "stated end date closes"
 
-To confirm: **Is 20 years the right limit for the hourly editor?** A 20-year variant of case 04 peaks near 375 MB and saves 4.9 MB; 30 years would cover devices kept 15 years from an older start, near 520 MB.
+Changed: **A stated web volume is that of 2027-01-01, discounted to an earlier start.** With a past start, a stated growth compounded from too high a base, 203 t against 10 in one run. The field's comment says how. → test "reaches its stated volume on 2027-01-01"
+
+Changed: **A usage span above its devices' shortest lifespan is cut to it and listed.** The library refuses such a span, which refused the whole answer: three of eight at high effort. → test "usage span above its devices"
+
+Changed: **The growth and recurrent editors accept any decimal.** A generated weekly volume, or a workload of 0.05, opened on a value the browser refused to save unchanged: 28 of 96 recorded answers. This changes these editors for every user. → code "recurrent_quantities_from_constant.html"; code "recurrent_quantities_from_weekly_pattern.html"; code "weekly_pattern_builder.js"
+
+To confirm: **Should the hourly editor accept a negative growth rate?** The library computes a decline above −100 % a year, but the editor and its preview refuse one. A generated negative growth is set to 0 and listed for now; accepting it changes the editor for every user.
 
 ## #server-calls-scale
 

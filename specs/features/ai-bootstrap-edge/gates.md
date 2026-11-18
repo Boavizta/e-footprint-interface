@@ -17,13 +17,27 @@
 - **The `efootprint` dependency.** `pyproject.toml` and `poetry.lock` already pointed at the local
   checkout (`../e-footprint`, editable) before the run, uncommitted. The run leaves both files as
   it found them and commits neither.
-- **Not built, for the user to decide: a stated web volume is applied at the usage's start, not
-  at the web year.** A usage pattern's volume is the first value of its Growth projection inputs.
-  With a fleet in service since a past date, web usage starts on that date with today's stated
-  volume, so a stated growth rate compounds from too high a base (first run, case 03 rep 2: 40 %
-  a year from 2022-12 gave 203 t of user-device manufacturing against about 10 t elsewhere).
-  Without a stated growth nothing is off. The fix would discount the volume back from 2027-01-01
-  to the start, and the editor would then open on a figure the user did not write.
+- **The user's answers on the delivery page, read on 2026-11-18** (13 approved, 2 not read: the
+  two paragraphs saying where the Web + edge prompt file shows up). Applied, range
+  `9e74f2ac..91489c99`, built by an implementer and read by a reviewer:
+  - the hourly editor's limit is 10 years / 120 months again ("Don't increase the hourly editor's
+    limit. Beyond 10 years, web usage is cut and listed."); a deployment longer than it is refused;
+  - both cost lines carry two significant figures (0.12 and 0.15 US cent);
+  - asked in the conversation and answered there: a stated web volume is the one of 2027-01-01,
+    discounted by its growth back to an earlier start (the point this file held as "not built");
+    a usage span above its devices' shortest lifespan is cut and listed; a comment written as a
+    number is read as text; nested groups ship as they are, with "explore stronger models once
+    provider calls are asynchronous" added to `specs/features/ai-assistance/roadmap.md`.
+- **Decided by the supervisor, for the user to refuse on the delivery page: the growth and
+  recurrent editors accept any decimal.** The review of that range found that a generated value
+  could open in the editor on a number the browser refused to save unchanged (a weekly volume not
+  divisible by 7, in 28 of 96 recorded answers; a workload of 0.05; a call 0.33 times an hour),
+  against the rule `generated-values-editable`, whose test posts the form and never met the
+  browser. The inputs' `step` is now `any`, for every user of these editors; an imported modeling
+  with such values was blocked the same way.
+- **Open, asked in the conversation and not answered yet: a deployment that keeps installing for
+  more than 10 years** (a fleet "since 2015" with no end) is refused. It could be split by the
+  builder into consecutive deployments of 10 years at most, at the same rate, and listed.
 - **After the run, on 2026-11-18: a fix and an addition, on the user's word.** The user tried Web +
   edge on the local interface, met a provider failure, then a building whose cabinet was not
   grouped. What followed, all asked or approved in the conversation ("ok for the paid runs, and yes
@@ -55,7 +69,8 @@
    switch): `poetry run pytest tests/e2e/test_ai_bootstrap.py -k "web_edge_generation or scope_choice" --headed --slowmo 400`
    (prefix `PWDEBUG=1` to step through). It starts its own server and answers with handwritten
    answer 04. Look at the summary's edge checks after the web ones, the edge objects on the
-   canvas, and the generated web usage pattern opening on 12 years from 2024-01-01. In a real
+   canvas, and the generated web usage pattern opening on 10 years from 2024-01-01, its 12 years cut
+   and listed in the summary. In a real
    Web + edge generation, also read the summary's list "Changes made to the AI answer" (formerly
    "Catalog substitutions"): a device written among sub-groups reads "… → device … (moved)", a
    device no deployment runs reads "… → left out of the footprint (no deployment runs it)".
@@ -164,10 +179,12 @@ Cost of these calls: USD 0.095 (0.009 for the seven reproduction calls, then 0.0
   device figures drive the result and vary between calls on the same description (a sensor's
   manufacturing footprint from 0.1 to 5 kg, a controller's power from 5 to 15 W in the paid runs).
   Nothing in the code can catch it; the check is where a user does.
-- **Opening a generated web usage pattern of a fleet in service for years.** Its period can reach
-  12 years and more (20 at most): look at how the hourly editor and its preview respond.
-- **A description stating both a fleet in service and a growth of its web usage**: the volume
-  point under "Standing calls".
+- **A generated web usage pattern of a fleet in service for years.** Its period is cut at the
+  editor's 10 years, from its start, and the summary lists the cut: the last devices then outlive
+  the web usage. With a stated growth, its comment gives both volumes ("1,000 a month on
+  2027-01-01 as stated: 260 a month on 2023-01-01 at 40 % a year."): read it once on a real answer.
+- **A description of a declining usage.** A negative growth is set to 0 and listed; whether the
+  editor should accept one is asked in the plan (`#deployments-over-time`).
 - **A provider failure ("The AI provider could not complete the request").** The user met one on
   2026-11-18. The application log now holds one line per failure, `AI provider failure: <kind>
   after <seconds> s` (timeout, HTTP status, unfinished answer, or the error's class), and nothing
@@ -335,3 +352,8 @@ Known subtotal: 52.7979; unpriced: 145; unattributed: 0
 
 The fix and the coupling cost USD 11.94 of sub-agents (the other roles unchanged), the supervisor
 still unpriced, and USD 0.095 of paid sandbox calls.
+
+**After the user's answers (2026-11-18).** Collected again: known subtotal USD 62.20 over 992
+requests (implementer 12.77, reviewer 32.03, the other roles unchanged; the supervisor's 172
+requests unpriced). Applying the answers and the editor fix cost USD 9.41 of sub-agents and no
+paid call.
