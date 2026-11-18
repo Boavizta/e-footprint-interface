@@ -93,9 +93,10 @@ record with:
   local development data. Alternatively, import the exported `.e-f.json` through the builder's normal **Open file** action.
 
 `--max-cost-usd` (default 3) stops launching calls past that total. `--effort` maps to
-`output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral). The Flash entry always
-uses the production adapter's fixed low effort, 16,000-token limit, 45-second timeout and no SDK retries, regardless
-of `--effort`. Other entries use their configured default when effort is omitted and record it in `request_params`.
+`output_config.effort` (Anthropic), `reasoning.effort` (OpenAI) and `reasoning_effort` (Mistral). Without `--effort`,
+the Flash entry goes through the production adapter and its pin: low effort, 16,000-token limit, 45-second timeout and
+no SDK retries. An explicit `--effort` sends Flash through the sandbox's Mistral adapter at that effort, to compare
+efforts past the pin. Other entries use their configured default when effort is omitted and record it in `request_params`.
 
 ## Models
 
@@ -116,8 +117,8 @@ of `--effort`. Other entries use their configured default when effort is omitted
 The first full run (`runs/20261028-164221`, 3 cases x 7 models x 2 reps) narrowed the default to Haiku and Luna:
 Sonnet and Large 4 cost 10x for no structural gain, Medium and Small take the user count as the journey volume.
 The three open-weight models joined the default run on 2026-10-29 through the Mistral platform. The GLM entries
-default to effort `low` because reasoning cannot be switched off. Flash keeps that fixed through the production
-adapter; the other CLI entries accept an `--effort` override.
+default to effort `low` because reasoning cannot be switched off; Flash reads it from the production adapter's pin.
+Every entry accepts an `--effort` override.
 
 ## Design choices worth challenging
 

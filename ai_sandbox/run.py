@@ -23,7 +23,6 @@ import json
 import re
 import time
 import traceback
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -40,22 +39,7 @@ SANDBOX = Path(__file__).parent
 CASES_DIR = SANDBOX / "cases"
 RUNS_DIR = SANDBOX / "runs"
 
-
-@dataclass(frozen=True)
-class Scope:
-    system_prompt: str
-    validate: object  # data -> (spec, ignored fields)
-    build: object     # answer text -> GeneratedModel
-
-
-def _production(name: str) -> Scope:
-    """A production scope's instructions, schema and builder."""
-    return Scope(service.system_prompt(name),
-                 lambda data: dsl.validate_tolerating_extras(data, service.SCOPES[name].schema),
-                 lambda text: service.build_answer(text, name))
-
-
-SCOPES = {name: _production(name) for name in service.SCOPES}
+# A scope is named as production names it: its instructions, schema and builder are read from `service.SCOPES`.
 DEVICE_TOTAL_TOLERANCE = 0.2  # "about 1,500 buildings", "around 40 sensors"
 WEB_YEAR_START = datetime.combine(dsl.WEB_YEAR_START, datetime.min.time(), tzinfo=timezone.utc)
 
@@ -140,7 +124,7 @@ def device_total_checks(totals: dict[str, float], expected: dict[str, float]) ->
     return results
 
 
-def evaluate(data: dict, case: dict, export_path: Path | None, scope: Scope = SCOPES["web"]) -> dict:
+def evaluate(data: dict, case: dict, export_path: Path | None, scope: str = "web") -> dict:
     """Validate -> build -> compute -> export -> reload. Each stage records ok/error."""
     from efootprint.api_utils.json_to_system import json_to_system
     from efootprint.api_utils.system_to_json import system_to_json
@@ -148,7 +132,7 @@ def evaluate(data: dict, case: dict, export_path: Path | None, scope: Scope = SC
 
     result = {"schema_ok": False, "build_ok": False, "compute_ok": False, "export_ok": False}
     try:
-        spec, extra_fields = scope.validate(data)
+        spec, extra_fields = dsl.validate_tolerating_extras(data, service.SCOPES[scope].schema)
         result["schema_ok"] = True
         if extra_fields:
             result["extra_fields_ignored"] = extra_fields
@@ -167,7 +151,7 @@ def evaluate(data: dict, case: dict, export_path: Path | None, scope: Scope = SC
             for obj in section)}
     try:
         start = time.perf_counter()
-        generated = scope.build(json.dumps(data))
+        generated = service.build_answer(json.dumps(data), scope)
         system, resolutions = generated.system, generated.resolutions
         result["build_ok"] = True
         if system.edge_usage_patterns:
@@ -231,8 +215,8 @@ def model_error(result: dict) -> str | None:
     return None
 
 
-def attempt(case: dict, model: str, prompt: str, effort: str | None, export_path: Path, scope: Scope) -> dict:
-    completion = providers.complete(model, scope.system_prompt, prompt, effort)
+def attempt(case: dict, model: str, prompt: str, effort: str | None, export_path: Path, scope: str) -> dict:
+    completion = providers.complete(model, service.system_prompt(scope), prompt, effort)
     cost = completion.cost_usd(model)
     result = {
         "raw_output": completion.text, "input_tokens": completion.input_tokens,
@@ -247,12 +231,11 @@ def attempt(case: dict, model: str, prompt: str, effort: str | None, export_path
     return result
 
 
-def run_one(case: dict, model: str, rep: int, effort: str | None, retries: int, run_dir: Path, scope_name: str) -> dict:
-    scope = SCOPES[scope_name]
+def run_one(case: dict, model: str, rep: int, effort: str | None, retries: int, run_dir: Path, scope: str) -> dict:
     stem = f"{case['id']}__{model}__r{rep}"
-    record = {"case": case["id"], "model": model, "rep": rep, "effort": effort, "scope": scope_name,
+    record = {"case": case["id"], "model": model, "rep": rep, "effort": effort, "scope": scope,
               "timestamp": datetime.now().isoformat(timespec="seconds"),
-              "system_prompt_chars": len(scope.system_prompt), "user_prompt": case["user_prompt"]}
+              "system_prompt_chars": len(service.system_prompt(scope)), "user_prompt": case["user_prompt"]}
     attempts, prompt = [], case["user_prompt"]
     try:
         for _ in range(retries + 1):
@@ -288,7 +271,7 @@ def replay(run_dir: Path):
         data, first_ok, parse_error = parse_json(record["raw_output"])
         record.update({"json_first_attempt_ok": first_ok, "json_ok": data is not None, "json_error": parse_error})
         if data is not None:
-            scope = SCOPES[record.get("scope", config.get("scope", "web"))]
+            scope = record.get("scope", config.get("scope", "web"))
             record.update(evaluate(data, cases[record["case"]], path.with_suffix(".e-f.json"), scope))
         path.write_text(json.dumps(record, indent=2))
         print(path.name, summary_line(record))
@@ -309,7 +292,7 @@ def summary_line(r: dict) -> str:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cases", nargs="*", help="case id prefixes, e.g. 01 02; default: every case of the scope")
-    parser.add_argument("--scope", choices=sorted(SCOPES), default="web", help="prompt and builder (default web)")
+    parser.add_argument("--scope", choices=sorted(service.SCOPES), default="web", help="prompt and builder (default web)")
     parser.add_argument("--models", nargs="*", default=providers.DEFAULT_MODELS)
     parser.add_argument("--reps", type=int, default=1)
     parser.add_argument("--effort", default=None, help="low|medium|high; omitted = provider default")
@@ -329,7 +312,7 @@ def main():
                 case = c
         out = RUNS_DIR / "dry_run"
         out.mkdir(parents=True, exist_ok=True)
-        result = evaluate(json.loads(path.read_text()), case, out / f"{path.stem}.e-f.json", SCOPES[args.scope])
+        result = evaluate(json.loads(path.read_text()), case, out / f"{path.stem}.e-f.json", args.scope)
         print(json.dumps({k: v for k, v in result.items() if "traceback" not in k}, indent=2))
         return
 
@@ -340,7 +323,7 @@ def main():
     (run_dir / "config.json").write_text(json.dumps(
         {"cases": [c["id"] for c in cases], "models": args.models, "reps": args.reps, "effort": args.effort,
          "retries": args.retries, "scope": args.scope,
-         "system_prompt": SCOPES[args.scope].system_prompt}, indent=2))
+         "system_prompt": service.system_prompt(args.scope)}, indent=2))
     total_cost = 0.0
     unknown_cost = False
     for case, model, rep in itertools.product(cases, args.models, range(1, args.reps + 1)):

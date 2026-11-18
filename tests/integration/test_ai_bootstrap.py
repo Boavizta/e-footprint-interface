@@ -85,7 +85,7 @@ def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, case_id, answer, f
     case = run.load_cases([case_id])[0]
 
     result = run.evaluate(json.loads((CASES / f"{answer}.json").read_text()), case, tmp_path / f"{answer}.e-f.json",
-                          run.SCOPES["web_edge"])
+                          "web_edge")
 
     assert all(result[k] for k in ("schema_ok", "build_ok", "compute_ok", "export_ok")), result
     assert all(result["checks"].values()), result["checks"]
