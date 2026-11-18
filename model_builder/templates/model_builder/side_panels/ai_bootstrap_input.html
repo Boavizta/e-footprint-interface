@@ -28,8 +28,8 @@
         <textarea id="ai-description" name="description" class="form-control" rows="10" required>{{ ai_prompt }}</textarea>
         {% if ai_error %}<p role="alert" class="text-danger mt-2">{{ ai_error }}</p>{% endif %}
     </form>
-    <p class="small mt-3" data-ai-scope="web">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.1 US cent (USD 0.001). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
-    <p class="small mt-3" data-ai-scope="web_edge">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.2 US cent (USD 0.002). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
+    <p class="small mt-3" data-ai-scope="web">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.12 US cent (USD 0.0012). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
+    <p class="small mt-3" data-ai-scope="web_edge">Uses zai-glm-5-3-flash on Mistral infrastructure; your description is sent to Mistral. Indicative cost: about 0.15 US cent (USD 0.0015). Estimated impact: typically below 1 g CO2-eq, based on EcoLogits estimates for the parent model. These are uncertain expectations, not caps or measurements. A call-specific estimate will be shown after generation.</p>
     <p class="small">We do not log your prompt or the generated response. Latency and estimated cost may be logged. Save your description if you want to keep it. These generation details won’t be available after closing this panel.</p>
 </div>
 {% endblock %}

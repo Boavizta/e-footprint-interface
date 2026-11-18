@@ -193,7 +193,7 @@ def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
     panel = page.locator('[data-ai-bootstrap-panel="input"]')
     web, web_edge = panel.locator('[data-ai-scope="web"]'), panel.locator('[data-ai-scope="web_edge"]')
     expect(page.get_by_label("Web only")).to_be_checked()
-    expect(web.last).to_contain_text("USD 0.001")
+    expect(web.last).to_contain_text("USD 0.0012")
     for index in range(web.count()):
         expect(web.nth(index)).to_be_visible()
         expect(web_edge.nth(index)).to_be_hidden()
@@ -205,7 +205,7 @@ def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
         expect(web.nth(index)).to_be_hidden()
         expect(web_edge.nth(index)).to_be_visible()
     expect(web_edge.first).to_contain_text("Which devices does your system deploy")
-    for disclosed in ("zai-glm-5-3-flash", "USD 0.002", "below 1 g CO2-eq"):
+    for disclosed in ("zai-glm-5-3-flash", "USD 0.0015", "below 1 g CO2-eq"):
         expect(web_edge.last).to_contain_text(disclosed)
     expect(page.locator("#ai-description")).to_have_value(DESCRIPTION)
 
@@ -223,7 +223,7 @@ def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled)
     for index in range(web.count()):
         expect(web.nth(index)).to_be_hidden()
         expect(web_edge.nth(index)).to_be_visible()
-    expect(web_edge.last).to_contain_text("USD 0.002")
+    expect(web_edge.last).to_contain_text("USD 0.0015")
 
 
 @titled("ai-bootstrap-edge#scope-choice: Web + edge generation shows edge objects; a web usage cut to 10 years is "
