@@ -14,7 +14,8 @@ canvas.
 
 ## The change
 
-Above the description, the user chooses **Web only** (the default) or **Web + edge**. Web + edge
+Above the description, the user chooses **Web only** or **Web + edge**. Web only is selected when the panel
+opens, or Web + edge when Edge modeling is on. Web + edge
 covers the deployed devices, what they run, how many are deployed and for how long, the servers they
 call, and the usage journeys of people around them, such as a dashboard. There is no edge-only
 choice: an edge system almost always reports to servers, and the people using its data cost little
@@ -39,7 +40,7 @@ The design page of today's flow is
 [Start a modeling with AI](../../design/journeys/ai-bootstrap.html). The changes, screen by screen:
 
 - **The description panel** (screen 3) reads the scope choice above the description, with **Web only**
-  selected. The guidance paragraphs and the disclosure line below the form follow the selected
+  selected, or **Web + edge** when Edge modeling is on. The guidance paragraphs and the disclosure line below the form follow the selected
   scope; changing it keeps what the user typed.
 - **The refused generation** (screen 5) shows the error with the description and the scope the
   user had chosen.
@@ -48,8 +49,9 @@ The design page of today's flow is
 
 ## Rules no screen shows
 
-- **web-by-default** Opening Start with AI selects Web only, whatever was chosen in an earlier
-  bootstrap.
+- **web-by-default** Opening Start with AI does not recall the scope of an earlier bootstrap: with
+  Edge modeling off, Web only is selected.
+- **edge-modeling-preselects** With Edge modeling on, opening Start with AI selects Web + edge.
 - **web-only-stays-web** A Web only generation creates no edge object.
 - **edge-scope-builds-edge** A Web + edge description of deployed devices produces a modeling with
   those devices, what runs on them, how many are deployed each period and how long they stay in
@@ -78,7 +80,10 @@ The design page of today's flow is
 ## Not doing
 
 - An edge-only scope: Web + edge covers a fleet with no web usage.
-- Reading the scope from the description, or from the Edge modeling toggle.
+- Reading the scope from the description.
+- Replacing the scope choice with the Edge modeling toggle, or turning the toggle on from the choice:
+  the toggle only sets the scope selected when the panel opens, and a generation that creates edge
+  objects turns it on.
 - A different AI model or reasoning effort for Web + edge: on the sandbox cases, more reasoning
   brought no gain for a slower, costlier call.
 - An installed base: devices already in service are described as deployments over time.

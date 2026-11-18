@@ -24,6 +24,13 @@
   a year from 2022-12 gave 203 t of user-device manufacturing against about 10 t elsewhere).
   Without a stated growth nothing is off. The fix would discount the volume back from 2027-01-01
   to the start, and the editor would then open on a figure the user did not write.
+- **After the run, on 2026-11-18: a fix and an addition, on the user's word.** The user tried Web +
+  edge on the local interface, met a provider failure, then a building whose cabinet was not
+  grouped. What followed, all asked or approved in the conversation ("ok for the paid runs, and yes
+  log the provider failure kind too", "ok add the coupling as a small piece after the fix"): the
+  provider failure's kind is logged; sandbox cases 05 and 06, three prompt edits and two builder
+  changes for groups inside groups; the panel opens on Web + edge when Edge modeling is on. Each
+  was built by an implementer and read by a reviewer; the range is `df9516c4..8949968d`.
 - **Supervisor model.** The supervisor ran on `claude-fable-5-2`; `implementer-hard` pins
   `claude-fable-5-1[1m]`.
 
@@ -33,7 +40,9 @@
    feature's archive. No paid call is made by these steps.
    1. `AI_BOOTSTRAP_ENABLED=1 MISTRAL_API_KEY=dummy poetry run python manage.py runserver`, open
       `http://localhost:8000/model_builder/`, then Modeling actions → Start with AI.
-   2. Web only is checked, with its guidance and its cost and impact line.
+   2. Web only is checked, with its guidance and its cost and impact line. (With the navbar's
+      Edge modeling toggle on, the panel opens on Web + edge instead: turn it on, start with AI
+      again, and look.)
    3. Type a description, check Web + edge: the guidance and the cost and impact line change, the
       typed text stays. Read the Web + edge guidance and disclosure wording: both are new copy.
       The web part of the Web + edge guidance leaves out two hints the Web only text gives
@@ -46,7 +55,10 @@
    switch): `poetry run pytest tests/e2e/test_ai_bootstrap.py -k "web_edge_generation or scope_choice" --headed --slowmo 400`
    (prefix `PWDEBUG=1` to step through). It starts its own server and answers with handwritten
    answer 04. Look at the summary's edge checks after the web ones, the edge objects on the
-   canvas, and the generated web usage pattern opening on 12 years from 2024-01-01.
+   canvas, and the generated web usage pattern opening on 12 years from 2024-01-01. In a real
+   Web + edge generation, also read the summary's list "Changes made to the AI answer" (formerly
+   "Catalog substitutions"): a device written among sub-groups reads "… → device … (moved)", a
+   device no deployment runs reads "… → left out of the footprint (no deployment runs it)".
 
    Verdict:
 
@@ -119,6 +131,33 @@ case's facts: 30 g of electronics), the gateway's from 25 to 60 kg. On case 04 s
 electricity dominates and the controller's power ranges from 5 to 15 W (the facts: 8 W). Lifespans
 and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizon.
 
+**After the run, 2026-11-18: groups inside groups.** Every count below is of first attempts, since
+production makes one request; all at low effort unless said. Case 05 is the user's description,
+verbatim ("A smart building in France, with 7 floors, and in each floor 5 sensors + an electrical
+cabinet with an industrial PC and 5 merging units…"): right is Cabinet in Floor, Floor × 7 in
+Building, one building, 35 sensors, 7 PCs, 35 merging units, no web usage. Case 06 is held out (a
+growing chain of stores: a server at the store's root, 3 lanes of a scanner and a terminal, a cold
+room of 4 probes); no prompt example has its shape.
+
+| Build | Run | 05 fully right | 05, the misses | 03, 04, 06 |
+|---|---|---|---|---|
+| `a6c7fe59`, before the fix | six calls with production's parameters, one through the dev server | 0 of 6 (the user's answer and five more) | no answer groups the cabinet; 2 of 5 count 35 / 7 / 35; one refused (the floor names its building as a sub-group); one floor alone; one building a month | not run |
+| `becc50e2`, first prompt edit | `20261118-075313` | 1 of 3 | two answers give a function to the PC alone, so sensors and merging units are left out; one of them refused first (a device written as a sub-group) | 03: 2 of 3. 04: 1 of 3, one answer writing the country fleets as groups (17.9 million controllers) |
+| `2cbe1e46`, second edit, builder repair | `20261118-080103` | 2 of 4 | one without the Building group; one inventing a web usage on screens (1.3 million kg) and a fourth device | 03: 3 of 4. 04: 3 of 4, no group in any |
+| `8a11e0dc`, third edit | `20261118-090032`, `-090921`, `-091235` | 2 of 4 | two without the Building group, one of them deploying from 2017 with no end; no web usage in any | 03: 5 of 8 (one refused, a comment written as a number; one fleet deployed from 2027; one server not shared). 04: 2 of 3 (one refused, a start date in 2028). 06: device counts right in 4 of 4, the cold room grouped in 0 of 4, one refused first and written in Spanish |
+| `8a11e0dc`, high effort | `20261118-091749` | 2 of 4 | two refused (a usage span above a device's lifespan) | 06: 1 of 4 fully right, counts right in 2 of 4 first attempts, two refused; 16 to 107 s a call, about twice the cost |
+
+Medium effort is refused by the model (HTTP 400). High effort brings no gain and half its calls pass
+production's 45 s timeout, as the spec's "Not doing" already held for cases 03 and 04. What three
+prompt edits did not move: the outermost group of a single site left out in one answer of four to
+two of four, and (case 06) a container holding one sub-group of its kind flattened into its parent.
+The prompt's nested example (trains, cars, racks) has case 05's shape, which is why 06 exists.
+Read by the reviewer on the raw answers, not built: at high effort three answers of eight set a
+usage span above a device's lifespan and were refused; the builder could cut the span and list it.
+
+Cost of these calls: USD 0.095 (0.009 for the seven reproduction calls, then 0.0165, 0.0173,
+0.0057, 0.0103, 0.0128 and 0.0237 a run).
+
 ## Watch in normal use
 
 - **A Web + edge generation, at the summary's "Device characteristics" check.** The answers'
@@ -130,17 +169,16 @@ and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizo
 - **A description stating both a fleet in service and a growth of its web usage**: the volume
   point under "Standing calls".
 - **A provider failure ("The AI provider could not complete the request").** The user met one on
-  2026-11-18 on the smart-building description below; six calls made after it (five with the
-  production call's parameters, one through the running dev server) all completed, in 7 to 20 s.
-  The adapter keeps no trace of a failure's kind (timeout, HTTP status, unfinished answer), so the
-  cause is unknown. For the user to decide: log that kind, which holds no prompt and no answer.
-- **A description with groups inside groups** ("a building of 7 floors, on each floor 5 sensors and
-  a cabinet with an industrial PC and 5 merging units", one building, no growth). Of the five
-  answers of 2026-11-18 (USD 0.009 with the sixth call, beyond the two approved runs): one named
-  the building as a sub-group of its floor and was refused ("Unknown or cyclic edge device
-  groups"); one wrote the floor group alone, so 5 sensors where 35 are described; one put a
-  building in service every month; two wrote floor × 7 in one building. Cases 03 and 04 hold no
-  nested group and no single site: a prompt edit here needs its own case and paid runs.
+  2026-11-18. The application log now holds one line per failure, `AI provider failure: <kind>
+  after <seconds> s` (timeout, HTTP status, unfinished answer, or the error's class), and nothing
+  of the prompt or the answer. On that day the provider answered three of some forty calls with
+  HTTP 429 "not enough capacity", dropped one, and took 50 and 72 s on two, past production's 45 s
+  timeout: read the log before suspecting the code.
+- **A description with groups inside groups**, at the summary's "Devices per group" check and its
+  "Changes made to the AI answer" list. Measured under "Evidence": about half of the answers on
+  the user's building are fully right, the others leaving out the outermost group (a floor is then
+  deployed where a building is described); a container holding one sub-group of its kind is often
+  flattened, with the right device counts.
 
 ## Parked
 
@@ -284,3 +322,16 @@ Unassigned-to-task overhead: 40.8548. No inference about completed-task quality 
 The supervisor's 74 requests are unpriced, the ledger's rates not knowing `claude-fable-5-2`, so
 the subtotal of USD 40.85 leaves them out. The paid sandbox calls are outside the ledger: twelve
 calls, USD 0.019 (under "Evidence").
+
+**After the run (2026-11-18, the fix and the coupling).** The same report, collected again:
+
+```
+Usage snapshot: 823 requests · USD API-equivalent (tokens only) · rates 2026-09-30
+Known subtotal: 52.7979; unpriced: 145; unattributed: 0
+  implementer: 8.9775 (follow-up 1.3023); 161 requests; claude-fable-5-1, claude-haiku-5-5, claude-opus-5-5; effort high, medium
+  reviewer: 26.4162 (follow-up 14.6897); 395 requests; claude-opus-5-5; effort high
+  supervisor: 0.0000 (follow-up 0.0000); 145 requests; claude-fable-5-2; effort high
+```
+
+The fix and the coupling cost USD 11.94 of sub-agents (the other roles unchanged), the supervisor
+still unpriced, and USD 0.095 of paid sandbox calls.

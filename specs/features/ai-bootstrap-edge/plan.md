@@ -5,11 +5,13 @@ gains the edge sections; the library scales server calls with every device deplo
 
 ## #scope-choice
 
-Above the description, a Web only / Web + edge radio, Web only checked; a stylesheet rule shows the checked scope's guidance and disclosure alone, keeping the typed text.
+Above the description, a Web only / Web + edge radio, Web only checked unless Edge modeling is on; a stylesheet rule shows the checked scope's guidance and disclosure alone.
 
 A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions.
 
-Changed: **One browser test and five files beyond the plan.** The test alone sees the editor keep a 12-year period on reopening. The radio lives in the input template and its stylesheet; the changelog and the architecture page follow the feature.
+Changed: **The panel opens on Web + edge when Edge modeling is on.** Asked by the user after trying it. The toggle's script checks the radio once on a fresh panel; a refused panel keeps the posted scope. → statement "unless Edge modeling is on"; test "opens on Web + edge"; code "edge_modeling_toggle.js"
+
+Changed: **One browser test and five files beyond the plan.** The test alone sees the editor keep a 12-year period on reopening. The radio lives in the input template and its stylesheet; the changelog and the architecture page follow the feature. → test "12-year web usage saved unchanged"; test "test_a_provider_failure_keeps"; code "ai_bootstrap_input.html"; code "bs_main.css"; code "bs_main.css.map"; code "custom.scss"
 
 To confirm: **Should both cost lines carry two significant figures?** Rounded to one like Web only, Web + edge reads about 0.2 US cent against 0.1, twice the cost; measured, it is 0.15 against 0.12. Two figures would change the approved Web only line.
 
@@ -31,11 +33,13 @@ Changed: **The Web + edge prompt is a product file no place names.** It is the s
 
 ## #edge-instructions
 
-Web + edge gets its own whole prompt: the sandbox's measured one, edited only for the new format and for what cases 03 and 04 missed.
+Web + edge gets its own whole prompt: the sandbox's measured one, edited only for the new format and for what cases 03 to 05 missed.
 
 Its edge material runs through the web text, from the paradigms to the field notes, so an addendum would leave the web framing contradicting it. The cost is a copy of the web rules, which a web edit mirrors. Cases 03 and 04 re-run at low effort, each paid run on the user's word; the disclosure's figures come from them.
 
-Changed: **The prompt dates the description's present to 2027-01-01.** In the first paid run four of six answers put today in 2024 to 2026, up to doubling the fleet; after the edit five of six count it right.
+Changed: **The prompt dates the description's present to 2027-01-01.** In the first paid run four of six answers put today in 2024 to 2026, up to doubling the fleet; after the edit five of six count it right. → code "system_prompt_web_edge.md"
+
+Changed: **Two cases join the measured ones: groups inside groups, and a held-out chain of stores.** On the user's building no answer of six grouped the cabinet; after three prompt edits half are fully right, the rest omitting the building group. → statement "03 to 05"; test "answer 05"; test "held-out answer 06"
 
 ## #edge-format
 
@@ -66,6 +70,12 @@ Changed: **An omitted reserved storage is a quarter of the device's storage, the
 Devices described as deployed together become an optional group with counts per group and sub-groups; a deployment then counts one group, each device as many times as it holds.
 
 Grouping stays the AI's choice: the sandbox's group-required check remains informative, and device totals are the correctness check. Groups are built children first, since a group takes its sub-groups at construction.
+
+Changed: **A device written among a group's sub-groups counts as that device.** One nested answer in three was refused for that slip; the summary lists the move. A name that is neither a group nor a device still refuses the answer. → test "written as a sub-group"; test "declared neither as a group"; test "a sub-group no group declares"
+
+Changed: **A device no deployment runs is listed as left out of the footprint.** It shows in its group on the canvas, yet the library counts neither its use nor its manufacturing. → test "is listed as left out"
+
+Changed: **The summary's "Catalog substitutions" heading becomes "Changes made to the AI answer".** It already covered renamed labels and dropped comments, and now moved and left-out devices. The Web only summary changes too. → code "ai_bootstrap_summary.html"
 
 ## #deployments-over-time
 
