@@ -210,6 +210,22 @@ def test_scope_choice_switches_guidance_and_disclosure(empty_model_builder):
     expect(page.locator("#ai-description")).to_have_value(DESCRIPTION)
 
 
+@titled("ai-bootstrap-edge#scope-choice: with Edge modeling on, Start with AI opens on Web + edge, showing its "
+        "guidance and disclosure alone")
+def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled):
+    builder = edge_modeling_enabled
+    page = builder.page
+    builder.start_ai_bootstrap()
+    panel = page.locator('[data-ai-bootstrap-panel="input"]')
+    web, web_edge = panel.locator('[data-ai-scope="web"]'), panel.locator('[data-ai-scope="web_edge"]')
+
+    expect(page.get_by_label("Web + edge")).to_be_checked()
+    for index in range(web.count()):
+        expect(web.nth(index)).to_be_hidden()
+        expect(web_edge.nth(index)).to_be_visible()
+    expect(web_edge.last).to_contain_text("USD 0.002")
+
+
 @titled("ai-bootstrap-edge#scope-choice: a generated Web + edge modeling shows its edge objects, and a 12-year web "
         "usage saved unchanged keeps its period")
 def test_web_edge_generation_keeps_a_long_web_usage_period(empty_model_builder, isolated_bootstrap):

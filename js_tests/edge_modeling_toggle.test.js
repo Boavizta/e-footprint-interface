@@ -105,3 +105,43 @@ test("rebuild is skipped when the leaderline module is absent", () => {
 
     expect(() => handleEdgeModelingChange({ target: toggle })).not.toThrow();
 });
+
+function renderAiScopeChoice({ marked }) {
+    document.body.insertAdjacentHTML("beforeend", `
+        <fieldset ${marked ? "data-ai-scope-follows-edge-modeling" : ""}>
+            <input type="radio" name="scope" id="ai-scope-web" value="web" checked />
+            <input type="radio" name="scope" id="ai-scope-web-edge" value="web_edge" />
+        </fieldset>
+    `);
+}
+
+function checkedScope() {
+    return document.querySelector('input[name="scope"]:checked').value;
+}
+
+test("ai-bootstrap-edge#scope-choice: a fresh panel with Edge modeling on selects Web + edge once, then keeps the user's choice", () => {
+    renderLatchedToggle();
+    renderAiScopeChoice({ marked: true });
+
+    applyEdgeModelingState();
+
+    expect(checkedScope()).toBe("web_edge");
+    expect(document.querySelector("[data-ai-scope-follows-edge-modeling]")).toBeNull();
+    document.getElementById("ai-scope-web").checked = true;
+    applyEdgeModelingState();
+    expect(checkedScope()).toBe("web");
+});
+
+test("ai-bootstrap-edge#scope-choice: Edge modeling off, or a refused generation's unmarked panel, keeps the rendered scope", () => {
+    renderUnlatchedToggle();
+    renderAiScopeChoice({ marked: true });
+    applyEdgeModelingState();
+    expect(checkedScope()).toBe("web");
+    expect(document.querySelector("[data-ai-scope-follows-edge-modeling]")).toBeNull();
+
+    renderUnlatchedToggle();
+    localStorage.setItem(EDGE_MODELING_STORAGE_KEY, "on");
+    renderAiScopeChoice({ marked: false });
+    applyEdgeModelingState();
+    expect(checkedScope()).toBe("web");
+});

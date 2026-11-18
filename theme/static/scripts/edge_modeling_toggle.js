@@ -1,9 +1,12 @@
 /* Edge modeling toggle — drives `body.edge-modeling-on/off` from a localStorage flag and the
    server-rendered latch state. CSS keyed off that body class hides edge-paradigm add-buttons.
+   A freshly opened AI bootstrap panel marks its scope fieldset; with Edge modeling on, the marker
+   selects Web + edge once, so a later click on the radio is never overridden.
    See conventions.md → JavaScript (IIFE + data-action dispatch). */
 (function () {
     const EDGE_MODELING_STORAGE_KEY = "efootprint.edgeModeling";
     const TOGGLE_ACTION = "edge-modeling-toggle";
+    const AI_SCOPE_MARKER = "data-ai-scope-follows-edge-modeling";
 
     function readEdgeModelingPreference() {
         return localStorage.getItem(EDGE_MODELING_STORAGE_KEY) === "on" ? "on" : "off";
@@ -11,6 +14,17 @@
 
     function writeEdgeModelingPreference(value) {
         localStorage.setItem(EDGE_MODELING_STORAGE_KEY, value === "on" ? "on" : "off");
+    }
+
+    function preselectAiScope(edgeModelingOn) {
+        const fieldset = document.querySelector(`[${AI_SCOPE_MARKER}]`);
+        if (!fieldset) {
+            return;
+        }
+        fieldset.removeAttribute(AI_SCOPE_MARKER);
+        if (edgeModelingOn) {
+            document.getElementById("ai-scope-web-edge").checked = true;
+        }
     }
 
     function applyEdgeModelingState() {
@@ -27,6 +41,7 @@
         if (toggle) {
             toggle.checked = effectiveOn;
         }
+        preselectAiScope(effectiveOn);
 
         // Toggling hides/shows the edge-paradigm add-buttons (display:none), which reflows the
         // canvas and leaves the leader lines between cards stale — same as an accordion show/hide.

@@ -2,7 +2,7 @@
 {% block panel_body %}
 <div data-ai-bootstrap-panel="input">
     <p>Beta — a first version, built to improve with your feedback and contributions while keeping strong ecodesign principles. Use Feedback in the top right.</p>
-    <fieldset class="mb-3">
+    <fieldset class="mb-3"{% if ai_scope_follows_edge_modeling %} data-ai-scope-follows-edge-modeling{% endif %}>
         <legend class="form-label fs-6">What does your system run on?</legend>
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="radio" form="sidePanelForm" name="scope" id="ai-scope-web" value="web"{% if ai_scope != "web_edge" %} checked{% endif %}>

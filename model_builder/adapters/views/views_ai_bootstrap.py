@@ -38,9 +38,10 @@ def start_ai_bootstrap(request):
     narrate("The active slot **restarts from an empty modeling**, loaded by `load_system_into_session` like any "
             "other, its interface settings dropped. The other slot keeps its own.", lambda: {"slot": repository.slot})
     model_web = load_system_into_session(repository, get_example_system_data(SCRATCH_ID), workspace=workspace)
-    narrate("The builder comes back with **the description panel open and empty, on Web only**, and no example picker.")
-    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace,
-                                extra_context={"ai_panel": "input", "ai_prompt": "", "ai_scope": "web"})
+    narrate("The builder comes back with **the description panel open and empty, on Web only, or on Web + edge where "
+            "the browser's Edge modeling toggle is on**, and no example picker.")
+    return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace, extra_context={
+        "ai_panel": "input", "ai_prompt": "", "ai_scope": "web", "ai_scope_follows_edge_modeling": True})
 
 
 def _impact_label(value):
