@@ -75,9 +75,9 @@ Growth projection inputs are what the only hourly editor prefills; a raw series 
 
 Changed: **A usage pattern may state its own start date.** The clause needs the usage's own start date and no place added the field; the Web + edge prompt alone offers it. → code "system_prompt_web_edge.md"
 
-Changed: **The hourly editor's limit goes from 10 to 20 years, in one place.** Case 04 needs 12, and the editor silently cut a longer generated period on opening. Beyond 20, web usage is cut and listed; a deployment is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"
+Changed: **The hourly editor's limit goes from 10 to 20 years, in one place.** Case 04 needs 12, and the editor silently cut a longer generated period on opening. Beyond 20, web usage is cut and listed; a deployment is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"; test "beyond the editor's limit"
 
-Changed: **A deployment may state an end date.** Case 04's Dutch fleet no longer grows, and deploying it through 2027 put it a third too high; stated, the end date closes that deployment's period. → statement "end earlier"
+Changed: **A deployment may state an end date.** Case 04's Dutch fleet no longer grows, and deploying it through 2027 put it a third too high; stated, the end date closes that deployment's period. → statement "end earlier"; test "stated end date closes"
 
 To confirm: **Is 20 years the right limit for the hourly editor?** A 20-year variant of case 04 peaks near 375 MB and saves 4.9 MB; 30 years would cover devices kept 15 years from an older start, near 520 MB.
 

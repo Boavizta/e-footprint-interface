@@ -26,13 +26,15 @@ feature replaces the experimental UI and AI editing path; PoC close-out follows 
 then asynchronous AI provider I/O, then Boavizta-owned API credentials and provider-contract clarification. General AI editing and the broader architecture refactoring are
 outside this first feature.
 
-### AI bootstrap for edge systems — delivery approved, implementation pending
+### AI bootstrap for edge systems — implemented, awaiting the answers on its delivery and the archive
 
 [`features/ai-bootstrap-edge/spec.md`](features/ai-bootstrap-edge/spec.md): a Web only / Web + edge
 scope choice in the description panel, with instructions, guidance and review checklist per scope,
 and optional edge device groups. First step of the [AI assistance roadmap](features/ai-assistance/roadmap.md)'s
 follow-ups. Spec and plan approved on 2026-11-17; delivery in four lots (one in e-footprint) approved on 2026-11-17;
-then `feature-implement`.
+the four lots built and reviewed on 2026-11-18. Open: the decisions to answer on the delivery page and
+the gates of [`features/ai-bootstrap-edge/gates.md`](features/ai-bootstrap-edge/gates.md); the interface's
+deployment waits for the `efootprint` release that scales server calls with every device. Then `feature-archive`.
 
 ### Public modeling sharing — specification reviewed, implementation pending
 
