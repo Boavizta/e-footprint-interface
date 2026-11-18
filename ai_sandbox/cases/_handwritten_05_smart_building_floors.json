@@ -1,0 +1,42 @@
+{
+  "system_name": "Smart building in France",
+  "servers": [
+    {"name": "IoT ingestion API", "kind": "cpu"},
+    {"name": "Sensor database", "kind": "cpu", "storage_gb": 100}
+  ],
+  "jobs": [
+    {"name": "Receive sensor reading", "server": "IoT ingestion API", "data_transferred_kb": 1, "request_duration_s": 0.05},
+    {"name": "Store sensor reading", "server": "Sensor database", "data_stored_kb": 1}
+  ],
+  "edge_devices": [
+    {"name": "Floor sensor", "kind": "appliance", "power_w": 0.5, "idle_power_w": 0.2, "embodied_kg": 1, "lifespan_years": 8,
+     "comments": {"power_w": "Mains or battery sensor with a radio uplink"}},
+    {"name": "Industrial PC", "kind": "computer", "cores": 4, "ram_gb": 8, "storage_gb": 128, "power_w": 25, "idle_power_w": 12,
+     "base_ram_gb": 2, "base_storage_gb": 20, "embodied_kg": 60, "lifespan_years": 8,
+     "comments": {"power_w": "Fanless industrial PC running the protection supervision"}},
+    {"name": "Merging unit", "kind": "appliance", "power_w": 10, "idle_power_w": 8, "embodied_kg": 8, "lifespan_years": 15,
+     "comments": {"power_w": "Substation-grade merging unit sampling currents and voltages"}}
+  ],
+  "edge_device_groups": [
+    {"name": "Electrical cabinet", "device_counts": {"Industrial PC": 1, "Merging unit": 5},
+     "comments": {"Merging unit": "5 merging units for the electrical protection"}},
+    {"name": "Floor", "device_counts": {"Floor sensor": 5}, "sub_group_counts": {"Electrical cabinet": 1},
+     "comments": {"Floor sensor": "5 sensors on each floor", "Electrical cabinet": "One cabinet on each floor"}},
+    {"name": "Building", "sub_group_counts": {"Floor": 7}, "comments": {"Floor": "7 floors"}}
+  ],
+  "edge_functions": [
+    {"name": "Measure and upload", "device": "Floor sensor", "workload_fraction": 1,
+     "server_calls": [{"jobs": ["Receive sensor reading", "Store sensor reading"], "times_per_hour": 4,
+                       "comment": "Upload rate not stated: one reading every 15 minutes"}]},
+    {"name": "Supervise protection", "device": "Industrial PC", "cpu_cores_avg": 0.5, "ram_gb_avg": 2},
+    {"name": "Sample currents and voltages", "device": "Merging unit", "workload_fraction": 1}
+  ],
+  "edge_journeys": [
+    {"name": "Building operation", "functions": ["Measure and upload", "Supervise protection", "Sample currents and voltages"]}
+  ],
+  "edge_deployments": [
+    {"name": "The building", "journey": "Building operation", "country": "FRANCE", "network": "wifi",
+     "new_units": {"value": 1, "per": "month"}, "start_date": "2026-12-01", "end_date": "2026-12-31", "usage_span_years": 8,
+     "comments": {"new_units": "One building, already in service and not growing: installed over December 2026"}}
+  ]
+}

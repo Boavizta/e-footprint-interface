@@ -82,6 +82,17 @@ def test_offline_evaluation_and_replay_keep_reports_and_exports(tmp_path):
     ("04", "_handwritten_04_ev_charging", {"controller": 4200}),  # 2,700 German and 1,500 Dutch stations since January 2024
 ])
 def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, case_id, answer, fleet):
+    _assert_handwritten_edge_answer(tmp_path, case_id, answer, fleet)
+
+
+@titled("ai-bootstrap-edge#edge-instructions: the sandbox builds answer 05, groups three levels deep, passing its "
+        "nesting and device total checks")
+def test_sandbox_evaluates_handwritten_nested_group_answer(tmp_path):
+    _assert_handwritten_edge_answer(tmp_path, "05", "_handwritten_05_smart_building_floors",
+                                    {"sensor": 35, "industrial pc": 7, "merging": 35})  # one building of 7 floors
+
+
+def _assert_handwritten_edge_answer(tmp_path, case_id, answer, fleet):
     case = run.load_cases([case_id])[0]
 
     result = run.evaluate(json.loads((CASES / f"{answer}.json").read_text()), case, tmp_path / f"{answer}.e-f.json",

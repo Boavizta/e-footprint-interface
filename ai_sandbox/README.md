@@ -10,9 +10,10 @@ APIs, as if the interface's edge toggle were off. `web_edge` evaluates the Web +
 (`system_prompt_web_edge.md`), schema (`WebEdgeSpec`) and builder, which adds edge devices, optional device groups,
 edge functions and their server calls, edge journeys and edge deployments to the web sections. The sandbox measures
 what ships: it has no edge builder of its own.
-Cases carry their `scope` (03 and 04 are `web_edge`); without `--cases` a run takes the cases of its scope. Edge
+Cases carry their `scope` (03, 04 and 05 are `web_edge`); without `--cases` a run takes the cases of its scope. Edge
 checks: an edge deployment exists, a device calls a server, a server is shared by web journeys and devices, a device
-group is used or not as the case expects, and the devices in service as the web year opens (the most deployments in
+group is used or not as the case expects, a group nested a given depth holds the named devices
+(`devices_grouped_at_depth`, a cabinet in a floor in a building), and the devices in service as the web year opens (the most deployments in
 parallel over the first week of 2027, times each device's units per deployment: `run.device_totals`) match the case's
 totals within 20 %. A fleet already in service is deployed from a past `start_date`, so its devices are counted by
 then.
@@ -62,6 +63,7 @@ poetry run python -m ai_sandbox.providers
 poetry run python -m ai_sandbox.run --dry-run ai_sandbox/cases/_handwritten_01_recipe_app.json
 poetry run python -m ai_sandbox.run --scope web_edge --dry-run ai_sandbox/cases/_handwritten_03_smart_building.json
 poetry run python -m ai_sandbox.run --scope web_edge --dry-run ai_sandbox/cases/_handwritten_04_ev_charging.json
+poetry run python -m ai_sandbox.run --scope web_edge --dry-run ai_sandbox/cases/_handwritten_05_smart_building_floors.json
 
 # experiments (ANTHROPIC_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY read from .env)
 poetry run python -m ai_sandbox.run --cases 01 --models claude-haiku-5-5 mistral-small-latest --reps 1

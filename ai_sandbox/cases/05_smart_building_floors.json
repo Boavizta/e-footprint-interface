@@ -1,0 +1,28 @@
+{
+  "id": "05_smart_building_floors",
+  "title": "One smart building described floor by floor, with an electrical cabinet on each floor",
+  "scope": "web_edge",
+  "user_prompt": "A smart building in France, with 7 floors, and in each floor 5 sensors + an electrical cabinet with an industrial PC and 5 merging units for handling the electrical protection. The sensors upload data to the cloud.",
+  "facts_if_asked": {
+    "sensors": "Temperature and presence sensors, about 0.5 W, a reading every 15 minutes of about 1 kB.",
+    "industrial PC": "Fanless x86, 4 cores, 8 GB RAM, 128 GB SSD, about 25 W, supervises the protection locally.",
+    "merging units": "IEC 61850 merging units, about 10 W each, talking only to the industrial PC.",
+    "cloud": "An ingestion API and a time-series database on a public cloud."
+  },
+  "expected_properties": [
+    "Three levels of device groups: a building holding 7 floors, a floor holding 5 sensors and 1 electrical cabinet, a cabinet holding 1 industrial PC and 5 merging units; each group lists only what it directly holds, and the building names the floor (never the reverse).",
+    "One building in service as 2027 opens and none added: a single deployment of the building group, country FRANCE.",
+    "35 sensors, 7 industrial PCs and 35 merging units in service.",
+    "A sensor edge device and a merging unit edge device of kind appliance, an industrial PC of kind computer; cpu_cores_avg, ram_gb_avg and workload_fraction on edge functions, not on devices.",
+    "An edge function on the sensor with server_calls to an ingestion job and its database write; the PC and merging units make no server call the description does not state.",
+    "No web journey is required: the description names no user of a dashboard."
+  ],
+  "checks": {
+    "requires_edge_usage_pattern": true,
+    "requires_edge_server_call": true,
+    "countries_must_include": ["FRANCE"],
+    "requires_device_group": true,
+    "devices_grouped_at_depth": {"depth": 3, "devices": ["pc|computer", "merging"]},
+    "device_totals": {"sensor": 35, "pc|computer": 7, "merging": 35}
+  }
+}

@@ -85,12 +85,26 @@ def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
             results[key] = bool(edge_servers & set(server_journeys))
         elif key == "requires_device_group":
             results[key] = bool(getattr(spec, "edge_device_groups", [])) == expected
+        elif key == "devices_grouped_at_depth":
+            results[key] = devices_grouped_at_depth(getattr(spec, "edge_device_groups", []), **expected)
         elif key == "device_totals":
             results.update({device_total_key(pattern): False for pattern in expected})  # set from the built system
         else:
             raise ValueError(f"Unknown check {key}")
     results["all_journeys_have_usage_pattern"] = {j.name for j in spec.journeys} <= pattern_journeys
     return results
+
+
+def devices_grouped_at_depth(groups: list, depth: int, devices: list[str]) -> bool:
+    """One group nested `depth` levels deep (held by a group held by a group... up to an outermost one) directly holds a
+    device matching each pattern ("a|b" matches a device name containing a or b): a cabinet in a floor in a building."""
+    parents = {sub: g.name for g in groups for sub in g.sub_group_counts}
+
+    def level(name: str, seen: frozenset = frozenset()) -> int:
+        return 1 if name not in parents or name in seen else 1 + level(parents[name], seen | {name})
+
+    return any(level(g.name) >= depth and all(any(w in n.lower() for n in g.device_counts for w in p.lower().split("|"))
+                                              for p in devices) for g in groups)
 
 
 def device_total_key(pattern: str) -> str:
