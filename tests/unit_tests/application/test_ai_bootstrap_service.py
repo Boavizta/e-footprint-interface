@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -8,7 +9,9 @@ from efootprint.constants.units import u
 
 from model_builder.application.ai_bootstrap.dsl import EdgeDeviceSpec, WebEdgeSpec, build_edge_device, build_edge_groups
 from model_builder.application.ai_bootstrap.service import Completion, build_answer, generate
-from tests.declare import planned_test, titled
+from tests.declare import titled
+
+EDGE_ANSWER = (Path(__file__).parents[3] / "ai_sandbox/cases/_handwritten_04_ev_charging.json").read_text()
 
 
 def test_generate_calls_once_and_reports_ignored_wrapped_fields():
@@ -127,3 +130,49 @@ def test_usage_span_defaults_to_the_shortest_lifespan():
 
     assert {p.name: p.usage_span.value.to(u.year).magnitude for p in system.edge_usage_patterns} == {
         "Buildings": 5, "Malls": 6, "Stated": 8}
+
+
+def period(series) -> tuple:
+    inputs = series.form_inputs
+    return inputs["start_date"], inputs["modeling_duration_value"], inputs["modeling_duration_unit"]
+
+
+@titled("ai-bootstrap-edge#deployments-over-time: a deployment's stated end date closes its own period; the others "
+        "run to the end of 2027")
+def test_a_stated_end_date_closes_its_deployment():
+    system = build_answer(EDGE_ANSWER, "web_edge").system
+
+    periods = {p.name: period(p.hourly_deployment_starts) for p in system.edge_usage_patterns}
+
+    assert periods == {"Stations in Germany": ("2024-01-01", 4, "year"),
+                       "Stations in the Netherlands": ("2024-01-01", 3, "year")}
+    dutch = next(p for p in system.edge_usage_patterns if p.name == "Stations in the Netherlands")
+    assert "the Dutch rollout has stopped" in dutch.hourly_deployment_starts.comment
+
+
+def edge_answer(**deployment) -> str:
+    """A dashboard on one server, a kiosk kept 20 years, and one deployment of kiosks with the fields given."""
+    return json.dumps({
+        "system_name": "X", "servers": [{"name": "S"}], "jobs": [{"name": "J", "server": "S"}],
+        "journeys": [{"name": "Dashboard", "steps": [{"name": "Open", "jobs": ["J"]}]}],
+        "usage_patterns": [{"name": "Team", "journey": "Dashboard", "volume": {"value": 10, "per": "day"}}],
+        "edge_devices": [{"name": "Kiosk", "lifespan_years": 20}],
+        "edge_functions": [{"name": "Show", "device": "Kiosk"}],
+        "edge_journeys": [{"name": "Mall", "functions": ["Show"]}],
+        "edge_deployments": [{"name": "Malls", "journey": "Mall", "new_units": {"value": 1, "per": "month"}, **deployment}]})
+
+
+@titled("ai-bootstrap-edge#deployments-over-time: a web usage beyond the editor's limit is cut and listed; a deployment "
+        "beyond it, or misdated, is refused")
+def test_periods_beyond_the_editor_limit_are_cut_or_refused():
+    # Kiosks deployed 2010 to 2012 and kept 20 years: the web usage would run 23 years, to the last retirement in 2032.
+    cut = build_answer(edge_answer(start_date="2010-01-01", end_date="2012-12-31", usage_span_years=20), "web_edge")
+
+    [team] = cut.system.usage_patterns
+    assert period(team.hourly_occurrences) == ("2010-01-01", 20, "year")
+    [listed] = [r for r in cut.resolutions if r.how == "cut at the editor's limit"]
+    assert (listed.requested, listed.resolved) == ("Team: 23 years from 2010-01-01", "20 years")
+    with pytest.raises(ValueError, match="more than the editor accepts"):
+        build_answer(edge_answer(start_date="2000-01-01"), "web_edge")
+    with pytest.raises(ValueError, match="falls after the end"):
+        build_answer(edge_answer(start_date="2027-06-01", end_date="2027-01-01"), "web_edge")
