@@ -69,10 +69,13 @@ def test_availability_requires_flag_and_key(settings, monkeypatch):
     assert not is_available()
 
 
-def test_evaluation_flash_delegates_to_bounded_adapter(monkeypatch):
+def test_evaluation_flash_delegates_to_bounded_adapter_unless_an_effort_is_given(monkeypatch):
     from ai_sandbox.providers import complete
     client, _ = sdk(monkeypatch)
-    completion = complete("zai-glm-5-3-flash", "System", "Description", effort="high")
-    assert client.chat.complete.call_args.kwargs["reasoning_effort"] == "low"
+    completion = complete("zai-glm-5-3-flash", "System", "Description")
+    pinned = client.chat.complete.call_args.kwargs
+    assert (pinned["reasoning_effort"], pinned["max_tokens"]) == ("low", 16000)
     assert completion.cached_input_tokens is completion.reasoning_tokens is None
     assert completion.cost_usd("zai-glm-5-3-flash") == pytest.approx((20 * 0.15 + 30 * 0.50) / 1e6)
+    complete("zai-glm-5-3-flash", "System", "Description", effort="high")
+    assert client.chat.complete.call_args.kwargs["reasoning_effort"] == "high"
