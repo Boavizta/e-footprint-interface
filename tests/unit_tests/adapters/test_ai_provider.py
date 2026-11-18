@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import httpx2
 import pytest
-from mistralai.client.errors import SDKError
+from mistralai.client.errors import ResponseValidationError, SDKError
 
 from model_builder.adapters.ai_provider import ProviderError, complete_mistral, is_available
 
@@ -21,9 +21,11 @@ def sdk(monkeypatch, content='{"system_name":"Example"}', usage=NS(prompt_tokens
     return client, constructor
 
 
-def test_fixed_request_and_usage(monkeypatch):
+def test_fixed_request_and_usage(monkeypatch, caplog):
     client, constructor = sdk(monkeypatch)
-    completion = complete_mistral("System", "Description")
+    with caplog.at_level(logging.DEBUG):
+        completion = complete_mistral("System", "Description")
+    assert not caplog.records
     constructor.assert_called_once()
     assert constructor.call_args.kwargs["api_key"] == "dummy"
     from mistralai.client.utils.logger import NoOpLogger
@@ -64,8 +66,11 @@ def test_provider_error_is_content_free_and_never_retried(monkeypatch):
 @pytest.mark.parametrize("error, stop, kind", [
     (httpx2.ReadTimeout("SENTINEL timeout"), "stop", "timeout"),
     (SDKError("SENTINEL message", httpx2.Response(503, text="SENTINEL body")), "stop", "HTTP 503"),
+    (ResponseValidationError("SENTINEL message", httpx2.Response(200, text="SENTINEL body"), ValueError("SENTINEL")),
+     "stop", "ResponseValidationError (HTTP 200)"),
     (RuntimeError("SENTINEL other"), "stop", "RuntimeError"),
     (None, "length", "unfinished (length)"),
+    (None, "SENTINEL reason", "unfinished (unrecognized)"),
 ])
 def test_failure_logs_its_kind_and_latency_only(monkeypatch, caplog, error, stop, kind):
     client, _ = sdk(monkeypatch, content="SENTINEL answer", stop=stop)

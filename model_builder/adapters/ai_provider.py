@@ -7,6 +7,8 @@ from efootprint.logger import logger
 from model_builder.application.ai_bootstrap.service import Completion
 
 MODEL = "zai-glm-5-3-flash"
+# The finish reasons the SDK knows: any other string the provider sends is logged as "unrecognized".
+FINISH_REASONS = {"length", "model_length", "error", "tool_calls", None}
 
 
 class ProviderError(Exception):
@@ -28,9 +30,11 @@ def is_available() -> bool:
 def _failure_kind(error: Exception) -> str:
     """The failure's kind, never its text: the SDK's errors can carry the response body."""
     from httpx2 import TimeoutException
-    from mistralai.client.errors import MistralError
+    from mistralai.client.errors import MistralError, ResponseValidationError
     if isinstance(error, TimeoutException):
         return "timeout"
+    if isinstance(error, ResponseValidationError):  # a response the SDK could not read, often a 200
+        return f"ResponseValidationError (HTTP {error.status_code})"
     if isinstance(error, MistralError):
         return f"HTTP {error.status_code}"
     return type(error).__name__
@@ -51,7 +55,8 @@ def complete_mistral(system_prompt: str, description: str) -> Completion:
         latency = time.perf_counter() - start
         choice = response.choices[0]
         if choice.finish_reason != "stop":
-            logger.warning("AI provider failure: unfinished (%s) after %.1f s", choice.finish_reason, latency)
+            reason = choice.finish_reason if choice.finish_reason in FINISH_REASONS else "unrecognized"
+            logger.warning("AI provider failure: unfinished (%s) after %.1f s", reason, latency)
             raise ProviderError("Generation did not complete")
         content = choice.message.content
         if not isinstance(content, str):
