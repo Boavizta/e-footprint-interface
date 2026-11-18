@@ -87,7 +87,7 @@ Growth projection inputs are what the only hourly editor prefills; a raw series 
 
 Changed: **A usage pattern may state its own start date.** The clause needs the usage's own start date and no place added the field; the Web + edge prompt alone offers it. → code "system_prompt_web_edge.md"
 
-Changed: **Beyond the hourly editor's 10 years, web usage is cut and listed.** The editor silently cut a longer generated period on opening. Its limit now lives in one place, unchanged; a deployment longer than it is refused. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"; test "beyond the editor's limit"; test "until the last device retires, within the editor's limit"; test "until the last device retires [shared-period]"
+Changed: **Beyond the hourly editor's 10 years, web usage and deployments are cut and listed.** The editor silently cut a longer period on opening. A deployment keeps the 10 nearest 2027; web usage starts later or ends sooner, through 2027. → code "form_field_generator.py"; code "views_timeseries_preview.py"; code "usage_pattern_web_base_class.py"; code "hourly_quantities_from_growth.html"; code "usage_pattern_timeseries.js"; test "beyond the editor's limit"; test "until the last device retires, within the editor's limit"; test "until the last device retires [shared-period]"
 
 Changed: **A deployment may state an end date.** Case 04's Dutch fleet no longer grows, and deploying it through 2027 put it a third too high; stated, the end date closes that deployment's period. → statement "end earlier"; test "stated end date closes"
 
@@ -96,8 +96,6 @@ Changed: **A stated web volume is that of 2027-01-01, discounted to an earlier s
 Changed: **A usage span above its devices' shortest lifespan is cut to it and listed.** The library refuses such a span, which refused the whole answer: three of eight at high effort. → test "usage span above its devices"
 
 Changed: **The growth and recurrent editors accept any decimal.** A generated weekly volume, or a workload of 0.05, opened on a value the browser refused to save unchanged: 28 of 96 recorded answers. This changes these editors for every user. → code "recurrent_quantities_from_constant.html"; code "recurrent_quantities_from_weekly_pattern.html"; code "weekly_pattern_builder.js"
-
-To confirm: **Should the hourly editor accept a negative growth rate?** The library computes a decline above −100 % a year, but the editor and its preview refuse one. A generated negative growth is set to 0 and listed for now; accepting it changes the editor for every user.
 
 ## #server-calls-scale
 

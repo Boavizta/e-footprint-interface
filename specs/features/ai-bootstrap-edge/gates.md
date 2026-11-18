@@ -21,7 +21,7 @@
   two paragraphs saying where the Web + edge prompt file shows up). Applied, range
   `9e74f2ac..91489c99`, built by an implementer and read by a reviewer:
   - the hourly editor's limit is 10 years / 120 months again ("Don't increase the hourly editor's
-    limit. Beyond 10 years, web usage is cut and listed."); a deployment longer than it is refused;
+    limit. Beyond 10 years, web usage is cut and listed.");
   - both cost lines carry two significant figures (0.12 and 0.15 US cent);
   - asked in the conversation and answered there: a stated web volume is the one of 2027-01-01,
     discounted by its growth back to an earlier start (the point this file held as "not built");
@@ -35,9 +35,17 @@
   against the rule `generated-values-editable`, whose test posts the form and never met the
   browser. The inputs' `step` is now `any`, for every user of these editors; an imported modeling
   with such values was blocked the same way.
-- **Open, asked in the conversation and not answered yet: a deployment that keeps installing for
-  more than 10 years** (a fleet "since 2015" with no end) is refused. It could be split by the
-  builder into consecutive deployments of 10 years at most, at the same rate, and listed.
+- **Answered in the conversation on 2026-11-18: a deployment longer than 10 years is cut, the cut
+  listed** ("deployments for more than 10 years can be simply cut by the builder"). Decided by
+  the supervisor with it, after a review (commits `9e27826b`, `7115943b`): a deployment keeps the 10
+  years nearest 2027, the modeled year (a fleet since 2000 keeps 2018-01-03 to 2027-12-31; one from
+  2020 to 2040 keeps its first 10); web usage starts no earlier than 2018-01-03, so that a cut
+  never ends it before the end of 2027; only the loss of a date the answer states is listed, a
+  move of 15 days or less is not, and a period under 10 years that 120 months of 30 days cannot
+  hold is fitted silently (a deployment's start up to 34 days later). The summary line reads
+  "usage period: Malls: 2000-01-01 to 2027-12-31 → 2018-01-03 to 2027-12-31 (Growth projection
+  holds 10 years at most: installations before 2018-01-03 are not counted)". No browser test opens
+  a cut deployment or a moved start in the editor: look at one by eye on a real answer.
 - **After the run, on 2026-11-18: a fix and an addition, on the user's word.** The user tried Web +
   edge on the local interface, met a provider failure, then a building whose cabinet was not
   grouped. What followed, all asked or approved in the conversation ("ok for the paid runs, and yes
@@ -180,11 +188,13 @@ Cost of these calls: USD 0.095 (0.009 for the seven reproduction calls, then 0.0
   manufacturing footprint from 0.1 to 5 kg, a controller's power from 5 to 15 W in the paid runs).
   Nothing in the code can catch it; the check is where a user does.
 - **A generated web usage pattern of a fleet in service for years.** Its period is cut at the
-  editor's 10 years, from its start, and the summary lists the cut: the last devices then outlive
-  the web usage. With a stated growth, its comment gives both volumes ("1,000 a month on
+  editor's 10 years and the summary lists the cut ("usage period: Operations team: 2024-01-01 to
+  2035-12-28 → 2024-01-01 to 2033-12-28 (Growth projection holds 10 years at most)"): the last
+  devices then outlive the web usage. With a stated growth, its comment gives both volumes ("1,000 a month on
   2027-01-01 as stated: 260 a month on 2023-01-01 at 40 % a year."): read it once on a real answer.
-- **A description of a declining usage.** A negative growth is set to 0 and listed; whether the
-  editor should accept one is asked in the plan (`#deployments-over-time`).
+- **A description of a declining usage.** A negative growth is set to 0 and listed in the summary.
+  The user chose on 2026-11-18 to keep it so for now; the editor accepting a negative growth, which
+  the library computes above −100 % a year, stays a possible later change.
 - **A provider failure ("The AI provider could not complete the request").** The user met one on
   2026-11-18. The application log now holds one line per failure, `AI provider failure: <kind>
   after <seconds> s` (timeout, HTTP status, unfinished answer, or the error's class), and nothing
@@ -320,6 +330,9 @@ suite was not run again after that commit, which touches that one test file. No 
 **After the user's answers, on `91489c99` (2026-11-18).** jest 306 passed; non-browser pytest 1215
 passed, 6 xfailed; the whole browser suite 175 passed, 1 xfailed. The library's suite was not run
 again: nothing changed in `../e-footprint` since `f9ad5688`.
+
+**After the deployment cut, on `7115943b` (2026-11-18).** jest 306 passed; non-browser pytest 1215
+passed, 6 xfailed; the whole browser suite 175 passed, 1 xfailed.
 
 ## Spend
 

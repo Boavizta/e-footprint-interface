@@ -65,7 +65,8 @@ The design page of today's flow is
   value's comment says how.
 - **shared-period** Web usage runs from the earliest deployment start until the last deployed device
   retires, or for the 10 years the hourly editor accepts when that comes first; a usage the
-  description dates otherwise starts when it says.
+  description dates otherwise starts when it says. A start too early for those 10 years to reach the
+  end of 2027 is moved later, and a deployment longer than 10 years keeps the 10 nearest 2027.
 - **generated-values-editable** Each generated usage pattern, web or edge, opens in its edit panel
   with the values the AI set, and saving it unchanged keeps them.
 - **edge-calls-reach-servers** A device described as sending data to a server is connected to a job
