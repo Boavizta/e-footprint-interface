@@ -225,7 +225,7 @@ class TestAiBootstrap:
         [team] = library_system(client).usage_patterns
         inputs = team.hourly_occurrences.form_inputs
         assert inputs["start_date"] == "2024-01-01"  # the deployments' start: 2,700 stations since 2024
-        assert (inputs["modeling_duration_value"], inputs["modeling_duration_unit"]) == (12, "year")  # to 2035, 8 years after the last station
+        assert (inputs["modeling_duration_value"], inputs["modeling_duration_unit"]) == (10, "year")  # to 2035, 8 years after the last station, cut at the editor's limit
 
         dated = json.loads(EDGE_ANSWER)
         dated["usage_patterns"][0]["start_date"] = "2026-06-01"

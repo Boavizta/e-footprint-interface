@@ -201,13 +201,13 @@ def edge_answer(**deployment) -> str:
 @titled("ai-bootstrap-edge#deployments-over-time: a web usage beyond the editor's limit is cut and listed; a deployment "
         "beyond it, or misdated, is refused")
 def test_periods_beyond_the_editor_limit_are_cut_or_refused():
-    # Kiosks deployed 2010 to 2012 and kept 20 years: the web usage would run 23 years, to the last retirement in 2032.
-    cut = build_answer(edge_answer(start_date="2010-01-01", end_date="2012-12-31", usage_span_years=20), "web_edge")
+    # Kiosks deployed 2018 to 2020 and kept 10 years: the web usage would run 13 years, to the last retirement in 2030.
+    cut = build_answer(edge_answer(start_date="2018-01-01", end_date="2020-12-31", usage_span_years=10), "web_edge")
 
     [team] = cut.system.usage_patterns
-    assert period(team.hourly_occurrences) == ("2010-01-01", 20, "year")
+    assert period(team.hourly_occurrences) == ("2018-01-01", 10, "year")
     [listed] = [r for r in cut.resolutions if r.how == "cut at the editor's limit"]
-    assert (listed.requested, listed.resolved) == ("Team: 23 years from 2010-01-01", "20 years")
+    assert (listed.requested, listed.resolved) == ("Team: 13 years from 2018-01-01", "10 years")
     with pytest.raises(ValueError, match="more than the editor accepts"):
         build_answer(edge_answer(start_date="2000-01-01"), "web_edge")
     with pytest.raises(ValueError, match="falls after the end"):

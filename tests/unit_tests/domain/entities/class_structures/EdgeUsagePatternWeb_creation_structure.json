@@ -177,8 +177,8 @@
                     "initial_volume_timespan": "month"
                 },
                 "duration_limits": {
-                    "month": 240,
-                    "year": 20
+                    "month": 120,
+                    "year": 10
                 },
                 "subfields_ui_config": {
                     "initial_volume": {

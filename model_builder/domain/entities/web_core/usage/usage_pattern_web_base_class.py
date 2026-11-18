@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 # The longest Growth projection period, per duration unit: what the editor, its preview and the AI bootstrap accept.
-GROWTH_DURATION_LIMITS = {"month": 240, "year": 20}
+GROWTH_DURATION_LIMITS = {"month": 120, "year": 10}
 
 
 def default_modeling_start_date() -> str:

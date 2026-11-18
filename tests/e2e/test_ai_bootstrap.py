@@ -226,9 +226,9 @@ def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled)
     expect(web_edge.last).to_contain_text("USD 0.002")
 
 
-@titled("ai-bootstrap-edge#scope-choice: a generated Web + edge modeling shows its edge objects, and a 12-year web "
-        "usage saved unchanged keeps its period")
-def test_web_edge_generation_keeps_a_long_web_usage_period(empty_model_builder, isolated_bootstrap):
+@titled("ai-bootstrap-edge#scope-choice: Web + edge generation shows edge objects; a web usage cut to 10 years is "
+        "listed and keeps its period")
+def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, isolated_bootstrap):
     builder = empty_model_builder
     page = builder.page
     isolated_bootstrap.return_value = Completion(EDGE_ANSWER, 5000, 2000, latency_s=15)
@@ -239,8 +239,10 @@ def test_web_edge_generation_keeps_a_long_web_usage_period(empty_model_builder, 
 
     expect(page.locator("#edge-modeling-toggle")).to_be_checked()
     expect(page.locator("#edge-devices-list").get_by_text("Station controller")).to_be_visible()
+    expect(builder.ai_bootstrap_summary).to_contain_text(
+        "usage period: Operations team: 12 years from 2024-01-01 → 10 years (cut at the editor's limit)")
     builder.close_side_panel()
-    period = {"start_date": "2024-01-01", "modeling_duration_value": "12", "modeling_duration_unit": "year"}
+    period = {"start_date": "2024-01-01", "modeling_duration_value": "10", "modeling_duration_unit": "year"}
 
     def opened_period():
         click_and_wait_for_htmx(page, page.locator("#up-list button[hx-get*='open-edit-object-panel']").first)

@@ -7,10 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Start with AI offers a Web only or Web + edge scope above the description, Web only by default or Web + edge when Edge modeling is on; the guidance and the indicative cost and impact follow the scope chosen. A Web + edge generation builds edge devices, optional device groups, edge functions with their server calls, edge usage journeys and deployments with optional start and end dates; web usage runs until the last deployed device retires, and the summary adds deployment, device and server-call checks. The summary's list of changes made to the AI answer (formerly "Catalog substitutions") also names a device written as a sub-group, counted as that device, and any device no deployment runs, left out of the footprint.
-
-### Changed
-- The hourly editor's Growth projection duration limit is raised from 10 to 20 years.
+- Start with AI offers a Web only or Web + edge scope above the description, Web only by default or Web + edge when Edge modeling is on; the guidance and the indicative cost and impact follow the scope chosen. A Web + edge generation builds edge devices, optional device groups, edge functions with their server calls, edge usage journeys and deployments with optional start and end dates; web usage runs until the last deployed device retires, cut at the hourly editor's 10-year limit, and the summary adds deployment, device and server-call checks. The summary's list of changes made to the AI answer (formerly "Catalog substitutions") also names a web usage cut at that limit, a device written as a sub-group, counted as that device, and any device no deployment runs, left out of the footprint.
 
 ## [V1.15.0] - 2026-11-17
 

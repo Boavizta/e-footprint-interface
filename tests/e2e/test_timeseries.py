@@ -168,8 +168,8 @@ class TestTimeseriesValidation:
         duration_field.dispatch_event("input")
         expect(page.locator("#modeling_duration_value_error_message")).not_to_be_visible()
 
-        # Test value exceeding max (25 years - should exceed max for year unit)
-        duration_field.fill("25")
+        # Test value exceeding max (11 years - should exceed max for year unit)
+        duration_field.fill("11")
         # Get max value and verify it's exceeded
         max_value = duration_field.get_attribute("max")
         current_value = int(duration_field.input_value())
@@ -192,8 +192,8 @@ class TestTimeseriesValidation:
         duration_field.fill("12")
         expect(error_message).not_to_be_visible()
 
-        # Test value exceeding max for month unit (300 months)
-        duration_field.fill("300")
+        # Test value exceeding max for month unit (121 months)
+        duration_field.fill("121")
         # Get new max value for month unit and verify
         max_value = duration_field.get_attribute("max")
         current_value = int(duration_field.input_value())
@@ -252,15 +252,15 @@ class TestTimeseriesValidation:
         # Should NOT show error about the year unit's max value
         expect(page.locator("#modeling_duration_value_error_message")).not_to_be_visible()
 
-        # Try selecting back year unit ==> max should be 20 and error should be shown
+        # Try selecting back year unit ==> max should be 10 and error should be shown
         duration_unit_locator.click()
         duration_unit_locator.select_option("year")
         duration_unit_locator.click()
         expect(page.locator("#modeling_duration_value_error_message")).to_contain_text(
-            "Modeling duration value must be less than or equal to 20"
+            "Modeling duration value must be less than or equal to 10"
         )
         current_value = int(duration_field.input_value())
-        assert current_value == 20, f"Value should be corrected to 20 for year unit, but is {current_value}"
+        assert current_value == 10, f"Value should be corrected to 10 for year unit, but is {current_value}"
 
 
 @pytest.mark.e2e

@@ -177,7 +177,7 @@ def test_hourly_preview_reports_invalid_builder_inputs_without_a_chart():
 def test_hourly_preview_rejects_duration_beyond_the_form_limit_before_projection():
     response = timeseries_preview(
         preview_request(
-            hourly_inputs(duration_value=21),
+            hourly_inputs(duration_value=11),
             object_type="UsagePattern",
             field_name="hourly_occurrences",
             builder="growth",
