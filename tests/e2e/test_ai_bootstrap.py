@@ -1,4 +1,5 @@
 """Real bootstrap navigation and persistence, with inference isolated in process."""
+import json
 from pathlib import Path
 from unittest.mock import Mock
 from uuid import uuid4
@@ -231,7 +232,10 @@ def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled)
 def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, isolated_bootstrap):
     builder = empty_model_builder
     page = builder.page
-    isolated_bootstrap.return_value = Completion(EDGE_ANSWER, 5000, 2000, latency_s=15)
+    # 3,000 a week opens as 428.57... a day: a value the editor's whole-number step refused on an unchanged save.
+    answer = json.loads(EDGE_ANSWER)
+    answer["usage_patterns"][0]["volume"] = {"value": 3000, "per": "week"}
+    isolated_bootstrap.return_value = Completion(json.dumps(answer), 5000, 2000, latency_s=15)
     builder.start_ai_bootstrap()
     page.get_by_label("Web + edge").check()
 
@@ -244,10 +248,12 @@ def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, i
     builder.close_side_panel()
     period = {"start_date": "2024-01-01", "modeling_duration_value": "10", "modeling_duration_unit": "year"}
 
-    def opened_period():
+    def opened_inputs():
         click_and_wait_for_htmx(page, page.locator("#up-list button[hx-get*='open-edit-object-panel']").first)
-        return {key: page.locator(f"#UsagePattern_hourly_occurrences__{key}").input_value() for key in period}
+        return {key: page.locator(f"#UsagePattern_hourly_occurrences__{key}").input_value()
+                for key in [*period, "initial_volume"]}
 
-    assert opened_period() == period
+    opened = opened_inputs()
+    assert {key: opened[key] for key in period} == period and float(opened["initial_volume"]) == pytest.approx(3000 / 7)
     builder.side_panel.submit_and_wait_for_close()
-    assert opened_period() == period
+    assert opened_inputs() == opened

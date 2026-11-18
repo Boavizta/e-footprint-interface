@@ -190,18 +190,22 @@ def test_usage_span_defaults_to_the_shortest_lifespan():
 def test_a_usage_span_above_the_devices_lifespan_is_cut():
     answer = {"system_name": "X",
               "edge_devices": [{"name": "Gateway", "lifespan_years": 8}, {"name": "Sensor", "kind": "appliance"}],
-              "edge_functions": [{"name": "Upload", "device": "Gateway"}, {"name": "Sense", "device": "Sensor"}],
-              "edge_journeys": [{"name": "Building", "functions": ["Upload", "Sense"]}],
+              "edge_functions": [{"name": "Upload", "device": "Gateway"}, {"name": "Sense", "device": "Sensor"},
+                                 {"name": "Relay", "device": "Gateway"}],
+              "edge_journeys": [{"name": "Building", "functions": ["Upload", "Sense"]}, {"name": "Hub", "functions": ["Relay"]}],
               "edge_deployments": [{"name": "Buildings", "journey": "Building", "new_units": {"value": 1, "per": "month"},
+                                    "usage_span_years": 10},
+                                   {"name": "Hubs", "journey": "Hub", "new_units": {"value": 1, "per": "month"},
                                     "usage_span_years": 10}]}
 
     built = build_answer(json.dumps(answer), "web_edge")
 
-    [buildings] = built.system.edge_usage_patterns
-    assert buildings.usage_span.value.to(u.year).magnitude == 6  # the sensor's class default lifespan
-    [listed] = [r for r in built.resolutions if r.kind == "usage span"]
-    assert (listed.requested, listed.resolved, listed.how) == (
-        "Buildings: 10 years", "6 years", "cut to its devices' shortest lifespan")
+    # Buildings: the sensor's class default lifespan, none being stated; hubs: the gateway's stated one.
+    assert {p.name: p.usage_span.value.to(u.year).magnitude for p in built.system.edge_usage_patterns} == {
+        "Buildings": 6, "Hubs": 8}
+    assert [(r.requested, r.resolved, r.how) for r in built.resolutions if r.kind == "usage span"] == [
+        ("Buildings: 10 years", "6 years", "cut to its devices' shortest lifespan"),
+        ("Hubs: 10 years", "8 years", "cut to its devices' shortest lifespan")]
 
 
 def period(series) -> tuple:
@@ -237,22 +241,35 @@ def edge_answer(**deployment) -> str:
 @titled("ai-bootstrap-edge#deployments-over-time: a growing web usage started in the past reaches its stated volume on "
         "2027-01-01; a flat one starts from it")
 def test_a_past_growing_web_usage_is_discounted_to_its_start():
-    def team(**fields):
+    def team(volume=None, **fields):
         answer = {"system_name": "X", "servers": [{"name": "S"}], "jobs": [{"name": "J", "server": "S"}],
                   "journeys": [{"name": "Dashboard", "steps": [{"name": "Open", "jobs": ["J"]}]}],
-                  "usage_patterns": [{"name": "Team", "journey": "Dashboard", "volume": {"value": 1000, "per": "month"},
+                  "usage_patterns": [{"name": "Team", "journey": "Dashboard",
+                                      "volume": volume or {"value": 1000, "per": "month"},
                                       "start_date": "2023-01-01", **fields}]}
-        return build_answer(json.dumps(answer), "web").system.usage_patterns[0].hourly_occurrences
+        built = build_answer(json.dumps(answer), "web")
+        return built.system.usage_patterns[0].hourly_occurrences, built.resolutions
 
-    growing = team(growth_pct_per_year=40)
     days_to_2027 = (date(2027, 1, 1) - date(2023, 1, 1)).days
-    month_from_2027 = growing.value.magnitude[days_to_2027 * 24:(days_to_2027 + 30) * 24].sum()
-    assert month_from_2027 == pytest.approx(1000, rel=0.005)  # within the rounding of the initial volume
-    assert growing.form_inputs["initial_volume"] == round(1000 / 1.4 ** (days_to_2027 / 365))
-    assert growing.comment == ("Initial volume: 1,000 a month on 2027-01-01 as stated, discounted to 2023-01-01 at "
-                               "40 % a year, to a whole number.")
-    flat = team()
+
+    def from_2027(series, days):
+        return series.value.magnitude[days_to_2027 * 24:(days_to_2027 + days) * 24].sum()
+
+    growing, _ = team(growth_pct_per_year=40)
+    assert from_2027(growing, 30) == pytest.approx(1000, rel=1e-4)
+    assert growing.form_inputs["initial_volume"] == pytest.approx(1000 / 1.4 ** (days_to_2027 / 365))
+    assert growing.comment == "1,000 a month on 2027-01-01 as stated: 260 a month on 2023-01-01 at 40 % a year."
+    weekly, _ = team({"value": 9000, "per": "week"}, growth_pct_per_year=40)
+    assert from_2027(weekly, 7) == pytest.approx(9000, rel=0.005)  # within the growth inside one week
+    assert weekly.comment == "9,000 a week on 2027-01-01 as stated: 334 a day on 2023-01-01 at 40 % a year."
+    small, _ = team({"value": 1, "per": "month"}, growth_pct_per_year=40)
+    assert small.form_inputs["initial_volume"] == pytest.approx(0.26, abs=0.005)  # unrounded, so never zero
+    flat, _ = team()
     assert flat.form_inputs["initial_volume"] == 1000 and flat.comment is None
+    shrinking, resolutions = team(growth_pct_per_year=-10)  # the editor accepts no negative growth: set flat
+    assert shrinking.form_inputs["initial_volume"] == 1000 and shrinking.form_inputs["net_growth_rate_in_percentage"] == 0
+    assert [(r.kind, r.requested, r.resolved, r.how) for r in resolutions if r.kind == "growth"] == [
+        ("growth", "Team: -10 % a year", "0 % a year", "the editor accepts no negative growth")]
 
 
 @titled("ai-bootstrap-edge#deployments-over-time: a web usage beyond the editor's limit is cut and listed; a deployment "

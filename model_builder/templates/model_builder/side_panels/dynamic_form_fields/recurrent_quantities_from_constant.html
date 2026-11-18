@@ -6,7 +6,7 @@
                name="{{ field.web_id }}__constant_value"
                id="{{ field.web_id }}"
                value="{{ builder.default.constant_value|unlocalize }}"
-               step="0.1"
+               step="any"
                {% if not field.can_be_negative %}min="0"{% endif %}
                placeholder="Input a constant value"
                required

@@ -311,17 +311,28 @@ def _end(start: date, duration: tuple[int, str]) -> date:
     return start + timedelta(days=value * DAYS_PER_UNIT[unit] - 1)
 
 
+def _editor_volume(volume: VolumeSpec) -> tuple[float, str]:
+    """A volume per minute, hour or week as the per-day one the hourly editor takes; other periods as they are."""
+    value, per = volume.value, volume.per
+    if per == "minute":
+        return value * 60 * 24, "day"
+    if per == "hour":
+        return value * 24, "day"
+    if per == "week":
+        return value / 7, "day"
+    return value, per
+
+
+def _amount(value: float) -> str:
+    """A volume as a comment reads it: whole above 100, three significant figures below."""
+    return f"{value:,.0f}" if abs(value) >= 100 else f"{value:.3g}"
+
+
 def _volume_timeseries(volume: VolumeSpec, start: date, duration: tuple[int, str], growth_pct_per_year: float = 0,
                        comment: Optional[str] = None):
     """Hourly volume from the DSL period over `duration` from `start`, as the Growth projection inputs the hourly
     editor prefills: a raw series would open empty."""
-    value, per = volume.value, volume.per
-    if per == "minute":
-        value, per = value * 60 * 24, "day"
-    elif per == "hour":
-        value, per = value * 24, "day"
-    elif per == "week":
-        value, per = value / 7, "day"
+    value, per = _editor_volume(volume)
     return ExplainableHourlyQuantitiesFromFormInputs({
         "start_date": start.isoformat(),
         "modeling_duration_value": duration[0],
@@ -479,18 +490,23 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
                         resolutions: list[Resolution]) -> UsagePattern:
     """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start,
     until the period's end. A usage longer than the editor accepts is cut at its limit, and the cut listed. The
-    stated volume is the one of the web year's first day: a usage that starts before it with a growth starts from
-    that volume discounted by the growth between the two dates, to the whole number the editor saves, its comment
-    saying so."""
+    stated volume is the one of the web year's first day, or of the usage's own start when later: a usage that
+    starts before it with a growth starts from that volume discounted by the growth between the two dates, its
+    comment saying so. A negative growth, which the editor refuses, is set to 0 and listed."""
     c = _Comments(p, resolutions)
     start = p.start_date or period[0]
+    growth = p.growth_pct_per_year
+    if growth < 0:
+        resolutions.append(Resolution("growth", f"{p.name}: {growth:g} % a year", "0 % a year",
+                                      "the editor accepts no negative growth"))
+        growth = 0
     volume, discounted = p.volume, None
-    if p.growth_pct_per_year and start < WEB_YEAR_START:
-        factor = (1 + p.growth_pct_per_year / 100) ** ((WEB_YEAR_START - start).days / 365)
-        volume = VolumeSpec(value=round(p.volume.value / factor), per=p.volume.per)
-        discounted = (f"Initial volume: {p.volume.value:,.6g} a {p.volume.per} on {WEB_YEAR_START.isoformat()} as "
-                      f"stated, discounted to {start.isoformat()} at {p.growth_pct_per_year:g} % a year, to a whole "
-                      f"number.")
+    if growth and start < WEB_YEAR_START:
+        value, per = _editor_volume(p.volume)
+        volume = VolumeSpec(value=value / (1 + growth / 100) ** ((WEB_YEAR_START - start).days / 365), per=per)
+        article = "an" if p.volume.per == "hour" else "a"
+        discounted = (f"{_amount(p.volume.value)} {article} {p.volume.per} on {WEB_YEAR_START.isoformat()} as stated: "
+                      f"{_amount(volume.value)} a {per} on {start.isoformat()} at {growth:g} % a year.")
     volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date"),
                                             discounted))) or None
     duration = _duration(start, period[1], round_up=True)
@@ -502,7 +518,7 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
     pattern = UsagePattern(
         _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
         shared.network(p.network), shared.country(p.country),
-        _volume_timeseries(volume, start, duration, p.growth_pct_per_year, volume_comment))
+        _volume_timeseries(volume, start, duration, growth, volume_comment))
     c.close()
     return pattern
 

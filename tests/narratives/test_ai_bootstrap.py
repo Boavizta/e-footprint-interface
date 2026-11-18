@@ -219,7 +219,7 @@ class TestAiBootstrap:
         assert at_web_year_start(germany.nb_deployments_in_parallel) == pytest.approx(2700, rel=0.05)
 
     @titled("ai-bootstrap-edge#deployments-over-time: web usage runs from the earliest deployment start, unless dated, until "
-            "the last device retires [shared-period]")
+            "the last device retires, within the editor's limit [shared-period]")
     def test_web_usage_shares_the_deployments_period(self, client, provider):
         generate_web_edge(client, provider, EDGE_ANSWER)
         [team] = library_system(client).usage_patterns

@@ -223,7 +223,7 @@ def test_weekly_builder_template_keeps_typed_days_and_unlocalizes_numbers(minima
             {"field": field, "builder": builder},
         )
 
-    assert 'value="1.5" step="0.1"' in rendered
+    assert 'value="1.5" step="any"' in rendered
     assert 'value="2.5" required data-range-value' in rendered
     assert 'value="1,5"' not in rendered
     monday_input = re.search(r'id="[^"]+_day_0"[^>]+>', rendered)
