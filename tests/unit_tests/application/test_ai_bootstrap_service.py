@@ -272,33 +272,55 @@ def test_a_past_growing_web_usage_is_discounted_to_its_start():
         ("growth", "Team: -10 % a year", "0 % a year", "the editor accepts no negative growth")]
 
 
-@titled("ai-bootstrap-edge#deployments-over-time: beyond the editor's limit, a web usage starts later or ends sooner, a "
-        "deployment starts later, all listed; misdated refused")
+@titled("ai-bootstrap-edge#deployments-over-time: beyond the editor's limit, web usage starts later or ends sooner, a "
+        "deployment keeps the years nearest 2027; misdated refused")
 def test_periods_beyond_the_editor_limit_are_cut_or_refused():
-    def listed(built):
-        return {(r.requested, r.resolved, r.how) for r in built.resolutions if r.kind == "usage period"}
+    how = "Growth projection holds 10 years at most"
+
+    def build(usage_start=None, **deployment):
+        answer = json.loads(edge_answer(**deployment))
+        if usage_start:
+            answer["usage_patterns"][0]["start_date"] = usage_start
+        built = build_answer(json.dumps(answer), "web_edge")
+        [team], [malls] = built.system.usage_patterns, built.system.edge_usage_patterns
+        listed = {(r.requested, r.resolved, r.how) for r in built.resolutions if r.kind == "usage period"}
+        return period(team.hourly_occurrences), period(malls.hourly_deployment_starts), listed
 
     # Kiosks deployed 2019 to 2020 and kept 10 years: the web usage would run 12 years, to the last retirement in 2030.
-    ends_sooner = build_answer(edge_answer(start_date="2019-01-01", end_date="2020-12-31", usage_span_years=10),
-                               "web_edge")
-    [team] = ends_sooner.system.usage_patterns
-    assert period(team.hourly_occurrences) == ("2019-01-01", 10, "year")
-    assert listed(ends_sooner) == {("Team: 12 years from 2019-01-01", "10 years", "cut at the editor's limit")}
+    assert build(start_date="2019-01-01", end_date="2020-12-31", usage_span_years=10) == (
+        ("2019-01-01", 10, "year"), ("2019-01-01", 2, "year"),
+        {("Team: 2019-01-01 to 2030-12-28", "2019-01-01 to 2028-12-28", how)})
 
-    # Kiosks deployed since 2000: the deployment keeps its end, 2027's installations, and the web usage starts with it.
-    starts_later = build_answer(edge_answer(start_date="2000-01-01"), "web_edge")
-    [malls] = starts_later.system.edge_usage_patterns
-    assert period(malls.hourly_deployment_starts) == ("2018-01-03", 10, "year")
-    assert ("Malls: 28 years from 2000-01-01", "10 years from 2018-01-03",
-            "cut at the editor's limit: installations before 2018-01-03 are not counted") in listed(starts_later)
-    assert period(starts_later.system.usage_patterns[0].hourly_occurrences)[0] == "2018-01-03"
+    # Kiosks deployed since 2000: the deployment keeps 2027's ten years, and the web usage starts with it.
+    assert build(start_date="2000-01-01") == (
+        ("2018-01-03", 10, "year"), ("2018-01-03", 10, "year"),
+        {("Malls: 2000-01-01 to 2027-12-31", "2018-01-03 to 2027-12-31",
+          f"{how}: installations before 2018-01-03 are not counted"),
+         ("Team: 2018-01-03 to 2033-12-29", "2018-01-03 to 2027-12-31", how)})
 
-    # A web usage dated 2012 starts at the limit before the end of 2027, and covers the web year.
-    dated = json.loads(edge_answer())
-    dated["usage_patterns"][0]["start_date"] = "2012-01-01"
-    moved = build_answer(json.dumps(dated), "web_edge")
-    assert period(moved.system.usage_patterns[0].hourly_occurrences) == ("2018-01-03", 10, "year")
-    assert ("Team: from 2012-01-01", "from 2018-01-03",
-            "start moved to the editor's limit before the end of 2027") in listed(moved)
+    # Ending after 2027, a deployment keeps the ten years that cover it: its first ten, or the ten ending with 2027.
+    assert build(start_date="2020-01-01", end_date="2040-12-31") == (
+        ("2020-01-01", 10, "year"), ("2020-01-01", 10, "year"),
+        {("Malls: 2020-01-01 to 2040-12-31", "2020-01-01 to 2029-12-28",
+          f"{how}: installations after 2029-12-28 are not counted"),
+         ("Team: 2020-01-01 to 2035-12-27", "2020-01-01 to 2029-12-28", how)})
+    assert build(start_date="2000-01-01", end_date="2040-12-31")[1:] == (
+        ("2018-01-03", 10, "year"),
+        {("Malls: 2000-01-01 to 2040-12-31", "2018-01-03 to 2027-12-31",
+          f"{how}: installations before 2018-01-03 and after 2027-12-31 are not counted"),
+         ("Team: 2018-01-03 to 2033-12-29", "2018-01-03 to 2027-12-31", how)})
+
+    # A web usage dated 2012 starts ten years before the end of 2027; the undated deployment follows it unlisted.
+    assert build(usage_start="2012-01-01") == (
+        ("2018-01-03", 10, "year"), ("2018-01-03", 10, "year"),
+        {("Team: from 2012-01-01", "from 2018-01-03", f"{how}: the 10 ending with 2027 are kept"),
+         ("Team: 2018-01-03 to 2033-12-29", "2018-01-03 to 2027-12-31", how)})
+
+    # Within ten years but above 120 months: a deployment is 120 months to its end, a web usage ten years from its
+    # start, both unlisted.
+    assert build(start_date="2018-01-20")[1:] == (
+        ("2018-02-22", 120, "month"), {("Team: 2018-02-22 to 2033-12-29", "2018-02-22 to 2028-02-19", how)})
+    assert build(usage_start="2018-02-01", start_date="2025-01-01", end_date="2025-12-31", usage_span_years=1) == (
+        ("2018-02-01", 10, "year"), ("2025-01-01", 1, "year"), set())
     with pytest.raises(ValueError, match="falls after the end"):
         build_answer(edge_answer(start_date="2027-06-01", end_date="2027-01-01"), "web_edge")

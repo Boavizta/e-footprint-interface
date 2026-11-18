@@ -54,10 +54,9 @@ from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 WEB_YEAR_START = date(2027, 1, 1)
 WEB_YEAR_END = date(2027, 12, 31)
 MAX_DEFAULT_SPAN_YEARS = 6  # the library's own default usage span
-# A period cut at the editor's limit lasts its years, the longer of its two units (3,650 days against 3,600); web
-# usage starts no earlier than that limit before the web year's end, so that a cut one still covers the web year.
-LIMIT = (GROWTH_DURATION_LIMITS["year"], "year")
-EARLIEST_WEB_START = WEB_YEAR_END - timedelta(days=LIMIT[0] * 365 - 1)
+# The longest period the Growth projection editor holds, in the longer of its two units (3,650 days against 3,600).
+EDITOR_LIMIT = (GROWTH_DURATION_LIMITS["year"], "year")
+EDITOR_LIMIT_HOW = "Growth projection holds 10 years at most"
 
 
 class Strict(BaseModel):
@@ -294,6 +293,7 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
 
 
 DAYS_PER_UNIT = {"month": 30, "year": 365}  # the library's Growth projection units
+ROUNDING_DAYS = 15  # a duration is whole years within this many days; a move or a loss this short is not listed
 
 
 def _duration(start: date, end: date, round_up: bool = False) -> tuple[int, str]:
@@ -304,7 +304,7 @@ def _duration(start: date, end: date, round_up: bool = False) -> tuple[int, str]
     if days <= 0:
         raise ValueError(f"A start date ({start}) falls after the end of its period ({end})")
     years = round(days / 365)
-    if years and abs(days - 365 * years) <= 15 and not (round_up and days > 365 * years):
+    if years and abs(days - 365 * years) <= ROUNDING_DAYS and not (round_up and days > 365 * years):
         return years, "year"
     return max(1, math.ceil(days / 30) if round_up else round(days / 30)), "month"
 
@@ -313,6 +313,15 @@ def _end(start: date, duration: tuple[int, str]) -> date:
     """The last day a Growth projection period starting on `start` covers."""
     value, unit = duration
     return start + timedelta(days=value * DAYS_PER_UNIT[unit] - 1)
+
+
+def _start(end: date, duration: tuple[int, str]) -> date:
+    """The first day of a Growth projection period ending on `end`: the inverse of `_end`."""
+    value, unit = duration
+    return end - timedelta(days=value * DAYS_PER_UNIT[unit] - 1)
+
+
+EARLIEST_WEB_START = _start(WEB_YEAR_END, EDITOR_LIMIT)  # an earlier web usage cut to 10 years misses the web year
 
 
 def _editor_volume(volume: VolumeSpec) -> tuple[float, str]:
@@ -493,16 +502,18 @@ def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) ->
 def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, period: tuple[date, date],
                         resolutions: list[Resolution]) -> UsagePattern:
     """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start,
-    until the period's end. A start earlier than the editor's limit before the web year's end is moved there, and a
-    usage still longer than the limit loses its end, each listed: the usage always covers the web year. The
-    stated volume is the one of the web year's first day, or of the usage's own start when later: a usage that
-    starts before it with a growth starts from that volume discounted by the growth between the two dates, its
-    comment saying so. A negative growth, which the editor refuses, is set to 0 and listed."""
+    until the period's end. It starts no earlier than the editor's 10 years before the web year's end, a stated start
+    moved there listed beyond the rounding's 15 days; a usage still longer loses its end, listed, so that a cut never
+    ends it before the web year does. Within 10 years, a usage the month unit cannot hold is 10 years, reaching past
+    its end. The stated volume is the one of the web year's first day, or of the usage's own start when later: a
+    usage that starts before it with a growth starts from that volume discounted by the growth between the two dates,
+    its comment saying so. A negative growth, which the editor refuses, is set to 0 and listed."""
     c = _Comments(p, resolutions)
-    start = p.start_date or period[0]
+    start = p.start_date or max(period[0], EARLIEST_WEB_START)
     if start < EARLIEST_WEB_START:
-        resolutions.append(Resolution("usage period", f"{p.name}: from {start}", f"from {EARLIEST_WEB_START}",
-                                      "start moved to the editor's limit before the end of 2027"))
+        if (EARLIEST_WEB_START - start).days > ROUNDING_DAYS:
+            resolutions.append(Resolution("usage period", f"{p.name}: from {start}", f"from {EARLIEST_WEB_START}",
+                                          f"{EDITOR_LIMIT_HOW}: the 10 ending with 2027 are kept"))
         start = EARLIEST_WEB_START
     growth = p.growth_pct_per_year
     if growth < 0:
@@ -519,10 +530,11 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
     volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date"),
                                             discounted))) or None
     duration = _duration(start, period[1], round_up=True)
-    if duration[0] > GROWTH_DURATION_LIMITS[duration[1]]:
-        resolutions.append(Resolution("usage period", f"{p.name}: {duration[0]} {duration[1]}s from {start}",
-                                      f"{LIMIT[0]} {LIMIT[1]}s", "cut at the editor's limit"))
-        duration = LIMIT
+    if period[1] > _end(start, EDITOR_LIMIT):
+        resolutions.append(Resolution("usage period", f"{p.name}: {start} to {period[1]}",
+                                      f"{start} to {_end(start, EDITOR_LIMIT)}", EDITOR_LIMIT_HOW))
+    if duration[0] > GROWTH_DURATION_LIMITS[duration[1]]:  # beyond 10 years, or above 120 months within them
+        duration = EDITOR_LIMIT
     pattern = UsagePattern(
         _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
         shared.network(p.network), shared.country(p.country),
@@ -651,19 +663,27 @@ def _deployment_spans(spec: WebEdgeSpec, resolutions: list[Resolution]) -> dict[
     return spans
 
 
-def _deployment_period(dep: EdgeDeploymentSpec, start: date, resolutions: list[Resolution]):
+def _deployment_period(dep: EdgeDeploymentSpec, start: date,
+                       resolutions: list[Resolution]) -> tuple[date, tuple[int, str]]:
     """A deployment's start and its duration to its end date, the web year's end without one. A deployment longer
-    than the editor accepts keeps its end, its latest installations, and starts later, at the same rate: the
-    installations before its new start are left out, and the cut listed."""
+    than the editor's 10 years keeps, at the same rate, the 10 nearest the web year: its last 10 when it ends by the
+    web year's end, its first 10 when those cover the web year, else the 10 ending with it. The installations outside
+    them are left out, a stated date's loss listed beyond the rounding's 15 days. Within 10 years, a deployment the month unit cannot hold is 120 months to its end."""
     end = dep.end_date or WEB_YEAR_END
+    if end > _end(start, EDITOR_LIMIT):
+        cut_end = min(end, max(WEB_YEAR_END, _end(start, EDITOR_LIMIT)))
+        cut_start = _start(cut_end, EDITOR_LIMIT)
+        lost = [f"before {cut_start}"] if dep.start_date and (cut_start - start).days > ROUNDING_DAYS else []
+        if dep.end_date and (end - cut_end).days > ROUNDING_DAYS:
+            lost.append(f"after {cut_end}")
+        if lost:
+            resolutions.append(Resolution("usage period", f"{dep.name}: {start} to {end}", f"{cut_start} to {cut_end}",
+                                          f"{EDITOR_LIMIT_HOW}: installations {' and '.join(lost)} are not counted"))
+        return cut_start, EDITOR_LIMIT
     duration = _duration(start, end)
-    if duration[0] > GROWTH_DURATION_LIMITS[duration[1]]:
-        cut_start = end - timedelta(days=LIMIT[0] * 365 - 1)
-        resolutions.append(Resolution(
-            "usage period", f"{dep.name}: {duration[0]} {duration[1]}s from {start}",
-            f"{LIMIT[0]} {LIMIT[1]}s from {cut_start}",
-            f"cut at the editor's limit: installations before {cut_start} are not counted"))
-        return cut_start, LIMIT
+    if duration[0] > GROWTH_DURATION_LIMITS[duration[1]]:  # above 120 months within 10 years
+        duration = (GROWTH_DURATION_LIMITS["month"], "month")
+        return _start(end, duration), duration
     return start, duration
 
 
@@ -671,7 +691,7 @@ def _deployment_periods(usage_patterns: list[UsagePatternSpec], deployments: lis
                         resolutions: list[Resolution]) -> tuple[date, dict]:
     """The shared start, the earliest date the answer gives once the dated deployments are cut (the web year's first
     day without one), and each deployment's period: a dated one from its start date, the others from the shared
-    start."""
+    start, cut silently on that side."""
     periods = {dep.name: _deployment_period(dep, dep.start_date, resolutions) for dep in deployments if dep.start_date}
     start = min([p.start_date for p in usage_patterns if p.start_date] + [s for s, _ in periods.values()]
                 or [WEB_YEAR_START])
@@ -712,10 +732,10 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     start, periods = _deployment_periods(spec.usage_patterns, spec.edge_deployments if edge else [], resolutions)
     web_end = max([WEB_YEAR_END] + [_end(*periods[name]) + timedelta(days=round(365 * span))
                                     for name, span in spans.items()])
-    narrate("**One period for people and devices**: deployments run from their start to their end date, else the web "
-            "year's end, a too long one losing its earliest installations. Web usage runs from the earliest start "
-            "after those cuts until the last device retires, covering the web year within the editor's limit; a "
-            "dated usage starts when it says.",
+    narrate("**One period for people and devices**: deployments run to their end date, else the web year's end, "
+            "keeping at most the editor's 10 years, those nearest the web year. Web usage runs from the earliest "
+            "start after those cuts, or its own, no earlier than 2018-01-03, until the last device retires, within "
+            "10 years.",
             lambda: {"start": start.isoformat(), "web_end": web_end.isoformat(), "spans_years": spans})
     narrate("A fresh library system is built **in dependency order**: servers and external APIs, the jobs that run "
             "on them, the journeys made of those jobs, the usage patterns. Each name the answer gives a catalog is "

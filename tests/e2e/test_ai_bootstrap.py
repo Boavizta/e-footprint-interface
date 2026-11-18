@@ -244,7 +244,8 @@ def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, i
     expect(page.locator("#edge-modeling-toggle")).to_be_checked()
     expect(page.locator("#edge-devices-list").get_by_text("Station controller")).to_be_visible()
     expect(builder.ai_bootstrap_summary).to_contain_text(
-        "usage period: Operations team: 12 years from 2024-01-01 → 10 years (cut at the editor's limit)")
+        "usage period: Operations team: 2024-01-01 to 2035-12-28 → 2024-01-01 to 2033-12-28 "
+        "(Growth projection holds 10 years at most)")
     builder.close_side_panel()
     period = {"start_date": "2024-01-01", "modeling_duration_value": "10", "modeling_duration_unit": "year"}
 
