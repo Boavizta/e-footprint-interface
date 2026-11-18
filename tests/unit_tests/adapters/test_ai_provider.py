@@ -1,7 +1,10 @@
+import logging
 from types import SimpleNamespace as NS
 from unittest.mock import MagicMock
 
+import httpx2
 import pytest
+from mistralai.client.errors import SDKError
 
 from model_builder.adapters.ai_provider import ProviderError, complete_mistral, is_available
 
@@ -56,6 +59,23 @@ def test_provider_error_is_content_free_and_never_retried(monkeypatch):
     assert str(raised.value) == "Generation provider unavailable"
     assert raised.value.__suppress_context__
     client.chat.complete.assert_called_once()
+
+
+@pytest.mark.parametrize("error, stop, kind", [
+    (httpx2.ReadTimeout("SENTINEL timeout"), "stop", "timeout"),
+    (SDKError("SENTINEL message", httpx2.Response(503, text="SENTINEL body")), "stop", "HTTP 503"),
+    (RuntimeError("SENTINEL other"), "stop", "RuntimeError"),
+    (None, "length", "unfinished (length)"),
+])
+def test_failure_logs_its_kind_and_latency_only(monkeypatch, caplog, error, stop, kind):
+    client, _ = sdk(monkeypatch, content="SENTINEL answer", stop=stop)
+    client.chat.complete.side_effect = error
+    with pytest.raises(ProviderError), caplog.at_level(logging.DEBUG):
+        complete_mistral("SENTINEL prompt", "SENTINEL description")
+    [record] = caplog.records
+    assert record.levelno == logging.WARNING
+    assert record.getMessage().startswith(f"AI provider failure: {kind} after ") and record.getMessage().endswith(" s")
+    assert "SENTINEL" not in caplog.text
 
 
 def test_availability_requires_flag_and_key(settings, monkeypatch):
