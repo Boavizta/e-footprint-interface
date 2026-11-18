@@ -394,7 +394,7 @@
                 <div class="text-danger small d-none" role="alert" data-range-error></div></td>
             <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
                        value="${start + 1}" required aria-label="Range end hour" data-range-end></td>
-            <td><input class="form-control form-control-sm" type="number" step="any" value="0" required
+            <td><input class="form-control form-control-sm" type="number" step="0.01" value="0" required
                        aria-label="Range value" data-range-value${minValue}></td>
             <td><button class="btn btn-sm btn-link text-danger p-1" type="button"
                         data-action="remove-weekly-range">Remove</button></td>`;
@@ -422,7 +422,7 @@
                 }).join("")}
                 </div><div class="text-danger small d-none" role="alert" data-profile-days-error></div></div>
             <div class="weekly-profile-field"><label class="form-label" data-profile-baseline-label>Baseline</label><div class="input-group input-group-sm">
-                <input class="form-control" type="number" value="0" step="any" required data-profile-baseline${minValue}>
+                <input class="form-control" type="number" value="0" step="0.01" required data-profile-baseline${minValue}>
                 <span class="input-group-text" data-weekly-unit>${editor.querySelector("[data-weekly-unit]").textContent.trim()}</span>
                 <div class="invalid-feedback" data-profile-baseline-error></div></div></div>
             <div class="table-responsive"><table class="table table-sm align-middle weekly-ranges-table">

@@ -232,7 +232,7 @@ def test_start_opens_on_web_edge_when_edge_modeling_is_on(edge_modeling_enabled)
 def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, isolated_bootstrap):
     builder = empty_model_builder
     page = builder.page
-    # 3,000 a week opens as 428.57... a day: a value the editor's whole-number step refused on an unchanged save.
+    # 3,000 a week, 428.57 a day, opens on the editor's whole-number step: 429 a day saves unchanged.
     answer = json.loads(EDGE_ANSWER)
     answer["usage_patterns"][0]["volume"] = {"value": 3000, "per": "week"}
     isolated_bootstrap.return_value = Completion(json.dumps(answer), 5000, 2000, latency_s=15)
@@ -255,6 +255,6 @@ def test_web_edge_generation_keeps_a_cut_web_usage_period(empty_model_builder, i
                 for key in [*period, "initial_volume"]}
 
     opened = opened_inputs()
-    assert {key: opened[key] for key in period} == period and float(opened["initial_volume"]) == pytest.approx(3000 / 7)
+    assert {key: opened[key] for key in period} == period and opened["initial_volume"] == "429"
     builder.side_panel.submit_and_wait_for_close()
     assert opened_inputs() == opened

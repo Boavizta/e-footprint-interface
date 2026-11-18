@@ -292,7 +292,9 @@ def _apply_fields(kwargs: dict, c: _Comments, table: dict, fields=None):
             kwargs[attr] = SourceValue(value * unit, comment=c.take(field))
 
 
-DAYS_PER_UNIT = {"month": 30, "year": 365}  # the library's Growth projection units
+DAYS_PER_UNIT = {"minute": 1 / 1440, "hour": 1 / 24, "day": 1, "week": 7, "month": 30, "year": 365}  # Growth projection's
+EDITOR_TIMESPANS = ("day", "month", "year")  # the hourly editor's volume periods
+VOLUME_TOLERANCE = 0.005  # the most a volume moves when rounded to the editor's whole number
 ROUNDING_DAYS = 15  # a duration is whole years within this many days; a move or a loss this short is not listed
 
 
@@ -324,16 +326,22 @@ def _start(end: date, duration: tuple[int, str]) -> date:
 EARLIEST_WEB_START = _start(WEB_YEAR_END, EDITOR_LIMIT)  # an earlier web usage cut to 10 years misses the web year
 
 
-def _editor_volume(volume: VolumeSpec) -> tuple[float, str]:
-    """A volume per minute, hour or week as the per-day one the hourly editor takes; other periods as they are."""
-    value, per = volume.value, volume.per
-    if per == "minute":
-        return value * 60 * 24, "day"
-    if per == "hour":
-        return value * 24, "day"
-    if per == "week":
-        return value / 7, "day"
-    return value, per
+def _period_volume(days: float, growth_pct_per_year: float) -> float:
+    """What `days` days hold when the first holds 1, as Growth projection compounds a yearly growth day by day."""
+    rate = (1 + growth_pct_per_year / 100) ** (1 / 365)
+    return days if rate == 1 else (rate ** days - 1) / (rate - 1)
+
+
+def _editor_volume(volume: VolumeSpec, growth_pct_per_year: float) -> tuple[int, str]:
+    """A volume as the whole number the hourly editor's step takes, over its stated day, month or year (a day for a
+    shorter period) or the first longer one that rounding moves by 0.5 % at most, a year failing that: a week's
+    volume opens per day, a small one per month or year rather than as 0."""
+    first_day = volume.value / _period_volume(DAYS_PER_UNIT[volume.per], growth_pct_per_year)
+    spans = EDITOR_TIMESPANS[EDITOR_TIMESPANS.index(volume.per):] if volume.per in EDITOR_TIMESPANS else EDITOR_TIMESPANS
+    for per in spans:
+        value = first_day * _period_volume(DAYS_PER_UNIT[per], growth_pct_per_year)
+        if abs(round(value) - value) <= VOLUME_TOLERANCE * value or per == "year":
+            return round(value), per
 
 
 def _amount(value: float) -> str:
@@ -345,7 +353,7 @@ def _volume_timeseries(volume: VolumeSpec, start: date, duration: tuple[int, str
                        comment: Optional[str] = None):
     """Hourly volume from the DSL period over `duration` from `start`, as the Growth projection inputs the hourly
     editor prefills: a raw series would open empty."""
-    value, per = _editor_volume(volume)
+    value, per = _editor_volume(volume, growth_pct_per_year)
     return ExplainableHourlyQuantitiesFromFormInputs({
         "start_date": start.isoformat(),
         "modeling_duration_value": duration[0],
@@ -358,9 +366,10 @@ def _volume_timeseries(volume: VolumeSpec, start: date, duration: tuple[int, str
 
 
 def _weekly(value: float, unit: str, comment: Optional[str] = None):
-    """A constant need over the typical week, as the inputs the weekly editor prefills."""
+    """A constant need over the typical week, as the inputs the weekly editor prefills, to the hundredth its step
+    takes."""
     return ExplainableRecurrentQuantitiesFromConstant(
-        {"constant_value": value, "constant_unit": unit}, source=Sources.USER_DATA, comment=comment)
+        {"constant_value": round(value, 2), "constant_unit": unit}, source=Sources.USER_DATA, comment=comment)
 
 
 DEVICE_ARCHETYPES = ("smartphone", "laptop", "screen", "box")
@@ -507,7 +516,8 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
     ends it before the web year does. Within 10 years, a usage the month unit cannot hold is 10 years, reaching past
     its end. The stated volume is the one of the web year's first day, or of the usage's own start when later: a
     usage that starts before it with a growth starts from that volume discounted by the growth between the two dates,
-    its comment saying so. A negative growth, which the editor refuses, is set to 0 and listed."""
+    its comment saying so. The growth is the whole percent the editor's step takes; a negative one, which the editor
+    refuses, is set to 0 and listed."""
     c = _Comments(p, resolutions)
     start = p.start_date or max(period[0], EARLIEST_WEB_START)
     if start < EARLIEST_WEB_START:
@@ -515,18 +525,19 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
             resolutions.append(Resolution("usage period", f"{p.name}: from {start}", f"from {EARLIEST_WEB_START}",
                                           f"{EDITOR_LIMIT_HOW}: the 10 ending with 2027 are kept"))
         start = EARLIEST_WEB_START
-    growth = p.growth_pct_per_year
+    growth = round(p.growth_pct_per_year)
     if growth < 0:
-        resolutions.append(Resolution("growth", f"{p.name}: {growth:g} % a year", "0 % a year",
+        resolutions.append(Resolution("growth", f"{p.name}: {p.growth_pct_per_year:g} % a year", "0 % a year",
                                       "the editor accepts no negative growth"))
         growth = 0
     volume, discounted = p.volume, None
     if growth and start < WEB_YEAR_START:
-        value, per = _editor_volume(p.volume)
-        volume = VolumeSpec(value=value / (1 + growth / 100) ** ((WEB_YEAR_START - start).days / 365), per=per)
+        factor = (1 + growth / 100) ** ((WEB_YEAR_START - start).days / 365)
+        volume = VolumeSpec(value=p.volume.value / factor, per=p.volume.per)
+        value, per = _editor_volume(volume, growth)
         article = "an" if p.volume.per == "hour" else "a"
         discounted = (f"{_amount(p.volume.value)} {article} {p.volume.per} on {WEB_YEAR_START.isoformat()} as stated: "
-                      f"{_amount(volume.value)} a {per} on {start.isoformat()} at {growth:g} % a year.")
+                      f"{value:,} a {per} on {start.isoformat()} at {growth} % a year.")
     volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date"),
                                             discounted))) or None
     duration = _duration(start, period[1], round_up=True)

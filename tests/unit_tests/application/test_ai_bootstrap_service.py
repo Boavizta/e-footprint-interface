@@ -256,20 +256,41 @@ def test_a_past_growing_web_usage_is_discounted_to_its_start():
         return series.value.magnitude[days_to_2027 * 24:(days_to_2027 + days) * 24].sum()
 
     growing, _ = team(growth_pct_per_year=40)
-    assert from_2027(growing, 30) == pytest.approx(1000, rel=1e-4)
-    assert growing.form_inputs["initial_volume"] == pytest.approx(1000 / 1.4 ** (days_to_2027 / 365))
+    assert from_2027(growing, 30) == pytest.approx(1000, rel=0.005)  # within the rounding to a whole number
+    assert growing.form_inputs["initial_volume"] == round(1000 / 1.4 ** (days_to_2027 / 365))
     assert growing.comment == "1,000 a month on 2027-01-01 as stated: 260 a month on 2023-01-01 at 40 % a year."
     weekly, _ = team({"value": 9000, "per": "week"}, growth_pct_per_year=40)
-    assert from_2027(weekly, 7) == pytest.approx(9000, rel=0.005)  # within the growth inside one week
-    assert weekly.comment == "9,000 a week on 2027-01-01 as stated: 334 a day on 2023-01-01 at 40 % a year."
+    assert from_2027(weekly, 7) == pytest.approx(9000, rel=0.005)
+    assert weekly.comment == "9,000 a week on 2027-01-01 as stated: 333 a day on 2023-01-01 at 40 % a year."
     small, _ = team({"value": 1, "per": "month"}, growth_pct_per_year=40)
-    assert small.form_inputs["initial_volume"] == pytest.approx(0.26, abs=0.005)  # unrounded, so never zero
+    assert from_2027(small, 365) == pytest.approx(12 * 1.4 ** 0.5, rel=0.2)  # per year, rather than 0 a month
     flat, _ = team()
     assert flat.form_inputs["initial_volume"] == 1000 and flat.comment is None
     shrinking, resolutions = team(growth_pct_per_year=-10)  # the editor accepts no negative growth: set flat
     assert shrinking.form_inputs["initial_volume"] == 1000 and shrinking.form_inputs["net_growth_rate_in_percentage"] == 0
     assert [(r.kind, r.requested, r.resolved, r.how) for r in resolutions if r.kind == "growth"] == [
         ("growth", "Team: -10 % a year", "0 % a year", "the editor accepts no negative growth")]
+
+
+@titled("ai-bootstrap-edge#deployments-over-time: generated values open on the editors' steps: a whole volume per day, "
+        "month or year within 0.5 %, a whole growth percent, a weekly need to the hundredth")
+def test_generated_values_are_rounded_to_the_editors_steps():
+    answer = json.loads(edge_answer(new_units={"value": 1, "per": "week"}))
+    answer["usage_patterns"][0].update(volume={"value": 3000, "per": "week"}, growth_pct_per_year=2.6)
+    answer["edge_functions"][0].update(cpu_cores_avg=0.333, server_calls=[{"jobs": ["J"], "times_per_hour": 0.0417}])
+
+    system = build_answer(json.dumps(answer), "web_edge").system
+
+    [team], [malls] = system.usage_patterns, system.edge_usage_patterns
+    team_inputs, mall_inputs = team.hourly_occurrences.form_inputs, malls.hourly_deployment_starts.form_inputs
+    assert (team_inputs["initial_volume"], team_inputs["initial_volume_timespan"],
+            team_inputs["net_growth_rate_in_percentage"]) == (428, "day", 3)  # a growing week's first day
+    assert (mall_inputs["initial_volume"], mall_inputs["initial_volume_timespan"]) == (52, "year")  # not 0.14 a day
+    [function] = system.edge_usage_journeys[0].edge_functions
+    [process] = function.recurrent_edge_device_needs
+    [call] = function.recurrent_server_needs
+    assert process.recurrent_compute_needed.form_inputs["constant_value"] == 0.33
+    assert call.recurrent_volume_per_edge_device.form_inputs["constant_value"] == 0.04
 
 
 @titled("ai-bootstrap-edge#deployments-over-time: beyond the editor's limit, web usage starts later or ends sooner, a "

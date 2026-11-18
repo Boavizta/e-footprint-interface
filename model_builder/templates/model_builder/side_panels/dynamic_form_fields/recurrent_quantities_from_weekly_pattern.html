@@ -87,7 +87,7 @@
                     <div class="input-group input-group-sm">
                         <input class="form-control" type="number"
                                id="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline"
-                               value="{{ profile.baseline|unlocalize }}" step="any" required data-profile-baseline
+                               value="{{ profile.baseline|unlocalize }}" step="0.01" required data-profile-baseline
                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.counter0 }}_baseline_error"
                                {% if not field.can_be_negative %}min="0"{% endif %}>
                         <span class="input-group-text" data-weekly-unit>{{ builder.default.unit }}</span>
@@ -113,7 +113,7 @@
                                     <td><input class="form-control form-control-sm" type="number" min="1" max="24" step="1"
                                                value="{{ range.end|unlocalize }}" required data-range-end aria-label="Range end hour"
                                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"></td>
-                                    <td><input class="form-control form-control-sm" type="number" step="any"
+                                    <td><input class="form-control form-control-sm" type="number" step="0.01"
                                                value="{{ range.value|unlocalize }}" required data-range-value
                                                aria-label="Range value"
                                                aria-describedby="{{ field.web_id }}__profile_{{ forloop.parentloop.counter0 }}_range_{{ forloop.counter0 }}_error"
