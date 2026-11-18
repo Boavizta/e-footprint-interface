@@ -298,7 +298,8 @@ class TestAiBootstrap:
     @titled("ai-bootstrap-edge#scope-choice: Start with AI after a Web + edge generation opens on Web only "
             "[web-by-default]")
     def test_start_opens_on_web_only(self, client, provider):
-        generate_web_edge(client, provider, BUILDING_ANSWER)
+        generated = generate_web_edge(client, provider, BUILDING_ANSWER).content.decode()
+        assert 'data-ai-bootstrap-panel="summary"' in generated and "Deployments:" in generated
 
         started = client.post(START).content.decode()
 

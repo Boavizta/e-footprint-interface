@@ -21,6 +21,8 @@ from model_builder.narrate import event, narrate
 def _input_response(request, workspace, description, scope, error):
     # A failed preparation may have replaced request-local settings; recover only saved settings.
     model_web = ModelWeb(workspace.active_repository())
+    narrate("A refusal brings **the panel back with the description and the scope posted**, under one message; "
+            "the slot keeps the modeling it held, since nothing was saved.", lambda: {"scope": scope})
     return render_model_builder(request, model_web, show_example_picker=False, workspace=workspace, extra_context={
         "ai_panel": "input", "ai_prompt": description, "ai_scope": scope, "ai_error": error})
 
