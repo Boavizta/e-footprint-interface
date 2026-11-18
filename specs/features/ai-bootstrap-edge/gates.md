@@ -29,6 +29,27 @@
 
 ## Checklist
 
+1. **The scope choice and its two disclosures, by eye.** Nothing downstream waits on it but the
+   feature's archive. No paid call is made by these steps.
+   1. `AI_BOOTSTRAP_ENABLED=1 MISTRAL_API_KEY=dummy poetry run python manage.py runserver`, open
+      `http://localhost:8000/model_builder/`, then Modeling actions → Start with AI.
+   2. Web only is checked, with its guidance and its cost and impact line.
+   3. Type a description, check Web + edge: the guidance and the cost and impact line change, the
+      typed text stays. Read the Web + edge guidance and disclosure wording: both are new copy.
+      The web part of the Web + edge guidance leaves out two hints the Web only text gives
+      (users against visits, session or step durations).
+   4. Do not submit: with the dummy key the provider refuses at no cost, but the description
+      would still be sent to it.
+
+   Verdict:
+2. **A Web + edge generation, by eye, on the test fake** (the development server has no fake
+   switch): `poetry run pytest tests/e2e/test_ai_bootstrap.py -k "web_edge_generation or scope_choice" --headed --slowmo 400`
+   (prefix `PWDEBUG=1` to step through). It starts its own server and answers with handwritten
+   answer 04. Look at the summary's edge checks after the web ones, the edge objects on the
+   canvas, and the generated web usage pattern opening on 12 years from 2024-01-01.
+
+   Verdict:
+
 ## Post-run operations
 
 1. **Release the library before the interface's deployment commit.** The lot `library-server-calls`
@@ -172,6 +193,20 @@ and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizo
   nothing the user can open.
 - A replay of a sandbox run recorded before the format moved drops the removed fields and fails
   the device totals. Local, git-ignored runs only.
+
+### scope-choice
+
+- The scope strings `web` and `web_edge` are written out in the view's start route, the input
+  template (two radios, four `data-ai-scope` blocks), the summary template, the stylesheet rule
+  and the service's table. A third scope would touch all of them.
+- The `checked_scopes` regex of the narrative tests depends on the order of the radio's
+  attributes; it fails loudly if they move.
+- No test posts an absent scope; an unknown one (`edge_only`) is tested and both reach the same
+  lookup failure.
+- The journey page's screen 6 describes the edge checks in a state row only, with no mock.
+- The sandbox's `summary.md` states no impact of a call: its "total kg CO2e" column is the
+  generated modeling's footprint. The disclosure's "below 1 g CO2-eq" was recomputed with
+  `estimate_call` on each call's tokens and latency (0.21 to 0.40 g).
 
 ## End-of-run gate
 

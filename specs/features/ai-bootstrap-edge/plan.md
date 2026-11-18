@@ -9,6 +9,10 @@ Above the description, a Web only / Web + edge radio, Web only checked; a styles
 
 A request per switch would have to carry the description back. The stylesheet's `:has` selector, already used by simplified inputs, needs no script and no request. The Web + edge disclosure states its own indicative cost and impact, taken from the sandbox runs of #edge-instructions.
 
+Changed: **One browser test and five files beyond the plan.** The test alone sees the editor keep a 12-year period on reopening. The radio lives in the input template and its stylesheet; the changelog and the architecture page follow the feature.
+
+To confirm: **Should both cost lines carry two significant figures?** Rounded to one like Web only, Web + edge reads about 0.2 US cent against 0.1, twice the cost; measured, it is 0.15 against 0.12. Two figures would change the approved Web only line.
+
 ## #scope-in-request
 
 The scope travels with the generate request to the service, back on a refusal, and to the summary, whose checklist adds deployments, devices per group, device characteristics and server calls.
