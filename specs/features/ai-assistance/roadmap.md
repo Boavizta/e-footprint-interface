@@ -1,6 +1,6 @@
 # AI assistance roadmap
 
-Updated 2026-11-06. Interface-owned. This roadmap records direction, not implementation approval.
+Updated 2026-11-18. Interface-owned. This roadmap records direction, not implementation approval.
 Each extension gets its own specification before planning and implementation.
 
 ## First production feature — AI-assisted bootstrap (spec approved; planning pending)
@@ -54,6 +54,17 @@ After asynchronous processing, coordinate with Boavizta to use a Boavizta-owned 
 and API key. Clarify who holds the provider contract, owns billing and manages credentials, and
 confirm that the agreed terms cover the service's use and handling of submitted data. Record the
 outcome and align the application's provider disclosure with it.
+
+### 4. Explore stronger models for Web + edge descriptions
+
+Waits for asynchronous provider I/O (follow-up 2), not for follow-up 3: a stronger model answers
+more slowly, and the synchronous call already times out at 45 seconds on a slow day. The edge
+bootstrap ships on `zai-glm-5-3-flash` at low effort. On a description with groups inside groups
+(a building of floors, each holding a cabinet of devices), its answers are fully right about half
+the time, and high reasoning effort on the same model brought no gain for twice the cost and half
+its calls past the timeout (sandbox cases 05 and 06, 2026-11-18). Measure one or two stronger
+models on those cases and on 03 and 04 before any change: structure, device counts, refusals,
+latency, cost and impact per call. Case 06 is held out from the prompt's examples; keep it so.
 
 ## Later possibilities — unordered, no commitment
 
