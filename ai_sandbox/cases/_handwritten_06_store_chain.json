@@ -1,0 +1,69 @@
+{
+  "system_name": "Supermarket chain in Spain",
+  "servers": [
+    {"name": "Store API", "kind": "cpu"},
+    {"name": "Sales database", "kind": "cpu", "storage_gb": 500,
+     "comments": {"storage_gb": "Sales history of a few hundred stores"}}
+  ],
+  "jobs": [
+    {"name": "Receive sales batch", "server": "Store API", "data_transferred_kb": 50, "request_duration_s": 0.1,
+     "comments": {"data_transferred_kb": "One 15-minute batch of a store's sales"}},
+    {"name": "Write sales", "server": "Sales database", "data_stored_kb": 50,
+     "comments": {"data_stored_kb": "The batch kept in the database"}},
+    {"name": "Load dashboard", "server": "Store API", "data_transferred_kb": 800, "request_duration_s": 0.5,
+     "comments": {"data_transferred_kb": "A dashboard page with its charts"}},
+    {"name": "Query sales", "server": "Sales database", "data_transferred_kb": 200, "request_duration_s": 0.5,
+     "comments": {"data_transferred_kb": "A day of one store's sales"}}
+  ],
+  "journeys": [
+    {"name": "Check the store dashboard", "steps": [
+      {"name": "Open the dashboard", "user_time_spent_min": 3, "jobs": ["Load dashboard", "Query sales"],
+       "comments": {"user_time_spent_min": "A quick look at the day's sales"}}]}
+  ],
+  "usage_patterns": [
+    {"name": "Store managers", "journey": "Check the store dashboard", "device": "laptop", "network": "wifi",
+     "country": "SPAIN", "volume": {"value": 240, "per": "day"},
+     "comments": {"volume": "120 store managers, twice a day"}}
+  ],
+  "edge_devices": [
+    {"name": "Edge server", "kind": "computer", "cores": 4, "ram_gb": 16, "storage_gb": 512, "power_w": 60,
+     "idle_power_w": 35, "base_ram_gb": 4, "base_storage_gb": 64, "embodied_kg": 150, "lifespan_years": 6,
+     "comments": {"power_w": "A small back-office x86 server"}},
+    {"name": "Barcode scanner", "kind": "appliance", "power_w": 3, "idle_power_w": 1.5, "embodied_kg": 5,
+     "lifespan_years": 7, "comments": {"power_w": "A wired checkout scanner"}},
+    {"name": "Payment terminal", "kind": "appliance", "power_w": 5, "idle_power_w": 2, "embodied_kg": 8,
+     "lifespan_years": 5, "comments": {"power_w": "A card payment terminal"}},
+    {"name": "Temperature probe", "kind": "appliance", "power_w": 0.3, "idle_power_w": 0.2, "embodied_kg": 0.5,
+     "lifespan_years": 8, "comments": {"power_w": "A wireless probe reporting every minute"}}
+  ],
+  "edge_device_groups": [
+    {"name": "Checkout lane", "device_counts": {"Barcode scanner": 1, "Payment terminal": 1},
+     "comments": {"Barcode scanner": "One scanner at each lane", "Payment terminal": "One terminal at each lane"}},
+    {"name": "Cold room", "device_counts": {"Temperature probe": 4}, "comments": {"Temperature probe": "4 probes"}},
+    {"name": "Store", "device_counts": {"Edge server": 1}, "sub_group_counts": {"Checkout lane": 3, "Cold room": 1},
+     "comments": {"Edge server": "One edge server per store", "Checkout lane": "3 checkout lanes",
+                  "Cold room": "One cold room"}}
+  ],
+  "edge_functions": [
+    {"name": "Collect and upload sales", "device": "Edge server", "cpu_cores_avg": 0.5, "ram_gb_avg": 2,
+     "server_calls": [{"jobs": ["Receive sales batch", "Write sales"], "times_per_hour": 4,
+                       "comment": "The store's sales every 15 minutes"}],
+     "comments": {"cpu_cores_avg": "Light local collection for a few devices"}},
+    {"name": "Scan items", "device": "Barcode scanner", "workload_fraction": 0.2,
+     "comments": {"workload_fraction": "Scanning while the lane is open"}},
+    {"name": "Take payments", "device": "Payment terminal", "workload_fraction": 0.1,
+     "comments": {"workload_fraction": "A few seconds per customer"}},
+    {"name": "Measure temperature", "device": "Temperature probe", "workload_fraction": 1,
+     "comments": {"workload_fraction": "Measures continuously"}}
+  ],
+  "edge_journeys": [
+    {"name": "Store operation",
+     "functions": ["Collect and upload sales", "Scan items", "Take payments", "Measure temperature"]}
+  ],
+  "edge_deployments": [
+    {"name": "Stores in Spain", "journey": "Store operation", "country": "SPAIN", "network": "wifi",
+     "new_units": {"value": 5, "per": "month"}, "start_date": "2025-01-01", "usage_span_years": 5,
+     "comments": {"new_units": "120 stores in service on 2027-01-01 at 5 a month: opened from January 2025",
+                  "usage_span_years": "The payment terminals' lifespan, the shortest"}}
+  ]
+}

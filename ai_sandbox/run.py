@@ -85,8 +85,11 @@ def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
             results[key] = bool(edge_servers & set(server_journeys))
         elif key == "requires_device_group":
             results[key] = bool(getattr(spec, "edge_device_groups", [])) == expected
+        elif key == "requires_human_usage_pattern":  # false: no usage pattern on a person's device
+            results[key] = any((p.device or "none").strip().lower() not in dsl.NO_DEVICE_WORDS
+                               for p in spec.usage_patterns) == expected
         elif key == "devices_grouped_at_depth":
-            results[key] = devices_grouped_at_depth(getattr(spec, "edge_device_groups", []), **expected)
+            results[key] = all(devices_grouped_at_depth(getattr(spec, "edge_device_groups", []), **e) for e in expected)
         elif key == "device_totals":
             results.update({device_total_key(pattern): False for pattern in expected})  # set from the built system
         else:

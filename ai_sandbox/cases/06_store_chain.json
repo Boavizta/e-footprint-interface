@@ -1,0 +1,31 @@
+{
+  "id": "06_store_chain",
+  "title": "Held out: a growing chain of stores, each with a server and two different kinds of sub-groups",
+  "scope": "web_edge",
+  "user_prompt": "We have 120 supermarkets in Spain and we open about 5 new ones every month. Each store has a small edge server in the back office, 3 checkout lanes with a barcode scanner and a payment terminal at each lane, and a cold room with 4 temperature probes. Everything in the store talks to the edge server, and the edge server sends the store's sales to our cloud every 15 minutes. In the cloud we run an API and a database. Each store manager checks a web dashboard on that same cloud a couple of times a day.",
+  "facts_if_asked": {
+    "edge server": "A small x86 box, 4 cores, 16 GB RAM, 512 GB SSD, about 60 W, replaced every 6 years.",
+    "checkout": "Wired barcode scanners about 3 W, payment terminals about 5 W.",
+    "probes": "Wireless temperature probes, about 0.3 W, reporting to the edge server every minute.",
+    "sales upload": "About 50 kB per 15-minute batch, received by the API and written to the database."
+  },
+  "expected_properties": [
+    "Three groups: a store holding 1 edge server, 3 checkout lanes and 1 cold room; a checkout lane holding 1 scanner and 1 payment terminal; a cold room holding 4 probes. The store names the lane and the cold room (never the reverse).",
+    "120 stores in service as 2027 opens and 5 added a month: one deployment of the store group from a past start_date, country SPAIN.",
+    "120 edge servers, 360 scanners, 360 payment terminals and 480 temperature probes in service.",
+    "An edge function on the edge server with server_calls to an ingestion job and its database write at 4 times per hour; the scanners, terminals and probes make no server call of their own.",
+    "A dashboard journey on the same API and database, used by about 120 store managers a couple of times a day."
+  ],
+  "checks": {
+    "min_journeys": 1,
+    "requires_edge_usage_pattern": true,
+    "requires_edge_server_call": true,
+    "requires_server_shared_by_web_and_edge": true,
+    "countries_must_include": ["SPAIN"],
+    "requires_device_group": true,
+    "requires_human_usage_pattern": true,
+    "devices_grouped_at_depth": [{"depth": 2, "devices": ["scanner", "payment|terminal"]},
+                                 {"depth": 2, "devices": ["probe|temperature"]}],
+    "device_totals": {"server": 120, "scanner": 360, "payment|terminal": 360, "probe|temperature": 480}
+  }
+}

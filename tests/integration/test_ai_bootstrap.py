@@ -14,6 +14,7 @@ from ai_sandbox import run
 from model_builder.adapters.forms.form_data_parser import parse_form_data
 from model_builder.adapters.presenters.simplified_inputs import input_catalog
 from model_builder.adapters.repositories import InMemorySystemRepository
+from model_builder.application.ai_bootstrap.dsl import EdgeDeviceGroupSpec
 from model_builder.application.ai_bootstrap.service import build_answer
 from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
@@ -90,6 +91,20 @@ def test_sandbox_evaluates_handwritten_edge_answers(tmp_path, case_id, answer, f
 def test_sandbox_evaluates_handwritten_nested_group_answer(tmp_path):
     _assert_handwritten_edge_answer(tmp_path, "05", "_handwritten_05_smart_building_floors",
                                     {"sensor": 35, "industrial pc": 7, "merging": 35})  # one building of 7 floors
+    # Without its cabinet group, the PC and the merging units sit on the floor, two levels deep: the check fails.
+    groups = {g["name"]: g for g in json.loads((CASES / "_handwritten_05_smart_building_floors.json").read_text())[
+        "edge_device_groups"]}
+    cabinet = groups.pop("Electrical cabinet")
+    groups["Floor"] = {"name": "Floor", "device_counts": {**groups["Floor"]["device_counts"], **cabinet["device_counts"]}}
+    [depth] = run.load_cases(["05"])[0]["checks"]["devices_grouped_at_depth"]
+    assert not run.devices_grouped_at_depth([EdgeDeviceGroupSpec(**g) for g in groups.values()], **depth)
+
+
+@titled("ai-bootstrap-edge#edge-instructions: the sandbox builds held-out answer 06, a growing chain of stores with "
+        "sibling sub-groups, passing its checks")
+def test_sandbox_evaluates_handwritten_held_out_answer(tmp_path):
+    _assert_handwritten_edge_answer(tmp_path, "06", "_handwritten_06_store_chain",
+                                    {"edge server": 120, "scanner": 360, "payment": 360, "probe": 480})  # 120 stores
 
 
 def _assert_handwritten_edge_answer(tmp_path, case_id, answer, fleet):

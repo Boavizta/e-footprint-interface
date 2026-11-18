@@ -22,7 +22,8 @@
     "requires_edge_server_call": true,
     "countries_must_include": ["FRANCE"],
     "requires_device_group": true,
-    "devices_grouped_at_depth": {"depth": 3, "devices": ["pc|computer", "merging"]},
+    "requires_human_usage_pattern": false,
+    "devices_grouped_at_depth": [{"depth": 3, "devices": ["pc|computer", "merging"]}],
     "device_totals": {"sensor": 35, "pc|computer": 7, "merging": 35}
   }
 }
