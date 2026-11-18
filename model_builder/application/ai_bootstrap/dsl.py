@@ -470,10 +470,21 @@ def build_journey(jo: JourneySpec, jobs: dict, resolutions: list[Resolution]) ->
 def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, period: tuple[date, date],
                         resolutions: list[Resolution]) -> UsagePattern:
     """`period` is the shared one: the usage runs from its own start date when it has one, else the shared start,
-    until the period's end. A usage longer than the editor accepts is cut at its limit, and the cut listed."""
+    until the period's end. A usage longer than the editor accepts is cut at its limit, and the cut listed. The
+    stated volume is the one of the web year's first day: a usage that starts before it with a growth starts from
+    that volume discounted by the growth between the two dates, to the whole number the editor saves, its comment
+    saying so."""
     c = _Comments(p, resolutions)
-    volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date")))) or None
     start = p.start_date or period[0]
+    volume, discounted = p.volume, None
+    if p.growth_pct_per_year and start < WEB_YEAR_START:
+        factor = (1 + p.growth_pct_per_year / 100) ** ((WEB_YEAR_START - start).days / 365)
+        volume = VolumeSpec(value=round(p.volume.value / factor), per=p.volume.per)
+        discounted = (f"Initial volume: {p.volume.value:,.6g} a {p.volume.per} on {WEB_YEAR_START.isoformat()} as "
+                      f"stated, discounted to {start.isoformat()} at {p.growth_pct_per_year:g} % a year, to a whole "
+                      f"number.")
+    volume_comment = " ".join(filter(None, (c.take("volume"), c.take("growth_pct_per_year"), c.take("start_date"),
+                                            discounted))) or None
     duration = _duration(start, period[1], round_up=True)
     limit = GROWTH_DURATION_LIMITS[duration[1]]
     if duration[0] > limit:
@@ -483,7 +494,7 @@ def build_usage_pattern(p: UsagePatternSpec, journeys: dict, shared: _Shared, pe
     pattern = UsagePattern(
         _label(p.name, resolutions), [_lookup(journeys, p.journey, "journey")], shared.devices_for(p.device),
         shared.network(p.network), shared.country(p.country),
-        _volume_timeseries(p.volume, start, duration, p.growth_pct_per_year, volume_comment))
+        _volume_timeseries(volume, start, duration, p.growth_pct_per_year, volume_comment))
     c.close()
     return pattern
 

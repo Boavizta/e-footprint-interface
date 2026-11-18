@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -196,6 +197,27 @@ def edge_answer(**deployment) -> str:
         "edge_functions": [{"name": "Show", "device": "Kiosk"}],
         "edge_journeys": [{"name": "Mall", "functions": ["Show"]}],
         "edge_deployments": [{"name": "Malls", "journey": "Mall", "new_units": {"value": 1, "per": "month"}, **deployment}]})
+
+
+@titled("ai-bootstrap-edge#deployments-over-time: a growing web usage started in the past reaches its stated volume on "
+        "2027-01-01; a flat one starts from it")
+def test_a_past_growing_web_usage_is_discounted_to_its_start():
+    def team(**fields):
+        answer = {"system_name": "X", "servers": [{"name": "S"}], "jobs": [{"name": "J", "server": "S"}],
+                  "journeys": [{"name": "Dashboard", "steps": [{"name": "Open", "jobs": ["J"]}]}],
+                  "usage_patterns": [{"name": "Team", "journey": "Dashboard", "volume": {"value": 1000, "per": "month"},
+                                      "start_date": "2023-01-01", **fields}]}
+        return build_answer(json.dumps(answer), "web").system.usage_patterns[0].hourly_occurrences
+
+    growing = team(growth_pct_per_year=40)
+    days_to_2027 = (date(2027, 1, 1) - date(2023, 1, 1)).days
+    month_from_2027 = growing.value.magnitude[days_to_2027 * 24:(days_to_2027 + 30) * 24].sum()
+    assert month_from_2027 == pytest.approx(1000, rel=0.005)  # within the rounding of the initial volume
+    assert growing.form_inputs["initial_volume"] == round(1000 / 1.4 ** (days_to_2027 / 365))
+    assert growing.comment == ("Initial volume: 1,000 a month on 2027-01-01 as stated, discounted to 2023-01-01 at "
+                               "40 % a year, to a whole number.")
+    flat = team()
+    assert flat.form_inputs["initial_volume"] == 1000 and flat.comment is None
 
 
 @titled("ai-bootstrap-edge#deployments-over-time: a web usage beyond the editor's limit is cut and listed; a deployment "
