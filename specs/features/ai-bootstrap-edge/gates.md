@@ -129,6 +129,18 @@ and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizo
   12 years and more (20 at most): look at how the hourly editor and its preview respond.
 - **A description stating both a fleet in service and a growth of its web usage**: the volume
   point under "Standing calls".
+- **A provider failure ("The AI provider could not complete the request").** The user met one on
+  2026-11-18 on the smart-building description below; six calls made after it (five with the
+  production call's parameters, one through the running dev server) all completed, in 7 to 20 s.
+  The adapter keeps no trace of a failure's kind (timeout, HTTP status, unfinished answer), so the
+  cause is unknown. For the user to decide: log that kind, which holds no prompt and no answer.
+- **A description with groups inside groups** ("a building of 7 floors, on each floor 5 sensors and
+  a cabinet with an industrial PC and 5 merging units", one building, no growth). Of the five
+  answers of 2026-11-18 (USD 0.009 with the sixth call, beyond the two approved runs): one named
+  the building as a sub-group of its floor and was refused ("Unknown or cyclic edge device
+  groups"); one wrote the floor group alone, so 5 sensors where 35 are described; one put a
+  building in service every month; two wrote floor × 7 in one building. Cases 03 and 04 hold no
+  nested group and no single site: a prompt edit here needs its own case and paid runs.
 
 ## Parked
 
