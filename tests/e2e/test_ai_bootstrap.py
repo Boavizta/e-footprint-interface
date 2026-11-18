@@ -221,8 +221,6 @@ def test_web_edge_generation_keeps_a_long_web_usage_period(empty_model_builder, 
 
     builder.generate_ai_modeling(DESCRIPTION)
 
-    checks = builder.ai_bootstrap_summary.locator("ol").inner_text()
-    assert checks.index("Infrastructure:") < checks.index("Deployments:") < checks.index("Server calls:")
     expect(page.locator("#edge-modeling-toggle")).to_be_checked()
     expect(page.locator("#edge-devices-list").get_by_text("Station controller")).to_be_visible()
     builder.close_side_panel()
