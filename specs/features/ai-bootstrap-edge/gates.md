@@ -56,7 +56,8 @@
    changed `efootprint` on `dev` (`../e-footprint`, range `afc60887..f9ad5688`): a server need's
    volume now counts every unit of its device, and its attribute is renamed
    `hourly_volume_per_usage_pattern`. The interface's Web + edge bootstrap needs that release: on
-   the published `27.0.1` a grouped device sends one unit's calls. Follow
+   the published `27.0.1` a grouped device sends one unit's calls. The interface's narrative and
+   sandbox tests read the renamed attribute, so they go red on the published pin until then. Follow
    `../e-footprint/RELEASE_PROCESS.md` (its `## [Unreleased]` section of `CHANGELOG.md` is
    written), then restore the published pin here as `RELEASE_PROCESS.md` says.
 2. **The release must move the version number.** A modeling saved with its computed state at
@@ -119,6 +120,15 @@ electricity dominates and the controller's power ranges from 5 to 15 W (the fact
 and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizon.
 
 ## Watch in normal use
+
+- **A Web + edge generation, at the summary's "Device characteristics" check.** The answers'
+  device figures drive the result and vary between calls on the same description (a sensor's
+  manufacturing footprint from 0.1 to 5 kg, a controller's power from 5 to 15 W in the paid runs).
+  Nothing in the code can catch it; the check is where a user does.
+- **Opening a generated web usage pattern of a fleet in service for years.** Its period can reach
+  12 years and more (20 at most): look at how the hourly editor and its preview respond.
+- **A description stating both a fleet in service and a growth of its web usage**: the volume
+  point under "Standing calls".
 
 ## Parked
 
@@ -210,12 +220,55 @@ and usage spans of 8 to 10 years against the facts' 5 to 8 lengthen every horizo
 
 ## End-of-run gate
 
-Known red before the run's first product commit, and left as found:
+Known red before the run's first product commit:
 
 - Library: `tests/builders/hardware/test_boavizta_utils.py::test_web_api_and_package_dependency_calls_return_same_results`
   (`'2.5.0' != '2.6.0'`: the installed `boaviztapi` against the version the hosted API reports).
+  Left as found: its fix is a dependency bump with the cloud-instance snapshot regenerated, not
+  this feature's.
 - Interface: `tests/unit_tests/adapters/test_ai_provider.py::test_evaluation_flash_delegates_to_bounded_adapter`
-  (`'high' != 'low'`): the test still expects the flash entry to ignore an explicit effort, which
-  commit `4c57a120` changed on purpose.
+  (`'high' != 'low'`): the test still expected the flash entry to ignore an explicit effort, which
+  commit `4c57a120` changed on purpose. Fixed at the global review in its own commit `00bbad94`,
+  which names no piece: the test now reads the pin on a call with no effort and the explicit
+  effort on a call that gives one.
+
+The full gate, run on `f475b6c1` on 2026-11-18:
+
+| Suite | Command | Result |
+|---|---|---|
+| JavaScript | `npm run build:js:dev`, then `npm run jest` | 304 passed, 24 suites |
+| Python, no browser | `poetry run pytest tests --ignore=tests/e2e -q` | 1201 passed, 6 xfailed |
+| Browser, AI bootstrap | `poetry run pytest tests/e2e/test_ai_bootstrap.py -q` | 7 passed |
+| Browser, the rest | `poetry run pytest tests/e2e -n 4 --deselect tests/e2e/test_ai_bootstrap.py -q` | 165 passed, 1 xfailed, 2 failed |
+| Library | `poetry run pytest -q` in `../e-footprint` | 1688 passed, 1 failed (the known `boaviztapi` test) |
+
+The two browser failures reproduced alone and were the run's own: 
+`tests/e2e/test_timeseries.py::TestTimeseriesValidation::test_modeling_duration_validation_with_day_and_month_units`
+and `::test_edit_usage_pattern_with_month_unit_validation` typed 15 years, 150 months and 25
+months as values above the hourly editor's limit, which the run raised to 20 years and 240
+months. The product lost no validation; the tests' values and expected messages moved to the new
+limit in `a99d2660`, nothing weakened, and the file then passed whole (5 passed). The full browser
+suite was not run again after that commit, which touches that one test file. No test was flaky.
 
 ## Spend
+
+```
+Usage snapshot: 591 requests · USD API-equivalent (tokens only) · rates 2026-09-30
+Known subtotal: 40.8548; unpriced: 74; unattributed: 0
+Known tokens: input 2,828; cached 85,081,296; write 2,260,232; output 569,225
+Coverage: 0 source errors; 1 registered intervals missing measurements. Standard mode assumed for 0 requests.
+  gate: 0.0058 (follow-up 0.0000); 2 requests; claude-haiku-5-5; effort medium
+  implementer: 5.0594 (follow-up 0.0000); 92 requests; claude-fable-5-1, claude-haiku-5-5, claude-opus-5-5; effort high, medium
+  implementer-easy: 0.2659 (follow-up 0.0000); 49 requests; claude-haiku-5-5; effort high
+  implementer-hard: 10.7702 (follow-up 0.8499); 37 requests; claude-fable-5-1; effort high
+  light: 0.0128 (follow-up 0.0000); 15 requests; claude-haiku-5-5; effort medium
+  reviewer: 18.3912 (follow-up 8.6262); 303 requests; claude-opus-5-5; effort high
+  reviewer-global: 6.3495 (follow-up 1.9032); 19 requests; claude-fable-5-1; effort high
+  supervisor: 0.0000 (follow-up 0.0000); 74 requests; claude-fable-5-2; effort high
+Unassigned-to-task overhead: 40.8548. No inference about completed-task quality or subscription limits.
+  Unpriced: claude-fable-5-2: unknown model (74 requests)
+```
+
+The supervisor's 74 requests are unpriced, the ledger's rates not knowing `claude-fable-5-2`, so
+the subtotal of USD 40.85 leaves them out. The paid sandbox calls are outside the ledger: twelve
+calls, USD 0.019 (under "Evidence").
