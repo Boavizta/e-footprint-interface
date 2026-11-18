@@ -8,7 +8,8 @@ from pydantic import ValidationError
 
 from efootprint.constants.units import u
 
-from model_builder.application.ai_bootstrap.dsl import EdgeDeviceSpec, WebEdgeSpec, build_edge_device, build_edge_groups
+from model_builder.application.ai_bootstrap.dsl import (
+    EdgeDeviceSpec, ModelSpec, WebEdgeSpec, build_edge_device, build_edge_groups)
 from model_builder.application.ai_bootstrap.service import Completion, build_answer, generate
 from tests.declare import titled
 
@@ -30,6 +31,21 @@ def test_generate_calls_once_and_reports_ignored_wrapped_fields():
 def test_invalid_answers_fail_locally(answer):
     with pytest.raises((ValueError, ValidationError)):
         build_answer(answer, "web")
+
+
+@titled("ai-bootstrap-edge#edge-format: a comment written as a number is read as its text; a boolean, list or "
+        "object still fails")
+def test_a_comment_written_as_a_number_is_read_as_text():
+    def answer(comment):
+        return json.dumps({"system_name": "X", "servers": [{"name": "S"}],
+                           "jobs": [{"name": "J", "server": "S", "data_stored_kb": 2500,
+                                     "comments": {"data_stored_kb": comment}}]})
+
+    for schema in (ModelSpec, WebEdgeSpec):
+        assert schema.model_validate(json.loads(answer(2500))).jobs[0].comments == {"data_stored_kb": "2500"}
+    for refused in (True, [1], {"a": 1}):
+        with pytest.raises(ValidationError, match="valid string"):
+            build_answer(answer(refused), "web_edge")
 
 
 NAMED_SECTIONS = {"servers": {}, "genai_apis": {}, "jobs": {}, "journeys": {"steps": []}, "edge_devices": {},

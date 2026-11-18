@@ -10,9 +10,9 @@ import json
 import math
 import re
 from datetime import date, timedelta
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, ValidationError
 
 from efootprint.abstract_modeling_classes.source_objects import SourceObject, SourceValue
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import (
@@ -60,6 +60,14 @@ class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+def _number_as_text(value):
+    """A comment written as a number (`"data_stored_kb": 2500`) is read as its text; any other non-string fails."""
+    return str(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
+
+
+Comment = Annotated[str, BeforeValidator(_number_as_text)]  # every comment of the schemas
+
+
 class ServerSpec(Strict):
     name: str
     kind: Literal["cpu", "gpu"] = "cpu"
@@ -70,14 +78,14 @@ class ServerSpec(Strict):
     cloud_provider: Optional[str] = None
     instance_type: Optional[str] = None
     carbon_intensity_g_per_kwh: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
+    comments: dict[str, Comment] = Field(default_factory=dict)  # field name -> why that number
 
 
 class GenAIApiSpec(Strict):
     name: str
     provider: str = "openai"
     model_name: Optional[str] = None  # unstated in the description -> provider default, recorded as a resolution
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
+    comments: dict[str, Comment] = Field(default_factory=dict)  # field name -> why that number
 
 
 class JobSpec(Strict):
@@ -91,14 +99,14 @@ class JobSpec(Strict):
     gpus: Optional[float] = None
     ram_mb: Optional[float] = None
     output_tokens: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
+    comments: dict[str, Comment] = Field(default_factory=dict)  # field name -> why that number
 
 
 class StepSpec(Strict):
     name: str
     user_time_spent_min: Optional[float] = None
     jobs: list[str] = Field(default_factory=list)
-    comments: dict[str, str] = Field(default_factory=dict)
+    comments: dict[str, Comment] = Field(default_factory=dict)
 
 
 class JourneySpec(Strict):
@@ -120,7 +128,7 @@ class UsagePatternSpec(Strict):
     volume: VolumeSpec
     growth_pct_per_year: float = 0
     start_date: Optional[date] = None  # a usage the description dates otherwise than the shared start
-    comments: dict[str, str] = Field(default_factory=dict)  # field name -> why that number
+    comments: dict[str, Comment] = Field(default_factory=dict)  # field name -> why that number
 
 
 class ModelSpec(Strict):
@@ -145,20 +153,20 @@ class EdgeDeviceSpec(Strict):
     base_storage_gb: Optional[float] = None  # computer only
     embodied_kg: Optional[float] = None
     lifespan_years: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)
+    comments: dict[str, Comment] = Field(default_factory=dict)
 
 
 class EdgeDeviceGroupSpec(Strict):
     name: str
     device_counts: dict[str, float] = Field(default_factory=dict)     # edge device name -> count per group
     sub_group_counts: dict[str, float] = Field(default_factory=dict)  # group name -> count per group
-    comments: dict[str, str] = Field(default_factory=dict)            # device or group name -> why that count
+    comments: dict[str, Comment] = Field(default_factory=dict)            # device or group name -> why that count
 
 
 class ServerCallSpec(Strict):
     jobs: list[str]  # every job one call triggers, the database write included
     times_per_hour: float
-    comment: Optional[str] = None
+    comment: Optional[Comment] = None
 
 
 class EdgeFunctionSpec(Strict):
@@ -168,7 +176,7 @@ class EdgeFunctionSpec(Strict):
     ram_gb_avg: Optional[float] = None
     workload_fraction: Optional[float] = None  # appliance only
     server_calls: list[ServerCallSpec] = Field(default_factory=list)
-    comments: dict[str, str] = Field(default_factory=dict)
+    comments: dict[str, Comment] = Field(default_factory=dict)
 
 
 class EdgeJourneySpec(Strict):
@@ -185,7 +193,7 @@ class EdgeDeploymentSpec(Strict):
     start_date: Optional[date] = None  # a fleet already in service starts in the past
     end_date: Optional[date] = None    # the last installation of a fleet that no longer grows
     usage_span_years: Optional[float] = None
-    comments: dict[str, str] = Field(default_factory=dict)
+    comments: dict[str, Comment] = Field(default_factory=dict)
 
 
 class WebEdgeSpec(ModelSpec):
