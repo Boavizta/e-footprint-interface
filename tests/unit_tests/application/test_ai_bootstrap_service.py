@@ -272,17 +272,33 @@ def test_a_past_growing_web_usage_is_discounted_to_its_start():
         ("growth", "Team: -10 % a year", "0 % a year", "the editor accepts no negative growth")]
 
 
-@titled("ai-bootstrap-edge#deployments-over-time: a web usage beyond the editor's limit is cut and listed; a deployment "
-        "beyond it, or misdated, is refused")
+@titled("ai-bootstrap-edge#deployments-over-time: beyond the editor's limit, a web usage starts later or ends sooner, a "
+        "deployment starts later, all listed; misdated refused")
 def test_periods_beyond_the_editor_limit_are_cut_or_refused():
-    # Kiosks deployed 2018 to 2020 and kept 10 years: the web usage would run 13 years, to the last retirement in 2030.
-    cut = build_answer(edge_answer(start_date="2018-01-01", end_date="2020-12-31", usage_span_years=10), "web_edge")
+    def listed(built):
+        return {(r.requested, r.resolved, r.how) for r in built.resolutions if r.kind == "usage period"}
 
-    [team] = cut.system.usage_patterns
-    assert period(team.hourly_occurrences) == ("2018-01-01", 10, "year")
-    [listed] = [r for r in cut.resolutions if r.how == "cut at the editor's limit"]
-    assert (listed.requested, listed.resolved) == ("Team: 13 years from 2018-01-01", "10 years")
-    with pytest.raises(ValueError, match="more than the editor accepts"):
-        build_answer(edge_answer(start_date="2000-01-01"), "web_edge")
+    # Kiosks deployed 2019 to 2020 and kept 10 years: the web usage would run 12 years, to the last retirement in 2030.
+    ends_sooner = build_answer(edge_answer(start_date="2019-01-01", end_date="2020-12-31", usage_span_years=10),
+                               "web_edge")
+    [team] = ends_sooner.system.usage_patterns
+    assert period(team.hourly_occurrences) == ("2019-01-01", 10, "year")
+    assert listed(ends_sooner) == {("Team: 12 years from 2019-01-01", "10 years", "cut at the editor's limit")}
+
+    # Kiosks deployed since 2000: the deployment keeps its end, 2027's installations, and the web usage starts with it.
+    starts_later = build_answer(edge_answer(start_date="2000-01-01"), "web_edge")
+    [malls] = starts_later.system.edge_usage_patterns
+    assert period(malls.hourly_deployment_starts) == ("2018-01-03", 10, "year")
+    assert ("Malls: 28 years from 2000-01-01", "10 years from 2018-01-03",
+            "cut at the editor's limit: installations before 2018-01-03 are not counted") in listed(starts_later)
+    assert period(starts_later.system.usage_patterns[0].hourly_occurrences)[0] == "2018-01-03"
+
+    # A web usage dated 2012 starts at the limit before the end of 2027, and covers the web year.
+    dated = json.loads(edge_answer())
+    dated["usage_patterns"][0]["start_date"] = "2012-01-01"
+    moved = build_answer(json.dumps(dated), "web_edge")
+    assert period(moved.system.usage_patterns[0].hourly_occurrences) == ("2018-01-03", 10, "year")
+    assert ("Team: from 2012-01-01", "from 2018-01-03",
+            "start moved to the editor's limit before the end of 2027") in listed(moved)
     with pytest.raises(ValueError, match="falls after the end"):
         build_answer(edge_answer(start_date="2027-06-01", end_date="2027-01-01"), "web_edge")
