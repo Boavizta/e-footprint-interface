@@ -1283,26 +1283,33 @@ name = "efootprint"
 version = "27.0.2"
 description = "Digital service environmental footprint model"
 optional = false
-python-versions = "<4.0,>=3.12"
+python-versions = ">=3.12,<4.0"
 groups = ["main"]
-files = [
-    {file = "efootprint-27.0.2-py3-none-any.whl", hash = "sha256:f46cfca041eea43ff84316e7d42bc92f6e9a7c9dd4c4c4f873d33aa693ba1ca5"},
-    {file = "efootprint-27.0.2.tar.gz", hash = "sha256:dfef67c22933a47f989241be4a4cbe8eb84b326f12cc0616abcb902f5a43b4da"},
-]
+files = []
+develop = true
 
 [package.dependencies]
-boaviztapi = ">=2,<3"
+boaviztapi = {version = ">=2,<3", optional = true}
 ciso8601 = ">=2.3,<3.0"
 ecologits = ">=0.11,<0.12"
-matplotlib = ">=3.10,<4.0"
+matplotlib = {version = ">=3.10,<4.0", optional = true}
+numpy = ">=2,<3"
 orjson = ">=3.11,<4.0"
-pandas = ">=2,<3"
 pint = ">=0.25,<0.26"
-plotly = ">=6,<7"
+plotly = {version = ">=6,<7", optional = true}
 pytz = "2024.1"
-pyvis = "0.3.2"
+pyvis = {version = "0.3.2", optional = true}
 requests = ">=2.31,<3.0"
 zstandard = ">=0.23,<0.24"
+
+[package.extras]
+all = ["boaviztapi (>=2,<3)", "matplotlib (>=3.10,<4.0)", "plotly (>=6,<7)", "pyvis (==0.3.2)"]
+boaviztapi = ["boaviztapi (>=2,<3)"]
+viz = ["matplotlib (>=3.10,<4.0)", "plotly (>=6,<7)", "pyvis (==0.3.2)"]
+
+[package.source]
+type = "directory"
+url = "../e-footprint"
 
 [[package]]
 name = "et-xmlfile"
@@ -5236,4 +5243,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "e4feb02386b88a5c75dba92528d121e3eb41de33e273e59405573ab1161d495e"
+content-hash = "efcca8a8612c640c54eb5d79b73cbd0c33f9ae3d8278742fb771709f3694033f"

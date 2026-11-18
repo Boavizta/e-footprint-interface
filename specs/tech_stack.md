@@ -11,7 +11,7 @@
 | Library | Why | Version |
 |---|---|---|
 | **Django** | Web framework. Views are thin adapters in Clean Architecture. | `^5.0` |
-| **efootprint** | The modeling engine. Wrapped by `ModelWeb`. | `20.0.2` (pinned, PyPI) |
+| **efootprint** | The modeling engine. Wrapped by `ModelWeb`. Installed with its `viz` and `boaviztapi` optional groups. | pinned on PyPI (see `pyproject.toml`) |
 | **django-environ** | Settings via env vars. | `^0` |
 | **psycopg2-binary** | PostgreSQL driver (production). | `^2.9` |
 | **django-bootstrap5** | Bootstrap 5 form rendering. | `^24.3` |

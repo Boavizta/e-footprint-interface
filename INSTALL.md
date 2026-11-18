@@ -466,10 +466,10 @@ If you need to make changes to both `e-footprint` and `e-footprint-interface` si
 From the `e-footprint-interface` directory, run:
 
 ```bash
-poetry add ../e-footprint --editable
+poetry add ../e-footprint --editable -E viz -E boaviztapi
 ```
 
-This updates `pyproject.toml` to point to your local copy and installs it in development mode. You can verify it worked with:
+This updates `pyproject.toml` to point to your local copy and installs it in development mode. The two `-E` options keep the optional groups of `efootprint` the interface needs: `viz` (pyvis renders the calculation graph) and `boaviztapi` (offline fallback of the Boavizta server builders, also used by the tests). You can verify it worked with:
 
 ```bash
 poetry show efootprint
@@ -482,7 +482,7 @@ The source should show the local path instead of PyPI.
 Commit the `pyproject.toml` and `poetry.lock` changes on `dev`. The deployment commit switches back to the released version:
 
 ```bash
-poetry add efootprint@<version>
+poetry add efootprint@<version> -E viz -E boaviztapi
 ```
 
 **Important**: the path dependency only resolves next to a sibling `e-footprint` checkout, so it stays on `dev`. CI and the Docker build can't resolve it: publish the library and restore the pin before merging to `main` or pushing to preprod or production. See [RELEASE_PROCESS.md](RELEASE_PROCESS.md#update-the-efootprint-pin).
