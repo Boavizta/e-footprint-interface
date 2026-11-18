@@ -169,6 +169,25 @@ def test_usage_span_defaults_to_the_shortest_lifespan():
         "Buildings": 5, "Malls": 6, "Stated": 8}
 
 
+@titled("ai-bootstrap-edge#deployments-over-time: a stated usage span above its devices' shortest lifespan is cut to "
+        "it and listed")
+def test_a_usage_span_above_the_devices_lifespan_is_cut():
+    answer = {"system_name": "X",
+              "edge_devices": [{"name": "Gateway", "lifespan_years": 8}, {"name": "Sensor", "kind": "appliance"}],
+              "edge_functions": [{"name": "Upload", "device": "Gateway"}, {"name": "Sense", "device": "Sensor"}],
+              "edge_journeys": [{"name": "Building", "functions": ["Upload", "Sense"]}],
+              "edge_deployments": [{"name": "Buildings", "journey": "Building", "new_units": {"value": 1, "per": "month"},
+                                    "usage_span_years": 10}]}
+
+    built = build_answer(json.dumps(answer), "web_edge")
+
+    [buildings] = built.system.edge_usage_patterns
+    assert buildings.usage_span.value.to(u.year).magnitude == 6  # the sensor's class default lifespan
+    [listed] = [r for r in built.resolutions if r.kind == "usage span"]
+    assert (listed.requested, listed.resolved, listed.how) == (
+        "Buildings: 10 years", "6 years", "cut to its devices' shortest lifespan")
+
+
 def period(series) -> tuple:
     inputs = series.form_inputs
     return inputs["start_date"], inputs["modeling_duration_value"], inputs["modeling_duration_unit"]

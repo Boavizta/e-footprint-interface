@@ -512,11 +512,15 @@ def _reserve(kwargs: dict, attr: str, stated, capacity, share: float, cls, bound
         kwargs[attr] = SourceValue(min(default, cap), comment=comment)
 
 
+def _device_class(d: EdgeDeviceSpec):
+    return EdgeAppliance if d.kind == "appliance" else EdgeComputer
+
+
 def build_edge_device(d: EdgeDeviceSpec, resolutions: list[Resolution]):
     """A gateway, sensor or controller, built from the hardware and the reserved resources the answer states."""
     c = _Comments(d, resolutions)
     name = _label(d.name, resolutions)
-    cls = EdgeAppliance if d.kind == "appliance" else EdgeComputer
+    cls = _device_class(d)
     kwargs = {}
     _apply_fields(kwargs, c, EDGE_DEVICE_FIELDS, ("power_w", "idle_power_w", "embodied_kg", "lifespan_years"))
     _reserve(kwargs, "idle_power", d.idle_power_w, d.power_w, 1, cls, "the device's power")
@@ -594,17 +598,24 @@ def build_edge_function(f: EdgeFunctionSpec, devices: dict, jobs: dict, resoluti
     return function
 
 
-def _deployment_spans(spec: WebEdgeSpec) -> dict[str, float]:
+def _deployment_spans(spec: WebEdgeSpec, resolutions: list[Resolution]) -> dict[str, float]:
     """Years each deployment's units stay in service: as stated, else the shortest lifespan of the devices its
-    journey runs on, six years at most."""
+    journey runs on, six years at most. A device without a stated lifespan has its class default. A stated span
+    above the shortest lifespan, which the library refuses, is cut to it and the cut listed."""
     devices = {d.name: d for d in spec.edge_devices}
     device_of = {f.name: f.device for f in spec.edge_functions}
     functions_of = {j.name: j.functions for j in spec.edge_journeys}
     spans = {}
     for dep in spec.edge_deployments:  # an unknown name is refused by the builders, not here
-        lifespans = [devices[device_of[f]].lifespan_years for f in functions_of.get(dep.journey, [])
-                     if device_of.get(f) in devices]
-        spans[dep.name] = dep.usage_span_years or min([MAX_DEFAULT_SPAN_YEARS] + [years for years in lifespans if years])
+        run = [devices[device_of[f]] for f in functions_of.get(dep.journey, []) if device_of.get(f) in devices]
+        shortest = min((d.lifespan_years or _device_class(d).default_values["lifespan"].value.to(u.year).magnitude
+                        for d in run), default=math.inf)
+        stated = dep.usage_span_years
+        if stated and stated > shortest:
+            resolutions.append(Resolution("usage span", f"{dep.name}: {stated:g} years", f"{shortest:g} years",
+                                          "cut to its devices' shortest lifespan"))
+            stated = shortest
+        spans[dep.name] = stated or min(MAX_DEFAULT_SPAN_YEARS, shortest)
     return spans
 
 
@@ -651,7 +662,7 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
     shared = _Shared(resolutions)
     dated = [p.start_date for p in spec.usage_patterns] + ([d.start_date for d in spec.edge_deployments] if edge else [])
     start = min([d for d in dated if d] or [WEB_YEAR_START])
-    spans = _deployment_spans(spec) if edge else {}
+    spans = _deployment_spans(spec, resolutions) if edge else {}
     periods = _deployment_periods(spec, start) if edge else {}
     web_end = max([WEB_YEAR_END] + [_end(*periods[name]) + timedelta(days=round(365 * span))
                                     for name, span in spans.items()])
