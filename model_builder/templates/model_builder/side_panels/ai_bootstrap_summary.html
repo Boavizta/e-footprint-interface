@@ -24,7 +24,7 @@
     </dl>
     <p class="small">EcoLogits reference: mistralai / zai-glm-5-3, unscaled. This uncertain parent-model estimate is not a measured Flash result or a guaranteed ceiling. The upfront expectation is typically below 1 g CO2-eq.</p>
     {% if ai_resolutions %}
-    <h6>Catalog substitutions</h6>
+    <h6>Changes made to the AI answer</h6>
     <ul>{% for item in ai_resolutions %}<li>{{ item.kind }}: {{ item.requested }} → {{ item.resolved }} ({{ item.how }})</li>{% endfor %}</ul>
     {% endif %}
     {% if ai_ignored_fields %}

@@ -626,7 +626,7 @@
             <dd>310 mg – 920 mg CO2-eq</dd>
           </dl>
           <p class="ptext sm">EcoLogits reference: mistralai / zai-glm-5-3, unscaled. This uncertain parent-model estimate is not a measured Flash result or a guaranteed ceiling. The upfront expectation is typically below 1 g CO2-eq.</p>
-          <div class="ph6">Catalog substitutions</div>
+          <div class="ph6">Changes made to the AI answer</div>
           <ul class="plist"><li>network: 4G → mobile (normalized)</li><li>device: tablet → laptop (fallback)</li></ul>
           <div class="ph6">Ignored answer fields</div>
           <ul class="plist"><li>servers.0.region</li></ul>
@@ -636,7 +636,7 @@
         <div class="resultsbar" style="position:absolute;left:0;bottom:0;width:28%"><span class="rb">Results</span></div>
       </div>
     </div>
-    <div class="mock-help"><span class="lbl">On this screen</span>The generated <b>Recipe app</b> fills the canvas behind a read-only panel, <b>Your starting modeling is ready</b>: what to do next, a three-point <b>Review your modeling</b> checklist, the call's <b>estimated cost</b> and <b>impact</b>, any <b>catalog substitutions</b> and <b>ignored answer fields</b>, and the description folded under <b>Your description</b>. No Save button.</div>
+    <div class="mock-help"><span class="lbl">On this screen</span>The generated <b>Recipe app</b> fills the canvas behind a read-only panel, <b>Your starting modeling is ready</b>: what to do next, a three-point <b>Review your modeling</b> checklist, the call's <b>estimated cost</b> and <b>impact</b>, any <b>changes made to the AI answer</b> and <b>ignored answer fields</b>, and the description folded under <b>Your description</b>. No Save button.</div>
   </div>
   <div class="info-col">
     <div class="step"><span class="n">6</span><h3>The generated modeling and its summary</h3></div>
@@ -647,7 +647,7 @@
     <div class="states">
       <div class="state"><span class="k">Call estimate</span><span class="v">The cost comes in US dollars with the date of its rate card, plus the cached-input caveat. The impact is the parent model's EcoLogits estimate, often a range. Either reads <em>"Cost estimate unavailable"</em> / <em>"Impact estimate unavailable"</em> when it cannot be computed — the modeling is kept anyway.</span></div>
       <div class="state"><span class="k">Web + edge checks</span><span class="v">After a Web + edge generation, four checks follow the web ones: <b>Deployments</b>, <b>Devices per group</b>, <b>Device characteristics</b> and <b>Server calls</b>. The canvas shows the edge devices, groups and usage patterns, with Edge modeling on.</span></div>
-      <div class="state"><span class="k">Catalog substitutions</span><span class="v">Each value the app replaced to match its catalogs — a network, a device, a provider, a cloud instance, an AI model, an object name, a comment it could not attach — as <em>kind: requested → used (how)</em>. Shown only when there is one.</span></div>
+      <div class="state"><span class="k">Changes made to the AI answer</span><span class="v">Each value the app replaced to match its catalogs — a network, a device, a provider, a cloud instance, an AI model, an object name, a comment it could not attach — and, after a Web + edge generation, a usage cut at the editor's limit, a device written as a sub-group and moved, or a device no deployment runs, left out of the footprint; each as <em>kind: requested → used (how)</em>. Shown only when there is one.</span></div>
       <div class="state"><span class="k">Ignored answer fields</span><span class="v">Fields of the AI's answer the app does not know, dropped rather than failing the run. Shown only when there is one.</span></div>
       <div class="state"><span class="k">Your description</span><span class="v">Folded by default; opened, it shows the text exactly as sent, selectable so it can be copied and kept.</span></div>
       <div class="state"><span class="k">Comments on values</span><span class="v">Values the AI set from the description carry a comment, visible in the ordinary edit panels; everything else is a library default.</span></div>

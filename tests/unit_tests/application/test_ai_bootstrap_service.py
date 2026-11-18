@@ -101,7 +101,8 @@ def test_nested_groups_multiply_device_counts():
     assert devices["Gateway"].total_nb_of_units.value == 1 * u.dimensionless
 
 
-@titled("ai-bootstrap-edge#device-groups: a sub-group no group declares, or a cycle of sub-groups, refuses the answer")
+@titled("ai-bootstrap-edge#device-groups: a sub-group declared neither as a group nor as a device, or a cycle of "
+        "sub-groups, refuses the answer")
 @pytest.mark.parametrize("groups", [
     [{"name": "Building", "sub_group_counts": {"Wing": 2}}],
     [{"name": "Building", "sub_group_counts": {"Floor": 4}}, {"name": "Floor", "sub_group_counts": {"Building": 1}}],
@@ -126,6 +127,25 @@ def test_device_written_as_sub_group_counts_as_that_device():
     ambiguous = edge_groups_spec({"name": "Floor", "device_counts": {"Sensor": 1}, "sub_group_counts": {"Sensor": 5}})
     with pytest.raises(ValueError, match="both a device and a sub-group"):
         build_edge_groups(ambiguous, devices, [])
+    declared = edge_groups_spec({"name": "Floor", "sub_group_counts": {"Sensor": 5}},
+                                {"name": "Sensor", "device_counts": {"Gateway": 1}})  # a group named like a device
+    kept = []
+    assert [g.name for g in build_edge_groups(declared, devices, kept)["Floor"].sub_group_counts] == ["Sensor"]
+    assert kept == []
+
+
+@titled("ai-bootstrap-edge#device-groups: a device no deployment runs, without a function or outside every journey, "
+        "is listed as left out")
+@pytest.mark.parametrize("spare_function", [[], [{"name": "Idle", "device": "Spare"}]])
+def test_a_device_no_deployment_runs_is_listed_as_left_out(spare_function):
+    answer = json.loads(edge_answer())
+    answer["edge_devices"].append({"name": "Spare", "lifespan_years": 20})
+    answer["edge_functions"] += spare_function
+
+    resolutions = build_answer(json.dumps(answer), "web_edge").resolutions
+
+    assert [(r.kind, r.requested, r.resolved, r.how) for r in resolutions if r.kind == "edge device"] == [
+        ("edge device", "Spare", "left out of the footprint", "no deployment runs it")]
 
 
 @titled("ai-bootstrap-edge#deployments-over-time: a deployment's usage span is its stated one, else its devices' "

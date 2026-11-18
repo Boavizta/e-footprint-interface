@@ -669,12 +669,11 @@ def build_system(spec: ModelSpec) -> tuple[System, list[Resolution]]:
         devices = {d.name: build_edge_device(d, resolutions) for d in spec.edge_devices}
         build_edge_groups(spec, devices, resolutions)
         functions = {f.name: build_edge_function(f, devices, jobs, resolutions) for f in spec.edge_functions}
-        run = {f.device for f in spec.edge_functions}
-        resolutions.extend(Resolution("edge device", d.name, "not counted", "no edge function runs on it")
-                           for d in spec.edge_devices if d.name not in run)
         edge_journeys = {j.name: EdgeUsageJourney(_label(j.name, resolutions),
                                                   [_lookup(functions, n, "edge function") for n in j.functions])
                          for j in spec.edge_journeys}
         edge_patterns = [build_edge_deployment(dep, edge_journeys, shared, periods[dep.name], spans[dep.name], resolutions)
                          for dep in spec.edge_deployments]
+        resolutions.extend(Resolution("edge device", name, "left out of the footprint", "no deployment runs it")
+                           for name, device in devices.items() if not device.edge_usage_patterns)
     return System(_label(spec.system_name, resolutions), usage_patterns, edge_patterns), resolutions
