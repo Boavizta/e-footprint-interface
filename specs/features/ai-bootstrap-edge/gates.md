@@ -317,6 +317,10 @@ months. The product lost no validation; the tests' values and expected messages 
 limit in `a99d2660`, nothing weakened, and the file then passed whole (5 passed). The full browser
 suite was not run again after that commit, which touches that one test file. No test was flaky.
 
+**After the user's answers, on `91489c99` (2026-11-18).** jest 306 passed; non-browser pytest 1215
+passed, 6 xfailed; the whole browser suite 175 passed, 1 xfailed. The library's suite was not run
+again: nothing changed in `../e-footprint` since `f9ad5688`.
+
 ## Spend
 
 ```
