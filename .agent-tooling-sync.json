@@ -71,6 +71,7 @@
       "comprehension_harness/python/__init__.py",
       "comprehension_harness/python/collector.py",
       "comprehension_harness/python/declare.py",
+      "comprehension_harness/python/narrate.py",
       "comprehension_harness/python/source_index.py",
       "comprehension_harness/python/titles.py",
       "comprehension_harness/python/watch.py",

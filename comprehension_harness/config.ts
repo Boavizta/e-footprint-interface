@@ -5,7 +5,8 @@
  *
  *  - `name`: the project's name, on its pages' titles;
  *  - `stack`: what answers what the source says (`stack.ts`): a module, as a path from the root, or for a
- *    stack that does not run in Node the two commands that print it as JSON (`sourceIndex`, `titles`);
+ *    stack that does not run in Node the two commands that print it as JSON (`sourceIndex`, `titles`), beside
+ *    which such a stack keeps keys of its own (the Python stack's `calls`);
  *  - `cache`: where what a run writes and a render reads is kept (the stories, the map's snapshots);
  *  - `docs`: the folder of the project's documents. The feature folders (`features/`), the generated pages and
  *    the journeys' captures are under it, by the method's own layout; the local app serves it;

@@ -9,10 +9,10 @@ import sys
 
 import pytest
 
-from comprehension_harness.python.tests.conftest import ROOT, run_stack, source_index
+from comprehension_harness.python.tests.conftest import REFERENCE_CALLS, ROOT, run_stack, source_index
 
 CHECKOUT = '''
-    from comprehension_harness.python import event, narrate, planned
+    from shop.narrate import event, narrate, planned
 
 
     def pay(amount):
@@ -32,7 +32,9 @@ CHECKOUT = '''
             narrate("Each amount is **audited**.", lambda: {"ratio": 1 / amount})
 '''
 PROJECT = {
-    "comprehension.config.json": '{"cache": "cache"}',
+    "comprehension.config.json": '{"cache": "cache", "stack": {"calls": "shop.narrate"}}',
+    # A project's calls are its own copy of the reference, in its own package.
+    "shop/narrate.py": REFERENCE_CALLS.read_text(),
     "pytest.ini": "[pytest]\n",
     "conftest.py": 'pytest_plugins = ["comprehension_harness.python.collector"]\n',
     "cache/stories/checks__test_quiet.py.json": "[]",
@@ -71,7 +73,7 @@ PROJECT = {
     ''',
 }
 TEST_FILE = "checks/test_checkout.py"
-CALLS, DECLARE = "from comprehension_harness.python import", "from comprehension_harness.python.declare import"
+CALLS, DECLARE = "from shop.narrate import", "from comprehension_harness.python.declare import"
 
 
 def run_tests(root, *options) -> subprocess.CompletedProcess:
@@ -106,8 +108,8 @@ def test_a_story_is_what_its_test_crossed_and_a_test_file_has_one_story_file(pro
 def test_a_hit_is_its_call_as_the_source_index_has_it_with_the_frames_above(project):
     root = project(PROJECT)
     run_tests(root)
-    printed = source_index(root, source="shop/", calls="comprehension_harness.python",
-                           declare="comprehension_harness.python.declare").stdout
+    declare = "comprehension_harness.python.declare"
+    printed = source_index(root, source="shop/", calls="shop.narrate", declare=declare).stdout
     index = json.loads(printed)
     sites = {site["line"]: site for site in index["files"]["shop/checkout.py"]["sites"]}
 

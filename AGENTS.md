@@ -75,9 +75,10 @@ what each is for and who approves what.
 5. **Archive** — durable facts promoted to the reference docs, the feature folder deleted. Skill: `feature-archive`.
 
 Stages 2 to 4 run on the Python stack of the comprehension tools: the `narrate`, `event` and
-`planned` calls, the test declarations and the three commands of `comprehension_harness/python/`
-(`.agents/repository.md` § "The stack" says how each is spelled). The product imports the calls at
-runtime, so that folder ships to production and its `__init__.py` stays standard library only. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
+`planned` calls of `model_builder/narrate.py`, and the test declarations and the three commands of
+`comprehension_harness/python/` (`.agents/repository.md` § "The stack" says how each is spelled).
+`model_builder/narrate.py` is this project's copy of the stack's reference file: product code
+imports the calls from it, and nothing of the harness. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
 
 Investigations and ad-hoc design work are exempt; the staged flow is for features that ship.
 Conversational bug batches use `bug-fixes` (diagnostics plus `tasks.md`), then `bug-fixes-plan` (`plan.html` grouping the bugs and ordering the runs), followed by the implement, review and archive stages.

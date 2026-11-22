@@ -1,7 +1,8 @@
 """The pytest plugin that writes what each test crossed (``comprehension_harness/stack.md`` § 1).
 
 A project loads it for every run: ``pytest_plugins = ["comprehension_harness.python.collector"]`` in the
-conftest of its tests. For the lifetime of a run it is the collector of the three calls (``__init__.py``). Each
+conftest of its tests. For the lifetime of a run it is the collector of the project's own calls, the module
+``stack.calls`` of the configuration names, and of no other project's: a dependency's calls stay inert. Each
 ``narrate``, ``event`` or ``planned`` call a test crosses is a hit: its sentence, its watch's value, the frame of
 the call and the repository's frames above it. A test's hits are its story; a test file's stories are one JSON
 array at ``<cache>/stories/<the file, "/" written "__">.json``, deleted when the file's run starts and written
@@ -16,6 +17,7 @@ which writes the files when the run ends.
 """
 import dataclasses
 import datetime
+import importlib
 import itertools
 import json
 import math
@@ -24,8 +26,6 @@ import time
 from pathlib import Path
 
 import pytest
-
-from . import install_collector
 
 CONFIG_FILE = "comprehension.config.json"
 # A site keeps its first hits of a test in full and counts the rest: a test that loops over a narrated line
@@ -79,9 +79,14 @@ class StoryRecorder:
         if not isinstance(settings.get("cache"), str):
             raise pytest.UsageError(f'narrate collector: {CONFIG_FILE} — "cache" is not a string')
         self.stories_dir = self.root / settings["cache"] / "stories"
+        stack = settings.get("stack")
+        if not isinstance(stack, dict) or not isinstance(stack.get("calls"), str):
+            raise pytest.UsageError(f'narrate collector: {CONFIG_FILE} — "stack.calls" names the module this '
+                                    f'project imports narrate, event and planned from')
+        self.calls = importlib.import_module(stack["calls"])
         self.is_worker = hasattr(config, "workerinput")
         self.config = config
-        self.own_files = {os.path.realpath(Path(__file__).with_name("__init__.py")), os.path.realpath(__file__)}
+        self.own_files = {os.path.realpath(self.calls.__file__), os.path.realpath(__file__)}
         self.relative_paths: dict[str, str | None] = {}
         self.positions: dict[tuple, tuple[int, int]] = {}
         self.order: dict[str, int] = {}
@@ -252,7 +257,7 @@ class StoryRecorder:
             self.write(file)
 
     def pytest_unconfigure(self, config):
-        install_collector(None)
+        self.calls.install_collector(None)
 
 
 def pytest_configure(config):
@@ -262,4 +267,4 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "planned_test(title): a test to write, with an empty body (declare.py)")
     recorder = StoryRecorder(config)
     config.pluginmanager.register(recorder, "narrate-collector")
-    install_collector(recorder.collect)
+    recorder.calls.install_collector(recorder.collect)

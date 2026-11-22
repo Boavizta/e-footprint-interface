@@ -161,6 +161,8 @@ DECLARE = "from declare import narrative\n"
     (CALLS + 'TAG = "a#b"\ndef f():\n    planned(TAG, "c")\n', "app/x.py:4 — planned(…) needs a literal"),
     (CALLS + 'def f():\n    planned("NotATag", "c")\n', 'app/x.py:3 — "NotATag" is not <feature>#<slug>'),
     ("import narrate\ndef f():\n    narrate.narrate('a')\n", "app/x.py:3 — the calls are imported by name"),
+    ("from comprehension_harness.python.narrate import narrate\ndef f():\n    narrate('a')\n",
+     "app/x.py:3 — the calls are imported from this project's copy, narrate, not from the reference"),
     (CALLS + 'def f():\n    planned("a#b", "c")\n    raise ValueError("later")\n',
      'app/x.py:4 — the shell must raise NotImplementedError("planned: a#b")'),
     (DECLARE + "@narrative('n')\ndef test_x():\n    pass\n", "app/x.py:3 — a narrative is declared on a test class"),

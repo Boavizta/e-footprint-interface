@@ -134,7 +134,7 @@ When a feature reaches into a new public efootprint API (a method/property/dict-
 
 A narrative test crosses one flow in order so that its page can be drawn
 (`npm run comprehension:render`, then `specs/comprehension_harness/narratives/modeling.html`). The flow tells
-itself: `narrate` at each step and `event` at its cause, imported from `comprehension_harness.python`
+itself: `narrate` at each step and `event` at its cause, imported from `model_builder/narrate.py`
 and inert outside a test run. The test declares the narrative with `comprehension_harness/python/declare.py`:
 
 - `@narrative("<title>")` on a test class; the first paragraph of its docstring is the summary.
@@ -150,10 +150,11 @@ found. How each declaration is spelled: `.agents/repository.md` § "The stack".
 
 The stack's own tests are `comprehension_harness/python/tests/`, collected by a bare `pytest` run
 (`testpaths`) and by CI. They run its commands as the tools do, on small projects written to a
-temporary folder. Three of them hold what production relies on: the calls do nothing and never call
-a watch where no collector is installed, importing them loads the standard library alone, and this
-repository's own source passes the index's refusals, so a call whose arguments Python would compute
-in production fails the suite.
+temporary folder. Four of them hold what production relies on: the calls do nothing and never call
+a watch where no collector is installed; their module imports the standard library alone;
+`model_builder/narrate.py` is a copy of the reference these two are held on,
+`comprehension_harness/python/narrate.py`; and this repository's own source passes the index's
+refusals, so a call whose arguments Python would compute in production fails the suite.
 
 ## E2E tests (`tests/e2e/`)
 

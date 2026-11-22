@@ -44,7 +44,8 @@ They are written for any project. What a project is to them is the three things 
    the stack's own.
 
 3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
-   - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production;
+   - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production,
+     and its own: a project's code imports nothing of this folder;
    - a collector that writes what each test crossed as a story file under `<cache>/stories/`;
    - the source index and the test titles: a module for a stack that runs in Node, or two
      commands that print them as JSON (`json-source.ts`, `json-titles.ts`;
@@ -115,26 +116,34 @@ plugin and the declarations, which are pytest's.
 
 | File | Gives |
 |---|---|
-| `__init__.py` | The three calls: `from comprehension_harness.python import narrate, event, planned` |
+| `narrate.py` | The three calls, as the reference a project copies into its own package |
 | `declare.py` | What a test declares: `@narrative`, `@canonical`, `@titled`, `@planned_test` |
 | `collector.py` | The pytest plugin that writes the stories |
 | `source_index.py`, `titles.py`, `watch.py` | The three commands of the configuration |
 
-What the project writes to use it:
+What the project writes to use it, the same in every project:
 
+- **Its own copy of the calls**: `cp comprehension_harness/python/narrate.py <its package>/narrate.py`.
+  Its code imports `narrate`, `event` and `planned` from that module, by name.
 - `pytest_plugins = ["comprehension_harness.python.collector"]` in the conftest of its tests.
-- In `comprehension.config.json`, `"stack": { "sourceIndex": ["python3", "-m",
-  "comprehension_harness.python.source_index"], "titles": ["python3", "-m",
+- In `comprehension.config.json`, `"stack": { "calls": "<its package>.narrate", "sourceIndex":
+  ["python3", "-m", "comprehension_harness.python.source_index"], "titles": ["python3", "-m",
   "comprehension_harness.python.titles"] }` and `"watch": ["python3", "-m",
   "comprehension_harness.python.watch"]` under `commands`.
 - `comprehension_harness/python/tests` among the paths its pytest run collects.
 
-**The product imports `python/__init__.py` at runtime, so the folder ships with it**: it is in no
-ignore list of a production image. Three tests hold that this costs production nothing. Where no
-collector is installed a call returns at once and no watch is called. Importing the calls loads
-the standard library and no other module of this folder. And since Python computes a call's
-arguments before the call, the source index refuses a sentence that is not a literal string and a
-watch that is not a lambda, in the project's own source at each pytest run.
+**A project's code imports nothing of this folder.** The calls are the one thing that runs in
+production, and each project holds them in its own package, for two reasons. A published package
+then needs nothing beside itself. And two projects compose: a project that depends on another
+finds no shared module to clash on, and its test run collects its own calls alone, since each
+copy has its own collector and a dependency's stays empty. A narrative never crosses a project.
+
+Four tests hold that the calls cost production nothing. Where no collector is installed a call
+returns at once and no watch is called. Their module imports the standard library alone. The
+project's copy is the reference, word for word: the reference is edited, then copied. And since
+Python computes a call's arguments before the call, the source index refuses a sentence that is
+not a literal string and a watch that is not a lambda, in the project's own source at each
+pytest run.
 
 ## Checking the install
 

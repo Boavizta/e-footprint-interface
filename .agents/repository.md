@@ -34,7 +34,7 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 
 | The method says | Here |
 |---|---|
-| The three calls | `from comprehension_harness.python import narrate, event, planned`, always by name. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The sentence is a literal string and the watch a lambda, `narrate("…", lambda: {"count": n})`: the index refuses anything Python would compute in production |
+| The three calls | `from model_builder.narrate import narrate, event, planned`, always by name. The file is this project's copy of `comprehension_harness/python/narrate.py`, held identical by a test and never edited here. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The sentence is a literal string and the watch a lambda, `narrate("…", lambda: {"count": n})`: the index refuses anything Python would compute in production |
 | A place that changes, a place that goes, a shell | `planned("<feature>#<slug>", "<sentence>")` on existing code; `planned.remove(…)` in a function that goes; a shell is a new function whose whole body, under an optional docstring, is the `planned` call then `raise NotImplementedError("planned: <feature>#<slug>")`. One call a line |
 | A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `comprehension_harness/python/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
 | A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |

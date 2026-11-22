@@ -1,6 +1,7 @@
 {
   "name": "e-footprint interface",
   "stack": {
+    "calls": "model_builder.narrate",
     "sourceIndex": ["python3", "-m", "comprehension_harness.python.source_index"],
     "titles": ["python3", "-m", "comprehension_harness.python.titles"]
   },

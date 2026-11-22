@@ -8,8 +8,8 @@ declares a narrative or holds a site, each with its sites, functions, declaratio
 
 What this stack knows and the tools do not:
 
-- the three calls are those of this package (``__init__.py``), imported by name; a function of the same name
-  from anywhere else is no site;
+- the three calls are those of the project's own copy of ``narrate.py``, the module ``stack.calls`` of the
+  configuration names, imported by name; a function of the same name from anywhere else is no site;
 - a narrative is a test class under ``@narrative("…")`` of ``declare.py``; its summary is the first
   paragraph of the class docstring, its first test the first ``test_…`` method;
 - a function is named by its ``__qualname__``, which is what a frame of a story prints.
@@ -19,15 +19,16 @@ where the name is bound: a top-level declaration of the file, an import followed
 a package's re-exports), ``module.name`` on an imported module, ``self.name`` and ``cls.name`` on the class
 around them, a function or class of an enclosing function. A call on a value of unknown type is left out.
 
-Refused, with the file and the line: a file the parser refuses, two calls on one line, a tag or a sentence
+Refused, with the file and the line: a file the parser refuses, a call imported from the reference and not
+from the project's copy, two calls on one line, a tag or a sentence
 that is no literal string, a watch that is no lambda, a tag that is not ``<feature>#<slug>``, a shell that
 raises anything but ``planned: <tag>``, a narrative that is not declared on a class under one literal title.
 
 The literal and the lambda are what keeps the calls inert in production: Python computes a call's arguments
 before the call, and a call does nothing there. A literal and a lambda cost nothing to compute.
 
-Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config``,
-``--calls`` and ``--declare``, the modules the calls and the declarations are imported from.
+Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config`` and
+``--declare``, the module the declarations are imported from.
 
 Standard library only.
 """
@@ -42,7 +43,7 @@ from pathlib import Path
 from .titles import Refusal, declared_title, is_test_function, name_position, parse
 
 CONFIG_FILE = "comprehension.config.json"
-CALLS_MODULE = "comprehension_harness.python"
+REFERENCE_CALLS = "comprehension_harness.python.narrate"
 DECLARE_MODULE = "comprehension_harness.python.declare"
 KINDS = {"narrate": "step", "event": "event", "planned": "planned"}
 PLANNED_TAG = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)#([a-z0-9]+(?:-[a-z0-9]+)*)$")
@@ -373,6 +374,8 @@ class FileIndex(ast.NodeVisitor):
                 self.refuse(node, f"the calls are imported by name: from {self.calls} import {callee.attr}")
             return None
         kind = KINDS.get(self.imported_as(callee, self.calls) or "")
+        if kind is None and self.calls != REFERENCE_CALLS and self.imported_as(callee, REFERENCE_CALLS) in KINDS:
+            self.refuse(node, f"the calls are imported from this project's copy, {self.calls}, not from the reference")
         return (kind, False) if kind else None
 
     def visit_Call(self, node) -> None:
@@ -467,13 +470,14 @@ def python_files(root: Path, folder: str) -> list[str]:
     return found
 
 
-def build(root: Path, settings: dict, calls: str = CALLS_MODULE, declare: str = DECLARE_MODULE) -> dict:
+def build(root: Path, settings: dict, declare: str = DECLARE_MODULE) -> dict:
     try:
         source_folders, test_roots = settings["source"]["app"], settings["tests"]["roots"]
         test_pattern = re.compile(settings["tests"]["files"])
+        calls = settings["stack"]["calls"]
     except (KeyError, TypeError) as error:
-        raise Refusal(f'{CONFIG_FILE} — "source.app", "tests.roots" and "tests.files" are read from it, '
-                      f'and {error} is missing') from None
+        raise Refusal(f'{CONFIG_FILE} — "source.app", "tests.roots", "tests.files" and "stack.calls" are read '
+                      f'from it, and {error} is missing') from None
     source_files = sorted({file for folder in source_folders for file in python_files(root, folder)})
     # A test file can only declare a narrative or hold a site if it names where they are imported from.
     words = {calls.split(".")[-1], declare.split(".")[-1]}
@@ -495,7 +499,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Print the source index of the Python stack as JSON.")
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2], help="the repository root")
     parser.add_argument("--config", type=Path, help=f"the configuration, {CONFIG_FILE} of the root by default")
-    parser.add_argument("--calls", default=CALLS_MODULE, help="the module narrate, event and planned are imported from")
     parser.add_argument("--declare", default=DECLARE_MODULE, help="the module narrative is imported from")
     asked = parser.parse_args()
     try:
@@ -504,7 +507,7 @@ def main() -> int:
             settings = json.loads(config.read_text())
         except (OSError, json.JSONDecodeError) as error:
             raise Refusal(f"{config} is not a configuration that can be read — {error}") from None
-        document = build(asked.root.resolve(), settings, asked.calls, asked.declare)
+        document = build(asked.root.resolve(), settings, asked.declare)
     except Refusal as refusal:
         print(f"comprehension-source: {refusal}", file=sys.stderr)
         return 1
