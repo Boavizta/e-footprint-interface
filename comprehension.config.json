@@ -43,5 +43,6 @@
     "watch": ["python3", "-m", "comprehension_harness.python.watch"],
     "journeys": ["poetry", "run", "pytest", "tests/e2e/journeys", "--base-url", "http://localhost:8000"]
   },
-  "planDiff": null
+  "planDiff": null,
+  "repositories": { "e-footprint": "../e-footprint" }
 }

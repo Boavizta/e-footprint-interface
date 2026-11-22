@@ -17,7 +17,9 @@
  *  - `source` and `tests`: what a file is, by its path (`layout.ts`);
  *  - `pagesNamingCode`: the pages whose entries mark the steps they name: debts, rules, conventions;
  *  - `commands`: how a tool, the narrative tests and the journeys are run here;
- *  - `planDiff`: a module that draws what a proposed migration does to the database, or null.
+ *  - `planDiff`: a module that draws what a proposed migration does to the database, or null;
+ *  - `repositories`, optional: where the checkout of another repository is, by its name, as a path from the
+ *    root. A plan that points at a piece planned there is read against it (`plan.md` § "Planned elsewhere").
  *
  * A key that is missing or of the wrong shape stops the tool, naming it.
  */
@@ -54,6 +56,7 @@ export interface Config extends LayoutSettings {
     journeys: string[];
   };
   planDiff: string | null;
+  repositories?: Record<string, string>;
 }
 
 /** The nearest folder holding the configuration, from where the tool was started and upwards: the repository

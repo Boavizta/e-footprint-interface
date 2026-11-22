@@ -105,9 +105,10 @@ For each interaction a plan follows, say which of these it touches:
   names its upgrade handler and the test that holds it.
 - **HTMX**: which partials and out-of-band swaps a response carries, and what the page shows
   when the response is an error.
-- **The library**: a change that needs one there is cross-repository work. One working set in
-  the driving repository, explicit file ownership, one baseline and one commit range per
-  repository; test against the intended library checkout.
+- **The library**: a change that needs one there is planned there, in `e-footprint`'s own plan
+  of the feature, with its own baseline, commit range and approval. This plan points at it
+  (`## Planned elsewhere`) and relies on it; test against the intended library checkout. No
+  guard here against what the library should fix.
 - **A request with no response is out of scope.** It belongs to the parked
   `specs/backlog/network-interruption-message/problem.md`. Work scoped to HTTP responses adds no
   message specific to a timeout or an abort, no reload or retry per field, and no test that
@@ -122,9 +123,9 @@ What belongs in one lot here:
 - A change of a Django model with its migration.
 - A change of the saved JSON's shape with its upgrade handler.
 
-What is kept apart: a change in the library and the change here that consumes it, one lot per
-repository, each with its own commit range. Nothing else is particular to this project: the
-rules of `spec-tasks` apply.
+What is kept apart: a change in the library is no lot here. It is delivered by the library's
+own plan, and a lot that consumes it says so in its reason. Nothing else is particular to this
+project: the rules of `spec-tasks` apply.
 
 ## Review surfaces
 
@@ -173,4 +174,4 @@ fake), a force push, a branch deletion or a hard reset (constitution §3.3), a c
   § "Active streams".
 - **Unfinished work** goes to a topic folder of `specs/backlog/` or to a horizon of the roadmap.
 - **Never retired with a feature**: a test of a Django migration or of a serialization upgrade.
-- A cross-repository feature is archived in the driving repository, where its folder is.
+- A feature that changed both repositories is archived in each, its plan with its code.

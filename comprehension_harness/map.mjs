@@ -415,6 +415,14 @@ function plan(map, feature) {
     }
     say('');
   }
+  if (p.pointers?.length) {
+    say('─'.repeat(60), `Planned elsewhere — ${plural(p.pointers.length, 'piece')} this plan relies on and holds none of: each is planned and built in its repository's plan of ${p.feature}`);
+    for (const x of p.pointers) {
+      const there = x.target === null ? 'not checked: no checkout known here' : x.target.statement === null ? 'NO SUCH PIECE THERE' : `${x.target.approvedOn ? `approved ${x.target.approvedOn}` : 'not approved yet'} — ${x.target.statement}`;
+      say(`  ${x.repository} #${x.slug} (${there})`, `    ${x.reason}`);
+    }
+    say('');
+  }
   if (p.rules.length) {
     say('─'.repeat(60), `Rules of ${p.rulesFile} — one test owns each, or ${p.doc ? p.doc.file : 'plan.md'} waives it`);
     for (const r of p.rules) say(`  ${r.slug}: ${r.waiver ? `no test${r.waiver.toConfirm ? ' (TO CONFIRM)' : ''} — ${r.waiver.reason}` : r.owners.length === 0 ? 'NO OWNER YET' : r.owners.length === 1 ? `owned by ${at(r.owners[0])}` : `TWO OWNERS — ${r.owners.map(at).join(', ')}`}`);

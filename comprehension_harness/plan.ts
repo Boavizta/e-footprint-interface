@@ -188,7 +188,7 @@ export interface PlanNote {
 }
 
 /** Words at most. A piece over its budget fails `--check`: the page is read, so it stays short. */
-export const BUDGET = { clause: 25, title: 20, what: 30, why: 60, ask: 60, changed: 40, lot: 40, note: 40 } as const;
+export const BUDGET = { clause: 25, title: 20, what: 30, why: 60, ask: 60, changed: 40, lot: 40, note: 40, pointer: 40 } as const;
 
 export const words = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
@@ -216,6 +216,29 @@ export interface PlanDoc {
   waivers: PlanWaiver[];
   /** The items of "## Delivery", in delivery order; empty until the tasks stage has written the section. */
   lots: PlanLot[];
+  /** The items of "## Planned elsewhere". */
+  pointers: PlanPointer[];
+}
+
+/** A piece this plan relies on and does not hold: it is planned, built and approved in the plan of the same
+ *  feature in another repository. `- **the-repository** #the-slug — what this plan relies on`. A plan is local
+ *  to the changes of its repository; a pointer is how one that spans two says so. */
+export interface PlanPointer {
+  repository: string;
+  slug: string;
+  reason: string;
+  line: number;
+}
+
+/** What the repository a pointer names says of the piece, read from its checkout. */
+export interface PointerTarget {
+  /** The piece's statement there; null when that plan holds no such piece. */
+  statement: string | null;
+  /** The day that plan was approved with the piece in it; null while it was not. */
+  approvedOn: string | null;
+  /** Its `plan.md`, as an absolute path, and the line of the piece's section. */
+  source: string;
+  line: number;
 }
 
 /** A rule of the spec the plan gives no test, with the reason: `- **the-rule** why no test`. The reviewer
@@ -328,6 +351,9 @@ export interface Plan {
   unknownRefs: Array<{ slug: string; section: string; line: number }>;
   /** A `#slug` of a lot that names no piece, planned or approved. */
   unknownLotPieces: Array<{ slug: string; lot: string; line: number }>;
+  /** The pieces planned elsewhere, each with what its repository says of it; `target` is null when the
+   *  configuration names no checkout of that repository, or none is there. */
+  pointers: Array<PlanPointer & { target: PointerTarget | null }>;
   /** The plan as it stands, in the form it is approved in. */
   snapshot: PlanSnapshot;
   /** The approval on file, `plan.approved.json`; null while the plan was never approved. */
@@ -344,7 +370,7 @@ export interface Plan {
 
 // ── The approved plan and what differs from it ─────────────────────────────────
 
-export type UnitKind = 'piece' | 'decision' | 'waivers' | 'delivery' | 'journey' | 'story';
+export type UnitKind = 'piece' | 'decision' | 'waivers' | 'elsewhere' | 'delivery' | 'journey' | 'story';
 
 /** One thing a reviewer approves, as lines by facet. No line holds a line number: moving code changes nothing. */
 export interface SnapshotUnit {
@@ -715,11 +741,34 @@ function lotsOf(section: MdSection | undefined, file: string): PlanLot[] {
   return lots;
 }
 
-const RESERVED_SECTIONS = [WAIVERS_SECTION, DELIVERY_SECTION];
+export const ELSEWHERE_SECTION = 'Planned elsewhere';
+
+const POINTER = new RegExp(`^#(${KEBAB})(?![a-z0-9-])\\s*[—–:-]\\s*`);
+
+/** The items of "## Planned elsewhere": a list and nothing else. An item opens with the repository in bold,
+ *  then the piece's tag, then what this plan relies on. */
+function pointersOf(section: MdSection | undefined, file: string): PlanPointer[] {
+  if (!section) return [];
+  const form = '"- **the-repository** #the-piece — what this plan relies on, and which pieces here stand on it"';
+  const stray = section.blocks.find((b) => b.kind === 'p');
+  if (stray) throw new Error(`comprehension-plan: ${file}:${stray.line} — "## ${ELSEWHERE_SECTION}" holds a list and nothing else: ${form}`);
+  const pointers = section.blocks.flatMap((b) => (b.kind === 'ul' ? b.items : [])).map((item): PlanPointer => {
+    const named = POINTER.exec(item.text);
+    const reason = named ? item.text.slice(named[0].length).trim() : '';
+    if (item.slug === null || !named || reason === '') throw new Error(`comprehension-plan: ${file}:${item.line} — a piece planned elsewhere names its repository in bold, then its tag, then says what this plan relies on: ${form}`);
+    return { repository: item.slug, slug: named[1], reason, line: item.line };
+  });
+  const twice = pointers.find((p, i) => pointers.findIndex((o) => o.slug === p.slug) !== i);
+  if (twice) throw new Error(`comprehension-plan: ${file}:${twice.line} — two pieces planned elsewhere are tagged #${twice.slug}`);
+  return pointers;
+}
+
+const RESERVED_SECTIONS = [WAIVERS_SECTION, DELIVERY_SECTION, ELSEWHERE_SECTION];
 
 export function planDocOf(intent: Intent, file: string): PlanDoc {
   const waivers = waiversOf(intent.sections.find((s) => s.title === WAIVERS_SECTION), file);
   const lots = lotsOf(intent.sections.find((s) => s.title === DELIVERY_SECTION), file);
+  const pointers = pointersOf(intent.sections.find((s) => s.title === ELSEWHERE_SECTION), file);
   const sections = intent.sections.filter((s) => !RESERVED_SECTIONS.includes(s.title)).map((s) => {
     const texts = s.blocks.flatMap((b) => (b.kind === 'p' ? [b.text] : b.items.map((i) => i.text)));
     const piece = PIECE_TITLE.exec(s.title)?.[1] ?? null;
@@ -741,7 +790,7 @@ export function planDocOf(intent: Intent, file: string): PlanDoc {
   });
   const twice = sections.find((s, i) => sections.findIndex((o) => o.anchor === s.anchor) !== i);
   if (twice) throw new Error(`comprehension-plan: ${file}:${twice.line} — two sections are titled "${twice.title}"`);
-  return { file, title: intent.title, lead: intent.lead, sections, waivers, lots };
+  return { file, title: intent.title, lead: intent.lead, sections, waivers, lots, pointers };
 }
 
 /** A piece's section taken apart. It opens with a paragraph, the statement; at most one paragraph opens
@@ -823,6 +872,8 @@ export function snapshotOf(plan: Pick<Plan, 'pieces' | 'doc' | 'journeyCases'> &
       } else units.push({ kind: 'decision', name: section.title, facets: { text: blockTexts(section.blocks.filter((b) => !(b.kind === 'p' && CHANGED.test(b.text)))) } });
     }
     if (doc.waivers.length) units.push({ kind: 'waivers', name: WAIVERS_SECTION, facets: { waivers: doc.waivers.map((w) => `${w.rule} — ${w.toConfirm ? 'To confirm: ' : ''}${w.reason}`) } });
+    // A pointer carries its reason, as a waiver and a lot do: one that moves is listed, and asks nothing more.
+    if (doc.pointers.length) units.push({ kind: 'elsewhere', name: ELSEWHERE_SECTION, facets: { pointers: doc.pointers.map((p) => `${p.repository} #${p.slug} — ${p.reason}`) } });
     if (doc.lots.length) units.push({ kind: 'delivery', name: DELIVERY_SECTION, facets: { lots: doc.lots.map((l) => `${l.slug}${l.difficulty === 'standard' ? '' : ` (${l.difficulty})`} ${[...l.pieces.map((x) => `#${x}`), ...l.screens.map((x) => `@${x}`)].join(' ')} — ${l.reason}`) } });
   }
   const cases = [...plan.journeyCases.map(caseLineOf), ...(plan.builtCases ?? [])];
@@ -1047,6 +1098,8 @@ export interface FeatureDocs {
   /** The commits whose message names a piece of the feature, oldest first, and whether the commit of the
    *  approval is in this branch's history. */
   commits?: { list: PieceCommit[]; baseKnown: boolean } | null;
+  /** What a repository says of a piece of this feature it plans; null when no checkout of it is known. */
+  pointed?: (repository: string, slug: string) => PointerTarget | null;
 }
 
 export interface PlanInput {
@@ -1149,6 +1202,9 @@ export function assemblePlans(input: PlanInput): Plan[] {
     const openCases = journeyCases.map(caseLineOf);
     const builtCases = implementing ? linesOver(approved!.baseline.units.find((u) => u.kind === 'journey')?.facets.cases ?? [], openCases) : [];
     const known = (slug: string) => bySlug.has(slug) || approvedSlugs.has(slug);
+    const pointers = (doc?.pointers ?? []).map((p) => ({ ...p, target: docs.pointed?.(p.repository, p.slug) ?? null }));
+    // A section may name a piece planned elsewhere; a lot may not: it delivers what is planned here.
+    const named = (slug: string) => known(slug) || pointers.some((p) => p.slug === slug);
     // The stories the plan is read against: of every narrative a site lands in, and of every one the approved
     // plan landed in, so that a story is still compared once the sites that crossed it are code.
     const landed = new Set([...pieces.flatMap((x) => x.sites.flatMap((s) => s.crossedBy.map((c) => c.narrative))), ...(approved?.baseline.units ?? []).filter((u) => u.kind === 'story').map((u) => u.name)]);
@@ -1182,6 +1238,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
       moves: diffed?.moves ?? [],
       feedback: docs.feedback ?? {},
       unknownLotPieces: doc ? doc.lots.flatMap((l) => l.pieces.filter((slug) => !known(slug)).map((slug) => ({ slug, lot: l.slug, line: l.line }))) : [],
+      pointers,
       rulesFile: docs.spec?.file ?? null,
       rules,
       unknownRules: todos.filter((t) => t.rule !== null && !rules.some((r) => r.slug === t.rule)),
@@ -1192,7 +1249,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
       commits,
       unknownCommitPieces: commits.flatMap((c) => c.pieces.filter((slug) => !bySlug.has(slug)).map((slug) => ({ sha: c.sha, slug }))),
       baseKnown: docs.commits?.baseKnown ?? true,
-      unknownRefs: doc ? doc.sections.flatMap((s) => [...new Set([...(s.piece === null ? [] : [s.piece]), ...s.slugs])].filter((slug) => !known(slug)).map((slug) => ({ slug, section: s.title, line: s.line }))) : [],
+      unknownRefs: doc ? doc.sections.flatMap((s) => [...new Set([...(s.piece === null ? [] : [s.piece]), ...s.slugs])].filter((slug) => !named(slug)).map((slug) => ({ slug, section: s.title, line: s.line }))) : [],
     };
   });
 }
@@ -1226,6 +1283,14 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
       if (archive && r.waiver.toConfirm) failures.push(`archive ${plan.feature}: the waiver of [${r.slug}] still opens "To confirm:" (${plan.doc!.file}:${r.waiver.line})`);
     }
     if (r.owners.length === 0 && !r.waiver) (archive ? failures : info).push(archive ? `archive ${plan.feature}: rule [${r.slug}] is owned by no test (${plan.rulesFile}:${r.line})` : `rule [${r.slug}] has no owner yet (${plan.rulesFile}:${r.line})`);
+  }
+  for (const p of plan.pointers) {
+    const where = `${plan.doc!.file}:${p.line}`;
+    const there = `${p.repository}'s ${plan.feature}#${p.slug}`;
+    over(words(p.reason), BUDGET.pointer, `${where} #${p.slug}`, 'says what the plan relies on', 'what is relied on, and which pieces stand on it: the piece is stated where it is planned');
+    if (plan.pieces.some((x) => x.slug === p.slug)) failures.push(`planned: ${where} points at ${there}, and #${p.slug} is a piece of this plan too — a piece is planned here or there, under two tags when both repositories change`);
+    if (p.target === null) info.push(`planned: ${where} points at ${there}, which is not checked — no checkout of ${p.repository} is named under "repositories" of the configuration, or none is there`);
+    else if (p.target.statement === null) failures.push(`planned: ${where} points at ${there}, and the plan of that repository holds no such piece (${p.target.source})`);
   }
   for (const w of plan.unknownWaivers) failures.push(`planned: ${plan.doc!.file}:${w.line} waives [${w.rule}], which is no rule of ${plan.rulesFile ?? `specs/features/${plan.feature}/spec.md (no such file)`}`);
   for (const ref of plan.unknownRefs) failures.push(`planned: ${plan.doc!.file}:${ref.line} "${ref.section}" names #${ref.slug}, which is no piece of ${plan.feature}`);

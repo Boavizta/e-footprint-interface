@@ -65,6 +65,12 @@ a smaller extension of what exists. Remove what has no demonstrated need.
 - A confirmed bug found on the way is reported with its evidence, and a deferred concern parked
   where the repository parks them. Nothing is fixed during planning.
 
+**A change the feature needs in another repository is planned there**, in that repository's own
+plan of the feature, by a session run there. Here it is a pointer, an item of
+`## Planned elsewhere`, never a piece: say what this plan relies on and which pieces stand on it
+(`workflow-formats.md` § "A feature that changes two repositories"). A guard here against what
+the other repository should fix is put to the reviewer as a `To confirm:`.
+
 **A requirement a small behaviour change would make much cheaper** is put to the reviewer as a
 `To confirm:` in the piece it concerns: the smaller behaviour, which states, coordination or
 recovery would disappear, and what the user would lose. Weigh frequency, benefit and failure

@@ -648,6 +648,65 @@ describe('the approved plan', () => {
     expect(reviewItems(now({}, MD, null))).toEqual([]);
   });
 
+  describe('a piece planned elsewhere', () => {
+    const ELSEWHERE = `${MD}\n## Planned elsewhere\n\n- **the-library** #scale-calls — A call scales with every device; #cut reads it.\n`;
+    const there = (statement: string | null, approvedOn: string | null = null) => ({ statement, approvedOn, source: '/work/the-library/specs/features/demo/plan.md', line: 12 });
+    const pointing = (md: string, pointed: (repository: string, slug: string) => plan.PointerTarget | null, baseline: PlanBaseline | null = BASELINE) => assemble({
+      ...base, sites: [crossedSite],
+      docs: (feature) => ({ ...docs(md, null)(feature), approved: baseline ? { file: 'specs/features/demo/plan.approved.json', baseline } : null, pointed }),
+    })[0];
+
+    it('is read off its section, with what its repository says of it, and is no piece of this plan', () => {
+      const asked: string[] = [];
+      const p = pointing(ELSEWHERE, (repository, slug) => { asked.push(`${repository} ${slug}`); return there('A call scales with every device.', '2026-11-20'); });
+      expect(p.pointers).toEqual([{ repository: 'the-library', slug: 'scale-calls', reason: 'A call scales with every device; #cut reads it.', line: 15, target: there('A call scales with every device.', '2026-11-20') }]);
+      expect(asked).toEqual(['the-library scale-calls']);
+      expect(p.pieces.map((x) => x.slug)).toEqual(['cut']);
+      expect(findings(p).failures).toEqual([]);
+    });
+
+    it('is held by the approval: one added since is listed, and carries its own reason', () => {
+      const p = pointing(ELSEWHERE, () => there('A call scales with every device.'));
+      expect(p.delta!.map((d) => [d.kind, d.name, d.state, d.reason, d.facets[0].added])).toEqual([
+        ['elsewhere', 'Planned elsewhere', 'new', 'none', ['the-library #scale-calls — A call scales with every device; #cut reads it.']],
+      ]);
+      expect(pointing(ELSEWHERE, () => null, approvedAs({ ...base, sites: [crossedSite] }, ELSEWHERE)).delta).toEqual([]);
+    });
+
+    it('fails when that plan holds no such piece, and only says so when no checkout is known', () => {
+      expect(findings(pointing(ELSEWHERE, () => there(null))).failures).toEqual([
+        'planned: specs/features/demo/plan.md:15 points at the-library\'s demo#scale-calls, and the plan of that repository holds no such piece (/work/the-library/specs/features/demo/plan.md)',
+      ]);
+      const unchecked = findings(pointing(ELSEWHERE, () => null));
+      expect(unchecked.failures).toEqual([]);
+      expect(unchecked.info).toContain('planned: specs/features/demo/plan.md:15 points at the-library\'s demo#scale-calls, which is not checked — no checkout of the-library is named under "repositories" of the configuration, or none is there');
+    });
+
+    it('may be named by a section and by no lot, and is not planned here too', () => {
+      const named = ELSEWHERE.replace('Regenerated with #cut.', 'Regenerated with #cut, after #scale-calls.');
+      expect(pointing(named, () => there('It scales.')).unknownRefs).toEqual([]);
+      const lot = `${ELSEWHERE}\n## Delivery\n\n- **a** #cut #scale-calls — why\n`;
+      expect(pointing(lot, () => there('It scales.')).unknownLotPieces.map((x) => x.slug)).toEqual(['scale-calls']);
+      const twice = ELSEWHERE.replace('#scale-calls —', '#cut —');
+      expect(findings(pointing(twice, () => there('It scales.'))).failures).toEqual([
+        'planned: specs/features/demo/plan.md:15 points at the-library\'s demo#cut, and #cut is a piece of this plan too — a piece is planned here or there, under two tags when both repositories change',
+      ]);
+    });
+
+    it('refuses a section that is not a list of pointers, and a reason over its budget', () => {
+      const section = (items: string) => () => planDocOf(parseIntent(`# P\n\n## Planned elsewhere\n\n${items}\n`, 'plan.md'), 'plan.md');
+      expect(section('Some prose.')).toThrow(/plan\.md:5 — "## Planned elsewhere" holds a list and nothing else/);
+      expect(section('- #scale-calls — no repository')).toThrow(/names its repository in bold, then its tag, then says what this plan relies on/);
+      expect(section('- **the-library** scales the calls')).toThrow(/names its repository in bold, then its tag/);
+      expect(section('- **the-library** #scale-calls')).toThrow(/names its repository in bold, then its tag/);
+      expect(section('- **the-library** #scale-calls — one\n- **another** #scale-calls — two')).toThrow(/plan\.md:6 — two pieces planned elsewhere are tagged #scale-calls/);
+      const long = ELSEWHERE.replace('A call scales with every device; #cut reads it.', 'word '.repeat(BUDGET.pointer + 1).trim());
+      expect(findings(pointing(long, () => there('It scales.'))).failures).toEqual([
+        `planned: specs/features/demo/plan.md:15 #scale-calls says what the plan relies on in ${BUDGET.pointer + 1} words, and the budget is ${BUDGET.pointer} — what is relied on, and which pieces stand on it: the piece is stated where it is planned`,
+      ]);
+    });
+  });
+
   it('takes a line one piece lost and another gained, word for word, as a move: no reason, no line of either delta', () => {
     const md = `${MD}\n## #save\n\nSave sends it.\n`;
     const save = site('save', 'src/card.tsx', 2);

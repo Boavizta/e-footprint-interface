@@ -41,7 +41,8 @@ They are written for any project. What a project is to them is the three things 
    that run a tool, the narrative tests and the journeys. Two of the commands are held to more
    than their shape: `tests` is typed with test paths after it, and `watch` must keep running,
    since the local app stops when it exits. A runner with no watch mode needs a small loop of
-   the stack's own.
+   the stack's own. One key is optional: `repositories`, the checkout of another repository by
+   its name, for a plan that points at a piece planned there.
 
 3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
    - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production,

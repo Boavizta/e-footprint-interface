@@ -89,6 +89,8 @@ A title, a lead, then:
 - **Any other title** is a decision across pieces, which names the pieces it concerns as `#slug`.
 - **`## Rules no test holds`**: the waivers, `- **the-rule** why no test holds it`, for a rule
   that is true by the shape of the code.
+- **`## Planned elsewhere`**: the pointers, `- **the-repository** #the-piece — what this plan
+  relies on`, for a feature that changes two repositories. Below.
 - **`## Delivery`**: the lots, below.
 
 Three paragraphs have a prefix:
@@ -117,6 +119,29 @@ Each fact has one home, and each home a budget in words, which the check enforce
 
 A word is a run of characters between spaces. The tag, the `[rule]` suffix, the prefixes and a
 `Changed:` paragraph's claims are not counted.
+
+## A feature that changes two repositories
+
+**A plan is local to the changes of its repository.** Each repository holds a plan of the feature,
+under the same feature name, for what changes there: its pieces have their places, their tests,
+their commits and their approval where the code is. The spec is written once, in the repository
+that drives the feature.
+
+Where one plan relies on a piece of the other, it says so with a pointer, an item of
+`## Planned elsewhere`: the repository in bold, the piece's tag, then what this plan relies on and
+which of its pieces stand on it, in 40 words at most.
+
+- A pointer is no piece: it has no place, no test and no commit here, and no lot delivers it. A
+  section names it as `#slug`; a lot says in its reason what it waits for.
+- The plan page puts the pointers first, each with the statement its own plan gives the piece
+  and whether that plan is approved. They are read from the other checkout's files, where the
+  configuration names it (`repositories`); nothing of the other repository is run.
+- The check fails on a pointer whose repository holds no such piece, and on a tag that is both
+  a pointer and a piece. Where no checkout is known it says so and checks nothing.
+- The approval holds the pointers: one that moves since is listed, and carries its own reason.
+
+A narrative never crosses a repository: each project's calls are its own, and a test run
+collects its own alone (`comprehension_harness/README.md` § "The Python stack").
 
 ## The approval, and what moved since
 

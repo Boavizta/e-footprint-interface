@@ -16,6 +16,9 @@ stage is for, who approves what, and what never happens without a person.
   where a change lands, a test title with no body, a comment where no line runs. The plan page
   draws the flows the change lands in, each change at the step it lands in, then a card a piece.
   A piece no flow shows, in no narrative or with no place in this repository, is put first.
+- **A plan is local to the changes of its repository.** A feature that changes two has a plan
+  in each, and the one that relies on a piece of the other points at it
+  (`workflow-formats.md` § "A feature that changes two repositories").
 - **The reviewer reads everything that is generated for them.** So each fact has one home, under
   a budget of words, and what is not worth reading is not written.
 - **No edit of an approved plan is silent.** The approval is a committed file; whatever differs

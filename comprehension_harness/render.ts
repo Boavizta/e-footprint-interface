@@ -88,14 +88,14 @@
 import { renderStamp } from './render-stamp';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { PAGES, ROOT, STORIES, STORIES_DIR, config, featureFolder, layout, typed } from './config';
+import { CONFIG_FILE, PAGES, ROOT, STORIES, STORIES_DIR, config, featureFolder, layout, typed } from './config';
 import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, editItems, filesNamed, findings, isOwnNotice, lotLeft, names, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceQuestion, reviewItems, waiverQuestion, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOwnNotice, lotLeft, names, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, LOOKS_DECLARED, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -942,7 +942,29 @@ function featureDocs(feature: string): FeatureDocs {
     approved,
     feedback: readFeedback(feature),
     commits: readPieceCommits(feature, approved?.baseline.base ?? null, ROOT, titles, layout),
+    pointed: (repository, slug) => pointerTarget(feature, repository, slug),
   };
+}
+
+/** What another repository's plan of the same feature says of a piece, read from its checkout's files: its
+ *  `plan.md` and its approval. Nothing of that repository is run. Null when the configuration names no
+ *  checkout of it, or none is there: another machine may hold this repository alone. */
+function pointerTarget(feature: string, repository: string, slug: string): PointerTarget | null {
+  const at = config.repositories?.[repository];
+  const root = at === undefined ? null : resolve(ROOT, at);
+  if (root === null || !existsSync(root)) return null;
+  // Its documents' folder is its own configuration's.
+  const theirs = join(root, CONFIG_FILE);
+  const docs = existsSync(theirs) ? (JSON.parse(readFileSync(theirs, 'utf8')) as { docs?: string }).docs ?? config.docs : config.docs;
+  const source = join(root, docs, 'features', feature, 'plan.md');
+  const absent = { statement: null, approvedOn: null, source, line: 1 };
+  if (!existsSync(source)) return absent;
+  const section = planDocOf(parseIntent(readFileSync(source, 'utf8'), source), source).sections.find((s) => s.piece === slug);
+  if (!section) return absent;
+  const approval = join(dirname(source), APPROVED_FILE);
+  const baseline = existsSync(approval) ? JSON.parse(readFileSync(approval, 'utf8')) as PlanBaseline : null;
+  const approved = baseline?.units.some((u) => u.kind === 'piece' && u.name === `#${slug}`) ?? false;
+  return { statement: pieceDocOf(section, source).what, approvedOn: approved ? baseline!.approvedOn : null, source, line: section.line };
 }
 
 /** The reviewer's answers, written from the pages by the local app (`npm run comprehension`); deleted by an approval. */
@@ -1164,9 +1186,11 @@ const narrativeHref = (n: Narrative) => (n.kind === 'product' ? PLAN_LINKS.produ
 /** `plan.md`'s markdown-lite, plus its own two links: `[text](url)` and `#slug`, a piece of this plan. */
 function planInline(text: string, plan: Plan): string {
   const known = new Set(plan.pieces.map((s) => s.slug));
+  const elsewhere = new Set(plan.pointers.map((p) => p.slug));
   const refs = replaceSlugRefs(esc(text), (slug) => (known.has(slug)
     ? `<a class="slug" href="#piece-${slug}">#${slug}</a>`
-    : `<span class="flag" title="no site carries this tag">#${slug} — no such piece</span>`));
+    : elsewhere.has(slug) ? `<a class="slug" href="#elsewhere-${slug}" title="planned in another repository">#${slug}</a>`
+      : `<span class="flag" title="no site carries this tag">#${slug} — no such piece</span>`));
   return refs
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -1377,6 +1401,20 @@ function landsLabel(piece: PlanPiece, group: PlanGroup | undefined, narratives: 
   return group?.kind === 'narrative' ? `crossed by ${esc(group.narrative!)}, in no step of it` : 'crossed by no narrative';
 }
 
+/** A piece planned elsewhere: where, what its repository states of it and whether that is approved there, then
+ *  what this plan relies on. */
+function pointerHtml(pointer: Plan['pointers'][number], plan: Plan): string {
+  const { target } = pointer;
+  const state = target === null ? 'not checked: no checkout of that repository is known here'
+    : target.statement === null ? '<span class="flag">no such piece in its plan</span>'
+      : target.approvedOn ? `approved there on ${esc(target.approvedOn)}` : 'not approved there yet';
+  const stated = target?.statement
+    ? `<b>${esc(target.statement)}</b> <small><a class="src" href="vscode://file/${esc(target.source)}:${target.line}:1">its plan.md</a></small><br>`
+    : '';
+  return `<div class="pline" id="elsewhere-${pointer.slug}"><span class="where"><span class="slug">${esc(pointer.repository)} #${pointer.slug}</span><br><small>${state}</small></span>`
+    + `<span class="clause">${stated}${planInline(pointer.reason, plan)} <small>${srcLink(plan.doc!.file, pointer.line, 1, 'plan.md')}</small></span></div>`;
+}
+
 function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   const { plan } = ctx;
   const group = plan.groups.find((g) => g.pieces.includes(piece));
@@ -1469,6 +1507,10 @@ ${points || bar ? `
 <h2 id="answers">Your answers${points ? ` — ${plural(points, 'point')} to confirm, each answered where it is stated` : ''}</h2>
 ${points ? `<p class="pbox">${[...asks.map((s) => `<a class="slug ask" href="#ask-${s.slug}">#${s.slug} ?</a>`), ...waiversToConfirm.map((r) => `<a class="slug ask" href="#rule-${r.slug}">no test for ${r.slug} ?</a>`)].join(' ')}</p>` : ''}
 ${bar}` : ''}
+${plan.pointers.length ? `
+<h2 id="elsewhere">Planned elsewhere — ${plural(plan.pointers.length, 'piece')}</h2>
+<div class="pbox outside">${plan.pointers.map((p) => pointerHtml(p, plan)).join('')}</div>
+<p class="legend">Each is planned, built and approved in its own repository, under this feature's name. This plan relies on it and holds none of it.</p>` : ''}
 ${outside.length ? `
 <h2 id="outside">Outside the narrated flows — ${plural(outside.length, 'piece')}</h2>
 <div class="pbox outside">${outside.map((s) => `<div class="pline"><span class="where">${pieceChip(s)}<br><small>${landsLabel(s, plan.groups.find((g) => g.pieces.includes(s)), narratives, plan)}</small></span><span class="clause">${s.doc ? planInline(s.doc.what, plan) : '<span class="pending">no statement in plan.md</span>'}</span></div>`).join('')}</div>
@@ -1535,7 +1577,7 @@ const filesOf = (piece: PlanPiece | undefined) => [
 ].filter((x) => layout.isApp(x.file));
 
 /** What a line of the delta is, in the reader's words: the facet says how the plan stores it, this says what it is. */
-const LINE_KIND: Record<string, string> = { statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note' };
+const LINE_KIND: Record<string, string> = { statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', pointers: 'planned elsewhere', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note' };
 const commentKind = (file: string, removes: boolean) => (removes ? 'test goes' : layout.isTest(file) ? 'test changes' : file.endsWith('.sql') ? 'migration' : /\.(?:md|html)$/.test(file) ? 'doc' : 'code');
 
 /**
