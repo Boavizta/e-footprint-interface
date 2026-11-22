@@ -636,6 +636,18 @@ describe('the approved plan', () => {
     expect(reviewItems(now({}))).toEqual([]);
   });
 
+  it('gives a question to answer from the first draft on, a piece\'s and a waiver\'s, with no approval to have moved from', () => {
+    const asked = `${MD.replace('## The snapshot', 'To confirm: **Is the cut made twice?** Once settles a tie by id.\n\n## The snapshot')}\n## Rules no test holds\n\n- **owned-once** To confirm: A test would restate the code.\n- **owned-by-none** True by the order of the code.\n`;
+    const draft = reviewItems(now({}, asked, null));
+    expect(draft.map((i) => [i.unit, i.kind, i.what])).toEqual([
+      ['#cut', 'question', 'Is the cut made twice? Once settles a tie by id.'],
+      ['no test for owned-once', 'question', 'A test would restate the code.'],
+    ]);
+    // The same question is the same item once the plan is approved: an answer given on the draft still stands.
+    expect(reviewItems(now({}, asked)).map((i) => i.key)).toEqual(draft.map((i) => i.key));
+    expect(reviewItems(now({}, MD, null))).toEqual([]);
+  });
+
   it('takes a line one piece lost and another gained, word for word, as a move: no reason, no line of either delta', () => {
     const md = `${MD}\n## #save\n\nSave sends it.\n`;
     const save = site('save', 'src/card.tsx', 2);

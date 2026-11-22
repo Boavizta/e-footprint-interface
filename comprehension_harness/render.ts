@@ -95,7 +95,7 @@ import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, filesNamed, findings, isOwnNotice, lotLeft, names, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, reviewItems, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOwnNotice, lotLeft, names, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceQuestion, reviewItems, waiverQuestion, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, LOOKS_DECLARED, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -961,8 +961,9 @@ export function saveFeedback(feature: string, answer: { key: string; unit: strin
   writeFileSync(feedbackPath(feature), `${JSON.stringify(all, null, 2)}\n`);
 }
 
-/** The approval given from the page: every edit and every question of the plan as it stands was answered
- *  "approved". Then it is `approve`, which also refuses while a `To confirm:` stands in `plan.md`. */
+/** The approval given from the page: every edit of the plan as it stands was answered "approved". Then it is
+ *  `approve`, which refuses while a `To confirm:` stands in `plan.md`: a question answered there is still one
+ *  until the agent has written the answer as a statement. */
 export function approveFromPage(feature: string, source: SourceReader = openSource()): { file: string; units: number; cleared: number } {
   const index = new SourceIndex(source);
   const stories = readStories();
@@ -1384,10 +1385,6 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
     ? `<p class="what">${planInline(doc.what, plan)} <small>${srcLink(plan.doc!.file, doc.section.line, 1, 'plan.md')}</small></p>${doc.why.length ? `<div class="why">${mdBlocks(doc.why, plan)}</div>` : ''}`
     : plan.doc ? `<p class="what"><span class="pending">No section "## #${esc(piece.slug)}" in plan.md: the piece has no statement.</span></p>` : '';
   const moved = (plan.delta ?? []).find((d) => d.kind === 'piece' && d.name === `#${piece.slug}`);
-  // A question raised since the approval is drawn once, among what moved, where it is answered.
-  const ask = doc?.ask && !raisedQuestion(moved)
-    ? `<p class="ask" id="ask-${piece.slug}"><span class="askmark">to confirm</span> <b>${planInline(doc.ask.question, plan)}</b> ${planInline(doc.ask.detail, plan)}</p>`
-    : '';
   const places = [...piece.sites.map((s) => siteLine(s, ctx)), ...piece.statics.map((s) => staticLine(s, plan)), builtLinesHtml(piece, plan, ctx.index)].filter(Boolean);
   const tests = piece.todos.map((t) => todoLine(t, plan));
   const reach = piece.sites.filter((s) => s.reachedBy.length);
@@ -1401,7 +1398,7 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   <header><a class="slug big" href="#piece-${piece.slug}">#${piece.slug}</a><small>${landsLabel(piece, group, ctx.narratives, plan)}</small>${moved ? `<a class="slug ask" href="${deliveryPage(plan.feature)}#piece-${piece.slug}">${moved.state === 'new' ? 'new' : 'modified'} since your approval</a>` : ''}</header>
   ${statement}
   ${notesHtml(piece, plan, (t) => planInline(t, plan))}
-  ${ask}
+  ${pieceAskHtml(piece, plan)}
   <div class="plines">${places.join('') || '<div class="pline"><span class="mark"></span><span class="where"></span><span class="clause"><small>no place in the code: planned tests only</small></span></div>'}</div>
   ${tests.length ? `<div class="plines tests">${tests.join('')}</div>` : '<p class="also">No planned test yet.</p>'}
   ${piece.sql.map((file) => dbDiffHtml(file, ctx)).join('')}
@@ -1412,7 +1409,8 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
 }
 
 /** The rules of `spec.md` and the one test that owns each; a rule with none or with two is flagged. A rule the
- *  plan waives reads "no test" and its reason, with the amber mark while the waiver is to confirm. */
+ *  plan waives reads "no test" and its reason, with the amber mark and the reviewer's answer under it while the
+ *  waiver is to confirm. */
 function planRulesHtml(plan: Plan): string {
   if (plan.rulesFile === null) return '';
   const owner = (todo: PlanTodo) => `${todo.tier} · ${placeLink(todo.file, todo.line, todo.column)} <a class="slug" href="#piece-${todo.slug}">#${todo.slug}</a>`;
@@ -1425,7 +1423,7 @@ function planRulesHtml(plan: Plan): string {
         : r.owners.length === 1 ? owner(r.owners[0])
           : r.owners.length === 0 ? `<span class="pending">no owner yet</span>`
             : `<span class="flag">${r.owners.length} owners — a rule has one</span> ${r.owners.map(owner).join(' ')}`;
-    return `<div class="pline" id="rule-${r.slug}"><span class="rule">${r.slug}</span><span class="clause">${planInline(headClause(r.text), plan)} <small>${srcLink(plan.rulesFile!, r.line, 1, `spec.md:${r.line}`)}</small></span><span class="where">${state}</span></div>`;
+    return `<div class="pline" id="rule-${r.slug}"><span class="rule">${r.slug}</span><span class="clause">${planInline(headClause(r.text), plan)} <small>${srcLink(plan.rulesFile!, r.line, 1, `spec.md:${r.line}`)}</small></span><span class="where">${state}</span></div>${r.waiver?.toConfirm ? verdictHtml(waiverQuestion(r.waiver), plan) : ''}`;
   });
   const stray = plan.unknownRules.map((t) => `<div class="pline"><span class="flag">[${esc(t.rule!)}]</span><span class="clause"><span class="flag">is no rule of spec.md</span></span><span class="where">${owner(t)}</span></div>`);
   const owned = plan.rules.filter((r) => r.owners.length === 1 && !r.waiver).length;
@@ -1450,6 +1448,7 @@ export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrati
   const asks = plan.pieces.filter((s) => s.doc?.ask);
   const waiversToConfirm = plan.rules.filter((r) => r.waiver?.toConfirm);
   const points = asks.length + waiversToConfirm.length;
+  const bar = doc ? reviewBarHtml(plan) : '';
   const places = plan.pieces.reduce((n, s) => n + s.sites.length + s.statics.length, 0);
   const toWrite = plan.pieces.reduce((n, s) => n + s.todos.filter((t) => !t.written).length, 0);
   const builtPlaces = plan.pieces.reduce((n, s) => n + s.built.sites.length + s.built.comments.length, 0);
@@ -1462,6 +1461,10 @@ export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrati
 <h1>${esc(doc ? doc.title : `Plan — ${plan.feature}`)}</h1>
 ${lede}
 ${doc && (plan.approved || doc.lots.length) ? `<p class="legend">${plan.approved ? `Approved on ${esc(plan.approved.approvedOn)}${plan.delta!.length ? `; <b>${plural(plan.delta!.length, 'unit')} not as approved</b>` : ', and as approved'}. ` : ''}<a href="${deliveryPage(plan.feature)}">The delivery${doc.lots.length ? `, in ${plural(doc.lots.length, 'lot')}` : ''}, and what moved since the approval</a>.</p>` : ''}
+${points || bar ? `
+<h2 id="answers">Your answers${points ? ` — ${plural(points, 'point')} to confirm, each answered where it is stated` : ''}</h2>
+${points ? `<p class="pbox">${[...asks.map((s) => `<a class="slug ask" href="#ask-${s.slug}">#${s.slug} ?</a>`), ...waiversToConfirm.map((r) => `<a class="slug ask" href="#rule-${r.slug}">no test for ${r.slug} ?</a>`)].join(' ')}</p>` : ''}
+${bar}` : ''}
 ${flows.length ? `
 <h2 id="flows">The change, in the ${flows.length === 1 ? 'flow' : `${flows.length} flows`} it lands in</h2>
 <div class="flows">
@@ -1477,10 +1480,7 @@ ${planRulesHtml(plan)}
 ${across.length ? `
 <h2 id="across">Decided across pieces</h2>
 <div class="cards">${across.map((s) => `<section class="card" id="${s.anchor}"><h2>${srcLink(doc!.file, s.line, 1, s.title)}</h2>${mdBlocks(s.blocks, plan)}</section>`).join('')}</div>` : ''}
-${points ? `
-<h2 id="answers">Your answers — ${plural(points, 'point')}, each stated where it is marked</h2>
-<p class="pbox">${[...asks.map((s) => `<a class="slug ask" href="#ask-${s.slug}">#${s.slug} ?</a>`), ...waiversToConfirm.map((r) => `<a class="slug ask" href="#rule-${r.slug}">no test for ${r.slug} ?</a>`)].join(' ')}</p>` : ''}
-${plan.delta?.length ? REVIEW_SCRIPT : ''}
+${REVIEW_SCRIPT}
 `;
   const crumb = `comprehension · plans / ${esc(plan.feature)} · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt}`;
   return pageHtml(`Plan — ${plan.feature}`, crumb, body, `${doc ? 'each piece\'s statement and reason hand-written in plan.md' : 'no hand-written input'}; the places from the <code>planned</code> calls under ${APP} and the <code>@planned</code> comments, the tests from the tagged titles, which step a change lands in from the reference case of each narrative`, dbCss);
@@ -1605,9 +1605,6 @@ function movesHtml(plan: Plan, index: SourceIndex): string {
 /** The legend of the delta's rows. */
 const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to. A place that became code is no difference: it is listed with its piece, as built.';
 
-/** A unit's delta holds a question raised since the approval: it is drawn there, once, with its answer. */
-const raisedQuestion = (d: UnitDelta | undefined) => d !== undefined && d.unclaimed.some((l) => l.facet === 'question' && l.sign === '+');
-
 /** The reviewer's answer to one item, and the buttons that give it. The page posts to the local app, which
  *  writes `plan-feedback.json`; opened as a file, the buttons are off and say where to open it. */
 function verdictHtml(item: ReviewItem, plan: Plan): string {
@@ -1620,40 +1617,48 @@ function verdictHtml(item: ReviewItem, plan: Plan): string {
     + `<span class="vform" hidden><textarea rows="2" placeholder="${ask}">${given?.verdict === 'refused' ? esc(given.note) : ''}</textarea><button type="button" data-act="send">Send</button></span></div>`;
 }
 
+/** A question that stands in `plan.md`, with the reviewer's answer under it. */
+const askHtml = (item: ReviewItem, text: string, plan: Plan, id: string) => `<div class="edit" id="${id}"><p class="ask"><span class="askmark">to confirm</span> ${text}</p>${verdictHtml(item, plan)}</div>`;
+
+/** A piece's question on its card, of the plan page and of the delivery page: answered where it is stated, from
+ *  the first draft on. */
+function pieceAskHtml(piece: PlanPiece, plan: Plan): string {
+  const item = pieceQuestion(piece);
+  return item ? askHtml(item, `<b>${planInline(piece.doc!.ask!.question, plan)}</b> ${planInline(piece.doc!.ask!.detail, plan)}`, plan, `ask-${piece.slug}`) : '';
+}
+
 /**
  * What of a unit is not as approved, an edit at a time: what moved, in bold, then why, then the lines that
- * edit comes to, then the reviewer's answer. A question the unit raises is drawn as one, with its answer, and
- * not as a line. The lines no edit names follow — every line of a unit that says no `Changed:`; under several
+ * edit comes to, then the reviewer's answer. A question the unit raises is no line of it: it is drawn on the
+ * piece's card. The lines no edit names follow — every line of a unit that says no `Changed:`; under several
  * edits they are flagged, since `--check` fails on them.
  */
 function unitDeltaHtml(d: UnitDelta, plan: Plan, index: SourceIndex): string {
   const piece = plan.pieces.find((x) => `#${x.slug}` === d.name);
   const files = filesOf(piece);
-  const items = reviewItems({ delta: [d] });
+  const items = editItems(d);
   const said = (c: PlanChange) => `<p class="chg">${c.what ? `<b>${codeInline(c.what, plan, files, index)}.</b>` : '<span class="askmark">why</span>'} ${codeInline(c.why, plan, files, index)} <small>${srcLink(plan.doc!.file, c.line, 1, 'plan.md')}</small></p>`;
   const need = d.reason === 'needed' ? `<p class="note red">Not as approved, and its section of plan.md says no <code>Changed:</code> — <code>--check</code> fails on it.</p>` : '';
   const edits = d.edits.map((e, n) => `<div class="edit">${said(e.change)}${e.lines.length ? `<div class="plines">${deltaLinesHtml(e.lines, d, plan, index)}</div>` : ''}${verdictHtml(items[n], plan)}</div>`).join('');
-  const questions = items.filter((item) => item.kind === 'question').map((item) => {
-    const ask = piece?.doc?.ask;
-    const text = ask ? `<b>${codeInline(ask.question, plan, files, index)}</b> ${codeInline(ask.detail, plan, files, index)}` : codeInline(item.what, plan, files, index);
-    return `<div class="edit"${piece ? ` id="ask-${piece.slug}"` : ''}><p class="ask"><span class="askmark">to confirm</span> ${text}</p>${verdictHtml(item, plan)}</div>`;
-  }).join('');
   // A note is drawn with its piece, as a note: it is no line to answer.
   const lines = d.unclaimed.filter((l) => !isOwnNotice(l.facet));
   const loose = lines.length ? `${d.edits.length > 1 ? '<p class="note red">Lines no edit names:</p>' : ''}<div class="plines">${deltaLinesHtml(lines, d, plan, index)}</div>` : '';
-  return `${need}${edits}${questions}${loose}`;
+  return `${need}${edits}${loose}`;
 }
 
-/** Where the review stands, and the one button that approves the plan once every item is approved. */
+/** Where the review stands, and the one button that approves the plan once every item is approved and no
+ *  question stands. Drawn while there is something to answer, and for a plan never approved. */
 function reviewBarHtml(plan: Plan): string {
   const items = reviewItems(plan);
-  if (items.length === 0) return '';
+  if (items.length === 0 && plan.approved !== null) return '';
   const of = (verdict: string) => items.filter((i) => plan.feedback[i.key]?.verdict === verdict).length;
   const [yes, no] = [of('approved'), of('refused')];
-  const asks = plan.pieces.filter((x) => x.doc?.ask).length + (plan.doc?.waivers.filter((w) => w.toConfirm).length ?? 0);
+  const asks = items.filter((i) => i.kind === 'question').length;
   const ready = yes === items.length && asks === 0;
   const blocked = ready ? '' : asks ? ` ${plural(asks, 'question')} still ${asks === 1 ? 'stands' : 'stand'} in plan.md: an answer becomes a statement there first.` : ' Every item is approved first.';
-  return `<div class="pbox review"><b>${plural(items.length, 'item')} to answer</b> — ${yes} approved, ${no} not approved, ${items.length - yes - no} not read. Your answers go to <code>${esc(featureFolder(plan.feature))}/${FEEDBACK_FILE}</code>; the agent reads them with <code>npm run map -- feedback ${esc(plan.feature)}</code>. `
+  const standing = items.length === 0 ? '<b>Nothing to answer.</b> '
+    : `<b>${plural(items.length, 'item')} to answer</b> — ${yes} approved, ${no} not approved, ${items.length - yes - no} not read. Your answers go to <code>${esc(featureFolder(plan.feature))}/${FEEDBACK_FILE}</code>; the agent reads them with <code>npm run map -- feedback ${esc(plan.feature)}</code>. `;
+  return `<div class="pbox review">${standing}`
     + `<button type="button" id="approve-plan" data-feature="${esc(plan.feature)}"${ready ? '' : ' disabled'}>Approve the plan</button> <span id="approve-state">${blocked}</span></div>`;
 }
 
@@ -1820,13 +1825,12 @@ function deliveryPieceHtml(piece: PlanPiece | undefined, slug: string, plan: Pla
   const state = done ? `<b class="ok">built</b>${piece.commits.length ? `, in ${plural(piece.commits.length, 'commit')}` : ' · <span class="flag">no commit names it</span>'}`
     : `${plural(left, 'place')} and ${plural(toWrite, 'test')} to go${started ? ` · ${plural(built, 'place')} built` : ''}`;
   const builtLines = builtLinesHtml(piece, plan, index, false);
-  const ask = piece.doc?.ask && !raisedQuestion(d) ? `<p class="ask"><span class="askmark">to confirm</span> <b>${planInline(piece.doc.ask.question, plan)}</b> ${planInline(piece.doc.ask.detail, plan)}</p>` : '';
   return `
 <section class="piece${d ? ' moved' : ''}${done ? ' built' : ''}" id="piece-${slug}">
   <header>${card}<small>${state}${d ? ` · <b>${d.state === 'new' ? 'new' : 'modified'} since your approval</b>` : ' · as approved'}</small></header>
   ${piece.doc ? `<p class="what">${codeInline(piece.doc.what, plan, filesOf(piece), index)}</p>` : ''}
   ${notesHtml(piece, plan, (t) => codeInline(t, plan, filesOf(piece), index))}
-  ${ask}
+  ${pieceAskHtml(piece, plan)}
   ${d ? `${unitDeltaHtml(d, plan, index)}` : ''}
   ${builtLines ? `<div class="plines">${builtLines}</div>` : ''}
   ${commitsHtml(piece, plan)}
@@ -1855,12 +1859,14 @@ export function renderDeliveryPage(plan: Plan, stories: Story[], index: SourceIn
   const unitLink = (d: UnitDelta) => (d.kind === 'piece' ? `<a class="slug${d.reason === 'needed' ? ' ask' : ''}" href="#piece-${d.name.slice(1)}">${esc(d.name)}</a>` : `<a href="#unit-${anchorFor(d.name)}">${esc(d.name)}</a>`);
   const count = (d: UnitDelta) => d.facets.map((f) => `${esc(f.facet === 'sites' ? 'code' : f.facet === 'comments' ? 'tests and types' : f.facet === 'tests' ? 'tests to write' : LINE_KIND[f.facet] ?? f.facet)}${f.added.length ? ` +${f.added.length}` : ''}${f.removed.length ? ` −${f.removed.length}` : ''}`).join(', ');
   const others = delta.filter((d) => d.kind !== 'piece');
+  // The rules are drawn on the plan page: a waiver to confirm is answered here too, under the bar.
+  const answers = `${reviewBarHtml(plan)}${doc.waivers.filter((w) => w.toConfirm).map((w) => askHtml(waiverQuestion(w), `<b>No test holds <span class="rule">${esc(w.rule)}</span>.</b> ${planInline(w.reason, plan)}`, plan, `ask-rule-${w.rule}`)).join('')}`;
   const since = plan.approved === null
-    ? `<h2 id="since">Never approved</h2><p class="pbox">On the reviewer's word: <code>${esc(typed(config.commands.tool, SELF))} --approve ${esc(plan.feature)}</code>. From then on this block lists what moved.</p>`
+    ? `<h2 id="since">Never approved</h2><p class="pbox">On the reviewer's word: <code>${esc(typed(config.commands.tool, SELF))} --approve ${esc(plan.feature)}</code>. From then on this block lists what moved.</p>${answers}`
     : `
 <h2 id="since">Since your approval — ${delta.length === 0 ? 'nothing moved' : `${plural(delta.length, 'unit')} not as approved`}</h2>
 <p class="legend">Approved on ${esc(plan.approved.approvedOn)} at <code>${esc(plan.approved.base.slice(0, 8))}</code>. Everything below compares the plan as it stands with the plan you approved, never with the code. ${DELTA_LEGEND}${delta.length ? ` To approve again: <code>${esc(typed(config.commands.tool, SELF))} --approve ${esc(plan.feature)}</code>.` : ''}</p>
-${reviewBarHtml(plan)}
+${answers}
 ${delta.length ? `<div class="pbox">${delta.map((d) => `<div class="pline"><span class="mark">${d.state === 'changed' ? 'modified' : d.state}</span><span class="where">${unitLink(d)}</span><span class="clause">${count(d)}${d.reason === 'needed' ? ' <span class="flag">no "Changed:"</span>' : ''}</span></div>`).join('')}</div>` : ''}
 ${movesHtml(plan, index)}
 ${others.map((d) => `<section class="piece moved" id="unit-${anchorFor(d.name)}"><header><b>${esc(d.name)}</b><small>${d.kind} · ${d.state === 'changed' ? 'modified' : d.state} since your approval</small></header>${unitDeltaHtml(d, plan, index)}</section>`).join('')}`;

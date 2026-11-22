@@ -140,7 +140,9 @@ What asks nothing:
   approved, and reads as built.
 
 The reviewer answers on the served pages: under each edit and each question, approve, or say what
-should change. The answers are read with the map's `feedback` verb.
+should change. A question is answered where it is stated, on the plan page and the delivery page,
+from the first draft on: it needs no approval to have moved from. A plan never approved is approved
+from its page too. The answers are read with the map's `feedback` verb.
 
 ## The delivery
 

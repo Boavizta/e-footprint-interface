@@ -140,7 +140,9 @@ title is `spec-tasks`' to plan.
 ## The review, and the approval
 
 - The reviewer reads the page top down: the flows the change lands in, then a card a piece. They
-  ask in this session; each answer is an edit in place and a commit.
+  ask in this session, and answer each point to confirm under it on the served page
+  (`npm run comprehension`). Read those answers with `map feedback <feature>`; each answer is an
+  edit in place and a commit.
 - A simplification of the underlying code found on the way is made in another session, and the
   plan is then rewritten against it.
 - **The plan is approved when no question is left and the reviewer says so.** Then, and only

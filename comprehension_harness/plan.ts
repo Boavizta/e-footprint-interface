@@ -403,9 +403,9 @@ export interface UnitEdit {
   unmatched: string[];
 }
 
-/** One thing the reviewer answers on the pages: an edit of a unit, or a question a unit raises. `key` is its
- *  unit, its words and its lines hashed: an answer stands for the item as it was read, and an item reworded
- *  since is to read again. */
+/** One thing the reviewer answers on the pages: an edit of a unit, or a question that stands in `plan.md` — a
+ *  piece's `To confirm:`, or a waiver that opens with it. `key` is its unit, its words and its lines hashed: an
+ *  answer stands for the item as it was read, and an item reworded since is to read again. */
 export interface ReviewItem {
   key: string;
   unit: string;
@@ -425,16 +425,33 @@ function hash(text: string): string {
   return (h >>> 0).toString(16).padStart(8, '0');
 }
 
-/** What the reviewer has to answer, in the order of the delta: each edit, then each question raised. A unit
- *  that is not as approved and says no `Changed:` holds nothing to answer yet — `--check` fails on it. */
-export function reviewItems(plan: Pick<Plan, 'delta'>): ReviewItem[] {
-  return (plan.delta ?? []).flatMap((d) => [
-    ...d.edits.map((e): ReviewItem => ({
-      key: hash([d.name, e.change.text, ...e.lines.map((l) => `${l.sign} ${l.facet} ${l.text}`)].join('\n')),
-      unit: d.name, kind: 'edit', what: e.change.what ?? e.change.why, why: e.change.what ? e.change.why : '',
-    })),
-    ...d.unclaimed.filter((l) => l.facet === 'question' && l.sign === '+').map((l): ReviewItem => ({ key: hash(`${d.name}\nquestion\n${l.text}`), unit: d.name, kind: 'question', what: l.text, why: '' })),
-  ]);
+/** The edits of one unit that is not as approved, in the order its section says them. A unit that says no
+ *  `Changed:` holds nothing to answer yet — `--check` fails on it. */
+export const editItems = (d: UnitDelta): ReviewItem[] => d.edits.map((e) => ({
+  key: hash([d.name, e.change.text, ...e.lines.map((l) => `${l.sign} ${l.facet} ${l.text}`)].join('\n')),
+  unit: d.name, kind: 'edit', what: e.change.what ?? e.change.why, why: e.change.what ? e.change.why : '',
+}));
+
+const questionItem = (unit: string, what: string): ReviewItem => ({ key: hash(`${unit}\nquestion\n${what}`), unit, kind: 'question', what, why: '' });
+
+/** A piece's question, in one line: what it asks, then the alternative. */
+export const askLine = (ask: NonNullable<PlanPieceDoc['ask']>) => `${ask.question}${ask.detail ? ` ${ask.detail}` : ''}`;
+
+/** The question a piece asks, as an item to answer; null when it asks none. */
+export const pieceQuestion = (piece: PlanPiece): ReviewItem | null => (piece.doc?.ask ? questionItem(`#${piece.slug}`, askLine(piece.doc.ask)) : null);
+
+/** A waiver that is to confirm, as an item to answer. */
+export const waiverQuestion = (waiver: PlanWaiver): ReviewItem => questionItem(`no test for ${waiver.rule}`, waiver.reason);
+
+/** What the reviewer has to answer: each edit, in the order of the delta, then each question that stands in
+ *  `plan.md`, a piece's then a waiver's. A question is one from the first draft on: it needs no approval to
+ *  have moved from. */
+export function reviewItems(plan: Pick<Plan, 'delta' | 'pieces' | 'doc'>): ReviewItem[] {
+  return [
+    ...(plan.delta ?? []).flatMap(editItems),
+    ...plan.pieces.flatMap((piece) => pieceQuestion(piece) ?? []),
+    ...(plan.doc?.waivers ?? []).filter((w) => w.toConfirm).map(waiverQuestion),
+  ];
 }
 
 // ── The tag ────────────────────────────────────────────────────────────────────
@@ -791,7 +808,7 @@ export function snapshotOf(plan: Pick<Plan, 'pieces' | 'doc' | 'journeyCases'> &
       comments: [...piece.statics.map(commentLineOf), ...piece.built.comments],
       tests: piece.todos.map(testLineOf),
       // An approved plan holds none: a question a later stage raises is a line of the delta.
-      question: piece.doc?.ask ? [`${piece.doc.ask.question}${piece.doc.ask.detail ? ` ${piece.doc.ask.detail}` : ''}`] : [],
+      question: piece.doc?.ask ? [askLine(piece.doc.ask)] : [],
       // What it was built with, told for whoever builds on it: listed when new, and asks nothing.
       [NOTES]: (piece.doc?.notes ?? []).map((n) => n.text),
     },
