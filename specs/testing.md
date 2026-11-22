@@ -30,7 +30,7 @@ npm run jest
 node --test tools/vscode-plan-review-links/extension.test.js
 
 # Comprehension tools (vitest, on inputs built by hand; always with the folder, jest owns js_tests/)
-npx vitest run comprehension-harness
+npx vitest run comprehension_harness
 
 # Their Python stack (the source index, the title reader, the collector) and the narratives it records
 poetry run pytest tests/unit_tests/comprehension_python
@@ -133,7 +133,7 @@ When a feature reaches into a new public efootprint API (a method/property/dict-
 ## Narrative tests (`tests/narratives/`)
 
 A narrative test crosses one flow in order so that its page can be drawn
-(`npm run comprehension:render`, then `specs/comprehension-harness/narratives/modeling.html`). The flow tells
+(`npm run comprehension:render`, then `specs/comprehension_harness/narratives/modeling.html`). The flow tells
 itself: `narrate` at each step and `event` at its cause, imported from `model_builder/narrate.py`
 and inert outside a test run. The test declares the narrative with `tests/declare.py`:
 
@@ -143,8 +143,8 @@ and inert outside a test run. The test declares the narrative with `tests/declar
 - Assert what the flow gives, as any test does. The steps are recorded, not asserted.
 
 `tests/narrate_collector.py` is loaded for every pytest run and writes what each test crossed
-under `node_modules/.cache/comprehension-harness/stories/`, one file a test file; a test that
-crosses no call costs nothing. `npx tsx comprehension-harness/render.ts --check` holds a narrative
+under `node_modules/.cache/comprehension_harness/stories/`, one file a test file; a test that
+crosses no call costs nothing. `npx tsx comprehension_harness/render.ts --check` holds a narrative
 to its form: every step after a cause, every sentence within its budget, every symbol it names
 found. How each declaration is spelled: `.agents/repository.md` § "The stack".
 

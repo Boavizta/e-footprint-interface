@@ -114,7 +114,7 @@ export const FEATURES = `${config.docs}/features`;
 export const featureFolder = (feature: string) => `${FEATURES}/${feature}`;
 
 /** The generated pages: the narratives, the mechanisms, the plans, and their stylesheet. */
-export const PAGES = `${config.docs}/comprehension-harness`;
+export const PAGES = `${config.docs}/comprehension_harness`;
 
 /** What a journey run writes, a folder per journey, and the journey pages beside them. */
 export const JOURNEYS = `${config.docs}/design/journeys-generated`;

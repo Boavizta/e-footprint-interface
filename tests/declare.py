@@ -1,4 +1,4 @@
-"""What a test declares to the comprehension tools (``comprehension-harness/stack.md``).
+"""What a test declares to the comprehension tools (``comprehension_harness/stack.md``).
 
 - ``@narrative("<title>")`` on a test class declares a product narrative, ``@narrative.mechanism("<title>")``
   a mechanism one. The class docstring's first paragraph is its summary; its first test is the reference case

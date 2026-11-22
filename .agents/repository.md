@@ -27,7 +27,7 @@ is particular to this one here. `AGENTS.md` stays the entry point and wins where
 ## The stack
 
 The Python stack of the comprehension harness is written to its contract
-(`comprehension-harness/stack.md`), and `comprehension.config.json` names its commands. One flow
+(`comprehension_harness/stack.md`), and `comprehension.config.json` names its commands. One flow
 is narrated, the AI-assisted bootstrap (`tests/narratives/test_ai_bootstrap.py`); the others
 have no narrative yet. A feature in flight on `plan.html` and `tasks.md` is finished by hand or
 ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
@@ -39,7 +39,7 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 | A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `tests/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
 | A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |
 | A narrative, its reference case | A test class under `@narrative("<title>")` of `tests/declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
-| What each test crossed | `tests/narrate_collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension-harness/stories/` |
+| What each test crossed | `tests/narrate_collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
 | The source index, the test titles, the watch | `scripts/comprehension_python/source_index.py`, `titles.py` and `watch.py`: the three commands of the configuration, standard library only, run by `python3`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
 | A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class. A backticked name shaped like a declaration (`CamelCase`, or words joined by `_`) that the index cannot place fails `--check`, so a dict key, a field or a method is written without backticks |
 | A journey | Not drawn from a run here: a feature's spec is its `spec.md`, and what changes on screen is described against the hand-drawn journey under `specs/design/journeys/` |
@@ -52,15 +52,15 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 | For | Run |
 |---|---|
 | The map | `npm run map -- <verb> …` (the `code-map` skill) |
-| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension-harness/render.ts --check` |
+| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension_harness/render.ts --check` |
 | The pages served, with the answer buttons | `npm run comprehension` |
-| The approval, on the reviewer's word only | `npx tsx comprehension-harness/render.ts --approve <feature>` |
-| The archive gate | `npx tsx comprehension-harness/render.ts --check --archive <feature>` |
+| The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
+| The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |
 | The Python tests that need no browser | `poetry run pytest tests --ignore=tests/e2e` |
 | The tests of what changed | `poetry run pytest <test files>` |
 | The browser tests | `poetry run pytest tests/e2e -n 4`, against `poetry run python manage.py runserver` on `http://localhost:8000`. `tests/e2e/test_ai_bootstrap.py` starts its own server and runs before the rest (`specs/testing.md` § "AI bootstrap browser harness") |
 | The JavaScript tests | `npm run jest`; `npm run build:js:dev` first after an edit under `theme/static/scripts/` |
-| The comprehension tools' own tests | `npx vitest run comprehension-harness` |
+| The comprehension tools' own tests | `npx vitest run comprehension_harness` |
 | The Python stack's tests | `poetry run pytest tests/unit_tests/comprehension_python` |
 | The narrative tests | `poetry run pytest tests/narratives` |
 | The review-link extension's routes | `node --test tools/vscode-plan-review-links/extension.test.js` |

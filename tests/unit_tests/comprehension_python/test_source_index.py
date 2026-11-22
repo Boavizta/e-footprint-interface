@@ -1,7 +1,7 @@
 """The source index of the Python stack: what `scripts/comprehension_python/source_index.py` prints for a tree.
 
 The example it conforms to is the index the tools' own tests read, written by hand for three files
-(`comprehension-harness/tests/fixtures/shop/`). The rest is what that example does not show.
+(`comprehension_harness/tests/fixtures/shop/`). The rest is what that example does not show.
 """
 import json
 
@@ -9,7 +9,7 @@ import pytest
 
 from tests.unit_tests.comprehension_python.conftest import ROOT, source_index
 
-SHOP = ROOT / "comprehension-harness/tests/fixtures/shop"
+SHOP = ROOT / "comprehension_harness/tests/fixtures/shop"
 
 ENGINE = '''
     from narrate import event, narrate, planned

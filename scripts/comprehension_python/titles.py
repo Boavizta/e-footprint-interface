@@ -1,4 +1,4 @@
-"""The test titles of the Python stack (``comprehension-harness/stack.md`` § 3), read with ``ast``.
+"""The test titles of the Python stack (``comprehension_harness/stack.md`` § 3), read with ``ast``.
 
     python3 scripts/comprehension_python/titles.py < files.json
 

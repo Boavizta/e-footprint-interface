@@ -1,5 +1,5 @@
 /**
- * map-build — the narratives as data, for `comprehension-harness/map.mjs` (`npm run map`).
+ * map-build — the narratives as data, for `comprehension_harness/map.mjs` (`npm run map`).
  *
  * The pages `render.ts` draws are for a person: 80 to 220 kB of HTML each. An agent asks one
  * question at a time and needs the answer in a screen of text. Both read the same derivation
@@ -15,7 +15,7 @@
  * `inputs` lists every file the snapshot was read from with its modification time: `map.mjs` compares
  * them and rebuilds when one moved.
  *
- * Usage: npx tsx comprehension-harness/map-build.ts   (run by `map.mjs` when the snapshot is stale)
+ * Usage: npx tsx comprehension_harness/map-build.ts   (run by `map.mjs` when the snapshot is stale)
  */
 import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';

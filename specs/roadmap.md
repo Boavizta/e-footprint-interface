@@ -8,9 +8,9 @@ This file tracks active workstreams and the near/mid/far horizon. Detailed plans
 
 The spec-driven workflow moved to plans written into the code as pieces and delivered in lots
 ([`workflow.md`](workflow.md)). The tools, the stage skills and the roles are installed
-([`comprehension-harness/README.md`](../comprehension-harness/README.md)), and so is the Python stack
+([`comprehension_harness/README.md`](../comprehension_harness/README.md)), and so is the Python stack
 they read (`.agents/repository.md` § "The stack"; its contract is
-[`comprehension-harness/stack.md`](../comprehension-harness/stack.md)): the three calls, the pytest plugin that records
+[`comprehension_harness/stack.md`](../comprehension_harness/stack.md)): the three calls, the pytest plugin that records
 what a test crossed, the source index on Python's `ast`, the title reader, the watch loop. One flow
 is narrated, the AI-assisted bootstrap, and its page renders (`npm run comprehension:render`).
 Next: the first feature planned in pieces, the other flows narrated as they are touched, then

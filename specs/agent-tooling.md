@@ -14,7 +14,7 @@ entry points are `specs/architecture/index.html`.
 
 The method is [`workflow.md`](workflow.md); the forms of a feature's files are
 [`workflow-formats.md`](workflow-formats.md); the tools, and how a project installs them, are
-[`comprehension-harness/README.md`](../comprehension-harness/README.md).
+[`comprehension_harness/README.md`](../comprehension_harness/README.md).
 
 ## Synchronization
 
@@ -239,7 +239,7 @@ Do not automatically stage private ledgers or exports into public commits.
 ```sh
 python3 -m unittest discover -s ai-usage/tests -v
 python3 scripts/test_sync_agent_tooling.py
-npx vitest run comprehension-harness
+npx vitest run comprehension_harness
 node --test tools/vscode-plan-review-links/extension.test.js
 ```
 

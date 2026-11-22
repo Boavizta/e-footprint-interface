@@ -1,4 +1,4 @@
-# comprehension-harness
+# comprehension_harness
 
 A project's comprehension harness is the layer between a reader and its code: the narratives the
 code tells itself, the plan of a feature read at the places it changes, the pages generated from
@@ -13,8 +13,8 @@ The method it serves is `specs/workflow.md`; the forms it holds a feature's file
 
 | Files | What |
 |---|---|
-| `comprehension-harness/` | The tools (the renderers, the plan model, the map, the local app) and their tests |
-| `specs/comprehension-harness/comprehension-harness.css` | The pages' stylesheet |
+| `comprehension_harness/` | The tools (the renderers, the plan model, the map, the local app) and their tests |
+| `specs/comprehension_harness/comprehension_harness.css` | The pages' stylesheet |
 | `specs/review-links.js` | The script the pages load: it points each source link at this checkout and adds the right-click menu |
 | `specs/workflow.md`, `specs/workflow-formats.md` | The method and its forms |
 | `.agents/skills/` | `code-map`, `spec-specify`, `spec-plan`, `spec-tasks`, `feature-implement`, `task-implement`, `task-review`, `feature-archive`, `update-constitution` |
@@ -30,7 +30,7 @@ They are written for any project. What a project is to them is the three things 
 1. **Node, with `tsx` and `typescript` as development dependencies.** The tools are TypeScript
    and run under Node whatever the project's language. They need no `tsconfig.json` and no
    `"type"` in `package.json`. To run the tools' own tests, `vitest`: always with the folder
-   (`npx vitest run comprehension-harness`) where the project's other `*.test.*` files belong to
+   (`npx vitest run comprehension_harness`) where the project's other `*.test.*` files belong to
    another runner, which a bare `vitest run` would collect.
 
 2. **`comprehension.config.json` at the repository root.** `config.ts` says what each key means
@@ -58,20 +58,20 @@ They are written for any project. What a project is to them is the three things 
 4. **Four scripts in `package.json`**, under these names: the tools print them in their hints.
 
    ```json
-   "map": "node comprehension-harness/map.mjs",
-   "comprehension": "tsx comprehension-harness/dev.ts",
-   "comprehension:render": "tsx comprehension-harness/render.ts",
-   "journey:render": "tsx comprehension-harness/journey-render.ts"
+   "map": "node comprehension_harness/map.mjs",
+   "comprehension": "tsx comprehension_harness/dev.ts",
+   "comprehension:render": "tsx comprehension_harness/render.ts",
+   "journey:render": "tsx comprehension_harness/journey-render.ts"
    ```
 
 5. **What git ignores.** The pages are generated and never committed; their hand-written heads
    are. With `specs` as the documents' folder:
 
    ```gitignore
-   specs/comprehension-harness/narratives/*.html
-   specs/comprehension-harness/mechanisms/*.html
-   !specs/comprehension-harness/**/*.skeleton.html
-   specs/comprehension-harness/plans/
+   specs/comprehension_harness/narratives/*.html
+   specs/comprehension_harness/mechanisms/*.html
+   !specs/comprehension_harness/**/*.skeleton.html
+   specs/comprehension_harness/plans/
    specs/design/journeys-generated/
    specs/features/*/plan-feedback.json
    ai-usage/.state/
@@ -95,7 +95,7 @@ They are written for any project. What a project is to them is the three things 
    settings are each project's own: they are in no shared list.
 
 8. **Optional: the edit hook.** A `PreToolUse` hook on `Edit|Write` running
-   `node comprehension-harness/map-hook.mjs` tells an agent, the first time it edits a file that
+   `node comprehension_harness/map-hook.mjs` tells an agent, the first time it edits a file that
    carries a step or sits next to one, which steps and which test tell them. It reads a snapshot,
    speaks once per file per session, and can never fail an edit.
 
@@ -107,9 +107,9 @@ They are written for any project. What a project is to them is the three things 
 ## Checking the install
 
 ```bash
-npx vitest run comprehension-harness              # the tools' own tests, which read no project's file
-node comprehension-harness/map.mjs                # the narratives, one line each
-npx tsx comprehension-harness/render.ts --check   # every narrative, every plan, what does not hold
+npx vitest run comprehension_harness              # the tools' own tests, which read no project's file
+node comprehension_harness/map.mjs                # the narratives, one line each
+npx tsx comprehension_harness/render.ts --check   # every narrative, every plan, what does not hold
 ```
 
 The first needs Node alone. The other two need the stack and a first narrative: the map runs
@@ -118,7 +118,7 @@ stories.
 
 The first flow to tell is the project's own choice: one `narrate` call per step and a test that
 crosses them. The product page needs its hand-written head first, a title and a lede in
-`specs/comprehension-harness/narratives/<productPage>.skeleton.html`; the render stops and says
+`specs/comprehension_harness/narratives/<productPage>.skeleton.html`; the render stops and says
 so when it is missing.
 
 ## Keeping the copies in step

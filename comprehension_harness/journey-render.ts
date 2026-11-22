@@ -624,7 +624,7 @@ function intentOf(file: string): { title: string; lead: string; cards: string } 
   };
 }
 
-/** A feature's spec as data, written beside the page for `comprehension-harness/map.mjs` (`npm run map -- spec <feature>`). */
+/** A feature's spec as data, written beside the page for `comprehension_harness/map.mjs` (`npm run map -- spec <feature>`). */
 interface SpecMap {
   feature: string;
   builtAt: string;

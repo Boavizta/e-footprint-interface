@@ -5,7 +5,7 @@
  * which steps, and which test tells them. An agent that was never told `npm run map` exists still
  * learns that the file it is about to change is part of a told flow.
  *
- * It only reads the snapshot `comprehension-harness/map-build.ts` wrote (no rebuild, no test run: a hook answers in
+ * It only reads the snapshot `comprehension_harness/map-build.ts` wrote (no rebuild, no test run: a hook answers in
  * milliseconds or not at all), says so when that snapshot is older than the file, and never fails the
  * edit: any error ends silently with exit 0. It speaks once per file per session.
  */

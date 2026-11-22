@@ -9,7 +9,7 @@ Some flows of this app are **narratives**: the code tells them itself, one `narr
 per step, and a test crosses those steps in order. `npm run map` is that knowledge as text. Ask it
 before opening files: it gives the `file:line` of what matters, so you read ranges, not files.
 
-Call it as `node comprehension-harness/map.mjs <verb> …` (or `npm run map -- <verb> …`).
+Call it as `node comprehension_harness/map.mjs <verb> …` (or `npm run map -- <verb> …`).
 
 | You need | Ask |
 |---|---|
@@ -68,4 +68,4 @@ itself, and says how to:
 
 `--stale-ok` answers from what is there.
 
-How it is built: `comprehension-harness/map-build.ts` and `comprehension-harness/map.mjs`.
+How it is built: `comprehension_harness/map-build.ts` and `comprehension_harness/map.mjs`.

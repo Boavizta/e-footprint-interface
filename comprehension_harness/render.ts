@@ -1,22 +1,22 @@
 /**
  * render.ts — the narrative pages and the plan pages, generated from `narrate` stories.
  *
- *   npx tsx comprehension-harness/render.ts            # render every page
- *   npx tsx comprehension-harness/render.ts --check    # symbols that did not link, gaps, dead actions, a plan out of order
+ *   npx tsx comprehension_harness/render.ts            # render every page
+ *   npx tsx comprehension_harness/render.ts --check    # symbols that did not link, gaps, dead actions, a plan out of order
  *                                              # (a missing feature folder, a rule claimed that does not exist or
  *                                              # claimed twice, a `#slug` of plan.md naming no piece); exit 1 on any;
  *                                              # plus informative lists (unclaimed sites, stale page tokens,
  *                                              # untraced entries, rules with no owner)
- *   npx tsx comprehension-harness/render.ts --check --archive <feature>   # the archive gate: fails while a planned site of it remains
- *   npx tsx comprehension-harness/render.ts --approve <feature>           # on the reviewer's word only: writes the plan as it stands to
+ *   npx tsx comprehension_harness/render.ts --check --archive <feature>   # the archive gate: fails while a planned site of it remains
+ *   npx tsx comprehension_harness/render.ts --approve <feature>           # on the reviewer's word only: writes the plan as it stands to
  *                                              # `specs/features/<feature>/plan.approved.json` and takes the `Changed:`
  *                                              # paragraphs off `plan.md`; `--check` then holds every difference to a reason
  *
  * Reads every story the stack's collector wrote under the stories folder of the project's cache
  * (one JSON array per test file; a cache, so a clean install empties it and a unit run refills it) and
- * renders the product page under `specs/comprehension-harness/narratives/` (the configuration names it), one page per mechanism
- * narrative under `specs/comprehension-harness/mechanisms/` and one plan page per feature with a planned
- * site under `specs/comprehension-harness/plans/`, all on the one stylesheet `specs/comprehension-harness/comprehension-harness.css`
+ * renders the product page under `specs/comprehension_harness/narratives/` (the configuration names it), one page per mechanism
+ * narrative under `specs/comprehension_harness/mechanisms/` and one plan page per feature with a planned
+ * site under `specs/comprehension_harness/plans/`, all on the one stylesheet `specs/comprehension_harness/comprehension_harness.css`
  * (hand-written, inlined). Nothing on a page is declared here: a narrative is declared where
  * its story is produced —
  *
@@ -107,7 +107,7 @@ export type { Plan, PlanDoc, PlanGroup, PlanRule, PlanSection, PlanSite, PlanPie
 export { ROOT };
 /** This script, from the root: what a page and a message tell the reader to run. */
 const SELF = relative(ROOT, fileURLToPath(import.meta.url));
-const PAGE_CSS = join(ROOT, PAGES, 'comprehension-harness.css');
+const PAGE_CSS = join(ROOT, PAGES, 'comprehension_harness.css');
 export const PRODUCT_PAGE = join(ROOT, PAGES, `narratives/${config.productPage}.html`);
 const PRODUCT_SKELETON = join(ROOT, PAGES, `narratives/${config.productPage}.skeleton.html`);
 export const MECHANISMS_DIR = join(ROOT, PAGES, 'mechanisms');

@@ -1,5 +1,5 @@
-/* The generated pages' stylesheet — the one stylesheet of every generated page under specs/comprehension-harness/
-   (narratives, mechanisms, plans). `comprehension-harness/render.ts` inlines it at render time, so a page opens
+/* The generated pages' stylesheet — the one stylesheet of every generated page under specs/comprehension_harness/
+   (narratives, mechanisms, plans). `comprehension_harness/render.ts` inlines it at render time, so a page opens
    from file:// with no second request. Hand-written; the pages are not. */
   :root { --ink:#1f2937; --muted:#6b7280; --faint:#9ca3af; --line:#e5e7eb; --bg:#f9fafb; --card:#fff;
           --accent:#4f46e5; --accent-soft:#eef2ff;

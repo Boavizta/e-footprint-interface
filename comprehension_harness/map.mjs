@@ -18,7 +18,7 @@
  * A slug may be shortened to any part that names one narrative (`settings`, `checkout`).
  *
  * This file is plain JavaScript and imports nothing of the repo: it reads the snapshots
- * `comprehension-harness/map-build.ts` (the narratives) and `comprehension-harness/journey-render.ts` (the specs) write under
+ * `comprehension_harness/map-build.ts` (the narratives) and `comprehension_harness/journey-render.ts` (the specs) write under
  * `map/` of the project's cache, so an answer costs a process start. Each snapshot lists the
  * files it was read from with their modification times; when one moved, the snapshot is rebuilt
  * first (a few seconds), and when source moved under the stories, the narrative tests are run again
@@ -45,7 +45,7 @@ const staleOk = args.includes('--stale-ok');
 const [verb = 'narratives', ...rest] = args.filter((a) => !a.startsWith('--'));
 const arg = rest.join(' ');
 
-// What a call cost and gave, logged when the process ends (`comprehension-harness/map-log.mjs`).
+// What a call cost and gave, logged when the process ends (`comprehension_harness/map-log.mjs`).
 const started = Date.now();
 const usage = { chars: 0, refreshed: [] };
 process.on('exit', (code) => logMapEvent({ kind: 'verb', verb, arg, stale_ok: staleOk, refreshed: usage.refreshed, ms: Date.now() - started, chars: usage.chars, exit: code }));

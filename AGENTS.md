@@ -26,7 +26,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | Tech stack and version bounds | `specs/tech_stack.md` |
 | What's planned and in flight | `specs/roadmap.md` |
 | The spec-driven workflow (specify → plan → tasks → implement → archive) and the forms of a feature's files | `specs/workflow.md`, `specs/workflow-formats.md` |
-| The comprehension tools (the narrative and plan pages, the map), how they are installed, and what this project gives them | [`comprehension-harness/README.md`](comprehension-harness/README.md), `comprehension.config.json`, `.agents/repository.md` § "The stack" |
+| The comprehension tools (the narrative and plan pages, the map), how they are installed, and what this project gives them | [`comprehension_harness/README.md`](comprehension_harness/README.md), `comprehension.config.json`, `.agents/repository.md` § "The stack" |
 | Shared workflow, agent roles, and usage tooling | [`specs/agent-tooling.md`](specs/agent-tooling.md) |
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |

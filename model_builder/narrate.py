@@ -12,7 +12,7 @@ outside a test. The sentence is markdown-lite: ``**bold**`` for the rule the ste
 of the code.
 
 Standard library only: ``domain/`` and ``application/`` import this module, so it imports no Django.
-The contract these calls are written to is ``comprehension-harness/stack.md``.
+The contract these calls are written to is ``comprehension_harness/stack.md``.
 """
 import re
 import sys

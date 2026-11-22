@@ -6,7 +6,7 @@
  * so a commit of the same branch that names no piece is other work and is not read.
  *
  * For each such commit: the files it touched, and what it did to the tests of each test file it touched, read
- * against the plan that file carried before it (`testChanges`, `comprehension-harness/plan.ts`): what it deleted or
+ * against the plan that file carried before it (`testChanges`, `comprehension_harness/plan.ts`): what it deleted or
  * changed as a comment said, kept with the commit for the page.
  *
  * What a lot did beyond the plan is judged on what the lot comes to, not on each commit's own steps: each test

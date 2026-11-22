@@ -1,7 +1,7 @@
 /**
- * plan.ts — a feature's plan as data: the model `comprehension-harness/render.ts` draws as
- * `specs/comprehension-harness/plans/<feature>.html`, and the pure parts that build it (no source reader, no disk, no story file:
- * `comprehension-harness/tests/plan.test.ts` builds its inputs by hand).
+ * plan.ts — a feature's plan as data: the model `comprehension_harness/render.ts` draws as
+ * `specs/comprehension_harness/plans/<feature>.html`, and the pure parts that build it (no source reader, no disk, no story file:
+ * `comprehension_harness/tests/plan.test.ts` builds its inputs by hand).
  *
  * A plan is never written as a list. A piece is a slug, `<feature>#<slug>`, and every site tagged with it:
  *
@@ -253,7 +253,7 @@ export interface PlanPiece {
 /**
  * A commit that delivers a piece: its message holds the line `Piece: <feature>#<slug>`, once per piece it
  * delivers — one for a piece's own commit and for a fix of it, several for a lot's closing commit, which tells
- * the steps of each piece it names. Read from git by `comprehension-harness/commits.ts`.
+ * the steps of each piece it names. Read from git by `comprehension_harness/commits.ts`.
  */
 export interface PieceCommit {
   sha: string;

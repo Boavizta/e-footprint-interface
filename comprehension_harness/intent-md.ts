@@ -6,10 +6,10 @@
  * is declared where it runs (a journey test, a `planned` site) and the page is rendered from there.
  *
  * A list item may open with a bold kebab-case slug, `- **rule-is-the-judge** The rule stays…`: the item's
- * name, by which a test claims it (`comprehension-harness/plan.ts`, the ownership check). The slug is parsed off the
+ * name, by which a test claims it (`comprehension_harness/plan.ts`, the ownership check). The slug is parsed off the
  * text and drawn as a chip.
  *
- * One parser for the two renderers: `comprehension-harness/journey-render.ts` (the spec page) and `comprehension-harness/render.ts`
+ * One parser for the two renderers: `comprehension_harness/journey-render.ts` (the spec page) and `comprehension_harness/render.ts`
  * (the plan page).
  */
 

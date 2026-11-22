@@ -1,8 +1,8 @@
-"""The source index of the Python stack (``comprehension-harness/stack.md`` § 2), built on ``ast``.
+"""The source index of the Python stack (``comprehension_harness/stack.md`` § 2), built on ``ast``.
 
     python3 scripts/comprehension_python/source_index.py
 
-Prints the index as one JSON document (``SourceIndexDocument`` of ``comprehension-harness/stack.ts``): every
+Prints the index as one JSON document (``SourceIndexDocument`` of ``comprehension_harness/stack.ts``): every
 Python file of the source folders (``source.app`` of ``comprehension.config.json``) and every test file that
 declares a narrative or holds a site, each with its sites, functions, declarations, imports, locals and uses.
 

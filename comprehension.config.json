@@ -4,7 +4,7 @@
     "sourceIndex": ["python3", "scripts/comprehension_python/source_index.py"],
     "titles": ["python3", "scripts/comprehension_python/titles.py"]
   },
-  "cache": "node_modules/.cache/comprehension-harness",
+  "cache": "node_modules/.cache/comprehension_harness",
   "docs": "specs",
   "hub": { "label": "architecture index", "page": "specs/architecture/index.html" },
   "productPage": "modeling",
@@ -13,7 +13,7 @@
     "scan": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "specs"],
     "app": ["model_builder/", "e_footprint_interface/", "theme/"],
     "product": ["model_builder/", "e_footprint_interface/", "theme/"],
-    "words": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "scripts", "comprehension-harness", "tools", "ai-usage"],
+    "words": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "scripts", "comprehension_harness", "tools", "ai-usage"],
     "mechanisms": [],
     "chips": [
       ["model_builder/templates", "ui", "template"],

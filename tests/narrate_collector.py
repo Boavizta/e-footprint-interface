@@ -1,4 +1,4 @@
-"""The pytest plugin that writes what each test crossed (``comprehension-harness/stack.md`` § 1).
+"""The pytest plugin that writes what each test crossed (``comprehension_harness/stack.md`` § 1).
 
 For the lifetime of a run it is the collector of ``model_builder/narrate.py``. Each ``narrate``, ``event`` or
 ``planned`` call a test crosses is a hit: its sentence, its watch's value, the frame of the call and the

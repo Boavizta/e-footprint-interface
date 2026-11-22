@@ -256,7 +256,7 @@ Cost of these calls: USD 0.095 (0.009 for the seven reproduction calls, then 0.0
   runs of `edge-builder` read whether the shipped prompt still makes them.
 - A replay of a run recorded under the removed sandbox scope `web_edge_hw` now raises `KeyError`.
   Local runs only.
-- The map's `help` verb crashes (`comprehension-harness/map.mjs:571`: `fileURLToPath` is called
+- The map's `help` verb crashes (`comprehension_harness/map.mjs:571`: `fileURLToPath` is called
   with no import from `node:url`). Tooling, outside the feature, not fixed.
 
 ### edge-builder
