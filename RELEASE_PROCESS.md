@@ -62,7 +62,7 @@ Run test suites:
 # Python tests (unit + integration + E2E; E2E requires running server)
 # -n indicates number of parallel workers for pytest-xdist
 poetry run pytest tests/e2e -n 4 --base-url http://localhost:8000
-poetry run pytest tests --ignore=tests/e2e
+poetry run pytest --ignore=tests/e2e
 
 # JavaScript unit tests
 npm run jest

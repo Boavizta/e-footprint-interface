@@ -19,7 +19,7 @@ from model_builder.adapters.views import views_ai_bootstrap as views
 from model_builder.application.ai_bootstrap.service import Completion
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.services import is_empty_model
-from tests.declare import narrative, titled
+from comprehension_harness.python.declare import narrative, titled
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"

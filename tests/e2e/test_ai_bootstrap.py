@@ -11,7 +11,7 @@ from playwright.sync_api import expect, sync_playwright
 
 from model_builder.adapters.views import views_ai_bootstrap
 from model_builder.application.ai_bootstrap.service import Completion
-from tests.declare import titled
+from comprehension_harness.python.declare import titled
 from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
 
 pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True)]

@@ -1,6 +1,6 @@
 """Keeps the narrative tests running: runs the test files again at each save, and never exits on its own.
 
-    python3 scripts/comprehension_python/watch.py tests/narratives/test_….py …
+    python3 -m comprehension_harness.python.watch tests/narratives/test_….py …
 
 pytest has no watch mode, and the local app (``npm run comprehension``) stops when this command exits. It runs
 ``commands.tests`` of ``comprehension.config.json`` with the files it was given, then again each time a file of

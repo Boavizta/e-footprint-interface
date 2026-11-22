@@ -69,7 +69,7 @@ anthropic = "^2.3.0"
 openai = "^3.40.0"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "comprehension_harness/python/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

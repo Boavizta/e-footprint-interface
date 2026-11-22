@@ -1,6 +1,6 @@
 """The source index of the Python stack (``comprehension_harness/stack.md`` § 2), built on ``ast``.
 
-    python3 scripts/comprehension_python/source_index.py
+    python3 -m comprehension_harness.python.source_index
 
 Prints the index as one JSON document (``SourceIndexDocument`` of ``comprehension_harness/stack.ts``): every
 Python file of the source folders (``source.app`` of ``comprehension.config.json``) and every test file that
@@ -8,9 +8,9 @@ declares a narrative or holds a site, each with its sites, functions, declaratio
 
 What this stack knows and the tools do not:
 
-- the three calls are those of ``model_builder/narrate.py``, imported by name; a function of the same name
+- the three calls are those of this package (``__init__.py``), imported by name; a function of the same name
   from anywhere else is no site;
-- a narrative is a test class under ``@narrative("…")`` of ``tests/declare.py``; its summary is the first
+- a narrative is a test class under ``@narrative("…")`` of ``declare.py``; its summary is the first
   paragraph of the class docstring, its first test the first ``test_…`` method;
 - a function is named by its ``__qualname__``, which is what a frame of a story prints.
 
@@ -19,9 +19,12 @@ where the name is bound: a top-level declaration of the file, an import followed
 a package's re-exports), ``module.name`` on an imported module, ``self.name`` and ``cls.name`` on the class
 around them, a function or class of an enclosing function. A call on a value of unknown type is left out.
 
-Refused, with the file and the line: a file the parser refuses, two calls on one line, a ``planned`` call
-whose tag or sentence is no literal, a tag that is not ``<feature>#<slug>``, a shell that raises anything but
-``planned: <tag>``, a narrative that is not declared on a class under one literal title.
+Refused, with the file and the line: a file the parser refuses, two calls on one line, a tag or a sentence
+that is no literal string, a watch that is no lambda, a tag that is not ``<feature>#<slug>``, a shell that
+raises anything but ``planned: <tag>``, a narrative that is not declared on a class under one literal title.
+
+The literal and the lambda are what keeps the calls inert in production: Python computes a call's arguments
+before the call, and a call does nothing there. A literal and a lambda cost nothing to compute.
 
 Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config``,
 ``--calls`` and ``--declare``, the modules the calls and the declarations are imported from.
@@ -36,11 +39,11 @@ import re
 import sys
 from pathlib import Path
 
-from titles import Refusal, declared_title, is_test_function, name_position, parse
+from .titles import Refusal, declared_title, is_test_function, name_position, parse
 
 CONFIG_FILE = "comprehension.config.json"
-CALLS_MODULE = "model_builder.narrate"
-DECLARE_MODULE = "tests.declare"
+CALLS_MODULE = "comprehension_harness.python"
+DECLARE_MODULE = "comprehension_harness.python.declare"
 KINDS = {"narrate": "step", "event": "event", "planned": "planned"}
 PLANNED_TAG = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)#([a-z0-9]+(?:-[a-z0-9]+)*)$")
 FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef)
@@ -366,7 +369,7 @@ class FileIndex(ast.NodeVisitor):
         if isinstance(callee, ast.Attribute):
             if self.imported_as(callee.value, self.calls) == "planned" and callee.attr == "remove":
                 return "planned", True
-            if callee.attr in KINDS and self.module_of(callee.value) == self.calls:
+            if callee.attr in KINDS and self.dotted_of(callee.value) == self.calls:
                 self.refuse(node, f"the calls are imported by name: from {self.calls} import {callee.attr}")
             return None
         kind = KINDS.get(self.imported_as(callee, self.calls) or "")
@@ -383,10 +386,18 @@ class FileIndex(ast.NodeVisitor):
             self.refuse(node, f"one narrate, event or planned call a line: a site is a file and a line, and this "
                               f"line already holds a {self.site_lines[node.lineno]}")
         self.site_lines[node.lineno] = kind
+        literals = 2 if kind == "planned" else 1
         site = {"kind": kind, "line": node.lineno, "column": node.col_offset + 1, "fn": self.frame_name(),
-                "sentence": literal_argument(node, 1 if kind == "planned" else 0)}
+                "sentence": literal_argument(node, literals - 1)}
         if kind == "planned":
             site["planned"] = self.planned(node, literal_argument(node, 0), site["sentence"], removes)
+        elif site["sentence"] is None:
+            self.refuse(node, "the sentence of a narrate or event call is a literal string: anything else is "
+                              "computed in production, where the call does nothing")
+        for argument in [*node.args[literals:], *(keyword.value for keyword in node.keywords)]:
+            if not isinstance(argument, ast.Lambda):
+                self.refuse(argument, "the watch is a lambda (lambda: {…}): anything else is computed in production, "
+                                      "where nobody reads it")
         self.sites.append(site)
 
     def planned(self, node: ast.Call, tag: str | None, sentence: str | None, removes: bool) -> dict:
@@ -429,7 +440,7 @@ class FileIndex(ast.NodeVisitor):
     # ── Narratives ──────────────────────────────────────────────────────────────────────────────────
 
     def narrative_decorator(self, decorator) -> bool:
-        """``@narrative(…)`` or ``@narrative.mechanism(…)``, the name being the one ``tests/declare.py`` gives."""
+        """``@narrative(…)`` or ``@narrative.mechanism(…)``, the name being the one ``declare.py`` gives."""
         callee = decorator.func if isinstance(decorator, ast.Call) else decorator
         if isinstance(callee, ast.Attribute) and callee.attr == "mechanism":
             callee = callee.value

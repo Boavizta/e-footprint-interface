@@ -1,4 +1,4 @@
-"""The collector of the Python stack: the story `tests/narrate_collector.py` writes for a test that crosses a site.
+"""The collector of the Python stack: the story `collector.py` writes for a test that crosses a site.
 
 A small project is run by its own pytest process, as a test run is, and its story file is read back.
 """
@@ -9,10 +9,10 @@ import sys
 
 import pytest
 
-from tests.unit_tests.comprehension_python.conftest import ROOT, run_stack, source_index
+from comprehension_harness.python.tests.conftest import ROOT, run_stack, source_index
 
 CHECKOUT = '''
-    from model_builder.narrate import event, narrate, planned
+    from comprehension_harness.python import event, narrate, planned
 
 
     def pay(amount):
@@ -34,14 +34,14 @@ CHECKOUT = '''
 PROJECT = {
     "comprehension.config.json": '{"cache": "cache"}',
     "pytest.ini": "[pytest]\n",
-    "conftest.py": 'pytest_plugins = ["tests.narrate_collector"]\n',
+    "conftest.py": 'pytest_plugins = ["comprehension_harness.python.collector"]\n',
     "cache/stories/checks__test_quiet.py.json": "[]",
     "shop/checkout.py": CHECKOUT,
     "checks/test_quiet.py": "def test_crosses_nothing():\n    assert True\n",
     "checks/test_checkout.py": '''
         import pytest
         from shop.checkout import audit, pay
-        from tests.declare import canonical, narrative, planned_test, titled
+        from comprehension_harness.python.declare import canonical, narrative, planned_test, titled
 
 
         @narrative("The customer pays a basket")
@@ -71,6 +71,7 @@ PROJECT = {
     ''',
 }
 TEST_FILE = "checks/test_checkout.py"
+CALLS, DECLARE = "from comprehension_harness.python import", "from comprehension_harness.python.declare import"
 
 
 def run_tests(root, *options) -> subprocess.CompletedProcess:
@@ -105,7 +106,8 @@ def test_a_story_is_what_its_test_crossed_and_a_test_file_has_one_story_file(pro
 def test_a_hit_is_its_call_as_the_source_index_has_it_with_the_frames_above(project):
     root = project(PROJECT)
     run_tests(root)
-    printed = source_index(root, source="shop/", calls="model_builder.narrate", declare="tests.declare").stdout
+    printed = source_index(root, source="shop/", calls="comprehension_harness.python",
+                           declare="comprehension_harness.python.declare").stdout
     index = json.loads(printed)
     sites = {site["line"]: site for site in index["files"]["shop/checkout.py"]["sites"]}
 
@@ -123,7 +125,7 @@ def test_a_hit_is_its_call_as_the_source_index_has_it_with_the_frames_above(proj
     # One title a test: the story's, the index's first test, the title reader's.
     assert index["narratives"][0]["firstTest"] == "test_crosses_nothing"
     asked = json.dumps([{"file": TEST_FILE, "text": (root / TEST_FILE).read_text()}])
-    [titles] = json.loads(run_stack("titles.py", stdin=asked).stdout)
+    [titles] = json.loads(run_stack("titles", stdin=asked).stdout)
     assert {story["test"].split("[")[0] for story in stories_of(root)} <= {test["title"] for test in titles["tests"]}
 
 
@@ -160,15 +162,15 @@ def test_the_stories_of_a_parallel_run_are_those_of_a_plain_one(project):
 
 
 @pytest.mark.parametrize("test_file, said", [
-    ('from tests.declare import narrative\n\n\n@narrative("A flow")\ndef test_x():\n    assert True\n',
+    (f'{DECLARE} narrative\n\n\n@narrative("A flow")\ndef test_x():\n    assert True\n',
      "checks/test_bad.py:4 — a narrative is declared on a test class"),
-    ('from tests.declare import canonical\n\n\n@canonical\ndef test_x():\n    assert True\n',
+    (f'{DECLARE} canonical\n\n\n@canonical\ndef test_x():\n    assert True\n',
      "checks/test_bad.py:4 — @canonical marks the reference case of a narrative"),
-    ('from tests.declare import planned_test\n\n\n@planned_test("a#b: c")\ndef test_x():\n    assert True\n',
+    (f'{DECLARE} planned_test\n\n\n@planned_test("a#b: c")\ndef test_x():\n    assert True\n',
      "checks/test_bad.py:4 — @planned_test stands on a test with an empty body"),
-    ('from model_builder.narrate import narrate\n\n\ndef test_x():\n    narrate("A step.", {"amount": 3})\n',
+    (f'{CALLS} narrate\n\n\ndef test_x():\n    narrate("A step.", {{"amount": 3}})\n',
      "checks/test_bad.py:5 — the watch is passed as a function"),
-    ('from model_builder.narrate import planned\n\n\ndef test_x():\n    planned("NotATag", "A change.")\n',
+    (f'{CALLS} planned\n\n\ndef test_x():\n    planned("NotATag", "A change.")\n',
      "checks/test_bad.py:5 — planned: 'NotATag' is not <feature>#<slug>"),
 ])
 def test_a_declaration_or_a_call_that_does_not_have_the_shape_fails_the_run_with_its_line(project, test_file, said):

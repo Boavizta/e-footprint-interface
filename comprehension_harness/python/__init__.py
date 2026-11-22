@@ -6,12 +6,14 @@
   ``planned.remove(…)`` marks a function the piece removes. A shell is a new function whose whole body is the
   ``planned`` call followed by ``raise NotImplementedError("planned: <feature>#<slug>")``.
 
-None of them does anything unless a collector is installed, which only a test run does
-(``tests/narrate_collector.py``). The watch is a function the collector calls, so nothing is computed for it
+None of them does anything unless a collector is installed, which only a test run does (``collector.py``).
+Python computes a call's arguments before the call, so the source index (``source_index.py``) refuses any that
+is not inert: the sentence is a literal string and the watch a lambda the collector calls, which nothing calls
 outside a test. The sentence is markdown-lite: ``**bold**`` for the rule the step enacts, backticks for a symbol
 of the code.
 
-Standard library only: ``domain/`` and ``application/`` import this module, so it imports no Django.
+This module is the one file of the harness the product imports, in production too: standard library only, and
+no other module of this package (``tests/test_calls.py`` holds both).
 The contract these calls are written to is ``comprehension_harness/stack.md``.
 """
 import re

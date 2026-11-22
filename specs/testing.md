@@ -33,7 +33,7 @@ node --test tools/vscode-plan-review-links/extension.test.js
 npx vitest run comprehension_harness
 
 # Their Python stack (the source index, the title reader, the collector) and the narratives it records
-poetry run pytest tests/unit_tests/comprehension_python
+poetry run pytest comprehension_harness/python/tests
 poetry run pytest tests/narratives
 
 # Shared-file synchronization script
@@ -134,23 +134,26 @@ When a feature reaches into a new public efootprint API (a method/property/dict-
 
 A narrative test crosses one flow in order so that its page can be drawn
 (`npm run comprehension:render`, then `specs/comprehension_harness/narratives/modeling.html`). The flow tells
-itself: `narrate` at each step and `event` at its cause, imported from `model_builder/narrate.py`
-and inert outside a test run. The test declares the narrative with `tests/declare.py`:
+itself: `narrate` at each step and `event` at its cause, imported from `comprehension_harness.python`
+and inert outside a test run. The test declares the narrative with `comprehension_harness/python/declare.py`:
 
 - `@narrative("<title>")` on a test class; the first paragraph of its docstring is the summary.
 - Its first test is the reference case, the one the page tells step by step, unless another is
   marked `@canonical`. The other tests are variants: a refusal, a failure.
 - Assert what the flow gives, as any test does. The steps are recorded, not asserted.
 
-`tests/narrate_collector.py` is loaded for every pytest run and writes what each test crossed
+`comprehension_harness/python/collector.py` is loaded for every pytest run and writes what each test crossed
 under `node_modules/.cache/comprehension_harness/stories/`, one file a test file; a test that
 crosses no call costs nothing. `npx tsx comprehension_harness/render.ts --check` holds a narrative
 to its form: every step after a cause, every sentence within its budget, every symbol it names
 found. How each declaration is spelled: `.agents/repository.md` § "The stack".
 
-The stack's own tests are `tests/unit_tests/comprehension_python/`. They run its commands as the
-tools do, on small projects written to a temporary folder: a fixture kept as a file under `tests/`
-would be read by the render as a test or a plan of this project.
+The stack's own tests are `comprehension_harness/python/tests/`, collected by a bare `pytest` run
+(`testpaths`) and by CI. They run its commands as the tools do, on small projects written to a
+temporary folder. Three of them hold what production relies on: the calls do nothing and never call
+a watch where no collector is installed, importing them loads the standard library alone, and this
+repository's own source passes the index's refusals, so a call whose arguments Python would compute
+in production fails the suite.
 
 ## E2E tests (`tests/e2e/`)
 

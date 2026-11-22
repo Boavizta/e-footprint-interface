@@ -34,13 +34,13 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 
 | The method says | Here |
 |---|---|
-| The three calls | `from model_builder.narrate import narrate, event, planned`, always by name. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The watch is a function: `narrate("…", lambda: {"count": n})` |
+| The three calls | `from comprehension_harness.python import narrate, event, planned`, always by name. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The sentence is a literal string and the watch a lambda, `narrate("…", lambda: {"count": n})`: the index refuses anything Python would compute in production |
 | A place that changes, a place that goes, a shell | `planned("<feature>#<slug>", "<sentence>")` on existing code; `planned.remove(…)` in a function that goes; a shell is a new function whose whole body, under an optional docstring, is the `planned` call then `raise NotImplementedError("planned: <feature>#<slug>")`. One call a line |
-| A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `tests/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
+| A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `comprehension_harness/python/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
 | A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |
-| A narrative, its reference case | A test class under `@narrative("<title>")` of `tests/declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
-| What each test crossed | `tests/narrate_collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
-| The source index, the test titles, the watch | `scripts/comprehension_python/source_index.py`, `titles.py` and `watch.py`: the three commands of the configuration, standard library only, run by `python3`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
+| A narrative, its reference case | A test class under `@narrative("<title>")` of the same `declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
+| What each test crossed | `comprehension_harness/python/collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
+| The source index, the test titles, the watch | `source_index.py`, `titles.py` and `watch.py` of `comprehension_harness/python/`: the three commands of the configuration, standard library only, run as `python3 -m comprehension_harness.python.<name>`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
 | A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class. A backticked name shaped like a declaration (`CamelCase`, or words joined by `_`) that the index cannot place fails `--check`, so a dict key, a field or a method is written without backticks |
 | A journey | Not drawn from a run here: a feature's spec is its `spec.md`, and what changes on screen is described against the hand-drawn journey under `specs/design/journeys/` |
 | The tier of a test | Where its file stands: narrative under `tests/narratives/`, browser under `tests/e2e/`, unit otherwise (`tests/unit_tests/`, `tests/integration/`, `js_tests/`) |
@@ -56,12 +56,12 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 | The pages served, with the answer buttons | `npm run comprehension` |
 | The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
 | The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |
-| The Python tests that need no browser | `poetry run pytest tests --ignore=tests/e2e` |
+| The Python tests that need no browser | `poetry run pytest --ignore=tests/e2e` (`tests/` and the stack's own tests, by `testpaths`) |
 | The tests of what changed | `poetry run pytest <test files>` |
 | The browser tests | `poetry run pytest tests/e2e -n 4`, against `poetry run python manage.py runserver` on `http://localhost:8000`. `tests/e2e/test_ai_bootstrap.py` starts its own server and runs before the rest (`specs/testing.md` § "AI bootstrap browser harness") |
 | The JavaScript tests | `npm run jest`; `npm run build:js:dev` first after an edit under `theme/static/scripts/` |
 | The comprehension tools' own tests | `npx vitest run comprehension_harness` |
-| The Python stack's tests | `poetry run pytest tests/unit_tests/comprehension_python` |
+| The Python stack's tests | `poetry run pytest comprehension_harness/python/tests` |
 | The narrative tests | `poetry run pytest tests/narratives` |
 | The review-link extension's routes | `node --test tools/vscode-plan-review-links/extension.test.js` |
 | The links of a `plan.html` | `python3 .agents/skills/feature-implement/scripts/vscode_review_links.py <plan.html> --in-place` |
@@ -73,7 +73,7 @@ Fixtures and environment setup: `specs/testing.md`.
 
 - **An edit of a plan or a doc**: the check. Nothing of the product runs for a document.
 - **A piece's commit**: the test files of what it changed; `npm run jest` when a script changed.
-- **A lot**: `poetry run pytest tests --ignore=tests/e2e` and `npm run jest` once, before its last
+- **A lot**: `poetry run pytest --ignore=tests/e2e` and `npm run jest` once, before its last
   commit, and the browser tests of each flow it changes.
 - **The end of a run**: the full pytest suite (unit, integration, browser) and jest
   (constitution §2.2, §2.3).

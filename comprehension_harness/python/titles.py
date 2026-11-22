@@ -1,6 +1,6 @@
 """The test titles of the Python stack (``comprehension_harness/stack.md`` § 3), read with ``ast``.
 
-    python3 scripts/comprehension_python/titles.py < files.json
+    python3 -m comprehension_harness.python.titles < files.json
 
 Reads ``[{file, text}]`` on its input and prints ``[{file, tests, stands, journeyCases}]`` in the same order.
 It is asked for a file's text and not for the checkout: the lot check reads a test file on both sides of a
@@ -8,7 +8,7 @@ commit.
 
 - A test is a function named ``test_…`` at the top of the file or in a class named ``Test…``. Its title is its
   function's name, or the string of ``@titled("…")`` above it. ``@planned_test("…")`` on a function with an
-  empty body is a test to write (``tests/declare.py``).
+  empty body is a test to write (``declare.py``).
 - A stand is the line that opens a test, a class or another declaration of the file or of a class: its first
   decorator when it has one. A ``@planned`` comment right above that line stands on it.
 - Journeys are not drawn from a run here: ``journeyCases`` is always empty.

@@ -45,8 +45,8 @@ from efootprint.core.usage.usage_journey import UsageJourney
 from efootprint.core.usage.usage_journey_step import UsageJourneyStep
 from efootprint.core.usage.usage_pattern import UsagePattern
 
+from comprehension_harness.python import narrate
 from model_builder.domain.entities.web_core.usage.usage_pattern_web_base_class import GROWTH_DURATION_LIMITS
-from model_builder.narrate import narrate
 
 from .catalogs import Resolution, resolve_cloud_instance, resolve_genai
 

@@ -12,7 +12,7 @@ These are the strong preferences and patterns the project follows. They are soft
 - **Prefer double quotes (`"`) for strings**, over single quotes (`'`).
 - **Keep functions small.** Raise explicit errors with actionable messages.
 - **Comments only when the WHY is non-obvious.** Never comment what the code does — only why it does it that way.
-- **A narrated flow tells itself.** `narrate("…")` stands at the line of a step and `event("…")` at its cause (`from model_builder.narrate import …`, by name; one call a line). The sentence is present tense, sixty words at most, with one `**bold**` for the rule the step enacts and backticks for a symbol the file can name. The watch is a function, `lambda: {…}`, and holds counts and names, never a user's content. Moving or rewording a call changes the flow's page: run `poetry run pytest tests/narratives` and `npx tsx comprehension_harness/render.ts --check`.
+- **A narrated flow tells itself.** `narrate("…")` stands at the line of a step and `event("…")` at its cause (`from comprehension_harness.python import …`, by name; one call a line). The sentence is present tense, sixty words at most, with one `**bold**` for the rule the step enacts and backticks for a symbol the file can name. The watch is a lambda, `lambda: {…}`, and holds counts and names, never a user's content. A sentence that is not a literal string, or a watch that is not a lambda, is refused by the source index: Python would compute it in production, where the calls do nothing. Moving or rewording a call changes the flow's page: run `poetry run pytest tests/narratives` and `npx tsx comprehension_harness/render.ts --check`.
 
 ### Django
 

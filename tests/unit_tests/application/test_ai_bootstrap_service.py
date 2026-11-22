@@ -11,7 +11,7 @@ from efootprint.constants.units import u
 from model_builder.application.ai_bootstrap.dsl import (
     EdgeDeviceSpec, ModelSpec, WebEdgeSpec, build_edge_device, build_edge_groups)
 from model_builder.application.ai_bootstrap.service import Completion, build_answer, generate
-from tests.declare import titled
+from comprehension_harness.python.declare import titled
 
 EDGE_ANSWER = (Path(__file__).parents[3] / "ai_sandbox/cases/_handwritten_04_ev_charging.json").read_text()
 

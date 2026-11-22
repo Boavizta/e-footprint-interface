@@ -66,6 +66,21 @@
       "tools/vscode-plan-review-links/pytest-run.js",
       "tools/vscode-plan-review-links/vitest-run.js"
     ],
+    "python": [
+      "comprehension_harness/__init__.py",
+      "comprehension_harness/python/__init__.py",
+      "comprehension_harness/python/collector.py",
+      "comprehension_harness/python/declare.py",
+      "comprehension_harness/python/source_index.py",
+      "comprehension_harness/python/titles.py",
+      "comprehension_harness/python/watch.py",
+      "comprehension_harness/python/tests/__init__.py",
+      "comprehension_harness/python/tests/conftest.py",
+      "comprehension_harness/python/tests/test_calls.py",
+      "comprehension_harness/python/tests/test_collector.py",
+      "comprehension_harness/python/tests/test_source_index.py",
+      "comprehension_harness/python/tests/test_titles.py"
+    ],
     "e-footprint": [
       ".agents/roles/diagnostician.md",
       ".agents/roles/plan-review-guide.md",

@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).parents[3]
-STACK = ROOT / "scripts/comprehension_python"
 
 
 @pytest.fixture
@@ -24,9 +23,9 @@ def project(tmp_path):
     return write
 
 
-def run_stack(script: str, *arguments, stdin: str | None = None) -> subprocess.CompletedProcess:
-    command = [sys.executable, str(STACK / script), *map(str, arguments)]
-    return subprocess.run(command, input=stdin, capture_output=True, text=True)
+def run_stack(module: str, *arguments, stdin: str | None = None) -> subprocess.CompletedProcess:
+    command = [sys.executable, "-m", f"comprehension_harness.python.{module}", *map(str, arguments)]
+    return subprocess.run(command, input=stdin, cwd=ROOT, capture_output=True, text=True)
 
 
 def source_index(root: Path, source="app/", tests="checks/", calls="narrate", declare="declare"):
@@ -36,4 +35,4 @@ def source_index(root: Path, source="app/", tests="checks/", calls="narrate", de
     with tempfile.TemporaryDirectory() as folder:
         config = Path(folder) / "comprehension.config.json"
         config.write_text(json.dumps(settings))
-        return run_stack("source_index.py", "--root", root, "--config", config, "--calls", calls, "--declare", declare)
+        return run_stack("source_index", "--root", root, "--config", config, "--calls", calls, "--declare", declare)

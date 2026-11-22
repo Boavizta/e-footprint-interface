@@ -18,7 +18,7 @@ from model_builder.application.ai_bootstrap.dsl import EdgeDeviceGroupSpec
 from model_builder.application.ai_bootstrap.service import build_answer
 from model_builder.application.use_cases import EditObjectInput, EditObjectUseCase
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from tests.declare import titled
+from comprehension_harness.python.declare import titled
 
 CASES = Path(__file__).parents[2] / "ai_sandbox/cases"
 ANSWER = CASES / "_handwritten_01_recipe_app.json"

@@ -1,8 +1,8 @@
 {
   "name": "e-footprint interface",
   "stack": {
-    "sourceIndex": ["python3", "scripts/comprehension_python/source_index.py"],
-    "titles": ["python3", "scripts/comprehension_python/titles.py"]
+    "sourceIndex": ["python3", "-m", "comprehension_harness.python.source_index"],
+    "titles": ["python3", "-m", "comprehension_harness.python.titles"]
   },
   "cache": "node_modules/.cache/comprehension_harness",
   "docs": "specs",
@@ -39,7 +39,7 @@
   "commands": {
     "tool": ["npx", "tsx"],
     "tests": ["poetry", "run", "pytest"],
-    "watch": ["python3", "scripts/comprehension_python/watch.py"],
+    "watch": ["python3", "-m", "comprehension_harness.python.watch"],
     "journeys": ["poetry", "run", "pytest", "tests/e2e/journeys", "--base-url", "http://localhost:8000"]
   },
   "planDiff": null

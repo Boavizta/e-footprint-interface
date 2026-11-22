@@ -19,7 +19,7 @@ from model_builder.application.ai_bootstrap.service import Completion, build_ans
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import PayloadSizeLimitExceeded
 from model_builder.domain.services import get_example_system_data, is_empty_model
-from tests.declare import titled
+from comprehension_harness.python.declare import titled
 
 pytestmark = pytest.mark.django_db
 START = "/model_builder/start-ai-bootstrap/"

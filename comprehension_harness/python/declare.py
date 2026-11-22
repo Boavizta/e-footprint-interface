@@ -8,8 +8,8 @@
 - ``@titled("<feature>#<slug>: <title> [<rule>]")`` gives a written test the title a function name cannot hold.
   A test without it is titled by its function's name.
 
-All four are pytest markers. ``tests/narrate_collector.py`` reads them when it writes a test's story;
-``scripts/comprehension_python/source_index.py`` and ``titles.py`` read them from the source.
+All four are pytest markers. ``collector.py`` reads them when it writes a test's story; ``source_index.py``
+and ``titles.py`` read them from the source.
 """
 import dis
 

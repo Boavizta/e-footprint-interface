@@ -1,3 +1,4 @@
+# comprehension_harness/ is never ignored: the product imports comprehension_harness.python at runtime.
 .git/
 .github/
 .agents/

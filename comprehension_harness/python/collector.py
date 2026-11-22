@@ -1,10 +1,11 @@
 """The pytest plugin that writes what each test crossed (``comprehension_harness/stack.md`` § 1).
 
-For the lifetime of a run it is the collector of ``model_builder/narrate.py``. Each ``narrate``, ``event`` or
-``planned`` call a test crosses is a hit: its sentence, its watch's value, the frame of the call and the
-repository's frames above it. A test's hits are its story; a test file's stories are one JSON array at
-``<cache>/stories/<the file, "/" written "__">.json``, deleted when the file's run starts and written when it
-ends. A test that crosses no call has no story.
+A project loads it for every run: ``pytest_plugins = ["comprehension_harness.python.collector"]`` in the
+conftest of its tests. For the lifetime of a run it is the collector of the three calls (``__init__.py``). Each
+``narrate``, ``event`` or ``planned`` call a test crosses is a hit: its sentence, its watch's value, the frame of
+the call and the repository's frames above it. A test's hits are its story; a test file's stories are one JSON
+array at ``<cache>/stories/<the file, "/" written "__">.json``, deleted when the file's run starts and written
+when it ends. A test that crosses no call has no story.
 
 A hit carries no identity: the tools derive ``<file>#<function>#<ordinal>`` from the source index. A frame's
 function is its ``__qualname__``, as the index names it; its line and column are where the call expression
@@ -24,7 +25,7 @@ from pathlib import Path
 
 import pytest
 
-from model_builder import narrate as calls
+from . import install_collector
 
 CONFIG_FILE = "comprehension.config.json"
 # A site keeps its first hits of a test in full and counts the rest: a test that loops over a narrated line
@@ -80,7 +81,7 @@ class StoryRecorder:
         self.stories_dir = self.root / settings["cache"] / "stories"
         self.is_worker = hasattr(config, "workerinput")
         self.config = config
-        self.own_files = {os.path.realpath(calls.__file__), os.path.realpath(__file__)}
+        self.own_files = {os.path.realpath(Path(__file__).with_name("__init__.py")), os.path.realpath(__file__)}
         self.relative_paths: dict[str, str | None] = {}
         self.positions: dict[tuple, tuple[int, int]] = {}
         self.order: dict[str, int] = {}
@@ -170,7 +171,7 @@ class StoryRecorder:
                     raise pytest.UsageError(f"{where} — a narrative is declared on a test class: "
                                             f"@narrative(\"…\") above `class Test…`")
                 if len(mark.args) != 1 or not isinstance(mark.args[0], str) or mark.kwargs.get("kind") not in KINDS:
-                    raise pytest.UsageError(f"{where} — a narrative is declared with tests.declare: "
+                    raise pytest.UsageError(f"{where} — a narrative is declared with declare.py: "
                                             f"@narrative(\"<title>\") or @narrative.mechanism(\"<title>\")")
             if item.get_closest_marker("canonical") and not item.get_closest_marker("narrative"):
                 raise pytest.UsageError(f"{where} — @canonical marks the reference case of a narrative, "
@@ -251,14 +252,14 @@ class StoryRecorder:
             self.write(file)
 
     def pytest_unconfigure(self, config):
-        calls.install_collector(None)
+        install_collector(None)
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "narrative(title, kind): the test class tells a narrative (tests.declare)")
-    config.addinivalue_line("markers", "canonical: the reference case of its narrative (tests.declare)")
-    config.addinivalue_line("markers", "titled(title): the test's title, when its name cannot hold it (tests.declare)")
-    config.addinivalue_line("markers", "planned_test(title): a test to write, with an empty body (tests.declare)")
+    config.addinivalue_line("markers", "narrative(title, kind): the test class tells a narrative (declare.py)")
+    config.addinivalue_line("markers", "canonical: the reference case of its narrative (declare.py)")
+    config.addinivalue_line("markers", "titled(title): the test's title, when its name cannot hold it (declare.py)")
+    config.addinivalue_line("markers", "planned_test(title): a test to write, with an empty body (declare.py)")
     recorder = StoryRecorder(config)
     config.pluginmanager.register(recorder, "narrate-collector")
-    calls.install_collector(recorder.collect)
+    install_collector(recorder.collect)

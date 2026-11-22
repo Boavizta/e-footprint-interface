@@ -1,14 +1,14 @@
-"""The title reader of the Python stack: what `scripts/comprehension_python/titles.py` prints for a file's text."""
+"""The title reader of the Python stack: what `titles.py` prints for a file's text."""
 import json
 import textwrap
 
 import pytest
 
-from tests.unit_tests.comprehension_python.conftest import run_stack
+from comprehension_harness.python.tests.conftest import run_stack
 
 TEST_FILE = textwrap.dedent('''
     import pytest
-    from tests.declare import narrative, planned_test, titled
+    from comprehension_harness.python.declare import narrative, planned_test, titled
 
     LIMIT = 3
 
@@ -50,7 +50,7 @@ TEST_FILE = textwrap.dedent('''
 
 
 def read(*files: tuple[str, str]) -> list[dict]:
-    done = run_stack("titles.py", stdin=json.dumps([{"file": file, "text": text} for file, text in files]))
+    done = run_stack("titles", stdin=json.dumps([{"file": file, "text": text} for file, text in files]))
     assert done.returncode == 0, done.stderr
     return json.loads(done.stdout)
 
@@ -105,7 +105,7 @@ def test_a_batch_is_answered_in_order_and_a_file_that_is_not_python_holds_nothin
     ("def test_x(:\n    pass\n", "t.py:1 — the Python parser refuses the file"),
 ])
 def test_a_file_that_does_not_have_the_shape_is_refused_with_its_line(source, said):
-    done = run_stack("titles.py", stdin=json.dumps([{"file": "t.py", "text": source}]))
+    done = run_stack("titles", stdin=json.dumps([{"file": "t.py", "text": source}]))
 
     assert done.returncode == 1 and done.stdout == ""
     assert f"comprehension-titles: {said}" in done.stderr
@@ -114,6 +114,6 @@ def test_a_file_that_does_not_have_the_shape_is_refused_with_its_line(source, sa
 @pytest.mark.parametrize("stdin, said", [
     ("not json", "the input is not JSON"), ('[{"file": "t.py"}]', "the input is not [{file, text}]")])
 def test_an_input_of_another_shape_is_refused(stdin, said):
-    done = run_stack("titles.py", stdin=stdin)
+    done = run_stack("titles", stdin=stdin)
 
     assert done.returncode == 1 and said in done.stderr

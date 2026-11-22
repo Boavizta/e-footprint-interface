@@ -14,6 +14,7 @@ The method it serves is `specs/workflow.md`; the forms it holds a feature's file
 | Files | What |
 |---|---|
 | `comprehension_harness/` | The tools (the renderers, the plan model, the map, the local app) and their tests |
+| `comprehension_harness/python/` | The stack of a Python project and its tests. Its own list, `python`: a project in another language leaves it |
 | `specs/comprehension_harness/comprehension_harness.css` | The pages' stylesheet |
 | `specs/review-links.js` | The script the pages load: it points each source link at this checkout and adds the right-click menu |
 | `specs/workflow.md`, `specs/workflow-formats.md` | The method and its forms |
@@ -50,6 +51,9 @@ They are written for any project. What a project is to them is the three things 
      `tests/fixtures/shop/` is an index written by hand to conform to);
    - optionally, a journey helper that writes screens, captures and cases under
      `<docs>/design/journeys-generated/`. Without it a feature's spec is its `spec.md` alone.
+
+   A Python project that tests with pytest takes `python/` and writes none of the four but the
+   journey helper: "The Python stack" below.
 
    Everything else of this list can be done before the stack exists. The tools then stop and
    name what is missing: the command of the configuration that failed, the narrative tests that
@@ -104,6 +108,34 @@ They are written for any project. What a project is to them is the three things 
    of a page opened as a file works without it; the diff against the main branch, the debug
    entries (a vitest case, a pytest test) and a page served over HTTP need it.
 
+## The Python stack
+
+`python/` is the stack of a project in Python tested with pytest, standard library only but for the
+plugin and the declarations, which are pytest's.
+
+| File | Gives |
+|---|---|
+| `__init__.py` | The three calls: `from comprehension_harness.python import narrate, event, planned` |
+| `declare.py` | What a test declares: `@narrative`, `@canonical`, `@titled`, `@planned_test` |
+| `collector.py` | The pytest plugin that writes the stories |
+| `source_index.py`, `titles.py`, `watch.py` | The three commands of the configuration |
+
+What the project writes to use it:
+
+- `pytest_plugins = ["comprehension_harness.python.collector"]` in the conftest of its tests.
+- In `comprehension.config.json`, `"stack": { "sourceIndex": ["python3", "-m",
+  "comprehension_harness.python.source_index"], "titles": ["python3", "-m",
+  "comprehension_harness.python.titles"] }` and `"watch": ["python3", "-m",
+  "comprehension_harness.python.watch"]` under `commands`.
+- `comprehension_harness/python/tests` among the paths its pytest run collects.
+
+**The product imports `python/__init__.py` at runtime, so the folder ships with it**: it is in no
+ignore list of a production image. Three tests hold that this costs production nothing. Where no
+collector is installed a call returns at once and no watch is called. Importing the calls loads
+the standard library and no other module of this folder. And since Python computes a call's
+arguments before the call, the source index refuses a sentence that is not a literal string and a
+watch that is not a lambda, in the project's own source at each pytest run.
+
 ## Checking the install
 
 ```bash
@@ -124,7 +156,7 @@ so when it is missing.
 ## Keeping the copies in step
 
 The reference repository lists the shared files in `.agent-tooling-sync.json`, in named lists;
-`core` is this package. A project records what it took in `.agent-tooling-lock.json`: the lists,
+`core` is this package but for `python/`, which is the list `python`. A project records what it took in `.agent-tooling-lock.json`: the lists,
 the hash of each file at the last sync, and the reference's address, commit and licence. The
 script is copied by hand once, and its first run brings the rest:
 

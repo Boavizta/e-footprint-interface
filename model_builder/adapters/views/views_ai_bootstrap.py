@@ -6,6 +6,7 @@ from efootprint.constants.units import u
 from efootprint.core.hardware.hardware_base import InsufficientCapacityError
 from efootprint.utils.display import format_quantity_for_display
 
+from comprehension_harness.python import event, narrate
 from model_builder.adapters.ai_provider import ProviderError, complete_mistral, is_available
 from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.views.views import (
@@ -15,7 +16,6 @@ from model_builder.application.ai_bootstrap.service import generate
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded, PayloadSizeLimitExceeded
 from model_builder.domain.services import SCRATCH_ID, SystemValidationService, get_example_system_data, is_empty_model
-from model_builder.narrate import event, narrate
 
 
 def _input_response(request, workspace, description, scope, error):

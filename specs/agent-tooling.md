@@ -23,6 +23,7 @@ The method is [`workflow.md`](workflow.md); the forms of a feature's files are
 | List | Holds | Taken by |
 |---|---|---|
 | `core` | The comprehension tools and their tests, the stylesheet and the script of the generated pages, the method's two documents, the stage skills, the roles' instructions, the review-link extension, the synchronization script and its test | Every project that uses the method |
+| `python` | The Python stack of the comprehension tools, `comprehension_harness/python/`, with its tests: the three calls, the test declarations, the pytest plugin, the source index, the title reader and the watch loop | Every Python project that uses the method |
 | `e-footprint` | The bug-batch skills of the `plan.html` form with their references, their two roles and their link converter, the usage collector, the Codex hooks, this page | The library |
 
 A project that takes lists runs the script from its own checkout, with this one as upstream:

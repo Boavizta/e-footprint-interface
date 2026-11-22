@@ -64,7 +64,7 @@ jobs:
                   poetry run python manage.py collectstatic --noinput
 
             - name: Run unit and integration tests
-              run: poetry run pytest tests/unit_tests tests/integration
+              run: poetry run pytest tests/unit_tests tests/integration comprehension_harness/python/tests
 
             - name: Install Playwright browsers
               run: poetry run playwright install --with-deps chromium

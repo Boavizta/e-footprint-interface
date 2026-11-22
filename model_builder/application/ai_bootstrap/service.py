@@ -5,7 +5,7 @@ from typing import Callable
 
 from efootprint.core.system import System
 
-from model_builder.narrate import narrate
+from comprehension_harness.python import narrate
 
 from .catalogs import Resolution
 from .dsl import ModelSpec, WebEdgeSpec, build_system, parse_json, validate_tolerating_extras
