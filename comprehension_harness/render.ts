@@ -1143,8 +1143,8 @@ export async function planDbDiffs(sources: PlanSources = readPlanSources()): Pro
 }
 
 // ── The plan page ──────────────────────────────────────────────────────────────
-// Read top down: the flows the change lands in, each step one grey line for what it does today and one bold
-// line per change that lands there; then a card per piece of the plan (its statement and reason from plan.md,
+// Read top down: the pieces no flow shows; the flows the change lands in, each step one grey line for what it
+// does today and one bold line per change that lands there; then a card per piece of the plan (its statement and reason from plan.md,
 // one line per place in the code, one per test); then the rules' owners, the decisions across pieces, and the
 // points the reviewer must answer. A site's clause is written once, at the site, and drawn in its flow row and
 // in its card.
@@ -1368,7 +1368,7 @@ function landsLabel(piece: PlanPiece, group: PlanGroup | undefined, narratives: 
   };
   const lands = stepsOf(piece.sites);
   if (lands) return lands;
-  if (piece.sites.length === 0) return piece.built.sites.length ? 'built: its places are code' : 'no runtime line';
+  if (piece.sites.length === 0) return piece.built.sites.length ? 'built: its places are code' : piece.statics.length ? 'no runtime line' : 'no place in this repository\'s code';
   // A piece of shells runs where the sites that name its functions land.
   const shells = piece.sites.filter((x) => x.change === 'added');
   const callers = plan.pieces.flatMap((other) => other.sites).filter((x) => !piece.sites.includes(x) && shells.some((shell) => names(x.sentence, shell.fn)));
@@ -1444,7 +1444,11 @@ export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrati
       ? `<span class="flag">${esc(folder)}plan.md does not exist</span>: the pieces have no statement and no reason.`
       : `<span class="flag">${esc(folder)} does not exist — <code>--check</code> fails on it.</span>`}</p>`;
   const { flows, shown } = planFlows(ctx);
-  const beside = plan.pieces.filter((s) => !s.sites.some((x) => shown.has(x)));
+  // What no flow shows is read first: a piece no narrative crosses, one with no place in this repository. A
+  // flow gives such a piece no context, so nothing else on the page points the reader at it. A piece whose
+  // places all became code is no such piece.
+  const outside = plan.pieces.filter((s) => !s.sites.some((x) => shown.has(x)) && !pieceState(s).done && !(s.sites.length === 0 && s.built.sites.length > 0));
+  const cards = [...outside, ...plan.pieces.filter((s) => !outside.includes(s))];
   const asks = plan.pieces.filter((s) => s.doc?.ask);
   const waiversToConfirm = plan.rules.filter((r) => r.waiver?.toConfirm);
   const points = asks.length + waiversToConfirm.length;
@@ -1465,16 +1469,19 @@ ${points || bar ? `
 <h2 id="answers">Your answers${points ? ` — ${plural(points, 'point')} to confirm, each answered where it is stated` : ''}</h2>
 ${points ? `<p class="pbox">${[...asks.map((s) => `<a class="slug ask" href="#ask-${s.slug}">#${s.slug} ?</a>`), ...waiversToConfirm.map((r) => `<a class="slug ask" href="#rule-${r.slug}">no test for ${r.slug} ?</a>`)].join(' ')}</p>` : ''}
 ${bar}` : ''}
+${outside.length ? `
+<h2 id="outside">Outside the narrated flows — ${plural(outside.length, 'piece')}</h2>
+<div class="pbox outside">${outside.map((s) => `<div class="pline"><span class="where">${pieceChip(s)}<br><small>${landsLabel(s, plan.groups.find((g) => g.pieces.includes(s)), narratives, plan)}</small></span><span class="clause">${s.doc ? planInline(s.doc.what, plan) : '<span class="pending">no statement in plan.md</span>'}</span></div>`).join('')}</div>
+<p class="legend">No flow${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}: ${outside.length === 1 ? 'its card is' : 'their cards are'} the first of the pieces.</p>` : ''}
 ${flows.length ? `
 <h2 id="flows">The change, in the ${flows.length === 1 ? 'flow' : `${flows.length} flows`} it lands in</h2>
 <div class="flows">
 ${flows.map((f) => flowHtml(f, ctx)).join('\n')}
 </div>
 <p class="legend">Grey is what a step does today; the line under it is what changes there.${asks.length ? ` A piece marked <span class="slug ask">?</span> holds a point for you to confirm: ${asks.length} in all.` : ''}</p>` : ''}
-${beside.length ? `<p class="legend">Beside the flows: ${beside.map(pieceChip).join(' ')}</p>` : ''}
 
 <h2 id="plan">The ${plural(plan.pieces.length, 'piece')} — ${plural(places, 'place')} in the code, ${plural(toWrite, 'test')} to write${builtPlaces ? `, ${plural(builtPlaces, 'place')} built` : ''}</h2>
-${plan.pieces.map((s) => planPieceHtml(s, ctx)).join('\n')}
+${cards.map((s) => planPieceHtml(s, ctx)).join('\n')}
 ${planJourneyCasesHtml(plan)}
 ${planRulesHtml(plan)}
 ${across.length ? `

@@ -161,6 +161,7 @@
   .pline .where { font-size: .8rem; overflow-wrap: anywhere; } .pline .where a.src { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .pline small { color: var(--faint); font-size: .76rem; }
   .pbox.rules .pline { grid-template-columns: 12rem 1fr minmax(18rem, 36%); }
+  .pbox.outside .pline { grid-template-columns: minmax(12rem, 24%) 1fr; padding: .3rem 0; }
   .pline > .rule { justify-self: start; }
   .pline:target { background: var(--accent-soft); }
   details.pfold { margin: .5rem 0 0; font-size: .82rem; color: var(--muted); }
@@ -203,4 +204,4 @@
   .crow > code { font-size: .76rem; color: var(--muted); } .crow .cfiles { grid-column: 2; font-size: .8rem; } .crow details.cfiles > summary { cursor: pointer; color: var(--muted); }
   .cfile { display: inline-block; margin-right: .9rem; white-space: nowrap; } .cfile small { color: var(--faint); } .cfile a.src { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .badge { font: 600 .66rem/1.6 system-ui, sans-serif; color: #b45309; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 999px; padding: 0 .45rem; white-space: nowrap; }
-  @media (max-width: 46rem) { .pline, .pbox.rules .pline { grid-template-columns: 4.6rem 1fr; } .pline .clause { grid-column: 2; } .pbox.rules .pline .where { grid-column: 2; } }
+  @media (max-width: 46rem) { .pline, .pbox.rules .pline { grid-template-columns: 4.6rem 1fr; } .pline .clause { grid-column: 2; } .pbox.rules .pline .where { grid-column: 2; } .pbox.outside .pline { grid-template-columns: 1fr; } .pbox.outside .pline .clause { grid-column: 1; } }
