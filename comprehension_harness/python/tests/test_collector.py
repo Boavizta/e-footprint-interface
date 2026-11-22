@@ -152,6 +152,7 @@ def timeless(stories: list[dict]) -> list[dict]:
 
 
 def test_the_stories_of_a_parallel_run_are_those_of_a_plain_one(project):
+    pytest.importorskip("xdist", reason="a project that does not run its tests in parallel has no such run")
     root = project(PROJECT)
     run_tests(root)
     plain = timeless(stories_of(root))

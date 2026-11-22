@@ -130,7 +130,8 @@ What the project writes to use it, the same in every project:
   ["python3", "-m", "comprehension_harness.python.source_index"], "titles": ["python3", "-m",
   "comprehension_harness.python.titles"] }` and `"watch": ["python3", "-m",
   "comprehension_harness.python.watch"]` under `commands`.
-- `comprehension_harness/python/tests` among the paths its pytest run collects.
+- `comprehension_harness/python/tests` among the paths its pytest run collects. A run that collects from
+  the root takes them without a word, and leaves the tools' fixtures alone.
 
 **A project's code imports nothing of this folder.** The calls are the one thing that runs in
 production, and each project holds them in its own package, for two reasons. A published package

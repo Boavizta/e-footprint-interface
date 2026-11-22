@@ -42,6 +42,7 @@
       "comprehension_harness/stack.ts",
       "comprehension_harness/tests/backlinks.test.ts",
       "comprehension_harness/tests/commits.test.ts",
+      "comprehension_harness/tests/conftest.py",
       "comprehension_harness/tests/fixtures/shop/README.md",
       "comprehension_harness/tests/fixtures/shop/shop/checkout.py",
       "comprehension_harness/tests/fixtures/shop/shop/pricing.py",
