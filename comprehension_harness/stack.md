@@ -29,7 +29,8 @@ every stack.
 ## Rules the four share
 
 - A path is relative to the repository root, with `/`. Lines and columns start at 1.
-- **A site is a file and a line.** One `narrate`, `event` or `planned` call per line.
+- **A site is a file and a line.** One `narrate`, `event` or `planned` call per line. A template makes the
+  calls too, where the stack reads them: there a site is a tag, in no function.
 - **A function has one name**: the one the stack's own frames print (V8's in JavaScript,
   `__qualname__` in Python). A story's frame and an indexed function are matched by `file` and
   `fn`.
@@ -43,7 +44,7 @@ every stack.
 One JSON array per test file, at `<stories>/<the test file, "/" written "__">.json`, `<stories>`
 being `<cache>/stories` of the configuration. A file's run deletes its story file when it starts
 and writes it when it ends, so a stale story is never read. A test that crosses no site has no
-story; a file with no story writes no file. Every test is recorded, in a declared narrative or
+story, but for a reproduction; a file with no story writes no file. Every test is recorded, in a declared narrative or
 not: the tests reaching a site are counted over all of them.
 
 | Field | Holds |
@@ -52,8 +53,10 @@ not: the tests reaching a site are counted over all of them.
 | `narrative` | `{ title, kind }` of the narrative the test is declared in, `kind` being `product` or `mechanism`; `null` outside one |
 | `canonical` | The test marked itself the narrative's reference case |
 | `order` | A number growing with the run: variants are told in that order |
-| `state`, `durationMs` | Shown on the page, never judged |
+| `state`, `durationMs` | Shown on the page, never judged. `xfailed` for a failure the run expected |
 | `hits` | The calls crossed, in order |
+| `reproduction` | Optional. The test is declared to fail today, for a bug its piece fixes: it has a story whatever it crossed |
+| `failure` | Optional. How the test failed, of a failure the run expected too: `{ message, file, line }` |
 | `capped` | Optional. `[{ file, line, kept, omitted }]`: a site keeps its first 50 hits of a test and counts the rest |
 
 A hit:
@@ -61,6 +64,7 @@ A hit:
 | Field | Holds |
 |---|---|
 | `kind` | `step`, `event` or `planned` |
+| `planned` | For a `planned` hit: `{ feature, slug, change }` |
 | `sentence` | As passed to the call |
 | `watch` | The watch's value as plain JSON, or `null`. `{ "error": "…" }` when computing it threw, which never fails the test |
 | `site` | The frame of the call: `{ file, line, column, fn }`, `fn` `null` for a function with no name |
@@ -125,7 +129,12 @@ source by the test.
   `RegExp` (`SourceReader.looksDeclared`).
 - `files` holds every file of the source folders and every test file that declares a narrative.
 - A `planned` site adds `"planned": { "feature", "slug", "change", "signature" }`, `change` being
-  `changed`, `removed` or `added`.
+  `changed`, `removed`, `added` or `evidence`. Evidence is a place a bug shows: it marks no
+  change and goes with the fix. A changed or an evidence site may add `"expect"`, the value each
+  key of its watch should have, as the source states it: the stack reads it from the source and
+  never at run time, so it is a literal.
+- A site of a template has `"fn": "(template)"`, in a story too, and its file lists nothing but
+  its sites.
 - `functions`: every named function, with the line its name is on. A site or a local belongs to
   the functions whose lines hold it.
 - `declarations` are the top-level ones; `locals` every other one (a parameter, a variable, an
@@ -143,7 +152,7 @@ a commit. The answer:
 
 | Field | Holds |
 |---|---|
-| `tests` | Every test in file order: `{ title, line, column, planned }`. `planned` is a test declared with no body: `it.todo` in vitest, a function under a marker that carries the title in pytest |
+| `tests` | Every test in file order: `{ title, line, column, planned }`. `planned` is a test declared with no body: `it.todo` in vitest, a function under a marker that carries the title in pytest. `reproduction: true` is added for a written test declared to fail today, for a bug to fix |
 | `stands` | For each line that opens a test, a group of tests or a declaration: `{ line, label, test }`. A `@planned` comment right above that line stands on it. `label` is what the pages print; `test` is the title when the line opens one test |
 | `journeyCases` | The cases a feature will add to a journey, declared in a journey test: `{ feature, journey, screen, title, line, column }` |
 

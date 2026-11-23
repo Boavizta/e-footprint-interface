@@ -329,7 +329,15 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
   const siteHead = (x) => {
     const inside = x.crossedBy.map((c) => `${c.narrative}${c.step ? ` step ${c.step.n} (${c.step.how === 'in' ? 'in' : c.step.how === 'via' ? 'through' : 'right after'} ${c.step.label})` : ', in no step'}`).join('; ');
     const tests = x.reachedBy.reduce((a, r) => a + r.tests, 0);
-    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}`,
+    // Evidence marks no change: it says what a reproduction saw at the place, and goes with the fix.
+    if (x.change === 'evidence') {
+      const differs = (flat) => Object.entries(x.expect ?? {}).some(([key, value]) => JSON.stringify(JSON.parse(flat)?.[key]) !== JSON.stringify(value));
+      // What the place does not expect is said first: that is the bug.
+      const seen = [...new Set((x.seenBy ?? []).flatMap((s) => s.watches).filter((w) => w !== null).map((w) => JSON.stringify(w)))].sort((a, b) => Number(differs(b)) - Number(differs(a)));
+      return [`  evidence ${at(x)}  in ${x.fn} — ${x.sentence}`,
+        `    goes with the fix${x.expect ? `  · should see ${JSON.stringify(x.expect)}` : ''}${seen.length ? `  · a reproduction saw ${seen.slice(0, 3).join(' | ')}${seen.length > 3 ? ` … (${seen.length} values)` : ''}` : '  · crossed by no reproduction yet'}`];
+    }
+    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}${x.expect ? `  · should see ${JSON.stringify(x.expect)}` : ''}`,
       ...(x.change === 'added' ? [`    called from: ${(plan.calledFrom?.[x.id] ?? []).map((c) => `${at(c)} (#${c.slug})`).join(', ') || 'NOWHERE — no site names it'}`] : []),
       `    ${x.change === 'added' ? `new seam: ${x.signature ?? x.fn}` : inside ? `lands in ${inside}` : 'crossed by no narrative'}${tests ? `  · reached by ${plural(tests, 'test')} in ${plural(x.reachedBy.length, 'file')}` : x.change === 'added' ? '' : '  · seen by no run yet: run the narrative tests it should sit in, then ask again'}`];
   };
@@ -388,7 +396,10 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
   for (const tier of TIERS) {
     const todos = piece.todos.filter((t) => t.tier === tier);
     const toWrite = todos.filter((t) => !t.written).length;
-    if (todos.length) out.push(`  ${tier} tests (${toWrite} to write${todos.length > toWrite ? `, ${todos.length - toWrite} written` : ''}):`, ...todos.filter((t) => whole || !t.written).flatMap((t) => [`    ${at(t)}  ${t.written ? 'written — ' : ''}${t.title}${t.rule ? `  [owns ${t.rule}]` : ''}`, ...(notes.get(t) ?? []).map((x) => `      how: ${x.text}  (the comment at :${x.line}, which goes)`)]));
+    const failing = todos.filter((t) => t.reproduction).length;
+    // A reproduction is written and fails today: it is owed until the piece is built and it is declared a test like another.
+    const said = (t) => (t.reproduction ? `FAILS TODAY, a reproduction${t.run?.failure ? ` (${t.run.failure.message.split('\n')[0].slice(0, 120)})` : ''} — ` : t.written ? 'written — ' : '');
+    if (todos.length) out.push(`  ${tier} tests (${toWrite} to write${failing ? `, ${failing} failing today` : ''}${todos.length > toWrite + failing ? `, ${todos.length - toWrite - failing} written` : ''}):`, ...todos.filter((t) => whole || !t.written || t.reproduction).flatMap((t) => [`    ${at(t)}  ${said(t)}${t.title}${t.rule ? `  [owns ${t.rule}]` : ''}`, ...(notes.get(t) ?? []).map((x) => `      how: ${x.text}  (the comment at :${x.line}, which goes)`)]));
   }
   if (piece.todos.length === 0) out.push('  no test to write');
   const moved = code ? (plan.delta ?? []).find((d) => d.kind === 'piece' && d.name === `#${piece.slug}`) : undefined;
@@ -562,6 +573,8 @@ function reach(map, name) {
   if (untraced.length) say(`NOT LISTED ABOVE — the tests of what ${untraced.length === 1 ? 'this comment site changes' : `these ${untraced.length} comment sites change`}: a comment is crossed by no run, so find them by the symbol`, ...untraced.map((x) => `    ${at(x)} — ${x.text}`), '');
   const planned = pieces.flatMap((piece) => piece.todos.filter((t) => !t.written));
   if (planned.length) say(`Planned, to write — ${planned.length}`, ...planned.map((t) => `    ${at(t)}  ${t.tier} — ${t.title}`));
+  const failing = pieces.flatMap((piece) => piece.todos.filter((t) => t.reproduction));
+  if (failing.length) say(`Failing today, the reproductions — ${failing.length}`, ...failing.map((t) => `    ${at(t)}  ${t.tier} — ${t.title}`));
 }
 
 const VERBS = {

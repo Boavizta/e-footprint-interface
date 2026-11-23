@@ -15,6 +15,8 @@ repository's (`.agents/repository.md`).
 - A **rule** is a behaviour of the spec that no screen shows. One test owns it, or a **waiver**
   says why none does.
 - A **lot** is what one implementer delivers and one reviewer reads: a few pieces, a commit each.
+- A **reproduction** is a written test that fails today, for the bug its piece fixes. **Evidence**
+  is a place the bug shows, with the values a reproduction saw there.
 - A **unit** is one thing the reviewer approves: a piece, a decision across pieces, the waivers,
   the delivery, the journey cases, a narrative's steps.
 
@@ -79,6 +81,29 @@ An existing test that changes carries an `@planned` comment. One a planned case 
 an `@planned.remove` comment naming the holder, and says "planned" when the holder is not written
 yet. An existing case extended is a planned test beside it, under a comment saying which case it
 is and that no case is added.
+
+## A bug
+
+A piece that fixes a bug says, beside what changes, what is wrong today. Two forms carry it, and
+the plan page draws them as one chain under the piece: each reproduction, the places it crossed
+in run order with the values it saw at each, then how it failed.
+
+- **A reproduction** is declared in place of a planned test, under the same kind of title. It is
+  written, it asserts what should be, and a run expects its failure, strictly. It observes
+  everything it has to and asserts once, at its end: a story stops where its test fails. A bug
+  whose chain crosses a process has one reproduction per process, joined by the piece.
+- **Evidence** is a call on a line the bug shows at, with a watch: what is seen there today. It
+  marks no change, so it stands where the cause is even when the fix is elsewhere.
+- **`expect`**, on evidence or on a `planned` call, gives the value a key of the watch should
+  have, as a literal. The page sets it against what the reproduction saw, in red where it
+  differs. A place crossed for what works too expects what works: the crossings that differ are
+  the bug.
+
+The check fails on evidence in a piece with no reproduction, and on a place whose reproductions
+saw only what it expects: the bug does not show there. It names the test files to run when no
+story crosses an evidence site. The piece is built when its evidence is gone and its
+reproductions are declared as written tests; until then its lot is not delivered and the archive
+gate holds.
 
 ## `plan.md`
 
@@ -206,6 +231,8 @@ the code.
 
 - Each `planned` call becomes code, and each comment goes.
 - Each planned test becomes a test under the same title, tag and `[rule]` kept until the archive.
+- Each evidence call goes, with nothing written in its place, and each reproduction passes and is
+  declared as a written test, under the same title.
 - **A `planned` call does not become a `narrate` by rule.** A sentence the code makes false is
   corrected in the piece's commit. New and removed steps are written in one pass, the lot's last
   commit.
@@ -232,4 +259,5 @@ a cause a test simulates calls it in the test. No prose names a step by its numb
 
 A bug batch still writes `tasks.md`, diagnostics and a `plan.html` with its callouts (the
 `bug-fixes` and `bug-fixes-plan` skills). So does a feature planned before pieces, until it is
-ported.
+ported. One batch is being ported to pieces, a bug at a time, to settle the forms of "A bug"
+above before those skills are rewritten.

@@ -22,11 +22,22 @@ around them, a function or class of an enclosing function. A call on a value of 
 
 Refused, with the file and the line: a file the parser refuses, a call imported from the reference and not
 from the project's copy, two calls on one line, a tag or a sentence
-that is no literal string, a watch that is no lambda, a tag that is not ``<feature>#<slug>``, a shell that
-raises anything but ``planned: <tag>``, a narrative that is not declared on a class under one literal title.
+that is no literal string, a watch that is no lambda, an ``expect`` that is no literal dict of plain values, a
+tag that is not ``<feature>#<slug>``, a shell that raises anything but ``planned: <tag>``, a narrative that is
+not declared on a class under one literal title.
 
 The literal and the lambda are what keeps the calls inert in production: Python computes a call's arguments
 before the call, and a call does nothing there. A literal and a lambda cost nothing to compute.
+
+``planned.evidence(…)`` is a planned site whose change is ``evidence``: a place a bug shows, which goes with the
+fix. ``expect={…}`` on it, or on a ``planned`` call, is read here and never at run time: the site says it as
+``expect``, the value each key of the watch should have.
+
+A template makes the calls as tags, and no ``ast`` reads it: an ``.html`` file of the source folders is read for
+``{% narrate "…" %}``, ``{% event "…" %}``, ``{% planned "<feature>#<slug>" "…" %}`` and ``{% evidence
+"<feature>#<slug>" "…" %}``, one a line, each a site of the file in no function. After the sentence a tag gives
+its watch as ``key=value`` pairs, which the template resolves when a run collects, and after the word ``expect``
+the values the place should see, each a literal: ``{% evidence "a#b" "…" kind=row.kind expect kind="card" %}``.
 
 Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config`` and
 ``--declare``, the module the declarations are imported from.
@@ -56,6 +67,8 @@ FUNCTIONS = (ast.FunctionDef, ast.AsyncFunctionDef)
 # What has names of its own. A list, set or dict comprehension runs in its function's frame; a generator
 # expression and a lambda in a frame with no name.
 COMPREHENSIONS = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+# The forms of `planned` that are written `planned.<form>(…)`, and the change each says.
+PLANNED_FORMS = {"remove": "removed", "evidence": "evidence"}
 SCOPES = (*FUNCTIONS, ast.ClassDef, ast.Lambda, *COMPREHENSIONS)
 SKIPPED_FOLDERS = ("__pycache__", "node_modules")
 
@@ -369,19 +382,20 @@ class FileIndex(ast.NodeVisitor):
         source = found[1].source if found else None
         return source[1] if source and source[0] == module else None
 
-    def call_kind(self, node: ast.Call) -> tuple[str, bool] | None:
-        """The kind of site a call is and whether it is ``planned.remove``; None for any other call."""
+    def call_kind(self, node: ast.Call) -> tuple[str, str] | None:
+        """The kind of site a call is and the change it says, ``changed`` for any call that is not written
+        ``planned.<form>``; None for any other call."""
         callee = node.func
         if isinstance(callee, ast.Attribute):
-            if self.imported_as(callee.value, self.calls) == "planned" and callee.attr == "remove":
-                return "planned", True
+            if self.imported_as(callee.value, self.calls) == "planned" and callee.attr in PLANNED_FORMS:
+                return "planned", PLANNED_FORMS[callee.attr]
             if callee.attr in KINDS and self.dotted_of(callee.value) == self.calls:
                 self.refuse(node, f"the calls are imported by name: from {self.calls} import {callee.attr}")
             return None
         kind = KINDS.get(self.imported_as(callee, self.calls) or "")
         if kind is None and self.calls != REFERENCE_CALLS and self.imported_as(callee, REFERENCE_CALLS) in KINDS:
             self.refuse(node, f"the calls are imported from this project's copy, {self.calls}, not from the reference")
-        return (kind, False) if kind else None
+        return (kind, "changed") if kind else None
 
     def visit_Call(self, node) -> None:
         found = self.call_kind(node)
@@ -389,7 +403,7 @@ class FileIndex(ast.NodeVisitor):
             self.generic_visit(node)
             return
         # A site, and nothing inside it is read as a use: a watch is documentation.
-        kind, removes = found
+        kind, change = found
         if node.lineno in self.site_lines:
             self.refuse(node, f"one narrate, event or planned call a line: a site is a file and a line, and this "
                               f"line already holds a {self.site_lines[node.lineno]}")
@@ -397,26 +411,44 @@ class FileIndex(ast.NodeVisitor):
         literals = 2 if kind == "planned" else 1
         site = {"kind": kind, "line": node.lineno, "column": node.col_offset + 1, "fn": self.frame_name(),
                 "sentence": literal_argument(node, literals - 1)}
+        expected = [keyword for keyword in node.keywords if keyword.arg == "expect"]
         if kind == "planned":
-            site["planned"] = self.planned(node, literal_argument(node, 0), site["sentence"], removes)
+            site["planned"] = self.planned(node, literal_argument(node, 0), site["sentence"], change)
+            if expected and change != "removed":
+                site["planned"]["expect"] = self.expect(expected[0].value)
         elif site["sentence"] is None:
             self.refuse(node, "the sentence of a narrate or event call is a literal string: anything else is "
                               "computed in production, where the call does nothing")
-        for argument in [*node.args[literals:], *(keyword.value for keyword in node.keywords)]:
+        watches = [keyword.value for keyword in node.keywords if kind != "planned" or keyword not in expected]
+        for argument in [*node.args[literals:], *watches]:
             if not isinstance(argument, ast.Lambda):
                 self.refuse(argument, "the watch is a lambda (lambda: {…}): anything else is computed in production, "
                                       "where nobody reads it")
         self.sites.append(site)
 
-    def planned(self, node: ast.Call, tag: str | None, sentence: str | None, removes: bool) -> dict:
+    def expect(self, node) -> dict:
+        """What ``expect={…}`` says, a key of the watch each: read from the source, so a literal."""
+        try:
+            said = ast.literal_eval(node)
+        except (ValueError, SyntaxError):
+            said = None
+        plain = (str, int, float, bool, type(None))
+        if not isinstance(said, dict) or not said or not all(isinstance(key, str) for key in said) or not all(
+                isinstance(value, plain) or (isinstance(value, list) and all(isinstance(one, plain) for one in value))
+                for value in said.values()):
+            self.refuse(node, 'expect is a literal dict, a key of the watch each and a plain value or a list of '
+                              'them (expect={"status": 200}): the page reads it from the source')
+        return said
+
+    def planned(self, node: ast.Call, tag: str | None, sentence: str | None, change: str) -> dict:
         if tag is None or sentence is None:
             self.refuse(node, 'planned(…) needs a literal "<feature>#<slug>" and a literal sentence')
         parsed = PLANNED_TAG.match(tag)
         if parsed is None:
             self.refuse(node, f'"{tag}" is not <feature>#<slug>, two kebab-case names around one #')
         piece = {"feature": parsed.group(1), "slug": parsed.group(2)}
-        if removes:
-            return {**piece, "change": "removed", "signature": None}
+        if change != "changed":
+            return {**piece, "change": change, "signature": None}
         shell = self.shell_around(node)
         if shell is None:
             return {**piece, "change": "changed", "signature": None}
@@ -466,13 +498,81 @@ class FileIndex(ast.NodeVisitor):
                 "summary": re.sub(r"\s+", " ", paragraph).strip(), "firstTest": first}
 
 
-def python_files(root: Path, folder: str) -> list[str]:
-    """The Python files under a folder, as paths from the root."""
+def files_under(root: Path, folder: str, suffix: str) -> list[str]:
+    """The files of one kind under a folder, as paths from the root."""
     found = []
     for directory, folders, files in os.walk(root / folder):
         folders[:] = sorted(f for f in folders if not f.startswith(".") and f not in SKIPPED_FOLDERS)
-        found.extend((Path(directory) / f).relative_to(root).as_posix() for f in sorted(files) if f.endswith(".py"))
+        found.extend((Path(directory) / f).relative_to(root).as_posix() for f in sorted(files) if f.endswith(suffix))
     return found
+
+
+def python_files(root: Path, folder: str) -> list[str]:
+    return files_under(root, folder, ".py")
+
+
+# A call a template makes: a tag named after it. What a function is to a Python site, a template has none of.
+TEMPLATE_TAG = re.compile(r"\{%-?\s*(narrate|event|planned|evidence)\s+(.*?)\s*-?%\}")
+TEMPLATE_WORD = re.compile(r'''"(?:[^"\\]|\\.)*"|[^\s"]+(?:"(?:[^"\\]|\\.)*")?''')
+TEMPLATE_FN = "(template)"
+TEMPLATE_LITERALS = {"True": True, "False": False, "None": None}
+
+
+def template_literal(written: str, where: str):
+    """A value of a tag's ``expect``: a string in double quotes, a number, True, False or None."""
+    if len(written) >= 2 and written[0] == written[-1] == '"':
+        return written[1:-1].replace('\\"', '"')
+    if written in TEMPLATE_LITERALS:
+        return TEMPLATE_LITERALS[written]
+    try:
+        return int(written)
+    except ValueError:
+        try:
+            return float(written)
+        except ValueError:
+            raise Refusal(f'{where} — after expect, a value is a literal ("text", 3, True, None), not {written}: the '
+                          f'page reads it from the source') from None
+
+
+def template_sites(file: str, text: str) -> list[dict]:
+    """The sites of a template: its ``narrate``, ``event``, ``planned`` and ``evidence`` tags, one a line."""
+    sites = []
+    for number, line in enumerate(text.split("\n"), start=1):
+        found = list(TEMPLATE_TAG.finditer(line))
+        if not found:
+            continue
+        where = f"{file}:{number}"
+        if len(found) > 1:
+            raise Refusal(f"{where} — one narrate, event, planned or evidence tag a line: a site is a file and a line")
+        call, words = found[0].group(1), TEMPLATE_WORD.findall(found[0].group(2))
+        literals = 2 if call in ("planned", "evidence") else 1
+        said = [word[1:-1].replace('\\"', '"') for word in words[:literals] if word.startswith('"') and word.endswith('"')]
+        if len(said) < literals:
+            raise Refusal(f'{where} — {{% {call} %}} opens with {"its tag and its sentence" if literals == 2 else "its sentence"}'
+                          f', in double quotes: anything else is computed in production, where the tag does nothing')
+        rest = words[literals:]
+        watched = rest[:rest.index("expect")] if "expect" in rest else rest
+        expected = rest[rest.index("expect") + 1:] if "expect" in rest else []
+        pairs = [word.partition("=") for word in [*watched, *expected]]
+        if any(not key.isidentifier() or not separator or not value for key, separator, value in pairs) or (
+                "expect" in rest and not expected):
+            raise Refusal(f"{where} — after the sentence a tag gives key=value pairs, the watch, then after the word "
+                          f"expect the values the place should see")
+        site = {"kind": KINDS.get(call, "planned"), "line": number, "column": found[0].start() + 1,
+                "fn": TEMPLATE_FN, "sentence": said[-1]}
+        if literals == 2:
+            parsed = PLANNED_TAG.match(said[0])
+            if parsed is None:
+                raise Refusal(f'{where} — "{said[0]}" is not <feature>#<slug>, two kebab-case names around one #')
+            site["planned"] = {"feature": parsed.group(1), "slug": parsed.group(2),
+                               "change": "evidence" if call == "evidence" else "changed", "signature": None}
+            if expected:
+                site["planned"]["expect"] = {key: template_literal(value, where)
+                                             for key, _, value in (word.partition("=") for word in expected)}
+        elif expected:
+            raise Refusal(f"{where} — expect is said of a planned or an evidence tag: a step expects nothing")
+        sites.append(site)
+    return sites
 
 
 def build(root: Path, settings: dict, declare: str = DECLARE_MODULE) -> dict:
@@ -484,6 +584,7 @@ def build(root: Path, settings: dict, declare: str = DECLARE_MODULE) -> dict:
         raise Refusal(f'{CONFIG_FILE} — "source.app", "tests.roots", "tests.files" and "stack.calls" are read '
                       f'from it, and {error} is missing') from None
     source_files = sorted({file for folder in source_folders for file in python_files(root, folder)})
+    templates = sorted({file for folder in source_folders for file in files_under(root, folder, ".html")})
     # A test file can only declare a narrative or hold a site if it names where they are imported from.
     words = {calls.split(".")[-1], declare.split(".")[-1]}
     test_files = sorted({file for folder in test_roots for file in python_files(root, folder)
@@ -497,6 +598,12 @@ def build(root: Path, settings: dict, declare: str = DECLARE_MODULE) -> dict:
         if file in source_files or index.narratives or index.sites:
             narratives.extend(index.narratives)
             files[file] = index.tables()
+    # A template is listed when it holds a site: it has no function, no declaration and no reference to index.
+    for file in templates:
+        text = (root / file).read_text()
+        sites = template_sites(file, text) if "{%" in text else []
+        if sites:
+            files[file] = {"sites": sites, "functions": [], "declarations": [], "imports": [], "locals": [], "uses": []}
     return {"looksDeclared": LOOKS_DECLARED, "narratives": narratives, "files": files}
 
 

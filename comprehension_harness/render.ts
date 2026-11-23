@@ -95,7 +95,7 @@ import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, editItems, filesNamed, findings, isOwnNotice, lotLeft, names, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, siteLineOf, unexpected, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -1085,10 +1085,14 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
     const p = site.planned!;
     const crossedBy: PlanSite['crossedBy'] = [];
     const reachedBy = new Map<string, string[]>();
+    const seenBy: PlanSite['seenBy'] = [];
     for (const story of stories) {
-      const at = story.hits.findIndex((h) => h.kind === 'planned' && index.identity(h.site).id === site.id);
+      const here = (h: StoryHit) => h.kind === 'planned' && index.identity(h.site).id === site.id;
+      const at = story.hits.findIndex(here);
       if (at < 0) continue;
       reachedBy.set(story.file, [...(reachedBy.get(story.file) ?? []), story.test]);
+      // A bug's evidence is what a test that fails today saw at the place, every time it crossed it.
+      if (story.reproduction) seenBy.push({ file: story.file, test: story.test, at, watches: story.hits.filter(here).map((h) => h.watch) });
       const n = narratives.find((x) => x.canonical === story);
       if (!n) continue;
       const lands = landsIn(story, at, site, n, index);
@@ -1096,14 +1100,19 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
     }
     return {
       feature: p.feature, slug: p.slug, id: site.id, file: site.file, line: site.line, column: site.column, fn: site.fn,
-      change: p.change, sentence: p.sentence, signature: p.signature,
+      change: p.change, sentence: p.sentence, signature: p.signature, expect: p.expect ?? null, seenBy,
       crossedBy, reachedBy: [...reachedBy].sort(([a], [b]) => a.localeCompare(b)).map(([file, titles]) => ({ file, tests: titles.length, titles })),
     };
+  });
+  // A reproduction's last run: its state and how it failed, from its story.
+  const todos = sources.todos.map((todo) => {
+    const story = todo.reproduction ? stories.find((s) => isStoryOf(todo, s)) : undefined;
+    return story ? { ...todo, run: { state: story.state, failure: story.failure ?? null } } : todo;
   });
   return assemblePlans({
     sites,
     statics: sources.statics,
-    todos: sources.todos,
+    todos,
     journeyCases: sources.journeyCases,
     narratives: narratives.filter((n) => n.canonical).map((n) => ({ title: n.title, kind: n.kind, steps: n.steps.map((step) => `${label(step, index)} — ${step.sentence}`) })),
     docs: featureDocs,
@@ -1233,7 +1242,7 @@ function siteClause(site: PlanSite, ctx: PlanContext): string {
   return sentenceHtml(site.sentence, source, ctx.index).html;
 }
 
-const CHANGE_MARK: Record<PlannedSite['change'], string> = { changed: 'changed', removed: 'removed', added: 'new' };
+const CHANGE_MARK: Record<PlannedSite['change'], string> = { changed: 'changed', removed: 'removed', added: 'new', evidence: 'evidence' };
 
 // ── The flows ──
 
@@ -1327,7 +1336,8 @@ function staticMark(site: StaticSite): string {
 
 function siteLine(site: PlanSite, ctx: PlanContext): string {
   const name = site.change === 'added' && site.signature ? site.signature.replace(/^export\s+(?:default\s+)?(?:async\s+)?(?:function\s+|const\s+)?/, '') : site.fn;
-  const flag = site.change === 'added' ? ''
+  // Evidence is what a reproduction saw, in no narrative: a bug is in no told flow, or it would not be one.
+  const flag = site.change === 'added' || site.change === 'evidence' ? ''
     : site.crossedBy.length === 0 ? ' <small class="pending" title="no narrative\'s reference case crosses this call">no narrative crosses it</small>'
       : '';
   const untested = site.change !== 'added' && site.reachedBy.length === 0 ? ' <small class="pending">no test reaches it</small>' : '';
@@ -1348,6 +1358,7 @@ function todoLine(todo: PlanTodo, plan: Plan): string {
       : ` <span class="flag">[${esc(todo.rule)}] is no rule of spec.md</span>`;
   const unnamed = todo.tier === 'unit' && layout.isServerTest(todo.file) ? ' <small>a db or edge test no server step names as its truth</small>' : '';
   // A planned test is a test added: its tier says where it stands.
+  if (todo.reproduction) return `<div class="pline"><span class="mark failing">fails today</span><span class="where">${placeLink(todo.file, todo.line, todo.column)} <small>${todo.tier} · reproduction</small></span><span class="clause">${clauseInline(todo.title)}${rule}</span></div>`;
   return `<div class="pline"><span class="mark added">added</span><span class="where">${placeLink(todo.file, todo.line, todo.column)} <small>${todo.tier}${todo.written ? ' · written' : ''}</small></span><span class="clause">${clauseInline(todo.title)}${rule}${unnamed}</span></div>`;
 }
 
@@ -1415,6 +1426,60 @@ function pointerHtml(pointer: Plan['pointers'][number], plan: Plan): string {
     + `<span class="clause">${stated}${planInline(pointer.reason, plan)} <small>${srcLink(plan.doc!.file, pointer.line, 1, 'plan.md')}</small></span></div>`;
 }
 
+/** The watches a place shows in full before the rest is counted. */
+const SEEN_SHOWN = 6;
+
+/** What a reproduction saw at one place: each distinct watch, counted, a value the place does not expect in red
+ *  with the one it should be. Where the place expects something, what differs is shown first and in full; the
+ *  crossings that saw what is expected are counted, and folded. */
+function seenValuesHtml(site: PlanSite, watches: unknown[]): string {
+  const distinct = new Map<string, { watch: unknown; times: number }>();
+  for (const watch of watches) {
+    if (watch === null || watch === undefined) continue;
+    const flat = JSON.stringify(watch);
+    distinct.set(flat, { watch, times: (distinct.get(flat)?.times ?? 0) + 1 });
+  }
+  const rows = [...distinct.values()].map((x) => ({ ...x, wrong: site.expect ? unexpected(site.expect, x.watch) : [] }));
+  const row = ({ watch, times, wrong }: typeof rows[number]) => {
+    const pairs = watch !== null && typeof watch === 'object' && !Array.isArray(watch)
+      ? Object.entries(watch as Record<string, unknown>).map(([key, v]) => `<span class="pair${wrong.includes(key) ? ' wrong' : ''}"><span class="k">${esc(key)}</span> ${value(v)}${wrong.includes(key) ? ` <span class="should">should be ${value(site.expect![key])}</span>` : ''}</span>`).join('')
+      : `<span class="pair">${value(watch)}</span>`;
+    const missing = wrong.filter((key) => !(watch !== null && typeof watch === 'object' && key in (watch as object))).map((key) => `<span class="pair wrong"><span class="k">${esc(key)}</span> <small>not in the watch</small> <span class="should">should be ${value(site.expect![key])}</span></span>`).join('');
+    return `<div class="seen">${times > 1 ? `<small class="times">×${times}</small>` : ''}${pairs}${missing}</div>`;
+  };
+  const list = (some: typeof rows) => `${some.slice(0, SEEN_SHOWN).map(row).join('')}${some.length > SEEN_SHOWN ? `<div class="seen"><small>… and ${plural(some.length - SEEN_SHOWN, 'other value')}</small></div>` : ''}`;
+  if (site.expect === null) return list(rows);
+  const wrong = rows.filter((x) => x.wrong.length > 0);
+  const right = rows.filter((x) => x.wrong.length === 0);
+  const crossings = right.reduce((n, x) => n + x.times, 0);
+  const expected = `<div class="seen"><small>expects</small>${Object.entries(site.expect).map(([key, v]) => `<span class="pair"><span class="k">${esc(key)}</span> <span class="should">${value(v)}</span></span>`).join('')}</div>`;
+  return `${wrong.length ? wrong.map(row).join('') : expected}${right.length ? `<details class="pfold"><summary>${plural(crossings, 'other crossing')} saw what the place expects</summary>${list(right)}</details>` : ''}`;
+}
+
+/**
+ * The bug a piece fixes, as its reproductions tell it: each test declared to fail today, the places of the
+ * piece it crossed in run order with what it saw at each, then how it failed. A reproduction is run under the
+ * debugger from here. Evidence no reproduction crossed is listed last: it shows nothing yet.
+ */
+function bugHtml(piece: PlanPiece, ctx: PlanContext): string {
+  const reproductions = piece.todos.filter((t) => t.reproduction);
+  const evidence = piece.sites.filter((s) => s.change === 'evidence');
+  if (reproductions.length === 0 && evidence.length === 0) return '';
+  const told = reproductions.map((t) => {
+    const crossed = piece.sites.flatMap((site) => site.seenBy.filter((s) => isStoryOf(t, s)).map((seen) => ({ site, seen }))).sort((a, b) => a.seen.at - b.seen.at);
+    const rows = crossed.map(({ site, seen }) => `<div class="pline"><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(site.fn)}</code>${seen.watches.length > 1 ? ` <small>crossed ×${seen.watches.length}</small>` : ''}</span><span class="clause">${siteClause(site, ctx)}${seenValuesHtml(site, seen.watches)}</span></div>`).join('');
+    const failure = t.run?.failure;
+    const failed = failure ? `<div class="failure"><small>it fails at ${failure.file ? placeLink(failure.file, failure.line) : `line ${failure.line}`}:</small><pre>${esc(failure.message)}</pre></div>`
+      : t.run ? `<p class="also"><span class="flag">Its last run did not fail (${esc(t.run.state ?? 'no state')}):</span> a reproduction that passes is a test like another, declared as one.</p>`
+        : `<p class="also"><span class="pending">No run on file:</span> run ${srcLink(t.file, 1, 1, t.file)}, then render again.</p>`;
+    return `<div class="repro"><div class="repro-head"><span class="mark failing">fails today</span><span>${clauseInline(t.title)}</span>${srcLink(t.file, t.line, t.column, '▶ debug this reproduction', ' data-debug-reproduction title="Run this test under the VS Code debugger, stopping at your breakpoints"')}</div>`
+      + `${rows ? `<div class="plines">${rows}</div>` : t.run ? '<p class="also">It crosses no place of the piece.</p>' : ''}${failed}</div>`;
+  });
+  const unseen = evidence.filter((s) => s.seenBy.length === 0);
+  const loose = unseen.length ? `<div class="repro"><p class="also"><span class="pending">Crossed by no reproduction:</span> ${unseen.map((s) => placeLink(s.file, s.line, s.column)).join(', ')}</p></div>` : '';
+  return `<div class="bug"><p class="bug-head"><b>The bug today</b> — what each reproduction saw at the piece's places, in the order it crossed them, then how it failed.</p>${told.join('')}${loose}</div>`;
+}
+
 function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   const { plan } = ctx;
   const group = plan.groups.find((g) => g.pieces.includes(piece));
@@ -1437,6 +1502,7 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   ${statement}
   ${notesHtml(piece, plan, (t) => planInline(t, plan))}
   ${pieceAskHtml(piece, plan)}
+  ${bugHtml(piece, ctx)}
   <div class="plines">${places.join('') || '<div class="pline"><span class="mark"></span><span class="where"></span><span class="clause"><small>no place in the code: planned tests only</small></span></div>'}</div>
   ${tests.length ? `<div class="plines tests">${tests.join('')}</div>` : '<p class="also">No planned test yet.</p>'}
   ${piece.sql.map((file) => dbDiffHtml(file, ctx)).join('')}
@@ -1599,9 +1665,9 @@ function deltaLinesHtml(lines: DeltaLine[], d: Pick<UnitDelta, 'kind' | 'name'>,
   const tag = (change: string) => (change === 'added' ? ' <span class="badge">new function</span>' : change === 'removed' ? ' <span class="badge">deleted</span>' : '');
   interface Row { sign: '+' | '−'; kind: string; html: string; at: string }
   const row = (facet: string, line: string, sign: Row['sign']): Row => {
-    const site = /^(changed|added|removed) (\S+) in (\S+) — (.*)$/.exec(facet === 'sites' ? line : '');
+    const site = /^(changed|added|removed|evidence) (\S+) in (\S+) — (.*)$/.exec(facet === 'sites' ? line : '');
     if (site) {
-      const x = sign === '+' ? piece?.sites.find((o) => `${o.change} ${o.file} in ${o.fn} — ${o.sentence}` === line) : undefined;
+      const x = sign === '+' ? piece?.sites.find((o) => siteLineOf(o) === line) : undefined;
       return { sign, kind: 'code', at: `sites ${site[2]} ${site[3]}`, html: `${x ? placeLink(x.file, x.line, x.column) : file(site[2])} in ${fn(site[2], site[3])}${tag(site[1])} — ${inline(site[4])}` };
     }
     const comment = /^(changes|removes) (\S+) — (.*)$/.exec(facet === 'comments' ? line : '');
@@ -1758,7 +1824,7 @@ const builtTitles = (piece: PlanPiece, file: string, removes: boolean, text: str
 /** Where a piece stands: nothing of it started, some of it code, or all of it — no place and no test left. */
 function pieceState(piece: PlanPiece): { left: number; toWrite: number; built: number; started: boolean; done: boolean } {
   const left = piece.sites.length + piece.statics.length;
-  const toWrite = piece.todos.filter((t) => !t.written).length;
+  const toWrite = piece.todos.filter(isOpenTest).length;
   const built = piece.built.sites.length + piece.built.comments.length;
   const started = built + piece.todos.filter((t) => t.written).length + piece.commits.length > 0;
   return { left, toWrite, built, started, done: started && left + toWrite === 0 };

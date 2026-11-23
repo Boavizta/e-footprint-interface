@@ -388,12 +388,11 @@ class Journeys:
         if kind not in ("step", "event") or not _runs or threading.current_thread() is threading.main_thread():
             return
         action = getattr(_request, "action", None)
-        file = self.recorder.relative(frame.f_code.co_filename)
+        site = self.recorder.site_of(kind, frame)
         if action is None:
             for run in list(_runs.values()):
-                run.unannounced = run.unannounced or f"{file}:{frame.f_lineno}"
+                run.unannounced = run.unannounced or f"{site['file']}:{site['line']}"
             return
-        site = self.recorder.frame(frame, file)
         value = None
         # The watch is read for causes only: a step's watch is the narrative page's subject.
         if kind == "event" and watch is not None:
@@ -402,7 +401,7 @@ class Journeys:
             except Exception as error:
                 value = {"error": f"{type(error).__name__}: {error}"}
         hit = {"seq": action, "kind": kind, "sentence": sentence, "watch": value,
-               "site": {"file": file, "line": site["line"], "fn": site["fn"]}}
+               "site": {"file": site["file"], "line": site["line"], "fn": site["fn"]}}
         for run in list(_runs.values()):
             with run.lock:
                 run.hits.append(hit)

@@ -143,6 +143,77 @@ def test_a_watch_that_raises_is_recorded_and_a_site_keeps_its_first_fifty_hits(p
     assert audit["capped"] == [{"file": "shop/checkout.py", "line": 18, "kept": 50, "omitted": 10}]
 
 
+REPRODUCTIONS = '''
+    from shop.narrate import planned
+    from comprehension_harness.python.declare import reproduces
+
+
+    def due(total, card):
+        planned.evidence("gift-cards#deduct-the-card", "The card is **not deducted**.",
+                         lambda: {"due": total}, expect={"due": 6})
+        return total
+
+
+    @reproduces("gift-cards#deduct-the-card: the amount due loses the card's balance")
+    def test_deducts():
+        assert due(10, 4) == 6
+
+
+    @reproduces("gift-cards#deduct-the-card: a refund goes back to the card")
+    def test_refunds():
+        assert "refund" == "card"
+'''
+
+
+def test_a_reproduction_has_a_story_that_says_how_it_fails_whatever_it_crossed(project):
+    around = {file: text for file, text in PROJECT.items() if not file.startswith("checks/")}
+    root = project({**around, "checks/test_checkout.py": REPRODUCTIONS})
+
+    done = run_tests(root)
+
+    # A failure a run expects fails no run.
+    assert done.returncode == 0 and "2 xfailed" in done.stdout, done.stdout + done.stderr
+    deducts, refunds = stories_of(root)
+    assert (deducts["state"], deducts["reproduction"]) == ("xfailed", True)
+    assert deducts["failure"] == {"message": "assert 10 == 6\n +  where 10 = due(10, 4)", "file": TEST_FILE,
+                                  "line": 13}
+    [hit] = deducts["hits"]
+    assert (hit["kind"], hit["watch"]) == ("planned", {"due": 10})
+    assert hit["planned"] == {"feature": "gift-cards", "slug": "deduct-the-card", "change": "evidence"}
+    # It crossed no call: a test that is no reproduction would have no story.
+    assert (refunds["hits"], refunds["state"], refunds["failure"]["line"]) == ([], "xfailed", 18)
+
+
+def test_a_call_a_template_makes_is_a_hit_at_its_tag_under_the_frames_that_rendered_it(project):
+    """No frame of Python says where a tag is written: the tag gives its file and its line."""
+    around = {file: text for file, text in PROJECT.items() if not file.startswith("checks/")}
+    root = project({**around, "shop/pages/rows.html": '<ul>\n  <li>{% narrate "A row is **drawn**." kind=row.kind %}</li>\n</ul>\n',
+                    "shop/pages.py": '''
+        from pathlib import Path
+        from shop.narrate import template_call
+
+
+        def tag(kind):
+            template_call("narrate", str(Path(__file__).parent / "pages/rows.html"), 2, "A row is **drawn**.",
+                          lambda: {"kind": kind})
+
+
+        def render(kind):
+            tag(kind)
+    ''', "checks/test_checkout.py": "from shop.pages import render\n\n\ndef test_rows():\n    render('card')\n"})
+
+    done = run_tests(root)
+
+    assert done.returncode == 0, done.stdout + done.stderr
+    [story] = stories_of(root)
+    [hit] = story["hits"]
+    assert (hit["kind"], hit["sentence"], hit["watch"]) == ("step", "A row is **drawn**.", {"kind": "card"})
+    assert hit["site"] == {"file": "shop/pages/rows.html", "line": 2, "column": 7, "fn": "(template)"}
+    # The function that makes the call for the template is no frame of the story: the tag is the site.
+    assert [(frame["file"], frame["fn"]) for frame in hit["stack"]] == [
+        ("shop/pages.py", "render"), ("checks/test_checkout.py", "test_rows")]
+
+
 def timeless(stories: list[dict]) -> list[dict]:
     """Stories without what differs from a run to the next: when each hit fired, how long the test took."""
     def without_times(fields: dict) -> dict:

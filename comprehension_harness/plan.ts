@@ -37,7 +37,7 @@
  */
 import { sluggedItems, type Intent, type MdBlock, type MdSection } from './intent-md';
 import type { Layout, Tier } from './layout';
-import type { NarrativeKind, Stand, TitleReader } from './stack';
+import type { NarrativeKind, PlannedChange, Stand, StoryFailure, TitleReader } from './stack';
 
 /** The piece of a plan a site belongs to: `<feature>#<slug>`, both kebab-case. */
 export interface PlannedTag {
@@ -60,11 +60,18 @@ export interface PlanSite extends PlannedTag, At {
   id: string;
   /** The function the call sits in. */
   fn: string;
-  /** `changed`: on existing code. `removed`: `planned.remove`. `added`: the only body of a shell. */
-  change: 'changed' | 'removed' | 'added';
+  /** `changed`: on existing code. `removed`: `planned.remove`. `added`: the only body of a shell. `evidence`:
+   *  `planned.evidence`, a place the bug the piece fixes shows today, which marks no change and goes with the fix. */
+  change: PlannedChange;
   /** What changes at this place, in one clause (`BUDGET.clause`). The reason is `plan.md`'s, the cases the
-   *  test titles'; the `narrate` sentence is written when the piece is implemented. */
+   *  test titles'; the `narrate` sentence is written when the piece is implemented. For evidence, what is seen
+   *  at this place today. */
   sentence: string;
+  /** The value each key of the watch should have, as the site states it; null when it states none. */
+  expect: Record<string, unknown> | null;
+  /** What each reproduction that crosses the call saw there: the watch of each crossing, in run order, and
+   *  `at`, the position of the first among the story's hits. */
+  seenBy: Array<{ file: string; test: string; at: number; watches: unknown[] }>;
   /** A shell's declaration text up to its body; null otherwise. */
   signature: string | null;
   /** The narratives whose canonical story crosses the call. `at` is the position of the first crossing among
@@ -106,7 +113,32 @@ export interface PlanTodo extends PlannedTag, At {
    *  piece's test keeps `<feature>#<slug>: … [rule]` in its title until the feature is archived, so a rule's
    *  owner can still be read once nothing is planned any more. */
   written: boolean;
+  /** Written, and declared to fail today for the bug its piece fixes (`TestTitle.reproduction`). The piece is
+   *  not built while one stands: the fix turns it into a test like another, under the same title. */
+  reproduction: boolean;
+  /** What a reproduction's last run said: its state, and how it failed. Null for any other test, and for a
+   *  reproduction no run has told yet. */
+  run: { state: string | undefined; failure: StoryFailure | null } | null;
 }
+
+/** A test of a plan that is still owed: one to write, or a reproduction that still fails. */
+export const isOpenTest = (t: Pick<PlanTodo, 'written' | 'reproduction'>) => !t.written || t.reproduction;
+
+/** Whether a story is that of a tagged test: the same file, and its title, with the case pytest or vitest adds
+ *  to a parametrized test after it. */
+export const isStoryOf = (t: PlanTodo, story: { file: string; test: string }) => story.file === t.file && story.test.startsWith(`${t.feature}#${t.slug}: ${t.title}`);
+
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+
+/** The keys of a watch whose value is not the one the site expects; every expected key for a watch that is no
+ *  object. */
+export function unexpected(expect: Record<string, unknown>, watch: unknown): string[] {
+  const seen = watch !== null && typeof watch === 'object' && !Array.isArray(watch) ? watch as Record<string, unknown> : {};
+  return Object.keys(expect).filter((key) => !(key in seen) || !same(seen[key], expect[key]));
+}
+
+/** Whether a reproduction saw at a site a value the site does not expect: the bug shows there. */
+export const showsTheBug = (site: Pick<PlanSite, 'expect' | 'seenBy'>) => site.expect !== null && site.seenBy.some((s) => s.watches.some((w) => unexpected(site.expect!, w).length > 0));
 
 /** A case the spec declared in a journey test and nobody has written yet: `todo(<feature>, <screen>, <title>)`
  *  inside `journey('<name>', …)`. It is a criterion of the spec, tagged with the feature and with no piece: a
@@ -607,7 +639,7 @@ export function scanTodos(file: string, text: string, titles: TitleReader): Arra
   for (const t of titles.read(file, text).tests) {
     if (!t.planned && !TODO_TAG.test(t.title)) continue;
     const parsed = parseTodoTitle(t.title, `${file}:${t.line}`);
-    if (parsed) out.push({ ...parsed, file, line: t.line, column: t.column, written: !t.planned });
+    if (parsed) out.push({ ...parsed, file, line: t.line, column: t.column, written: !t.planned, reproduction: t.reproduction === true, run: null });
   }
   return out;
 }
@@ -835,7 +867,8 @@ export function rulesOf(intent: Intent, file: string): Array<Omit<PlanRule, 'own
 // ── The snapshot and the delta ─────────────────────────────────────────────────
 
 /** A site, a comment and a test as a line of the snapshot: what the approval holds of each. */
-export const siteLineOf = (x: PlanSite) => `${x.change} ${x.file} in ${x.fn} — ${x.sentence}`;
+/** A site as a line of the plan. What it expects is part of what is approved: a diagnosis is its values. */
+export const siteLineOf = (x: Pick<PlanSite, 'change' | 'file' | 'fn' | 'sentence' | 'expect'>) => `${x.change} ${x.file} in ${x.fn} — ${x.sentence}${x.expect ? ` ⇒ ${JSON.stringify(x.expect)}` : ''}`;
 export const commentLineOf = (x: StaticSite) => `${x.removes ? 'removes' : 'changes'} ${x.file} — ${x.text}`;
 export const testLineOf = (t: PlanTodo) => `${t.tier} ${t.file} — ${t.title}${t.rule ? ` [${t.rule}]` : ''}`;
 const caseLineOf = (c: JourneyCase) => `${c.journey} · ${c.screen} — ${c.title}`;
@@ -963,7 +996,7 @@ const linesOf = (f: UnitDelta['facets'][number]): DeltaLine[] => [...f.removed.m
 export function placeOfLine(line: DeltaLine): string {
   // What a commit did beyond the plan is no rewording of anything: each line is its own place.
   if (line.facet === UNPLANNED) return `${UNPLANNED} ${line.text}`;
-  const site = /^(?:changed|added|removed) (\S+) in (\S+) — /.exec(line.facet === 'sites' ? line.text : '');
+  const site = /^(?:changed|added|removed|evidence) (\S+) in (\S+) — /.exec(line.facet === 'sites' ? line.text : '');
   if (site) return `sites ${site[1]} ${site[2]}`;
   const filed = /^\S+ (\S+) — /.exec(line.facet === 'comments' || line.facet === 'tests' ? line.text : '');
   return filed ? `${line.facet} ${filed[1]}` : line.facet;
@@ -1077,7 +1110,7 @@ export function lotLeft(plan: Pick<Plan, 'pieces' | 'journeyCases'>, lot: PlanLo
   const pieces = plan.pieces.filter((x) => lot.pieces.includes(x.slug));
   return {
     sites: pieces.reduce((n, x) => n + x.sites.length + x.statics.length, 0),
-    tests: pieces.reduce((n, x) => n + x.todos.filter((t) => !t.written).length, 0),
+    tests: pieces.reduce((n, x) => n + x.todos.filter(isOpenTest).length, 0),
     cases: plan.journeyCases.filter((c) => lot.screens.includes(c.screen)).length,
   };
 }
@@ -1267,7 +1300,7 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
   const failures: string[] = [];
   const info: string[] = [];
   const all = plan.pieces.flatMap((s) => [...s.sites, ...s.statics, ...s.todos]);
-  const open = (s: PlanPiece) => [...s.sites, ...s.statics, ...s.todos.filter((t) => !t.written)];
+  const open = (s: PlanPiece) => [...s.sites, ...s.statics, ...s.todos.filter(isOpenTest)];
   const left = plan.pieces.flatMap(open);
   if (!plan.folderExists) failures.push(`planned: specs/features/${plan.feature}/ does not exist, yet ${all.length} site${all.length === 1 ? '' : 's'} name${all.length === 1 ? 's' : ''} it (${all.map(at).join(', ')})`);
   // The budgets: each fact has one home, and each home is short.
@@ -1309,6 +1342,16 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
         over(words(n.text), BUDGET.note, `${plan.doc!.file}:${n.line} #${s.slug}`, 'notes what it was built with', 'one point a note: a second point is a second "Note:"');
         if (n.what === null) failures.push(`planned: ${plan.doc!.file}:${n.line} #${s.slug} holds a note with no point — "Note: **the point.** what follows from it", so the reader knows what to keep before reading why`);
       }
+    }
+  }
+  // A bug's evidence: a place that expects a value shows the bug when a reproduction saw another there.
+  for (const s of plan.pieces) {
+    const reproductions = s.todos.filter((t) => t.reproduction);
+    for (const x of s.sites) {
+      if (x.change !== 'evidence' && x.expect === null) continue;
+      if (x.change === 'evidence' && reproductions.length === 0) failures.push(`planned: ${at(x)} is evidence of #${s.slug}, which has no reproduction — a bug's evidence is what a test that fails today saw: declare one with the stack's reproduction form, or take the call off`);
+      else if (x.seenBy.length === 0 && reproductions.length > 0) info.push(`${at(x)} (#${s.slug}) is crossed by no reproduction of its piece in the stories on file — run ${reproductions.map((t) => t.file).filter((f, i, all) => all.indexOf(f) === i).join(', ')}, then check again`);
+      else if (x.expect !== null && x.seenBy.length > 0 && !showsTheBug(x)) failures.push(`planned: ${at(x)} expects ${JSON.stringify(x.expect)}, and that is what ${x.seenBy.length === 1 ? 'the reproduction that crosses it' : `the ${x.seenBy.length} reproductions that cross it`} saw — the bug does not show at this place: correct the diagnosis, or take the expectation off`);
     }
   }
   // A shell nobody names is drawn on no flow: the reviewer cannot see where the new code runs.

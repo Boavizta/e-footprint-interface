@@ -161,10 +161,10 @@ describe('slug references of plan.md', () => {
 
 const site = (slug: string, file: string, line: number, crossedBy: PlanSite['crossedBy'] = [], change: PlanSite['change'] = 'changed'): PlanSite => ({
   feature: 'demo', slug, id: `planned:demo#${slug}@${file}:${line}`, file, line, column: 3, fn: 'fn', change, sentence: `${slug} happens.`, signature: change === 'added' ? 'export function fn()' : null,
-  crossedBy, reachedBy: [],
+  crossedBy, reachedBy: [], expect: null, seenBy: [],
 });
 const comment = (slug: string, file: string, line: number, removes = false): StaticSite => ({ feature: 'demo', slug, file, line, column: 4, text: `${slug} in a comment`, removes, on: null });
-const todo = (slug: string, file: string, line: number, rule: string | null = null, tier: PlanTodo['tier'] = 'unit'): PlanTodo => ({ feature: 'demo', slug, file, line, column: 3, title: `${slug} is tested`, rule, tier, written: false });
+const todo = (slug: string, file: string, line: number, rule: string | null = null, tier: PlanTodo['tier'] = 'unit'): PlanTodo => ({ feature: 'demo', slug, file, line, column: 3, title: `${slug} is tested`, rule, tier, written: false, reproduction: false, run: null });
 const crossed = (narrative: string, at: number) => ({ narrative, at, step: null });
 
 const SPEC = '# Demo\n\n## Rules no screen shows\n\n- **owned-once** One owner.\n- **owned-twice** Two owners.\n- **owned-by-none** No owner.\n';
@@ -417,6 +417,61 @@ describe('findings', () => {
     expect(findings(unowned, true).failures).toEqual(['archive demo: rule [other-rule] is owned by no test (specs/features/demo/spec.md:6)']);
     const [done] = assemble({ todos: [written('one-rule'), written('other-rule')], docs: docs(null, spec) });
     expect(findings(done, true).failures).toEqual([]);
+  });
+});
+
+describe('a bug', () => {
+  // A reproduction is a written test declared to fail today; evidence is what it saw at a place of its piece.
+  const reproduction = (line = 3): PlanTodo => ({ ...todo('cut', 'tests/x.test.ts', line), written: true, reproduction: true });
+  const evidence = (seen: unknown[] | null, expect: PlanSite['expect'] = { due: 6 }): PlanSite => ({
+    ...site('cut', 'src/a.ts', 1, [], 'evidence'), expect,
+    seenBy: seen === null ? [] : [{ file: 'tests/x.test.ts', test: 'demo#cut: cut is tested', at: 0, watches: seen }],
+  });
+  const failed = (sites: PlanSite[], todos: PlanTodo[] = [reproduction()]) => findings(assemble({ sites, todos, docs: docs(null, null) })[0]);
+
+  it('reads a reproduction as written and still owed: its lot is not delivered, and the archive gate holds', () => {
+    const [plan] = assemble({ todos: [reproduction()], docs: docs('# P\n\n## #cut\n\nCuts.\n\n## Delivery\n\n- **a** #cut — why\n', null) });
+    expect(lotLeft(plan, plan.doc!.lots[0])).toEqual({ sites: 0, tests: 1, cases: 0 });
+    expect(findings(plan).failures).toEqual([]);
+    expect(findings(plan, true).failures).toEqual(['archive demo: 1 planned site remains — #cut at tests/x.test.ts:3']);
+  });
+
+  it('holds a place that expects a value to a reproduction that saw another there', () => {
+    expect(failed([evidence([{ due: 10 }])]).failures).toEqual([]);
+    // One crossing in many is enough: the place is crossed for what works too.
+    expect(failed([evidence([{ due: 6 }, { due: 10 }, { due: 6 }])]).failures).toEqual([]);
+    expect(failed([evidence([{ due: 6 }, { due: 6 }])]).failures.map((f) => f.split(' — ')[0])).toEqual([
+      'planned: src/a.ts:1 expects {"due":6}, and that is what the reproduction that crosses it saw',
+    ]);
+    // A key the watch does not give is a value the place does not have.
+    expect(plan.unexpected({ due: 6, kind: 'card' }, { due: 6 })).toEqual(['kind']);
+    expect(plan.unexpected({ due: 6 }, null)).toEqual(['due']);
+  });
+
+  it('asks nothing of evidence that expects no value, and says which reproductions to run for one no story crosses', () => {
+    expect(failed([evidence([{ due: 10 }], null)])).toEqual({ failures: [], info: [] });
+    const unseen = failed([evidence(null)]);
+    expect(unseen.failures).toEqual([]);
+    expect(unseen.info).toEqual(['src/a.ts:1 (#cut) is crossed by no reproduction of its piece in the stories on file — run tests/x.test.ts, then check again']);
+  });
+
+  it('fails evidence of a piece that has no reproduction: nothing can have seen it', () => {
+    expect(failed([evidence(null)], []).failures.map((f) => f.split(' — ')[0])).toEqual(['planned: src/a.ts:1 is evidence of #cut, which has no reproduction']);
+  });
+
+  it('approves what a place expects with its clause, and takes evidence that went for no place left unbuilt', () => {
+    expect(plan.siteLineOf(evidence(null))).toBe('evidence src/a.ts in fn — cut happens. ⇒ {"due":6}');
+    expect(plan.siteLineOf(evidence(null, null))).toBe('evidence src/a.ts in fn — cut happens.');
+    // A place built is one its commits wrote at; evidence goes with the fix and nothing is written there.
+    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
+    expect([...lines]).toEqual([]);
+  });
+
+  it('matches a story to its tagged test by file and title, a parametrized case included', () => {
+    const t = reproduction();
+    expect(plan.isStoryOf(t, { file: 'tests/x.test.ts', test: 'demo#cut: cut is tested' })).toBe(true);
+    expect(plan.isStoryOf(t, { file: 'tests/x.test.ts', test: 'demo#cut: cut is tested[card]' })).toBe(true);
+    expect(plan.isStoryOf(t, { file: 'tests/y.test.ts', test: 'demo#cut: cut is tested' })).toBe(false);
   });
 });
 
