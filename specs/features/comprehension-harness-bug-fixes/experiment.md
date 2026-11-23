@@ -32,17 +32,50 @@ plan's, not a bug's, so a bug ported after an approval is an edit of an approved
 
 ## Next
 
-**The reviewer reads Task 10's piece**, then approves the plan: Tasks 9 and 10, three pieces, one
-approval. Nothing of it is approved yet.
-
-Then **the small batch**: Tasks 9 and 10 delivered and fixed as one run. It is small on purpose.
-The implement stage has never met the bug forms, and what it has to hold is tested in the tools
-alone, not through a delivery:
+The plan of Tasks 9 and 10 is approved (2026-11-23): two bugs, three pieces. **The small batch** is
+now delivered and fixed, a fresh session a stage. It is small on purpose. The tasks and implement
+stages have never met the bug forms, and what they have to hold is tested in the tools alone, not
+through a delivery:
 
 - the lot check, when an evidence call goes with nothing written in its place;
 - a reproduction becoming a written test under the same title, its lot then delivered;
 - what the approval makes of a reproduction: a unit test written at the plan stage, where the
   workflow has unit tests planned at the tasks stage.
+
+The skills do not know the forms yet: "A bug batch" in `feature-implement` and `task-implement`
+describes the earlier one, tasks and an expected-failure marker to remove. Each session is told
+so, and ends with the list of where a skill or a check did not fit. A misfit is reported, not
+worked around: it is what this batch is run for.
+
+**1. The delivery**, with `spec-tasks`. One lot of the three pieces is expected, in this order:
+`#dict-entry-own-template`, `#fragment-views-show-modal`, `#explanation-ids-per-item`. Task 10
+depends on Task 9, and the two share a test file and the panel's templates. The session also
+settles what the baseline holds outside the pieces: the three browser files to run, and whether
+the line of `specs/architecture/rendering.html` on these ids becomes a place. The reviewer then
+approves the delivery on its page. To open it:
+
+> Prepare the delivery of `bug-fixes-2026-10` with `spec-tasks`. Its plan is approved and made of
+> pieces under bug sections: it is the first plan of bugs to reach this stage, as
+> `specs/features/comprehension-harness-bug-fixes/experiment.md` § "Next" says. The folder's
+> `tasks.md` and `plan.html` are the earlier form, kept as a baseline: read them for what Tasks 9
+> and 10 hold outside the pieces, and write nothing in them. End with the list of where the skill
+> or the check did not fit a reproduction, an evidence call or a bug section, and work around
+> none.
+
+**2. The run**, with `feature-implement`, on that lot: an implementer, the lot check, a reviewer,
+a commit a piece, the entry of `CHANGELOG.md`. To open it:
+
+> Run the delivery of `bug-fixes-2026-10` with `feature-implement`: a lot of pieces, not the
+> tasks of `tasks.md`. The skill's "A bug batch" section describes the earlier form and does not
+> apply. A piece that fixes a bug is built as `specs/workflow-formats.md` § "Implementing a
+> piece" says: each evidence call goes, and each reproduction passes and is declared as a written
+> test under the same title. `specs/features/comprehension-harness-bug-fixes/experiment.md`
+> § "Next" says why. Once the lot is delivered, mark Tasks 9 and 10 complete in `tasks.md`, so
+> that no run of the earlier form picks them up. End with the list of where a skill, the lot
+> check or the pages did not fit, and work around none.
+
+**3. Back here**, in a session of the experiment: what the two sessions listed is written under
+Findings, and decides what the skills are taught before the next batch.
 
 Then **the rest of run B, ported in full before any of it is fixed**, as a batch is run: Tasks 7,
 16, 12 and 2. They join a plan approved once already, and are approved in a second round.
@@ -51,8 +84,8 @@ Then **the rest of run B, ported in full before any of it is fixed**, as a batch
 
 | Bug | Why here | State |
 |---|---|---|
-| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported, read by the reviewer, its question answered. Approved and fixed with Task 10 |
-| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Ported. To be read by the reviewer, then approved with Task 9 |
+| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported and approved. Next to deliver and fix, in one lot with Task 10 |
+| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Ported and approved. Next to deliver and fix, in one lot with Task 9 |
 | Task 7 — "each hour" after the unit | Template-only: third use of the template site | Next to port, once the small batch is fixed |
 | Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | |
 | Task 12 — system prefix first in card ids | Cause in Python, symptom in a jest test: two evidence tests joined at the piece | |
