@@ -423,9 +423,10 @@ describe('findings', () => {
 describe('a bug', () => {
   // A reproduction is a written test declared to fail today; evidence is what it saw at a place of its piece.
   const reproduction = (line = 3): PlanTodo => ({ ...todo('cut', 'tests/x.test.ts', line), written: true, reproduction: true });
-  const evidence = (seen: unknown[] | null, expect: PlanSite['expect'] = { due: 6 }): PlanSite => ({
-    ...site('cut', 'src/a.ts', 1, [], 'evidence'), expect,
-    seenBy: seen === null ? [] : [{ file: 'tests/x.test.ts', test: 'demo#cut: cut is tested', at: 0, watches: seen }],
+  // What a crossing should have seen is its own: the place says how it is computed, a run says its value.
+  const evidence = (seen: unknown[] | null, expect: unknown = { due: 6 }): PlanSite => ({
+    ...site('cut', 'src/a.ts', 1, [], 'evidence'), expect: expect === null ? null : "{'due': total - card}",
+    seenBy: seen === null ? [] : [{ file: 'tests/x.test.ts', test: 'demo#cut: cut is tested', at: 0, crossings: seen.map((watch) => ({ watch, expect })) }],
   });
   const failed = (sites: PlanSite[], todos: PlanTodo[] = [reproduction()]) => findings(assemble({ sites, todos, docs: docs(null, null) })[0]);
 
@@ -441,11 +442,12 @@ describe('a bug', () => {
     // One crossing in many is enough: the place is crossed for what works too.
     expect(failed([evidence([{ due: 6 }, { due: 10 }, { due: 6 }])]).failures).toEqual([]);
     expect(failed([evidence([{ due: 6 }, { due: 6 }])]).failures.map((f) => f.split(' — ')[0])).toEqual([
-      'planned: src/a.ts:1 expects {"due":6}, and that is what the reproduction that crosses it saw',
+      "planned: src/a.ts:1 expects {'due': total - card}, and that is what the reproduction that crosses it saw at every crossing",
     ]);
-    // A key the watch does not give is a value the place does not have.
-    expect(plan.unexpected({ due: 6, kind: 'card' }, { due: 6 })).toEqual(['kind']);
-    expect(plan.unexpected({ due: 6 }, null)).toEqual(['due']);
+    // A key the watch does not give is a value the place does not have; a crossing that expects nothing has none wrong.
+    expect(plan.unexpected({ watch: { due: 6 }, expect: { due: 6, kind: 'card' } })).toEqual(['kind']);
+    expect(plan.unexpected({ watch: null, expect: { due: 6 } })).toEqual(['due']);
+    expect(plan.unexpected({ watch: { due: 10 }, expect: null })).toEqual([]);
   });
 
   it('asks nothing of evidence that expects no value, and says which reproductions to run for one no story crosses', () => {
@@ -460,7 +462,7 @@ describe('a bug', () => {
   });
 
   it('approves what a place expects with its clause, and takes evidence that went for no place left unbuilt', () => {
-    expect(plan.siteLineOf(evidence(null))).toBe('evidence src/a.ts in fn — cut happens. ⇒ {"due":6}');
+    expect(plan.siteLineOf(evidence(null))).toBe("evidence src/a.ts in fn — cut happens. ⇒ {'due': total - card}");
     expect(plan.siteLineOf(evidence(null, null))).toBe('evidence src/a.ts in fn — cut happens.');
     // A place built is one its commits wrote at; evidence goes with the fix and nothing is written there.
     const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);

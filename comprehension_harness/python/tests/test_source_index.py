@@ -103,11 +103,11 @@ def test_a_function_is_named_as_its_frames_are_and_a_site_says_its_kind_and_its_
         "feature": "quiet-stop", "slug": "drop-stop", "change": "removed", "signature": None}
 
 
-def test_an_evidence_site_says_the_values_the_place_should_see(project):
-    """`expect` is read from the source and never at run time: the page sets it against what a run saw."""
+def test_an_evidence_site_says_what_the_place_should_see_as_it_is_written(project):
+    """A literal, or a lambda where the right value depends on the crossing: its value is a story's."""
     root = project({"app/due.py": f'''{CALLS}def due(total, card):
     planned.evidence("gift-cards#deduct-the-card", "The card is **not deducted**.",
-                     lambda: {{"due": total}}, expect={{"due": 6, "kinds": ["card", None]}})
+                     lambda: {{"due": total}}, expect=lambda: {{"due": total - card}})
     planned("gift-cards#deduct-the-card", "The due amount **loses the card**.", expect={{"due": 6}})
     planned.evidence("gift-cards#deduct-the-card", "The total is **read as it is**.")
     return total
@@ -117,8 +117,8 @@ def test_an_evidence_site_says_the_values_the_place_should_see(project):
 
     piece = {"feature": "gift-cards", "slug": "deduct-the-card", "signature": None}
     assert [site["planned"] for site in sites] == [
-        {**piece, "change": "evidence", "expect": {"due": 6, "kinds": ["card", None]}},
-        {**piece, "change": "changed", "expect": {"due": 6}},
+        {**piece, "change": "evidence", "expect": "{'due': total - card}"},
+        {**piece, "change": "changed", "expect": "{'due': 6}"},
         {**piece, "change": "evidence"}]
 
 
@@ -126,7 +126,7 @@ TEMPLATE = '''<ul>
   {% for row in rows %}
     {% narrate "A row is **drawn**." kind=row.kind %}
     {% if row.card %}{% planned "gift-cards#card-row" "The row shows the card\'s balance." %}{% endif %}
-    {% evidence "gift-cards#card-row" "A card is drawn **as a plain row**." kind=row.kind|lower expect kind="card" count=2 %}
+    {% evidence "gift-cards#card-row" "A card is drawn **as a plain row**." drawn_as="row" expect drawn_as=row.kind|lower %}
   {% endfor %}
 </ul>
 '''
@@ -148,7 +148,7 @@ def test_a_template_makes_the_calls_as_tags_and_each_is_a_site_of_it_in_no_funct
         {"kind": "planned", "line": 4, "column": 22, "fn": "(template)", "sentence": "The row shows the card's balance.",
          "planned": {**piece, "change": "changed"}},
         {"kind": "planned", "line": 5, "column": 5, "fn": "(template)", "sentence": "A card is drawn **as a plain row**.",
-         "planned": {**piece, "change": "evidence", "expect": {"kind": "card", "count": 2}}}]
+         "planned": {**piece, "change": "evidence", "expect": "drawn_as=row.kind|lower"}}]
 
 
 @pytest.mark.parametrize("tag, said", [
@@ -157,7 +157,7 @@ def test_a_template_makes_the_calls_as_tags_and_each_is_a_site_of_it_in_no_funct
     ('{% planned "NotATag" "A change." %}', 'app/t.html:1 — "NotATag" is not <feature>#<slug>'),
     ('{% narrate "A step." %}{% event "A cause." %}', "app/t.html:1 — one narrate, event, planned or evidence tag a line"),
     ('{% evidence "a#b" "A bug." kind %}', "app/t.html:1 — after the sentence a tag gives key=value pairs"),
-    ('{% evidence "a#b" "A bug." expect kind=row.kind %}', "app/t.html:1 — after expect, a value is a literal"),
+    ('{% evidence "a#b" "A bug." kind=row.kind expect %}', "app/t.html:1 — after the sentence a tag gives key=value pairs"),
     ('{% narrate "A step." expect kind="card" %}', "app/t.html:1 — expect is said of a planned or an evidence tag"),
 ])
 def test_a_tag_that_does_not_have_the_shape_is_refused_with_its_file_and_line(project, tag, said):
@@ -251,7 +251,7 @@ def test_a_source_that_does_not_have_the_shape_is_refused_with_its_file_and_line
     ('narrate("The lines are added.", *n)', "app/x.py:3 — the watch is a lambda"),
     ('planned.evidence("a#b", "A bug shows.", expect={"count": n})', "app/x.py:3 — expect is a literal dict"),
     ('planned.evidence("a#b", "A bug shows.", expect=["count"])', "app/x.py:3 — expect is a literal dict"),
-    ('planned("a#b", "A change.", expect={"count": {"deep": 1}})', "app/x.py:3 — expect is a literal dict"),
+    ('planned("a#b", "A change.", expect=dict(count=n))', "app/x.py:3 — expect is a literal dict"),
 ])
 def test_an_argument_python_would_compute_in_production_is_refused(project, call, said):
     """A call does nothing in production, and Python computes its arguments before it all the same."""

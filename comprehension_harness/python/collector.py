@@ -175,17 +175,25 @@ class StoryRecorder:
             if own is not None:
                 stack.append(self.frame(above, own))
             above = above.f_back
-        value = None
-        if watch is not None:
-            try:
-                value = plain(watch())
-            except Exception as error:  # A watch documents a run and never fails it.
-                value = {"error": f"{type(error).__name__}: {error}"}
-        hit = {"kind": kind, "sentence": sentence, "watch": value, "site": site, "stack": stack,
+        hit = {"kind": kind, "sentence": sentence, "watch": self.read(watch), "site": site, "stack": stack,
                "atMs": round((time.perf_counter() - test["started"]) * 1000, 1)}
         if planned_as is not None:
-            hit["planned"] = dict(zip(("feature", "slug", "change"), planned_as))
+            *piece, expect = planned_as
+            hit["planned"] = dict(zip(("feature", "slug", "change"), piece))
+            if expect is not None:
+                # What this crossing should have seen: said once for the place, or computed for the crossing.
+                hit["expect"] = self.read(expect)
         test["hits"].append(hit)
+
+    @staticmethod
+    def read(said):
+        """A watch's value, or what a place expects: a function is called, anything else is the value."""
+        if said is None:
+            return None
+        try:
+            return plain(said() if callable(said) else said)
+        except Exception as error:  # A watch documents a run and never fails it.
+            return {"error": f"{type(error).__name__}: {error}"}
 
     # ── Tests ───────────────────────────────────────────────────────────────────────────────────────
 

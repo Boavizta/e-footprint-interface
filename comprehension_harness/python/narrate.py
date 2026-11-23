@@ -7,8 +7,9 @@
   ``planned`` call followed by ``raise NotImplementedError("planned: <feature>#<slug>")``.
 - ``planned.evidence("<feature>#<slug>", sentence, watch, expect={…})`` is a place a bug shows, written while it
   is diagnosed: what is seen there today, the watch giving the values. It marks no change and goes with the fix.
-  ``expect`` says, a key of the watch each, the value the place should see: a literal, which the plan's page
-  reads from the source and sets against what the reproduction saw. ``planned`` takes it too.
+  ``expect`` says, a key of the watch each, the value the place should see, which the plan's page sets against
+  what the reproduction saw: a literal dict, or a lambda where the right value depends on the crossing (a line
+  crossed for many rows, each with its own). ``planned`` takes it too.
 
 A template makes the same calls through ``template_call``, which the tag library of the project's web
 framework calls with the template's file and the line of the tag: no frame of Python says where a tag is written.
@@ -16,7 +17,7 @@ framework calls with the template's file and the line of the tag: no frame of Py
 None of them does anything unless a collector is installed, which only a test run of this project does
 (``comprehension_harness/python/collector.py``). Python computes a call's arguments before the call, so the
 source index refuses any that is not inert: the sentence is a literal string, the watch a lambda the
-collector calls, which nothing calls outside a test, and ``expect`` a literal nobody reads at run time. The sentence is markdown-lite: ``**bold**`` for the rule
+collector calls, which nothing calls outside a test, and ``expect`` a literal dict or another such lambda. The sentence is markdown-lite: ``**bold**`` for the rule
 the step enacts, backticks for a symbol of the code.
 
 Every project keeps this file inside its own package and imports the calls from there, so that its code
@@ -44,9 +45,11 @@ class Place:
         self.file, self.line, self.above = file, line, above
 
 
+# What a place should see: a dict, or a function the collector calls as it calls a watch.
+Expect = Any
 # kind, sentence, watch, the frame of the call or the place a template says, and for a planned call (feature,
-# slug, change).
-Collector = Callable[[str, str, Optional[Watch], "FrameType | Place", Optional[tuple[str, str, str]]], None]
+# slug, change, expect).
+Collector = Callable[[str, str, Optional[Watch], "FrameType | Place", Optional[tuple[str, str, str, Expect]]], None]
 
 PLANNED_TAG = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)#([a-z0-9]+(?:-[a-z0-9]+)*)$")
 
@@ -84,30 +87,30 @@ def event(sentence: str, watch: Optional[Watch] = None) -> None:
         _record("event", sentence, watch, sys._getframe(1))
 
 
-def _record_planned(tag, change: str, sentence, watch, frame) -> None:
+def _record_planned(tag, change: str, sentence, watch, frame, expect=None) -> None:
     parsed = PLANNED_TAG.match(tag) if isinstance(tag, str) else None
     if parsed is None:
         _refuse(frame, f"planned: {tag!r} is not <feature>#<slug>, two kebab-case names around one #")
-    _record("planned", sentence, watch, frame, (parsed.group(1), parsed.group(2), change))
+    if expect is not None and not isinstance(expect, dict) and not callable(expect):
+        _refuse(frame, f"expect is a dict or a function (lambda: {{…}}), not {type(expect).__name__}")
+    _record("planned", sentence, watch, frame, (parsed.group(1), parsed.group(2), change, expect))
 
 
 class _Planned:
-    def __call__(self, tag: str, sentence: str, watch: Optional[Watch] = None,
-                 expect: Optional[dict] = None) -> None:
+    def __call__(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None) -> None:
         """What this place will do once the piece ``tag`` of a feature's plan is built."""
         if _collector is not None:
-            _record_planned(tag, "changed", sentence, watch, sys._getframe(1))
+            _record_planned(tag, "changed", sentence, watch, sys._getframe(1), expect)
 
     def remove(self, tag: str, sentence: str) -> None:
         """The function this call sits in goes with the piece ``tag``."""
         if _collector is not None:
             _record_planned(tag, "removed", sentence, None, sys._getframe(1))
 
-    def evidence(self, tag: str, sentence: str, watch: Optional[Watch] = None,
-                 expect: Optional[dict] = None) -> None:
+    def evidence(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None) -> None:
         """What the bug the piece ``tag`` fixes shows at this place today. The call goes with the fix."""
         if _collector is not None:
-            _record_planned(tag, "evidence", sentence, watch, sys._getframe(1))
+            _record_planned(tag, "evidence", sentence, watch, sys._getframe(1), expect)
 
 
 planned = _Planned()
@@ -116,7 +119,7 @@ _TEMPLATE_CALLS = {"narrate": "step", "event": "event", "planned": "changed", "e
 
 
 def template_call(call: str, file: str, line: int, sentence: str, watch: Optional[Watch] = None,
-                  tag: Optional[str] = None) -> None:
+                  tag: Optional[str] = None, expect: Expect = None) -> None:
     """A call written as a tag of a template: ``call`` is ``narrate``, ``event``, ``planned`` or ``evidence``, the
     last two with their ``tag``. Called by the tag as it renders, with where the tag is written."""
     if _collector is None:
@@ -128,4 +131,4 @@ def template_call(call: str, file: str, line: int, sentence: str, watch: Optiona
     if said in ("step", "event"):
         _record(said, sentence, watch, place)
     else:
-        _record_planned(tag, said, sentence, watch, place)
+        _record_planned(tag, said, sentence, watch, place, expect)

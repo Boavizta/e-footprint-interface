@@ -65,6 +65,7 @@ A hit:
 |---|---|
 | `kind` | `step`, `event` or `planned` |
 | `planned` | For a `planned` hit: `{ feature, slug, change }` |
+| `expect` | Optional, for a `planned` hit whose site says what it should see: that, at this crossing, a key of the watch each. `{ "error": "…" }` when computing it threw |
 | `sentence` | As passed to the call |
 | `watch` | The watch's value as plain JSON, or `null`. `{ "error": "…" }` when computing it threw, which never fails the test |
 | `site` | The frame of the call: `{ file, line, column, fn }`, `fn` `null` for a function with no name |
@@ -130,9 +131,10 @@ source by the test.
 - `files` holds every file of the source folders and every test file that declares a narrative.
 - A `planned` site adds `"planned": { "feature", "slug", "change", "signature" }`, `change` being
   `changed`, `removed`, `added` or `evidence`. Evidence is a place a bug shows: it marks no
-  change and goes with the fix. A changed or an evidence site may add `"expect"`, the value each
-  key of its watch should have, as the source states it: the stack reads it from the source and
-  never at run time, so it is a literal.
+  change and goes with the fix. A changed or an evidence site may add `"expect"`: what the place
+  should see, a key of its watch each, as the source writes it. It is a literal, or an expression
+  computed at each crossing as a watch is, so the same rule keeps it inert; its value is the
+  story's, a crossing at a time.
 - A site of a template has `"fn": "(template)"`, in a story too, and its file lists nothing but
   its sites.
 - `functions`: every named function, with the line its name is on. A site or a local belongs to

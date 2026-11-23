@@ -95,9 +95,11 @@ in run order with the values it saw at each, then how it failed.
 - **Evidence** is a call on a line the bug shows at, with a watch: what is seen there today. It
   marks no change, so it stands where the cause is even when the fix is elsewhere.
 - **`expect`**, on evidence or on a `planned` call, gives the value a key of the watch should
-  have, as a literal. The page sets it against what the reproduction saw, in red where it
-  differs. A place crossed for what works too expects what works: the crossings that differ are
-  the bug.
+  have. The page sets it against what the reproduction saw, in red where it differs. It is said
+  once for the place, or computed at each crossing where the right value depends on it: a line
+  crossed for every row, each with its own.
+- **Watch what is wrong, not what led to it.** "Should be" reads as a claim about the watched
+  value: a value that is right and only reaches the wrong branch is context, with no `expect`.
 
 The check fails on evidence in a piece with no reproduction, and on a place whose reproductions
 saw only what it expects: the bug does not show there. It names the test files to run when no

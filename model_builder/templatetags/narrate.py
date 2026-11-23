@@ -2,12 +2,12 @@
 
     {% narrate "sentence" key=value … %}
     {% event "sentence" key=value … %}
-    {% planned "<feature>#<slug>" "clause" key=value … expect key="literal" … %}
-    {% evidence "<feature>#<slug>" "what is seen here today" key=value … expect key="literal" … %}
+    {% planned "<feature>#<slug>" "clause" key=value … expect key=value … %}
+    {% evidence "<feature>#<slug>" "what is seen here today" key=value … expect key=value … %}
 
-A tag renders nothing. Its pairs are its watch, resolved only when a test run collects. What follows ``expect``
-is what the place should see: the plan's page reads it from the source, and nothing reads it here. The source
-index reads the tags as sites of the template (``comprehension_harness/python/source_index.py``).
+A tag renders nothing. Its pairs are its watch, and those after ``expect`` what the place should see, a key of
+the watch each: both are resolved only when a test run collects, in the context the tag is rendered in. The
+source index reads the tags as sites of the template (``comprehension_harness/python/source_index.py``).
 """
 from django import template
 
@@ -24,12 +24,16 @@ def _said(word: str, call: str) -> str:
 
 
 class Call(template.Node):
-    def __init__(self, call, tag, sentence, watch, file, line):
-        self.call, self.tag, self.sentence, self.watch, self.file, self.line = call, tag, sentence, watch, file, line
+    def __init__(self, call, tag, sentence, watch, expect, file, line):
+        self.call, self.tag, self.sentence, self.watch, self.expect = call, tag, sentence, watch, expect
+        self.file, self.line = file, line
 
     def render(self, context):
-        watch = (lambda: {key: value.resolve(context) for key, value in self.watch.items()}) if self.watch else None
-        calls.template_call(self.call, self.file, self.line, self.sentence, watch, self.tag)
+        def reader(pairs):
+            return (lambda: {key: value.resolve(context) for key, value in pairs.items()}) if pairs else None
+
+        calls.template_call(self.call, self.file, self.line, self.sentence, reader(self.watch), self.tag,
+                            reader(self.expect))
         return ""
 
 
@@ -40,14 +44,19 @@ def _compile(parser, token):
         raise template.TemplateSyntaxError(f"{{% {call} %}} takes {'its tag and ' if literals == 2 else ''}its sentence")
     said = [_said(word, call) for word in words[:literals]]
     pairs = words[literals:]
-    watched = pairs[:pairs.index("expect")] if "expect" in pairs else pairs
-    watch = {}
-    for pair in watched:
-        key, separator, expression = pair.partition("=")
-        if not separator or not key.isidentifier() or not expression:
-            raise template.TemplateSyntaxError(f"{{% {call} %}} gives its watch as key=value pairs, not {pair}")
-        watch[key] = parser.compile_filter(expression)
-    return Call(call, said[0] if literals == 2 else None, said[-1], watch, parser.origin.name, token.lineno)
+    cut = pairs.index("expect") if "expect" in pairs else len(pairs)
+
+    def compiled(some) -> dict:
+        read = {}
+        for pair in some:
+            key, separator, expression = pair.partition("=")
+            if not separator or not key.isidentifier() or not expression:
+                raise template.TemplateSyntaxError(f"{{% {call} %}} gives its watch as key=value pairs, not {pair}")
+            read[key] = parser.compile_filter(expression)
+        return read
+
+    return Call(call, said[0] if literals == 2 else None, said[-1], compiled(pairs[:cut]), compiled(pairs[cut + 1:]),
+                parser.origin.name, token.lineno)
 
 
 for name in ("narrate", "event", *TAGGED):

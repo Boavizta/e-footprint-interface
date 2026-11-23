@@ -150,7 +150,8 @@ REPRODUCTIONS = '''
 
     def due(total, card):
         planned.evidence("gift-cards#deduct-the-card", "The card is **not deducted**.",
-                         lambda: {"due": total}, expect={"due": 6})
+                         lambda: {"due": total}, expect=lambda: {"due": total - card})
+        planned("gift-cards#deduct-the-card", "The due amount **loses the card**.", expect={"due": 6})
         return total
 
 
@@ -176,12 +177,14 @@ def test_a_reproduction_has_a_story_that_says_how_it_fails_whatever_it_crossed(p
     deducts, refunds = stories_of(root)
     assert (deducts["state"], deducts["reproduction"]) == ("xfailed", True)
     assert deducts["failure"] == {"message": "assert 10 == 6\n +  where 10 = due(10, 4)", "file": TEST_FILE,
-                                  "line": 13}
-    [hit] = deducts["hits"]
+                                  "line": 14}
+    hit, change = deducts["hits"]
     assert (hit["kind"], hit["watch"]) == ("planned", {"due": 10})
     assert hit["planned"] == {"feature": "gift-cards", "slug": "deduct-the-card", "change": "evidence"}
+    # What a crossing should have seen is its own: computed as the watch is, or said once for the place.
+    assert (hit["expect"], change["expect"], change["watch"]) == ({"due": 6}, {"due": 6}, None)
     # It crossed no call: a test that is no reproduction would have no story.
-    assert (refunds["hits"], refunds["state"], refunds["failure"]["line"]) == ([], "xfailed", 18)
+    assert (refunds["hits"], refunds["state"], refunds["failure"]["line"]) == ([], "xfailed", 19)
 
 
 def test_a_call_a_template_makes_is_a_hit_at_its_tag_under_the_frames_that_rendered_it(project):

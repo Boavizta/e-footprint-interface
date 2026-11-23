@@ -331,13 +331,15 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
     const tests = x.reachedBy.reduce((a, r) => a + r.tests, 0);
     // Evidence marks no change: it says what a reproduction saw at the place, and goes with the fix.
     if (x.change === 'evidence') {
-      const differs = (flat) => Object.entries(x.expect ?? {}).some(([key, value]) => JSON.stringify(JSON.parse(flat)?.[key]) !== JSON.stringify(value));
-      // What the place does not expect is said first: that is the bug.
-      const seen = [...new Set((x.seenBy ?? []).flatMap((s) => s.watches).filter((w) => w !== null).map((w) => JSON.stringify(w)))].sort((a, b) => Number(differs(b)) - Number(differs(a)));
+      // A crossing whose watch is not what it should have seen is said first, with what it should: that is the bug.
+      const differs = (c) => Object.entries(c.expect ?? {}).some(([key, value]) => JSON.stringify(c.watch?.[key]) !== JSON.stringify(value));
+      const said = (c) => `${JSON.stringify(c.watch)}${differs(c) ? ` (should be ${JSON.stringify(c.expect)})` : ''}`;
+      const crossings = (x.seenBy ?? []).flatMap((s) => s.crossings).filter((c) => c.watch !== null).sort((a, b) => Number(differs(b)) - Number(differs(a)));
+      const seen = [...new Set(crossings.map(said))];
       return [`  evidence ${at(x)}  in ${x.fn} — ${x.sentence}`,
-        `    goes with the fix${x.expect ? `  · should see ${JSON.stringify(x.expect)}` : ''}${seen.length ? `  · a reproduction saw ${seen.slice(0, 3).join(' | ')}${seen.length > 3 ? ` … (${seen.length} values)` : ''}` : '  · crossed by no reproduction yet'}`];
+        `    goes with the fix${x.expect ? `  · should see ${x.expect}` : ''}${seen.length ? `  · a reproduction saw ${seen.slice(0, 3).join(' | ')}${seen.length > 3 ? ` … (${seen.length} values)` : ''}` : '  · crossed by no reproduction yet'}`];
     }
-    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}${x.expect ? `  · should see ${JSON.stringify(x.expect)}` : ''}`,
+    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}${x.expect ? `  · should see ${x.expect}` : ''}`,
       ...(x.change === 'added' ? [`    called from: ${(plan.calledFrom?.[x.id] ?? []).map((c) => `${at(c)} (#${c.slug})`).join(', ') || 'NOWHERE — no site names it'}`] : []),
       `    ${x.change === 'added' ? `new seam: ${x.signature ?? x.fn}` : inside ? `lands in ${inside}` : 'crossed by no narrative'}${tests ? `  · reached by ${plural(tests, 'test')} in ${plural(x.reachedBy.length, 'file')}` : x.change === 'added' ? '' : '  · seen by no run yet: run the narrative tests it should sit in, then ask again'}`];
   };

@@ -22,22 +22,24 @@ around them, a function or class of an enclosing function. A call on a value of 
 
 Refused, with the file and the line: a file the parser refuses, a call imported from the reference and not
 from the project's copy, two calls on one line, a tag or a sentence
-that is no literal string, a watch that is no lambda, an ``expect`` that is no literal dict of plain values, a
-tag that is not ``<feature>#<slug>``, a shell that raises anything but ``planned: <tag>``, a narrative that is
+that is no literal string, a watch that is no lambda, an ``expect`` that is neither a literal dict nor a
+lambda, a tag that is not ``<feature>#<slug>``, a shell that raises anything but ``planned: <tag>``, a narrative that is
 not declared on a class under one literal title.
 
 The literal and the lambda are what keeps the calls inert in production: Python computes a call's arguments
 before the call, and a call does nothing there. A literal and a lambda cost nothing to compute.
 
 ``planned.evidence(…)`` is a planned site whose change is ``evidence``: a place a bug shows, which goes with the
-fix. ``expect={…}`` on it, or on a ``planned`` call, is read here and never at run time: the site says it as
-``expect``, the value each key of the watch should have.
+fix. ``expect=`` on it, or on a ``planned`` call, is what the place should see, a key of the watch each: a
+literal dict, or a lambda where the right value depends on the crossing. The site says it as ``expect``, the
+expression as written; its value at each crossing is the story's.
 
 A template makes the calls as tags, and no ``ast`` reads it: an ``.html`` file of the source folders is read for
 ``{% narrate "…" %}``, ``{% event "…" %}``, ``{% planned "<feature>#<slug>" "…" %}`` and ``{% evidence
 "<feature>#<slug>" "…" %}``, one a line, each a site of the file in no function. After the sentence a tag gives
-its watch as ``key=value`` pairs, which the template resolves when a run collects, and after the word ``expect``
-the values the place should see, each a literal: ``{% evidence "a#b" "…" kind=row.kind expect kind="card" %}``.
+its watch as ``key=value`` pairs, and after the word ``expect`` the values the place should see, as pairs too:
+``{% evidence "a#b" "…" drawn_as="row" expect drawn_as=row.kind %}``. The template resolves both when a run
+collects.
 
 Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config`` and
 ``--declare``, the module the declarations are imported from.
@@ -426,19 +428,20 @@ class FileIndex(ast.NodeVisitor):
                                       "where nobody reads it")
         self.sites.append(site)
 
-    def expect(self, node) -> dict:
-        """What ``expect={…}`` says, a key of the watch each: read from the source, so a literal."""
+    def expect(self, node) -> str:
+        """What ``expect=`` says, as written: a literal dict, or the body of a lambda, which costs production
+        nothing to compute."""
+        if isinstance(node, ast.Lambda):
+            return ast.unparse(node.body)
         try:
             said = ast.literal_eval(node)
         except (ValueError, SyntaxError):
             said = None
-        plain = (str, int, float, bool, type(None))
-        if not isinstance(said, dict) or not said or not all(isinstance(key, str) for key in said) or not all(
-                isinstance(value, plain) or (isinstance(value, list) and all(isinstance(one, plain) for one in value))
-                for value in said.values()):
-            self.refuse(node, 'expect is a literal dict, a key of the watch each and a plain value or a list of '
-                              'them (expect={"status": 200}): the page reads it from the source')
-        return said
+        if not isinstance(said, dict) or not said or not all(isinstance(key, str) for key in said):
+            self.refuse(node, 'expect is a literal dict, a key of the watch each (expect={"status": 200}), or a '
+                              'lambda (expect=lambda: {…}): anything else is computed in production, where nobody '
+                              'reads it')
+        return ast.unparse(node)
 
     def planned(self, node: ast.Call, tag: str | None, sentence: str | None, change: str) -> dict:
         if tag is None or sentence is None:
@@ -515,23 +518,6 @@ def python_files(root: Path, folder: str) -> list[str]:
 TEMPLATE_TAG = re.compile(r"\{%-?\s*(narrate|event|planned|evidence)\s+(.*?)\s*-?%\}")
 TEMPLATE_WORD = re.compile(r'''"(?:[^"\\]|\\.)*"|[^\s"]+(?:"(?:[^"\\]|\\.)*")?''')
 TEMPLATE_FN = "(template)"
-TEMPLATE_LITERALS = {"True": True, "False": False, "None": None}
-
-
-def template_literal(written: str, where: str):
-    """A value of a tag's ``expect``: a string in double quotes, a number, True, False or None."""
-    if len(written) >= 2 and written[0] == written[-1] == '"':
-        return written[1:-1].replace('\\"', '"')
-    if written in TEMPLATE_LITERALS:
-        return TEMPLATE_LITERALS[written]
-    try:
-        return int(written)
-    except ValueError:
-        try:
-            return float(written)
-        except ValueError:
-            raise Refusal(f'{where} — after expect, a value is a literal ("text", 3, True, None), not {written}: the '
-                          f'page reads it from the source') from None
 
 
 def template_sites(file: str, text: str) -> list[dict]:
@@ -567,8 +553,7 @@ def template_sites(file: str, text: str) -> list[dict]:
             site["planned"] = {"feature": parsed.group(1), "slug": parsed.group(2),
                                "change": "evidence" if call == "evidence" else "changed", "signature": None}
             if expected:
-                site["planned"]["expect"] = {key: template_literal(value, where)
-                                             for key, _, value in (word.partition("=") for word in expected)}
+                site["planned"]["expect"] = " ".join(expected)
         elif expected:
             raise Refusal(f"{where} — expect is said of a planned or an evidence tag: a step expects nothing")
         sites.append(site)

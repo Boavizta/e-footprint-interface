@@ -55,6 +55,8 @@ export interface StoryHit {
   stack: StoryFrame[];
   /** Milliseconds since the test began. */
   atMs: number;
+  /** For a planned hit whose site says what it should see: that, at this crossing, a key of the watch each. */
+  expect?: unknown;
 }
 
 /** A site that fired more often in one test than a story keeps. */
@@ -111,9 +113,9 @@ export interface PlannedSite {
   sentence: string;
   change: PlannedChange;
   signature: string | null;
-  /** The value each key of the watch should have, as the site states it: read from the source, never from a
-   *  run, and set against what a reproduction saw. */
-  expect?: Record<string, unknown>;
+  /** What the place should see, as the site writes it: a literal, or an expression computed at each crossing.
+   *  Its value at a crossing is the story's (`StoryHit.expect`). */
+  expect?: string;
 }
 
 /** A `narrate`, `event` or `planned` call, as the source holds it. */
@@ -218,7 +220,7 @@ export interface SourceFileIndex {
     column: number;
     fn: string;
     sentence: string | null;
-    planned?: { feature: string; slug: string; change: PlannedChange; signature: string | null; expect?: Record<string, unknown> };
+    planned?: { feature: string; slug: string; change: PlannedChange; signature: string | null; expect?: string };
   }>;
   /** Every named function, with the line its name is on and its last line. A site, a local or a use belongs to
    *  the functions whose lines hold it, the innermost first. */
