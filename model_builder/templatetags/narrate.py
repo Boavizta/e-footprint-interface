@@ -2,12 +2,14 @@
 
     {% narrate "sentence" key=value … %}
     {% event "sentence" key=value … %}
-    {% planned "<feature>#<slug>" "clause" key=value … expect key=value … %}
-    {% evidence "<feature>#<slug>" "what is seen here today" key=value … expect key=value … %}
+    {% planned "<feature>#<slug>" "clause" key=value … expect key=value … distinct key … %}
+    {% evidence "<feature>#<slug>" "what is seen here today" key=value … expect key=value … distinct key … %}
 
 A tag renders nothing. Its pairs are its watch, and those after ``expect`` what the place should see, a key of
 the watch each: both are resolved only when a test run collects, in the context the tag is rendered in. The
-source index reads the tags as sites of the template (``comprehension_harness/python/source_index.py``).
+words after ``distinct`` are the keys of the watch each crossing should see a value of its own for. The source
+index reads the tags as sites of the template, and what is distinct from them alone
+(``comprehension_harness/python/source_index.py``).
 """
 from django import template
 
@@ -15,6 +17,7 @@ from model_builder import narrate as calls
 
 register = template.Library()
 TAGGED = ("planned", "evidence")
+PARTS = ("expect", "distinct")
 
 
 def _said(word: str, call: str) -> str:
@@ -42,9 +45,14 @@ def _compile(parser, token):
     literals = 2 if call in TAGGED else 1
     if len(words) < literals:
         raise template.TemplateSyntaxError(f"{{% {call} %}} takes {'its tag and ' if literals == 2 else ''}its sentence")
-    said = [_said(word, call) for word in words[:literals]]
-    pairs = words[literals:]
-    cut = pairs.index("expect") if "expect" in pairs else len(pairs)
+    quoted = [_said(word, call) for word in words[:literals]]
+    said = {"watch": [], "expect": [], "distinct": []}
+    part = "watch"
+    for word in words[literals:]:
+        if word in PARTS:
+            part = word
+        else:
+            said[part].append(word)
 
     def compiled(some) -> dict:
         read = {}
@@ -55,7 +63,11 @@ def _compile(parser, token):
             read[key] = parser.compile_filter(expression)
         return read
 
-    return Call(call, said[0] if literals == 2 else None, said[-1], compiled(pairs[:cut]), compiled(pairs[cut + 1:]),
+    watch = compiled(said["watch"])
+    if not set(said["distinct"]) <= set(watch):
+        raise template.TemplateSyntaxError(f"{{% {call} %}} names after distinct keys of its watch, not "
+                                           f"{' '.join(said['distinct'])}")
+    return Call(call, quoted[0] if literals == 2 else None, quoted[-1], watch, compiled(said["expect"]),
                 parser.origin.name, token.lineno)
 
 

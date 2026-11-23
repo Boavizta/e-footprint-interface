@@ -210,6 +210,7 @@
   .bug .seen .k { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .76rem; color: var(--adp); }
   .bug .seen code { font-size: .78rem; } .bug .seen .times { color: var(--faint); min-width: 1.6rem; }
   .bug .seen + .seen { border-top: 1px dotted var(--line); padding-top: .2rem; }
+  .bug .seen.each, .bug .seen + .seen.each { margin: .15rem 0 0 1.6rem; padding: 0 0 0 .5rem; border-top: 0; border-left: 2px solid var(--line); }
   .bug .pair.wrong > code, .bug .pair.wrong > pre.val { background: #fee2e2; color: #b91c1c; }
   .bug .should, .bug .should code { color: #047857; } .bug .should { font-size: .78rem; }
   .bug details.pfold { margin-top: .15rem; }

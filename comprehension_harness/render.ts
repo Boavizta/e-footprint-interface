@@ -95,7 +95,7 @@ import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, siteLineOf, unexpected, type Crossing, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type Crossing, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -1124,7 +1124,7 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
     }
     return {
       feature: p.feature, slug: p.slug, id: site.id, file: site.file, line: site.line, column: site.column, fn: site.fn,
-      change: p.change, sentence: p.sentence, signature: p.signature, expect: p.expect ?? null, seenBy,
+      change: p.change, sentence: p.sentence, signature: p.signature, expect: p.expect ?? null, distinct: p.distinct ?? [], seenBy,
       crossedBy, reachedBy: [...reachedBy].sort(([a], [b]) => a.localeCompare(b)).map(([file, titles]) => ({ file, tests: titles.length, titles })),
     };
   });
@@ -1454,34 +1454,46 @@ function pointerHtml(pointer: Plan['pointers'][number], plan: Plan): string {
 const SEEN_SHOWN = 6;
 
 /** What a reproduction saw at one place: each distinct crossing, counted, a value that is not the one the
- *  crossing should have in red, with that one. Where the place expects something, the crossings that differ are
- *  shown first and in full; those that saw what they should are counted, and folded. */
+ *  crossing should have in red, with that one. Where the place says what it should see, the crossings that
+ *  differ are shown first and in full; those that saw what they should are counted, and folded. Crossings that
+ *  saw one value where each should have its own open the list, together: the value once, then what else each saw. */
 function seenValuesHtml(site: PlanSite, crossings: Crossing[]): string {
+  const pairsOf = (x: unknown) => (x !== null && typeof x === 'object' && !Array.isArray(x) ? x as Record<string, unknown> : null);
+  const groups = shared(site.distinct, crossings);
+  const together = new Set(groups.flat());
   const distinct = new Map<string, { crossing: Crossing; times: number }>();
   for (const crossing of crossings) {
-    if ((crossing.watch ?? null) === null && (crossing.expect ?? null) === null) continue;
+    if (together.has(crossing) || ((crossing.watch ?? null) === null && (crossing.expect ?? null) === null)) continue;
     const flat = JSON.stringify(crossing);
     distinct.set(flat, { crossing, times: (distinct.get(flat)?.times ?? 0) + 1 });
   }
-  const pairsOf = (x: unknown) => (x !== null && typeof x === 'object' && !Array.isArray(x) ? x as Record<string, unknown> : null);
   const rows = [...distinct.values()].map((x) => ({ ...x, wrong: unexpected(x.crossing) }));
-  const row = ({ crossing, times, wrong }: typeof rows[number]) => {
+  /** The pairs of a crossing, those of `left` aside: a key whose value is not the one it should have in red. */
+  const pairsHtml = (crossing: Crossing, left: string[] = []) => {
+    const wrong = unexpected(crossing);
     const seen = pairsOf(crossing.watch);
     const should = pairsOf(crossing.expect) ?? {};
     const shouldBe = (key: string) => ` <span class="should">should be ${value(should[key])}</span>`;
     const pairs = seen
-      ? Object.entries(seen).map(([key, v]) => `<span class="pair${wrong.includes(key) ? ' wrong' : ''}"><span class="k">${esc(key)}</span> ${value(v)}${wrong.includes(key) ? shouldBe(key) : ''}</span>`).join('')
+      ? Object.entries(seen).filter(([key]) => !left.includes(key)).map(([key, v]) => `<span class="pair${wrong.includes(key) ? ' wrong' : ''}"><span class="k">${esc(key)}</span> ${value(v)}${wrong.includes(key) ? shouldBe(key) : ''}</span>`).join('')
       : crossing.watch === null ? '' : `<span class="pair">${value(crossing.watch)}</span>`;
     const missing = wrong.filter((key) => !(seen && key in seen)).map((key) => `<span class="pair wrong"><span class="k">${esc(key)}</span> <small>not in the watch</small>${shouldBe(key)}</span>`).join('');
-    return `<div class="seen">${times > 1 ? `<small class="times">×${times}</small>` : ''}${pairs}${missing}</div>`;
+    return `${pairs}${missing}`;
   };
+  const row = ({ crossing, times }: typeof rows[number]) => `<div class="seen">${times > 1 ? `<small class="times">×${times}</small>` : ''}${pairsHtml(crossing)}</div>`;
+  const sharedRows = groups.map((group) => {
+    const seen = pairsOf(group[0].watch)!;
+    const same = site.distinct.map((key) => `<span class="pair wrong"><span class="k">${esc(key)}</span> ${value(seen[key])}</span>`).join('');
+    const each = group.map((crossing) => pairsHtml(crossing, site.distinct)).filter(Boolean).map((pairs) => `<div class="seen each">${pairs}</div>`).join('');
+    return `<div class="seen"><small class="times">×${group.length}</small>${same} <span class="should">should be one for each crossing</span></div>${each}`;
+  }).join('');
   const list = (some: typeof rows) => `${some.slice(0, SEEN_SHOWN).map(row).join('')}${some.length > SEEN_SHOWN ? `<div class="seen"><small>… and ${plural(some.length - SEEN_SHOWN, 'other value')}</small></div>` : ''}`;
-  if (site.expect === null) return list(rows);
+  if (site.expect === null && site.distinct.length === 0) return list(rows);
   const wrong = rows.filter((x) => x.wrong.length > 0);
   const right = rows.filter((x) => x.wrong.length === 0);
   const times = right.reduce((n, x) => n + x.times, 0);
-  const stated = `<div class="seen"><small>should see</small><code>${esc(site.expect)}</code></div>`;
-  return `${wrong.length ? wrong.map(row).join('') : stated}${right.length ? `<details class="pfold"><summary>${plural(times, 'other crossing')} saw what ${times === 1 ? 'it' : 'they'} should</summary>${list(right)}</details>` : ''}`;
+  const stated = site.expect !== null && !wrong.length && !groups.length ? `<div class="seen"><small>should see</small><code>${esc(site.expect)}</code></div>` : '';
+  return `${sharedRows}${wrong.map(row).join('')}${stated}${right.length ? `<details class="pfold"><summary>${plural(times, 'other crossing')} saw ${site.expect === null ? `a value of ${times === 1 ? 'its' : 'their'} own` : `what ${times === 1 ? 'it' : 'they'} should`}</summary>${list(right)}</details>` : ''}`;
 }
 
 /**

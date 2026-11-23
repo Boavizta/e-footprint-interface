@@ -23,7 +23,7 @@ around them, a function or class of an enclosing function. A call on a value of 
 Refused, with the file and the line: a file the parser refuses, a call imported from the reference and not
 from the project's copy, two calls on one line, a tag or a sentence
 that is no literal string, a watch that is no lambda, an ``expect`` that is neither a literal dict nor a
-lambda, a tag that is not ``<feature>#<slug>``, a shell that raises anything but ``planned: <tag>``, a narrative that is
+lambda, a ``distinct`` that is no literal string or tuple of them, a tag that is not ``<feature>#<slug>``, a shell that raises anything but ``planned: <tag>``, a narrative that is
 not declared on a class under one literal title.
 
 The literal and the lambda are what keeps the calls inert in production: Python computes a call's arguments
@@ -32,14 +32,16 @@ before the call, and a call does nothing there. A literal and a lambda cost noth
 ``planned.evidence(…)`` is a planned site whose change is ``evidence``: a place a bug shows, which goes with the
 fix. ``expect=`` on it, or on a ``planned`` call, is what the place should see, a key of the watch each: a
 literal dict, or a lambda where the right value depends on the crossing. The site says it as ``expect``, the
-expression as written; its value at each crossing is the story's.
+expression as written; its value at each crossing is the story's. ``distinct=`` names the keys of the watch each
+crossing should see a value of its own for, where the bug is a value two crossings share: the site lists them
+as ``distinct``, and no run reads them.
 
 A template makes the calls as tags, and no ``ast`` reads it: an ``.html`` file of the source folders is read for
 ``{% narrate "…" %}``, ``{% event "…" %}``, ``{% planned "<feature>#<slug>" "…" %}`` and ``{% evidence
 "<feature>#<slug>" "…" %}``, one a line, each a site of the file in no function. After the sentence a tag gives
 its watch as ``key=value`` pairs, and after the word ``expect`` the values the place should see, as pairs too:
 ``{% evidence "a#b" "…" drawn_as="row" expect drawn_as=row.kind %}``. The template resolves both when a run
-collects.
+collects. After the word ``distinct`` it names keys of its watch: ``{% planned "a#b" "…" id=row.id distinct id %}``.
 
 Options, for a tree that is not this repository (the stack's own tests): ``--root``, ``--config`` and
 ``--declare``, the module the declarations are imported from.
@@ -414,14 +416,18 @@ class FileIndex(ast.NodeVisitor):
         site = {"kind": kind, "line": node.lineno, "column": node.col_offset + 1, "fn": self.frame_name(),
                 "sentence": literal_argument(node, literals - 1)}
         expected = [keyword for keyword in node.keywords if keyword.arg == "expect"]
+        distinct = [keyword for keyword in node.keywords if keyword.arg == "distinct"]
         if kind == "planned":
             site["planned"] = self.planned(node, literal_argument(node, 0), site["sentence"], change)
             if expected and change != "removed":
                 site["planned"]["expect"] = self.expect(expected[0].value)
+            if distinct and change != "removed":
+                site["planned"]["distinct"] = self.distinct(distinct[0].value)
         elif site["sentence"] is None:
             self.refuse(node, "the sentence of a narrate or event call is a literal string: anything else is "
                               "computed in production, where the call does nothing")
-        watches = [keyword.value for keyword in node.keywords if kind != "planned" or keyword not in expected]
+        said = [*expected, *distinct] if kind == "planned" else []
+        watches = [keyword.value for keyword in node.keywords if keyword not in said]
         for argument in [*node.args[literals:], *watches]:
             if not isinstance(argument, ast.Lambda):
                 self.refuse(argument, "the watch is a lambda (lambda: {…}): anything else is computed in production, "
@@ -442,6 +448,18 @@ class FileIndex(ast.NodeVisitor):
                               'lambda (expect=lambda: {…}): anything else is computed in production, where nobody '
                               'reads it')
         return ast.unparse(node)
+
+    def distinct(self, node) -> list[str]:
+        """The keys ``distinct=`` names: a literal string, or a literal tuple or list of them."""
+        try:
+            said = ast.literal_eval(node)
+        except (ValueError, SyntaxError):
+            said = None
+        keys = [said] if isinstance(said, str) else list(said) if isinstance(said, (tuple, list)) else []
+        if not keys or not all(isinstance(key, str) and key.isidentifier() for key in keys):
+            self.refuse(node, 'distinct names keys of the watch, as a literal string or a literal tuple of them '
+                              '(distinct="id"): anything else is computed in production, where nobody reads it')
+        return keys
 
     def planned(self, node: ast.Call, tag: str | None, sentence: str | None, change: str) -> dict:
         if tag is None or sentence is None:
@@ -518,6 +536,8 @@ def python_files(root: Path, folder: str) -> list[str]:
 TEMPLATE_TAG = re.compile(r"\{%-?\s*(narrate|event|planned|evidence)\s+(.*?)\s*-?%\}")
 TEMPLATE_WORD = re.compile(r'''"(?:[^"\\]|\\.)*"|[^\s"]+(?:"(?:[^"\\]|\\.)*")?''')
 TEMPLATE_FN = "(template)"
+# The words of a tag that open what the place should see: values, then the keys that should differ at each crossing.
+TEMPLATE_PARTS = ("expect", "distinct")
 
 
 def template_sites(file: str, text: str) -> list[dict]:
@@ -537,13 +557,23 @@ def template_sites(file: str, text: str) -> list[dict]:
             raise Refusal(f'{where} — {{% {call} %}} opens with {"its tag and its sentence" if literals == 2 else "its sentence"}'
                           f', in double quotes: anything else is computed in production, where the tag does nothing')
         rest = words[literals:]
-        watched = rest[:rest.index("expect")] if "expect" in rest else rest
-        expected = rest[rest.index("expect") + 1:] if "expect" in rest else []
+        # The watch, then what follows each of the two words, in either order.
+        parts = {"watch": [], "expect": [], "distinct": []}
+        part = "watch"
+        for word in rest:
+            if word in TEMPLATE_PARTS:
+                part = word
+            else:
+                parts[part].append(word)
+        watched, expected, distinct = parts.values()
         pairs = [word.partition("=") for word in [*watched, *expected]]
         if any(not key.isidentifier() or not separator or not value for key, separator, value in pairs) or (
                 "expect" in rest and not expected):
             raise Refusal(f"{where} — after the sentence a tag gives key=value pairs, the watch, then after the word "
                           f"expect the values the place should see")
+        if ("distinct" in rest and not distinct) or not set(distinct) <= {word.partition("=")[0] for word in watched}:
+            raise Refusal(f"{where} — after the word distinct a tag names keys of its watch, those each crossing "
+                          f"should see a value of its own for")
         site = {"kind": KINDS.get(call, "planned"), "line": number, "column": found[0].start() + 1,
                 "fn": TEMPLATE_FN, "sentence": said[-1]}
         if literals == 2:
@@ -554,8 +584,11 @@ def template_sites(file: str, text: str) -> list[dict]:
                                "change": "evidence" if call == "evidence" else "changed", "signature": None}
             if expected:
                 site["planned"]["expect"] = " ".join(expected)
-        elif expected:
-            raise Refusal(f"{where} — expect is said of a planned or an evidence tag: a step expects nothing")
+            if distinct:
+                site["planned"]["distinct"] = distinct
+        elif expected or distinct:
+            raise Refusal(f"{where} — expect and distinct are said of a planned or an evidence tag: a step expects "
+                          f"nothing")
         sites.append(site)
     return sites
 

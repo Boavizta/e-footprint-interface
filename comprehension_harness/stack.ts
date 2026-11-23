@@ -116,6 +116,9 @@ export interface PlannedSite {
   /** What the place should see, as the site writes it: a literal, or an expression computed at each crossing.
    *  Its value at a crossing is the story's (`StoryHit.expect`). */
   expect?: string;
+  /** The keys of the watch each crossing should see a value of its own for: the bug shows where two crossings
+   *  of a test saw the same. */
+  distinct?: string[];
 }
 
 /** A `narrate`, `event` or `planned` call, as the source holds it. */
@@ -220,7 +223,7 @@ export interface SourceFileIndex {
     column: number;
     fn: string;
     sentence: string | null;
-    planned?: { feature: string; slug: string; change: PlannedChange; signature: string | null; expect?: string };
+    planned?: { feature: string; slug: string; change: PlannedChange; signature: string | null; expect?: string; distinct?: string[] };
   }>;
   /** Every named function, with the line its name is on and its last line. A site, a local or a use belongs to
    *  the functions whose lines hold it, the innermost first. */

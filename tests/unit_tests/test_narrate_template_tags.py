@@ -9,6 +9,7 @@ TEMPLATE = '''{% load narrate %}<ul>
   <li>{% evidence "gift-cards#card-row" "A card is drawn **as a plain row**." drawn_as="ROW" expect drawn_as=row.kind|upper %}</li>
 {% endfor %}
 {% narrate "The list is **closed**." %}
+{% planned "gift-cards#card-row" "The row\'s id is the card\'s." id=rows|length distinct id expect id=1 %}
 </ul>'''
 
 
@@ -27,14 +28,17 @@ def test_a_tag_renders_nothing_and_hands_its_call_with_where_it_is_written(monke
     assert "".join(rendered.split()) == "<ul><li></li><li></li></ul>"
     # What follows `expect` is what the row should be drawn as: its own kind, at each crossing.
     evidence = ("evidence", 3, "A card is drawn **as a plain row**.", {"drawn_as": "ROW"}, "gift-cards#card-row")
+    # The keys after `distinct` are the source index's to read: the call is handed the watch and what it expects.
     assert handed == [(*evidence, {"drawn_as": "CARD"}), (*evidence, {"drawn_as": "CASH"}),
-                      ("narrate", 5, "The list is **closed**.", None, None, None)]
+                      ("narrate", 5, "The list is **closed**.", None, None, None),
+                      ("planned", 6, "The row's id is the card's.", {"id": 2}, "gift-cards#card-row", {"id": 1})]
 
 
 @pytest.mark.parametrize("tag, said", [
     ("{% narrate sentence %}", "opens with literal strings in double quotes"),
     ('{% planned "gift-cards#card-row" %}', "takes its tag and its sentence"),
     ('{% narrate "A step." kind %}', "gives its watch as key=value pairs"),
+    ('{% planned "gift-cards#card-row" "A change." id=row.id distinct kind %}', "names after distinct keys of its watch"),
 ])
 def test_a_tag_that_does_not_have_the_shape_fails_the_template(tag, said):
     with pytest.raises(TemplateSyntaxError, match=said):

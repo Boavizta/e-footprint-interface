@@ -28,6 +28,8 @@ def test_without_a_collector_a_call_returns_nothing_and_its_watch_is_never_calle
         assert planned("gift-cards#deduct-the-card", "A change.", watch, expect={"due": 0}) is None
         assert template_call("narrate", "pages/rows.html", 2, "A step.", watch) is None
         assert planned.evidence("gift-cards#deduct-the-card", "A bug shows.", watch, expect=watch) is None
+        assert planned.evidence("gift-cards#deduct-the-card", "A bug shows.", watch, distinct="row") is None
+        assert planned("gift-cards#deduct-the-card", "A change.", watch, distinct=("row", "of")) is None
     """)
 
     assert done.returncode == 0, done.stderr

@@ -326,6 +326,8 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
     out.push(...pieceNotes);
   } else if (plan.doc) out.push(`  (no section "## #${piece.slug}" in ${plan.doc.file}: the piece has no statement)`);
   if (piece.decidedIn.length) out.push(`  also decided in: ${piece.decidedIn.map((d) => `"${d.title}"`).join(', ')}`);
+  // What a place says it should see: values, and the keys each crossing should see its own of.
+  const should = (x) => `${x.expect ? `  · should see ${x.expect}` : ''}${x.distinct?.length ? `  · each crossing its own ${x.distinct.join(', ')}` : ''}`;
   const siteHead = (x) => {
     const inside = x.crossedBy.map((c) => `${c.narrative}${c.step ? ` step ${c.step.n} (${c.step.how === 'in' ? 'in' : c.step.how === 'via' ? 'through' : 'right after'} ${c.step.label})` : ', in no step'}`).join('; ');
     const tests = x.reachedBy.reduce((a, r) => a + r.tests, 0);
@@ -337,9 +339,9 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
       const crossings = (x.seenBy ?? []).flatMap((s) => s.crossings).filter((c) => c.watch !== null).sort((a, b) => Number(differs(b)) - Number(differs(a)));
       const seen = [...new Set(crossings.map(said))];
       return [`  evidence ${at(x)}  in ${x.fn} — ${x.sentence}`,
-        `    goes with the fix${x.expect ? `  · should see ${x.expect}` : ''}${seen.length ? `  · a reproduction saw ${seen.slice(0, 3).join(' | ')}${seen.length > 3 ? ` … (${seen.length} values)` : ''}` : '  · crossed by no reproduction yet'}`];
+        `    goes with the fix${should(x)}${seen.length ? `  · a reproduction saw ${seen.slice(0, 3).join(' | ')}${seen.length > 3 ? ` … (${seen.length} values)` : ''}` : '  · crossed by no reproduction yet'}`];
     }
-    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}${x.expect ? `  · should see ${x.expect}` : ''}`,
+    return [`  ${x.change}  ${at(x)}  in ${x.fn} — ${x.sentence}${should(x)}`,
       ...(x.change === 'added' ? [`    called from: ${(plan.calledFrom?.[x.id] ?? []).map((c) => `${at(c)} (#${c.slug})`).join(', ') || 'NOWHERE — no site names it'}`] : []),
       `    ${x.change === 'added' ? `new seam: ${x.signature ?? x.fn}` : inside ? `lands in ${inside}` : 'crossed by no narrative'}${tests ? `  · reached by ${plural(tests, 'test')} in ${plural(x.reachedBy.length, 'file')}` : x.change === 'added' ? '' : '  · seen by no run yet: run the narrative tests it should sit in, then ask again'}`];
   };

@@ -161,7 +161,7 @@ describe('slug references of plan.md', () => {
 
 const site = (slug: string, file: string, line: number, crossedBy: PlanSite['crossedBy'] = [], change: PlanSite['change'] = 'changed'): PlanSite => ({
   feature: 'demo', slug, id: `planned:demo#${slug}@${file}:${line}`, file, line, column: 3, fn: 'fn', change, sentence: `${slug} happens.`, signature: change === 'added' ? 'export function fn()' : null,
-  crossedBy, reachedBy: [], expect: null, seenBy: [],
+  crossedBy, reachedBy: [], expect: null, distinct: [], seenBy: [],
 });
 const comment = (slug: string, file: string, line: number, removes = false): StaticSite => ({ feature: 'demo', slug, file, line, column: 4, text: `${slug} in a comment`, removes, on: null });
 const todo = (slug: string, file: string, line: number, rule: string | null = null, tier: PlanTodo['tier'] = 'unit'): PlanTodo => ({ feature: 'demo', slug, file, line, column: 3, title: `${slug} is tested`, rule, tier, written: false, reproduction: false, run: null });
@@ -448,6 +448,25 @@ describe('a bug', () => {
     expect(plan.unexpected({ watch: { due: 6 }, expect: { due: 6, kind: 'card' } })).toEqual(['kind']);
     expect(plan.unexpected({ watch: null, expect: { due: 6 } })).toEqual(['due']);
     expect(plan.unexpected({ watch: { due: 10 }, expect: null })).toEqual([]);
+  });
+
+  it('holds a place whose crossings should each see their own value to two that saw the same', () => {
+    // The bug is no crossing's own: it is a value two of them share, as two rows written under one id.
+    const row = (seen: unknown[]): PlanSite => ({ ...evidence(seen, null), change: 'changed', distinct: ['id'] });
+    const cpu = { id: 'row-footprint', of: 'cpu' };
+    const ram = { id: 'row-footprint', of: 'ram' };
+    const power = { id: 'row-power', of: 'cpu' };
+    expect(plan.shared(['id'], [cpu, power, ram].map((watch) => ({ watch, expect: null }))).map((group) => group.map((c) => c.watch))).toEqual([[cpu, ram]]);
+    expect(failed([row([cpu, power, ram])]).failures).toEqual([]);
+    expect(failed([row([cpu, power])]).failures.map((f) => f.split(' — ')[0])).toEqual([
+      'planned: src/a.ts:1 says each crossing sees its own id, and that is what the reproduction that crosses it saw at every crossing',
+    ]);
+    // Several keys are one value together; a crossing whose watch lacks one shares nothing; no key, no group.
+    expect(plan.shared(['id', 'of'], [cpu, ram, cpu].map((watch) => ({ watch, expect: null })))).toHaveLength(1);
+    expect(plan.shared(['id'], [{ watch: { of: 'cpu' }, expect: null }, { watch: null, expect: null }])).toEqual([]);
+    expect(plan.shared([], [cpu, cpu].map((watch) => ({ watch, expect: null })))).toEqual([]);
+    // What a place says is distinct is approved with its clause, as what it expects is.
+    expect(plan.siteLineOf(row([]))).toBe('changed src/a.ts in fn — cut happens. ⇒ distinct id');
   });
 
   it('asks nothing of evidence that expects no value, and says which reproductions to run for one no story crosses', () => {

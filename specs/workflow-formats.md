@@ -98,6 +98,10 @@ in run order with the values it saw at each, then how it failed.
   have. The page sets it against what the reproduction saw, in red where it differs. It is said
   once for the place, or computed at each crossing where the right value depends on it: a line
   crossed for every row, each with its own.
+- **`distinct`**, on the same calls, names keys of the watch that each crossing should see a value
+  of its own for. It is for a bug no crossing shows alone: one value written at several, as an id
+  three rows share. The page draws those crossings together, the shared value once and in red,
+  then what else each saw; the others are counted, and folded.
 - **Watch what is wrong, not what led to it.** "Should be" reads as a claim about the watched
   value: a value that is right and only reaches the wrong branch is context, with no `expect`.
 
@@ -110,8 +114,9 @@ Under the chain, the piece lists what the chain does not show: the places no rep
 crosses, and the tests that are no reproduction.
 
 The check fails on evidence in a piece with no reproduction, on a place whose reproductions saw
-only what it expects (the bug does not show there), and when the reproductions do not run as
-expected: one that passes fails its run. The piece is built when its evidence is gone and its
+only what it expects, or a value of its own at each crossing where it names distinct keys (the
+bug does not show there), and when the reproductions do not run as expected: one that passes
+fails its run. The piece is built when its evidence is gone and its
 reproductions are declared as written tests; until then its lot is not delivered and the archive
 gate holds.
 

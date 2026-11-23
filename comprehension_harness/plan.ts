@@ -70,6 +70,8 @@ export interface PlanSite extends PlannedTag, At {
   /** What the place should see, as the site writes it: a literal, or an expression computed at each crossing;
    *  null when it states none. */
   expect: string | null;
+  /** The keys of the watch each crossing should see a value of its own for; empty when the site names none. */
+  distinct: string[];
   /** What each reproduction that crosses the call saw there: the watch of each crossing, in run order, beside
    *  what that crossing should have seen, and `at`, the position of the first among the story's hits. */
   seenBy: Array<{ file: string; test: string; at: number; crossings: Crossing[] }>;
@@ -148,8 +150,22 @@ export function unexpected({ watch, expect }: Crossing): string[] {
   return should === null ? [] : Object.keys(should).filter((key) => !(key in seen) || !same(seen[key], should[key]));
 }
 
-/** Whether a reproduction saw at a site a value the site does not expect: the bug shows there. */
-export const showsTheBug = (site: Pick<PlanSite, 'seenBy'>) => site.seenBy.some((s) => s.crossings.some((c) => unexpected(c).length > 0));
+/** The crossings of one test that saw the same values for the keys a site says are each crossing's own, by
+ *  group of two or more. A crossing whose watch lacks one of the keys is in no group. */
+export function shared(distinct: string[], crossings: Crossing[]): Crossing[][] {
+  const groups = new Map<string, Crossing[]>();
+  for (const crossing of distinct.length ? crossings : []) {
+    const seen = record(crossing.watch);
+    if (seen === null || distinct.some((key) => !(key in seen))) continue;
+    const flat = JSON.stringify(distinct.map((key) => seen[key]));
+    groups.set(flat, [...(groups.get(flat) ?? []), crossing]);
+  }
+  return [...groups.values()].filter((group) => group.length > 1);
+}
+
+/** Whether a reproduction saw at a site a value the site does not expect, or one value at two crossings that
+ *  should each have their own: the bug shows there. */
+export const showsTheBug = (site: Pick<PlanSite, 'seenBy' | 'distinct'>) => site.seenBy.some((s) => s.crossings.some((c) => unexpected(c).length > 0) || shared(site.distinct, s.crossings).length > 0);
 
 /** A case the spec declared in a journey test and nobody has written yet: `todo(<feature>, <screen>, <title>)`
  *  inside `journey('<name>', …)`. It is a criterion of the spec, tagged with the feature and with no piece: a
@@ -879,7 +895,7 @@ export function rulesOf(intent: Intent, file: string): Array<Omit<PlanRule, 'own
 
 /** A site, a comment and a test as a line of the snapshot: what the approval holds of each. */
 /** A site as a line of the plan. What it expects is part of what is approved: a diagnosis is its values. */
-export const siteLineOf = (x: Pick<PlanSite, 'change' | 'file' | 'fn' | 'sentence' | 'expect'>) => `${x.change} ${x.file} in ${x.fn} — ${x.sentence}${x.expect ? ` ⇒ ${x.expect}` : ''}`;
+export const siteLineOf = (x: Pick<PlanSite, 'change' | 'file' | 'fn' | 'sentence' | 'expect' | 'distinct'>) => `${x.change} ${x.file} in ${x.fn} — ${x.sentence}${x.expect ? ` ⇒ ${x.expect}` : ''}${x.distinct.length ? ` ⇒ distinct ${x.distinct.join(' ')}` : ''}`;
 export const commentLineOf = (x: StaticSite) => `${x.removes ? 'removes' : 'changes'} ${x.file} — ${x.text}`;
 export const testLineOf = (t: PlanTodo) => `${t.tier} ${t.file} — ${t.title}${t.rule ? ` [${t.rule}]` : ''}`;
 const caseLineOf = (c: JourneyCase) => `${c.journey} · ${c.screen} — ${c.title}`;
@@ -1355,14 +1371,16 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
       }
     }
   }
-  // A bug's evidence: a place that expects a value shows the bug when a reproduction saw another there.
+  // A bug's evidence: a place that expects a value shows the bug when a reproduction saw another there, and one
+  // whose crossings should each see their own when two saw the same.
   for (const s of plan.pieces) {
     const reproductions = s.todos.filter((t) => t.reproduction);
     for (const x of s.sites) {
-      if (x.change !== 'evidence' && x.expect === null) continue;
+      const claims = [x.expect !== null ? `expects ${x.expect}` : '', x.distinct.length ? `says each crossing sees its own ${x.distinct.join(', ')}` : ''].filter(Boolean).join(' and ');
+      if (x.change !== 'evidence' && !claims) continue;
       if (x.change === 'evidence' && reproductions.length === 0) failures.push(`planned: ${at(x)} is evidence of #${s.slug}, which has no reproduction — a bug's evidence is what a test that fails today saw: declare one with the stack's reproduction form, or take the call off`);
       else if (x.seenBy.length === 0 && reproductions.length > 0) info.push(`${at(x)} (#${s.slug}) is crossed by no reproduction of its piece in the stories on file — run ${reproductions.map((t) => t.file).filter((f, i, all) => all.indexOf(f) === i).join(', ')}, then check again`);
-      else if (x.expect !== null && x.seenBy.length > 0 && !showsTheBug(x)) failures.push(`planned: ${at(x)} expects ${x.expect}, and that is what ${x.seenBy.length === 1 ? 'the reproduction that crosses it' : `the ${x.seenBy.length} reproductions that cross it`} saw at every crossing — the bug does not show at this place: correct the diagnosis, or take the expectation off`);
+      else if (claims && x.seenBy.length > 0 && !showsTheBug(x)) failures.push(`planned: ${at(x)} ${claims}, and that is what ${x.seenBy.length === 1 ? 'the reproduction that crosses it' : `the ${x.seenBy.length} reproductions that cross it`} saw at every crossing — the bug does not show at this place: correct the diagnosis, or take the expectation off`);
     }
   }
   // A shell nobody names is drawn on no flow: the reviewer cannot see where the new code runs.

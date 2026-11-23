@@ -141,7 +141,10 @@ source by the test.
   change and goes with the fix. A changed or an evidence site may add `"expect"`: what the place
   should see, a key of its watch each, as the source writes it. It is a literal, or an expression
   computed at each crossing as a watch is, so the same rule keeps it inert; its value is the
-  story's, a crossing at a time.
+  story's, a crossing at a time. Either may add `"distinct"`: the keys of its watch each crossing
+  should see a value of its own for, a list of names. It is the source's alone: a bug shows there
+  where two crossings of a test saw the same values for them, which the tools tell from the
+  watches, and no story holds it.
 - A site of a template has `"fn": "(template)"`, in a story too, and its file lists nothing but
   its sites.
 - `functions`: every named function, with the line its name is on. A site or a local belongs to

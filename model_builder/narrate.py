@@ -9,7 +9,9 @@
   is diagnosed: what is seen there today, the watch giving the values. It marks no change and goes with the fix.
   ``expect`` says, a key of the watch each, the value the place should see, which the plan's page sets against
   what the reproduction saw: a literal dict, or a lambda where the right value depends on the crossing (a line
-  crossed for many rows, each with its own). ``planned`` takes it too.
+  crossed for many rows, each with its own). ``distinct`` names the keys of the watch that each crossing
+  should see a value of its own for: the bug shows where two crossings of a test saw the same. It is read from
+  the source alone, and a run does nothing with it. ``planned`` takes both too.
 
 A template makes the same calls through ``template_call``, which the tag library of the project's web
 framework calls with the template's file and the line of the tag: no frame of Python says where a tag is written.
@@ -17,7 +19,8 @@ framework calls with the template's file and the line of the tag: no frame of Py
 None of them does anything unless a collector is installed, which only a test run of this project does
 (``comprehension_harness/python/collector.py``). Python computes a call's arguments before the call, so the
 source index refuses any that is not inert: the sentence is a literal string, the watch a lambda the
-collector calls, which nothing calls outside a test, and ``expect`` a literal dict or another such lambda. The sentence is markdown-lite: ``**bold**`` for the rule
+collector calls, which nothing calls outside a test, ``expect`` a literal dict or another such lambda, and
+``distinct`` a literal string or a literal tuple of them. The sentence is markdown-lite: ``**bold**`` for the rule
 the step enacts, backticks for a symbol of the code.
 
 Every project keeps this file inside its own package and imports the calls from there, so that its code
@@ -47,6 +50,9 @@ class Place:
 
 # What a place should see: a dict, or a function the collector calls as it calls a watch.
 Expect = Any
+# The keys of the watch each crossing should see a value of its own for: one, or a tuple of them. The source
+# index reads it where it is written; no run does.
+Distinct = Any
 # kind, sentence, watch, the frame of the call or the place a template says, and for a planned call (feature,
 # slug, change, expect).
 Collector = Callable[[str, str, Optional[Watch], "FrameType | Place", Optional[tuple[str, str, str, Expect]]], None]
@@ -97,7 +103,8 @@ def _record_planned(tag, change: str, sentence, watch, frame, expect=None) -> No
 
 
 class _Planned:
-    def __call__(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None) -> None:
+    def __call__(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None,
+                 distinct: Distinct = None) -> None:
         """What this place will do once the piece ``tag`` of a feature's plan is built."""
         if _collector is not None:
             _record_planned(tag, "changed", sentence, watch, sys._getframe(1), expect)
@@ -107,7 +114,8 @@ class _Planned:
         if _collector is not None:
             _record_planned(tag, "removed", sentence, None, sys._getframe(1))
 
-    def evidence(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None) -> None:
+    def evidence(self, tag: str, sentence: str, watch: Optional[Watch] = None, expect: Expect = None,
+                 distinct: Distinct = None) -> None:
         """What the bug the piece ``tag`` fixes shows at this place today. The call goes with the fix."""
         if _collector is not None:
             _record_planned(tag, "evidence", sentence, watch, sys._getframe(1), expect)
