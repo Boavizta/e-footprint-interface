@@ -14,7 +14,7 @@ import { parseIntent, sluggedItems } from '../intent-md';
 import {
   BUDGET, SENTENCE_BUDGET, overSentenceBudget,
   assemblePlans, findings, parseTag, parseTodoTitle, replaceSlugRefs, rulesOf, slugRefs, todosByTier,
-  lotLeft, planDocOf, reviewItems,
+  lotLeft, planDocOf, reviewItems, chainsToFreeze, fixedChains,
   type FeatureDocs, type PieceCommit, type PlanBaseline, type PlanInput, type PlanSite, type PlanTodo, type StaticSite,
 } from '../plan';
 import * as plan from '../plan';
@@ -484,7 +484,7 @@ describe('a bug', () => {
     expect(plan.siteLineOf(evidence(null))).toBe("evidence src/a.ts in fn — cut happens. ⇒ {'due': total - card}");
     expect(plan.siteLineOf(evidence(null, null))).toBe('evidence src/a.ts in fn — cut happens.');
     // A place built is one its commits wrote at; evidence goes with the fix and nothing is written there.
-    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, bug: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, takenBack: { sites: [], comments: [] }, reproduced: [], commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
+    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, bug: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, takenBack: { sites: [], comments: [] }, reproduced: [], frozen: [], commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
     expect([...lines]).toEqual([]);
   });
 
@@ -508,6 +508,26 @@ describe('a bug', () => {
     expect(told.delta![0].edits[0].lines.map((l) => l.sign)).toEqual(['−', '+']);
     // A test the approval did not hold as a reproduction is no line, written or edited.
     expect(now([fixed, { ...todo('cut', 'tests/x.test.ts', 12), title: 'the rest is tested', written: true, body: 'ccc333' }]).delta!.flatMap((d) => d.facets.map((f) => f.facet))).toEqual(['tests']);
+  });
+
+  it('freezes what each reproduction tells at the approval, and keeps it once the test is one like another', () => {
+    const MD = '# P\n\n## #cut\n\nCuts.\n\n## Delivery\n\n- **a** #cut — why\n';
+    const failure = { message: 'assert 5 == 6', file: 'tests/x.test.ts', line: 7 };
+    const failing = { ...reproduction(), run: { state: 'failed', failure } };
+    const [today] = assemble({ sites: [evidence([{ due: 5 }])], todos: [failing], docs: docs(MD, null) });
+    const chains = chainsToFreeze(today.pieces[0]);
+    expect(chains).toEqual([{ file: 'tests/x.test.ts', title: 'cut is tested', failure, crossed: [{ change: 'evidence', file: 'src/a.ts', fn: 'fn', sentence: 'cut happens.', expect: "{'due': total - card}", distinct: [], crossings: [{ watch: { due: 5 }, expect: { due: 6 } }] }] }]);
+    // While the test still fails, a run tells the bug: the approval's chain is not the one to read.
+    const approved: PlanBaseline = { feature: 'demo', base: 'abc12345', approvedOn: '2026-11-23', units: today.snapshot.units, chains: { cut: chains } };
+    const now = (input: Partial<PlanInput>) => assemble({ ...input, docs: (feature) => ({ ...docs(MD, null)(feature), approved: { file: 'specs/features/demo/plan.approved.json', baseline: approved } }) })[0].pieces[0];
+    expect(fixedChains(now({ sites: [evidence([{ due: 5 }])], todos: [failing] }))).toEqual([]);
+    // Fixed: the evidence is gone, the test passes and is no reproduction. The approval alone still tells the bug,
+    // and the next approval keeps it.
+    const fixed = now({ todos: [{ ...reproduction(), reproduction: false }] });
+    expect(fixedChains(fixed)).toEqual(chains);
+    expect(chainsToFreeze(fixed)).toEqual(chains);
+    // A reproduction no run has told freezes nothing.
+    expect(chainsToFreeze(assemble({ todos: [reproduction()], docs: docs(MD, null) })[0].pieces[0])).toEqual([]);
   });
 
   it('reads a bug as a section of plan.md, and the pieces whose sections stand under it as what fixes it', () => {

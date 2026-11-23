@@ -170,6 +170,48 @@ export function shared(distinct: string[], crossings: Crossing[]): Crossing[][] 
  *  should each have their own: the bug shows there. */
 export const showsTheBug = (site: Pick<PlanSite, 'seenBy' | 'distinct'>) => site.seenBy.some((s) => s.crossings.some((c) => unexpected(c).length > 0) || shared(site.distinct, s.crossings).length > 0);
 
+/**
+ * What one reproduction told of a bug when the plan was approved, kept in the approval: once the piece is built
+ * its evidence is gone from the source and the test passes, so no run can tell it again. The places of the
+ * piece the test crossed, in run order, with what it saw at each, then how it failed.
+ */
+export interface FrozenChain {
+  /** The test, by what its fix does not move: its file and its title (`reproductionKeyOf`). */
+  file: string;
+  title: string;
+  failure: StoryFailure | null;
+  crossed: Array<Pick<PlanSite, 'change' | 'file' | 'fn' | 'sentence' | 'expect' | 'distinct'> & { crossings: Crossing[] }>;
+}
+
+/** The places of a piece one of its reproductions crossed, in run order, with what it saw at each. */
+export function placesCrossed(piece: Pick<PlanPiece, 'sites'>, t: PlanTodo): Array<{ site: PlanSite; seen: PlanSite['seenBy'][number] }> {
+  return piece.sites.flatMap((site) => site.seenBy.filter((s) => isStoryOf(t, s)).map((seen) => ({ site, seen }))).sort((a, b) => a.seen.at - b.seen.at);
+}
+
+/** Whether a frozen chain is that of a test. */
+export const isChainOf = (chain: Pick<FrozenChain, 'file' | 'title'>, t: Pick<PlanTodo, 'file' | 'title'>) => chain.file === t.file && chain.title === t.title;
+
+/**
+ * What an approval keeps of a piece's bug: the chain of each reproduction a run has told, as it stands, then
+ * the chains an earlier approval froze for the tests that are no reproduction any more — a piece built between
+ * two approvals keeps what it was approved on. A reproduction no run has told freezes nothing.
+ */
+export function chainsToFreeze(piece: Pick<PlanPiece, 'sites' | 'todos' | 'frozen'>): FrozenChain[] {
+  const failing = piece.todos.filter((t) => t.reproduction);
+  const told = failing.filter((t) => t.run !== null).map((t): FrozenChain => ({
+    file: t.file, title: t.title, failure: t.run!.failure,
+    crossed: placesCrossed(piece, t).map(({ site, seen }) => ({ change: site.change, file: site.file, fn: site.fn, sentence: site.sentence, expect: site.expect, distinct: site.distinct, crossings: seen.crossings })),
+  }));
+  return [...told, ...piece.frozen.filter((chain) => !failing.some((t) => isChainOf(chain, t)))];
+}
+
+/** The chains of a piece's bug that only the approval can still tell: those of tests that are no reproduction
+ *  any more. */
+export const fixedChains = (piece: Pick<PlanPiece, 'todos' | 'frozen'>) => piece.frozen.filter((chain) => !piece.todos.some((t) => t.reproduction && isChainOf(chain, t)));
+
+/** Evidence that went was no place to build: it is not counted as one, and never taken back. */
+export const isBuiltPlace = (line: string) => !line.startsWith('evidence ');
+
 /** A case the spec declared in a journey test and nobody has written yet: `todo(<feature>, <screen>, <title>)`
  *  inside `journey('<name>', …)`. It is a criterion of the spec, tagged with the feature and with no piece: a
  *  journey case usually needs several pieces, and is written once they are in. */
@@ -353,6 +395,8 @@ export interface PlanPiece {
   /** The tests the approval holds as reproductions of the piece, by file and title (`reproductionKeyOf`): each
    *  goes on being compared with the body approved once it passes and is declared a test like another. */
   reproduced: string[];
+  /** The chains the approval froze for the piece (`FrozenChain`): what its reproductions told before the fix. */
+  frozen: FrozenChain[];
   /** The commits that deliver the piece, oldest first: those whose message names it (`PieceCommit`). */
   commits: PieceCommit[];
 }
@@ -475,6 +519,9 @@ export interface PlanBaseline extends PlanSnapshot {
   /** The commit the approval was given on: what the code and the tests were, for whoever compares them later. */
   base: string;
   approvedOn: string;
+  /** By piece, what each of its reproductions told when the plan was approved (`chainsToFreeze`). Read by the
+   *  pages once the piece is built; never compared, so it is no unit and no line of a delta. */
+  chains?: Record<string, FrozenChain[]>;
 }
 
 /** A unit that is not as approved. `reason`: `needed`, the change is one the reviewer must be told of and the
@@ -1157,9 +1204,6 @@ const claims = (claim: PlanChange['claims'][number], l: DeltaLine, piece: PlanPi
   ? l.sign === '−' && (l.facet === 'sites' || l.facet === 'comments') && (piece?.takenBack[l.facet].includes(l.text) ?? false)
   : claim.kind === kindOfLine(l)) && heldBy(l, piece).includes(claim.fragment);
 
-/** Evidence that went was no place to build: it is never taken back. */
-const isBuiltPlace = (line: string) => !line.startsWith('evidence ');
-
 /**
  * Takes back the built places a piece's `Changed:` paragraphs name: each line of `built` that holds the fragment
  * of an `unbuilt` claim leaves it for `takenBack`. Run before the plan is read as a snapshot, so that the line
@@ -1279,6 +1323,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
           built: { sites: [], comments: [] },
           takenBack: { sites: [], comments: [] },
           reproduced: [],
+          frozen: docs.approved?.baseline.chains?.[slug] ?? [],
           commits: [],
         };
         bySlug.set(slug, piece);

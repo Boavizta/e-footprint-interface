@@ -129,6 +129,11 @@ under the debugger writes no story.
 Under the chain, the piece lists what the chain does not show: the places no reproduction
 crosses, and the tests that are no reproduction.
 
+**The chain outlives the fix.** Built, a piece has no evidence left and its reproductions pass:
+no run tells the bug again. So the approval freezes each reproduction's chain as it stands, and
+the pages draw it under the built piece, beside the test that now passes: what was approved as
+wrong, then the code that fixed it. A bug reads "fixed" once every piece under it is built.
+
 The check fails on evidence in a piece with no reproduction, on a place whose reproductions saw
 only what it expects, or a value of its own at each crossing where it names distinct keys (the
 bug does not show there), and when the reproductions do not run as expected: one that passes
@@ -214,8 +219,10 @@ collects its own alone (`comprehension_harness/README.md` § "The Python stack")
 ## The approval, and what moved since
 
 `plan.approved.json` is written by the approval command and by nothing else. It is committed: it
-is the approval. It holds the plan a unit at a time, with no line number. The command refuses
-while a `To confirm:` stands, and takes the `Changed:` paragraphs off `plan.md`.
+is the approval. It holds the plan a unit at a time, with no line number, and for a piece that
+fixes a bug what each reproduction told that day (§ "A bug"), which is kept and never compared.
+The command refuses while a `To confirm:` stands, and takes the `Changed:` paragraphs off
+`plan.md`.
 
 From then on the check lists every unit that is not as approved, and fails:
 
