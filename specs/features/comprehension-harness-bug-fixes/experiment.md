@@ -142,6 +142,12 @@ Built on the fix of Tasks 9 and 10, for what the implement stage showed:
   place skipped beside built ones, or undone by a later commit, read as built. It now reads the
   place's function, from the approval's commit to the code as it stands, what stands directly on
   it counted with it. So the check asks for the `unbuilt` paragraph where nothing was written.
+- **What a lot changed at no place of the plan is listed**, in a file the plan names: a function
+  that changed and that no place names, or lines above a template's first place. It is shown with
+  the piece, on the delivery page and in the brief, and asks nothing: an edit names one only when
+  it is a decision. On the first lot it lists the dict's label and the load line that five
+  templates lost, and nothing of the Python files. On `ai-bootstrap-edge`, whose lot added 424
+  lines to one file of 38 functions, it lists three: the helpers of a place are left out.
 
 Still candidates:
 
@@ -155,8 +161,8 @@ Still candidates:
 - A place built wrongly: code stands there and does not do what the clause says. No tool tells,
   and the `unbuilt` paragraph is then written only when a reviewer sees it. Nor does one tell a
   place built by taking lines off from one that was skipped: its `Changed:` says which.
-- A change in a file the plan names, on a line no place names: neither the lot check nor the
-  brief shows it.
+- How far down a template's place goes. A tag stands above what it changes and nothing bounds
+  it: of a template, only what changed above its first place is listed.
 - A feature name used again after an archive: a plan reads every commit that names one of its
   feature's pieces, and fails on one whose piece it no longer holds.
 

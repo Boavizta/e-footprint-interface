@@ -285,6 +285,14 @@ each of these is settled:
 Each is a decision: a `Changed:` in the piece's section, in words the reviewer can read without
 the code.
 
+**What a lot changed at no place of the plan, in a file the plan names, is listed and asks
+nothing.** A ripple and a small extraction are common and sound: the reviewer is shown them, with
+the piece, and an edit names one (`→ code <fragment>`) only when it is a decision. In code it is a
+function that changed and that no place names; a line in no function, as an import, and a new
+function that a line written elsewhere names are left out. A file with no function, as a
+template, lists only what is certain: a change above its first place, since a tag stands above
+what it changes and nothing says how far down that goes.
+
 ## Implementing a piece
 
 - Each `planned` call becomes code, and each comment goes.
