@@ -32,7 +32,7 @@ from pydantic import ValidationError
 
 from . import providers
 from . import report
-from model_builder.application.ai_bootstrap import dsl, service
+from model_builder.application.ai_bootstrap import catalogs, dsl, service
 from model_builder.application.ai_bootstrap.dsl import ModelSpec, parse_json
 
 SANDBOX = Path(__file__).parent
@@ -67,6 +67,9 @@ def structural_checks(spec: ModelSpec, checks: dict) -> dict[str, bool]:
             results[key] = len(spec.journeys) >= expected
         elif key == "requires_genai_api":
             results[key] = bool(spec.genai_apis) and any(j.genai_api for j in spec.jobs)
+        elif key == "genai_models_must_include":  # "provider/model" after catalog resolution
+            resolved = {"/".join(catalogs.resolve_genai(a.provider, a.model_name, [])) for a in spec.genai_apis}
+            results[key] = set(expected) <= resolved
         elif key == "requires_gpu_server":
             results[key] = any(s.kind == "gpu" for s in spec.servers)
         elif key == "requires_server_shared_by_journeys":

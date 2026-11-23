@@ -24,7 +24,7 @@ class Resolution:
     kind: str          # "genai_model" | "cloud_instance" | "provider"
     requested: str
     resolved: str
-    how: str           # "exact" | "normalized" | "prefix" | "fallback" | "sized"
+    how: str           # "exact" | "normalized" | "prefix" | "contains" | "model_name" | "fallback" | "default" | "sized" ...
 
     def as_dict(self):
         return dict(self.__dict__)
@@ -83,26 +83,37 @@ def genai_models_by_provider() -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in out.items()}
 
 
+SNAP_STRENGTH = ("exact", "normalized", "prefix", "contains")
+
+
 def resolve_genai(provider: str, model_name: str | None, resolutions: list[Resolution]) -> tuple[str, str]:
     catalog = genai_models_by_provider()
+    stated_key = GENAI_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "_"))
     if not model_name:
-        provider_key = GENAI_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "_"), "openai")
+        provider_key = stated_key or "openai"
         default = GENAI_DEFAULT_MODEL.get(provider_key, catalog[provider_key][0])
         resolutions.append(Resolution("genai_model", f"{provider}/<unstated>", f"{provider_key}/{default}", "default"))
         return provider_key, default
-    provider_key = GENAI_PROVIDER_ALIASES.get(provider.strip().lower().replace(" ", "_"))
-    if provider_key is None:
-        # last resort: the provider whose catalog contains the model name
-        matches = [p for p, names in catalog.items() if _snap(model_name, names, "")[1] != "fallback"]
-        provider_key = matches[0] if matches else "openai"
-        resolutions.append(Resolution("provider", provider, provider_key, "fallback"))
-    elif provider_key != provider:
+    provider_key = stated_key
+    resolved, how = _snap(model_name, catalog[stated_key], "") if stated_key else ("", "fallback")
+    if how == "fallback":
+        # The provider is unknown or guessed wrong, as for a model released after the LLM's training: the catalog
+        # that matches the model name, copied from the description, decides.
+        matches = [(SNAP_STRENGTH.index(h), p, r, h) for p, names in catalog.items()
+                   for r, h in [_snap(model_name, names, "")] if h != "fallback"]
+        if matches:
+            _, provider_key, resolved, how = min(matches)
+            resolutions.append(Resolution("provider", provider, provider_key, "model_name"))
+        elif stated_key is None:
+            provider_key = "openai"
+            resolutions.append(Resolution("provider", provider, provider_key, "fallback"))
+    if provider_key == stated_key != provider:
         resolutions.append(Resolution("provider", provider, provider_key, "normalized"))
-    names = catalog[provider_key]
-    fallback = GENAI_DEFAULT_MODEL.get(provider_key) or next(
-        (n for key in ("llama-3.3-70b", "llama-3.1-70b", "llama-3.1-8b", "llama-3", "llama")
-         for n in names if key in n.lower()), names[0])
-    resolved, how = _snap(model_name, names, fallback)
+    if how == "fallback":
+        names = catalog[provider_key]
+        resolved = GENAI_DEFAULT_MODEL.get(provider_key) or next(
+            (n for key in ("llama-3.3-70b", "llama-3.1-70b", "llama-3.1-8b", "llama-3", "llama")
+             for n in names if key in n.lower()), names[0])
     if how != "exact":
         resolutions.append(Resolution("genai_model", f"{provider}/{model_name}", f"{provider_key}/{resolved}", how))
     return provider_key, resolved

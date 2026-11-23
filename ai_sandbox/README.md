@@ -142,6 +142,10 @@ Every entry accepts an `--effort` override.
   specs cached in `model_builder/application/ai_bootstrap/catalogs/boavizta_instance_specs.json`, refreshed only by
   the developer command `poetry run python -m ai_sandbox.catalogs refresh`).
   Every non-exact resolution is recorded in the run record, so hallucinated names stay measurable.
+  The prompt lists no model names: a list goes stale with each release, and models took it for the catalog,
+  swapping a newer model the description named (Fable 5.1, Opus 5.5) for a listed one. They are told to copy the
+  name as written; when the provider they guess has no match, the provider whose catalog matches the name wins.
+  Case 07 guards this: its `genai_models_must_include` check resolves each GenAI API and expects the named models.
 - **Every CPU server is a cloud instance.** A server with no `cloud_provider` is sized on `DEFAULT_CLOUD_PROVIDER`
   (aws) in `catalogs.py`. The library's plain `Server` default is a whole physical machine, 30-40x the footprint of
   a small instance, so whether a model happened to name a provider swung the server total (Luna never names one, the

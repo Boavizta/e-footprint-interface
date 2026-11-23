@@ -1,0 +1,20 @@
+{
+  "id": "07_support_assistant_named_models",
+  "title": "Customer support assistant naming recent Anthropic models",
+  "user_prompt": "We sell accounting software to about 8,000 small businesses in France and Belgium. Our support portal has an AI assistant: when a customer opens a ticket, Fable 5.1 drafts a first answer, and the hardest tickets, roughly one in ten, get a second pass with Opus 5.5 before an agent reviews them. We handle about 30,000 tickets a month. Customers write from their office laptops. The portal itself is a small web app with a database, hosted on OVHcloud. We want to know how much of the portal's footprint comes from the AI part.",
+  "facts_if_asked": {
+    "answers": "Fable 5.1 drafts are about 400 tokens; Opus 5.5 second passes about 800 tokens.",
+    "backend": "One API server and one managed Postgres database."
+  },
+  "expected_properties": [
+    "Two GenAI API objects with provider anthropic: one on claude-fable-5-1, one on claude-opus-5-5, each copied from the description rather than replaced by a model the LLM knows.",
+    "A ticket journey whose drafting job runs on the Fable API, and an escalation step or journey on the Opus API at about a tenth of the volume.",
+    "Usage patterns on laptop for FRANCE and BELGIUM, about 30,000 tickets a month in total."
+  ],
+  "checks": {
+    "requires_genai_api": true,
+    "genai_models_must_include": ["anthropic/claude-fable-5-1", "anthropic/claude-opus-5-5"],
+    "devices_must_include": ["laptop"],
+    "countries_must_include": ["FRANCE"]
+  }
+}
