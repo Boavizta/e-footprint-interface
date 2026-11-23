@@ -14,6 +14,7 @@ from efootprint.core.usage.edge.edge_function import EdgeFunction
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 
+from comprehension_harness.python.declare import reproduces
 from model_builder.adapters.repositories import SessionSystemRepository
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -37,17 +38,19 @@ def edge_computer_system_data():
         System("Edge system", usage_patterns=[], edge_usage_patterns=[edge_usage_pattern]), save_computed_state=False)
 
 
-def _assert_success_or_exception_modal(response, url):
-    if response.status_code != 200:
-        assert response.status_code == 500, url
-        assert response.headers.get("HX-Reswap") == "none", url
-        assert "openModalDialog" in response.headers.get("HX-Trigger-After-Settle", ""), url
+def _answer(response) -> str:
+    """What a fragment request came to, as the user meets it."""
+    if response.status_code == 200:
+        return "the fragment"
+    shown = response.headers.get("HX-Reswap") == "none" and "openModalDialog" in response.headers.get(
+        "HX-Trigger-After-Settle", "")
+    return "the exception modal" if response.status_code == 500 and shown else f"a raw {response.status_code}"
 
 
-@pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 9")
+@reproduces("bug-fixes-2026-10#dict-entry-own-template: a dict entry the library leaves empty reads no value, with "
+            "its formula and no chart")
 @pytest.mark.django_db
-def test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_fail_silently(
-        client, monkeypatch, edge_computer_system_data, minimal_system_data):
+def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monkeypatch, edge_computer_system_data):
     monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
     client.raise_request_exception = False
     SessionSystemRepository(client.session).save_data(edge_computer_system_data)
@@ -55,31 +58,55 @@ def test_empty_calculated_dict_entries_render_no_chart_and_fragment_views_never_
     storage_id = next(iter(edge_computer_system_data["EdgeStorage"]))
     cpu_id = next(iter(edge_computer_system_data["EdgeComputerCPUComponent"]))
     ram_id = next(iter(edge_computer_system_data["EdgeComputerRAMComponent"]))
-    process_id = next(iter(edge_computer_system_data["RecurrentEdgeProcess"]))
     usage_pattern_id = next(iter(edge_computer_system_data["EdgeUsagePattern"]))
 
     panel = client.get(f"/model_builder/open-edit-object-panel/{edge_computer_id}/").content.decode()
     chart_urls = re.findall(rf'hx-get="({re.escape(HOURLY_CHART_URL)}[^"]+)"', panel)
+    entry = f"{storage_id}/{{}}/{usage_pattern_id}"
+    seen = {
+        "empty entries offering a chart": [
+            name for name in EMPTY_STORAGE_DICT_ATTRIBUTES if HOURLY_CHART_URL + entry.format(name) in chart_urls],
+        "empty entries offering their formula": [
+            name for name in EMPTY_STORAGE_DICT_ATTRIBUTES
+            if "/model_builder/get_calculated_attribute_explanation/" + entry.format(name) in panel],
+        "components still charted": [name for name, component_id in (("cpu", cpu_id), ("ram", ram_id))
+                                     if any(url.startswith(f"{HOURLY_CHART_URL}{component_id}/") for url in chart_urls)],
+        "charts offered that do not draw": sum(_answer(client.get(url)) != "the fragment" for url in chart_urls),
+    }
 
-    for attr_name in EMPTY_STORAGE_DICT_ATTRIBUTES:
-        assert f"{HOURLY_CHART_URL}{storage_id}/{attr_name}/{usage_pattern_id}" not in chart_urls
-        assert (f"/model_builder/get_calculated_attribute_explanation/{storage_id}/{attr_name}/{usage_pattern_id}"
-                in panel)
-    assert any(url.startswith(f"{HOURLY_CHART_URL}{cpu_id}/") for url in chart_urls)
-    assert any(url.startswith(f"{HOURLY_CHART_URL}{ram_id}/") for url in chart_urls)
-    for url in chart_urls:
-        assert client.get(url).status_code == 200, url
-    empty_entry_chart_url = f"{HOURLY_CHART_URL}{storage_id}/unitary_power_per_usage_pattern/{usage_pattern_id}"
-    _assert_success_or_exception_modal(client.get(empty_entry_chart_url), empty_entry_chart_url)
+    assert seen == {
+        "empty entries offering a chart": [], "empty entries offering their formula": EMPTY_STORAGE_DICT_ATTRIBUTES,
+        "components still charted": ["cpu", "ram"], "charts offered that do not draw": 0}
 
+
+@reproduces("bug-fixes-2026-10#fragment-views-show-modal: a fragment view that fails answers with the exception "
+            "modal, never a raw 500")
+@pytest.mark.django_db
+def test_failing_fragment_views_show_the_exception_modal(
+        client, monkeypatch, edge_computer_system_data, minimal_system_data):
+    monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
+    client.raise_request_exception = False
+    SessionSystemRepository(client.session).save_data(edge_computer_system_data)
+    edge_computer_id = next(iter(edge_computer_system_data["EdgeComputer"]))
+    storage_id = next(iter(edge_computer_system_data["EdgeStorage"]))
+    cpu_id = next(iter(edge_computer_system_data["EdgeComputerCPUComponent"]))
+    process_id = next(iter(edge_computer_system_data["RecurrentEdgeProcess"]))
+    usage_pattern_id = next(iter(edge_computer_system_data["EdgeUsagePattern"]))
+
+    # The chart of an entry the library leaves empty: no panel links to it once fixed, and it still cannot be drawn.
+    answers = {"the chart of an empty entry": _answer(client.get(
+        f"{HOURLY_CHART_URL}{storage_id}/unitary_power_per_usage_pattern/{usage_pattern_id}"))}
     # Another tab loads a different model into the session: every URL the open panels hold is now stale.
     SessionSystemRepository(client.session).save_data(minimal_system_data)
-    for url in [f"{HOURLY_CHART_URL}{cpu_id}/energy_per_edge_device/",
-                f"/model_builder/get_explainable_recurrent_quantity_chart_and_explanation/{process_id}/"
-                f"recurrent_compute_needed/",
-                f"/model_builder/get_calculated_attribute_explanation/{storage_id}/energy_per_edge_device/",
-                f"/model_builder/ask-delete-object/{edge_computer_id}/"]:
-        _assert_success_or_exception_modal(client.get(url), url)
+    answers.update({name: _answer(client.get(url)) for name, url in {
+        "a stale hourly chart": f"{HOURLY_CHART_URL}{cpu_id}/energy_per_edge_device/",
+        "a stale recurrent chart": f"/model_builder/get_explainable_recurrent_quantity_chart_and_explanation/"
+                                   f"{process_id}/recurrent_compute_needed/",
+        "a stale explanation": f"/model_builder/get_calculated_attribute_explanation/{storage_id}/"
+                               f"energy_per_edge_device/",
+        "a stale delete confirmation": f"/model_builder/ask-delete-object/{edge_computer_id}/"}.items()})
+
+    assert answers == dict.fromkeys(answers, "the exception modal")
 
 
 @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 10")

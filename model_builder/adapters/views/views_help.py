@@ -3,9 +3,12 @@ from django.shortcuts import render
 
 from model_builder.adapters.ui_config.class_ui_config_provider import ClassUIConfigProvider
 from model_builder.adapters.ui_config.efootprint_description_provider import EFOOTPRINT_DESCRIPTION_PROVIDER
+from model_builder.narrate import planned
 
 
 def open_help_drawer(request, class_name):
+    planned("bug-fixes-2026-10#fragment-views-show-modal",
+            "A failure here shows the exception modal instead of a raw 500.")
     provider = EFOOTPRINT_DESCRIPTION_PROVIDER
     try:
         description = provider.class_description(class_name)

@@ -19,6 +19,12 @@ Next: the first feature planned in pieces, and the other flows narrated and give
 they are touched. The hand-drawn journeys of `specs/design/journeys/` stay until a drawn one
 replaces each. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
 
+An experiment ports the bug batch `bug-fixes-2026-10`, runs B and C, to pieces one bug at a time, to
+find what the harness needs for bugs:
+[`features/comprehension-harness-bug-fixes/experiment.md`](features/comprehension-harness-bug-fixes/experiment.md).
+Task 9 is ported on the bug forms it asked for (reproductions, evidence, template sites); its fix
+and the next bug follow.
+
 ### AI-assisted bootstrap — specification approved, planning pending
 
 [First production feature](features/ai-assisted-bootstrap/spec.html): guided web-modeling bootstrap

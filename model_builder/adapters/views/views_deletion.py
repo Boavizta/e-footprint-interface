@@ -8,11 +8,14 @@ from model_builder.adapters.repositories import SessionWorkspaceRepository
 from model_builder.adapters.presenters import HtmxPresenter
 from model_builder.application.use_cases import DeleteObjectUseCase, DeleteObjectInput
 from model_builder.domain.entities.web_core.model_web import ModelWeb
+from model_builder.narrate import planned
 from model_builder.adapters.views.exception_handling import render_exception_modal_if_error
 
 
 @time_it
 def ask_delete_object(request, object_id):
+    planned("bug-fixes-2026-10#fragment-views-show-modal",
+            "A failure here shows the exception modal instead of a raw 500.")
     repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     web_obj = model_web.get_web_object_from_efootprint_id(object_id)

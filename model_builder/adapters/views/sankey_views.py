@@ -21,6 +21,7 @@ from model_builder.adapters.views.exception_handling import render_exception_mod
 from model_builder.adapters.views.data_status import append_workspace_storage_status
 from model_builder.domain.entities.web_core.model_web import ModelWeb
 from model_builder.domain.exceptions import ComputationMemoryLimitExceeded
+from model_builder.narrate import planned
 
 EXCLUDABLE_CLASSES = ["Device", "EdgeDevice", "Network", "ServerBase", "ExternalAPI", "Storage", "EdgeStorage"]
 
@@ -437,6 +438,8 @@ def sankey_diagram(request):
 
 
 def sankey_form(request):
+    planned("bug-fixes-2026-10#fragment-views-show-modal",
+            "A failure here shows the exception modal instead of a raw 500.")
     repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
     present_classes = _get_present_classes(model_web)
@@ -458,6 +461,8 @@ def sankey_form(request):
 
 def sankey_cards(request):
     """Return all saved Sankey cards, or a default one if none exist."""
+    planned("bug-fixes-2026-10#fragment-views-show-modal",
+            "A failure here shows the exception modal instead of a raw 500.")
     repository = SessionWorkspaceRepository(request.session).active_repository()
     saved_diagrams = repository.interface_config.get("sankey_diagrams", [])
 
@@ -497,6 +502,8 @@ def sankey_cards(request):
 
 def sankey_delete_card(request):
     """Delete a persisted Sankey card configuration."""
+    planned("bug-fixes-2026-10#fragment-views-show-modal",
+            "A failure here shows the exception modal instead of a raw 500.")
     card_id = request.POST.get("card_id", "")
     repository = SessionWorkspaceRepository(request.session).active_repository()
     model_web = ModelWeb(repository)
