@@ -129,6 +129,9 @@ export interface PlanTodo extends PlannedTag, At {
   /** What a reproduction's last run said: its state, and how it failed. Null for any other test, and for a
    *  reproduction no run has told yet. */
   run: { state: string | undefined; failure: StoryFailure | null } | null;
+  /** The test as written, hashed by the stack (`TestTitle.body`); null for a test to write, and where the stack
+   *  gives none. What the approval holds of a reproduction: the fix makes it pass, and does not edit it. */
+  body: string | null;
 }
 
 /** A test of a plan that is still owed: one to write, or a reproduction that still fails. */
@@ -347,6 +350,9 @@ export interface PlanPiece {
    *  that were. Nothing in the source marks that, so the plan does: the line leaves `built`, is a `−` of the
    *  delta under the edit that names it, and the next approval no longer holds it. */
   takenBack: { sites: string[]; comments: string[] };
+  /** The tests the approval holds as reproductions of the piece, by file and title (`reproductionKeyOf`): each
+   *  goes on being compared with the body approved once it passes and is declared a test like another. */
+  reproduced: string[];
   /** The commits that deliver the piece, oldest first: those whose message names it (`PieceCommit`). */
   commits: PieceCommit[];
 }
@@ -685,7 +691,7 @@ export function scanTodos(file: string, text: string, titles: TitleReader): Arra
   for (const t of titles.read(file, text).tests) {
     if (!t.planned && !TODO_TAG.test(t.title)) continue;
     const parsed = parseTodoTitle(t.title, `${file}:${t.line}`);
-    if (parsed) out.push({ ...parsed, file, line: t.line, column: t.column, written: !t.planned, reproduction: t.reproduction === true, run: null });
+    if (parsed) out.push({ ...parsed, file, line: t.line, column: t.column, written: !t.planned, reproduction: t.reproduction === true, run: null, body: t.planned ? null : t.body ?? null });
   }
   return out;
 }
@@ -931,6 +937,15 @@ export const commentLineOf = (x: StaticSite) => `${x.removes ? 'removes' : 'chan
 export const testLineOf = (t: PlanTodo) => `${t.tier} ${t.file} — ${t.title}${t.rule ? ` [${t.rule}]` : ''}`;
 const caseLineOf = (c: JourneyCase) => `${c.journey} · ${c.screen} — ${c.title}`;
 
+/** The facet of a piece that holds its reproductions as written: a line a test, its body's hash last. */
+export const REPRODUCTIONS = 'reproductions';
+/** A reproduction by what does not move when it is fixed: its file and its title. */
+export const reproductionKeyOf = (t: Pick<PlanTodo, 'file' | 'title' | 'rule'>) => `${t.file} — ${t.title}${t.rule ? ` [${t.rule}]` : ''}`;
+const BODY = ' ⇒ ';
+const reproductionLineOf = (t: PlanTodo) => `${reproductionKeyOf(t)}${BODY}${t.body}`;
+/** The key of a line of the facet: the line without its hash. */
+const reproductionOfLine = (line: string) => line.slice(0, line.lastIndexOf(BODY));
+
 const blockTexts = (blocks: MdBlock[]) => blocks.flatMap((b) => (b.kind === 'p' ? [b.text] : b.items.map((i) => `- ${i.slug ? `**${i.slug}** ` : ''}${i.text}`)));
 
 /** The plan as lines. A piece is its statement, its reason, its sites and its comments — those still planned,
@@ -947,6 +962,9 @@ export function snapshotOf(plan: Pick<Plan, 'pieces' | 'doc' | 'journeyCases'> &
       sites: [...piece.sites.map(siteLineOf), ...piece.built.sites],
       comments: [...piece.statics.map(commentLineOf), ...piece.built.comments],
       tests: piece.todos.map(testLineOf),
+      // A reproduction as written, and still as written once it passes: a body edited since the approval is a
+      // line of the delta. A test the approval did not hold as one is no line, written or not.
+      [REPRODUCTIONS]: piece.todos.filter((t) => t.body !== null && (t.reproduction || piece.reproduced.includes(reproductionKeyOf(t)))).map(reproductionLineOf),
       // An approved plan holds none: a question a later stage raises is a line of the delta.
       question: piece.doc?.ask ? [askLine(piece.doc.ask)] : [],
       // What it was built with, told for whoever builds on it: listed when new, and asks nothing.
@@ -982,7 +1000,9 @@ const ASKS_NOTHING = ['question', NOTES];
 
 /** A line of the unit tier: a unit title to write, or a comment on a test file that is neither a narrative's nor
  *  a journey's. It touches neither the product's code nor what a narrative tells. */
-export const isUnitTestLine = (facet: string, line: string, layout: Layout) => (facet === 'tests' ? line.startsWith('unit ') : facet === 'comments' && layout.isUnitTest(/^\S+ (\S*)/.exec(line)?.[1] ?? ''));
+export const isUnitTestLine = (facet: string, line: string, layout: Layout) => (facet === 'tests' ? line.startsWith('unit ')
+  : facet === REPRODUCTIONS ? layout.isUnitTest(/^(\S*)/.exec(line)?.[1] ?? '')
+    : facet === 'comments' && layout.isUnitTest(/^\S+ (\S*)/.exec(line)?.[1] ?? ''));
 
 /** The lines of `now` that `was` does not hold, each as many times as it is over. */
 const linesOver = (now: string[], was: string[]) => {
@@ -1056,6 +1076,8 @@ export function placeOfLine(line: DeltaLine): string {
   if (line.facet === UNPLANNED) return `${UNPLANNED} ${line.text}`;
   const site = /^(?:changed|added|removed|evidence) (\S+) in (\S+) — /.exec(line.facet === 'sites' ? line.text : '');
   if (site) return `sites ${site[1]} ${site[2]}`;
+  // A reproduction is its own place: its body as approved and its body now are one rewording.
+  if (line.facet === REPRODUCTIONS) return `${REPRODUCTIONS} ${reproductionOfLine(line.text)}`;
   const filed = /^\S+ (\S+) — /.exec(line.facet === 'comments' || line.facet === 'tests' ? line.text : '');
   return filed ? `${line.facet} ${filed[1]}` : line.facet;
 }
@@ -1063,7 +1085,7 @@ export function placeOfLine(line: DeltaLine): string {
 /** The kind a claim names a line by. */
 export function kindOfLine(line: DeltaLine): string {
   if (line.facet === 'sites') return 'code';
-  if (line.facet === 'tests') return 'test';
+  if (line.facet === 'tests' || line.facet === REPRODUCTIONS) return 'test';
   if (line.facet === 'comments') return /^\S+ tests\//.test(line.text) ? 'test' : 'code';
   if (line.facet === UNPLANNED) return line.text.startsWith('test ') ? 'test' : 'code';
   return line.facet;
@@ -1256,6 +1278,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
           decidedIn: doc ? doc.sections.filter((s) => s.piece === null && !s.bug && s.slugs.includes(slug)) : [],
           built: { sites: [], comments: [] },
           takenBack: { sites: [], comments: [] },
+          reproduced: [],
           commits: [],
         };
         bySlug.set(slug, piece);
@@ -1276,6 +1299,11 @@ export function assemblePlans(input: PlanInput): Plan[] {
     const approved = docs.approved ?? null;
     const approvedPieces = (approved?.baseline.units ?? []).filter((u) => u.kind === 'piece');
     const implementing = approved !== null && approved.baseline.units.some((u) => u.kind === 'delivery');
+    // A test the approval holds as a reproduction is compared with the body approved from then on.
+    for (const unit of approvedPieces) {
+      const piece = bySlug.get(unit.name.slice(1));
+      if (piece) piece.reproduced = (unit.facets[REPRODUCTIONS] ?? []).map(reproductionOfLine);
+    }
     if (implementing) {
       const heldBy = new Map<string, string>();
       for (const piece of bySlug.values()) for (const line of [...piece.sites.map(siteLineOf), ...piece.statics.map(commentLineOf)]) heldBy.set(line, piece.slug);

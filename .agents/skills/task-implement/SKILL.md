@@ -58,6 +58,7 @@ Its brief shows it: a reproduction reads "FAILS TODAY", and evidence "goes with 
 3. **Each reproduction passes, and is then declared a written test under the same title**
    (`repository.md` § "The stack" says how). Its body is not touched: a reproduction is never
    weakened to pass, and one that should assert more is a doubt you report, not an edit you make.
+   The approval holds its lines, and the check lists one that changed.
 
 The reproductions are the piece's tests. Nothing else is written (rule 3 of "A piece").
 

@@ -46,10 +46,10 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
      holder's assertion fail if the behaviour breaks?
    - **The steps written in the last commit**, when it wrote any: read the story. Is a sentence
      now false, a step missing where a reader would stop?
-   - **A piece that fixes a bug** (`specs/workflow-formats.md` § "A bug"): is each reproduction
-     now declared a written test under its title, its body the one the plan was approved on
-     (compare it with the approval's commit)? Did it fail before the fix for the reason the piece
-     gives? Is an evidence call left, or something written where one stood?
+   - **A piece that fixes a bug** (`specs/workflow-formats.md` § "A bug"): the check holds that
+     each reproduction is declared a written test and reads as approved. Did it fail before the
+     fix for the reason the piece gives? Is an evidence call left, or something written where
+     one stood? A reproduction you would have assert more is a finding, and a change of the plan.
    - **What the next lot stands on**: a choice made here that no line of the plan says.
 
 5. **Then the checklist**, at your tier's depth:

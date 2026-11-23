@@ -95,7 +95,7 @@ import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type Crossing, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanSection, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type Crossing, NOTES, REPRODUCTIONS, UNPLANNED, reproductionKeyOf, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanSection, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -1706,7 +1706,7 @@ const filesOf = (piece: PlanPiece | undefined) => [
 ].filter((x) => layout.isApp(x.file));
 
 /** What a line of the delta is, in the reader's words: the facet says how the plan stores it, this says what it is. */
-const LINE_KIND: Record<string, string> = { statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', pointers: 'planned elsewhere', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note' };
+const LINE_KIND: Record<string, string> = { statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', pointers: 'planned elsewhere', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note', [REPRODUCTIONS]: 'reproduction' };
 const commentKind = (file: string, removes: boolean) => (removes ? 'test goes' : layout.isTest(file) ? 'test changes' : file.endsWith('.sql') ? 'migration' : /\.(?:md|html)$/.test(file) ? 'doc' : 'code');
 
 /**
@@ -1747,6 +1747,12 @@ function deltaLinesHtml(lines: DeltaLine[], d: Pick<UnitDelta, 'kind' | 'name'>,
       const t = sign === '+' ? piece?.todos.find((o) => `${o.tier} ${o.file} — ${o.title}${o.rule ? ` [${o.rule}]` : ''}` === line) : undefined;
       return { sign, kind: t?.written ? 'test written' : 'test to write', at: `tests ${test[2]}`, html: `${t ? placeLink(t.file, t.line, t.column) : file(test[2])} <small>${test[1]}</small> — ${inline(test[3])}` };
     }
+    // A reproduction as written: its body as approved, and its body now when it was edited since.
+    const reproduced = /^(\S+) — (.*) ⇒ (\S+)$/.exec(facet === REPRODUCTIONS ? line : '');
+    if (reproduced) {
+      const t = piece?.todos.find((o) => reproductionKeyOf(o) === `${reproduced[1]} — ${reproduced[2]}`);
+      return { sign, kind: 'reproduction', at: `${REPRODUCTIONS} ${reproduced[1]} ${reproduced[2]}`, html: `${t ? placeLink(t.file, t.line, t.column) : file(reproduced[1])} — ${inline(reproduced[2])} <small>its body ${sign === '+' ? 'as it stands' : 'as approved'}: <code>${esc(reproduced[3])}</code></small>` };
+    }
     // What a commit did and the plan did not say — a test it deleted, a file of the product it changed — and a
     // planned place it took off and wrote nothing at.
     const beyond = /^(file|test|place) (\S+) — (.*)$/.exec(facet === UNPLANNED ? line : '');
@@ -1784,7 +1790,7 @@ function movesHtml(plan: Plan, index: SourceIndex): string {
 }
 
 /** The legend of the delta's rows. */
-const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to · <b>taken back</b> a place that read as built, which its edit names: the code does not do what its clause said. A place that became code is no difference: it is listed with its piece, as built.';
+const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to · <b>taken back</b> a place that read as built, which its edit names: the code does not do what its clause said · <b>reproduction</b>, was / now: a test you approved as the bug\'s reproduction was edited since, by more than its declaration. A place that became code is no difference: it is listed with its piece, as built.';
 
 /** The reviewer's answer to one item, and the buttons that give it. The page posts to the local app, which
  *  writes `plan-feedback.json`; opened as a file, the buttons are off and say where to open it. */

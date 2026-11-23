@@ -105,6 +105,9 @@ in run order with the values it saw at each, then how it failed.
   written, it asserts what should be, and a run expects its failure, strictly. It observes
   everything it has to and asserts once, at its end: a story stops where its test fails. A bug
   whose chain crosses a process has one reproduction per process, joined by the piece.
+  **The approval holds it as written.** The fix makes it pass and changes its declaration, not
+  its lines: one edited since, to pass or to assert more, is a line of the piece's difference
+  and takes a `Changed:` (`→ test "<its title>"`).
 - **Evidence** is a call on a line the bug shows at, with a watch: what is seen there today. It
   marks no change, so it stands where the cause is even when the fix is elsewhere.
 - **`expect`**, on evidence or on a `planned` call, gives the value a key of the watch should
@@ -218,6 +221,7 @@ From then on the check lists every unit that is not as approved, and fails:
 
 - a piece that gained a line, or lost one of its statement, its reason or its tests, and a
   decision that is new or reads differently, while its section holds no `Changed:`;
+- a reproduction whose lines are not those approved, the same way (§ "A bug");
 - a `Changed:` that stands on no difference.
 
 What asks nothing:
