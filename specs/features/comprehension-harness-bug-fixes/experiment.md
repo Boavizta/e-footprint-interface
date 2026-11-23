@@ -77,6 +77,8 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **A debug button on each reproduction**, on the route the narratives' button uses.
 - **A template site**: `{% narrate %}`, `{% event %}`, `{% planned %}` and `{% evidence %}`, tags of
   `model_builder/templatetags/narrate.py`.
+- **A bug**, built on reading Tasks 9 and 10 together: a `## Bug: <what is wrong>` section of
+  `plan.md`, and the pieces whose sections stand under it. The page is read a bug at a time.
 - **`distinct`**, built on Task 10: on a `planned` or an evidence call, the keys of the watch each
   crossing should see a value of its own for. For a bug no crossing shows alone: one value at
   several. Read from the source; no run and no story holds it.
@@ -85,8 +87,8 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 
 Still candidates:
 
-- A home for what the baseline holds and a piece does not: the verdict, the clusters by failure
-  mechanism, the link to the diagnostic.
+- A home for what the baseline holds and neither a bug nor a piece does: the verdict, the clusters
+  by failure mechanism, the acceptance on the shipped examples.
 - The debug run stopping at the evidence by itself: today it stops at the reader's breakpoints.
 - The order of several reproductions of one piece: today the order of their file.
 - One clause for a ripple: seen at Task 9 and again at Task 10. The lot check wants a place in each
@@ -253,3 +255,22 @@ Left open by Task 10:
 
 - Gap 2, with Task 9's gap 7: now a candidate above.
 - Whether a plan may leave a place to the implementer.
+
+### Tasks 9 and 10 — read as one plan (the reviewer's, 2026-11-23)
+
+With a second bug the page stopped reading: three pieces in the order of their files, Task 10's
+first and Task 9's two after it, with nothing saying which bug a piece fixes. A plan of pieces
+had no notion of bug.
+
+- **A bug is a section, and its pieces stand under it.** Membership is the file's order, not a
+  list of names: a bug's text can then name another bug's piece in passing, as Task 10's does of
+  Task 9's, and a piece is under one bug by construction.
+- **It gives a home to what a user met.** The symptom was nowhere: a piece states the change, its
+  chain the cause. The link to the diagnostic stands there too, opened from the page.
+- **A bug's text is held to what is wrong.** Sixty words, and no cause: the baseline's "root
+  cause" and "fix" are the pieces'.
+- **It costs the approval nothing new.** A bug is approved as a decision across pieces is: its
+  text, under its title.
+
+Still with no home: the verdict, the clusters by failure mechanism, the acceptance on the
+shipped examples.
