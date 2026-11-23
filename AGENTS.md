@@ -27,6 +27,7 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | What's planned and in flight | `specs/roadmap.md` |
 | The spec-driven workflow (specify → plan → tasks → implement → archive) and the forms of a feature's files | `specs/workflow.md`, `specs/workflow-formats.md` |
 | The comprehension tools (the narrative and plan pages, the map), how they are installed, and what this project gives them | [`comprehension_harness/README.md`](comprehension_harness/README.md), `comprehension.config.json`, `.agents/repository.md` § "The stack" |
+| Journeys drawn from a run of a browser test (how to write one, what it runs on, how its page is rendered) | `specs/testing.md` § "Journey tests", `.agents/repository.md` § "The stack" |
 | Shared workflow, agent roles, and usage tooling | [`specs/agent-tooling.md`](specs/agent-tooling.md) |
 | Visual user-journey docs — the design hub (how the user moves through each flow) | `specs/design/` (start at `index.html`); live unlinked catalogue at `/design` |
 | Reference modeling of this interface's own operation (usage sessions, benchmark operations, deployment and traffic assumptions) | `specs/e-footprint-modeling/README.md` |
@@ -52,6 +53,7 @@ poetry run python manage.py runserver         # http://localhost:8000
 # Tests
 poetry run pytest --ignore=tests/e2e         # unit + integration, and the comprehension stack's own tests
 poetry run pytest tests/e2e -n 4             # E2E (requires running server)
+poetry run pytest tests/e2e/journeys         # the journeys, on their own server; then npm run journey:render
 npm run jest                                 # JS unit tests
 ```
 

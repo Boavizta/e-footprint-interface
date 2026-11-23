@@ -36,6 +36,10 @@ npx vitest run comprehension_harness
 poetry run pytest comprehension_harness/python/tests
 poetry run pytest tests/narratives
 
+# The journeys drawn from a run (their own server, one process), then their pages
+poetry run pytest tests/e2e/journeys
+npm run journey:render
+
 # Shared-file synchronization script
 python3 scripts/test_sync_agent_tooling.py
 ```
@@ -203,6 +207,31 @@ def edge_system_in_browser(model_builder_page: ModelBuilderPage):
 
     return load_system_dict_into_browser(model_builder_page, system_data)
 ```
+
+### Journey tests (`tests/e2e/journeys/`)
+
+A journey test walks a flow screen by screen so that its page can be drawn from the run:
+`specs/design/journeys-generated/<journey>.html`, gitignored, written by `npm run journey:render`
+(`comprehension_harness/README.md` § "The Python stack"). It is a test class under
+`@journey("<name>", who=…, wants=…, now=…)`; each test is a case, the first the reference run
+and the others its variants, and `screen(page, "<id>", why="…")` marks a screen once what makes
+it reached has been waited for. Between two screens the page shows the user's actions and the
+`event` and `narrate` calls the server crossed for each.
+
+- **Its job is to show screens, not to hold rules.** A rule stays in the E2E test that asserts
+  it; a journey case asserts only what tells it has reached the next screen. A variant is worth
+  a case when it is a screen, or a state of one, worth seeing.
+- **It runs on a server of the test process**, as the AI bootstrap module does: `page` and
+  `base_url` of `tests/e2e/journeys/conftest.py`, and `isolated_bootstrap` for a flow that calls
+  the provider. Run the folder alone, in one process: under `-n 4` its cases are skipped, since
+  the process that runs a journey rewrites its folder.
+- **Two runs write the same captures.** `pinned_server` of that conftest pins what the server
+  draws at random, the ids of the objects it creates and the CSRF token; the helper pins the
+  browser's clock, time zone, locale and viewport. A capture that still moves between two runs
+  names something else to pin there.
+- **A feature that changes a screen of a journey** declares it in the journey test: a planned
+  screen with its mockup, and a `@planned_case` per state worth seeing
+  (`.agents/repository.md` § "The stack").
 
 **Key helpers** (from `tests/e2e/utils.py` and `tests/e2e/conftest.py`):
 

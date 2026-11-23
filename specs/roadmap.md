@@ -11,10 +11,13 @@ The spec-driven workflow moved to plans written into the code as pieces and deli
 ([`comprehension_harness/README.md`](../comprehension_harness/README.md)), and so is the Python stack
 they read (`.agents/repository.md` § "The stack"; its contract is
 [`comprehension_harness/stack.md`](../comprehension_harness/stack.md)): the three calls, the pytest plugin that records
-what a test crossed, the source index on Python's `ast`, the title reader, the watch loop. One flow
-is narrated, the AI-assisted bootstrap, and its page renders (`npm run comprehension:render`).
-Next: the first feature planned in pieces, the other flows narrated as they are touched, then
-journeys drawn from a run. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
+what a test crossed, the source index on Python's `ast`, the title reader, the watch loop, the
+journey helper. One flow is narrated, the AI-assisted bootstrap, and its page renders
+(`npm run comprehension:render`). The same flow has the first journey drawn from a run of its
+browser test, *Start a modeling with AI* (`npm run journey:render`).
+Next: the first feature planned in pieces, and the other flows narrated and given a journey as
+they are touched. The hand-drawn journeys of `specs/design/journeys/` stay until a drawn one
+replaces each. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
 
 ### AI-assisted bootstrap — specification approved, planning pending
 

@@ -8,6 +8,8 @@ Copy in these artefacts follows the [writing style guide](writing-style-guide.md
 
 **What's live now:** all six journeys are authored — [`build-a-model`](journeys/build-a-model.html) is the **reference** (its `<style>` block is the shared toolkit the others copy) — and **tokens + components** are the live `/design` route (see below). [`index.html`](index.html) indexes everything.
 
+**Journeys drawn from a run.** A flow whose browser test walks it screen by screen has its journey page generated from that run, under `journeys-generated/` (gitignored; `poetry run pytest tests/e2e/journeys`, then `npm run journey:render`): the real screens captured, what led to each, and the code steps crossed. One flow has one so far, *Start a modeling with AI*. The hand-authored journeys below stay the record of a flow until a drawn one replaces it. See [`../testing.md`](../testing.md) § "Journey tests".
+
 > Engineer-first context: the maintainer is an engineer with no formal design background. This folder exists so design decisions land as durable repo artefacts that survive past any one conversation, rather than evaporating into chat history.
 
 ## Guiding principle
