@@ -18,11 +18,7 @@ A fragment view that fails shows the exception modal, a not-found at its own 404
 
 A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page, a download, a fetched endpoint stays as it is. The chart preparers gain no empty-value branch.
 
-Changed: **Three views are no longer decorated: the calculus graph's two, and the Sankey card deletion.** The first two are full pages, opened in a tab and its iframe; the third is called by a script, which shows no modal. → reason "a fetched endpoint"
-
-Changed: **The statement lists the views built.** "The other undecorated fragment views" claimed more than its places: seven fragment views of other panels are still undecorated, the question below. → statement "the Sources table"
-
-To confirm: **Should the seven fragment views still undecorated show the modal here too?** The JSON import panel, the model-import panel, the system rename, the model switch, the example picker, the simplified-inputs workspace and its field: each fails into a raw 500 no swap shows. The alternative: a later piece, with a test that every fragment route is decorated or exempt.
+Note: **Seven fragment views stay undecorated.** They wait for the backlog's HTMX-aware server error handler, one fallback for every fragment, which would also retire the bare decorators added here.
 
 ## Bug: A formula button opens another object's explanation
 

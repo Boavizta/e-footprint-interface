@@ -18,7 +18,9 @@ Views make their failures visible today in two ways, both server-rendered throug
 [`render_exception_modal()`](../../../model_builder/adapters/views/exception_handling.py), which returns the
 error modal out-of-band with `HX-Reswap: none` so the main target is untouched:
 
-- 17 views use the bare `@render_exception_modal_if_error` decorator: catch everything, status 500, no flags.
+- 27 views use the bare `@render_exception_modal_if_error` decorator: catch everything, no flags, status 500
+  or, for a view's own not-found, 404. Ten of them were decorated by `bug-fixes-2026-10` (2026-11-23), for
+  want of this fallback.
 - 14 views call it explicitly because their response differs: status 422 for validation errors,
   `preserve_workspace` or `preserve_panels` so the modal does not clear the panels, or an appended fragment
   (the rejected-field fragment in Simplified inputs).
@@ -31,7 +33,7 @@ to catch.
 
 Make `handler500` HTMX-aware: when the request carries `HX-Request`, return `render_exception_modal()` for the
 current exception (`sys.exc_info()`), status 500, instead of the recovery page; full-page requests keep the
-recovery page. With that single fallback in place, the 17 bare decorator uses add nothing and can be retired.
+recovery page. With that single fallback in place, the 27 bare decorator uses add nothing and can be retired.
 The 14 explicit calls stay, since each chooses a status, a preservation flag or a fragment the global handler
 cannot know.
 
@@ -48,9 +50,16 @@ Nothing is broken that a user has reported; the uncaught case is visible in the 
   acceptable for development or whether the same HTMX branch should run in a middleware so both modes behave alike.
 - Tests run with `RAISE_EXCEPTIONS`, which makes `render_exception_modal()` re-raise; the new fallback must
   respect the same switch so failures still surface as exceptions in the test runner.
-- Confirm which of the 17 decorated views would need `preserve_workspace` or `preserve_panels` if the
+- Confirm which of the 27 decorated views would need `preserve_workspace` or `preserve_panels` if the
   decorator goes: the bare decorator passes neither today, so a straight replacement keeps behaviour, but the
   audit is the moment to notice a view that should have passed one.
 - [`ComputationMemoryMiddleware`](../../../e_footprint_interface/computation_memory_middleware.py) already
   answers `ComputationMemoryLimitExceeded` with the exception modal itself and re-raises everything else, and it
   defines `process_exception`; the new fallback sits behind it and must not change that memory-limit response.
+- Seven fragment views were left undecorated on purpose when `bug-fixes-2026-10` decorated the others
+  (decided 2026-11-23), to be covered here: `open_import_json_panel`, `open_add_model_import_panel`,
+  `save_system_name`, `switch_model`, `open_example_picker`, `simplified_inputs` and
+  `simplified_input_field`. Each fails today into a response no swap shows.
+- Since that batch the decorator answers an `Http404` with the modal at 404, which `open_help_drawer` and
+  `source_table_row_editor` rely on. `handler500` never sees a 404: retiring the decorator from those two
+  needs the same HTMX branch in `handler404`, or they keep it.

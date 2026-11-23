@@ -1,17 +1,39 @@
 {
   "feature": "bug-fixes-2026-10",
-  "base": "dbe81dbd9ce9f336d1bf41179ddd26845e909bca",
+  "base": "05b8ca757ac7e8d0090a9ca4ff2c5e69e97f17c5",
   "approvedOn": "2026-11-23",
   "units": [
+    {
+      "kind": "piece",
+      "name": "#dict-entry-own-template",
+      "facets": {
+        "statement": [
+          "Each entry of a calculated dict is drawn by the template of its own class: an entry the library leaves empty reads \"no value\", keeps its formula, offers no chart."
+        ],
+        "reason": [
+          "Today the dict template sends every entry that is not a quantity to the hourly chart, the empty ones included. The top-level section already includes by class. Refused: charting an empty value as zeros, which invents the date and the unit the library leaves out; a branch for the empty class, a list kept by hand."
+        ],
+        "sites": [
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Each entry includes the template named by its own class, as the top-level section does.",
+          "evidence model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Whatever is not a quantity is drawn **as an hourly series**, with its chart button. ⇒ drawn_with=sub_item.class_as_snake_str"
+        ],
+        "comments": [],
+        "tests": [
+          "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — a dict entry the library leaves empty reads no value, with its formula and no chart"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
     {
       "kind": "piece",
       "name": "#fragment-views-show-modal",
       "facets": {
         "statement": [
-          "A fragment view that fails shows the exception modal, a not-found at its own 404: the four calculated-attribute read views, the delete confirmation, and the other undecorated fragment views."
+          "A fragment view that fails shows the exception modal, a not-found at its own 404: the calculated-attribute reads, the delete confirmation, the Sources table, the Sankey cards, the help drawer."
         ],
         "reason": [
-          "A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page or a download stays as it is. The chart preparers gain no empty-value branch."
+          "A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page, a download, a fetched endpoint stays as it is. The chart preparers gain no empty-value branch."
         ],
         "sites": [
           "changed model_builder/adapters/views/exception_handling.py in render_exception_modal_if_error.<locals>.wrapper — A not-found shows the modal at its own 404; any other failure at 500, as today.",
@@ -35,7 +57,9 @@
           "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — a fragment view that fails answers with the exception modal, a not-found at its own 404"
         ],
         "question": [],
-        "notes": []
+        "notes": [
+          "**Seven fragment views stay undecorated.** They wait for the backlog's HTMX-aware server error handler, one fallback for every fragment, which would also retire the bare decorators added here."
+        ]
       }
     },
     {
@@ -65,28 +89,6 @@
         ],
         "tests": [
           "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — in a panel of several objects, each formula button opens a row of its own"
-        ],
-        "question": [],
-        "notes": []
-      }
-    },
-    {
-      "kind": "piece",
-      "name": "#dict-entry-own-template",
-      "facets": {
-        "statement": [
-          "Each entry of a calculated dict is drawn by the template of its own class: an entry the library leaves empty reads \"no value\", keeps its formula, offers no chart."
-        ],
-        "reason": [
-          "Today the dict template sends every entry that is not a quantity to the hourly chart, the empty ones included. The top-level section already includes by class. Refused: charting an empty value as zeros, which invents the date and the unit the library leaves out; a branch for the empty class, a list kept by hand."
-        ],
-        "sites": [
-          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Each entry includes the template named by its own class, as the top-level section does.",
-          "evidence model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Whatever is not a quantity is drawn **as an hourly series**, with its chart button. ⇒ drawn_with=sub_item.class_as_snake_str"
-        ],
-        "comments": [],
-        "tests": [
-          "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — a dict entry the library leaves empty reads no value, with its formula and no chart"
         ],
         "question": [],
         "notes": []
