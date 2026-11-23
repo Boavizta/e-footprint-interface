@@ -117,7 +117,7 @@ Then make the reproductions tell it:
 ## A cause that is only plausible
 
 A `PLAUSIBLE` diagnostic has no reproduction and no fix to plan yet. Its piece is what produces
-the reading that tells the hypotheses apart, designed as [bug-fixes](../bug-fixes/SKILL.md#diagnose-each-report)
+the reading that tells the hypotheses apart, designed as [bug-fixes](../bug-fixes/SKILL.md#a-cause-that-is-only-plausible)
 says: the sequence instrumented, an exit when the reading refutes them all, the build it is read
 on. What follows the reading is another piece, in a later lot whose reason says what it waits
 on. The plan ranks the hypotheses and commits to none.
