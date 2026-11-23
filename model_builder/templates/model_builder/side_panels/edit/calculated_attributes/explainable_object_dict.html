@@ -26,7 +26,7 @@
             {% if sub_item.class_as_snake_str == "explainable_quantity" %}
                 {% include "model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html" with item=sub_item %}
             {% else %}
-                {% evidence "bug-fixes-2026-10#dict-entry-own-template" "Whatever is not a quantity is drawn **as an hourly series**, with its chart button." attribute=sub_item.attr_name_in_mod_obj_container entry_is=sub_item.class_as_snake_str expect entry_is="explainable_hourly_quantities" %}
+                {% evidence "bug-fixes-2026-10#dict-entry-own-template" "Whatever is not a quantity is drawn **as an hourly series**, with its chart button." entry=sub_item.attr_name_in_mod_obj_container drawn_with="explainable_hourly_quantities" expect drawn_with=sub_item.class_as_snake_str %}
                 {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
             {% endif %}
         {% endfor %}

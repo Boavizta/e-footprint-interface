@@ -50,7 +50,8 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **A reproduction**: `@reproduces("<feature>#<slug>: <title>")`, a written test a run expects to
   fail. Several per piece. Its story is kept whatever it crossed, with how it failed.
 - **Evidence**: `planned.evidence(tag, sentence, watch, expect={…})`, a place the bug shows, which
-  marks no change and goes with the fix. `expect` is a literal the page reads from the source.
+  marks no change and goes with the fix. `expect` is what the place should see: a literal, or a
+  lambda where the right value depends on the crossing.
 - **The chain on the page**: under the piece, each reproduction, the places it crossed in run order
   with the values seen, in red against the expected one, then the failure's message.
 - **A debug button on each reproduction**, on the route the narratives' button uses.
@@ -130,9 +131,13 @@ that draws an empty entry as a series, and the chart preparer holds one evidence
 
 What the second port showed:
 
-- **A place crossed for what works expects what works.** The template's branch is crossed 22 times
-  and wrong 3 times: `expect` names the one class the branch draws well, and the page shows the
-  three crossings that differ and folds the nineteen that do not.
+- **What a place should see can depend on the crossing.** The template's branch is crossed 22 times
+  and wrong 3 times, and the right template is the entry's own class: `expect` is computed at each
+  crossing. The page shows the three that differ and folds the nineteen that do not.
+- **"Should be" is read as a claim about the watched value.** The first version watched the entry's
+  class and expected the one class the branch draws well, so the page said an empty entry "should
+  be" an hourly series: true of the branch, false of the entry, and the reviewer read it as the
+  second. The evidence now watches the template used. This is what made `expect` a lambda.
 - **A value that is right can still be evidence.** The preparer receives an empty value, which the
   library means: the call has no `expect`, and reads as a link of the chain.
 - **A failure's message is worth designing.** Asserting one dict of named observations gives a
