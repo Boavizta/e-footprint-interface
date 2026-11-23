@@ -58,6 +58,9 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **A template site**: `{% narrate %}`, `{% event %}`, `{% planned %}` and `{% evidence %}`, tags of
   `model_builder/templatetags/narrate.py`.
 
+- **The pages own the reproductions' runs**: the render and the check run them first, whole files,
+  and the served pages at each save. A debug run writes no story.
+
 Still candidates:
 
 - A home for what the baseline holds and a piece does not: the verdict, the clusters by failure
@@ -145,9 +148,19 @@ What the second port showed:
 - **Evidence is a piece's own.** The first reproduction also crosses the chart view and the
   preparer, which are the second piece's: they are not drawn under the first.
 
+What reading the page showed (the reviewer's, 2026-11-23):
+
+- **The chain said things twice.** The piece's own lists repeated the places and the reproduction
+  the chain had just drawn. They now hold what the chain does not: the places no reproduction
+  crosses, the tests that are no reproduction.
+- **The page showed whichever run came last.** A debug run of one test left the file's other
+  reproduction as "no run", and its failure in the long form a verbose run words. Hence the two
+  rules above.
+
 Left open by Task 9:
 
 - Gap 7, one clause thirteen times, and gap 8, what has no home.
+- Reproductions a browser runs: left out of the tools' own run for now, to settle at Task 2.
 - The 404 question on the second piece, which is the reviewer's.
 - The tag library is written here and held by a test of this project; `e-footprint` takes the
   shared files at its next sync and needs none.

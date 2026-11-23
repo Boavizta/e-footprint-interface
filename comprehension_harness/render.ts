@@ -86,7 +86,7 @@
  * file reads no source language itself.
  */
 import { renderStamp } from './render-stamp';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -928,6 +928,30 @@ export function readPlanSources(): PlanSources {
   return { statics, todos, journeyCases };
 }
 
+/** The test files that hold a reproduction of a plan and that a plain run of the tests runs: a browser's are
+ *  left to whoever starts a browser. */
+export function reproductionFiles(sources: PlanSources): string[] {
+  return [...new Set(sources.todos.filter((t) => t.reproduction && !layout.isBrowserTest(t.file)).map((t) => t.file))].sort();
+}
+
+/**
+ * Runs the reproductions the plans hold, before a page is drawn or a plan checked: a bug's evidence is what its
+ * reproductions saw, and a page drawn from whichever run came last says "no run" of a test nobody ran lately.
+ * Whole files, by the configuration's own command and no option: a file's stories are then complete, and a
+ * failure is worded the same at each render. A run that exits with an error is returned with what it printed: a
+ * reproduction that passes fails it, since its failure is expected strictly.
+ */
+export function runReproductions(files: string[]): { ran: number; ok: boolean; command: string; output: string } {
+  const [program, ...args] = [...config.commands.tests, ...files];
+  const command = typed(config.commands.tests, ...files);
+  if (files.length === 0) return { ran: 0, ok: true, command, output: '' };
+  const done = spawnSync(program, args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  return { ran: files.length, ok: done.status === 0, command, output: `${done.stdout ?? ''}${done.stderr ?? ''}${done.error ? String(done.error) : ''}` };
+}
+
+/** What a run of the reproductions that did not end well says, in a few lines. */
+const reproductionsFailed = (run: { command: string; output: string }) => `the reproductions did not run as expected — ${run.command}\n${run.output.trim().split('\n').slice(-12).map((line) => `    ${line}`).join('\n')}`;
+
 /** What a feature folder holds beside its sites: `plan.md` and `spec.md`, parsed. */
 function featureDocs(feature: string): FeatureDocs {
   const dir = featureFolder(feature);
@@ -1334,10 +1358,10 @@ function staticMark(site: StaticSite): string {
   return 'comment';
 }
 
-function siteLine(site: PlanSite, ctx: PlanContext): string {
+function siteLine(site: PlanSite, ctx: PlanContext, ofABug = false): string {
   const name = site.change === 'added' && site.signature ? site.signature.replace(/^export\s+(?:default\s+)?(?:async\s+)?(?:function\s+|const\s+)?/, '') : site.fn;
-  // Evidence is what a reproduction saw, in no narrative: a bug is in no told flow, or it would not be one.
-  const flag = site.change === 'added' || site.change === 'evidence' ? ''
+  // What a reproduction saw is in no narrative: a bug is in no told flow, or it would not be one.
+  const flag = site.change === 'added' || site.change === 'evidence' || ofABug ? ''
     : site.crossedBy.length === 0 ? ' <small class="pending" title="no narrative\'s reference case crosses this call">no narrative crosses it</small>'
       : '';
   const untested = site.change !== 'added' && site.reachedBy.length === 0 ? ' <small class="pending">no test reaches it</small>' : '';
@@ -1463,14 +1487,17 @@ function seenValuesHtml(site: PlanSite, crossings: Crossing[]): string {
 /**
  * The bug a piece fixes, as its reproductions tell it: each test declared to fail today, the places of the
  * piece it crossed in run order with what it saw at each, then how it failed. A reproduction is run under the
- * debugger from here. Evidence no reproduction crossed is listed last: it shows nothing yet.
+ * debugger from here. Evidence no reproduction crossed is listed last: it shows nothing yet. `shown` is the
+ * places the block draws, which the piece's own list then leaves out.
  */
-function bugHtml(piece: PlanPiece, ctx: PlanContext): string {
+function bugHtml(piece: PlanPiece, ctx: PlanContext): { html: string; shown: Set<PlanSite> } {
   const reproductions = piece.todos.filter((t) => t.reproduction);
   const evidence = piece.sites.filter((s) => s.change === 'evidence');
-  if (reproductions.length === 0 && evidence.length === 0) return '';
+  const shown = new Set<PlanSite>();
+  if (reproductions.length === 0 && evidence.length === 0) return { html: '', shown };
   const told = reproductions.map((t) => {
     const crossed = piece.sites.flatMap((site) => site.seenBy.filter((s) => isStoryOf(t, s)).map((seen) => ({ site, seen }))).sort((a, b) => a.seen.at - b.seen.at);
+    for (const { site } of crossed) shown.add(site);
     const rows = crossed.map(({ site, seen }) => `<div class="pline"><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(site.fn)}</code>${seen.crossings.length > 1 ? ` <small>crossed ×${seen.crossings.length}</small>` : ''}</span><span class="clause">${siteClause(site, ctx)}${seenValuesHtml(site, seen.crossings)}</span></div>`).join('');
     const failure = t.run?.failure;
     const failed = failure ? `<div class="failure"><small>it fails at ${failure.file ? placeLink(failure.file, failure.line) : `line ${failure.line}`}:</small><pre>${esc(failure.message)}</pre></div>`
@@ -1479,9 +1506,7 @@ function bugHtml(piece: PlanPiece, ctx: PlanContext): string {
     return `<div class="repro"><div class="repro-head"><span class="mark failing">fails today</span><span>${clauseInline(t.title)}</span>${srcLink(t.file, t.line, t.column, '▶ debug this reproduction', ' data-debug-reproduction title="Run this test under the VS Code debugger, stopping at your breakpoints"')}</div>`
       + `${rows ? `<div class="plines">${rows}</div>` : t.run ? '<p class="also">It crosses no place of the piece.</p>' : ''}${failed}</div>`;
   });
-  const unseen = evidence.filter((s) => s.seenBy.length === 0);
-  const loose = unseen.length ? `<div class="repro"><p class="also"><span class="pending">Crossed by no reproduction:</span> ${unseen.map((s) => placeLink(s.file, s.line, s.column)).join(', ')}</p></div>` : '';
-  return `<div class="bug"><p class="bug-head"><b>The bug today</b> — what each reproduction saw at the piece's places, in the order it crossed them, then how it failed.</p>${told.join('')}${loose}</div>`;
+  return { html: `<div class="bug"><p class="bug-head"><b>The bug today</b> — what each reproduction saw at the piece's places, in the order it crossed them, then how it failed.</p>${told.join('')}</div>`, shown };
 }
 
 function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
@@ -1492,8 +1517,15 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
     ? `<p class="what">${planInline(doc.what, plan)} <small>${srcLink(plan.doc!.file, doc.section.line, 1, 'plan.md')}</small></p>${doc.why.length ? `<div class="why">${mdBlocks(doc.why, plan)}</div>` : ''}`
     : plan.doc ? `<p class="what"><span class="pending">No section "## #${esc(piece.slug)}" in plan.md: the piece has no statement.</span></p>` : '';
   const moved = (plan.delta ?? []).find((d) => d.kind === 'piece' && d.name === `#${piece.slug}`);
-  const places = [...piece.sites.map((s) => siteLine(s, ctx)), ...piece.statics.map((s) => staticLine(s, plan)), builtLinesHtml(piece, plan, ctx.index)].filter(Boolean);
-  const tests = piece.todos.map((t) => todoLine(t, plan));
+  // A bug's piece says each thing once: a place its reproductions crossed and the reproductions themselves are
+  // in the block above, and the lists under it hold the rest.
+  const bug = bugHtml(piece, ctx);
+  const ofABug = bug.html !== '';
+  const uncrossed = piece.sites.filter((s) => !bug.shown.has(s));
+  const places = [...uncrossed.map((s) => siteLine(s, ctx, ofABug)), ...piece.statics.map((s) => staticLine(s, plan)), builtLinesHtml(piece, plan, ctx.index)].filter(Boolean);
+  const tests = piece.todos.filter((t) => !t.reproduction).map((t) => todoLine(t, plan));
+  const placesHead = ofABug && uncrossed.length ? `<p class="also">${plural(uncrossed.length, 'place')} of the piece no reproduction crosses:</p>` : '';
+  const noPlace = '<div class="pline"><span class="mark"></span><span class="where"></span><span class="clause"><small>no place in the code: planned tests only</small></span></div>';
   const reach = piece.sites.filter((s) => s.reachedBy.length);
   const reached = reach.length ? `<details class="pfold"><summary>the tests that reach these places today</summary>${reach.map((s) => {
     const total = s.reachedBy.reduce((n, r) => n + r.tests, 0);
@@ -1506,9 +1538,10 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   ${statement}
   ${notesHtml(piece, plan, (t) => planInline(t, plan))}
   ${pieceAskHtml(piece, plan)}
-  ${bugHtml(piece, ctx)}
-  <div class="plines">${places.join('') || '<div class="pline"><span class="mark"></span><span class="where"></span><span class="clause"><small>no place in the code: planned tests only</small></span></div>'}</div>
-  ${tests.length ? `<div class="plines tests">${tests.join('')}</div>` : '<p class="also">No planned test yet.</p>'}
+  ${bug.html}
+  ${placesHead}
+  ${places.length ? `<div class="plines">${places.join('')}</div>` : ofABug ? '' : `<div class="plines">${noPlace}</div>`}
+  ${tests.length ? `<div class="plines tests">${tests.join('')}</div>` : ofABug ? '' : '<p class="also">No planned test yet.</p>'}
   ${piece.sql.map((file) => dbDiffHtml(file, ctx)).join('')}
   ${moved && unitDeltaHtml(moved, plan, ctx.index) ? `<details class="pfold since" open><summary>since your approval — the card above is the plan as it stands; this is what differs from the plan you approved</summary>${unitDeltaHtml(moved, plan, ctx.index)}<p class="legend">${DELTA_LEGEND}</p></details>` : ''}
   ${reached}
@@ -2242,27 +2275,39 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const at = process.argv.indexOf('--archive');
     const archive = at >= 0 ? process.argv[at + 1] ?? null : null;
     if (at >= 0 && archive === null) throw new Error('comprehension-render --check --archive <feature>: the feature name is missing');
+    // A bug's evidence is checked against what its reproductions see now, not against the last run on file.
+    const reproductions = runReproductions(reproductionFiles(readPlanSources()));
     // A gate with nothing to judge has not passed: with no story every list below is empty.
     if (readStories().length === 0) {
       console.error(`comprehension-render --check: ${NO_STORIES}`);
       process.exit(1);
     }
     const flagged = check(undefined, archive);
+    if (!reproductions.ok) {
+      console.error(`\nplanned: ${reproductionsFailed(reproductions)}`);
+      flagged.push('the reproductions did not run as expected');
+    }
     if (flagged.length) {
       console.error(`\ncomprehension-render --check: ${flagged.length} finding${flagged.length === 1 ? '' : 's'} (a symbol that looks declared and did not link, a gap, a dead action, a cause that was not silent, a sentence over its budget, a plan out of order):\n  ${flagged.join('\n  ')}`);
       process.exit(1);
     }
     console.log('\ncomprehension-render --check: every symbol that looks declared is linked; every step has a cause and every cause a step; every sentence is within its budget; every planned site names a feature folder, every rule a test claims exists and has one owner, every #slug of a plan.md names a piece, every piece of a plan is within its budget of words, every new function is named by the site that will call it, every difference from an approved plan says why, every piece of a plan with a delivery is in one lot, every piece of a delivered lot is named by a commit, and no commit of a lot added a test under no planned title');
-  } else if (readStories().length === 0) {
-    // A cold start, not a failure: rendering would overwrite the pages of an earlier run with empty ones,
-    // and `npm run docs` chains this script, so it says so and lets the chain go on.
-    console.log(`comprehension-render: ${NO_STORIES}; no page rendered`);
   } else {
-    // The one async part: the database diff of a plan's proposed migration.
     const sources = readPlanSources();
-    void planDbDiffs(sources).then((diffs) => {
-      const { stories, pages } = render(undefined, diffs, sources);
-      console.log(`comprehension-render: ${stories} stories → ${pages.join(', ')}`);
-    });
+    // A plan's page shows what its reproductions see now: they run first, whole files.
+    const reproductions = runReproductions(reproductionFiles(sources));
+    if (reproductions.ran) console.log(`comprehension-render: ran the reproductions of ${reproductions.ran} test file${reproductions.ran === 1 ? '' : 's'}`);
+    if (!reproductions.ok) console.error(`comprehension-render: ${reproductionsFailed(reproductions)}`);
+    if (readStories().length === 0) {
+      // A cold start, not a failure: rendering would overwrite the pages of an earlier run with empty ones,
+      // and `npm run docs` chains this script, so it says so and lets the chain go on.
+      console.log(`comprehension-render: ${NO_STORIES}; no page rendered`);
+    } else {
+      // The one async part: the database diff of a plan's proposed migration.
+      void planDbDiffs(sources).then((diffs) => {
+        const { stories, pages } = render(undefined, diffs, sources);
+        console.log(`comprehension-render: ${stories} stories → ${pages.join(', ')}`);
+      });
+    }
   }
 }

@@ -76,8 +76,8 @@ TEST_FILE = "checks/test_checkout.py"
 CALLS, DECLARE = "from shop.narrate import", "from comprehension_harness.python.declare import"
 
 
-def run_tests(root, *options) -> subprocess.CompletedProcess:
-    environment = {**os.environ, "PYTHONPATH": str(ROOT)}
+def run_tests(root, *options, environment: dict | None = None) -> subprocess.CompletedProcess:
+    environment = {**os.environ, "PYTHONPATH": str(ROOT), **(environment or {})}
     command = [sys.executable, "-m", "pytest", "checks", "-q", "-p", "no:django", "-p", "no:cacheprovider", *options]
     return subprocess.run(command, cwd=root, env=environment, capture_output=True, text=True)
 
@@ -215,6 +215,18 @@ def test_a_call_a_template_makes_is_a_hit_at_its_tag_under_the_frames_that_rende
     # The function that makes the call for the template is no frame of the story: the tag is the site.
     assert [(frame["file"], frame["fn"]) for frame in hit["stack"]] == [
         ("shop/pages.py", "render"), ("checks/test_checkout.py", "test_rows")]
+
+
+def test_a_run_started_for_a_person_writes_no_story_and_leaves_those_on_file(project):
+    """A debug run of one test would leave its file's stories with that test alone."""
+    root = project(PROJECT)
+    run_tests(root)
+    whole = stories_of(root)
+
+    done = run_tests(root, "-k", "test_audit", environment={"COMPREHENSION_STORIES": "off"})
+
+    assert done.returncode == 0 and "1 passed" in done.stdout, done.stdout + done.stderr
+    assert stories_of(root) == whole and len(whole) == 4
 
 
 def timeless(stories: list[dict]) -> list[dict]:

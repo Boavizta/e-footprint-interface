@@ -58,7 +58,7 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 | For | Run |
 |---|---|
 | The map | `npm run map -- <verb> …` (the `code-map` skill) |
-| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension_harness/render.ts --check` |
+| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension_harness/render.ts --check`. Both first run, by `poetry run pytest`, the test files that hold a plan's reproduction, those under `tests/e2e/` left out |
 | The pages served, with the answer buttons | `npm run comprehension` |
 | The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
 | The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |
@@ -78,7 +78,8 @@ Fixtures and environment setup: `specs/testing.md`.
 
 ## Gates
 
-- **An edit of a plan or a doc**: the check. Nothing of the product runs for a document.
+- **An edit of a plan or a doc**: the check. Nothing of the product runs for a document, but the
+  reproductions of a bug's plan, which the check runs itself.
 - **A piece's commit**: the test files of what it changed; `npm run jest` when a script changed.
 - **A lot**: `poetry run pytest --ignore=tests/e2e` and `npm run jest` once, before its last
   commit, and the browser tests of each flow it changes.

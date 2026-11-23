@@ -14,6 +14,10 @@ A hit carries no identity: the tools derive ``<file>#<function>#<ordinal>`` from
 function is its ``__qualname__``, as the index names it; its line and column are where the call expression
 starts, as ``ast`` has them.
 
+A run started for a person and not for the pages writes no story and deletes none: with
+``COMPREHENSION_STORIES=off`` in its environment, as a debug run of one test has it, the calls are collected as
+ever and the story files are left as the last whole run wrote them.
+
 Under pytest-xdist a file's tests run in several processes: each worker hands its stories to the controller,
 which writes the files when the run ends.
 """
@@ -40,6 +44,8 @@ MAX_HITS_PER_SITE = 50
 MAX_FAILURE_CHARS = 1200
 PYTEST_HINT = re.compile(r"^\s*(?:Use -v+ to get more diff|Omitting \d+ identical items, use -v+ to show)\s*$")
 KINDS = ("product", "mechanism")
+# The environment of a run that writes no story: a debug run of one test would leave its file's stories with one.
+STORIES_SWITCH = "COMPREHENSION_STORIES"
 WORKER_OUTPUT = "narrate_stories"
 
 
@@ -93,6 +99,7 @@ class StoryRecorder:
                                     f'project imports narrate, event and planned from')
         self.calls = importlib.import_module(stack["calls"])
         self.is_worker = hasattr(config, "workerinput")
+        self.writes = os.environ.get(STORIES_SWITCH, "").lower() != "off"
         self.config = config
         self.own_files = {os.path.realpath(self.calls.__file__), os.path.realpath(__file__)}
         self.relative_paths: dict[str, str | None] = {}
@@ -223,7 +230,7 @@ class StoryRecorder:
         if file is None:
             yield
             return
-        if file not in self.started:
+        if file not in self.started and self.writes:
             # A file's run rewrites its stories from nothing: a run that dies leaves none to be read as fresh.
             self.started.add(file)
             self.story_file(file).unlink(missing_ok=True)
@@ -288,7 +295,7 @@ class StoryRecorder:
 
     def write(self, file: str) -> None:
         stories = self.pending.pop(file, [])
-        if not stories:
+        if not stories or not self.writes:
             return
         target = self.story_file(file)
         # Tests of one file that ran in two stretches of a run are one file's stories.

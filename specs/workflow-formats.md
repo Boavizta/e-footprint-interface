@@ -101,9 +101,17 @@ in run order with the values it saw at each, then how it failed.
 - **Watch what is wrong, not what led to it.** "Should be" reads as a claim about the watched
   value: a value that is right and only reaches the wrong branch is context, with no `expect`.
 
-The check fails on evidence in a piece with no reproduction, and on a place whose reproductions
-saw only what it expects: the bug does not show there. It names the test files to run when no
-story crosses an evidence site. The piece is built when its evidence is gone and its
+The render and the check run the plans' reproductions first, whole files, so the page shows what
+they see now and not what the last run happened to leave: the served pages rerun them at each
+save. A reproduction a browser runs is left out, and its page says when no run tells it. A run
+under the debugger writes no story.
+
+Under the chain, the piece lists what the chain does not show: the places no reproduction
+crosses, and the tests that are no reproduction.
+
+The check fails on evidence in a piece with no reproduction, on a place whose reproductions saw
+only what it expects (the bug does not show there), and when the reproductions do not run as
+expected: one that passes fails its run. The piece is built when its evidence is gone and its
 reproductions are declared as written tests; until then its lot is not delivered and the archive
 gate holds.
 

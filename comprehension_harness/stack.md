@@ -75,6 +75,13 @@ A hit:
 A collector may write fields of its own beside these. The tools read one of them when it is
 there: `mappedFn`, a source-mapped name, where `fn` is `null`.
 
+**A run started for a person writes no story and deletes none.** A debug run of one test would
+leave its file's stories with that test alone, worded for a terminal. With
+`COMPREHENSION_STORIES=off` in its environment a collector records as ever and leaves the story
+files as the last whole run wrote them; the editor extension starts its debug runs so. The tools
+run the files that hold a plan's reproductions themselves, whole and by `commands.tests` alone,
+before they draw or check a plan: a browser's are left out.
+
 The three calls are inert in production: none does anything unless a collector is installed,
 which only a test run does. The watch is passed as a function the collector calls, so nothing
 is computed for it outside a test.
