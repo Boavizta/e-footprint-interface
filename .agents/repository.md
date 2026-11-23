@@ -58,7 +58,7 @@ ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
 | For | Run |
 |---|---|
 | The map | `npm run map -- <verb> …` (the `code-map` skill) |
-| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension_harness/render.ts --check`. Both first run, by `poetry run pytest`, the test files that hold a plan's reproduction, those under `tests/e2e/` left out |
+| The pages, once; the check | `npm run comprehension:render`; `npx tsx comprehension_harness/render.ts --check`. Both first run the test files that hold a plan's reproduction, those under `tests/e2e/` left out, by `commands.tests` of `comprehension.config.json`: `poetry run pytest` with pytest's limits on an assertion's message raised, so that a page shows the whole of how a reproduction fails |
 | The pages served, with the answer buttons | `npm run comprehension` |
 | The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
 | The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |

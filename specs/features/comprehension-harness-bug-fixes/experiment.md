@@ -161,6 +161,7 @@ Left open by Task 9:
 
 - Gap 7, one clause thirteen times, and gap 8, what has no home.
 - Reproductions a browser runs: left out of the tools' own run for now, to settle at Task 2.
-- The 404 question on the second piece, which is the reviewer's.
+- Settled by the reviewer: a view's own not-found shows the modal and keeps its 404. The decorator
+  gained a site for it, and the reproduction two observations.
 - The tag library is written here and held by a test of this project; `e-footprint` takes the
   shared files at its next sync and needs none.

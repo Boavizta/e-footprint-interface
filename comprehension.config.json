@@ -39,7 +39,7 @@
   ],
   "commands": {
     "tool": ["npx", "tsx"],
-    "tests": ["poetry", "run", "pytest"],
+    "tests": ["poetry", "run", "pytest", "-o", "truncation_limit_lines=40", "-o", "truncation_limit_chars=4000"],
     "watch": ["python3", "-m", "comprehension_harness.python.watch"],
     "journeys": ["poetry", "run", "pytest", "tests/e2e/journeys"]
   },

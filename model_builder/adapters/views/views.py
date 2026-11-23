@@ -579,7 +579,7 @@ def source_table(request):
 @time_it
 def source_table_row_editor(request, object_id: str, attr_name: str):
     planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
+            "A failure here shows the exception modal, and its own not-found keeps its 404.")
     context = build_source_table_row_editor_context(
         SessionWorkspaceRepository(request.session).active_repository(), object_id, attr_name)
     return render(request, "model_builder/result/source_table_row_editor.html", context)

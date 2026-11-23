@@ -44,7 +44,9 @@ def _answer(response) -> str:
         return "the fragment"
     shown = response.headers.get("HX-Reswap") == "none" and "openModalDialog" in response.headers.get(
         "HX-Trigger-After-Settle", "")
-    return "the exception modal" if response.status_code == 500 and shown else f"a raw {response.status_code}"
+    if not shown:
+        return f"a raw {response.status_code}"
+    return "the exception modal" if response.status_code == 500 else f"the exception modal, as a {response.status_code}"
 
 
 @reproduces("bug-fixes-2026-10#dict-entry-own-template: a dict entry the library leaves empty reads no value, with "
@@ -80,7 +82,7 @@ def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monk
 
 
 @reproduces("bug-fixes-2026-10#fragment-views-show-modal: a fragment view that fails answers with the exception "
-            "modal, never a raw 500")
+            "modal, a not-found at its own 404")
 @pytest.mark.django_db
 def test_failing_fragment_views_show_the_exception_modal(
         client, monkeypatch, edge_computer_system_data, minimal_system_data):
@@ -105,8 +107,13 @@ def test_failing_fragment_views_show_the_exception_modal(
         "a stale explanation": f"/model_builder/get_calculated_attribute_explanation/{storage_id}/"
                                f"energy_per_edge_device/",
         "a stale delete confirmation": f"/model_builder/ask-delete-object/{edge_computer_id}/"}.items()})
+    # What a view answers not-found to by itself: nothing the page shows, today.
+    not_found = {name: _answer(client.get(url)) for name, url in {
+        "a stale Sources row": f"/model_builder/source-table-row-editor/{edge_computer_id}/lifespan/",
+        "the help of an unknown class": "/model_builder/open-help-drawer/NotARealClass/"}.items()}
 
-    assert answers == dict.fromkeys(answers, "the exception modal")
+    assert {**answers, **not_found} == {**dict.fromkeys(answers, "the exception modal"),
+                                        **dict.fromkeys(not_found, "the exception modal, as a 404")}
 
 
 @pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 10")

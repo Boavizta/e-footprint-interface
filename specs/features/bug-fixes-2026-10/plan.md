@@ -10,8 +10,6 @@ Today the dict template sends every entry that is not a quantity to the hourly c
 
 ## #fragment-views-show-modal
 
-A fragment view that fails shows the exception modal: the four calculated-attribute read views, the delete confirmation, and the other fragment views that carry no decorator.
+A fragment view that fails shows the exception modal, a not-found at its own 404: the four calculated-attribute read views, the delete confirmation, and the other undecorated fragment views.
 
-A raw 500 is swapped nowhere: the user sees a stale pane and no error (constitution §1.4). Only a stale id reaches it today, in the read views and the delete confirmation; the rest is hardening. A full page or a download stays as it is. The chart preparers gain no branch for an empty value.
-
-To confirm: **Do the help drawer and the source-table row editor keep their own 404?** The decorator catches every exception, so an unknown class or row would show the modal, and the three tests that expect a 404 would change. The alternative leaves both undecorated.
+A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page or a download stays as it is. The chart preparers gain no empty-value branch.
