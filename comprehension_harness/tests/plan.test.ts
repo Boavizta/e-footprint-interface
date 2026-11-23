@@ -484,7 +484,7 @@ describe('a bug', () => {
     expect(plan.siteLineOf(evidence(null))).toBe("evidence src/a.ts in fn — cut happens. ⇒ {'due': total - card}");
     expect(plan.siteLineOf(evidence(null, null))).toBe('evidence src/a.ts in fn — cut happens.');
     // A place built is one its commits wrote at; evidence goes with the fix and nothing is written there.
-    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, bug: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
+    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, bug: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, takenBack: { sites: [], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
     expect([...lines]).toEqual([]);
   });
 
@@ -906,6 +906,30 @@ describe('a plan being implemented', () => {
     expect(now(built, [touched(6)]).delta).toEqual([]);
     // A later commit of the piece that writes there settles it.
     expect(now(built, [touched(0), commit('2222222233', ['cut'], { files: [{ file: 'src/reader.ts', added: 2, removed: 0, line: 151 }] })]).delta).toEqual([]);
+  });
+
+  it('takes back a built place a "Changed:" names: the piece loses it, and so does the next approval', () => {
+    const undone = MD.replace('The reader cuts.\n', 'The reader cuts.\n\nChanged: **The reader no longer cuts.** A page keeps its whole. → unbuilt src/reader.ts\n');
+    const plan = now(built, [commit('1111111122', ['cut'])], undone);
+    const cutPiece = plan.pieces.find((x) => x.slug === 'cut')!;
+    // The comment on a test is a line of another kind: the claim names the place in the code alone.
+    expect(cutPiece.built).toEqual({ sites: [], comments: ['removes tests/x.test.ts — cut in a comment'] });
+    expect(cutPiece.takenBack).toEqual({ sites: ['changed src/reader.ts in fn — cut happens.'], comments: [] });
+    expect(plan.delta).toMatchObject([{ name: '#cut', reason: 'given', facets: [{ facet: 'sites', added: [], removed: ['changed src/reader.ts in fn — cut happens.'] }] }]);
+    expect(plan.delta![0].edits.map((e) => e.lines.map((l) => `${l.sign} ${l.text}`))).toEqual([['− changed src/reader.ts in fn — cut happens.']]);
+    expect(findings(plan).failures).toEqual([]);
+    expect(plan.snapshot.units.find((u) => u.name === '#cut')!.facets.sites).toEqual([]);
+    // A `code` claim names a line of the difference, never a built place whose line holds its fragment.
+    const stale = undone.replace('→ unbuilt src/reader.ts', '→ code src/reader.ts');
+    const kept = now(built, [commit('1111111122', ['cut'])], stale);
+    expect(kept.pieces.find((x) => x.slug === 'cut')!.takenBack.sites).toEqual([]);
+    expect(findings(kept).failures).toEqual([expect.stringContaining('says "Changed:" and is as approved')]);
+    // A claim that takes back no built place says so, whatever else its section holds.
+    const nowhere = undone.replace('→ unbuilt src/reader.ts', '→ unbuilt src/nowhere.ts');
+    expect(findings(now(built, [commit('1111111122', ['cut'])], nowhere)).failures).toEqual([
+      expect.stringContaining('claims unbuilt "src/nowhere.ts", and no built place of #cut holds that fragment'),
+      expect.stringContaining('says "Changed:" and is as approved'),
+    ]);
   });
 
   it('reads a note as what a piece was built with: listed when new, asking nothing, kept by the approval', () => {

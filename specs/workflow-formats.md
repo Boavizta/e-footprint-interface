@@ -158,9 +158,17 @@ Three paragraphs have a prefix:
 | `Note: **the point.** what follows from it` | Something to know, asking no answer | A piece was built with a choice no line of the plan says and a later lot stands on |
 
 After ` → `, a `Changed:` names the lines of the difference it comes to, parted by `;`: a kind
-(`code`, `test`, `statement`, `reason`, `text`) and a fragment the line holds, in double quotes
+(`code`, `test`, `statement`, `reason`, `text`, `unbuilt`) and a fragment the line holds, in double quotes
 when it has a space. `Changed: **Its narrative case leaves for #wrap-row.** It reads the row the
 other piece adds → test "a wrapped order"`. A section with one such paragraph needs no claim.
+
+**A claim takes back a built place.** Once a place is code, nothing in the source marks it: the
+plan alone can say that the code does not do what its clause said, because a review undid it or
+because it was never written beside places that were. An `unbuilt` claim names such a place by a
+fragment of its line: `→ unbuilt get_calculus_graph`. The place is then a line the piece lost,
+drawn "taken back" under its edit, and the next approval no longer holds it. A claim that names
+no built place fails the check. The check cannot ask for the paragraph itself: only a reading of
+the code tells that one is owed.
 
 Each fact has one home, and each home a budget in words, which the check enforces:
 
@@ -219,7 +227,7 @@ What asks nothing:
 - **The tasks stage's own output**, until a delivery is approved: the delivery, the unit-tier
   titles and the comments on unit tests.
 - **A site that became code**, once the approval holds a delivery: the piece keeps its line, as
-  approved, and reads as built.
+  approved, and reads as built, until a `Changed:` takes it back (§ "`plan.md`").
 
 The reviewer answers on the served pages: under each edit and each question, approve, or say what
 should change. A question is answered where it is stated, on the plan page and the delivery page,

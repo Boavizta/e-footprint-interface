@@ -1731,13 +1731,16 @@ function deltaLinesHtml(lines: DeltaLine[], d: Pick<UnitDelta, 'kind' | 'name'>,
     const site = /^(changed|added|removed|evidence) (\S+) in (\S+) — (.*)$/.exec(facet === 'sites' ? line : '');
     if (site) {
       const x = sign === '+' ? piece?.sites.find((o) => siteLineOf(o) === line) : undefined;
-      return { sign, kind: 'code', at: `sites ${site[2]} ${site[3]}`, html: `${x ? placeLink(x.file, x.line, x.column) : file(site[2])} in ${fn(site[2], site[3])}${tag(site[1])} — ${inline(site[4])}` };
+      // A place that was built and that its edit takes back: the code no longer does what the clause says.
+      const back = sign === '−' && (piece?.takenBack.sites.includes(line) ?? false);
+      return { sign, kind: back ? 'taken back' : 'code', at: `sites ${site[2]} ${site[3]}`, html: `${x ? placeLink(x.file, x.line, x.column) : file(site[2])} in ${fn(site[2], site[3])}${tag(site[1])} — ${inline(site[4])}` };
     }
     const comment = /^(changes|removes) (\S+) — (.*)$/.exec(facet === 'comments' ? line : '');
     if (comment) {
       const xs = sign === '+' ? (piece?.statics ?? []).filter((o) => `${o.removes ? 'removes' : 'changes'} ${o.file} — ${o.text}` === line) : [];
       const where = xs.length ? xs.map((x) => `${placeLink(x.file, x.line, x.column)}${x.on ? ` <small>${inline(x.on.replace(/^(?:it|test|describe) /, ''))}</small>` : ''}`).join(' · ') : file(comment[2]);
-      return { sign, kind: commentKind(comment[2], comment[1] === 'removes'), at: `comments ${comment[2]}`, html: `${where} — ${inline(comment[3])}` };
+      const back = sign === '−' && (piece?.takenBack.comments.includes(line) ?? false);
+      return { sign, kind: back ? 'taken back' : commentKind(comment[2], comment[1] === 'removes'), at: `comments ${comment[2]}`, html: `${where} — ${inline(comment[3])}` };
     }
     const test = /^(narrative|server|unit) (\S+) — (.*)$/.exec(facet === 'tests' ? line : '');
     if (test) {
@@ -1781,7 +1784,7 @@ function movesHtml(plan: Plan, index: SourceIndex): string {
 }
 
 /** The legend of the delta's rows. */
-const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to. A place that became code is no difference: it is listed with its piece, as built.';
+const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to · <b>taken back</b> a place that read as built, which its edit names: the code does not do what its clause said. A place that became code is no difference: it is listed with its piece, as built.';
 
 /** The reviewer's answer to one item, and the buttons that give it. The page posts to the local app, which
  *  writes `plan-feedback.json`; opened as a file, the buttons are off and say where to open it. */

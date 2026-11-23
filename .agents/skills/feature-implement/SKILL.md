@@ -78,7 +78,8 @@ beyond the plan) and its **doubts**. No diff, no narration.
 
 **A place not built is a decision, whatever the check says.** In a file where the piece built
 other places, the check reads it as built. You settle it at step 2 as the rest: explained, in a
-`Changed:` that names the place, or sent back to be built.
+`Changed:` whose claim names the place and takes it back (`→ unbuilt <a fragment of its line>`,
+`specs/workflow-formats.md` § "`plan.md`"), or sent back to be built.
 
 **A lot that fixes bugs is a lot like another.** Its brief shows the reproductions that fail
 today and the evidence that goes with the fix, and its implementer follows `task-implement`
@@ -145,7 +146,9 @@ The plan is the only record of a decision. No callout, no list in a report.
 
 - **`Changed:`** for whatever changes a line of the plan: a deviation you accept, a fix that
   moves a clause, a test beyond the plan. One paragraph an edit, in the piece's section, in words
-  the reviewer can read without the code.
+  the reviewer can read without the code. **A fix that undoes a built place takes it back**, by an
+  `unbuilt` claim on its line: no tool sees that the code stopped doing what a clause says, so the
+  pages go on reading the place as built until you write it.
 - **`Note:`** for a choice that changes no line and that what follows stands on, taken from the
   implementer's deviations and the reviewer's remarks for the next lot. The next lot's brief
   prints it. A choice nobody builds on is no note: it is the code's, and its commit's.

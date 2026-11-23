@@ -210,8 +210,12 @@ export interface PlanChange {
 }
 
 /** The kinds a claim names a line by: a place in the code, a test (to write, changing or going), the piece's
- *  statement, its reason, a decision's text. */
-export const CLAIM_KINDS = ['code', 'test', 'statement', 'reason', 'text'] as const;
+ *  statement, its reason, a decision's text — and `unbuilt`, a place that reads as built and is not
+ *  (`takeBack`). */
+export const CLAIM_KINDS = ['code', 'test', 'statement', 'reason', 'text', 'unbuilt'] as const;
+/** The claim that takes a built place back. It is a kind of its own: a `code` claim names a line of the
+ *  difference, and must never drop a built place whose line happens to hold its fragment. */
+export const UNBUILT = 'unbuilt';
 
 export type Difficulty = 'easy' | 'standard' | 'hard';
 
@@ -337,6 +341,12 @@ export interface PlanPiece {
    *  line that went was taken off the plan. A built line stays in the plan, so the approval is still read once
    *  the place is code. */
   built: { sites: string[]; comments: string[] };
+  /** What was built of the piece and is taken back: the lines the approval holds, whose place holds no planned
+   *  line any more, and that a `Changed:` of the piece's section names with an `unbuilt` claim (`takeBack`).
+   *  The code does not do what such a clause says — a review undid it, or it was never written beside places
+   *  that were. Nothing in the source marks that, so the plan does: the line leaves `built`, is a `−` of the
+   *  delta under the edit that names it, and the next approval no longer holds it. */
+  takenBack: { sites: string[]; comments: string[] };
   /** The commits that deliver the piece, oldest first: those whose message names it (`PieceCommit`). */
   commits: PieceCommit[];
 }
@@ -1115,6 +1125,35 @@ export function unplannedLines(commits: PieceCommit[], named: ReadonlySet<string
   return out;
 }
 
+/** What a claim's fragment is looked for in: the line's text, and for a comment the plan holds, the title of
+ *  the test it stands on. */
+const heldBy = (l: DeltaLine, piece: PlanPiece | undefined) => `${l.text}${l.facet === 'comments' && l.sign === '+' ? ` ${(piece?.statics ?? []).filter((x) => commentLineOf(x) === l.text).map((x) => x.on ?? '').join(' ')}` : ''}`;
+
+/** Whether a claim names a line of a delta: by its kind and a fragment the line holds. An `unbuilt` claim names
+ *  the line of a place it took back, and no other. */
+const claims = (claim: PlanChange['claims'][number], l: DeltaLine, piece: PlanPiece | undefined) => (claim.kind === UNBUILT
+  ? l.sign === '−' && (l.facet === 'sites' || l.facet === 'comments') && (piece?.takenBack[l.facet].includes(l.text) ?? false)
+  : claim.kind === kindOfLine(l)) && heldBy(l, piece).includes(claim.fragment);
+
+/** Evidence that went was no place to build: it is never taken back. */
+const isBuiltPlace = (line: string) => !line.startsWith('evidence ');
+
+/**
+ * Takes back the built places a piece's `Changed:` paragraphs name: each line of `built` that holds the fragment
+ * of an `unbuilt` claim leaves it for `takenBack`. Run before the plan is read as a snapshot, so that the line
+ * is one the piece lost.
+ */
+export function takeBack(piece: PlanPiece, changes: PlanChange[]): void {
+  for (const claim of changes.flatMap((c) => c.claims)) {
+    if (claim.kind !== UNBUILT) continue;
+    for (const facet of ['sites', 'comments'] as const) {
+      const named = piece.built[facet].filter((text) => isBuiltPlace(text) && text.includes(claim.fragment));
+      piece.built[facet] = piece.built[facet].filter((text) => !named.includes(text));
+      piece.takenBack[facet].push(...named);
+    }
+  }
+}
+
 /**
  * Gives each `Changed:` paragraph of a unit the lines it comes to, so the reviewer reads an edit, its reason
  * and its lines together. One paragraph: every line is its. Several: a line goes to the first paragraph a claim
@@ -1124,12 +1163,11 @@ export function unplannedLines(commits: PieceCommit[], named: ReadonlySet<string
 export function groupEdits(delta: UnitDelta, changes: PlanChange[], piece: PlanPiece | undefined): void {
   const lines = delta.facets.flatMap(linesOf);
   const claimable = lines.filter((l) => !isOwnNotice(l.facet));
-  const holds = (l: DeltaLine) => `${l.text}${l.facet === 'comments' && l.sign === '+' ? ` ${(piece?.statics ?? []).filter((x) => `${x.removes ? 'removes' : 'changes'} ${x.file} — ${x.text}` === l.text).map((x) => x.on ?? '').join(' ')}` : ''}`;
   const owner = new Map<DeltaLine, PlanChange>();
   if (changes.length === 1) for (const l of claimable) owner.set(l, changes[0]);
   else {
     for (const l of claimable) {
-      const by = changes.find((c) => c.claims.some((claim) => claim.kind === kindOfLine(l) && holds(l).includes(claim.fragment)));
+      const by = changes.find((c) => c.claims.some((claim) => claims(claim, l, piece)));
       if (by) owner.set(l, by);
     }
     for (const l of claimable) {
@@ -1142,7 +1180,7 @@ export function groupEdits(delta: UnitDelta, changes: PlanChange[], piece: PlanP
   delta.edits = changes.map((change) => ({
     change,
     lines: lines.filter((l) => owner.get(l) === change),
-    unmatched: changes.length === 1 ? [] : change.claims.filter((claim) => !claimable.some((l) => claim.kind === kindOfLine(l) && holds(l).includes(claim.fragment))).map((claim) => `${claim.kind} "${claim.fragment}"`),
+    unmatched: changes.length === 1 ? [] : change.claims.filter((claim) => !claimable.some((l) => claims(claim, l, piece))).map((claim) => `${claim.kind} "${claim.fragment}"`),
   }));
   delta.unclaimed = lines.filter((l) => !owner.has(l));
 }
@@ -1217,6 +1255,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
           bug: doc?.sections.find((s) => s.bug && s.anchor === own?.under) ?? null,
           decidedIn: doc ? doc.sections.filter((s) => s.piece === null && !s.bug && s.slugs.includes(slug)) : [],
           built: { sites: [], comments: [] },
+          takenBack: { sites: [], comments: [] },
           commits: [],
         };
         bySlug.set(slug, piece);
@@ -1290,9 +1329,12 @@ export function assemblePlans(input: PlanInput): Plan[] {
     // The stories the plan is read against: of every narrative a site lands in, and of every one the approved
     // plan landed in, so that a story is still compared once the sites that crossed it are code.
     const landed = new Set([...pieces.flatMap((x) => x.sites.flatMap((s) => s.crossedBy.map((c) => c.narrative))), ...(approved?.baseline.units ?? []).filter((u) => u.kind === 'story').map((u) => u.name)]);
-    const snapshot = snapshotOf({ pieces, doc, journeyCases, builtCases }, narratives.flatMap((n) => (landed.has(n.title) && n.steps ? [{ title: n.title, steps: n.steps }] : [])));
     const sectionOf = (kind: UnitKind, name: string) => (kind === 'piece' ? doc?.sections.find((x) => x.piece === name.slice(1)) : kind === 'decision' ? doc?.sections.find((x) => x.piece === null && unitNameOf(x) === name) : undefined);
     const explained = (kind: UnitKind, name: string) => (sectionOf(kind, name)?.changed.length ?? 0) > 0;
+    // A built place a `Changed:` says is unbuilt is taken back before the plan is read: it is then a line the
+    // piece lost, which the edit stands on.
+    for (const piece of pieces) takeBack(piece, sectionOf('piece', `#${piece.slug}`)?.changed ?? []);
+    const snapshot = snapshotOf({ pieces, doc, journeyCases, builtCases }, narratives.flatMap((n) => (landed.has(n.title) && n.steps ? [{ title: n.title, steps: n.steps }] : [])));
     const diffed = approved ? diffSnapshots(approved.baseline, snapshot, explained, input.layout) : null;
     // What the commits made since the approval did beyond the plan joins the delta of the piece each names.
     if (diffed && implementing) {
@@ -1434,6 +1476,9 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
       const where = `${plan.doc!.file}:${c.line} ${unitOf(section)}`;
       over(words(c.text), BUDGET.changed, where, 'says what moved and why', 'one edit a paragraph: a second edit is a second "Changed:"');
       if (c.what === null) failures.push(`planned: ${where} gives a reason and does not say what moved — "Changed: **what moved.** why", one edit a paragraph, so the reviewer knows which change the reason speaks of`);
+      // A claim that takes a place back names one: checked whatever the number of edits, since nothing else would say.
+      const took = section.piece === null ? [] : Object.values(plan.pieces.find((x) => x.slug === section.piece)?.takenBack ?? {}).flat();
+      for (const claim of c.claims) if (claim.kind === UNBUILT && !took.some((line) => line.includes(claim.fragment))) failures.push(`planned: ${where} claims ${UNBUILT} "${claim.fragment}", and no built place of ${section.piece === null ? 'a decision' : `#${section.piece}`} holds that fragment — it names a place the approval holds and that reads as built, by a fragment of its line`);
       if (plan.delta === null) failures.push(`planned: ${where} says "Changed:" and the plan was never approved — there is nothing to have changed from`);
       else if (!plan.delta.some((d) => d.name === unitOf(section))) failures.push(`planned: ${where} says "Changed:" and is as approved (${plan.approved!.file}) — the paragraph goes`);
     }
