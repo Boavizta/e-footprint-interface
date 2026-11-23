@@ -27,58 +27,49 @@ plan's, not a bug's, so a bug ported after an approval is an edit of an approved
 1. Port the bug with the harness as it is.
 2. Compare the generated page with the bug's section of the baseline, and write the gaps below.
 3. Add the smallest primitive the comparison asks for, and render again.
-4. Once every bug of the batch is ported, the reviewer approves the plan; the batch is then
-   delivered and fixed through the new form, and what the implement stage showed is written below.
+4. Once every bug of the batch is ported, its lots are written and the reviewer approves the plan
+   with them; the batch is then fixed through the new form, and what the implement stage showed
+   is written below.
 
 ## Next
 
-The plan of Tasks 9 and 10 is approved (2026-11-23): two bugs, three pieces. **The small batch** is
-now delivered and fixed, a fresh session a stage. It is small on purpose. The tasks and implement
-stages have never met the bug forms, and what they have to hold is tested in the tools alone, not
-through a delivery:
+The plan of Tasks 9 and 10 is approved with its delivery (2026-11-23): two bugs, three pieces, one
+lot, `calculated-attribute-panel`. **The small batch** is now fixed, in one fresh session of
+`feature-implement`. It is small on purpose. The implement stage has never met the bug forms, and
+what it has to hold is tested in the tools alone, not through a delivery:
 
 - the lot check, when an evidence call goes with nothing written in its place;
-- a reproduction becoming a written test under the same title, its lot then delivered;
-- what the approval makes of a reproduction: a unit test written at the plan stage, where the
-  workflow has unit tests planned at the tasks stage.
+- a reproduction becoming a written test under the same title, its lot then delivered.
 
 The skills do not know the forms yet: "A bug batch" in `feature-implement` and `task-implement`
-describes the earlier one, tasks and an expected-failure marker to remove. Each session is told
-so, and ends with the list of where a skill or a check did not fit. A misfit is reported, not
-worked around: it is what this batch is run for.
+describes the earlier one, tasks and an expected-failure marker to remove. The session is told
+so, and ends with the list of where a skill, the lot check or the pages did not fit. A misfit is
+reported, not worked around: it is what this batch is run for. To open it:
 
-**1. The delivery**, with `spec-tasks`. One lot of the three pieces is expected, in this order:
-`#dict-entry-own-template`, `#fragment-views-show-modal`, `#explanation-ids-per-item`. Task 10
-depends on Task 9, and the two share a test file and the panel's templates. The session also
-settles what the baseline holds outside the pieces: the three browser files to run, and whether
-the line of `specs/architecture/rendering.html` on these ids becomes a place. The reviewer then
-approves the delivery on its page. To open it:
+> Run the delivery of `bug-fixes-2026-10` with `feature-implement`: its one lot,
+> `calculated-attribute-panel`, three pieces that fix two bugs. The plan and its delivery are
+> approved (`specs/features/bug-fixes-2026-10/plan.md`, `plan.approved.json`), and
+> `npm run map -- brief bug-fixes-2026-10/calculated-attribute-panel` prints the lot.
+>
+> This is the first plan of bugs run as pieces and lots. The folder's `tasks.md` and `plan.html`
+> are the earlier form, kept as a baseline and not to be run: the "A bug batch" sections of
+> `feature-implement` and `task-implement` do not apply. A piece that fixes a bug is built as
+> `specs/workflow-formats.md` § "A bug" and § "Implementing a piece" say: each `planned` call
+> becomes code, each evidence call goes with nothing written in its place, and each reproduction
+> passes and is declared `@titled` under the same title. No other test is written unless the
+> plan gains one.
+>
+> Once the lot is delivered, mark Tasks 9 and 10 complete in `tasks.md`, so that no run of the
+> earlier form picks them up. End your report with the list of where a skill, the lot check, the
+> map or the pages did not fit a bug's forms, and work around none of them:
+> `specs/features/comprehension-harness-bug-fixes/experiment.md` § "Next" says why.
 
-> Prepare the delivery of `bug-fixes-2026-10` with `spec-tasks`. Its plan is approved and made of
-> pieces under bug sections: it is the first plan of bugs to reach this stage, as
-> `specs/features/comprehension-harness-bug-fixes/experiment.md` § "Next" says. The folder's
-> `tasks.md` and `plan.html` are the earlier form, kept as a baseline: read them for what Tasks 9
-> and 10 hold outside the pieces, and write nothing in them. End with the list of where the skill
-> or the check did not fit a reproduction, an evidence call or a bug section, and work around
-> none.
-
-**2. The run**, with `feature-implement`, on that lot: an implementer, the lot check, a reviewer,
-a commit a piece, the entry of `CHANGELOG.md`. To open it:
-
-> Run the delivery of `bug-fixes-2026-10` with `feature-implement`: a lot of pieces, not the
-> tasks of `tasks.md`. The skill's "A bug batch" section describes the earlier form and does not
-> apply. A piece that fixes a bug is built as `specs/workflow-formats.md` § "Implementing a
-> piece" says: each evidence call goes, and each reproduction passes and is declared as a written
-> test under the same title. `specs/features/comprehension-harness-bug-fixes/experiment.md`
-> § "Next" says why. Once the lot is delivered, mark Tasks 9 and 10 complete in `tasks.md`, so
-> that no run of the earlier form picks them up. End with the list of where a skill, the lot
-> check or the pages did not fit, and work around none.
-
-**3. Back here**, in a session of the experiment: what the two sessions listed is written under
+**Then back here**, in a session of the experiment: what that session listed is written under
 Findings, and decides what the skills are taught before the next batch.
 
 Then **the rest of run B, ported in full before any of it is fixed**, as a batch is run: Tasks 7,
-16, 12 and 2. They join a plan approved once already, and are approved in a second round.
+16, 12 and 2. They join a plan approved once already, and are approved in a second round, with
+the lots they add.
 
 ## Order
 
@@ -137,6 +128,7 @@ Still candidates:
 - No header, middleware or spool file to trace the external development server.
 - The JavaScript stack is built after the bug primitives are settled on Python and the template
   site, so that they are designed once.
+- A plan of bugs has no tasks stage: the plan stage writes its lots, and one approval holds both.
 - A bug that is a value several crossings share is said with `distinct`, not with an `expect` that
   every crossing fails: what is red on the page is the bug, not the reach of the fix.
 
@@ -307,3 +299,21 @@ had no notion of bug.
 
 Still with no home: the verdict, the clusters by failure mechanism, the acceptance on the
 shipped examples.
+
+### The delivery of a plan of bugs (the reviewer's, 2026-11-23)
+
+A tasks session was planned between the approval and the fix, as a feature has. The reviewer asked
+what it would do.
+
+- **Nothing but one line.** That stage plans the unit tests, grounds the plan in the code and
+  cuts it into lots. A bug's reproduction is its test, already written and failing; its diagnosis
+  is its grounding, and the chain a run of it. The lots are left, and the bug sections already
+  group the pieces.
+- **The earlier form had none either.** A diagnosis gave the tasks, and the plan ordered the runs.
+- **The tools still need the list.** The lot check, the brief and "this place is built" read
+  `## Delivery`, and from an approval that holds it. So the plan stage writes it, and the plan is
+  approved once, with it.
+- **It settles the question left by the first port**: a reproduction is a unit test written at
+  the plan stage because, for a bug, no later stage plans tests.
+- **Left for a larger batch**: lots told from the bug sections alone. Two bugs do not say how
+  several bugs of one run would be grouped.
