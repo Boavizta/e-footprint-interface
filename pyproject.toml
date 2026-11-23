@@ -5,7 +5,7 @@
 
 [tool.poetry]
 name = "efootprint-interface"
-version = "1.16.0"
+version = "1.16.1"
 description = "Digital service environmental footprint model interface"
 authors = ["Vincent Villet", "Clémence Knaébel", "Julien Houbart", "Jordane Frouin"]
 readme = "README.md"
@@ -41,8 +41,7 @@ exclude = '''
 python = "^3.12"
 # The interface needs two optional groups of efootprint: viz (pyvis renders the calculation graph) and boaviztapi
 # (offline fallback of the Boavizta server builders, also used by the tests).
-efootprint = {path = "../e-footprint", develop = true, extras = ["viz", "boaviztapi"]}  # dev branch only: the deployment commit restores the published pin
-# efootprint = {version = "27.0.2", extras = ["viz", "boaviztapi"]}
+efootprint = {version = "27.1.0", extras = ["viz", "boaviztapi"]}
 django= "^5.0"
 django-browser-reload = "^1.12.1"
 django-environ = "^0"

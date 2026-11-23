@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [V1.16.1] - 2026-11-23
+
 ### Changed
+- Upgraded efootprint to 27.1.0, installed with its `viz` and `boaviztapi` optional groups. Models saved with an earlier version recompute their results the first time they are opened.
 - Data & privacy states that Redis backups are disabled and that the seven-day PostgreSQL backups are encrypted at rest.
 
 ## [V1.16.0]
