@@ -19,24 +19,44 @@ feature folder's `plan.md`, leave it alone.
   piece tags keep the batch's name.
 - `diagnostics/*.md` stay as the record of each investigation.
 
-## The loop, once per bug
+## The loop
+
+A bug is ported before it is fixed, and bugs are approved and fixed in batches: the approval is a
+plan's, not a bug's, so a bug ported after an approval is an edit of an approved plan.
 
 1. Port the bug with the harness as it is.
 2. Compare the generated page with the bug's section of the baseline, and write the gaps below.
 3. Add the smallest primitive the comparison asks for, and render again.
-4. Implement the fix through the new form.
-5. Pick the next bug for the gap it probes.
+4. Once every bug of the batch is ported, the reviewer approves the plan; the batch is then
+   delivered and fixed through the new form, and what the implement stage showed is written below.
+
+## Next
+
+**Port Task 10**, in a fresh session, before any fix. Nothing of the plan is approved yet: Task 9
+waits for Task 10, and the two are approved together.
+
+Then **the small batch**: Tasks 9 and 10 delivered and fixed as one run. It is small on purpose.
+The implement stage has never met the bug forms, and what it has to hold is tested in the tools
+alone, not through a delivery:
+
+- the lot check, when an evidence call goes with nothing written in its place;
+- a reproduction becoming a written test under the same title, its lot then delivered;
+- what the approval makes of a reproduction: a unit test written at the plan stage, where the
+  workflow has unit tests planned at the tasks stage.
+
+Then **the rest of run B, ported in full before any of it is fixed**, as a batch is run: Tasks 7,
+16, 12 and 2. They join a plan approved once already, and are approved in a second round.
 
 ## Order
 
 | Bug | Why here | State |
 |---|---|---|
-| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported, then ported again on the four harness changes it asked for. Next: the reviewer reads its page, then the fix |
-| Task 10 — explanation ids per item | Template-only: first use of a template site. Shares Task 9's test file | |
+| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported, read by the reviewer, its question answered. Waits for Task 10 to be approved and fixed with it |
+| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Next to port |
 | Task 7 — "each hour" after the unit | Template-only: second use of the template site | |
 | Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | |
 | Task 12 — system prefix first in card ids | Cause in Python, symptom in a jest test: two evidence tests joined at the piece | |
-| Task 2 — membership-section region | Symptom in a browser: an in-process cause test, and the browser test served by `live_server` | |
+| Task 2 — membership-section region | Symptom in a browser: an in-process cause test, and a browser reproduction, whose run is to settle then | |
 | Run C — Tasks 13, 14, 15 | Refactors: the check that the bug primitives stay optional | |
 | A JavaScript stack, then Task 1 | Task 1 is pure JavaScript; it waits for a stack that gives its code sites | |
 
@@ -57,7 +77,6 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **A debug button on each reproduction**, on the route the narratives' button uses.
 - **A template site**: `{% narrate %}`, `{% event %}`, `{% planned %}` and `{% evidence %}`, tags of
   `model_builder/templatetags/narrate.py`.
-
 - **The pages own the reproductions' runs**: the render and the check run them first, whole files,
   and the served pages at each save. A debug run writes no story.
 

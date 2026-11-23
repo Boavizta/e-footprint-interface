@@ -22,8 +22,8 @@ replaces each. A feature in flight on `plan.html` and `tasks.md` is finished by 
 An experiment ports the bug batch `bug-fixes-2026-10`, runs B and C, to pieces one bug at a time, to
 find what the harness needs for bugs:
 [`features/comprehension-harness-bug-fixes/experiment.md`](features/comprehension-harness-bug-fixes/experiment.md).
-Task 9 is ported on the bug forms it asked for (reproductions, evidence, template sites); its fix
-and the next bug follow.
+Task 9 is ported on the bug forms it asked for (reproductions, evidence, template sites). Next: Task 10
+ported, then the two approved and fixed as one small run.
 
 ### AI-assisted bootstrap — specification approved, planning pending
 
