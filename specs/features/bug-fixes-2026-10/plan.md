@@ -27,3 +27,7 @@ In a panel that shows several objects, an edge computer with its CPU, RAM and st
 Each calculated attribute's ids, and what points at them, are built from the item's web id: its collapse, the three references of its formula button, its input and its label.
 
 Today they are built from the attribute name, which several objects of one panel share: HTMX swaps into the first match, Bootstrap toggles every match. The web id already names the dict toggles. Refused: a relative target, which leaves Bootstrap's; a prefix passed by the section, which is not the item's owner; the route id, the URL's contract.
+
+## Delivery
+
+- **calculated-attribute-panel** (easy) #dict-entry-own-template #fragment-views-show-modal #explanation-ids-per-item — Both bugs are of the calculated-attribute panel and share its templates and one test file. The ids come last: the dict piece sends the empty entries through the templates whose ids they fix.

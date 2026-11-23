@@ -1,6 +1,6 @@
 {
   "feature": "bug-fixes-2026-10",
-  "base": "a837631a40d09568cf7f804bcda9673f8b1bed68",
+  "base": "dbe81dbd9ce9f336d1bf41179ddd26845e909bca",
   "approvedOn": "2026-11-23",
   "units": [
     {
@@ -107,6 +107,15 @@
       "facets": {
         "text": [
           "In a panel that shows several objects, an edge computer with its CPU, RAM and storage, the RAM's formula button puts its explanation in the CPU's row and opens all three rows. One more click, and the RAM's explanation cannot be reached until the panel is reopened. Task 10, diagnosed in [calculated-attribute-collapse-id-collision.md](diagnostics/calculated-attribute-collapse-id-collision.md)."
+        ]
+      }
+    },
+    {
+      "kind": "delivery",
+      "name": "Delivery",
+      "facets": {
+        "lots": [
+          "calculated-attribute-panel (easy) #dict-entry-own-template #fragment-views-show-modal #explanation-ids-per-item — Both bugs are of the calculated-attribute panel and share its templates and one test file. The ids come last: the dict piece sends the empty entries through the templates whose ids they fix."
         ]
       }
     }
