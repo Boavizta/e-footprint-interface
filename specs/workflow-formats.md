@@ -303,8 +303,15 @@ has neither one owner nor a confirmed waiver. The archive then takes the tags of
 5. **Sixty words, one bold at most, an opening clause that stands alone.** The bold is the rule
    the step enacts. The opening clause is what the plan page prints for the step.
 
-A step lives in a named function, one call a line. A user's action calls `event` at its handler;
-a cause a test simulates calls it in the test. No prose names a step by its number: it moves.
+A step lives in a named function, one call a line. **It stands in the function it tells**, as its
+first statement, unless that function runs more than once per action or the step is a decision
+of its caller: then it stands in the caller. The function's docstring keeps its contract and does
+not repeat the step. **A call stands above the code it tells, as a comment would**, and its watch
+shows what that code starts from or decides. It stands after only when what the code produced is
+the point of the step, and its watch then shows that result.
+
+A user's action calls `event` at its handler; a cause a test simulates calls it in the test. No
+prose names a step by its number: it moves.
 
 ## The earlier form
 
