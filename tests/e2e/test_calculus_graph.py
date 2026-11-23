@@ -56,7 +56,7 @@ class TestCalculusGraph:
         calc_attrs_toggle.click()
 
         # Expand duration attribute
-        duration_toggle = page.locator("button[data-bs-target^='#collapse-calculated_attributes-duration']")
+        duration_toggle = page.locator("button[data-bs-target^='#collapse-calculated_attributes-duration-in-']")
         expect(duration_toggle).to_be_enabled()
         duration_toggle.click()
 

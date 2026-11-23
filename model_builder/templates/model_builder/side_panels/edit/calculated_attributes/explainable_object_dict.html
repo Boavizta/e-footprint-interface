@@ -13,9 +13,9 @@
             <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M4.646 1.646l6 6-6 6" />
         </svg>
     </button>
-    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
+    <p class="col-auto col-form-label">
         {{ item.attr_name_web|field_label|capfirst }}
-    </label>
+    </p>
 </div>
 
 <div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}">

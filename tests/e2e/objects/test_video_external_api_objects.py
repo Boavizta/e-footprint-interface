@@ -144,9 +144,9 @@ class TestVideoExternalAPIObjects:
         calc_attrs_btn.click()
         page.locator("#collapseCalculatedAttributesEcoLogitsVideoGenExternalAPIJob").wait_for(state="visible")
 
-        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency']")
+        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency-in-']")
         click_and_wait_for_htmx(page, formula_btn)
-        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency']")
+        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency-in-']")
         expect(explanation.locator(".explainable-formula pre")).not_to_be_empty()
         expect(explanation.locator(".explainable-ancestors li").first).to_be_visible()
 

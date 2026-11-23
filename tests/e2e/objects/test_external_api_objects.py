@@ -67,11 +67,11 @@ class TestExternalAPIObjects:
         page.locator("#collapseCalculatedAttributesEcoLogitsGenAIExternalAPIJob").wait_for(state="visible")
 
         # Click the formula button for "Generation latency" and wait for HTMX to load the explanation
-        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency']")
+        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency-in-']")
         click_and_wait_for_htmx(page, formula_btn)
 
         # Check that the EcoLogits computation code is non-empty
-        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency']")
+        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency-in-']")
         expect(explanation.locator(".explainable-formula pre")).not_to_be_empty()
 
         # Check that Input Variables section has at least one entry
