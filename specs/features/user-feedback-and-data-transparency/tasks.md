@@ -197,7 +197,9 @@ Current provider status (2026-11-23):
 
 Done 2026-11-23: the Data & privacy copy, its tests, the save-and-load journey, the persistence architecture page (backup facts and their role for public-link sharing) and the `Unreleased` changelog entry reflect the two confirmed facts.
 
-Remaining: the Redis TLS switch and its runtime check, then the TLS paragraph and its test; the operational checks below (Redis baseline and metrics, purge-worker logs, Paris hosting, security contact); the gate; `feature-archive`.
+Operational checks done 2026-11-23 (operator): Redis baseline and metrics, purge-worker logs, Paris hosting, security contact.
+
+Remaining: the Redis TLS switch and its runtime check, then the TLS paragraph and its test; the gate; `feature-archive`.
 
 This is deliberately the final task. Do not close it, replace an interim or known negative fact with an optimistic assumption, or archive the feature until the outstanding provider answers have been received and checked against the running services.
 
