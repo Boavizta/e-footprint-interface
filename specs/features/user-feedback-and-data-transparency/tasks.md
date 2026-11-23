@@ -188,12 +188,16 @@ Dependencies: Tasks 2 and 3.
 
 **Deployment decision (2026-09-15):** Tasks 1–4 and truthful interim privacy copy are ready to deploy. Keep this task and feature folder open, and do not archive the feature, until the final provider changes and operational checks below are complete. Pending infrastructure work does not block deployment of the feature itself.
 
-Current provider status (2026-09-15):
+Current provider status (2026-11-23):
 
-- Live Redis storage is encrypted at rest; Redis backups are the unencrypted layer.
-- Redis TLS setup is in progress. Until it is completed and verified, the application makes no encrypted application-to-Redis transport claim.
-- Redis backups are being disabled. Until completion and verification, the application makes no claim that provider backup or persistence is disabled.
-- PostgreSQL backup encryption is being set up. Until activation is completed and verified, the backups continue to be described as unencrypted at rest.
+- Live Redis storage is encrypted at rest.
+- Redis backups are disabled: confirmed in writing by Clever Cloud, and no Redis backup is reachable from the console. The copy says backups are disabled and makes no wider claim about server-side persistence.
+- PostgreSQL backup encryption is activated (Clever Cloud). Its €100 cost was one-off.
+- Redis TLS: Clever Cloud says it has been set up, but the production `REDIS_URL` is still `redis://`, so the application connects in plaintext. Clever Cloud has been asked (2026-11-23) which URL and certificate to use. Until `REDIS_URL` is `rediss://` and checked at runtime, the copy makes no encrypted application-to-Redis transport claim.
+
+Done 2026-11-23: the Data & privacy copy, its tests, the save-and-load journey, the persistence architecture page (backup facts and their role for public-link sharing) and the `Unreleased` changelog entry reflect the two confirmed facts.
+
+Remaining: the Redis TLS switch and its runtime check, then the TLS paragraph and its test; the operational checks below (Redis baseline and metrics, purge-worker logs, Paris hosting, security contact); the gate; `feature-archive`.
 
 This is deliberately the final task. Do not close it, replace an interim or known negative fact with an optimistic assumption, or archive the feature until the outstanding provider answers have been received and checked against the running services.
 

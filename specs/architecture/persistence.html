@@ -99,6 +99,7 @@ request-local, so Postgres recovery during error rendering cannot persist that c
 <h2 id="security-and-data">Security and data</h2>
 <ul>
 <li>Model access is session-scoped; payloads are stored server-side in Redis and Postgres under the retention policy above. This is not browser-only storage. No PII is expected; do not log sensitive information.</li>
+<li>Redis is not backed up. Postgres is backed up daily, encrypted at rest and kept seven days; a modeling still stored when a backup runs stays in it for that time, whatever the recovery retention. These backups are required resilience for public-link sharing, whose links must outlive an infrastructure failure.</li>
 <li>Validate transport shape/types at adapter boundaries. Semantic modeling invariants belong to the domain/library; browser checks provide immediate feedback only. Deployment-specific data/privacy copy lives in <a class="source" href="../../model_builder/templates/model_builder/side_panels/data_privacy.html"><code>model_builder/templates/model_builder/side_panels/data_privacy.html</code></a>.</li>
 </ul>
 <aside class="rule"><strong>Related pages</strong><div class="related"><a href="workspace.html">Workspace slots and files</a><a href="runtime-and-recovery.html">Raw recovery and errors</a><a href="rendering.html">Sankey and source rendering</a></div></aside>

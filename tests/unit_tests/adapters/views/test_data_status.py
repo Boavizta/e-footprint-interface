@@ -164,10 +164,9 @@ def test_data_privacy_partial_separates_storage_layers_and_renders_exact_retenti
     assert ">Redis hot cache</h2>" not in content
     assert ">Live PostgreSQL recovery storage</h2>" not in content
     assert "Live PostgreSQL storage and the Redis hot cache are encrypted at rest" in content
-    assert "are not encrypted at rest" in normalized_content
-    assert "Redis backups are being disabled" in content
+    assert "Redis backups are disabled" in content
+    assert "Daily PostgreSQL backups are encrypted at rest and retained for seven days" in normalized_content
     assert "TLS protection for the connection between the application and Redis is being set up" in normalized_content
-    assert "Backup encryption is being set up" in content
     assert '<h2 id="security-heading" class="h6 fw-semibold">Security</h2>' in content
     assert ">Protection</h2>" not in content
     assert ">PostgreSQL backups</h2>" not in content
@@ -200,9 +199,9 @@ def test_data_privacy_route_is_standalone(client, settings):
     assert "Clever Cloud" in content
     assert "hosted in Paris" in content
     assert "8 MB limit is a capacity policy for this shared public deployment" in content
-    assert "Redis backups are being disabled" in content
+    assert "Redis backups are disabled" in content
     assert "TLS protection" in content
-    assert "Backup encryption is being set up" in content
+    assert "Daily PostgreSQL backups are encrypted at rest" in content
 
 
 @pytest.mark.django_db

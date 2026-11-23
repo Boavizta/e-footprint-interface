@@ -136,14 +136,9 @@
             Live PostgreSQL storage and the Redis hot cache are encrypted at rest.
         </p>
         <p>
-            <strong>Redis backups.</strong> Redis backups are being disabled. Until that change is completed and verified,
-            no claim is made that provider backup or persistence is disabled.
-        </p>
-        <p>
-            <strong>PostgreSQL backups.</strong>
-            Daily PostgreSQL backups are retained for seven days. They are separate from live recovery storage and are not
-            encrypted at rest. Backup encryption is being set up. Until activation is completed and verified, treat the
-            backups as unencrypted.
+            <strong>Backups.</strong>
+            Redis backups are disabled. Daily PostgreSQL backups are encrypted at rest and retained for seven days,
+            separately from live recovery storage.
         </p>
         <p>
             Backups are observed to run overnight, but their timing can vary. A short recovery period such as six hours
