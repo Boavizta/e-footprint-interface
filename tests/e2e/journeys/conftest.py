@@ -8,12 +8,15 @@ from django.core.signals import request_started
 from comprehension_harness.python.journey import CONTEXT, request_answers
 from tests.e2e.utils import in_process_page
 
+# The size every journey of this project is captured at: a desktop's window, the builder's layout.
+VIEWPORT = {"width": 1280, "height": 800}
+
 pytestmark = [pytest.mark.e2e]
 
 
 @pytest.fixture
 def page(transactional_db, browser_name, browser_type_launch_args):
-    with in_process_page(browser_name, browser_type_launch_args, **CONTEXT) as page:
+    with in_process_page(browser_name, browser_type_launch_args, **CONTEXT, viewport=VIEWPORT) as page:
         yield page
 
 

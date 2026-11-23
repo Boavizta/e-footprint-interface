@@ -43,7 +43,8 @@ page lists it under the screen, and the plan counts it as a case to write. Writt
 passes, and it is a cause of the journey.
 
 A journey's page fixture is the project's: it opens its context with ``CONTEXT``, what a capture must not
-vary with.
+vary with, and with the viewport the project draws its journeys at. The run writes down the viewport its
+page has.
 """
 import hashlib
 import json
@@ -61,9 +62,9 @@ from comprehension_harness.python.collector import CONFIG_FILE, plain, title_of
 from comprehension_harness.python.declare import has_empty_body
 
 PAGE_SCRIPT = Path(__file__).with_name("journey_page.js")
-# What a capture must not vary with. The page's clock is pinned per journey, at its `now`.
-CONTEXT = {"viewport": {"width": 1280, "height": 800}, "timezone_id": "UTC", "locale": "en-US",
-           "color_scheme": "light", "reduced_motion": "reduce"}
+# What a capture must not vary with, whatever the project. Its viewport is the project's to say, and the page's
+# clock is pinned per journey, at its `now`.
+CONTEXT = {"timezone_id": "UTC", "locale": "en-US", "color_scheme": "light", "reduced_motion": "reduce"}
 # A frame of the page's faked clock, in its milliseconds.
 FRAME_MS = 16
 ADDRESS = re.compile(r"^[a-z][a-z0-9-]*$")
@@ -408,7 +409,10 @@ class Journeys:
 
     def attach(self, page, item, marker) -> Run:
         name = marker.args[0]
-        meta = {"name": name, "slug": slug(name), **marker.kwargs, "viewport": CONTEXT["viewport"],
+        if page.viewport_size is None:
+            raise pytest.UsageError(f'journey "{name}": its page has no fixed viewport, and a capture is drawn at '
+                                    f'one: the page fixture opens its context with viewport={{"width": …, "height": …}}')
+        meta = {"name": name, "slug": slug(name), **marker.kwargs, "viewport": page.viewport_size,
                 "file": Path(str(item.path)).resolve().relative_to(self.recorder.root).as_posix(),
                 "todos": sorted(self.todos.get(slug(name), []), key=lambda todo: todo["line"])}
         folder = self.out / meta["slug"]

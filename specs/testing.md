@@ -227,7 +227,8 @@ it reached has been waited for. Between two screens the page shows the user's ac
   the process that runs a journey rewrites its folder.
 - **Two runs write the same captures.** `pinned_server` of that conftest pins what the server
   draws at random, the ids of the objects it creates and the CSRF token; the helper pins the
-  browser's clock, time zone, locale and viewport. A capture that still moves between two runs
+  browser's clock, time zone and locale, and `VIEWPORT` of that conftest is the one size this
+  project's journeys are captured at. A capture that still moves between two runs
   names something else to pin there.
 - **A feature that changes a screen of a journey** declares it in the journey test: a planned
   screen with its mockup, and a `@planned_case` per state worth seeing

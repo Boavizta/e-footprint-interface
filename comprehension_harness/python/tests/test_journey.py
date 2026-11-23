@@ -86,7 +86,7 @@ CONFTEST = '''
     def page():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch()
-            yield browser.new_context(**CONTEXT).new_page()
+            yield browser.new_context(**CONTEXT, viewport={"width": 390, "height": 844}).new_page()
             browser.close()
 '''
 JOURNEY = '''
@@ -162,12 +162,12 @@ def walked(tmp_path_factory):
     return root
 
 
-def test_a_journey_is_its_declaration_and_a_case_a_file_named_by_its_line(walked):
+def test_a_journey_is_its_declaration_with_its_pages_viewport_and_a_case_a_file_named_by_its_line(walked):
     declared = json.loads((walked / FOLDER / "journey.json").read_text())
 
     assert declared == {
         "name": "Fill a basket", "slug": "fill-a-basket", "who": "A customer", "wants": "Their articles in the basket",
-        "now": "2026-01-15T10:00:00Z", "viewport": {"width": 1280, "height": 800}, "file": "checks/test_basket.py",
+        "now": "2026-01-15T10:00:00Z", "viewport": {"width": 390, "height": 844}, "file": "checks/test_basket.py",
         "todos": [{"feature": "gift-cards", "screen": "basket", "title": "a gift card shows its balance", "line": 34}]}
     assert [file.name for file in sorted((walked / FOLDER / "cases").iterdir())] == [
         "0011-adds-an-article.json", "0025-test-looks-only.json"]
