@@ -34,7 +34,7 @@ skills, which your sub-agents follow. `map …` is the map's command (`code-map`
    is nothing to implement: say what is missing and stop.
 3. **Read the plan through the map**, not the files: `map plan <feature>` for the whole,
    `map brief <feature>/<lot>` for the lot, with the notes earlier lots left.
-4. **Sort the lot's user-held gates**, from its reason and its pieces:
+4. **Sort the lot's user-held gates**, from its reason, its pieces and the bugs they fix:
    - a **validation**: a check on a device, by eye or by ear. The lot ships fully tested and the
      check goes to the gates file. A failed check reopens the lot later; it never holds the run;
    - an **evidence gate**: later work hinges on a reading the run cannot produce. Only what comes
@@ -75,6 +75,11 @@ approval, and it does not chain into the next lot.
 Its report is all that enters your context: the commits, a line a piece; the gates passed; its
 **deviations** (a place not built, a file no place names, a test added, dropped or deleted
 beyond the plan) and its **doubts**. No diff, no narration.
+
+**A lot that fixes bugs is a lot like another.** Its brief shows the reproductions that fail
+today and the evidence that goes with the fix, and its implementer follows `task-implement`
+§ "A piece that fixes a bug". It is delivered when no evidence call and no reproduction stands:
+the check runs the reproductions itself, and fails on one that passes while still declared one.
 
 **A migration's piece waits for the user's go** when its tests destroy local state
 (`repository.md` § "Gates"): the lot is built and reviewed without them, and they run last.
@@ -220,9 +225,10 @@ session reads verdicts from it. It is committed with the run and leaves with the
 
 ## A bug batch
 
-A batch diagnosed by `bug-fixes` has no pieces: its unit is a **task** of `tasks.md`, and its plan,
-when `bug-fixes-plan` wrote one, a `plan.html`. Run it with this skill, a task where it says a lot,
-with these differences:
+A plan of bugs written as pieces is run as any delivery, above. This section is for a batch on the
+earlier form: one diagnosed by `bug-fixes` and not ported has no pieces, its unit is a **task** of
+`tasks.md`, and its plan, when `bug-fixes-plan` wrote one, a `plan.html`. Run it with this skill, a
+task where it says a lot, with these differences:
 
 - There is no `map check` and no `Piece:` line. A commit names its task.
 - **A fix is complete when its reproduction passes with its expected-failure marker removed.**

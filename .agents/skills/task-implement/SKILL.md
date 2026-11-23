@@ -41,6 +41,22 @@ to do differently goes in your report.
 7. **The commit passes a piece's gate** (`repository.md` § "Gates"): the types, and the tests
    related to what it changed. Not the whole suite: that is the lot's.
 
+## A piece that fixes a bug
+
+Its brief shows it: a reproduction reads "FAILS TODAY", and evidence "goes with the fix"
+(`specs/workflow-formats.md` § "A bug"). It is built as any piece, and:
+
+1. **See each reproduction fail first**, the way the brief says it fails. One that passes, or
+   fails for another reason, is a diagnosis that no longer holds: stop at the piece and report it.
+2. **Each evidence call goes, with nothing written in its place**, and so do the `expect` and the
+   `distinct` of the piece's other calls. An import or a load line that served only the calls that
+   went goes with them.
+3. **Each reproduction passes, and is then declared a written test under the same title**
+   (`repository.md` § "The stack" says how). Its body is not touched: a reproduction is never
+   weakened to pass, and one that should assert more is a doubt you report, not an edit you make.
+
+The reproductions are the piece's tests. Nothing else is written (rule 3 of "A piece").
+
 ## The lot's last commit
 
 - **The steps**: write the `narrate` and `event` calls the lot's pieces add, remove those of what
@@ -78,7 +94,8 @@ The reviewer starts from your deviations and doubts. They are a map, not a defen
 
 ## One task of a bug batch
 
-A batch from `bug-fixes` has tasks, not lots. Read the task in `tasks.md`, its diagnostic, and its
+A batch from `bug-fixes` that was not ported to pieces has tasks, not lots: this is its form, and
+"A piece that fixes a bug" above is not. Read the task in `tasks.md`, its diagnostic, and its
 step in the batch's `plan.html` when there is one. Touch the files the task lists. **The fix is
 done when the task's reproduction passes with its expected-failure marker removed**: run it
 unmasked first and check it fails the way the diagnostic records; never weaken it; add no other

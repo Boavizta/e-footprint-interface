@@ -42,10 +42,14 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
    - **A file with several places**: was one skipped?
    - **Does each test assert what its title says**, or less? A moved assertion is compared with
      the one it replaces by value, not by title.
-   - **Each deleted test against the holder the plan named**: does the holder's assertion fail
-     if the behaviour breaks?
-   - **The steps written in the last commit**: read the story. Is a sentence now false, a step
-     missing where a reader would stop?
+   - **Each deleted test against the holder the plan named**, when the lot deleted one: does the
+     holder's assertion fail if the behaviour breaks?
+   - **The steps written in the last commit**, when it wrote any: read the story. Is a sentence
+     now false, a step missing where a reader would stop?
+   - **A piece that fixes a bug** (`specs/workflow-formats.md` § "A bug"): is each reproduction
+     now declared a written test under its title, its body the one the plan was approved on
+     (compare it with the approval's commit)? Did it fail before the fix for the reason the piece
+     gives? Is an evidence call left, or something written where one stood?
    - **What the next lot stands on**: a choice made here that no line of the plan says.
 
 5. **Then the checklist**, at your tier's depth:
@@ -101,7 +105,8 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
 
 ## A bug-batch task
 
-The same process over the task's commit, with the task in `tasks.md` and its diagnostic as the
+For a batch that was not ported to pieces: one that was is reviewed as any lot, with the question
+above. The same process over the task's commit, with the task in `tasks.md` and its diagnostic as the
 intent. Add to the checklist: the fix removed the reproduction's expected-failure marker rather
 than rewriting the test; any assertion change encodes a decision the task names, never a
 weakening; a test beyond the task's list is a scope finding unless it covers a new public
