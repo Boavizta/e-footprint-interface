@@ -1,55 +1,22 @@
 """Real bootstrap navigation and persistence, with inference isolated in process."""
 import json
-from pathlib import Path
-from unittest.mock import Mock
-from uuid import uuid4
 
 import pytest
-from django.conf import settings as django_settings
-from django.core.cache import caches
-from playwright.sync_api import expect, sync_playwright
+from playwright.sync_api import expect
 
-from model_builder.adapters.views import views_ai_bootstrap
 from model_builder.application.ai_bootstrap.service import Completion
 from comprehension_harness.python.declare import titled
-from tests.e2e.utils import click_and_wait_for_htmx, wait_for_htmx_idle
+from tests.e2e.utils import click_and_wait_for_htmx, handwritten_ai_answer, in_process_page, wait_for_htmx_idle
 
-pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True)]
-EDGE_ANSWER = (Path(django_settings.BASE_DIR) / "ai_sandbox/cases/_handwritten_04_ev_charging.json").read_text()
+pytestmark = [pytest.mark.e2e, pytest.mark.django_db(transaction=True), pytest.mark.usefixtures("isolated_bootstrap")]
+EDGE_ANSWER = handwritten_ai_answer("04_ev_charging")
 DESCRIPTION = 'Recipe service <script>alert("prompt")</script> & monthly users'
 
 
 @pytest.fixture
 def page(transactional_db, browser_name, browser_type_launch_args):
-    # Keep Playwright's synchronous event loop inside the database fixture's lifetime.
-    with sync_playwright() as playwright:
-        browser = getattr(playwright, browser_name).launch(**browser_type_launch_args)
-        context = browser.new_context()
-        page = context.new_page()
+    with in_process_page(browser_name, browser_type_launch_args) as page:
         yield page
-        context.close()
-        browser.close()
-
-
-@pytest.fixture(autouse=True)
-def isolated_bootstrap(settings, monkeypatch):
-    monkeypatch.setenv("USE_BOAVIZTAPI_PACKAGE", "1")
-    settings.AI_BOOTSTRAP_ENABLED = True
-    settings.MISTRAL_API_KEY = "dummy-offline-key"
-    settings.STORAGES = {**settings.STORAGES, "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}
-    # LocMem is shared by the request thread and test, with separate locations for every test and alias.
-    prefix = f"bootstrap-{uuid4()}"
-    settings.CACHES = {alias: {"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-                              "LOCATION": f"{prefix}-{alias}"} for alias in ("default", "redis", "postgres")}
-    answer = (Path(django_settings.BASE_DIR) / "ai_sandbox/cases/_handwritten_01_recipe_app.json").read_text()
-    provider = Mock(return_value=Completion(answer, 5000, 800, latency_s=1.5))
-    monkeypatch.setattr(views_ai_bootstrap, "complete_mistral", provider)
-    monkeypatch.setattr(views_ai_bootstrap, "estimate_call", lambda completion: {
-        "cost_usd": 0.001, "cache_discount_unknown": True, "rate_card_date": "2026-11-09", "impact_kg": None})
-    yield provider
-    for alias in settings.CACHES:
-        caches[alias].clear()
 
 
 @pytest.fixture(scope="session")

@@ -1,6 +1,29 @@
 """E2E test utilities."""
-from playwright.sync_api import Page, Locator
 from collections.abc import Mapping
+from contextlib import contextmanager
+from pathlib import Path
+
+from playwright.sync_api import Page, Locator, sync_playwright
+
+
+def handwritten_ai_answer(case: str) -> str:
+    """A hand-written provider answer of the AI sandbox, by its case name (`01_recipe_app`)."""
+    return (Path(__file__).resolve().parents[2] / "ai_sandbox/cases" / f"_handwritten_{case}.json").read_text()
+
+
+@contextmanager
+def in_process_page(browser_name: str, launch_args: dict, **context_options):
+    """A page for a test whose server is pytest-django's `live_server`. A `page` fixture that depends on
+    `transactional_db` opens it, so that Playwright's synchronous event loop stays inside the database
+    fixture's lifetime."""
+    with sync_playwright() as playwright:
+        browser = getattr(playwright, browser_name).launch(**launch_args)
+        context = browser.new_context(**context_options)
+        try:
+            yield context.new_page()
+        finally:
+            context.close()
+            browser.close()
 
 
 def wait_for_htmx_idle(page: Page):

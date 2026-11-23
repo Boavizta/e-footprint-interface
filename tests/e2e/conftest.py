@@ -129,6 +129,37 @@ def model_builder_page(page: Page, base_url: str, request) -> ModelBuilderPage:
 
 
 @pytest.fixture
+def isolated_bootstrap(settings, monkeypatch):
+    """The AI bootstrap with inference isolated in process, for a test served by `live_server`: a dummy key, a
+    local fake provider (returned, to set its answer or count its calls) and caches of the test's own."""
+    from unittest.mock import Mock
+    from uuid import uuid4
+
+    from django.core.cache import caches
+
+    from model_builder.adapters.views import views_ai_bootstrap
+    from model_builder.application.ai_bootstrap.service import Completion
+    from tests.e2e.utils import handwritten_ai_answer
+
+    monkeypatch.setenv("USE_BOAVIZTAPI_PACKAGE", "1")
+    settings.AI_BOOTSTRAP_ENABLED = True
+    settings.MISTRAL_API_KEY = "dummy-offline-key"
+    settings.STORAGES = {**settings.STORAGES, "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}
+    # LocMem is shared by the request thread and test, with separate locations for every test and alias.
+    prefix = f"bootstrap-{uuid4()}"
+    settings.CACHES = {alias: {"BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                              "LOCATION": f"{prefix}-{alias}"} for alias in ("default", "redis", "postgres")}
+    provider = Mock(return_value=Completion(handwritten_ai_answer("01_recipe_app"), 5000, 800, latency_s=1.5))
+    monkeypatch.setattr(views_ai_bootstrap, "complete_mistral", provider)
+    monkeypatch.setattr(views_ai_bootstrap, "estimate_call", lambda completion: {
+        "cost_usd": 0.001, "cache_discount_unknown": True, "rate_card_date": "2026-11-09", "impact_kg": None})
+    yield provider
+    for alias in settings.CACHES:
+        caches[alias].clear()
+
+
+@pytest.fixture
 def empty_model_builder(model_builder_page: ModelBuilderPage) -> ModelBuilderPage:
     """Navigate to the model builder with a fresh/default model.
 
