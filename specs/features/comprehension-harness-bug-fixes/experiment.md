@@ -76,8 +76,7 @@ To open the next session:
 > reproduction and no test: one is written in the stack's form, to observe, then assert once
 > (`bug-fixes` § "The reproduction").
 >
-> The plan is approved: the new bug's section and each new piece's take a `Changed:`; the lot
-> takes none.
+> The plan is approved: the new bug's section takes a `Changed:`, for itself and its pieces.
 >
 > End your report with where `bug-fixes-plan`, `spec-plan`, the check, the map or the pages did
 > not fit, and work around none of them. Stop before the approval: it is the reviewer's, and
@@ -127,6 +126,12 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **The pages own the reproductions' runs**: the render and the check run them first, whole files,
   and the served pages at each save. A debug run writes no story.
 
+Built on the port of Task 7:
+
+- **A bug that joins an approved plan takes one `Changed:`**, its section's. A new piece under a
+  new bug asks nothing of its own, and is still listed as new.
+- **A reproduction is one test.** The title reader refuses a parametrized one.
+
 Built on the fix of Tasks 9 and 10, for what the implement stage showed:
 
 - **`unbuilt`**: a claim of a `Changed:` that names a place the plan reads as built and the code
@@ -168,14 +173,10 @@ Still candidates:
   it: of a template, only what changed above its first place is listed.
 - A feature name used again after an archive: a plan reads every commit that names one of its
   feature's pieces, and fails on one whose piece it no longer holds.
-- A parametrized reproduction: it is drawn as one, its cases end to end, with one failure. Task 7's
-  was folded into one test.
-- A `#` that names no piece: the check reads "GitHub #150" as one. A name of digits alone could
-  be none.
-- A long item of a failure's message: pytest cuts it in its middle past 240 characters, whatever
-  the limits raised, and the brief prints the message's first line alone.
-- A place undone before an approval: the check reads from the approval's commit on, and asked
-  nothing for the three views. Only a reader of the code knew.
+- The brief's line for a reproduction: the first of the failure's message, which for a value of
+  named observations is pytest's shortened form of both sides.
+- What a bug is known by, as its own data: its issue, its diagnostic, its task, perhaps its
+  verdict. Today they are links in its paragraph. To settle once the four bugs are ported.
 
 ## Decided so far
 
@@ -206,6 +207,8 @@ Still candidates:
 - The plan is extended between rounds and archived whole at the end (the reviewer's,
   2026-11-23). Closing it after a round would take the tags off its tests and leave its commits
   naming pieces the next plan does not hold, and its folder holds the baseline.
+- An issue is a link in its bug's paragraph (the reviewer's, 2026-11-23): `#150` reads as a
+  piece's name, and stays refused.
 - No global review of a round: rounds are the experiment's, and a batch is normally approved
   once. The leads of each lot's review wait in the gates file for the review of the whole.
 
@@ -554,6 +557,22 @@ name. Nothing was changed in the harness for it.
   the three "taken back" under the edit and eleven places built on the card; the page's count of
   places built went from 26 to 23. The piece reads "built" and "modified since your approval",
   its bug "fixed", its lot "delivered".
-- **Nothing asked for it.** Before the paragraph the check read the plan "as approved", and
-  passed. The plan was approved again after the review's fix, and the check reads a place from
-  the approval's commit on: a place undone before an approval is approved as built.
+- **Nothing asked for it, and nothing should again.** Before the paragraph the check read the
+  plan "as approved", and passed: the plan was approved again after the review's fix, and the
+  check reads a place from the approval's commit on. It is the order the tools were built in.
+  The first lot was reviewed before the check read a place's function: today that fix fails the
+  lot check until the paragraph is written, and no approval is made on a failing plan.
+
+### Task 7 — what was changed for it (2026-11-23)
+
+Three of the misfits, on the reviewer's word. The others stay as they are: an issue is a link,
+the helper's place has no value, a template no narrative crosses is searched for.
+
+- **One `Changed:` for a bug that joins.** The check asks a new piece nothing when its bug is
+  new too: the bug's paragraph is the one the reviewer answers. Task 7's piece lost its own, and
+  the pages went from three items to answer to two. A piece added under an approved bug still
+  owes one.
+- **A parametrized reproduction is refused** by the title reader, with what to write instead,
+  and the skills say that a reproduction reads its cases itself, each observation kept short.
+- **The plan page's first block** says, in a plan of bugs, that the cards stand in the order of
+  `plan.md`, a bug at a time.

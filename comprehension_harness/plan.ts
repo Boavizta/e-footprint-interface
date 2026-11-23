@@ -1093,14 +1093,15 @@ const linesOver = (now: string[], was: string[]) => {
 /**
  * What differs from the approved plan, a unit at a time, in the order of the plan as it stands, then what is
  * gone. A reason is needed for a piece that gained a line of any facet or lost one of its statement, its reason
- * or its tests, and for a decision that is new or reads differently. The waivers, the lots, the journey cases
+ * or its tests, and for a decision that is new or reads differently. A new piece under a new bug (`bugOf`, the
+ * name of the bug's unit) asks nothing of its own: the bug's paragraph says why both are there. The waivers, the lots, the journey cases
  * and the stories are listed and ask nothing: a waiver and a lot carry their reason, a story moves because the
  * plan is being implemented. A `To confirm:` a later stage adds is listed too, and is its own notice. While no
  * delivery is approved, the delivery and the unit tier (`isUnitTestLine`) are the tasks stage's output: they are
  * read on the delivery page, lot by lot, and are no line of the delta. A line one piece lost and another gained,
  * word for word, is a move: it leaves both deltas and is returned apart, of second order. `explained` says whether the unit's section holds a `Changed:`.
  */
-export function diffSnapshots(approved: PlanSnapshot, now: PlanSnapshot, explained: (kind: UnitKind, name: string) => boolean, layout: Layout): { delta: UnitDelta[]; moves: PlanMove[] } {
+export function diffSnapshots(approved: PlanSnapshot, now: PlanSnapshot, explained: (kind: UnitKind, name: string) => boolean, bugOf: (piece: string) => string | null, layout: Layout): { delta: UnitDelta[]; moves: PlanMove[] } {
   const key = (u: SnapshotUnit) => `${u.kind} ${u.name}`;
   const was = new Map(approved.units.map((u) => [key(u), u]));
   // Until a delivery is approved, what the tasks stage writes is its output and no change of the plan: the
@@ -1137,7 +1138,9 @@ export function diffSnapshots(approved: PlanSnapshot, now: PlanSnapshot, explain
       .map((f) => ({ ...f, added: f.added.filter((line) => !(tasksOpen && isUnitTestLine(f.facet, line, layout))) }))
       .filter((f) => f.added.length + f.removed.length > 0);
     if (facets.length === 0 && u.state === 'changed') continue;
-    const asks = u.state !== 'gone' && (u.kind === 'decision' || (u.kind === 'piece' && facets.some((f) => !ASKS_NOTHING.includes(f.facet) && (f.added.length > 0 || (f.removed.length > 0 && LOSS_IS_A_CHANGE.includes(f.facet))))));
+    const bug = u.kind === 'piece' && u.state === 'new' ? bugOf(u.name) : null;
+    const joinsWithItsBug = bug !== null && !was.has(`decision ${bug}`);
+    const asks = u.state !== 'gone' && !joinsWithItsBug && (u.kind === 'decision' || (u.kind === 'piece' && facets.some((f) => !ASKS_NOTHING.includes(f.facet) && (f.added.length > 0 || (f.removed.length > 0 && LOSS_IS_A_CHANGE.includes(f.facet))))));
     delta.push({ kind: u.kind, name: u.name, state: u.state, facets, reason: explained(u.kind, u.name) ? 'given' : asks ? 'needed' : 'none', edits: [], unclaimed: facets.flatMap(linesOf) });
   }
   return { delta, moves };
@@ -1571,7 +1574,12 @@ export function assemblePlans(input: PlanInput): Plan[] {
     // piece lost, which the edit stands on.
     for (const piece of pieces) takeBack(piece, sectionOf('piece', `#${piece.slug}`)?.changed ?? []);
     const snapshot = snapshotOf({ pieces, doc, journeyCases, builtCases }, narratives.flatMap((n) => (landed.has(n.title) && n.steps ? [{ title: n.title, steps: n.steps }] : [])));
-    const diffed = approved ? diffSnapshots(approved.baseline, snapshot, explained, input.layout) : null;
+    const bugOf = (name: string) => {
+      const under = sectionOf('piece', name)?.under;
+      const bug = under ? doc?.sections.find((x) => x.bug && x.anchor === under) : undefined;
+      return bug ? unitNameOf(bug) : null;
+    };
+    const diffed = approved ? diffSnapshots(approved.baseline, snapshot, explained, bugOf, input.layout) : null;
     // What the commits made since the approval did beyond the plan joins the delta of the piece each names.
     if (diffed && implementing) {
       for (const [slug, lines] of unplannedLines(commits, new Set([...filesNamed(approved!.baseline), ...filesNamed(snapshot)]), input.layout, [...bySlug.values()], docs.gained)) {

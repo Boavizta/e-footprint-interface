@@ -44,8 +44,6 @@ Every recurrent constant editor reads per hour: its unit box shows the unit then
 
 The stored unit holds no time, and stays: one suffix reads for amounts and levels alike. The component-need form rewrites the input's value by id and touches nothing beside it: no browser test is added. The weekly-pattern editor sets values on hour ranges, and stays. Refused: rate units in the library, a migration; "/ hour" by aggregation, which misses storage.
 
-Changed: **New piece, Task 7's.** Ported from the baseline after the approval: two places in one template, and its reproduction, which now reads every editor and asserts once.
-
 ## Delivery
 
 - **calculated-attribute-panel** (easy) #dict-entry-own-template #fragment-views-show-modal #explanation-ids-per-item — Both bugs are of the calculated-attribute panel and share its templates and one test file. The ids come last: the dict piece sends the empty entries through the templates whose ids they fix.

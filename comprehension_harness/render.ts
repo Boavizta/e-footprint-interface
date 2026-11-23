@@ -1763,7 +1763,7 @@ ${plan.pointers.length ? `
 ${outside.length ? `
 <h2 id="outside">Outside the narratives — ${plural(outside.length, 'piece')}</h2>
 <div class="pbox outside">${byBug(outside, outsideRow, (bug) => `<div class="pline bugrow"><span class="where"><a href="#${bug.anchor}"><span class="mark failing">bug</span></a></span><span class="clause"><b>${planInline(bug.title, plan)}</b></span></div>`).join('')}</div>
-<p class="legend">No narrative${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}: ${outside.length === 1 ? 'its card is' : 'their cards are'} the first of the pieces.</p>` : ''}
+<p class="legend">No narrative${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}: ${bugs.length ? `${outside.length === 1 ? 'its card stands' : 'their cards stand'} below in the order of plan.md, a bug at a time` : `${outside.length === 1 ? 'its card is' : 'their cards are'} the first of the pieces`}.</p>` : ''}
 ${flows.length ? `
 <h2 id="flows">The change, in the ${flows.length === 1 ? 'narrative' : `${flows.length} narratives`} it lands in</h2>
 <div class="flows">

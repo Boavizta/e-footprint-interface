@@ -558,6 +558,26 @@ describe('a bug', () => {
     expect(() => planDocOf(parseIntent('# P\n\n## Bug:\n\nNothing.\n', 'plan.md'), 'plan.md')).toThrow(/plan\.md:3 — "## Bug:": a bug's section is titled with what is wrong/);
   });
 
+  it('asks a bug that joins an approved plan for one paragraph, and the new pieces under it for none', () => {
+    const was = '# P\n\n## Bug: The total ignores the card\n\nThe buyer pays the whole amount.\n\n## #cut\n\nCuts.\n';
+    const baseline: PlanBaseline = { feature: 'demo', base: 'abc12345', approvedOn: '2026-11-13', units: assemble({ sites: [site('cut', 'src/a.ts', 2)], docs: docs(was, null) })[0].snapshot.units };
+    const joined = (saveSays = '', bugSays = '') => assemble({
+      sites: [site('cut', 'src/a.ts', 2), site('save', 'src/a.ts', 3), site('row', 'src/a.ts', 4)],
+      docs: (feature) => ({
+        ...docs(`${was}\n## #save\n\nSaves.\n${saveSays}\n## Bug: Two rows share an id\n\nOne click opens both.\n${bugSays}\n## #row\n\nRows.\n`, null)(feature),
+        approved: { file: 'specs/features/demo/plan.approved.json', baseline },
+      }),
+    })[0];
+    // The new bug owes its paragraph, and the piece that joins with it owes none. A new piece under a bug the
+    // approval holds is an edit of that bug's fix: it owes its own.
+    const bare = joined();
+    expect(Object.fromEntries(bare.delta!.map((d) => [d.name, `${d.state}, ${d.reason}`]))).toEqual({ '#save': 'new, needed', 'Bug: Two rows share an id': 'new, needed', '#row': 'new, none' });
+    expect(findings(bare).failures.map((f) => f.split(' is not as approved')[0])).toEqual(['planned: #save', 'planned: "Bug: Two rows share an id"']);
+    const told = joined('\nChanged: **The card is saved too.** The first fix left it.\n', '\nChanged: **A second bug joins the plan.** Found since.\n');
+    expect(findings(told).failures).toEqual([]);
+    expect(reviewItems(told).map((item) => item.unit)).toEqual(['#save', 'Bug: Two rows share an id']);
+  });
+
   it('matches a story to its tagged test by file and title, a parametrized case included', () => {
     const t = reproduction();
     expect(plan.isStoryOf(t, { file: 'tests/x.test.ts', test: 'demo#cut: cut is tested' })).toBe(true);
