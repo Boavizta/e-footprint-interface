@@ -497,7 +497,6 @@ def sankey_cards(request):
     return HttpResponse("".join(cards_html))
 
 
-@render_exception_modal_if_error
 def sankey_delete_card(request):
     """Delete a persisted Sankey card configuration."""
     card_id = request.POST.get("card_id", "")

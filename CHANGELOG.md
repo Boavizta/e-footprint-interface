@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - The chart button of an empty entry in a calculated dictionary, such as an edge storage's energy per usage pattern, no longer fails: the entry reads "no value" with its formula and no chart.
-- A failing side-panel or Sankey request shows the error modal instead of an empty pane with no error; a missing item keeps its not-found status.
+- A failing calculated-attribute chart or explanation, delete confirmation, help drawer, Sources table or Sources row editor, or Sankey settings or cards request shows the error modal instead of an empty pane with no error.
 - The formula button of a calculated attribute opens its own explanation when several objects are shown in the same panel, instead of another object's.
 
 ## [V1.16.1] - 2026-11-23

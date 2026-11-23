@@ -445,7 +445,6 @@ def result_chart(request):
     return http_response
 
 
-@render_exception_modal_if_error
 def get_calculus_graph(request, cache_key):
     cache_repository = SessionCacheRepository(request.session, namespace="calculus_graph")
     content_to_return = cache_repository.pop(cache_key)
@@ -456,7 +455,6 @@ def get_calculus_graph(request, cache_key):
     return HttpResponse(content_to_return, content_type="text/html")
 
 
-@render_exception_modal_if_error
 @time_it
 def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
