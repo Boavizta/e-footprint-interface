@@ -28,6 +28,15 @@ the stylesheet shared under ``css/``), lists the screen's controls with the role
 tree gives each, and closes the segment of actions and calls that led here. Reaching an id a second time in
 one case is a return: the capture is compared with the first and only kept when it differs.
 
+``screen(…, planned={"feature": …, "mockup": …, "what": …})`` says a feature changes the screen: the mockup is
+an edited copy of today's capture, as a path from the root, and the feature's spec page draws the two side by
+side.
+
+``@planned_case("<feature>", "<screen id>", "<title>")`` on a test of the class with an empty body declares a
+case a feature will add at a screen: one criterion of its spec, as a title. A run skips it; the feature's spec
+page lists it under the screen, and the plan counts it as a case to write. Written, it keeps its title with
+``@titled("<title>")`` (``declare.py``).
+
 ``seeded(page)`` ends the fixture part of a case: what was recorded so far is not part of the journey.
 
 ``pause_clock(page)`` stops the page's timers; from there ``elapse(page, ms, why)`` is the only way its time
@@ -41,6 +50,7 @@ import json
 import os
 import re
 import shutil
+import sys
 import threading
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -48,6 +58,7 @@ from urllib.parse import urlsplit
 import pytest
 
 from comprehension_harness.python.collector import CONFIG_FILE, plain, title_of
+from comprehension_harness.python.declare import has_empty_body
 
 PAGE_SCRIPT = Path(__file__).with_name("journey_page.js")
 # What a capture must not vary with. The page's clock is pinned per journey, at its `now`.
@@ -75,6 +86,26 @@ def journey(name: str, *, who: str, wants: str, now: str):
     """Declares a journey on a test class: who walks it, what they want from it, and the instant (ISO) every
     case runs at. The cases are the class's tests, the first one the reference run."""
     return pytest.mark.journey(name, who=who, wants=wants, now=now)
+
+
+def planned_case(feature: str, screen_id: str, title: str):
+    """Declares, on a test of a journey with an empty body, a case ``feature`` will add at the screen
+    ``screen_id``."""
+    if not all(isinstance(name, str) and ADDRESS.match(name) for name in (feature, screen_id)):
+        raise ValueError(f"@planned_case({feature!r}, {screen_id!r}, …) takes a feature folder's name, then a screen id")
+    if not isinstance(title, str) or not title.strip():
+        raise TypeError(f"@planned_case(…) takes the case's title, a string, not {title!r}")
+    line = sys._getframe(1).f_lineno
+
+    def declare(function):
+        code = function.__code__
+        if not has_empty_body(function):
+            raise TypeError(f"{code.co_filename}:{code.co_firstlineno} — @planned_case stands on a test with an "
+                            f"empty body; a written case carries its title with @titled(…)")
+        case = pytest.mark.planned_case(feature, screen_id, title, line=line)
+        return pytest.mark.skip(reason=f"planned: {feature} · {screen_id}: {title}")(case(function))
+
+    return declare
 
 
 def _path(url: str) -> str:
@@ -226,6 +257,10 @@ def screen(page, id: str, *, why: str, planned: dict | None = None) -> None:
     run = _run_of(page)
     if not ADDRESS.match(id):
         raise ValueError(f'journey: screen id "{id}" must be kebab-case: it is an address')
+    if planned is not None and (not isinstance(planned, dict) or set(planned) != {"feature", "mockup", "what"}
+                                or not all(isinstance(value, str) for value in planned.values())):
+        raise ValueError(f'journey: screen "{id}" is planned with {{"feature": <its folder\'s name>, "mockup": '
+                         f'<the edited capture, from the root>, "what": <what changes>}}')
     before = run.drain(page)
     run.check()
     controls = _controls_of(page)
@@ -325,14 +360,24 @@ class Journeys:
         # In front of the run's collector: a call a request crosses is the story's and the journey's.
         self.recorder.calls.install_collector(self.collect)
         self.started: set[str] = set()
+        # The cases to write, by journey.
+        self.todos: dict[str, list[dict]] = {}
         self.is_parallel = getattr(config, "workerinput", {}).get("workercount", 1) > 1
         self.command = " ".join(settings["commands"]["journeys"])
 
     def pytest_collection_modifyitems(self, items):
-        if not self.is_parallel:
-            return
         for item in items:
-            if item.get_closest_marker("journey"):
+            declared, case = item.get_closest_marker("journey"), item.get_closest_marker("planned_case")
+            if case:
+                if declared is None:
+                    raise pytest.UsageError(f"{item.location[0]}:{case.kwargs['line']} — @planned_case stands on "
+                                            f"a test of a @journey(…) class")
+                todo = dict(zip(("feature", "screen", "title"), case.args), line=case.kwargs["line"])
+                todos = self.todos.setdefault(slug(declared.args[0]), [])
+                # A case collected once a browser is one case.
+                if todo not in todos:
+                    todos.append(todo)
+            elif declared and self.is_parallel:
                 item.add_marker(pytest.mark.skip(reason=f"a journey's cases run in one process, which rewrites "
                                                         f"its folder: {self.command}"))
 
@@ -364,7 +409,8 @@ class Journeys:
     def attach(self, page, item, marker) -> Run:
         name = marker.args[0]
         meta = {"name": name, "slug": slug(name), **marker.kwargs, "viewport": CONTEXT["viewport"],
-                "file": Path(str(item.path)).resolve().relative_to(self.recorder.root).as_posix(), "todos": []}
+                "file": Path(str(item.path)).resolve().relative_to(self.recorder.root).as_posix(),
+                "todos": sorted(self.todos.get(slug(name), []), key=lambda todo: todo["line"])}
         folder = self.out / meta["slug"]
         if meta["slug"] not in self.started:
             self.started.add(meta["slug"])
@@ -422,4 +468,5 @@ def _journey_case(request):
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     config.addinivalue_line("markers", "journey(name, who, wants, now): the test class walks a design journey (journey.py)")
+    config.addinivalue_line("markers", "planned_case(feature, screen, title): a case to write in a journey (journey.py)")
     config.pluginmanager.register(Journeys(config), "journeys")
