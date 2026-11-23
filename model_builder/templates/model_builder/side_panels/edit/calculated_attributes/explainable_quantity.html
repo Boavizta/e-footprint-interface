@@ -1,6 +1,9 @@
 {% extends "model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html" %}
 
+{% load narrate %}
+
 {% block input %}
+    {% planned "bug-fixes-2026-10#explanation-ids-per-item" "The input's id is built from the item's web id." %}
     <input disabled
        name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
        id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"

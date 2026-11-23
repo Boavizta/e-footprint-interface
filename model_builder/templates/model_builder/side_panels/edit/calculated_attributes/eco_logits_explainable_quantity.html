@@ -1,7 +1,9 @@
 {% extends "model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html" %}
 {% load static %}
+{% load narrate %}
 
 {% block calculated-attribute-explanation-button %}
+{% planned "bug-fixes-2026-10#explanation-ids-per-item" "The button's three references name the collapse of its own item." %}
 <button type="button"
         hx-get="{% url 'get_eco_logits_calculated_attribute_explanation' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"
         hx-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
@@ -18,6 +20,7 @@
 {% endblock %}
 
 {% block input %}
+    {% planned "bug-fixes-2026-10#explanation-ids-per-item" "The input's id is built from the item's web id." %}
     <input disabled
        name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
        id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"

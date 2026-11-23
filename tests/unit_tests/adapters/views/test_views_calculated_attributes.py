@@ -116,7 +116,8 @@ def test_failing_fragment_views_show_the_exception_modal(
                                         **dict.fromkeys(not_found, "the exception modal, as a 404")}
 
 
-@pytest.mark.xfail(strict=True, reason="bug-fixes-2026-10 Task 10")
+@reproduces("bug-fixes-2026-10#explanation-ids-per-item: in a panel of several objects, each formula button opens "
+            "a row of its own")
 @pytest.mark.django_db
 def test_edit_panel_explanation_buttons_target_their_own_row(client, edge_computer_system_data):
     # A second edge usage pattern gives the storage's per-pattern dicts several entries.
@@ -129,23 +130,35 @@ def test_edit_panel_explanation_buttons_target_their_own_row(client, edge_comput
     system_data = system_to_json(system, save_computed_state=False)
     SessionSystemRepository(client.session).save_data(system_data)
     edge_computer_id = next(iter(system_data["EdgeComputer"]))
-    cpu_id = next(iter(system_data["EdgeComputerCPUComponent"]))
-    ram_id = next(iter(system_data["EdgeComputerRAMComponent"]))
+    owners = {edge_computer_id: "edge computer", **{next(iter(system_data[class_name])): owner for owner, class_name in (
+        ("cpu", "EdgeComputerCPUComponent"), ("ram", "EdgeComputerRAMComponent"), ("storage", "EdgeStorage"))}}
 
     panel = client.get(f"/model_builder/open-edit-object-panel/{edge_computer_id}/").content.decode()
 
-    id_counts = Counter(re.findall(r'(?<![\w-])id="([^"]+)"', panel))
-    assert {element_id: count for element_id, count in id_counts.items() if count > 1} == {}
     buttons = list(re.finditer(
-        r'<button[^>]*hx-get="(/model_builder/get_(?:eco_logits_)?calculated_attribute_explanation/[^"]+)"[^>]*>',
+        r'<button[^>]*hx-get="/model_builder/get_(?:eco_logits_)?calculated_attribute_explanation/([^"]+)"[^>]*>',
         panel))
-    targets = {}
+    opened_by, astray = {}, []
     for button, next_button in zip(buttons, buttons[1:] + [None]):
+        owner_id, *attribute = button.group(1).strip("/").split("/")
+        formula = f"{owners[owner_id]}: {' of '.join(attribute)}"
         attributes = dict(re.findall(r'([\w-]+)="([^"]*)"', button.group(0)))
-        target_id = attributes["aria-controls"]
-        assert attributes["hx-target"] == attributes["data-bs-target"] == f"#{target_id}", button.group(1)
+        row_id = attributes["aria-controls"]
         own_row = panel[button.end():next_button.start() if next_button else len(panel)]
-        assert f'id="{target_id}"' in own_row, button.group(1)
-        targets[button.group(1)] = target_id
-    explanation_url = "/model_builder/get_calculated_attribute_explanation/{}/carbon_footprint_manufacturing/"
-    assert targets[explanation_url.format(cpu_id)] != targets[explanation_url.format(ram_id)]
+        if not (attributes["hx-target"] == attributes["data-bs-target"] == f"#{row_id}" and f'id="{row_id}"' in own_row):
+            astray.append(formula)
+        opened_by.setdefault(row_id, []).append(formula)
+    id_counts = Counter(re.findall(r'(?<![\w-])id="([^"]+)"', panel))
+    seen = {
+        "objects whose formula buttons were read": sorted({formula.split(":")[0] for formula in sum(
+            opened_by.values(), [])}),
+        "ids the panel holds more than once": {
+            element_id: count for element_id, count in id_counts.items() if count > 1},
+        "rows that several formula buttons open": {
+            row_id: formulas for row_id, formulas in opened_by.items() if len(formulas) > 1},
+        "formula buttons whose references name no row under them": astray,
+    }
+
+    assert seen == {
+        "objects whose formula buttons were read": sorted(owners.values()), "ids the panel holds more than once": {},
+        "rows that several formula buttons open": {}, "formula buttons whose references name no row under them": []}

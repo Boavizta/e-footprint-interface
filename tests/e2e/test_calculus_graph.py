@@ -36,6 +36,8 @@ def _open_calculus_graph_frame(page, graph_url, retries=3):
 class TestCalculusGraph:
     """Tests for calculus graph visualization."""
 
+    # @planned bug-fixes-2026-10#explanation-ids-per-item The id ends with the item's web id: the selector
+    # matches its prefix.
     def test_simple_calculus_graph_opens(self, minimal_complete_model_builder: ModelBuilderPage):
         """Calculus graph should open and render for simple calculated attributes.
 
