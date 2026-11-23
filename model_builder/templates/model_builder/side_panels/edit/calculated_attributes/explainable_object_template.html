@@ -1,8 +1,6 @@
 {% load label_filters %}
-{% load narrate %}
 <div class="row align-items-center mb-3">
-    {% planned "bug-fixes-2026-10#explanation-ids-per-item" "The label names the input of its own item, by the item's web id." %}
-    <label for="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}" class="col-auto col-form-label">
+    <label for="calculated_attributes-{{ item.web_id }}" class="col-auto col-form-label">
         {% if item.dict_container %}
             {{ item.key_in_dict.name }}:
         {% else %}
@@ -12,10 +10,9 @@
 
     <div class="col-auto">
         {% block input %}
-            {% planned "bug-fixes-2026-10#explanation-ids-per-item" "The input's id is built from the item's web id." %}
             <input disabled
                    name="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
-                   id="calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
+                   id="calculated_attributes-{{ item.web_id }}"
                    value="{{ item.value|stringformat:"s"|truncatechars:30 }}"
                    class="form-control form-control-sm"
             >
@@ -29,5 +26,4 @@
     </div>
 </div>
 
-{% planned "bug-fixes-2026-10#explanation-ids-per-item" "The collapse id is built from the item's web id, which holds the attribute, its container and its dict key." of=item.modeling_obj_container.name keyed_by=item.attr_name_in_mod_obj_container web_id=item.web_id distinct keyed_by %}
-<div class="collapse" id="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"></div>
+<div class="collapse" id="collapse-calculated_attributes-{{ item.web_id }}"></div>

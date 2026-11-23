@@ -10,8 +10,6 @@ from tests.e2e.utils import click_and_wait_for_htmx
 class TestExternalAPIObjects:
     """Tests for EcoLogitsGenAI external API creation, job linkage, and calculated attributes."""
 
-    # @planned bug-fixes-2026-10#explanation-ids-per-item The id ends with the item's web id: the selector
-    # matches its prefix.
     def test_ecologits_genai_full_workflow(self, seeded_journey_model_builder: ModelBuilderPage):
         """Test full workflow: create EcoLogitsGenAIExternalAPI, add job, usage pattern, check results
         and EcoLogits formula, then delete the job without raising an error."""
@@ -69,11 +67,11 @@ class TestExternalAPIObjects:
         page.locator("#collapseCalculatedAttributesEcoLogitsGenAIExternalAPIJob").wait_for(state="visible")
 
         # Click the formula button for "Generation latency" and wait for HTMX to load the explanation
-        formula_btn = page.locator("[data-bs-target='#collapse-calculated_attributes-generation_latency']")
+        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency']")
         click_and_wait_for_htmx(page, formula_btn)
 
         # Check that the EcoLogits computation code is non-empty
-        explanation = page.locator("#collapse-calculated_attributes-generation_latency")
+        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency']")
         expect(explanation.locator(".explainable-formula pre")).not_to_be_empty()
 
         # Check that Input Variables section has at least one entry

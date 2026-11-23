@@ -14,7 +14,7 @@ from efootprint.core.usage.edge.edge_function import EdgeFunction
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 
-from comprehension_harness.python.declare import reproduces, titled
+from comprehension_harness.python.declare import titled
 from model_builder.adapters.repositories import SessionSystemRepository
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -116,8 +116,8 @@ def test_failing_fragment_views_show_the_exception_modal(
                                         **dict.fromkeys(not_found, "the exception modal, as a 404")}
 
 
-@reproduces("bug-fixes-2026-10#explanation-ids-per-item: in a panel of several objects, each formula button opens "
-            "a row of its own")
+@titled("bug-fixes-2026-10#explanation-ids-per-item: in a panel of several objects, each formula button opens "
+        "a row of its own")
 @pytest.mark.django_db
 def test_edit_panel_explanation_buttons_target_their_own_row(client, edge_computer_system_data):
     # A second edge usage pattern gives the storage's per-pattern dicts several entries.

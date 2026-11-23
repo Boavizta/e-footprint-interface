@@ -1,20 +1,18 @@
 {% load static %}
-{% load narrate %}
-{% planned "bug-fixes-2026-10#explanation-ids-per-item" "The button's three references name the collapse of its own item." of=item.modeling_obj_container.name opens=item.attr_name_in_mod_obj_container distinct opens %}
 <button type="button"
         {% if item.dict_container %}
         hx-get="{% url 'get_calculated_attribute_explanation_from_dict' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container item.key_in_dict.route_id %}"
         {% else %}
         hx-get="{% url 'get_calculated_attribute_explanation' item.modeling_obj_container.efootprint_id item.attr_name_in_mod_obj_container %}"
         {% endif %}
-        hx-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
+        hx-target="#collapse-calculated_attributes-{{ item.web_id }}"
         hx-trigger="click once"
         hx-swap="innerHTML"
         hx-disabled-elt="button:not(:disabled)"
         class="btn btn-light p-1"
         data-bs-toggle="collapse"
-        data-bs-target="#collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}"
+        data-bs-target="#collapse-calculated_attributes-{{ item.web_id }}"
         aria-expanded="false"
-        aria-controls="collapse-calculated_attributes-{{ item.attr_name_in_mod_obj_container }}">
+        aria-controls="collapse-calculated_attributes-{{ item.web_id }}">
     <img src="{% static 'icons/formula.svg' %}" width="16" height="16" alt="formula-icon">
 </button>

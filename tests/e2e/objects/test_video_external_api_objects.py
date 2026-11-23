@@ -20,8 +20,6 @@ from tests.e2e.utils import click_and_wait_for_htmx
 class TestVideoExternalAPIObjects:
     """Tests for EcoLogitsVideoGenExternalAPI creation, job linkage, and results."""
 
-    # @planned bug-fixes-2026-10#explanation-ids-per-item The id ends with the item's web id: the selector
-    # matches its prefix.
     def test_ecologits_video_full_workflow(self, seeded_journey_model_builder: ModelBuilderPage):
         model_builder = seeded_journey_model_builder
         side_panel = model_builder.side_panel
@@ -146,9 +144,9 @@ class TestVideoExternalAPIObjects:
         calc_attrs_btn.click()
         page.locator("#collapseCalculatedAttributesEcoLogitsVideoGenExternalAPIJob").wait_for(state="visible")
 
-        formula_btn = page.locator("[data-bs-target='#collapse-calculated_attributes-generation_latency']")
+        formula_btn = page.locator("[data-bs-target^='#collapse-calculated_attributes-generation_latency']")
         click_and_wait_for_htmx(page, formula_btn)
-        explanation = page.locator("#collapse-calculated_attributes-generation_latency")
+        explanation = page.locator("[id^='collapse-calculated_attributes-generation_latency']")
         expect(explanation.locator(".explainable-formula pre")).not_to_be_empty()
         expect(explanation.locator(".explainable-ancestors li").first).to_be_visible()
 
