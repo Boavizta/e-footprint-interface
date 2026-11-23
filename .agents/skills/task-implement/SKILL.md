@@ -1,6 +1,6 @@
 ---
 name: task-implement
-description: Implement one lot of an approved delivery, a commit a piece — the implementer's rules in the fourth stage of the spec-driven workflow, under feature-implement or alone. Reads the lot's brief from the map, turns each planned place into code and each planned test into a test under its title, and reports its deviations and doubts. Also implements one task of a bug batch.
+description: Implement one lot of an approved delivery, a commit a piece — the implementer's rules in the fourth stage of the spec-driven workflow, under feature-implement or alone. Reads the lot's brief from the map, turns each planned place into code and each planned test into a test under its title, and reports its deviations and doubts. A piece that fixes a bug is built the same way, from its reproduction.
 ---
 
 # task-implement
@@ -99,16 +99,6 @@ End your turn only when the work is durable: committed, nothing running. Then re
 - **Docs** updated, one line each.
 
 The reviewer starts from your deviations and doubts. They are a map, not a defence of the work.
-
-## One task of a bug batch
-
-A batch from `bug-fixes` that was not ported to pieces has tasks, not lots: this is its form, and
-"A piece that fixes a bug" above is not. Read the task in `tasks.md`, its diagnostic, and its
-step in the batch's `plan.html` when there is one. Touch the files the task lists. **The fix is
-done when the task's reproduction passes with its expected-failure marker removed**: run it
-unmasked first and check it fails the way the diagnostic records; never weaken it; add no other
-test unless the task names a new public contract (`bug-fixes` § "Reproduction test"). Mark the
-task done in `tasks.md`, commit naming the task, and report as above.
 
 ## Alone, without a supervisor
 

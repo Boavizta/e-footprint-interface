@@ -1,6 +1,6 @@
 ---
 name: task-review
-description: Review one lot's commits (or one bug-batch task's) for whether the code does what the approved plan says, complexity, dead code, missed invariants, test quality and wider code quality — at a depth (LIGHT / STANDARD / FULL) the reviewer sets itself from the diff. Returns numbered findings; applies only the fixes it is then told to. Use after task-implement delivers a lot.
+description: Review one lot's commits for whether the code does what the approved plan says, complexity, dead code, missed invariants, test quality and wider code quality — at a depth (LIGHT / STANDARD / FULL) the reviewer sets itself from the diff. Returns numbered findings; applies only the fixes it is then told to. Use after task-implement delivers a lot.
 ---
 
 # task-review
@@ -104,15 +104,6 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
    the piece's `Piece:` line, files staged by name, verified as `repository.md` says a
    reviewer's fix is. A fix that makes a line of the docs or of the lot's changelog entry false
    corrects that line in the same commit. Report tersely what you committed.
-
-## A bug-batch task
-
-For a batch that was not ported to pieces: one that was is reviewed as any lot, with the question
-above. The same process over the task's commit, with the task in `tasks.md` and its diagnostic as the
-intent. Add to the checklist: the fix removed the reproduction's expected-failure marker rather
-than rewriting the test; any assertion change encodes a decision the task names, never a
-weakening; a test beyond the task's list is a scope finding unless it covers a new public
-contract the task names.
 
 ## The global review
 

@@ -1,5 +1,5 @@
 name = "implementer"
-description = "Implement one lot of an approved delivery, or one task of a bug batch."
+description = "Implement one lot of an approved delivery."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 developer_instructions = """

@@ -1,6 +1,6 @@
 ---
 name: implementer
-description: Implement one lot of an approved delivery, or one task of a bug batch.
+description: Implement one lot of an approved delivery.
 model: claude-opus-5-5[1m]
 effort: medium
 ---

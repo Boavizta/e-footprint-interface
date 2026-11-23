@@ -31,7 +31,7 @@ The Python stack of the comprehension harness is written to its contract
 is narrated, the AI-assisted bootstrap (`tests/narratives/test_ai_bootstrap.py`); the others
 have no narrative yet. The same flow has the one journey drawn from a run, *Start a modeling
 with AI* (`tests/e2e/journeys/test_start_a_modeling_with_ai.py`). A feature in flight on `plan.html` and `tasks.md` is finished by hand or
-ported; a bug batch keeps its own form (`bug-fixes`, `bug-fixes-plan`).
+ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 
 | The method says | Here |
 |---|---|
@@ -167,9 +167,8 @@ fake), a force push, a branch deletion or a hard reset (constitution §3.3), a c
 - A role's model and effort are pinned in its runtime adapter, `.claude/agents/<role>.md` or
   `.codex/agents/<role>.toml`, and named nowhere else (`specs/agent-tooling.md` § "Agent roles").
 - A spawn is labelled `<feature>--impl-lot-<lot>`, `--review-lot-<lot>`, `--review-global`,
-  `--gate-full`, `<lot>` being the lot's slug; for a bug batch `--impl-task-<n>`,
-  `--review-task-<n>`, `--diag-<bug>` and `--plan-review-guide`. The ledger reads the feature and
-  the role from a lot's label, and the task from a task's.
+  `--gate-full`, `<lot>` being the lot's slug, and `--diag-<bug>` for a diagnosis. The ledger reads
+  the feature and the role from the label.
 - In Claude Code the label opens the spawn's description, and a spawn takes no name: a named
   agent inherits the session's effort and loses its own. Under Codex, bind the session
   (`specs/agent-tooling.md` § "Attribute current work").

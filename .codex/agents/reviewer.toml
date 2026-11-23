@@ -1,5 +1,5 @@
 name = "reviewer"
-description = "Independently review one lot's commits, or one task of a bug batch."
+description = "Independently review one lot's commits."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 developer_instructions = """

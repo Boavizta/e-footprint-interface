@@ -1,6 +1,6 @@
 ---
 name: feature-implement
-description: Supervise the implementation of an approved delivery, lot by lot — fourth stage of the spec-driven workflow. For each lot the supervisor spawns an implementer, runs the lot check against the approved plan, spawns a reviewer over the lot's commits, triages the findings itself, and hands the reviewer of the plan every decision as a Changed paragraph to answer on the delivery page. It parks a lot it cannot land, keeps a gates file of what only the user can do, and closes the last lot with a global review and the full gate. Also runs the tasks of a bug batch. Autonomous by default; human input is needed only for the approvals, for production-destructive actions, or for a run that cannot usefully continue.
+description: Supervise the implementation of an approved delivery, lot by lot — fourth stage of the spec-driven workflow. For each lot the supervisor spawns an implementer, runs the lot check against the approved plan, spawns a reviewer over the lot's commits, triages the findings itself, and hands the reviewer of the plan every decision as a Changed paragraph to answer on the delivery page. It parks a lot it cannot land, keeps a gates file of what only the user can do, and closes the last lot with a global review and the full gate. A plan of bugs is delivered the same way. Autonomous by default; human input is needed only for the approvals, for production-destructive actions, or for a run that cannot usefully continue.
 ---
 
 # feature-implement
@@ -229,24 +229,6 @@ session reads verdicts from it. It is committed with the run and leaves with the
 4. **Close**: commit the gates file and the plan, and tell the user what landed, what is parked,
    the decisions left to answer, the gates, the suite's state and the spend. Suggest
    `feature-archive` once the gates are cleared. Do not run it.
-
-## A bug batch
-
-A plan of bugs written as pieces is run as any delivery, above. This section is for a batch on the
-earlier form: one diagnosed by `bug-fixes` and not ported has no pieces, its unit is a **task** of
-`tasks.md`, and its plan, when `bug-fixes-plan` wrote one, a `plan.html`. Run it with this skill, a
-task where it says a lot, with these differences:
-
-- There is no `map check` and no `Piece:` line. A commit names its task.
-- **A fix is complete when its reproduction passes with its expected-failure marker removed.**
-  The implementer runs it unmasked first and checks it fails as the diagnostic records, never
-  weakens it, and adds no other test unless the task names a new public contract
-  (`bug-fixes` § "Reproduction test").
-- A consequential decision is an `IMPL-DECISION` callout beside the task's step in the plan
-  ([the shared format](../spec-plan/references/plan-decision-callouts.md)), or under the task in
-  `tasks.md` when the batch has no plan. A parked task is marked in `tasks.md`.
-- At close-out, after the final gate, a `plan-review-guide` agent turns the batch's plan into the
-  guide for reviewing the code (`plan-review-guide` skill).
 
 ## Halt and surface
 

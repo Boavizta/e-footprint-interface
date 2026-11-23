@@ -308,7 +308,8 @@ a cause a test simulates calls it in the test. No prose names a step by its numb
 
 ## The earlier form
 
-A bug batch still writes `tasks.md`, diagnostics and a `plan.html` with its callouts (the
-`bug-fixes` and `bug-fixes-plan` skills). So does a feature planned before pieces, until it is
-ported. One batch is being ported to pieces, a bug at a time, to settle the forms of "A bug"
-above before those skills are rewritten.
+A feature planned before pieces keeps its `tasks.md` and its `plan.html`, with its callouts, until
+it is ported or finished by hand. No skill writes that form any more: a bug batch is diagnosed
+and planned in pieces (`bug-fixes`, `bug-fixes-plan`, § "A bug"). The batch `bug-fixes-2026-10`
+keeps the `plan.html` and the `tasks.md` it was first written in, as the baseline it is ported
+from: they are not run.

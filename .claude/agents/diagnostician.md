@@ -1,6 +1,6 @@
 ---
 name: diagnostician
-description: Diagnose one bug; write only its diagnostic.
+description: Diagnose one bug; write only its diagnostic and its reproductions.
 model: claude-opus-5-5[1m]
 effort: high
 ---
