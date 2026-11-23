@@ -176,8 +176,9 @@ plan alone can say that the code does not do what its clause said, because a rev
 because it was never written beside places that were. An `unbuilt` claim names such a place by a
 fragment of its line: `→ unbuilt get_calculus_graph`. The place is then a line the piece lost,
 drawn "taken back" under its edit, and the next approval no longer holds it. A claim that names
-no built place fails the check. The check cannot ask for the paragraph itself: only a reading of
-the code tells that one is owed.
+no built place fails the check. The check asks for the paragraph where nothing was written at the
+place (§ "Commits, and the lot check"); where something was, and does not do what the clause
+says, only a reading of the code tells that one is owed.
 
 Each fact has one home, and each home a budget in words, which the check enforces:
 
@@ -273,7 +274,11 @@ each of these is settled:
 - a test added under no planned title. It takes the piece's tag and a `Changed:`, or it goes;
 - a test deleted with no `@planned.remove` on it, and a file of the product's code no place of
   the plan names;
-- a place the approval held, taken off with nothing written in its file;
+- a place the approval held, taken off with nothing written: its function holds no line it did
+  not hold when the plan was approved, what stands directly on the function counted with it. A
+  place in no function, as a template's, is read by its file. Skipped beside places that were
+  built, or undone by a later commit, it is taken back with an `unbuilt` claim (§ "`plan.md`");
+  built by taking lines off, which reads the same, its `Changed:` says so;
 - a delivered lot one of whose pieces no commit names.
 
 Each is a decision: a `Changed:` in the piece's section, in words the reviewer can read without

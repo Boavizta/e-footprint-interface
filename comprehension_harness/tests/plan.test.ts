@@ -956,6 +956,32 @@ describe('a plan being implemented', () => {
     expect(now(built, [touched(0), commit('2222222233', ['cut'], { files: [{ file: 'src/reader.ts', added: 2, removed: 0, line: 151 }] })]).delta).toEqual([]);
   });
 
+  it('tells a place whose function gained no line, in a file that did: skipped beside a built one, or undone since', () => {
+    // The piece's commits wrote in the file: read by the file, every place of it is built.
+    const wrote = commit('1111111122', ['cut'], { files: [{ file: 'src/reader.ts', added: 6, removed: 1, line: 151 }] });
+    const read = (gained: FeatureDocs['gained'], md = MD) => assemble({
+      ...planned, ...built,
+      docs: (feature) => ({ ...docs(md, null)(feature), approved: { file: 'specs/features/demo/plan.approved.json', baseline: BASELINE }, commits: { list: [wrote], baseKnown: true }, gained }),
+    })[0];
+    expect(read(undefined).delta).toEqual([]);
+    expect(read(() => 2).delta).toEqual([]);
+    // Its own function holds nothing new: the place was taken off, and nothing was written there.
+    const asked: string[] = [];
+    const bare = read((file, fn) => { asked.push(`${file} ${fn}`); return 0; });
+    expect(asked).toEqual(['src/reader.ts fn']);
+    expect(bare.delta).toMatchObject([{ name: '#cut', reason: 'needed', facets: [{ facet: 'unplanned', added: ['place src/reader.ts — planned in fn, which gained no line since the approval: cut happens.'], removed: [] }] }]);
+    expect(findings(bare).failures).toEqual([expect.stringContaining('#cut is not as approved')]);
+    // Taken back, it is a line the piece lost and no place left to build: the edit stands on it.
+    const taken = read(() => 0, MD.replace('The reader cuts.\n', 'The reader cuts.\n\nChanged: **The reader no longer cuts.** A page keeps its whole. → unbuilt src/reader.ts\n'));
+    expect(taken.delta!.map((d) => d.facets.map((f) => f.facet))).toEqual([['sites']]);
+    expect(findings(taken).failures).toEqual([]);
+    // Built by taking lines off, it is explained as any line beyond the plan.
+    const explained = read(() => 0, MD.replace('The reader cuts.\n', 'The reader cuts.\n\nChanged: **The cut is the guard\'s removal.** Nothing replaces it.\n'));
+    expect(findings(explained).failures).toEqual([]);
+    // A function that cannot be placed leaves the place to its file.
+    expect(read(() => null).delta).toEqual([]);
+  });
+
   it('takes back a built place a "Changed:" names: the piece loses it, and so does the next approval', () => {
     const undone = MD.replace('The reader cuts.\n', 'The reader cuts.\n\nChanged: **The reader no longer cuts.** A page keeps its whole. → unbuilt src/reader.ts\n');
     const plan = now(built, [commit('1111111122', ['cut'])], undone);

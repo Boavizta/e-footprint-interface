@@ -138,6 +138,10 @@ Built on the fix of Tasks 9 and 10, for what the implement stage showed:
   tests; evidence that went is no place built.
 - **The brief of a built piece** prints each place that became code with its clause as approved,
   and each test written: what a reviewer sets the code against.
+- **A place is built when its function gained a line.** The lot check read a place by its file: a
+  place skipped beside built ones, or undone by a later commit, read as built. It now reads the
+  place's function, from the approval's commit to the code as it stands, what stands directly on
+  it counted with it. So the check asks for the `unbuilt` paragraph where nothing was written.
 
 Still candidates:
 
@@ -148,8 +152,9 @@ Still candidates:
 - One clause for a ripple: seen at Task 9 and again at Task 10. The lot check wants a place in each
   file the piece changes, so a ripple cannot be stated at its cause alone. The fix of Task 9 gave
   it a cost: one clause over thirteen views hid the three it did not fit.
-- A check that an `unbuilt` paragraph is owed: no tool tells that the code stopped doing what a
-  clause says, so the paragraph is written only when a reviewer sees it.
+- A place built wrongly: code stands there and does not do what the clause says. No tool tells,
+  and the `unbuilt` paragraph is then written only when a reviewer sees it. Nor does one tell a
+  place built by taking lines off from one that was skipped: its `Changed:` says which.
 - A change in a file the plan names, on a line no place names: neither the lot check nor the
   brief shows it.
 - A feature name used again after an archive: a plan reads every commit that names one of its

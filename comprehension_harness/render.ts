@@ -952,6 +952,37 @@ export function runReproductions(files: string[]): { ran: number; ok: boolean; c
 /** What a run of the reproductions that did not end well says, in a few lines. */
 const reproductionsFailed = (run: { command: string; output: string }) => `the reproductions did not run as expected — ${run.command}\n${run.output.trim().split('\n').slice(-12).map((line) => `    ${line}`).join('\n')}`;
 
+/**
+ * How many lines a function holds that it did not hold at `base`, the commit of an approval: what tells a place
+ * built from one that was skipped or undone (`FeatureDocs.gained`). The function is the source index's, as the
+ * code stands; what stands directly on it, up to the first blank line, is counted with it, since a decorator or
+ * an attribute is where a change of the function is often written. The lines are git's, from `base` to the
+ * working tree. Null where the index places no single function of that name, and where git cannot read `base`.
+ */
+export function gainedSince(base: string, index: SourceIndex): NonNullable<FeatureDocs['gained']> {
+  const added = new Map<string, Array<[number, number]> | null>();
+  const addedTo = (file: string) => {
+    if (!added.has(file)) {
+      let ranges: Array<[number, number]> | null = null;
+      try {
+        const diff = execFileSync('git', ['diff', '--unified=0', '--no-renames', base, '--', file], { cwd: ROOT, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+        ranges = [...diff.matchAll(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/gm)].map((m): [number, number] => [Number(m[1]), Number(m[1]) + Number(m[2] ?? 1) - 1]).filter(([from, to]) => to >= from);
+      } catch { ranges = null; }
+      added.set(file, ranges);
+    }
+    return added.get(file)!;
+  };
+  return (file, fn) => {
+    const lines = existsSync(join(ROOT, file)) ? index.lines(file, fn) : null;
+    const ranges = lines ? addedTo(file) : null;
+    if (!lines || !ranges) return null;
+    const text = readFileSync(join(ROOT, file), 'utf8').split('\n');
+    let from = lines[0];
+    while (from > 1 && (text[from - 2] ?? '').trim() !== '') from -= 1;
+    return ranges.reduce((n, [a, b]) => n + Math.max(0, Math.min(b, lines[1]) - Math.max(a, from) + 1), 0);
+  };
+}
+
 /** What a feature folder holds beside its sites: `plan.md` and `spec.md`, parsed. */
 function featureDocs(feature: string): FeatureDocs {
   const dir = featureFolder(feature);
@@ -1142,7 +1173,12 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
     todos,
     journeyCases: sources.journeyCases,
     narratives: narratives.filter((n) => n.canonical).map((n) => ({ title: n.title, kind: n.kind, steps: n.steps.map((step) => `${label(step, index)} — ${step.sentence}`) })),
-    docs: featureDocs,
+    // A place of an approved plan is read by its function: what it gained since the approval.
+    docs: (feature) => {
+      const docs = featureDocs(feature);
+      const base = docs.approved?.baseline.base;
+      return base ? { ...docs, gained: gainedSince(base, index) } : docs;
+    },
     layout,
   });
 }
@@ -1819,7 +1855,7 @@ function movesHtml(plan: Plan, index: SourceIndex): string {
 }
 
 /** The legend of the delta's rows. */
-const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a file its commits added nothing to · <b>taken back</b> a place that read as built, which its edit names: the code does not do what its clause said · <b>reproduction</b>, was / now: a test you approved as the bug\'s reproduction was edited since, by more than its declaration. A place that became code is no difference: it is listed with its piece, as built.';
+const DELTA_LEGEND = 'An edit at a time: what moved in bold, why, then the lines that edit comes to. <span class="dl add inline"><span class="sign">+</span></span> in the plan now, not in what you approved · <span class="dl rem inline"><span class="sign">−</span></span> approved, no longer in the plan · <b>was / now</b> one place reworded · <b>file</b>, <b>test goes</b> on a <span class="dl add inline"><span class="sign">+</span></span> line with no place in the plan: what a commit did beyond it · <b>not built</b> a planned place taken off, in a function that gained no line since, or a file its commits added nothing to · <b>taken back</b> a place that read as built, which its edit names: the code does not do what its clause said · <b>reproduction</b>, was / now: a test you approved as the bug\'s reproduction was edited since, by more than its declaration. A place that became code is no difference: it is listed with its piece, as built.';
 
 /** The reviewer's answer to one item, and the buttons that give it. The page posts to the local app, which
  *  writes `plan-feedback.json`; opened as a file, the buttons are off and say where to open it. */
