@@ -18,6 +18,8 @@ A fragment view that fails shows the exception modal, a not-found at its own 404
 
 A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page, a download, a fetched endpoint stays as it is. The chart preparers gain no empty-value branch.
 
+Changed: **Three views keep no decorator.** The two calculus-graph views are full pages and the Sankey card deletion is called by a script: the reason leaves each as it is, and the lot's review undid them. → unbuilt get_calculus_graph; unbuilt display_calculus_graph; unbuilt sankey_delete_card
+
 Note: **Seven fragment views stay undecorated.** They wait for the backlog's HTMX-aware server error handler, one fallback for every fragment, which would also retire the bare decorators added here.
 
 ## Bug: A formula button opens another object's explanation
@@ -30,6 +32,21 @@ Each calculated attribute's ids, and what points at them, are built from the ite
 
 Today they are built from the attribute name, which several objects of one panel share: HTMX swaps into the first match, Bootstrap toggles every match. The web id already names the dict toggles. Refused: a relative target, which leaves Bootstrap's; a prefix passed by the section, which is not the item's owner; the route id, the URL's contract.
 
+## Bug: A recurrent constant value reads as a weekly total
+
+In a recurrent need's constant editor, the unit box shows the bare unit, "occurrence", and the helper says the value "will be repeated over the entire canonical week (168 hours)". It reads as a week's total when it is each hour's: a total entered there gives results 168 times too high. Task 7, [GitHub issue 150](https://github.com/Boavizta/e-footprint-interface/issues/150), diagnosed in [recurrent-unit-each-hour.md](diagnostics/recurrent-unit-each-hour.md).
+
+Changed: **Task 7 joins the plan.** A bug of run B, ported from the baseline after the approval. Nothing of it is fixed.
+
+## #recurrent-unit-each-hour
+
+Every recurrent constant editor reads per hour: its unit box shows the unit then "each hour", words no field posts, and its helper says all 168 hours use the value.
+
+The stored unit holds no time, and stays: one suffix reads for amounts and levels alike. The component-need form rewrites the input's value by id and touches nothing beside it: no browser test is added. The weekly-pattern editor sets values on hour ranges, and stays. Refused: rate units in the library, a migration; "/ hour" by aggregation, which misses storage.
+
+Changed: **New piece, Task 7's.** Ported from the baseline after the approval: two places in one template, and its reproduction, which now reads every editor and asserts once.
+
 ## Delivery
 
 - **calculated-attribute-panel** (easy) #dict-entry-own-template #fragment-views-show-modal #explanation-ids-per-item — Both bugs are of the calculated-attribute panel and share its templates and one test file. The ids come last: the dict piece sends the empty entries through the templates whose ids they fix.
+- **recurrent-constant-editor** (easy) #recurrent-unit-each-hour — One template and its copy, on a surface of its own. For the user, after the run: an edge process's storage editor shows one box, "GB_stored each hour" on one line.

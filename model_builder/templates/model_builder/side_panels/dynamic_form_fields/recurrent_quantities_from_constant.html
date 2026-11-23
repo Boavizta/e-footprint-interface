@@ -1,4 +1,5 @@
 {% load l10n %}
+{% load narrate %}
 <div class="mb-3">
     <div class="input-group">
         <input type="number"
@@ -16,6 +17,7 @@
                oninput="onInputValueChange('{{ field.web_id }}');tagFormAsModified();"
                {% endif %}
         >
+        {% planned "bug-fixes-2026-10#recurrent-unit-each-hour" "The box's border and background move to a wrapper that holds this input, its name, id and value kept, then the words “each hour”." editor=field.web_id box_reads=builder.default.constant_unit posts=builder.default.constant_unit expect box_reads=builder.default.constant_unit|add:" each hour" %}
         <input
             class="border border-body-tertiary rounded-end-2 bg-light w-25 text-center text-body-tertiary"
             name="{{ field.web_id }}__constant_unit"
@@ -25,6 +27,7 @@
         >
     </div>
 
+    {% planned "bug-fixes-2026-10#recurrent-unit-each-hour" "The helper says that all hours of the canonical week (168 hours) will use this value." %}
     <small class="form-text text-muted" id="{{ field.web_id }}__constant_value_help">
         This constant value will be repeated over the entire canonical week (168 hours).
     </small>
