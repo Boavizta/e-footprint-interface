@@ -175,7 +175,7 @@ test("pytest link launches the exact reproduction in its Poetry environment with
   assert.ok(config.args.includes("--runxfail"));
   assert.ok(config.args.includes("--no-cov"));
   assert.ok(config.args.includes("tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"));
-  assert.deepEqual(config.env, { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "" });
+  assert.deepEqual(config.env, { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "", COMPREHENSION_STORIES: "off" });
   assert.equal(config.console, "integratedTerminal");
   assert.equal(config.redirectOutput, true);
   assert.equal(config.justMyCode, false);
@@ -208,7 +208,7 @@ test("a line of a pytest file runs the test it is in, with its class, through th
   await debugTestAt("tests/unit_tests/adapters/views/test_views_deletion.py", "def test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card", 2);
   assert.deepEqual(errors, []);
   assert.equal(debugRuns[0].configuration.type, "debugpy");
-  assert.deepEqual(debugRuns[0].configuration.env, { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "" });
+  assert.deepEqual(debugRuns[0].configuration.env, { RAISE_EXCEPTIONS: "1", PYTEST_ADDOPTS: "", COMPREHENSION_STORIES: "off" });
   assert.ok(debugRuns[0].configuration.args.includes("tests/unit_tests/adapters/views/test_views_deletion.py::test_recurrent_need_deletion_rerenders_its_edge_usage_journey_card"));
 
   await debugTestAt("tests/e2e/objects/test_jobs.py", "def test_deleting_nested_and_top_level_cards_logs_no_console_error");
