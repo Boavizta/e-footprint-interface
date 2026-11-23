@@ -31,7 +31,8 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
    change lands is what makes it dangerous. A lot's difficulty says how hard it was to write; it
    never lowers your tier. You may raise the tier on judgement and say why, never lower it.
 
-3. **Read the plan the lot was built from**: `map brief <feature>/<lot>`. Then the implementer's
+3. **Read the plan the lot was built from**: `map brief <feature>/<lot>`, which prints each built
+   place with its clause as approved, and each test written under its title. Then the implementer's
    deviations and doubts, as a map: they say where to look, never what to conclude. Verify any
    claim you lean on. A thin "doubts" is itself a finding.
 
