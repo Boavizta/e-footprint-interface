@@ -174,6 +174,15 @@ fake), a force push, a branch deletion or a hard reset (constitution §3.3), a c
   (`specs/agent-tooling.md` § "Attribute current work").
 - A stateful test suite and the application database are never shared between parallel agents.
 
+## Diagnosis
+
+- **The repository that drives a batch**: bugs of the library alone are driven from
+  `e-footprint`; interface bugs and bugs that cross the two from this repository. The library is
+  the truth of modeling: a fix that puts modeling logic in the interface is challenged.
+- **The layers open to a reproduction** are those of `specs/testing.md`. The tools run the
+  reproductions under `tests/` themselves, by `commands.tests`; those under `tests/e2e/` are left
+  to a browser run, each served by the test's own process.
+
 ## Archive
 
 - **Where durable insight goes**: the owning page of `specs/architecture/`,

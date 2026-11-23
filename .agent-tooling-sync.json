@@ -3,12 +3,15 @@
   "licence": "Apache-2.0",
   "lists": {
     "core": [
+      ".agents/roles/diagnostician.md",
       ".agents/roles/implementer-easy.md",
       ".agents/roles/implementer-hard.md",
       ".agents/roles/implementer.md",
       ".agents/roles/light.md",
       ".agents/roles/reviewer-global.md",
       ".agents/roles/reviewer.md",
+      ".agents/skills/bug-fixes-plan/SKILL.md",
+      ".agents/skills/bug-fixes/SKILL.md",
       ".agents/skills/code-map/SKILL.md",
       ".agents/skills/feature-archive/SKILL.md",
       ".agents/skills/feature-implement/SKILL.md",
@@ -89,10 +92,7 @@
       "comprehension_harness/python/tests/test_journey.py"
     ],
     "e-footprint": [
-      ".agents/roles/diagnostician.md",
       ".agents/roles/plan-review-guide.md",
-      ".agents/skills/bug-fixes-plan/SKILL.md",
-      ".agents/skills/bug-fixes/SKILL.md",
       ".agents/skills/feature-implement/scripts/test_vscode_review_links.py",
       ".agents/skills/feature-implement/scripts/vscode_review_links.py",
       ".agents/skills/plan-review-guide/SKILL.md",
