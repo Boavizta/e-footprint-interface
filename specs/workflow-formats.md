@@ -162,7 +162,7 @@ Three paragraphs have a prefix:
 
 | Prefix | Is | Written when |
 |---|---|---|
-| `To confirm: **the question.** the alternative` | A question, one per piece at most | Only the reviewer can decide. Answered, it becomes a statement and the paragraph goes |
+| `To confirm: **the proposal.** the alternative` | A point to decide, one per piece at most: the proposal stated as the plan would state it | Only the reviewer can decide. Answered as proposed on the page, the approval command writes the proposal in; another answer is the agent's to write in. Either way the paragraph goes |
 | `Changed: **what moved.** why → its lines` | One edit of an approved plan | A unit no longer reads as approved |
 | `Note: **the point.** what follows from it` | Something to know, asking no answer | A piece was built with a choice no line of the plan says and a later lot stands on |
 
@@ -223,8 +223,9 @@ collects its own alone (`comprehension_harness/README.md` § "The Python stack")
 `plan.approved.json` is written by the approval command and by nothing else. It is committed: it
 is the approval. It holds the plan a unit at a time, with no line number, and for a piece that
 fixes a bug what each reproduction told that day (§ "A bug"), which is kept and never compared.
-The command refuses while a `To confirm:` stands, and takes the `Changed:` paragraphs off
-`plan.md`.
+The command first writes in each point answered "Yes, as proposed" on the page, and approves only
+if the plan then passes. It refuses while a `To confirm:` stands, saying what the page answered,
+and takes the `Changed:` paragraphs off `plan.md`.
 
 From then on the check lists every unit that is not as approved, and fails:
 

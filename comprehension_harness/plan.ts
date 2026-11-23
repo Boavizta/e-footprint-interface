@@ -19,7 +19,7 @@
  * Each fact has one home. A site says what changes at its place, in one clause. A test title says the behaviour
  * and its case. `specs/features/<feature>/plan.md` holds the rest: a title, a lead, then one `## #slug` section
  * per piece — its statement (the first paragraph), its reason (what follows), at most one paragraph opening
- * `To confirm:` for a point the reviewer must answer, its question in bold, and any paragraph opening `Note:`
+ * `To confirm:` for a point the reviewer must answer, its proposal in bold, and any paragraph opening `Note:`
  * for something the piece was built with that no line of the plan says and what follows stands on, its
  * point in bold: it is read, kept, and asks no answer. A section with any other title is a
  * decision across pieces; it names the pieces it concerns as `#slug`, and each piece lists the sections naming it.
@@ -285,7 +285,8 @@ export interface PlanPieceDoc {
   what: string;
   /** The reason, and what was refused: the blocks after the statement. */
   why: MdBlock[];
-  /** A point the reviewer must answer: the paragraph opening `To confirm:`, its bold part the question. */
+  /** A point the reviewer must answer: the paragraph opening `To confirm:`, its bold part the proposal, which the
+   *  approval writes in when the page answered "Yes, as proposed". */
   ask: { question: string; detail: string; line: number } | null;
   /** What the piece was built with that no line of the plan says, and that a later lot or the reader of the
    *  code stands on: the paragraphs opening `Note:`, the bold part the point. A note asks no answer and no
@@ -609,6 +610,32 @@ export function reviewItems(plan: Pick<Plan, 'delta' | 'pieces' | 'doc'>): Revie
     ...plan.pieces.flatMap((piece) => pieceQuestion(piece) ?? []),
     ...(plan.doc?.waivers ?? []).filter((w) => w.toConfirm).map(waiverQuestion),
   ];
+}
+
+/** `plan.md`, given as `text`, with each point the reviewer answered "Yes, as proposed" on the page written in as
+ *  its proposal: a piece's `To confirm:` paragraph becomes its bold part, a waiver loses the prefix. Any other
+ *  answer is the agent's to write in. `applied` names the units written in. */
+export function writeAcceptedAnswers(text: string, plan: Pick<Plan, 'pieces' | 'doc' | 'feedback'>): { text: string; applied: string[] } {
+  const accepted = (item: ReviewItem) => plan.feedback[item.key]?.verdict === 'approved';
+  const lines = text.split('\n');
+  const edits: Array<{ start: number; end: number; lines: string[]; unit: string }> = [];
+  for (const piece of plan.pieces) {
+    const item = pieceQuestion(piece);
+    const ask = piece.doc?.ask;
+    if (!item || !ask || !accepted(item)) continue;
+    let end = ask.line - 1;
+    while (end + 1 < lines.length && lines[end + 1].trim() !== '') end += 1;
+    const proposal = ask.question.trim();
+    edits.push({ start: ask.line - 1, end, lines: [/[.!?]$/.test(proposal) ? proposal : `${proposal}.`], unit: item.unit });
+  }
+  for (const waiver of plan.doc?.waivers ?? []) {
+    const item = waiverQuestion(waiver);
+    if (!waiver.toConfirm || !accepted(item)) continue;
+    const at = waiver.line - 1;
+    edits.push({ start: at, end: at, lines: [lines[at].replace(/To confirm:\s*/, '')], unit: item.unit });
+  }
+  for (const e of [...edits].sort((a, b) => b.start - a.start)) lines.splice(e.start, e.end - e.start + 1, ...e.lines);
+  return { text: lines.join('\n'), applied: edits.map((e) => e.unit) };
 }
 
 // ── The tag ────────────────────────────────────────────────────────────────────
@@ -1520,7 +1547,7 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
       const where = `${plan.doc!.file}:${s.doc.section.line} #${s.slug}`;
       over(words(s.doc.what), BUDGET.what, where, 'states the piece', 'the statement is the first paragraph, the reason the next');
       over(s.doc.why.reduce((n, b) => n + (b.kind === 'p' ? words(b.text) : b.items.reduce((m, i) => m + words(i.text), 0)), 0), BUDGET.why, where, 'gives its reason', 'what the sites and the titles already say is not said again');
-      if (s.doc.ask) over(words(`${s.doc.ask.question} ${s.doc.ask.detail}`), BUDGET.ask, `${plan.doc!.file}:${s.doc.ask.line} #${s.slug}`, 'asks its question', 'the question in bold, then the alternative');
+      if (s.doc.ask) over(words(`${s.doc.ask.question} ${s.doc.ask.detail}`), BUDGET.ask, `${plan.doc!.file}:${s.doc.ask.line} #${s.slug}`, 'asks its question', 'the proposal in bold, then the alternative');
       for (const n of s.doc.notes) {
         over(words(n.text), BUDGET.note, `${plan.doc!.file}:${n.line} #${s.slug}`, 'notes what it was built with', 'one point a note: a second point is a second "Note:"');
         if (n.what === null) failures.push(`planned: ${plan.doc!.file}:${n.line} #${s.slug} holds a note with no point — "Note: **the point.** what follows from it", so the reader knows what to keep before reading why`);

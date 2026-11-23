@@ -14,8 +14,8 @@ import { parseIntent, sluggedItems } from '../intent-md';
 import {
   BUDGET, SENTENCE_BUDGET, overSentenceBudget,
   assemblePlans, findings, parseTag, parseTodoTitle, replaceSlugRefs, rulesOf, slugRefs, todosByTier,
-  lotLeft, planDocOf, reviewItems, chainsToFreeze, fixedChains,
-  type FeatureDocs, type PieceCommit, type PlanBaseline, type PlanInput, type PlanSite, type PlanTodo, type StaticSite,
+  lotLeft, planDocOf, reviewItems, writeAcceptedAnswers, chainsToFreeze, fixedChains,
+  type FeatureDocs, type PlanFeedback, type PieceCommit, type PlanBaseline, type PlanInput, type PlanSite, type PlanTodo, type StaticSite,
 } from '../plan';
 import * as plan from '../plan';
 import { LAYOUT } from './layout';
@@ -608,6 +608,30 @@ describe('a new function nobody names', () => {
     const caller = { ...todo('seam', 'tests/narratives/due.test.ts', 12, null, 'narrative'), title: '`latestPriors` lists the two latest priors' };
     const [plan] = assemble({ sites: [shell], todos: [caller], docs: docs(null, null) });
     expect(findings(plan).failures).toEqual([]);
+  });
+});
+
+describe('answers given as proposed', () => {
+  const TEXT = '# P\n\n## #cut\n\nThe reader cuts.\n\nTo confirm: **The cap is two.** The alternative is three,\nread from the settings.\n\n## #save\n\nSave sends it.\n\nTo confirm: **Save retries once** or never.\n\n## Rules no test holds\n\n- **owned-by-none** To confirm: the reader returns what the rule says.\n';
+  const planWith = (feedback: PlanFeedback) => assemble({ sites: [site('cut', 'src/reader.ts', 1), site('save', 'src/card.tsx', 2)], docs: (f) => ({ ...docs(TEXT)(f), feedback }) })[0];
+  const keyOf = (unit: string) => reviewItems(planWith({})).find((i) => i.unit === unit)!.key;
+  const answer = (verdict: 'approved' | 'refused', ...units: string[]): PlanFeedback => Object.fromEntries(units.map((u) => [keyOf(u), { unit: u, what: '', verdict, note: verdict === 'refused' ? 'three' : '', at: '' }]));
+
+  it("writes a piece's proposal in as a statement, and the whole paragraph goes", () => {
+    const { text, applied } = writeAcceptedAnswers(TEXT, planWith(answer('approved', '#cut')));
+    expect(applied).toEqual(['#cut']);
+    expect(text).toContain('The reader cuts.\n\nThe cap is two.\n\n## #save');
+    expect(text).toContain('To confirm: **Save retries once**');
+  });
+
+  it('ends a proposal with a full stop, and takes the prefix off a waiver', () => {
+    const { text } = writeAcceptedAnswers(TEXT, planWith(answer('approved', '#save', 'no test for owned-by-none')));
+    expect(text).toContain('Save sends it.\n\nSave retries once.\n');
+    expect(text).toContain('- **owned-by-none** the reader returns what the rule says.');
+  });
+
+  it('leaves a point answered otherwise, or not answered, for the agent', () => {
+    expect(writeAcceptedAnswers(TEXT, planWith(answer('refused', '#cut')))).toEqual({ text: TEXT, applied: [] });
   });
 });
 
