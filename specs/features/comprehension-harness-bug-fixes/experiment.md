@@ -45,44 +45,47 @@ Now **the rest of run B, ported in full before any of it is fixed**, as a batch 
 each is an edit of an approved plan, and the four are approved together, with the lots they add.
 The plan is not closed between rounds: it is archived whole, at the end (Decided so far).
 
-Three things are met for the first time, and a misfit of any is reported, not worked around:
+Task 7 is ported (2026-11-23), and the three views are taken back with it: both wait for the
+approval. Task 16 is next.
 
-- `bug-fixes-plan` in its new form, which nothing has run. `bug-fixes` waits for a batch not
-  yet diagnosed: these four are;
-- an edit that takes back a built place, the `unbuilt` claim;
-- an approval made with the tools that hold a reproduction as written and freeze its chain. The
-  first fix after it is the first time a real page shows a bug's chain under a built piece.
+Three things were to be met for the first time, a misfit of any reported and not worked around:
 
-To open the first session:
+- `bug-fixes-plan` in its new form: run on Task 7, its misfits under Findings. `bug-fixes` waits
+  for a batch not yet diagnosed: these four are;
+- an edit that takes back a built place, the `unbuilt` claim: made with Task 7's port;
+- an approval made with the tools that hold a reproduction as written and freeze its chain,
+  still to come. The first fix after it is the first time a real page shows a bug's chain under
+  a built piece.
 
-> Port Task 7 of `bug-fixes-2026-10` into its plan, with `bug-fixes-plan`. The plan
-> (`specs/features/bug-fixes-2026-10/plan.md`) holds two bugs, fixed and approved: Task 7 joins
-> it as a `## Bug:` section with its pieces, and its lot joins `## Delivery`. Fix nothing.
+To open the next session:
+
+> Port Task 16 of `bug-fixes-2026-10` into its plan, with `bug-fixes-plan`. The plan
+> (`specs/features/bug-fixes-2026-10/plan.md`) holds two bugs, fixed and approved, and Task 7,
+> ported and waiting for the approval: Task 16 joins it as a `## Bug:` section with its pieces,
+> and its lot joins `## Delivery`. Fix nothing.
 >
 > This is a session of the experiment
 > `specs/features/comprehension-harness-bug-fixes/experiment.md`: read it first. Its loop applies:
 > port the bug with the harness as it is, compare the generated page with the bug's section of
-> `plan.html`, write the gaps under Findings as Tasks 9 and 10 have theirs, and add a primitive
+> `plan.html`, write the gaps under Findings as Tasks 9, 10 and 7 have theirs, and add a primitive
 > only for a gap you name. `tasks.md`, `plan.html` and `diagnostics/` are the baseline the bug is
 > ported from: the first two are the earlier form, not edited and not run. The table "Order" says
-> what Task 7 probes.
+> what Task 16 probes.
 >
-> The bug is diagnosed already: `bug-fixes` is not run. Where the diagnosis left a reproduction
-> under an expected-failure marker, it is declared in the stack's form and made to observe, then
-> assert once.
+> The bug is diagnosed already: `bug-fixes` is not run. Its diagnosis left the shape of a
+> reproduction and no test: one is written in the stack's form, to observe, then assert once
+> (`bug-fixes` § "The reproduction").
 >
-> In the same session, take back the three places of `#fragment-views-show-modal` the plan still
-> reads as built and the review undid, the two calculus-graph views and the Sankey card deletion:
-> one `Changed:`, three `unbuilt` claims (`specs/workflow-formats.md` § "`plan.md`").
+> The plan is approved: the new bug's section and each new piece's take a `Changed:`; the lot
+> takes none.
 >
-> `bug-fixes-plan` was rewritten for pieces and has never been run. End your report with where it,
-> `spec-plan`, the check, the map or the pages did not fit, and work around none of them. Stop
-> before the approval: it is the reviewer's, and waits for Tasks 16, 12 and 2.
+> End your report with where `bug-fixes-plan`, `spec-plan`, the check, the map or the pages did
+> not fit, and work around none of them. Stop before the approval: it is the reviewer's, and
+> waits for Tasks 12 and 2.
 
-The sessions of Tasks 16, 12 and 2 open the same way, the task and what it probes changed, and
-without the paragraph on the three places. Each puts its pieces in a lot, since the check holds
-every piece to one. The last one reads the four together, groups in one lot the bugs that share a
-surface, and hands the plan to the reviewer.
+The sessions of Tasks 12 and 2 open the same way, the task and what it probes changed. Each puts
+its pieces in a lot, since the check holds every piece to one. The last one reads the four
+together, groups in one lot the bugs that share a surface, and hands the plan to the reviewer.
 
 **Then the fix**, one lot a run of `feature-implement`, and back here with what each run listed.
 
@@ -92,8 +95,8 @@ surface, and hands the plan to the reviewer.
 |---|---|---|
 | Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Fixed (2026-11-23), in the lot `calculated-attribute-panel` |
 | Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Fixed (2026-11-23), in the same lot |
-| Task 7 — "each hour" after the unit | Template-only: third use of the template site. First run of `bug-fixes-plan` in its new form, and of an edit that takes a built place back | Next to port |
-| Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | |
+| Task 7 — "each hour" after the unit | Template-only: third use of the template site. First run of `bug-fixes-plan` in its new form, and of an edit that takes a built place back | Ported (2026-11-23), in the lot `recurrent-constant-editor` |
+| Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | Next to port |
 | Task 12 — system prefix first in card ids | Cause in Python, symptom in a jest test: two evidence tests joined at the piece | |
 | Task 2 — membership-section region | Symptom in a browser: an in-process cause test, and a browser reproduction, whose run is to settle then | |
 | Run C — Tasks 13, 14, 15 | Refactors: the check that the bug primitives stay optional | |
@@ -165,6 +168,14 @@ Still candidates:
   it: of a template, only what changed above its first place is listed.
 - A feature name used again after an archive: a plan reads every commit that names one of its
   feature's pieces, and fails on one whose piece it no longer holds.
+- A parametrized reproduction: it is drawn as one, its cases end to end, with one failure. Task 7's
+  was folded into one test.
+- A `#` that names no piece: the check reads "GitHub #150" as one. A name of digits alone could
+  be none.
+- A long item of a failure's message: pytest cuts it in its middle past 240 characters, whatever
+  the limits raised, and the brief prints the message's first line alone.
+- A place undone before an approval: the check reads from the approval's commit on, and asked
+  nothing for the three views. Only a reader of the code knew.
 
 ## Decided so far
 
@@ -188,7 +199,8 @@ Still candidates:
   out.
 - What a diagnostic lists beyond its reproduction, as the sweep of the shipped examples, is a
   test, a check for the user named in its lot's reason, or dropped in a clause of the piece's
-  reason: the plan says which. Written into the skills; no bug has met it yet.
+  reason: the plan says which. Met at Task 7, which has a look for the user and a browser check
+  dropped.
 - A cause that is only plausible is planned as the piece that produces the reading, the fix a
   piece of a later lot that waits on it. Written into the skills; no bug has met it yet.
 - The plan is extended between rounds and archived whole at the end (the reviewer's,
@@ -471,6 +483,77 @@ Left open by the small batch:
 
 - 4, 5, 6 and 10 of the list. 5 is decided in the skills and met by no bug yet; 6 is the
   experiment's own, and asks nothing of a batch approved once.
-- The three views are still built in this plan's approval: the session that ports Task 7 takes
-  them back.
+- The three views were still built in this plan's approval: taken back with Task 7's port,
+  below.
 - Whether a place can be set against its piece's reason by a tool. The implementer now does it.
+
+### Task 7 — ported with the harness as it is (2026-11-23)
+
+One piece, `#recurrent-unit-each-hour`: two `planned` tags in the constant editor's template, one
+reproduction, and a lot of its own, `recurrent-constant-editor`. No evidence tag: both lines the
+bug shows at are lines the fix changes. No primitive was added.
+
+What the port did that the baseline did not:
+
+- **It reads every editor.** The baseline's reproduction is parametrized over four fields and
+  stops at its first assertion: "occurrence", and "likewise" for three. Folded into one test that
+  reads every constant editor of the three panels and asserts once, it shows six, the RAM's and
+  the workload's among them, and the helper's sentence, which the baseline's run never reached.
+- **Its `expect` is computed in the template.** The box should read the unit then "each hour":
+  the tag expects the watched unit through Django's `add` filter, and each of the six crossings
+  is red against its own. The posted unit is watched beside it and expects nothing: it is right
+  and stays, the baseline's "display-only".
+- **It decided what the baseline left open**, in the three ways the skills now give, met here
+  for the first time. "Widen it if needed" and "one visual box" are a look for the user, named in
+  the lot's reason. The browser check the diagnostic had dropped is dropped in a clause of the
+  piece's reason. The posts that must pass unchanged are existing tests, and ask nothing.
+- **Its places cannot go stale**, again: the baseline breaks at `:138` of a test rewritten since.
+
+What the generated page cannot say:
+
+1. **A place whose fault is its own words has no value.** The helper's sentence is the
+   template's text: there is nothing to watch. It shows in the failure's message, and one line
+   under the tag.
+2. **The baseline's first link is gone**, and is no gap: the registry's default, a right value
+   at a place nothing changes. The tag watches the same unit one step later.
+3. **A parametrized reproduction is drawn as one**: the crossings of its four cases end to end,
+   a panel that two cases read drawn twice, and one case's failure. Hence the fold.
+4. **pytest cuts a long item whatever the limits.** The raised limits bound the message, not an
+   item: six editors keyed by their web ids were cut in the middle. The test asserts sorted
+   lists, and the tags say which editor reads what.
+5. **No home**, gap 8 again: the verdict, the four decisions with their date, the
+   discrimination. The last was run again on the rewritten test, against a scratch copy of the
+   settled template, and is recorded here alone.
+6. **The diagnostic describes a test that is no more**: its parameters, its assertion, the line
+   of its breakpoint. A port rewrites what `bug-fixes` now writes in the stack's form at once.
+
+Where the skills, the check, the map and the pages did not fit:
+
+1. **`#150` reads as a piece.** "GitHub #150" in the bug's section failed the check: "names
+   #150, which is no piece". It is written as a link to the issue, which the page opens.
+2. **A bug that joins an approved plan takes two `Changed:` that say one thing**, its section's
+   and its piece's: each is new, and the check asks each for its paragraph. The lot it adds is
+   listed and asks none. `bug-fixes-plan` says nothing of either.
+3. **`bug-fixes-plan` says nothing of a parametrized reproduction**: "one reproduction a piece"
+   reads as met.
+4. **The plan page says of the new piece that "its card is the first of the pieces".** It is the
+   last, under its bug, in the file's order.
+5. **The brief prints the first line of the failure**, which for a dict of observations is
+   pytest's shortened form of both sides.
+6. **The whole check fails on another plan**, `ai-bootstrap-edge`, with three findings: "the
+   whole check once before the commit" cannot pass for this plan alone. `map check` does.
+7. **No verb of the map leads from a template no narrative crosses**: its one user, the builder
+   registry, was found by a search.
+
+### The three views — taken back (2026-11-23)
+
+One `Changed:` in `#fragment-views-show-modal`, with three `unbuilt` claims, each a function's
+name. Nothing was changed in the harness for it.
+
+- **The form fits.** The check lists the piece as three places fewer, and passes. The pages draw
+  the three "taken back" under the edit and eleven places built on the card; the page's count of
+  places built went from 26 to 23. The piece reads "built" and "modified since your approval",
+  its bug "fixed", its lot "delivered".
+- **Nothing asked for it.** Before the paragraph the check read the plan "as approved", and
+  passed. The plan was approved again after the review's fix, and the check reads a place from
+  the approval's commit on: a place undone before an approval is approved as built.

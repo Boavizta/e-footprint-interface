@@ -25,7 +25,8 @@ find what the harness needs for bugs:
 Tasks 9 and 10 are ported on the bug forms they asked for (reproductions, evidence, template sites),
 approved and fixed as one small run of `feature-implement` (2026-11-23). What that run showed is in the
 experiment, and changed the skills and the harness: a bug batch is now diagnosed and planned in pieces.
-Next: Tasks 7, 16, 12 and 2 ported into the same plan, then approved and fixed together.
+Task 7 is ported into the same plan (2026-11-23); next Tasks 16, 12 and 2, then the four are approved and
+fixed together.
 
 ### AI-assisted bootstrap — specification approved, planning pending
 
