@@ -83,6 +83,11 @@
       "comprehension_harness/python/tests/test_source_index.py",
       "comprehension_harness/python/tests/test_titles.py"
     ],
+    "python-journeys": [
+      "comprehension_harness/python/journey.py",
+      "comprehension_harness/python/journey_page.js",
+      "comprehension_harness/python/tests/test_journey.py"
+    ],
     "e-footprint": [
       ".agents/roles/diagnostician.md",
       ".agents/roles/plan-review-guide.md",
