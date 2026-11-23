@@ -87,8 +87,9 @@ Fixtures and environment setup: `specs/testing.md`.
   (constitution §2.2, §2.3).
 - **A Django model changed**: its migration file is committed (§2.5).
 - **Production code delivered**: one consolidated entry under `## [Unreleased]` of `CHANGELOG.md`
-  in each repository whose production code changed, written at the end of the run. Production
-  changes only: no spec, plan, tooling or test (§2.6).
+  in each repository whose production code changed. Each lot adds its part to that entry in its
+  last commit, and a review fix that makes a line of it false corrects it. Production changes
+  only: no spec, plan, tooling or test (§2.6).
 - **`pyproject.toml` and `poetry.lock`** name `efootprint` from PyPI before a commit reaches
   `main` (§2.4). An edit of them that was there before the work is preserved; the published pin
   is restored deliberately, never as a side effect.

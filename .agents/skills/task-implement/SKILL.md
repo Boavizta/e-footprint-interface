@@ -67,7 +67,10 @@ The reproductions are the piece's tests. Nothing else is written (rule 3 of "A p
   went, in one pass. A step is where a reader would stop, not every line that changed. Run the
   narrative tests that cross them and read the story you changed.
 - **The journey cases** of the lot's screens, each under its planned title.
-- Its message names every piece whose steps it tells, a `Piece:` line each.
+- **What the repository asks of production code that is delivered** (`repository.md` § "Gates":
+  a changelog entry, where it asks one): the lot's part of it, said for whoever uses the product.
+- Its message names every piece it tells of, a `Piece:` line each. A lot with no step, no case and
+  no such entry has no last commit.
 - **The lot's gate** runs before it (`repository.md` § "Gates").
 
 ## What you do not do

@@ -101,7 +101,8 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
 
 7. **Wait.** When fixes are approved, apply exactly those. **A fix is a commit of its piece**:
    the piece's `Piece:` line, files staged by name, verified as `repository.md` says a
-   reviewer's fix is. Report tersely what you committed.
+   reviewer's fix is. A fix that makes a line of the docs or of the lot's changelog entry false
+   corrects that line in the same commit. Report tersely what you committed.
 
 ## A bug-batch task
 
