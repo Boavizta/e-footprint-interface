@@ -177,12 +177,18 @@ export interface JourneyCase extends At {
   title: string;
 }
 
-/** A `plan.md` section: a piece's own (`## #slug`), or a decision across pieces. */
+/** A `plan.md` section: a piece's own (`## #slug`), a bug's (`## Bug: <what is wrong>`), or a decision across
+ *  pieces. */
 export interface PlanSection extends MdSection {
   /** The section's anchor on the plan page. */
   anchor: string;
-  /** The piece the section is titled after, `## #slug`; null for a decision across pieces. */
+  /** The piece the section is titled after, `## #slug`; null for a bug and for a decision across pieces. */
   piece: string | null;
+  /** The section states a bug, what is wrong for whoever meets it: the pieces whose sections stand under it,
+   *  up to the next bug, fix it. Its `title` is the bug's, the prefix taken off. */
+  bug: boolean;
+  /** For a piece's section, the anchor of the bug it stands under; null when it stands under none. */
+  under: string | null;
   /** The `#slug`s its text names, in order, each once. */
   slugs: string[];
   /** Its paragraphs opening `Changed:`, the prefix taken off, one an edit: `what` moved since the approval
@@ -247,7 +253,7 @@ export interface PlanNote {
 }
 
 /** Words at most. A piece over its budget fails `--check`: the page is read, so it stays short. */
-export const BUDGET = { clause: 25, title: 20, what: 30, why: 60, ask: 60, changed: 40, lot: 40, note: 40, pointer: 40 } as const;
+export const BUDGET = { clause: 25, title: 20, what: 30, why: 60, ask: 60, bug: 60, changed: 40, lot: 40, note: 40, pointer: 40 } as const;
 
 export const words = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
@@ -321,6 +327,9 @@ export interface PlanPiece {
   sql: string[];
   /** The piece's own section of `plan.md`; null when the file has none for it. */
   doc: PlanPieceDoc | null;
+  /** The bug the piece fixes, with the other pieces under the same section of `plan.md`; null for a piece
+   *  that stands under none. */
+  bug: PlanSection | null;
   /** The decisions across pieces that name this one. */
   decidedIn: PlanSection[];
   /** What the approved plan held of the piece and is now code: the lines of its sites and of its comments, as
@@ -750,7 +759,12 @@ export const names = (sentence: string, fn: string) => sentence.includes(`\`${fn
 
 const anchorOf = (title: string) => `decision-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 
+/** A section as a unit the reviewer approves: a piece by its tag, a bug and a decision by their title. */
+export const unitNameOf = (section: Pick<PlanSection, 'piece' | 'bug' | 'title'>) => (section.piece !== null ? `#${section.piece}` : section.bug ? `Bug: ${section.title}` : section.title);
+
 const PIECE_TITLE = new RegExp(`^#(${KEBAB})$`);
+/** A bug's section: what is wrong, as its title. */
+const BUG_TITLE = /^Bug:\s*(.*)$/;
 
 export const WAIVERS_SECTION = 'Rules no test holds';
 
@@ -828,9 +842,16 @@ export function planDocOf(intent: Intent, file: string): PlanDoc {
   const waivers = waiversOf(intent.sections.find((s) => s.title === WAIVERS_SECTION), file);
   const lots = lotsOf(intent.sections.find((s) => s.title === DELIVERY_SECTION), file);
   const pointers = pointersOf(intent.sections.find((s) => s.title === ELSEWHERE_SECTION), file);
-  const sections = intent.sections.filter((s) => !RESERVED_SECTIONS.includes(s.title)).map((s) => {
+  // A piece's section stands under the bug whose section is the last one above it.
+  let under: string | null = null;
+  const sections = intent.sections.filter((s) => !RESERVED_SECTIONS.includes(s.title)).map((s): PlanSection => {
     const texts = s.blocks.flatMap((b) => (b.kind === 'p' ? [b.text] : b.items.map((i) => i.text)));
     const piece = PIECE_TITLE.exec(s.title)?.[1] ?? null;
+    const bug = BUG_TITLE.exec(s.title);
+    if (bug && bug[1] === '') throw new Error(`comprehension-plan: ${file}:${s.line} — "## ${s.title}": a bug's section is titled with what is wrong, "## Bug: <what whoever meets it sees>"`);
+    const title = bug ? bug[1] : s.title;
+    const anchor = piece !== null ? `piece-${piece}` : bug ? anchorOf(title).replace(/^decision-/, 'bug-') : anchorOf(title);
+    if (bug) under = anchor;
     if (piece === null && s.title.startsWith('#')) throw new Error(`comprehension-plan: ${file}:${s.line} — "## ${s.title}": a piece's section is titled with its tag alone, "## #the-slug"`);
     const changed = s.blocks.flatMap((b) => {
       if (b.kind !== 'p' || !CHANGED.test(b.text)) return [];
@@ -845,7 +866,7 @@ export function planDocOf(intent: Intent, file: string): PlanDoc {
       const bold = /^\*\*(.+?)\*\*\s*/.exec(text);
       return [{ what: bold ? bold[1].replace(/\.$/, '') : null, why: bold ? text.slice(bold[0].length) : text, text, claims, line: b.line }];
     });
-    return { ...s, anchor: piece === null ? anchorOf(s.title) : `piece-${piece}`, piece, slugs: slugRefs(texts.join('\n')), changed };
+    return { ...s, title, anchor, piece, bug: bug !== null, under: piece === null ? null : under, slugs: slugRefs(texts.join('\n')), changed };
   });
   const twice = sections.find((s, i) => sections.findIndex((o) => o.anchor === s.anchor) !== i);
   if (twice) throw new Error(`comprehension-plan: ${file}:${twice.line} — two sections are titled "${twice.title}"`);
@@ -929,7 +950,7 @@ export function snapshotOf(plan: Pick<Plan, 'pieces' | 'doc' | 'journeyCases'> &
         if (plan.pieces.some((x) => x.slug === section.piece)) continue;
         const own = pieceDocOf(section, doc.file);
         units.push({ kind: 'piece', name: `#${section.piece}`, facets: { statement: [own.what], reason: blockTexts(own.why), sites: [], comments: [], tests: [] } });
-      } else units.push({ kind: 'decision', name: section.title, facets: { text: blockTexts(section.blocks.filter((b) => !(b.kind === 'p' && CHANGED.test(b.text)))) } });
+      } else units.push({ kind: 'decision', name: unitNameOf(section), facets: { text: blockTexts(section.blocks.filter((b) => !(b.kind === 'p' && CHANGED.test(b.text)))) } });
     }
     if (doc.waivers.length) units.push({ kind: 'waivers', name: WAIVERS_SECTION, facets: { waivers: doc.waivers.map((w) => `${w.rule} — ${w.toConfirm ? 'To confirm: ' : ''}${w.reason}`) } });
     // A pointer carries its reason, as a waiver and a lot do: one that moves is listed, and asks nothing more.
@@ -1193,7 +1214,8 @@ export function assemblePlans(input: PlanInput): Plan[] {
         piece = {
           slug, sites: [], statics: [], todos: [], sql: [],
           doc: own ? pieceDocOf(own, doc!.file) : null,
-          decidedIn: doc ? doc.sections.filter((s) => s.piece === null && s.slugs.includes(slug)) : [],
+          bug: doc?.sections.find((s) => s.bug && s.anchor === own?.under) ?? null,
+          decidedIn: doc ? doc.sections.filter((s) => s.piece === null && !s.bug && s.slugs.includes(slug)) : [],
           built: { sites: [], comments: [] },
           commits: [],
         };
@@ -1269,7 +1291,7 @@ export function assemblePlans(input: PlanInput): Plan[] {
     // plan landed in, so that a story is still compared once the sites that crossed it are code.
     const landed = new Set([...pieces.flatMap((x) => x.sites.flatMap((s) => s.crossedBy.map((c) => c.narrative))), ...(approved?.baseline.units ?? []).filter((u) => u.kind === 'story').map((u) => u.name)]);
     const snapshot = snapshotOf({ pieces, doc, journeyCases, builtCases }, narratives.flatMap((n) => (landed.has(n.title) && n.steps ? [{ title: n.title, steps: n.steps }] : [])));
-    const sectionOf = (kind: UnitKind, name: string) => (kind === 'piece' ? doc?.sections.find((x) => x.piece === name.slice(1)) : kind === 'decision' ? doc?.sections.find((x) => x.piece === null && x.title === name) : undefined);
+    const sectionOf = (kind: UnitKind, name: string) => (kind === 'piece' ? doc?.sections.find((x) => x.piece === name.slice(1)) : kind === 'decision' ? doc?.sections.find((x) => x.piece === null && unitNameOf(x) === name) : undefined);
     const explained = (kind: UnitKind, name: string) => (sectionOf(kind, name)?.changed.length ?? 0) > 0;
     const diffed = approved ? diffSnapshots(approved.baseline, snapshot, explained, input.layout) : null;
     // What the commits made since the approval did beyond the plan joins the delta of the piece each names.
@@ -1390,7 +1412,7 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
     }
   }
   // The approved plan: what differs from it says why, and a "Changed:" stands on a difference.
-  const unitOf = (section: PlanSection) => (section.piece === null ? section.title : `#${section.piece}`);
+  const unitOf = unitNameOf;
   for (const d of plan.delta ?? []) {
     if (d.reason === 'needed') failures.push(`planned: ${d.kind === 'piece' ? d.name : `"${d.name}"`} is not as approved (${plan.approved!.file}: ${d.state === 'new' ? 'new' : d.facets.map((f) => `${f.facet}${f.added.length ? ` +${f.added.length}` : ''}${f.removed.length ? ` −${f.removed.length}` : ''}`).join(', ')}) and its section of ${plan.doc?.file ?? 'plan.md'} holds no "Changed:" — one paragraph saying why, which the reviewer reads before approving again`);
   }
@@ -1399,6 +1421,13 @@ export function findings(plan: Plan, archive = false): { failures: string[]; inf
     for (const e of d.edits) for (const claim of e.unmatched) failures.push(`planned: ${plan.doc!.file}:${e.change.line} ${where} claims ${claim}, and no line of its delta is of that kind and holds that fragment`);
     const loose = d.edits.length > 1 ? d.unclaimed.filter((l) => !isOwnNotice(l.facet)) : [];
     if (loose.length) failures.push(`planned: ${where} holds ${d.edits.length} "Changed:" and ${loose.length} line${loose.length === 1 ? '' : 's'} of its delta that none of them names — an edit ends ' → kind "fragment"; …' naming its lines:${loose.map((l) => `\n      ${l.sign} ${kindOfLine(l)}: ${l.text}`).join('')}`);
+  }
+  // A bug is what its pieces fix: one with no piece under it is fixed by nothing the plan holds.
+  for (const section of plan.doc?.sections ?? []) {
+    if (!section.bug) continue;
+    const where = `${plan.doc!.file}:${section.line} bug "${section.title}"`;
+    if (!plan.pieces.some((piece) => piece.bug === section)) failures.push(`planned: ${where} has no piece under it — the pieces that fix a bug are the "## #slug" sections that follow its own, up to the next bug`);
+    over(section.blocks.reduce((n, b) => n + (b.kind === 'p' ? (CHANGED.test(b.text) ? 0 : words(b.text)) : b.items.reduce((m, i) => m + words(i.text), 0)), 0), BUDGET.bug, where, 'says what is wrong', 'what whoever meets the bug sees: the cause is its pieces\', and the chain their reproductions\'');
   }
   for (const section of plan.doc?.sections ?? []) {
     for (const c of section.changed) {

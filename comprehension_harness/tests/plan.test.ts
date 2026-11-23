@@ -484,8 +484,36 @@ describe('a bug', () => {
     expect(plan.siteLineOf(evidence(null))).toBe("evidence src/a.ts in fn — cut happens. ⇒ {'due': total - card}");
     expect(plan.siteLineOf(evidence(null, null))).toBe('evidence src/a.ts in fn — cut happens.');
     // A place built is one its commits wrote at; evidence goes with the fix and nothing is written there.
-    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
+    const lines = plan.unplannedLines([], new Set(), LAYOUT, [{ slug: 'cut', sites: [], statics: [], todos: [], sql: [], doc: null, bug: null, decidedIn: [], built: { sites: [plan.siteLineOf(evidence(null))], comments: [] }, commits: [{ sha: '1', subject: 's', pieces: ['cut'], sinceApproval: true, files: [{ file: 'src/a.ts', added: 0, removed: 3, line: 1 }], untagged: [], deleted: [], planned: [] }] }]);
     expect([...lines]).toEqual([]);
+  });
+
+  it('reads a bug as a section of plan.md, and the pieces whose sections stand under it as what fixes it', () => {
+    const md = ['# P', '', '## #free', '', 'A piece of no bug.', '',
+      '## Bug: The total ignores the card', '', 'The buyer pays the whole amount: see #save.', '', '## #cut', '', 'Cuts.', '', '## #save', '', 'Saves.', '',
+      '## Bug: Two rows share an id', '', 'One click opens both.', '', '## #row', '', 'Rows.', '',
+      '## Across', '', 'Decides #cut and #row.', ''].join('\n');
+    const [made] = assemble({ sites: [site('free', 'src/a.ts', 1), site('cut', 'src/a.ts', 2), site('save', 'src/a.ts', 3), site('row', 'src/a.ts', 4)], docs: docs(md, null) });
+    const piece = (slug: string) => made.pieces.find((p) => p.slug === slug)!;
+    // The title is the bug's, its prefix taken off; a piece stands under the last bug above its section.
+    expect(made.doc!.sections.filter((s) => s.bug).map((s) => [s.title, s.anchor])).toEqual([['The total ignores the card', 'bug-the-total-ignores-the-card'], ['Two rows share an id', 'bug-two-rows-share-an-id']]);
+    expect(['free', 'cut', 'save', 'row'].map((slug) => piece(slug).bug?.title ?? null)).toEqual([null, 'The total ignores the card', 'The total ignores the card', 'Two rows share an id']);
+    // A bug is no decision across pieces: the piece it names in passing is not decided there.
+    expect(piece('save').decidedIn).toEqual([]);
+    expect(piece('cut').decidedIn.map((s) => s.title)).toEqual(['Across']);
+    expect(findings(made).failures).toEqual([]);
+    // It is approved as a unit of its own, under its whole title.
+    expect(made.doc!.sections.map(plan.unitNameOf)).toEqual(['#free', 'Bug: The total ignores the card', '#cut', '#save', 'Bug: Two rows share an id', '#row', 'Across']);
+  });
+
+  it('fails a bug no piece stands under, one that says too much, and one with no title', () => {
+    const long = Array.from({ length: 61 }, () => 'word').join(' ');
+    const [made] = assemble({ sites: [site('cut', 'src/a.ts', 2)], docs: docs(`# P\n\n## Bug: Fixed by nothing\n\nNobody fixes it.\n\n## Bug: Said at length\n\n${long}\n\n## #cut\n\nCuts.\n`, null) });
+    expect(findings(made).failures.map((f) => f.split(' — ')[0])).toEqual([
+      'planned: specs/features/demo/plan.md:3 bug "Fixed by nothing" has no piece under it',
+      'planned: specs/features/demo/plan.md:7 bug "Said at length" says what is wrong in 61 words, and the budget is 60',
+    ]);
+    expect(() => planDocOf(parseIntent('# P\n\n## Bug:\n\nNothing.\n', 'plan.md'), 'plan.md')).toThrow(/plan\.md:3 — "## Bug:": a bug's section is titled with what is wrong/);
   });
 
   it('matches a story to its tagged test by file and title, a parametrized case included', () => {

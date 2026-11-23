@@ -95,7 +95,7 @@ import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
 import type { Location, NarrativeKind, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit } from './stack';
-import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type Crossing, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
+import { assemblePlans, editItems, filesNamed, findings, isOpenTest, isOwnNotice, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type Crossing, NOTES, UNPLANNED, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanSection, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { readPieceCommits } from './commits';
 import { buildBacklinks, describeEntry, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
 
@@ -1227,7 +1227,10 @@ function planInline(text: string, plan: Plan): string {
   return refs
     .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+    // A link to a file beside `plan.md` opens that file: the page is generated elsewhere.
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, shown: string, href: string) => (/^(?:[a-z][a-z0-9+.-]*:|[#/]|\.\.)/i.test(href)
+      ? `<a href="${href}">${shown}</a>`
+      : `<a class="src" href="vscode://file/${join(ROOT, featureFolder(plan.feature), href)}" data-review-source-href="${sourceHref({ file: `${featureFolder(plan.feature)}/${href}`, line: 1, column: 1 })}">${shown}</a>`));
 }
 
 const mdBlocks = (blocks: MdBlock[], plan: Plan) => blocksHtml(blocks, (t) => planInline(t, plan));
@@ -1609,7 +1612,18 @@ export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrati
   const places = plan.pieces.reduce((n, s) => n + s.sites.length + s.statics.length, 0);
   const toWrite = plan.pieces.reduce((n, s) => n + s.todos.filter((t) => !t.written).length, 0);
   const builtPlaces = plan.pieces.reduce((n, s) => n + s.built.sites.length + s.built.comments.length, 0);
-  const across = doc ? doc.sections.filter((s) => s.piece === null) : [];
+  const across = doc ? doc.sections.filter((s) => s.piece === null && !s.bug) : [];
+  // A plan of bugs is read a bug at a time: what is wrong, then the pieces that fix it, in the order plan.md
+  // holds them. A piece under no bug keeps its place before them.
+  const bugs = doc ? doc.sections.filter((s) => s.bug) : [];
+  const lineOf = (piece: PlanPiece) => piece.doc?.section.line ?? 0;
+  const fixing = (bug: PlanSection) => plan.pieces.filter((s) => s.bug === bug).sort((a, b) => lineOf(a) - lineOf(b));
+  const bugHead = (bug: PlanSection) => `<section class="abug" id="${bug.anchor}"><h3><span class="mark failing">bug</span> ${planInline(bug.title, plan)} <small>${srcLink(doc!.file, bug.line, 1, 'plan.md')}</small></h3>${mdBlocks(bug.blocks, plan)}<p class="also">Fixed by ${fixing(bug).map(pieceChip).join(' ')}</p></section>`;
+  const outsideRow = (s: PlanPiece) => `<div class="pline"><span class="where">${pieceChip(s)}<br><small>${landsLabel(s, plan.groups.find((g) => g.pieces.includes(s)), narratives, plan)}</small></span><span class="clause">${s.doc ? planInline(s.doc.what, plan) : '<span class="pending">no statement in plan.md</span>'}</span></div>`;
+  const byBug = <T>(pieces: PlanPiece[], piece: (s: PlanPiece) => T, head: (bug: PlanSection) => T): T[] => [
+    ...pieces.filter((s) => s.bug === null).map(piece),
+    ...bugs.flatMap((bug) => { const its = fixing(bug).filter((s) => pieces.includes(s)); return its.length ? [head(bug), ...its.map(piece)] : []; }),
+  ];
   // A drawn diff brings the database view's stylesheet, scoped to the element the fragment sits in (CSS nesting);
   // its `:root` variables are set on that element.
   const drawn = plan.pieces.flatMap((s) => s.sql).map((f) => diffs.get(f)).find((d) => d?.drawn);
@@ -1628,7 +1642,7 @@ ${plan.pointers.length ? `
 <p class="legend">Each is planned, built and approved in its own repository, under this feature's name. This plan relies on it and holds none of it.</p>` : ''}
 ${outside.length ? `
 <h2 id="outside">Outside the narrated flows — ${plural(outside.length, 'piece')}</h2>
-<div class="pbox outside">${outside.map((s) => `<div class="pline"><span class="where">${pieceChip(s)}<br><small>${landsLabel(s, plan.groups.find((g) => g.pieces.includes(s)), narratives, plan)}</small></span><span class="clause">${s.doc ? planInline(s.doc.what, plan) : '<span class="pending">no statement in plan.md</span>'}</span></div>`).join('')}</div>
+<div class="pbox outside">${byBug(outside, outsideRow, (bug) => `<div class="pline bugrow"><span class="where"><a href="#${bug.anchor}"><span class="mark failing">bug</span></a></span><span class="clause"><b>${planInline(bug.title, plan)}</b></span></div>`).join('')}</div>
 <p class="legend">No flow${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}: ${outside.length === 1 ? 'its card is' : 'their cards are'} the first of the pieces.</p>` : ''}
 ${flows.length ? `
 <h2 id="flows">The change, in the ${flows.length === 1 ? 'flow' : `${flows.length} flows`} it lands in</h2>
@@ -1637,8 +1651,8 @@ ${flows.map((f) => flowHtml(f, ctx)).join('\n')}
 </div>
 <p class="legend">Grey is what a step does today; the line under it is what changes there.${asks.length ? ` A piece marked <span class="slug ask">?</span> holds a point for you to confirm: ${asks.length} in all.` : ''}</p>` : ''}
 
-<h2 id="plan">The ${plural(plan.pieces.length, 'piece')} — ${plural(places, 'place')} in the code, ${plural(toWrite, 'test')} to write${builtPlaces ? `, ${plural(builtPlaces, 'place')} built` : ''}</h2>
-${cards.map((s) => planPieceHtml(s, ctx)).join('\n')}
+<h2 id="plan">The ${bugs.length ? `${plural(bugs.length, 'bug')}, ` : ''}${plural(plan.pieces.length, 'piece')} — ${plural(places, 'place')} in the code, ${plural(toWrite, 'test')} to write${builtPlaces ? `, ${plural(builtPlaces, 'place')} built` : ''}</h2>
+${byBug(cards, (s) => planPieceHtml(s, ctx), bugHead).join('\n')}
 ${planJourneyCasesHtml(plan)}
 ${planRulesHtml(plan)}
 ${across.length ? `

@@ -15,6 +15,8 @@ repository's (`.agents/repository.md`).
 - A **rule** is a behaviour of the spec that no screen shows. One test owns it, or a **waiver**
   says why none does.
 - A **lot** is what one implementer delivers and one reviewer reads: a few pieces, a commit each.
+- A **bug** is what is wrong for whoever meets it, with the pieces that fix it: one, or several
+  when the fix is several decisions.
 - A **reproduction** is a written test that fails today, for the bug its piece fixes. **Evidence**
   is a place the bug shows, with the values a reproduction saw there.
 - A **unit** is one thing the reviewer approves: a piece, a decision across pieces, the waivers,
@@ -84,6 +86,11 @@ is and that no case is added.
 
 ## A bug
 
+A bug is a section of `plan.md`, `## Bug: <what is wrong>`: its title and its paragraphs say what
+whoever meets it sees, and where it was diagnosed. The pieces whose sections stand under it, up to
+the next bug, fix it. The page is then read a bug at a time: what is wrong, then its pieces, in
+the order of the file. The cause is no part of the section: it is its pieces', and their chains'.
+
 A piece that fixes a bug says, beside what changes, what is wrong today. Two forms carry it, and
 the plan page draws them as one chain under the piece: each reproduction, the places it crossed
 in run order with the values it saw at each, then how it failed.
@@ -126,6 +133,9 @@ A title, a lead, then:
 
 - **One `## #slug` section per piece**: its statement in the first paragraph, then its reason
   and what was refused.
+- **A `## Bug: <what is wrong>` section**, in a plan that fixes bugs: the sections of the pieces
+  that fix it follow it. A piece of no bug stands above the first. A bug with no piece under it
+  fails the check. It is approved as a unit, as a decision is.
 - **Any other title** is a decision across pieces, which names the pieces it concerns as `#slug`.
 - **`## Rules no test holds`**: the waivers, `- **the-rule** why no test holds it`, for a rule
   that is true by the shape of the code.
@@ -155,6 +165,7 @@ Each fact has one home, and each home a budget in words, which the check enforce
 | What a piece changes, as a whole | The first paragraph of its section | 30 |
 | Why, and what was refused | The rest of the section | 60 |
 | A point to confirm, a waiver | Its paragraph, its item | 60 |
+| What is wrong, for whoever meets a bug | The bug's section | 60 |
 | An edit, a note, a lot's reason | Its paragraph, its item | 40 |
 
 A word is a run of characters between spaces. The tag, the `[rule]` suffix, the prefixes and a

@@ -325,6 +325,7 @@ function pieceText(plan, piece, code, whole = false, printed = new Map()) {
     if (piece.doc.ask) out.push(`  TO CONFIRM: ${piece.doc.ask.question}${piece.doc.ask.detail ? ` ${piece.doc.ask.detail}` : ''}`);
     out.push(...pieceNotes);
   } else if (plan.doc) out.push(`  (no section "## #${piece.slug}" in ${plan.doc.file}: the piece has no statement)`);
+  if (piece.bug && code) out.push(`  fixes the bug: ${piece.bug.title}  (${plan.doc.file}:${piece.bug.line})`);
   if (piece.decidedIn.length) out.push(`  also decided in: ${piece.decidedIn.map((d) => `"${d.title}"`).join(', ')}`);
   // What a place says it should see: values, and the keys each crossing should see its own of.
   const should = (x) => `${x.expect ? `  · should see ${x.expect}` : ''}${x.distinct?.length ? `  · each crossing its own ${x.distinct.join(', ')}` : ''}`;
@@ -417,11 +418,21 @@ function plan(map, feature) {
   if (p.doc) say(`# ${p.doc.title}   (${p.doc.file}: each piece's statement and reason)`, ...blockLines(p.doc.lead, ''), '', '─'.repeat(60));
   else say(`(no ${FEATURES}/${feature}/plan.md: the pieces have no statement and no reason)`, '');
   const bySlug = new Map(p.pieces.map((s) => [s.slug, s]));
+  // A piece of a bug is told under its bug, below: the groups hold the others.
   for (const g of p.groups) {
+    const slugs = g.slugs.filter((slug) => !bySlug.get(slug).bug);
+    if (slugs.length === 0) continue;
     say(g.kind === 'narrative' ? `In run order — ${g.narrative}` : g.kind === 'uncrossed' ? 'Pieces crossed by no narrative' : 'Pieces with no runtime line', '');
-    for (const slug of g.slugs) say(...pieceText(p, bySlug.get(slug), false), '');
+    for (const slug of slugs) say(...pieceText(p, bySlug.get(slug), false), '');
   }
-  for (const section of p.doc ? p.doc.sections.filter((x) => x.piece === null) : []) say(`Decided across pieces — ${section.title}`, ...blockLines(section.blocks, '  '), '');
+  // A bug at a time, as the plan page tells them: what is wrong, then the pieces that fix it, in the file's order.
+  const sections = p.doc?.sections ?? [];
+  for (const bug of sections.filter((x) => x.bug)) {
+    const fixing = p.pieces.filter((piece) => piece.bug?.anchor === bug.anchor).sort((a, b) => (a.doc?.section.line ?? 0) - (b.doc?.section.line ?? 0));
+    say(`Bug — ${bug.title}   (${p.doc.file}:${bug.line}, fixed by ${fixing.map((piece) => `#${piece.slug}`).join(', ') || 'NO PIECE'})`, ...blockLines(bug.blocks, '  '), '');
+    for (const piece of fixing) say(...pieceText(p, piece, false), '');
+  }
+  for (const section of sections.filter((x) => x.piece === null && !x.bug)) say(`Decided across pieces — ${section.title}`, ...blockLines(section.blocks, '  '), '');
   if (p.journeyCases?.length) {
     say('─'.repeat(60), `Journey cases of the spec, to write — ${p.journeyCases.length}, each once the pieces behind it are in`);
     for (const journey of [...new Set(p.journeyCases.map((c) => c.journey))]) {
@@ -547,8 +558,8 @@ function brief(map, name) {
   const printed = new Map();
   for (const piece of pieces) say(...pieceText(p, piece, true, !lot, printed), '');
   // The decisions across pieces are told whole: they hold what no site carries (a snapshot to regenerate, a doc made stale).
-  const decisions = (p.doc?.sections ?? []).filter((d) => d.piece === null && pieces.some((piece) => d.slugs.includes(piece.slug)));
-  for (const d of decisions) say(`Decided across pieces — ${d.title}  (${p.doc.file}:${d.line})`, ...blockLines(d.blocks, '  '), '');
+  const decisions = (p.doc?.sections ?? []).filter((d) => d.piece === null && pieces.some((piece) => (d.bug ? piece.bug?.anchor === d.anchor : d.slugs.includes(piece.slug))));
+  for (const d of decisions) say(`${d.bug ? 'Bug' : 'Decided across pieces'} — ${d.title}  (${p.doc.file}:${d.line})`, ...blockLines(d.blocks, '  '), '');
   // What the pieces outside this brief were built with, that this work may stand on.
   const before = p.pieces.filter((x) => !pieces.includes(x)).flatMap((x) => (x.doc?.notes ?? []).map((n) => `  #${x.slug}: ${n.text}`));
   if (before.length) say('Notes on what is built elsewhere in the plan:', ...before, '');
