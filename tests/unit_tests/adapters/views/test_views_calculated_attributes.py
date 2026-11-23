@@ -2,6 +2,7 @@ import re
 from collections import Counter
 
 import pytest
+from efootprint.abstract_modeling_classes.utils import css_escape
 from efootprint.api_utils.json_to_system import json_to_system
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
@@ -71,6 +72,10 @@ def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monk
         "empty entries offering their formula": [
             name for name in EMPTY_STORAGE_DICT_ATTRIBUTES
             if "/model_builder/get_calculated_attribute_explanation/" + entry.format(name) in panel],
+        "empty entries reading no value": [
+            name for name in EMPTY_STORAGE_DICT_ATTRIBUTES
+            if re.search(rf'id="calculated_attributes-{re.escape(name)}[^"]*-in-{re.escape(css_escape(storage_id))}"'
+                         rf'[^>]*value="no value"', panel)],
         "components still charted": [name for name, component_id in (("cpu", cpu_id), ("ram", ram_id))
                                      if any(url.startswith(f"{HOURLY_CHART_URL}{component_id}/") for url in chart_urls)],
         "charts offered that do not draw": sum(_answer(client.get(url)) != "the fragment" for url in chart_urls),
@@ -78,6 +83,7 @@ def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monk
 
     assert seen == {
         "empty entries offering a chart": [], "empty entries offering their formula": EMPTY_STORAGE_DICT_ATTRIBUTES,
+        "empty entries reading no value": EMPTY_STORAGE_DICT_ATTRIBUTES,
         "components still charted": ["cpu", "ram"], "charts offered that do not draw": 0}
 
 
