@@ -298,12 +298,12 @@ function nameFlags(c: Control, sameName: number): string[] {
   return flags;
 }
 
-/** A journey captured at another viewport than a phone's says so (`journey.viewport`): the frames take its size, and a
- *  wide one is scaled down to the width a phone's frame and its text take together. */
+/** A journey captured at another viewport than a phone's says so (`journey.viewport`): the frames take its size. A
+ *  wide one is scaled down to 640 px, and the page is laid out for it (`html.wide`): the text under each frame. */
 type Viewport = { viewport?: { width: number; height: number } };
 const isWide = (meta: Viewport) => (meta.viewport?.width ?? 400) > 600;
 const viewportStyle = (meta: Viewport): string => (meta.viewport
-  ? ` style="--vw:${meta.viewport.width}px;--vh:${meta.viewport.height}px${isWide(meta) ? `;--s:${(640 / meta.viewport.width).toFixed(3)}` : ''}"` : '');
+  ? `${isWide(meta) ? ' class="wide"' : ''} style="--vw:${meta.viewport.width}px;--vh:${meta.viewport.height}px${isWide(meta) ? `;--s:${(640 / meta.viewport.width).toFixed(3)}` : ''}"` : '');
 
 /** A capture in a frame. `base` is the path from the page to the journey's folder, where its stylesheet is. */
 function frame(html: string, base: string, label: string): string {
@@ -575,6 +575,15 @@ tr.walked td{background:#f0fdf4}.notwalked{color:var(--mute);white-space:nowrap}
 main.few{--s:.8;--fw:calc(var(--vw)*var(--s));--fh:calc(var(--vh)*var(--s));max-width:calc(var(--n)*772px + 20px);margin:0 auto}
 main.few .spine{grid-template-columns:repeat(var(--n),minmax(0,1fr))}
 @media (max-width:1123px){main.few .spine{grid-template-columns:minmax(0,1fr)}}
+/* A journey captured wide (a desktop's viewport): a frame takes the width a phone's frame and its text take together,
+   so the text goes under it at its full height, and a comparison takes the row. */
+html.wide .spine{grid-template-columns:repeat(auto-fill,minmax(min(calc(var(--fw) + 26px),100%),1fr))}
+html.wide .screen-body{flex-direction:column;flex-wrap:nowrap}
+html.wide .side,html.wide .note{flex:none;width:100%;max-width:calc(var(--fw) + 2px);max-height:none;background:none}
+html.wide .shot{max-width:100%}
+html.wide .variant,html.wide .planned{flex:1 1 calc(var(--fw) + 20px);max-width:calc(var(--fw) + 20px);flex-direction:column;flex-wrap:nowrap}
+html.wide .planned{flex-basis:100%;max-width:none}html.wide .planned .note{max-width:900px}
+html.wide .changes{grid-template-columns:minmax(0,1fr)}
 /* A feature's spec page: the intent as cards, then each changed screen as today against its mockup. */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px;margin:12px 0 4px}
 .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-width:0;font-size:14px}
@@ -802,7 +811,7 @@ function renderSpec(feature: string, journeys: Loaded[], linkOf: (site: StorySit
         ${plannedBlock(J, spine, s, feature, base).html}${k === changed.length - 1 ? later : ''}</section>`).join('\n');
   }).join('\n');
   const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${GENERATED}
+<html lang="en"${viewportStyle(journeys[0]?.cases[0].journey ?? {})}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${GENERATED}
 <title>${esc(intent.title)} — spec</title>
 <style>${STYLE}</style></head><body><main>
 <div class="crumb">features / ${esc(feature)} · spec · <b>generated</b> from ${src(`${featureFolder(feature)}/spec.md`, null, 'spec.md')} and ${journeys.map((J) => src(J.cases[0].journey.file, null, J.cases[0].journey.file.split('/').pop())).join(', ')} · ${esc(renderStamp())}</div>
