@@ -80,7 +80,7 @@ Green on `767be804`, 2026-11-23, with no retry:
 
 ```
 Usage snapshot: 171 requests · USD API-equivalent (tokens only) · rates 2026-09-30
-Known subtotal: 3.6939; unpriced: 20; unattributed: 0
+Known subtotal: 5.8060; unpriced: 0; unattributed: 0
 Known tokens: input 356; cached 20,014,507; write 431,707; output 117,554
 Coverage: 0 source errors; 14 registered intervals missing measurements. Standard mode assumed for 0 requests.
   gate: 0.0069 (follow-up 0.0000); 2 requests; claude-haiku-5-5; effort medium
@@ -88,10 +88,9 @@ Coverage: 0 source errors; 14 registered intervals missing measurements. Standar
   implementer-easy: 0.5682 (follow-up 0.0000); 74 requests; claude-haiku-5-5; effort high
   light: 0.0037 (follow-up 0.0000); 5 requests; claude-haiku-5-5; effort medium
   reviewer: 3.1099 (follow-up 1.0261); 69 requests; claude-opus-5-5; effort high
-  supervisor: 0.0000 (follow-up 0.0000); 20 requests; claude-fable-5-2; effort high
-Unassigned-to-task overhead: 3.6939. No inference about completed-task quality or subscription limits.
-  Unpriced: claude-fable-5-2: unknown model (20 requests)
+  supervisor: 2.1121 (follow-up 0.0000); 20 requests; claude-fable-5-2; effort high
+Unassigned-to-task overhead: 5.8060. No inference about completed-task quality or subscription limits.
 ```
 
-A snapshot taken before the close-out. The supervisor's requests are unpriced, its model being
-absent from the rate card: the subtotal is the sub-agents' alone.
+A snapshot taken before the close-out, revalued once `claude-fable-5-2` joined the rate card: the
+supervisor's 20 requests are those collected by then, not the whole session.
