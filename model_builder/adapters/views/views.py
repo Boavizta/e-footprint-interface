@@ -28,7 +28,6 @@ from model_builder.adapters.ui_config.canvas_help_info import build_canvas_class
 from model_builder.adapters.views.source_table_row_editor_context import build_source_table_row_editor_context
 from model_builder.adapters.views.data_status import append_workspace_storage_status, build_data_status
 from model_builder.domain.entities.web_core.model_web import ModelWeb
-from model_builder.narrate import planned
 from model_builder.domain.entities.web_core.explainable_timeseries_utils import (
     get_web_explainable_from_attr,
     prepare_timeseries_chart_context,
@@ -446,9 +445,8 @@ def result_chart(request):
     return http_response
 
 
+@render_exception_modal_if_error
 def get_calculus_graph(request, cache_key):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     cache_repository = SessionCacheRepository(request.session, namespace="calculus_graph")
     content_to_return = cache_repository.pop(cache_key)
 
@@ -458,10 +456,9 @@ def get_calculus_graph(request, cache_key):
     return HttpResponse(content_to_return, content_type="text/html")
 
 
+@render_exception_modal_if_error
 @time_it
 def display_calculus_graph(request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     efootprint_object = model_web.get_web_object_from_efootprint_id(efootprint_id)
     iframe_height = 95
@@ -555,10 +552,9 @@ def download_sources(request):
     return response
 
 
+@render_exception_modal_if_error
 @time_it
 def source_table(request):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     from model_builder.adapters.presenters.simplified_inputs import input_catalog
     from model_builder.adapters.forms.simplified_input_context import bookmark_context
@@ -576,21 +572,18 @@ def source_table(request):
     return render(request, "model_builder/result/source_table.html", {"source_rows": rows})
 
 
+@render_exception_modal_if_error
 @time_it
 def source_table_row_editor(request, object_id: str, attr_name: str):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal, and its own not-found keeps its 404.")
     context = build_source_table_row_editor_context(
         SessionWorkspaceRepository(request.session).active_repository(), object_id, attr_name)
     return render(request, "model_builder/result/source_table_row_editor.html", context)
 
 
+@render_exception_modal_if_error
 @time_it
 def get_explainable_hourly_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str, id_of_key_in_dict: str=None):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.",
-            lambda: {"attr_name": attr_name, "id_of_key_in_dict": id_of_key_in_dict})
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_hourly_quantity_data, id_of_key_in_dict)
@@ -603,11 +596,10 @@ def get_explainable_hourly_quantity_chart_and_explanation(
         "model_builder/side_panels/edit/calculated_attributes/calculated_attribute_chart.html", context=context)
 
 
+@render_exception_modal_if_error
 @time_it
 def get_explainable_recurrent_quantity_chart_and_explanation(
     request, efootprint_id: str, attr_name: str):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     context, _ = prepare_timeseries_chart_context(
         model_web, efootprint_id, attr_name, prepare_recurrent_quantity_data)
@@ -620,10 +612,9 @@ def get_explainable_recurrent_quantity_chart_and_explanation(
         "model_builder/side_panels/edit/calculated_attributes/recurrent_attribute_chart.html", context=context)
 
 
+@render_exception_modal_if_error
 @time_it
 def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr_name):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     explained_obj = getattr(model_web.get_web_object_from_efootprint_id(efootprint_id), attr_name)
 
@@ -635,10 +626,9 @@ def get_eco_logits_calculated_attribute_explanation(request, efootprint_id, attr
     )
 
 
+@render_exception_modal_if_error
 @time_it
 def get_calculated_attribute_explanation(request, efootprint_id, attr_name, id_of_key_in_dict=None):
-    planned("bug-fixes-2026-10#fragment-views-show-modal",
-            "A failure here shows the exception modal instead of a raw 500.")
     model_web = ModelWeb(SessionWorkspaceRepository(request.session).active_repository())
     explained_obj = get_web_explainable_from_attr(model_web, efootprint_id, attr_name, id_of_key_in_dict)
     literal_formula, ancestors_mapped_to_symbols_list = (

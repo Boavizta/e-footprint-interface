@@ -10,7 +10,6 @@ from pint import Quantity
 
 from model_builder.domain.entities.web_abstract_modeling_classes.dict_key_web_identity import DictKeyWebIdentity
 from model_builder.domain.entities.web_core.model_web_utils import to_rounded_daily_values, reindex_array
-from model_builder.narrate import planned
 from model_builder.domain.entities.web_abstract_modeling_classes.explainable_objects_web import (
     ExplainableObjectWeb,
     ExplainableQuantityWeb,
@@ -84,9 +83,6 @@ def prepare_timeseries_chart_context(
 
 def prepare_hourly_quantity_data(ehq: ExplainableHourlyQuantities) -> Tuple[Dict, Dict]:
     """Prepare chart data directly from a library hourly timeseries."""
-    planned.evidence("bug-fixes-2026-10#fragment-views-show-modal",
-                     "A value with **no series to chart** reaches the preparer, which raises on its next line.",
-                     lambda: {"value": type(ehq).__name__})
     aggregation_strategy = ehq.plot_aggregation_strategy
     if aggregation_strategy == "sum":
         display_unit = best_display_unit(24 * ehq.value)

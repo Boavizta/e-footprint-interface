@@ -2,11 +2,11 @@ import json
 import os
 from urllib.parse import urlencode
 
+from django.http import Http404
 from django.shortcuts import render
 from efootprint import __version__ as efootprint_version
 
 from e_footprint_interface import __version__ as interface_version
-from model_builder.narrate import planned
 
 GITHUB_NEW_ISSUE_URL = "https://github.com/Boavizta/e-footprint-interface/issues/new"
 FEEDBACK_EMAIL = "vincent.villet@publicissapient.com"
@@ -140,8 +140,5 @@ def render_exception_modal_if_error(func):
         try:
             return func(request, *args, **kwargs)
         except Exception as e:
-            planned("bug-fixes-2026-10#fragment-views-show-modal",
-                    "A not-found shows the modal at its own 404; any other failure at 500, as today.",
-                    lambda: {"failure": type(e).__name__})
-            return render_exception_modal(request, e)
+            return render_exception_modal(request, e, status=404 if isinstance(e, Http404) else 500)
     return wrapper

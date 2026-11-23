@@ -81,8 +81,8 @@ def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monk
         "components still charted": ["cpu", "ram"], "charts offered that do not draw": 0}
 
 
-@reproduces("bug-fixes-2026-10#fragment-views-show-modal: a fragment view that fails answers with the exception "
-            "modal, a not-found at its own 404")
+@titled("bug-fixes-2026-10#fragment-views-show-modal: a fragment view that fails answers with the exception "
+        "modal, a not-found at its own 404")
 @pytest.mark.django_db
 def test_failing_fragment_views_show_the_exception_modal(
         client, monkeypatch, edge_computer_system_data, minimal_system_data):
