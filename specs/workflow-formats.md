@@ -91,6 +91,10 @@ whoever meets it sees, and where it was diagnosed. The pieces whose sections sta
 the next bug, fix it. The page is then read a bug at a time: what is wrong, then its pieces, in
 the order of the file. The cause is no part of the section: it is its pieces', and their chains'.
 
+A plan of bugs has no tasks stage. Its reproductions are its unit tests, written and failing,
+and its diagnosis is its grounding: what is left of that stage is the lots, which the plan stage
+writes itself, as `## Delivery`. One approval holds the plan and its delivery.
+
 A piece that fixes a bug says, beside what changes, what is wrong today. Two forms carry it, and
 the plan page draws them as one chain under the piece: each reproduction, the places it crossed
 in run order with the values it saw at each, then how it failed.
