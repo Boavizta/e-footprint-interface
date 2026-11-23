@@ -1,9 +1,10 @@
 # Bug batches on the comprehension harness — experiment
 
-The comprehension harness plans a feature as pieces written into the code. A bug batch still uses
-the earlier form (`tasks.md`, diagnostics, a hand-written `plan.html`). This experiment ports
+The comprehension harness plans a feature as pieces written into the code. A bug batch used the
+earlier form (`tasks.md`, diagnostics, a hand-written `plan.html`). This experiment ports
 `bug-fixes-2026-10` runs B and C to the harness, one bug at a time, to find what the harness needs
-to plan and fix bugs well.
+to plan and fix bugs well. Since 2026-11-23 the bug skills write pieces too, on the forms settled
+so far: what the remaining bugs show corrects them.
 
 It is an experiment on the harness, not a feature of the product: it has no spec, no approval and
 no delivery of its own. Each change to the harness is decided on the bug in hand, made small, and
@@ -18,13 +19,15 @@ feature folder's `plan.md`, leave it alone.
   code, and the page generated at `specs/comprehension_harness/plans/bug-fixes-2026-10.html`. The
   piece tags keep the batch's name.
 - `diagnostics/*.md` stay as the record of each investigation.
+- `tasks.md` is the baseline too, and is not run. A task delivered through the plan is marked
+  complete there, and leaves the order of its run.
 
 ## The loop
 
 A bug is ported before it is fixed, and bugs are approved and fixed in batches: the approval is a
 plan's, not a bug's, so a bug ported after an approval is an edit of an approved plan.
 
-1. Port the bug with the harness as it is.
+1. Port the bug with the harness as it is, by `bug-fixes-plan`.
 2. Compare the generated page with the bug's section of the baseline, and write the gaps below.
 3. Add the smallest primitive the comparison asks for, and render again.
 4. Once every bug of the batch is ported, its lots are written and the reviewer approves the plan
@@ -33,51 +36,63 @@ plan's, not a bug's, so a bug ported after an approval is an edit of an approved
 
 ## Next
 
-The plan of Tasks 9 and 10 is approved with its delivery (2026-11-23): two bugs, three pieces, one
-lot, `calculated-attribute-panel`. **The small batch** is now fixed, in one fresh session of
-`feature-implement`. It is small on purpose. The implement stage has never met the bug forms, and
-what it has to hold is tested in the tools alone, not through a delivery:
+The small batch is fixed, reviewed and approved again (2026-11-23): Tasks 9 and 10, three pieces,
+one lot. What its run showed is under Findings, and the skills and the harness were changed for
+it the same day.
 
-- the lot check, when an evidence call goes with nothing written in its place;
-- a reproduction becoming a written test under the same title, its lot then delivered.
+Now **the rest of run B, ported in full before any of it is fixed**, as a batch is run: Tasks 7,
+16, 12 and 2, a session a bug, in that order. They join the plan that holds the two fixed bugs:
+each is an edit of an approved plan, and the four are approved together, with the lots they add.
+The plan is not closed between rounds: it is archived whole, at the end (Decided so far).
 
-The skills do not know the forms yet: "A bug batch" in `feature-implement` and `task-implement`
-describes the earlier one, tasks and an expected-failure marker to remove. The session is told
-so, and ends with the list of where a skill, the lot check or the pages did not fit. A misfit is
-reported, not worked around: it is what this batch is run for. To open it:
+Three things are met for the first time, and a misfit of any is reported, not worked around:
 
-> Run the delivery of `bug-fixes-2026-10` with `feature-implement`: its one lot,
-> `calculated-attribute-panel`, three pieces that fix two bugs. The plan and its delivery are
-> approved (`specs/features/bug-fixes-2026-10/plan.md`, `plan.approved.json`), and
-> `npm run map -- brief bug-fixes-2026-10/calculated-attribute-panel` prints the lot.
+- `bug-fixes-plan` in its new form, which nothing has run. `bug-fixes` waits for a batch not
+  yet diagnosed: these four are;
+- an edit that takes back a built place, the `unbuilt` claim;
+- an approval made with the tools that hold a reproduction as written and freeze its chain. The
+  first fix after it is the first time a real page shows a bug's chain under a built piece.
+
+To open the first session:
+
+> Port Task 7 of `bug-fixes-2026-10` into its plan, with `bug-fixes-plan`. The plan
+> (`specs/features/bug-fixes-2026-10/plan.md`) holds two bugs, fixed and approved: Task 7 joins
+> it as a `## Bug:` section with its pieces, and its lot joins `## Delivery`. Fix nothing.
 >
-> This is the first plan of bugs run as pieces and lots. The folder's `tasks.md` and `plan.html`
-> are the earlier form, kept as a baseline and not to be run: the "A bug batch" sections of
-> `feature-implement` and `task-implement` do not apply. A piece that fixes a bug is built as
-> `specs/workflow-formats.md` § "A bug" and § "Implementing a piece" say: each `planned` call
-> becomes code, each evidence call goes with nothing written in its place, and each reproduction
-> passes and is declared `@titled` under the same title. No other test is written unless the
-> plan gains one.
+> This is a session of the experiment
+> `specs/features/comprehension-harness-bug-fixes/experiment.md`: read it first. Its loop applies:
+> port the bug with the harness as it is, compare the generated page with the bug's section of
+> `plan.html`, write the gaps under Findings as Tasks 9 and 10 have theirs, and add a primitive
+> only for a gap you name. `tasks.md`, `plan.html` and `diagnostics/` are the baseline the bug is
+> ported from: the first two are the earlier form, not edited and not run. The table "Order" says
+> what Task 7 probes.
 >
-> Once the lot is delivered, mark Tasks 9 and 10 complete in `tasks.md`, so that no run of the
-> earlier form picks them up. End your report with the list of where a skill, the lot check, the
-> map or the pages did not fit a bug's forms, and work around none of them:
-> `specs/features/comprehension-harness-bug-fixes/experiment.md` § "Next" says why.
+> The bug is diagnosed already: `bug-fixes` is not run. Where the diagnosis left a reproduction
+> under an expected-failure marker, it is declared in the stack's form and made to observe, then
+> assert once.
+>
+> In the same session, take back the three places of `#fragment-views-show-modal` the plan still
+> reads as built and the review undid, the two calculus-graph views and the Sankey card deletion:
+> one `Changed:`, three `unbuilt` claims (`specs/workflow-formats.md` § "`plan.md`").
+>
+> `bug-fixes-plan` was rewritten for pieces and has never been run. End your report with where it,
+> `spec-plan`, the check, the map or the pages did not fit, and work around none of them. Stop
+> before the approval: it is the reviewer's, and waits for Tasks 16, 12 and 2.
 
-**Then back here**, in a session of the experiment: what that session listed is written under
-Findings, and decides what the skills are taught before the next batch.
+The sessions of Tasks 16, 12 and 2 open the same way, the task and what it probes changed, and
+without the paragraph on the three places. Each puts its pieces in a lot, since the check holds
+every piece to one. The last one reads the four together, groups in one lot the bugs that share a
+surface, and hands the plan to the reviewer.
 
-Then **the rest of run B, ported in full before any of it is fixed**, as a batch is run: Tasks 7,
-16, 12 and 2. They join a plan approved once already, and are approved in a second round, with
-the lots they add.
+**Then the fix**, one lot a run of `feature-implement`, and back here with what each run listed.
 
 ## Order
 
 | Bug | Why here | State |
 |---|---|---|
-| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported and approved. Next to deliver and fix, in one lot with Task 10 |
-| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Ported and approved. Next to deliver and fix, in one lot with Task 9 |
-| Task 7 — "each hour" after the unit | Template-only: third use of the template site | Next to port, once the small batch is fixed |
+| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Fixed (2026-11-23), in the lot `calculated-attribute-panel` |
+| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Fixed (2026-11-23), in the same lot |
+| Task 7 — "each hour" after the unit | Template-only: third use of the template site. First run of `bug-fixes-plan` in its new form, and of an edit that takes a built place back | Next to port |
 | Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | |
 | Task 12 — system prefix first in card ids | Cause in Python, symptom in a jest test: two evidence tests joined at the piece | |
 | Task 2 — membership-section region | Symptom in a browser: an in-process cause test, and a browser reproduction, whose run is to settle then | |
@@ -109,15 +124,36 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **The pages own the reproductions' runs**: the render and the check run them first, whole files,
   and the served pages at each save. A debug run writes no story.
 
+Built on the fix of Tasks 9 and 10, for what the implement stage showed:
+
+- **`unbuilt`**: a claim of a `Changed:` that names a place the plan reads as built and the code
+  does not hold. The piece loses the line, the page draws it "taken back" under its edit, and the
+  next approval drops it. A kind of its own: a `code` claim never drops a built place.
+- **The approval holds a reproduction as written.** The title reader gives a declared test's body
+  as a hash, its declaration left out. One edited since the approval, fixed or not, is a line of
+  its piece's difference.
+- **The chain outlives the fix.** The approval freezes what each reproduction saw and how it
+  failed, and the pages draw it under the built piece, beside the test that now passes. A bug
+  reads "fixed" once its pieces are built; the reproductions have their own block of a lot's
+  tests; evidence that went is no place built.
+- **The brief of a built piece** prints each place that became code with its clause as approved,
+  and each test written: what a reviewer sets the code against.
+
 Still candidates:
 
 - A home for what the baseline holds and neither a bug nor a piece does: the verdict, the clusters
-  by failure mechanism, the acceptance on the shipped examples.
+  by failure mechanism.
 - The debug run stopping at the evidence by itself: today it stops at the reader's breakpoints.
 - The order of several reproductions of one piece: today the order of their file.
 - One clause for a ripple: seen at Task 9 and again at Task 10. The lot check wants a place in each
-  file the piece changes, so a ripple cannot be stated at its cause alone.
-- What a plan leaves to the implementer: the baseline's "optional" has no form.
+  file the piece changes, so a ripple cannot be stated at its cause alone. The fix of Task 9 gave
+  it a cost: one clause over thirteen views hid the three it did not fit.
+- A check that an `unbuilt` paragraph is owed: no tool tells that the code stopped doing what a
+  clause says, so the paragraph is written only when a reviewer sees it.
+- A change in a file the plan names, on a line no place names: neither the lot check nor the
+  brief shows it.
+- A feature name used again after an archive: a plan reads every commit that names one of its
+  feature's pieces, and fails on one whose piece it no longer holds.
 
 ## Decided so far
 
@@ -131,6 +167,24 @@ Still candidates:
 - A plan of bugs has no tasks stage: the plan stage writes its lots, and one approval holds both.
 - A bug that is a value several crossings share is said with `distinct`, not with an `expect` that
   every crossing fails: what is red on the page is the bug, not the reach of the fix.
+- The bug skills write pieces (2026-11-23): `bug-fixes` leaves a diagnostic a bug and its
+  reproductions in the stack's form, `bug-fixes-plan` the plan as `spec-plan` does with what a
+  batch adds, and `feature-implement`, `task-implement` and `task-review` hold no earlier form.
+  No batch is left to run it: the rest of this one is ported. The tools of a `plan.html` stay for
+  the ones already written.
+- A plan leaves nothing to the implementer: a place is written or it is not. The implementer
+  reads each place against what the piece's reason leaves as it is, and reports the one it rules
+  out.
+- What a diagnostic lists beyond its reproduction, as the sweep of the shipped examples, is a
+  test, a check for the user named in its lot's reason, or dropped in a clause of the piece's
+  reason: the plan says which. Written into the skills; no bug has met it yet.
+- A cause that is only plausible is planned as the piece that produces the reading, the fix a
+  piece of a later lot that waits on it. Written into the skills; no bug has met it yet.
+- The plan is extended between rounds and archived whole at the end (the reviewer's,
+  2026-11-23). Closing it after a round would take the tags off its tests and leave its commits
+  naming pieces the next plan does not hold, and its folder holds the baseline.
+- No global review of a round: rounds are the experiment's, and a batch is normally approved
+  once. The leads of each lot's review wait in the gates file for the review of the whole.
 
 ## Findings
 
@@ -317,3 +371,95 @@ what it would do.
   the plan stage because, for a bug, no later stage plans tests.
 - **Left for a larger batch**: lots told from the bug sections alone. Two bugs do not say how
   several bugs of one run would be grouped.
+
+### The small batch — fixed through `feature-implement` (2026-11-23)
+
+One lot, `calculated-attribute-panel`, `easy`: three pieces in three commits, a docs commit and a
+changelog commit, then three commits of review fixes. The reviewer read it at full depth, for
+the shared exception wrapper, and returned eight findings. The suites were green at the end, and
+the plan was approved again once two edits and one question were answered.
+
+What held, of the two things the batch was run to test:
+
+- **An evidence call went with nothing written in its place**, and the lot check said nothing.
+- **Each reproduction became a written test under its title**, and its lot read as delivered.
+
+What the review found that the forms had let through:
+
+- **The plan contradicted itself.** Three of the thirteen views are no fragment: the two
+  calculus-graph views are full pages, and the Sankey card deletion is called by a script. The
+  piece's own reason says a full page stays as it is. The baseline had left it to the implementer
+  ("check each"); the port froze every view as a place, and nothing sets a place against a reason.
+- **The statement claimed more than its places.** "The other undecorated fragment views" read as
+  all of them: seven more are undecorated. They are left to the backlog's HTMX-aware server error
+  handler, which now names them.
+- **A reproduction asserted less than its title**: "reads no value" was in the title alone. The
+  review made it assert it, after the fix.
+- **A line the fix left dangling**: the dict's label pointed at an input id the piece renamed. It
+  was no place of the plan.
+
+Where the skills, the check, the map and the pages did not fit:
+
+1. The three skills spoke of bugs only in their sections for `tasks.md`: the forms of a piece
+   that fixes a bug had to be written into each brief.
+2. `task-review` asked for the story of the last commit and for deleted tests, which a bug's
+   piece has not, and did not ask whether a reproduction's body moved with its declaration.
+3. Nothing said what becomes of a template's load line once its last tag is gone.
+4. A comment on a browser test, "the selector matches its prefix", was built too loosely first.
+5. The gates are sorted from a lot's reason and its pieces: the baseline's acceptance on the
+   shipped examples has no home in the plan, so it was not sorted and not run.
+6. "When the last lot is reviewed" has no moment in a plan approved in rounds.
+7. Nothing said where the changelog entry goes: it was a commit naming three pieces, which a
+   review fix edited again.
+8. **A built place undone by a review fix is invisible.** The check reads a place as built once
+   its call is gone from the source, whatever was written there: a `Changed:` that claimed the
+   three views was refused, and stood on the reason's line alone. The delivery page and the next
+   approval went on holding them as built.
+9. The approval holds a test by its title: the reproduction the review strengthened passed
+   unseen.
+10. A change on a line no place names, in a file the plan names, passes unseen.
+11. The brief of a built lot printed counts: the reviewer read the approved clauses in
+    `plan.approved.json`. It counted the evidence that went as places built.
+12. A place of a bug's piece that no test reaches was sent to "the narrative tests it should sit
+    in".
+13. The map's `help` crashed, and a stale story file was counted and not named.
+14. **Once a piece is built, the page tells nothing of the bug**: no evidence, no value, no
+    failure, and the reproduction listed "written" under "Tests to write". A bug's section has
+    no state.
+
+### The small batch — what was changed for it (2026-11-23)
+
+A commit a change, each held by the tools' tests where it is the tools':
+
+| What | For | Commit |
+|---|---|---|
+| The three skills say how a piece that fixes a bug is built, reviewed and supervised | 1, 2, 3 | `24d2b8ec` |
+| The implementer reads each place against what the piece's reason leaves as it is | the plan that contradicted itself | `65b50d23` |
+| Each lot adds its part of the changelog entry in its last commit | 7 | `42ce3729` |
+| A `Changed:` takes back a place that reads as built, by an `unbuilt` claim | 8 | `5ea53588` |
+| The approval holds a reproduction as written | 9 | `2288b18e` |
+| The approval freezes each reproduction's chain, and the pages draw it under the built piece | 14, and 11's count | `272a8c4f` |
+| The brief prints a built piece as the approval holds it; `help`; the stale story's name | 11, 12, 13 | `79a422fc` |
+| `bug-fixes` and `bug-fixes-plan` write pieces, and the earlier form leaves the skills | 1, at its root | `dd1964bf` |
+
+What building them showed:
+
+- **Taking back needs a claim of its own.** The first version let a `code` claim name a built
+  place when it named no line of the difference. An old claim of another plan, on a file its
+  piece had built three places in, took the three back without a word. `unbuilt` cannot do that.
+- **The frozen chain has been seen on no real approval.** This plan was approved before the
+  tools froze anything, and an approval file is the approval command's alone: the drawing was
+  checked on the plan read in memory. The next approval is the first to freeze, and the fix after
+  it the first page to show.
+- **The body is held for a reproduction, not for every written test**: a planned change of a
+  test like another is announced by a comment on it, and is no edit to explain.
+- **A place that is code has no line.** The frozen chain and the brief name it by its file and
+  its function: the approval holds no line number, on purpose.
+
+Left open by the small batch:
+
+- 4, 5, 6 and 10 of the list. 5 is decided in the skills and met by no bug yet; 6 is the
+  experiment's own, and asks nothing of a batch approved once.
+- The three views are still built in this plan's approval: the session that ports Task 7 takes
+  them back.
+- Whether a place can be set against its piece's reason by a tool. The implementer now does it.
