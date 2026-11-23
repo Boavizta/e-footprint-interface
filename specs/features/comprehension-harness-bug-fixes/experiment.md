@@ -32,8 +32,8 @@ plan's, not a bug's, so a bug ported after an approval is an edit of an approved
 
 ## Next
 
-**Port Task 10**, in a fresh session, before any fix. Nothing of the plan is approved yet: Task 9
-waits for Task 10, and the two are approved together.
+**The reviewer reads Task 10's piece**, then approves the plan: Tasks 9 and 10, three pieces, one
+approval. Nothing of it is approved yet.
 
 Then **the small batch**: Tasks 9 and 10 delivered and fixed as one run. It is small on purpose.
 The implement stage has never met the bug forms, and what it has to hold is tested in the tools
@@ -51,9 +51,9 @@ Then **the rest of run B, ported in full before any of it is fixed**, as a batch
 
 | Bug | Why here | State |
 |---|---|---|
-| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported, read by the reviewer, its question answered. Waits for Task 10 to be approved and fixed with it |
-| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Next to port |
-| Task 7 — "each hour" after the unit | Template-only: second use of the template site | |
+| Task 9 — empty calculated dict entries | In-process reproduction, the baseline's richest chain of values, four Python links and one template link | Ported, read by the reviewer, its question answered. Approved and fixed with Task 10 |
+| Task 10 — explanation ids per item | Template-only: template sites as the only evidence. Shares Task 9's test file and its cluster of the baseline | Ported. To be read by the reviewer, then approved with Task 9 |
+| Task 7 — "each hour" after the unit | Template-only: third use of the template site | Next to port, once the small batch is fixed |
 | Task 16 — group-member confirmation | Pure Python, no reproduction yet: one written from scratch with the new primitives | |
 | Task 12 — system prefix first in card ids | Cause in Python, symptom in a jest test: two evidence tests joined at the piece | |
 | Task 2 — membership-section region | Symptom in a browser: an in-process cause test, and a browser reproduction, whose run is to settle then | |
@@ -77,6 +77,9 @@ Built on Task 9, and stated for a reader in `specs/workflow-formats.md` § "A bu
 - **A debug button on each reproduction**, on the route the narratives' button uses.
 - **A template site**: `{% narrate %}`, `{% event %}`, `{% planned %}` and `{% evidence %}`, tags of
   `model_builder/templatetags/narrate.py`.
+- **`distinct`**, built on Task 10: on a `planned` or an evidence call, the keys of the watch each
+  crossing should see a value of its own for. For a bug no crossing shows alone: one value at
+  several. Read from the source; no run and no story holds it.
 - **The pages own the reproductions' runs**: the render and the check run them first, whole files,
   and the served pages at each save. A debug run writes no story.
 
@@ -86,6 +89,9 @@ Still candidates:
   mechanism, the link to the diagnostic.
 - The debug run stopping at the evidence by itself: today it stops at the reader's breakpoints.
 - The order of several reproductions of one piece: today the order of their file.
+- One clause for a ripple: seen at Task 9 and again at Task 10. The lot check wants a place in each
+  file the piece changes, so a ripple cannot be stated at its cause alone.
+- What a plan leaves to the implementer: the baseline's "optional" has no form.
 
 ## Decided so far
 
@@ -96,6 +102,8 @@ Still candidates:
 - No header, middleware or spool file to trace the external development server.
 - The JavaScript stack is built after the bug primitives are settled on Python and the template
   site, so that they are designed once.
+- A bug that is a value several crossings share is said with `distinct`, not with an `expect` that
+  every crossing fails: what is red on the page is the bug, not the reach of the fix.
 
 ## Findings
 
@@ -184,3 +192,64 @@ Left open by Task 9:
   gained a site for it, and the reproduction two observations.
 - The tag library is written here and held by a test of this project; `e-footprint` takes the
   shared files at its next sync and needs none.
+
+### Task 10 — ported with the harness as it is (2026-11-23)
+
+One piece, `#explanation-ids-per-item`: seven `planned` tags in five templates, a comment on each
+of the three browser tests whose selector changes, one reproduction. No evidence tag: every line
+the bug shows at is a line the fix changes.
+
+What the port did that the baseline did not:
+
+- **The reproduction says who collides.** The baseline's stops at its first assertion, on two ids
+  written three times. Rewritten to observe then assert once, it also names the formula buttons
+  that open one row: the CPU's, the RAM's and the storage's.
+- **It had to decide what the baseline left optional.** The section button's `aria-controls` is
+  "optional" there. A place is written or it is not, and the lot check refuses a file no place
+  names: it is written, as a place the reviewer can refuse.
+- **It counts what reaches each place.** The EcoLogits override is reached by no test outside the
+  browser tier: the two browser tests that carry the piece's comment are all that hold it.
+- **Its places cannot go stale**, again: the baseline breaks at `:103` of a test that has moved.
+
+What the generated page cannot say:
+
+1. **The bug is no crossing's own.** The collapse's line is crossed sixteen times and is right at
+   each for its item: what is wrong is that three crossings wrote the same id. With `expect` set to
+   the web id, each of the two places drew sixteen crossings in red, the three that collide among
+   them. Without it, six of the sixteen were listed and nothing was red.
+2. **One clause three times**, gap 7 again: a template that overrides a block repeats its parent's
+   line, and each file needs its place.
+3. **The second usage pattern shows nothing yet.** The dict entries reach these templates once
+   Task 9's piece is built: the chain of one piece's reproduction depends on another piece's
+   state. The baseline says it in prose, as its "discrimination".
+4. **What the browser does with a shared id** (the first match swapped, every match toggled, the
+   fetch made once) was observed for the diagnostic and no test holds it. It is a clause of the
+   piece's reason.
+5. **No home**, gap 8 again: the sweep of the shipped examples as acceptance, the link to the
+   diagnostic.
+6. **The values hold generated ids**, so the page differs at each render. Nothing approved moves:
+   the approval holds what a place says, not what a run saw.
+
+### Task 10 — on the one harness change (2026-11-23)
+
+Gap 1 is closed by `distinct`. The collapse and the button each name the key their crossings
+should see their own value for, and the page reads as the baseline's first three links: the
+attribute name three times, in red, "should be one for each crossing", then the three owners,
+each with the web id it already has; the thirteen other crossings are counted, and folded.
+
+What it showed:
+
+- **The fix's value is context, not an expectation.** The web id is watched beside the shared key
+  and expects nothing: it is right today, and unused. This is the baseline's third link.
+- **The declaration is the source's.** Which crossings share a value is told from the watches a
+  story already holds: the collector, the calls at run time and the story are unchanged.
+- **The check holds the diagnosis**, as it does for `expect`: a place that names distinct keys and
+  whose reproduction saw a value of its own at each crossing fails.
+- **The message and the chain say the same thing twice**, from two sides: the test sees the panel,
+  the tags see each item. Neither is dropped: the message is what the fix has to turn, the chain
+  is where.
+
+Left open by Task 10:
+
+- Gap 2, with Task 9's gap 7: now a candidate above.
+- Whether a plan may leave a place to the implementer.
