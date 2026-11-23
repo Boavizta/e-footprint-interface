@@ -1,0 +1,114 @@
+{
+  "feature": "bug-fixes-2026-10",
+  "base": "a837631a40d09568cf7f804bcda9673f8b1bed68",
+  "approvedOn": "2026-11-23",
+  "units": [
+    {
+      "kind": "piece",
+      "name": "#fragment-views-show-modal",
+      "facets": {
+        "statement": [
+          "A fragment view that fails shows the exception modal, a not-found at its own 404: the four calculated-attribute read views, the delete confirmation, and the other undecorated fragment views."
+        ],
+        "reason": [
+          "A raw 500 is swapped nowhere: a stale pane and no error (constitution §1.4). A view's own not-found is as silent, on a stale Sources row: it shows the modal and keeps its 404, a missing thing being no server error. A full page or a download stays as it is. The chart preparers gain no empty-value branch."
+        ],
+        "sites": [
+          "changed model_builder/adapters/views/exception_handling.py in render_exception_modal_if_error.<locals>.wrapper — A not-found shows the modal at its own 404; any other failure at 500, as today.",
+          "changed model_builder/adapters/views/sankey_views.py in sankey_form — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/sankey_views.py in sankey_cards — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/sankey_views.py in sankey_delete_card — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views_deletion.py in ask_delete_object — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views_help.py in open_help_drawer — A failure here shows the exception modal, and its own not-found keeps its 404.",
+          "changed model_builder/adapters/views/views.py in get_calculus_graph — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in display_calculus_graph — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in source_table — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in source_table_row_editor — A failure here shows the exception modal, and its own not-found keeps its 404.",
+          "changed model_builder/adapters/views/views.py in get_explainable_hourly_quantity_chart_and_explanation — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in get_explainable_recurrent_quantity_chart_and_explanation — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in get_eco_logits_calculated_attribute_explanation — A failure here shows the exception modal instead of a raw 500.",
+          "changed model_builder/adapters/views/views.py in get_calculated_attribute_explanation — A failure here shows the exception modal instead of a raw 500.",
+          "evidence model_builder/domain/entities/web_core/explainable_timeseries_utils.py in prepare_hourly_quantity_data — A value with **no series to chart** reaches the preparer, which raises on its next line."
+        ],
+        "comments": [],
+        "tests": [
+          "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — a fragment view that fails answers with the exception modal, a not-found at its own 404"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#explanation-ids-per-item",
+      "facets": {
+        "statement": [
+          "Each calculated attribute's ids, and what points at them, are built from the item's web id: its collapse, the three references of its formula button, its input and its label."
+        ],
+        "reason": [
+          "Today they are built from the attribute name, which several objects of one panel share: HTMX swaps into the first match, Bootstrap toggles every match. The web id already names the dict toggles. Refused: a relative target, which leaves Bootstrap's; a prefix passed by the section, which is not the item's owner; the route id, the URL's contract."
+        ],
+        "sites": [
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes_section.html in (template) — The section button's `aria-controls` names the section's own id, as its target does.",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/components/get_calculated_attribute_explanation_button.html in (template) — The button's three references name the collapse of its own item. ⇒ distinct opens",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html in (template) — The button's three references name the collapse of its own item.",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/eco_logits_explainable_quantity.html in (template) — The input's id is built from the item's web id.",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html in (template) — The label names the input of its own item, by the item's web id.",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html in (template) — The input's id is built from the item's web id.",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_template.html in (template) — The collapse id is built from the item's web id, which holds the attribute, its container and its dict key. ⇒ distinct keyed_by",
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html in (template) — The input's id is built from the item's web id."
+        ],
+        "comments": [
+          "changes tests/e2e/objects/test_external_api_objects.py — The id ends with the item's web id: the selector matches its prefix.",
+          "changes tests/e2e/objects/test_video_external_api_objects.py — The id ends with the item's web id: the selector matches its prefix.",
+          "changes tests/e2e/test_calculus_graph.py — The id ends with the item's web id: the selector matches its prefix."
+        ],
+        "tests": [
+          "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — in a panel of several objects, each formula button opens a row of its own"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "piece",
+      "name": "#dict-entry-own-template",
+      "facets": {
+        "statement": [
+          "Each entry of a calculated dict is drawn by the template of its own class: an entry the library leaves empty reads \"no value\", keeps its formula, offers no chart."
+        ],
+        "reason": [
+          "Today the dict template sends every entry that is not a quantity to the hourly chart, the empty ones included. The top-level section already includes by class. Refused: charting an empty value as zeros, which invents the date and the unit the library leaves out; a branch for the empty class, a list kept by hand."
+        ],
+        "sites": [
+          "changed model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Each entry includes the template named by its own class, as the top-level section does.",
+          "evidence model_builder/templates/model_builder/side_panels/edit/calculated_attributes/explainable_object_dict.html in (template) — Whatever is not a quantity is drawn **as an hourly series**, with its chart button. ⇒ drawn_with=sub_item.class_as_snake_str"
+        ],
+        "comments": [],
+        "tests": [
+          "unit tests/unit_tests/adapters/views/test_views_calculated_attributes.py — a dict entry the library leaves empty reads no value, with its formula and no chart"
+        ],
+        "question": [],
+        "notes": []
+      }
+    },
+    {
+      "kind": "decision",
+      "name": "Bug: The chart button of an empty dict entry fails with nothing shown",
+      "facets": {
+        "text": [
+          "In an edge computer's panel, three entries of the edge storage offer a chart: the library leaves them empty on purpose. The button answers a raw 500, which the page swaps nowhere: an empty chart pane, and no error. Any fragment that fails is as silent. Task 9, diagnosed in [hourly-chart-empty-timeseries-500.md](diagnostics/hourly-chart-empty-timeseries-500.md)."
+        ]
+      }
+    },
+    {
+      "kind": "decision",
+      "name": "Bug: A formula button opens another object's explanation",
+      "facets": {
+        "text": [
+          "In a panel that shows several objects, an edge computer with its CPU, RAM and storage, the RAM's formula button puts its explanation in the CPU's row and opens all three rows. One more click, and the RAM's explanation cannot be reached until the panel is reopened. Task 10, diagnosed in [calculated-attribute-collapse-id-collision.md](diagnostics/calculated-attribute-collapse-id-collision.md)."
+        ]
+      }
+    }
+  ]
+}
