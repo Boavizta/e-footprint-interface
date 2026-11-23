@@ -25,6 +25,10 @@ to do differently goes in your report.
 1. **Each place becomes code**: a `planned` call is replaced by what its clause says, a shell
    gets its body, a comment goes with the change it announced. The clause is what was approved:
    when the code cannot do what it says, stop at that piece and report it.
+   **Read each place against what the piece's reason leaves as it is.** A reason that says what
+   stays (a kind of view, a file, a case) rules places out, and a clause repeated over many
+   places hides the one it does not fit. A place the reason rules out is not built: its call
+   goes, nothing is written, and it is the first of your deviations.
 2. **Each planned test becomes a test under the same title**, tag and `[rule]` kept. An existing
    case extended takes the planned title. A test under an `@planned.remove` comment is deleted,
    one under an `@planned` comment changed as the comment says.

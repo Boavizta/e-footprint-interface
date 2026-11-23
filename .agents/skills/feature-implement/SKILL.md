@@ -76,6 +76,10 @@ Its report is all that enters your context: the commits, a line a piece; the gat
 **deviations** (a place not built, a file no place names, a test added, dropped or deleted
 beyond the plan) and its **doubts**. No diff, no narration.
 
+**A place not built is a decision, whatever the check says.** In a file where the piece built
+other places, the check reads it as built. You settle it at step 2 as the rest: explained, in a
+`Changed:` that names the place, or sent back to be built.
+
 **A lot that fixes bugs is a lot like another.** Its brief shows the reproductions that fail
 today and the evidence that goes with the fix, and its implementer follows `task-implement`
 § "A piece that fixes a bug". It is delivered when no evidence call and no reproduction stands:
