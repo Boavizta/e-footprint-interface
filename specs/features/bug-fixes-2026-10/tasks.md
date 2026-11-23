@@ -7,7 +7,7 @@ Completed walkthrough: [`run-a-review.html`](run-a-review.html). Remaining work:
 | Run | Tasks in execution order | Prerequisites / release boundary |
 |---|---|---|
 | A — complete | 5 → 4 → 6 → 8 → 11 → 3 | Independent release checkpoint: publish the Run A library changes, restore a PyPI pin in the interface, and validate the published package before merging the interface to `main`. No dependency on B/C or Task 16. |
-| B — planned | 9 → 10 → 12 → 2 → 1 → 7 → 16 | Run A implementation; Task 16 is the newly recorded group-member confirmation follow-up. |
+| B — planned | 12 → 2 → 1 → 7 → 16 | Run A implementation; Task 16 is the newly recorded group-member confirmation follow-up. Tasks 9 and 10, first of this run, are complete: delivered as pieces from [`plan.md`](plan.md) (2026-11-23). |
 | C — planned | 13 → 14 → 15 | Run B; Task 13 follows Task 16 in the shared deletion use case. |
 
 Use a fresh `feature-implement` session for each remaining run. Release each completed run
@@ -561,6 +561,9 @@ correction; Task 6 separately fixes successful saves of editable objects with no
 
 ## Task 9 — Empty calculated dict entries render "no value" without a chart button; chart views show the error modal
 
+**Status:** complete (2026-11-23), delivered as pieces by the lot `calculated-attribute-panel` of
+[`plan.md`](plan.md), not through this task. Not to be run again.
+
 **Goal:** Calculated dict entries the library leaves empty on purpose (e.g. `EdgeStorage`
 `unitary_power_per_usage_pattern`, storage power treated as negligible, and the energy and
 use-footprint dicts derived from it) render "no value" with formula and calculus-graph buttons and
@@ -607,6 +610,9 @@ fragment views get it too.
 **Implementation:** easy — one template include and a set of decorators, cause verified.
 
 ## Task 10 — Calculated-attribute explanation ids are scoped per item, not per attribute name
+
+**Status:** complete (2026-11-23), delivered as pieces by the lot `calculated-attribute-panel` of
+[`plan.md`](plan.md), not through this task. Not to be run again.
 
 **Goal:** In panels that render several objects' calculated attributes (edge computer with CPU, RAM
 and storage; servers with storage; edge appliance; external API), every formula button opens its
