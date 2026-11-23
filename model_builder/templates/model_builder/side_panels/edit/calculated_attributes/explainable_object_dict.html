@@ -1,6 +1,5 @@
 {% load static %}
 {% load label_filters %}
-{% load narrate %}
 
 <div class="row align-items-center mb-3">
     <button type="button"
@@ -22,13 +21,7 @@
 <div class="collapse" id="collapse-calculated_attributes_{{ item.attr_name_in_mod_obj_container }}_{{ item.web_id }}">
     <div class="card card-body mb-3 no-truncate">
         {% for sub_item in item.get_values_as_list %}
-            {% planned "bug-fixes-2026-10#dict-entry-own-template" "Each entry includes the template named by its own class, as the top-level section does." %}
-            {% if sub_item.class_as_snake_str == "explainable_quantity" %}
-                {% include "model_builder/side_panels/edit/calculated_attributes/explainable_quantity.html" with item=sub_item %}
-            {% else %}
-                {% evidence "bug-fixes-2026-10#dict-entry-own-template" "Whatever is not a quantity is drawn **as an hourly series**, with its chart button." entry=sub_item.attr_name_in_mod_obj_container drawn_with="explainable_hourly_quantities" expect drawn_with=sub_item.class_as_snake_str %}
-                {% include "model_builder/side_panels/edit/calculated_attributes/explainable_hourly_quantities.html" with item=sub_item %}
-            {% endif %}
+            {% include "model_builder/side_panels/edit/calculated_attributes/"|add:sub_item.class_as_snake_str|add:".html" with item=sub_item %}
         {% endfor %}
     </div>
 </div>

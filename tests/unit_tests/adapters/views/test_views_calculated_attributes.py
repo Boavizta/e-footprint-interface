@@ -14,7 +14,7 @@ from efootprint.core.usage.edge.edge_function import EdgeFunction
 from efootprint.core.usage.edge.edge_usage_journey import EdgeUsageJourney
 from efootprint.core.usage.edge.edge_usage_pattern import EdgeUsagePattern
 
-from comprehension_harness.python.declare import reproduces
+from comprehension_harness.python.declare import reproduces, titled
 from model_builder.adapters.repositories import SessionSystemRepository
 from tests.fixtures.system_builders import create_hourly_usage
 
@@ -49,8 +49,8 @@ def _answer(response) -> str:
     return "the exception modal" if response.status_code == 500 else f"the exception modal, as a {response.status_code}"
 
 
-@reproduces("bug-fixes-2026-10#dict-entry-own-template: a dict entry the library leaves empty reads no value, with "
-            "its formula and no chart")
+@titled("bug-fixes-2026-10#dict-entry-own-template: a dict entry the library leaves empty reads no value, with "
+         "its formula and no chart")
 @pytest.mark.django_db
 def test_empty_calculated_dict_entries_render_no_value_and_no_chart(client, monkeypatch, edge_computer_system_data):
     monkeypatch.delenv("RAISE_EXCEPTIONS", raising=False)
