@@ -1,7 +1,8 @@
 """The AI-assisted bootstrap, told by its own code (`narrate` and `event` calls) through the real views.
 
-The provider is a local fake: no inference is made. The pages drawn from these tests are
-`specs/comprehension_harness/narratives/modeling.html` (`npm run comprehension:render`).
+The provider is a local fake: no inference is made. The page drawn from these tests is
+`specs/comprehension_harness/narratives/the-user-bootstraps-a-modeling-from-a-description.html`
+(`npm run comprehension:render`).
 """
 import json
 import re

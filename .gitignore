@@ -75,10 +75,10 @@ ai-usage/.local/
 !.claude/settings.json
 
 # The comprehension harness (comprehension_harness/README.md): the pages are generated from the code and
-# a test run, never committed; a page's hand-written head (*.skeleton.html) is.
+# a test run, never committed, the index that lists them included.
+specs/comprehension_harness/index.html
 specs/comprehension_harness/narratives/*.html
 specs/comprehension_harness/mechanisms/*.html
-!specs/comprehension_harness/**/*.skeleton.html
 specs/comprehension_harness/plans/
 specs/design/journeys-generated/
 specs/features/*/plan-feedback.json

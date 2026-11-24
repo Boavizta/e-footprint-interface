@@ -3,12 +3,12 @@
   "stack": {
     "calls": "model_builder.narrate",
     "sourceIndex": ["python3", "-m", "comprehension_harness.python.source_index"],
-    "titles": ["python3", "-m", "comprehension_harness.python.titles"]
+    "titles": ["python3", "-m", "comprehension_harness.python.titles"],
+    "strip": ["python3", "-m", "comprehension_harness.python.strip"]
   },
   "cache": "node_modules/.cache/comprehension_harness",
   "docs": "specs",
   "hub": { "label": "architecture index", "page": "specs/architecture/index.html" },
-  "productPage": "modeling",
   "actor": "user",
   "source": {
     "scan": ["model_builder", "e_footprint_interface", "theme", "tests", "js_tests", "specs"],

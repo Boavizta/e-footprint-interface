@@ -35,16 +35,17 @@ ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 
 | The method says | Here |
 |---|---|
-| The three calls | `from model_builder.narrate import narrate, event, planned`, always by name. The file is this project's copy of `comprehension_harness/python/narrate.py`, held identical by a test and never edited here. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The sentence is a literal string and the watch a lambda, `narrate("…", lambda: {"count": n})`: the index refuses anything Python would compute in production |
-| A place that changes, a place that goes, a shell | `planned("<feature>#<slug>", "<sentence>")` on existing code; `planned.remove(…)` in a function that goes; a shell is a new function whose whole body, under an optional docstring, is the `planned` call then `raise NotImplementedError("planned: <feature>#<slug>")`. One call a line |
+| The calls | `from model_builder.narrate import narrate, event, planned, built`, always by name. The file is this project's copy of `comprehension_harness/python/narrate.py`, held identical by a test and never edited here. Standard library only, so `domain/` and `application/` import it; inert unless a test run installed the collector. The sentence is a literal string and the watch a lambda, `narrate("…", lambda: {"count": n})`: the index refuses anything Python would compute in production |
+| A place that changes, a place that goes, a shell | `planned("<feature>#<slug>:<place>", "<sentence>")` on existing code, the place a short kebab-case name of the site's own within its piece; `planned.remove("<feature>#<slug>", "<sentence>")` in a function that goes, which names no place; a shell is a new function whose whole body, under an optional docstring, is the `planned("<feature>#<slug>:<place>", …)` call then `raise NotImplementedError("planned: <feature>#<slug>")`. One call a line |
+| A place that is code | `built("<feature>#<slug>:<place>")` on a line of its own where the change is, `built` imported from `model_builder.narrate` as `planned` was; in a template, `{% built "<feature>#<slug>:<place>" %}`. In Python it is a statement of a block that holds something else: never an expression's operand, nor all a block holds, which the strip refuses |
 | Evidence of a bug, and what a place should see | `planned.evidence("<feature>#<slug>", "<what is seen here today>", lambda: {…}, expect={…})`, on the line the bug shows at; `expect=` on a `planned(…)` call too. `expect` is a literal dict, a key of the watch each, or a lambda giving one where the right value depends on the crossing. `distinct="<key>"`, or a tuple of keys, on either call: the keys of the watch each crossing should see a value of its own for |
-| A call in a template | `{% load narrate %}` of `model_builder/templatetags/narrate.py`, then one tag a line: `{% narrate "…" key=value %}`, `{% event "…" %}`, `{% planned "<feature>#<slug>" "…" key=value expect key=value %}`, `{% evidence "<feature>#<slug>" "…" key=value expect key=value %}`. The pairs are the watch, those after `expect` what the place should see, and the keys after `distinct` those each crossing should see its own value for (`… id=row.id distinct id`); the tag renders nothing. On a template line that runs, a site is a tag, never a comment |
+| A call in a template | `{% load narrate %}` of `model_builder/templatetags/narrate.py`, then one tag a line: `{% narrate "…" key=value %}`, `{% event "…" %}`, `{% planned "<feature>#<slug>:<place>" "…" key=value expect key=value %}`, `{% evidence "<feature>#<slug>" "…" key=value expect key=value %}`, `{% built "<feature>#<slug>:<place>" %}`. The pairs are the watch, those after `expect` what the place should see, and the keys after `distinct` those each crossing should see its own value for (`… id=row.id distinct id`); the tag renders nothing. On a template line that runs, a site is a tag, never a comment |
 | A reproduction | `@reproduces("<feature>#<slug>: <title> [<rule>]")` of `declare.py` on a written test that fails today: a run expects the failure, strictly. Built, it becomes `@titled("…")` under the same title. It observes, then asserts once at its end |
 | A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `comprehension_harness/python/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
 | A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |
 | A narrative, its reference case | A test class under `@narrative("<title>")` of the same `declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
 | What each test crossed | `comprehension_harness/python/collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
-| The source index, the test titles, the watch | `source_index.py`, `titles.py` and `watch.py` of `comprehension_harness/python/`: the three commands of the configuration, standard library only, run as `python3 -m comprehension_harness.python.<name>`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
+| The source index, the test titles, the watch, the strip | `source_index.py`, `titles.py`, `watch.py` and `strip.py` of `comprehension_harness/python/`: the four commands of the configuration, standard library only, run as `python3 -m comprehension_harness.python.<name>`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
 | A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class. A backticked name shaped like a declaration (`CamelCase`, or words joined by `_`) that the index cannot place fails `--check`, so a dict key, a field or a method is written without backticks |
 | A journey | A test class under `@journey("<name>", who=…, wants=…, now=…)` of `comprehension_harness/python/journey.py`, in a file under `tests/e2e/journeys/`; `screen(page, "<id>", why="…")` at each screen reached, once what makes it reached has been waited for. Its first test is the reference run, the others its variants. It is served by pytest-django's `live_server`, with the fixtures of `tests/e2e/journeys/conftest.py` (`specs/testing.md` § "Journey tests") |
 | A planned screen, a case to write | On a flow that has a journey: `screen(…, planned={"feature": "<feature>", "mockup": "specs/features/<feature>/mockups/<screen>.html", "what": "…"})`, the mockup an edited copy of today's capture, and `@planned_case("<feature>", "<screen>", "<title>")` on a test of the class with an empty body. Written, the case keeps its title under `@titled("<title>")` |
@@ -62,6 +63,7 @@ ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 | The pages served, with the answer buttons | `npm run comprehension` |
 | The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
 | The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |
+| The strip of an archive, once the gate passes | `npx tsx comprehension_harness/render.ts --strip <feature>`, with `--dry-run` to list what it would take off and write nothing. It edits files under the product folders and `tests/`: `poetry run pytest --ignore=tests/e2e` runs after it, which also rewrites the stories of the retitled tests |
 | The Python tests that need no browser | `poetry run pytest --ignore=tests/e2e` (`tests/` and the stack's own tests, by `testpaths`) |
 | The tests of what changed | `poetry run pytest <test files>` |
 | The browser tests | `poetry run pytest tests/e2e -n 4`, against `poetry run python manage.py runserver` on `http://localhost:8000`. `tests/e2e/test_ai_bootstrap.py` starts its own server and runs before the rest (`specs/testing.md` § "AI bootstrap browser harness"); the journeys under `tests/e2e/journeys/` are skipped by a parallel run |
@@ -82,7 +84,8 @@ Fixtures and environment setup: `specs/testing.md`.
   reproductions of a bug's plan, which the check runs itself.
 - **A piece's commit**: the test files of what it changed; `npm run jest` when a script changed.
 - **A lot**: `poetry run pytest --ignore=tests/e2e` and `npm run jest` once, before its last
-  commit, and the browser tests of each flow it changes.
+  commit, and the browser tests of each flow it changes. Not on the last lot of a supervised
+  delivery: the end-of-run gate runs them once the global review's fixes are in.
 - **The end of a run**: the full pytest suite (unit, integration, browser) and jest
   (constitution §2.2, §2.3).
 - **A Django model changed**: its migration file is committed (§2.5).
@@ -185,8 +188,17 @@ fake), a force push, a branch deletion or a hard reset (constitution §3.3), a c
 
 ## Archive
 
-- **Where durable insight goes**: the owning page of `specs/architecture/`,
+- **Where a load-bearing decision goes**: the owning page of `specs/architecture/`,
   `specs/conventions.md`, `specs/testing.md`, and the user-journey pages under `specs/design/`.
+  It is written as what holds now and why, never as the story of the choice.
+- **Where the reason of one object goes**: the docstring of its declaration, or the comment
+  beside it for a field, a constant or a template block.
+- **The narrative pages a reference doc links to**, in place of prose that told a flow's steps:
+  `specs/comprehension_harness/narratives/<slug>.html` and `…/mechanisms/<slug>.html`, one a
+  narrative, listed by `specs/comprehension_harness/index.html`. They are generated and not
+  committed: the link is written by the page's path.
+- **What the strip leaves outside the code** is settled before the folder goes: a link into the
+  folder from a reference doc, an entry of `specs/roadmap.md`.
 - **`CHANGELOG.md` and the roadmap stay accurate**: the feature leaves `specs/roadmap.md`
   § "Active streams".
 - **Unfinished work** goes to a topic folder of `specs/backlog/` or to a horizon of the roadmap.

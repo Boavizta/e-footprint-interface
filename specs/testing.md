@@ -137,7 +137,8 @@ When a feature reaches into a new public efootprint API (a method/property/dict-
 ## Narrative tests (`tests/narratives/`)
 
 A narrative test crosses one flow in order so that its page can be drawn
-(`npm run comprehension:render`, then `specs/comprehension_harness/narratives/modeling.html`). The flow tells
+(`npm run comprehension:render`, then its page under `specs/comprehension_harness/narratives/`, which
+`specs/comprehension_harness/index.html` lists). The flow tells
 itself: `narrate` at each step and `event` at its cause, imported from `model_builder/narrate.py`
 and inert outside a test run. The test declares the narrative with `comprehension_harness/python/declare.py`:
 

@@ -10,7 +10,7 @@ The spec-driven workflow moved to plans written into the code as pieces and deli
 ([`workflow.md`](workflow.md)). The tools, the stage skills and the roles are installed
 ([`comprehension_harness/README.md`](../comprehension_harness/README.md)), and so is the Python stack
 they read (`.agents/repository.md` § "The stack"; its contract is
-[`comprehension_harness/stack.md`](../comprehension_harness/stack.md)): the three calls, the pytest plugin that records
+[`comprehension_harness/stack.md`](../comprehension_harness/stack.md)): the calls, the pytest plugin that records
 what a test crossed, the source index on Python's `ast`, the title reader, the watch loop, the
 journey helper. One flow is narrated, the AI-assisted bootstrap, and its page renders
 (`npm run comprehension:render`). The same flow has the first journey drawn from a run of its
