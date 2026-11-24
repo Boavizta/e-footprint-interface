@@ -88,8 +88,10 @@ Fixtures and environment setup: `specs/testing.md`.
   delivery: the end-of-run gate runs them once the global review's fixes are in.
 - **The strip of an archive**: `poetry run pytest --ignore=tests/e2e` once, which also rewrites
   the stories of the retitled tests. A browser test it retitled is collected, not run
-  (`poetry run pytest <files> --collect-only -q`); a journey's generated pages keep the planned
-  screens until the next run of the journeys and `npm run journey:render`, which the report says.
+  (`poetry run pytest <files> --collect-only -q`). A journey it edited is run
+  (`poetry run pytest tests/e2e/journeys`), then `npm run journey:render`: the generated journey
+  pages draw a planned screen from the last run's captures, and would keep the feature's with a
+  mockup that no longer exists.
 - **The end of a run**: the full pytest suite (unit, integration, browser) and jest
   (constitution §2.2, §2.3).
 - **A Django model changed**: its migration file is committed (§2.5).
