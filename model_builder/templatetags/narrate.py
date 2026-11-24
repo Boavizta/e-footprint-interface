@@ -2,10 +2,12 @@
 
     {% narrate "sentence" key=value … %}
     {% event "sentence" key=value … %}
-    {% planned "<feature>#<slug>" "clause" key=value … expect key=value … distinct key … %}
+    {% planned "<feature>#<slug>:<place>" "clause" key=value … expect key=value … distinct key … %}
     {% evidence "<feature>#<slug>" "what is seen here today" key=value … expect key=value … distinct key … %}
+    {% built "<feature>#<slug>:<place>" %}
 
-A tag renders nothing. Its pairs are its watch, and those after ``expect`` what the place should see, a key of
+A tag renders nothing. ``built`` stands where a ``planned`` tag stood once its place is code, and says its place
+alone. Its pairs are its watch, and those after ``expect`` what the place should see, a key of
 the watch each: both are resolved only when a test run collects, in the context the tag is rendered in. The
 words after ``distinct`` are the keys of the watch each crossing should see a value of its own for. The source
 index reads the tags as sites of the template, and what is distinct from them alone
@@ -42,6 +44,10 @@ class Call(template.Node):
 
 def _compile(parser, token):
     call, *words = token.split_contents()
+    if call == "built":
+        if len(words) != 1:
+            raise template.TemplateSyntaxError('{% built %} takes one literal, "<feature>#<slug>:<place>"')
+        return Call(call, _said(words[0], call), "", {}, {}, parser.origin.name, token.lineno)
     literals = 2 if call in TAGGED else 1
     if len(words) < literals:
         raise template.TemplateSyntaxError(f"{{% {call} %}} takes {'its tag and ' if literals == 2 else ''}its sentence")
@@ -71,5 +77,5 @@ def _compile(parser, token):
                 parser.origin.name, token.lineno)
 
 
-for name in ("narrate", "event", *TAGGED):
+for name in ("narrate", "event", *TAGGED, "built"):
     register.tag(name, _compile)

@@ -29,6 +29,7 @@
       "comprehension_harness/intent-md.ts",
       "comprehension_harness/journey-render.ts",
       "comprehension_harness/json-source.ts",
+      "comprehension_harness/json-strip.ts",
       "comprehension_harness/json-titles.ts",
       "comprehension_harness/layout.ts",
       "comprehension_harness/map-build.ts",
@@ -52,6 +53,7 @@
       "comprehension_harness/tests/fixtures/shop/source-index.json",
       "comprehension_harness/tests/fixtures/shop/tests/test_checkout.py",
       "comprehension_harness/tests/json-source.test.ts",
+      "comprehension_harness/tests/json-strip.test.ts",
       "comprehension_harness/tests/json-titles.test.ts",
       "comprehension_harness/tests/layout.ts",
       "comprehension_harness/tests/plan.test.ts",
@@ -77,6 +79,7 @@
       "comprehension_harness/python/declare.py",
       "comprehension_harness/python/narrate.py",
       "comprehension_harness/python/source_index.py",
+      "comprehension_harness/python/strip.py",
       "comprehension_harness/python/titles.py",
       "comprehension_harness/python/watch.py",
       "comprehension_harness/python/tests/__init__.py",
@@ -84,6 +87,7 @@
       "comprehension_harness/python/tests/test_calls.py",
       "comprehension_harness/python/tests/test_collector.py",
       "comprehension_harness/python/tests/test_source_index.py",
+      "comprehension_harness/python/tests/test_strip.py",
       "comprehension_harness/python/tests/test_titles.py"
     ],
     "python-journeys": [

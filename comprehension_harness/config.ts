@@ -5,8 +5,9 @@
  *
  *  - `name`: the project's name, on its pages' titles;
  *  - `stack`: what answers what the source says (`stack.ts`): a module, as a path from the root, or for a
- *    stack that does not run in Node the two commands that print it as JSON (`sourceIndex`, `titles`), beside
- *    which such a stack keeps keys of its own (the Python stack's `calls`);
+ *    stack that does not run in Node the two commands that print it as JSON (`sourceIndex`, `titles`) and,
+ *    optionally, the one that takes an archived feature's marks off a file (`strip`), beside which such a
+ *    stack keeps keys of its own (the Python stack's `calls`);
  *  - `cache`: where what a run writes and a render reads is kept (the stories, the map's snapshots);
  *  - `docs`: the folder of the project's documents. The feature folders (`features/`), the generated pages and
  *    the journeys' captures are under it, by the method's own layout; the local app serves it;
@@ -39,7 +40,7 @@ export interface PageNamingCode {
 
 export interface Config extends LayoutSettings {
   name: string;
-  stack: string | { sourceIndex: string[]; titles: string[] };
+  stack: string | { sourceIndex: string[]; titles: string[]; strip?: string[] };
   cache: string;
   docs: string;
   hub: { label: string; page: string } | null;
@@ -99,9 +100,9 @@ function readConfig(): Config {
     if (value === null && nullable) continue;
     const strings = (x: unknown) => Array.isArray(x) && x.length > 0 && x.every((part) => typeof part === 'string');
     if (shape === 'stack') {
-      const commands = value as { sourceIndex?: unknown; titles?: unknown } | null;
-      if (typeof value === 'string' || (commands !== null && typeof commands === 'object' && strings(commands.sourceIndex) && strings(commands.titles))) continue;
-      throw new Error(`config: ${CONFIG_FILE} — "stack" is ${value === undefined ? 'missing' : 'neither a module\'s path nor { "sourceIndex": [command…], "titles": [command…] }'}`);
+      const commands = value as { sourceIndex?: unknown; titles?: unknown; strip?: unknown } | null;
+      if (typeof value === 'string' || (commands !== null && typeof commands === 'object' && strings(commands.sourceIndex) && strings(commands.titles) && (commands.strip === undefined || strings(commands.strip)))) continue;
+      throw new Error(`config: ${CONFIG_FILE} — "stack" is ${value === undefined ? 'missing' : 'neither a module\'s path nor { "sourceIndex": [command…], "titles": [command…] }, with "strip": [command…] or without'}`);
     }
     const ok = shape === 'string' ? typeof value === 'string'
       : shape === 'strings' ? Array.isArray(value) && value.every((x) => typeof x === 'string')

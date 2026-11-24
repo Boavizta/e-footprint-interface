@@ -47,18 +47,20 @@ They are written for any project. What a project is to them is the three things 
    there, or null for a folder left to a run by hand.
 
 3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
-   - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production,
-     and its own: a project's code imports nothing of this folder;
+   - the calls (`narrate`, `event`, `planned`, and `built` where a planned place became code) in
+     the product's code, inert in production, and its own: a project's code imports nothing of
+     this folder;
    - a collector that writes what each test crossed as a story file under `<cache>/stories/`;
    - the source index and the test titles: a module for a stack that runs in Node, or two
      commands that print them as JSON (`json-source.ts`, `json-titles.ts`;
-     `tests/fixtures/shop/` is an index written by hand to conform to);
+     `tests/fixtures/shop/` is an index written by hand to conform to), with optionally a third
+     that strips an archived feature's marks off a file (`json-strip.ts`);
    - optionally, a journey helper that writes screens, captures and cases under
      `<docs>/design/journeys-generated/`. Without it a feature's spec is its `spec.md` alone.
 
    **A stack lives beside the tools, in `comprehension_harness/<language>/`**, with its own tests:
    the collector, the declarations a test makes, the source index and the title reader. Only the
-   three calls are elsewhere, in the product's own package. A Python project that tests with
+   calls are elsewhere, in the product's own package. A Python project that tests with
    pytest takes `python/` and writes none of the four: "The Python stack" below, its journey
    helper included, for a project whose browser tests run on Playwright. A stack no other project uses yet is its project's own, in the same place
    (`typescript/` for one written on the TypeScript compiler and vitest), and is in no shared
@@ -124,24 +126,26 @@ plugin and the declarations, which are pytest's.
 
 | File | Gives |
 |---|---|
-| `narrate.py` | The three calls, as the reference a project copies into its own package |
+| `narrate.py` | The calls (`narrate`, `event`, `planned`, `built`), as the reference a project copies into its own package |
 | `declare.py` | What a test declares: `@narrative`, `@canonical`, `@titled`, `@planned_test`, `@reproduces` |
 | `collector.py` | The pytest plugin that writes the stories |
 | `source_index.py`, `titles.py`, `watch.py` | The three commands of the configuration |
+| `strip.py` | The strip of an archive, a fourth command: a feature's `built` calls and tags, its tests' title tags and its planned screens, taken off one file |
 | `journey.py`, `journey_page.js` | The journey helper, a pytest plugin over Playwright's browser tests, and what it runs in the page: `@journey`, `screen`, `@planned_case`, `seeded`, `pause_clock`, `elapse` |
 
 What the project writes to use it, the same in every project:
 
 - **Its own copy of the calls**: `cp comprehension_harness/python/narrate.py <its package>/narrate.py`.
-  Its code imports `narrate`, `event` and `planned` from that module, by name.
+  Its code imports `narrate`, `event`, `planned` and `built` from that module, by name.
 - `pytest_plugins = ["comprehension_harness.python.collector"]` in the conftest of its tests.
 - In `comprehension.config.json`, `"stack": { "calls": "<its package>.narrate", "sourceIndex":
   ["python3", "-m", "comprehension_harness.python.source_index"], "titles": ["python3", "-m",
-  "comprehension_harness.python.titles"] }` and `"watch": ["python3", "-m",
+  "comprehension_harness.python.titles"], "strip": ["python3", "-m",
+  "comprehension_harness.python.strip"] }` and `"watch": ["python3", "-m",
   "comprehension_harness.python.watch"]` under `commands`.
 - Where its templates hold logic, a tag library of its web framework that hands each tag to
   `template_call` of its copy of the calls, with the template's file and the tag's line. The source
-  index reads the tags `narrate`, `event`, `planned` and `evidence` in the `.html` files of the source
+  index reads the tags `narrate`, `event`, `planned`, `evidence` and `built` in the `.html` files of the source
   folders. For Django it is some forty lines: `model_builder/templatetags/narrate.py` of the reference.
 - `comprehension_harness/python/tests` among the paths its pytest run collects. A run that collects from
   the root takes them without a word, and leaves the tools' fixtures alone.

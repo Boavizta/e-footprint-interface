@@ -9,7 +9,8 @@ TEMPLATE = '''{% load narrate %}<ul>
   <li>{% evidence "gift-cards#card-row" "A card is drawn **as a plain row**." drawn_as="ROW" expect drawn_as=row.kind|upper %}</li>
 {% endfor %}
 {% narrate "The list is **closed**." %}
-{% planned "gift-cards#card-row" "The row\'s id is the card\'s." id=rows|length distinct id expect id=1 %}
+{% planned "gift-cards#card-row:row-id" "The row\'s id is the card\'s." id=rows|length distinct id expect id=1 %}
+{% built "gift-cards#card-row:row-class" %}
 </ul>'''
 
 
@@ -31,12 +32,16 @@ def test_a_tag_renders_nothing_and_hands_its_call_with_where_it_is_written(monke
     # The keys after `distinct` are the source index's to read: the call is handed the watch and what it expects.
     assert handed == [(*evidence, {"drawn_as": "CARD"}), (*evidence, {"drawn_as": "CASH"}),
                       ("narrate", 5, "The list is **closed**.", None, None, None),
-                      ("planned", 6, "The row's id is the card's.", {"id": 2}, "gift-cards#card-row", {"id": 1})]
+                      ("planned", 6, "The row's id is the card's.", {"id": 2}, "gift-cards#card-row:row-id", {"id": 1}),
+                      # A built tag says its place alone: no sentence, no watch.
+                      ("built", 7, "", None, "gift-cards#card-row:row-class", None)]
 
 
 @pytest.mark.parametrize("tag, said", [
     ("{% narrate sentence %}", "opens with literal strings in double quotes"),
     ('{% planned "gift-cards#card-row" %}', "takes its tag and its sentence"),
+    ('{% built "gift-cards#card-row:row-id" "A change." %}', "takes one literal"),
+    ("{% built %}", "takes one literal"),
     ('{% narrate "A step." kind %}', "gives its watch as key=value pairs"),
     ('{% planned "gift-cards#card-row" "A change." id=row.id distinct kind %}', "names after distinct keys of its watch"),
 ])

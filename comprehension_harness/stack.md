@@ -64,7 +64,7 @@ A hit:
 | Field | Holds |
 |---|---|
 | `kind` | `step`, `event` or `planned` |
-| `planned` | For a `planned` hit: `{ feature, slug, change }` |
+| `planned` | For a `planned` hit: `{ feature, slug, change }`, with `place` where the call's tag names one. A `built` call is a `planned` hit whose change is `built` |
 | `expect` | Optional, for a `planned` hit whose site says what it should see: that, at this crossing, a key of the watch each. `{ "error": "…" }` when computing it threw |
 | `sentence` | As passed to the call |
 | `watch` | The watch's value as plain JSON, or `null`. `{ "error": "…" }` when computing it threw, which never fails the test |
@@ -141,8 +141,9 @@ source by the test.
   `RegExp` (`SourceReader.looksDeclared`).
 - `files` holds every file of the source folders and every test file that declares a narrative.
 - A `planned` site adds `"planned": { "feature", "slug", "change", "signature" }`, `change` being
-  `changed`, `removed`, `added` or `evidence`. Evidence is a place a bug shows: it marks no
-  change and goes with the fix. A changed or an evidence site may add `"expect"`: what the place
+  `changed`, `removed`, `added`, `evidence` or `built`, and `"place"` where its tag names one. A
+  `built` call is such a site, with its place and `"sentence": ""`. Evidence is a place a bug
+  shows: it marks no change and goes with the fix. A changed or an evidence site may add `"expect"`: what the place
   should see, a key of its watch each, as the source writes it. It is a literal, or an expression
   computed at each crossing as a watch is, so the same rule keeps it inert; its value is the
   story's, a crossing at a time. Either may add `"distinct"`: the keys of its watch each crossing
@@ -158,7 +159,8 @@ source by the test.
 - `imports` and `uses` give the declaration a name refers to, as far as the stack can tell; a
   reference it cannot place is left out, and so is what stands inside a `narrate`, `event` or
   `planned` call. Callers and callees are read from `uses`.
-- The project's configuration names the two commands in place of a module:
+- The project's configuration names the two commands in place of a module, and optionally a
+  third, `strip` ("The strip of an archive" below):
   `"stack": { "sourceIndex": ["python3", "…"], "titles": ["python3", "…"] }`.
 
 ## 3. Test titles: planned and written
@@ -228,6 +230,13 @@ pattern over the text: another feature's marks, and a tag written in a comment o
 is no title, stay. The tools choose the files, hold the strip to the archive gate, write the
 result and read what still names the feature (`render.ts --strip`). The type is `Stripped` of
 `stack.ts`. A stack that gives no strip has its marks listed, to take off by hand.
+
+A stack that does not run in Node gives its strip as a command, `"strip": [command…]` beside
+`sourceIndex` and `titles` in the configuration ([`json-strip.ts`](json-strip.ts)). It reads
+`{ "file", "text", "feature" }` on its input and prints
+`{ "text", "taken": [{ "line", "kind", "was" }] }`, `kind` being `built`, `title` or `screen`:
+one process a file. It refuses by failing, the file and the line on its error output, which
+the tools say as it is.
 
 ## Beside the four: a command that keeps the narrative tests running
 
