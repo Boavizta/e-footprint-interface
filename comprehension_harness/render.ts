@@ -2509,7 +2509,7 @@ export function stripFeature(feature: string, write: boolean, source: SourceRead
   const isCode = (file: string) => layout.isTest(file) || layout.isProduct(file) || layout.isApp(file);
   return {
     files: changed.map((f) => ({ file: f.file, taken: f.taken })),
-    remains: read.flatMap((f) => namesFeature(f.after, feature, folder).map((l) => ({ file: f.file, ...l, code: isCode(f.file) }))),
+    remains: read.flatMap((f) => namesFeature(f.after, feature).map((l) => ({ file: f.file, ...l, code: isCode(f.file) }))),
     stripped: read.length === 0 || read.some((f) => f.stripped),
   };
 }

@@ -63,7 +63,7 @@ ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 | The pages served, with the answer buttons | `npm run comprehension` |
 | The approval, on the reviewer's word only | `npx tsx comprehension_harness/render.ts --approve <feature>` |
 | The archive gate | `npx tsx comprehension_harness/render.ts --check --archive <feature>` |
-| The strip of an archive, once the gate passes | `npx tsx comprehension_harness/render.ts --strip <feature>`, with `--dry-run` to list what it would take off and write nothing. It edits files under the product folders and `tests/`: `poetry run pytest --ignore=tests/e2e` runs after it, which also rewrites the stories of the retitled tests |
+| The strip of an archive, once the gate passes | `npx tsx comprehension_harness/render.ts --strip <feature>`, with `--dry-run` to list what it would take off and write nothing. It edits files under the product folders and `tests/`, and § "Gates" says what runs after it |
 | The Python tests that need no browser | `poetry run pytest --ignore=tests/e2e` (`tests/` and the stack's own tests, by `testpaths`) |
 | The tests of what changed | `poetry run pytest <test files>` |
 | The browser tests | `poetry run pytest tests/e2e -n 4`, against `poetry run python manage.py runserver` on `http://localhost:8000`. `tests/e2e/test_ai_bootstrap.py` starts its own server and runs before the rest (`specs/testing.md` § "AI bootstrap browser harness"); the journeys under `tests/e2e/journeys/` are skipped by a parallel run |
@@ -86,6 +86,10 @@ Fixtures and environment setup: `specs/testing.md`.
 - **A lot**: `poetry run pytest --ignore=tests/e2e` and `npm run jest` once, before its last
   commit, and the browser tests of each flow it changes. Not on the last lot of a supervised
   delivery: the end-of-run gate runs them once the global review's fixes are in.
+- **The strip of an archive**: `poetry run pytest --ignore=tests/e2e` once, which also rewrites
+  the stories of the retitled tests. A browser test it retitled is collected, not run
+  (`poetry run pytest <files> --collect-only -q`); a journey's generated pages keep the planned
+  screens until the next run of the journeys and `npm run journey:render`, which the report says.
 - **The end of a run**: the full pytest suite (unit, integration, browser) and jest
   (constitution §2.2, §2.3).
 - **A Django model changed**: its migration file is committed (§2.5).
@@ -188,6 +192,9 @@ fake), a force push, a branch deletion or a hard reset (constitution §3.3), a c
 
 ## Archive
 
+- **An archive runs in any checkout that holds the stories of a test run**: on one that has
+  none, `poetry run pytest --ignore=tests/e2e` first. The reproductions its gate and its check
+  run, another feature's included, need the test process alone: no server and no shared database.
 - **Where a load-bearing decision goes**: the owning page of `specs/architecture/`,
   `specs/conventions.md`, `specs/testing.md`, and the user-journey pages under `specs/design/`.
   It is written as what holds now and why, never as the story of the choice.

@@ -1930,13 +1930,17 @@ export function assemblePlans(input: PlanInput): Plan[] {
 // ── What the archive leaves ────────────────────────────────────────────────────
 
 /** The lines of a file that still name a feature: a tag of it (`<feature>#…`: a `built` call, a test's title, a
- *  comment) or a path into its folder (a planned screen's mockup, a link). What the strip of an archive reads a
- *  file for once it has taken off what it can: a line left is taken off by hand, or the folder's deletion
- *  leaves it naming nothing. */
-export function namesFeature(text: string, feature: string, folder: string): Array<{ line: number; text: string }> {
+ *  comment) or a path into its folder, written from wherever (`specs/features/<feature>/…`, `../<feature>/…`: a
+ *  planned screen's mockup, a link, an ignore rule). What the strip of an archive reads a file for once it has
+ *  taken off what it can: a line left is settled by hand, or the folder's deletion leaves it naming nothing.
+ *  A path read back from a commit (`git show <commit>:<path>`) names what the history keeps, and is no such line. */
+export function namesFeature(text: string, feature: string): Array<{ line: number; text: string }> {
   if (!text.includes(feature)) return [];
-  const tag = new RegExp(`(?<![a-z0-9-])${feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}#`);
-  return text.split('\n').flatMap((line, i) => (tag.test(line) || line.includes(`${folder}/`) ? [{ line: i + 1, text: line.trim() }] : []));
+  const name = feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tag = new RegExp(`(?<![a-z0-9-])${name}#`);
+  const path = new RegExp(`([^\\s"'\`()<>\\[\\]]*)(?<![a-z0-9-])${name}/`, 'g');
+  const inFolder = (line: string) => [...line.matchAll(path)].some((m) => !/^[0-9a-f]{7,40}:/.test(m[1]));
+  return text.split('\n').flatMap((line, i) => (tag.test(line) || inFolder(line) ? [{ line: i + 1, text: line.trim() }] : []));
 }
 
 // ── What `--check` says of a plan ──────────────────────────────────────────────

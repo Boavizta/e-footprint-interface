@@ -431,18 +431,25 @@ describe('findings', () => {
 describe('what the archive leaves', () => {
   const FOLDER = 'specs/features/demo';
 
-  it('names the lines that hold a tag of the feature or a path into its folder', () => {
-    const text = ["built('demo#cut:the-cut');", 'const x = 1;', `mockup: '${FOLDER}/mockups/a.html',`, '// see demo#cut'].join('\n');
-    expect(plan.namesFeature(text, 'demo', FOLDER)).toEqual([
+  it('names the lines that hold a tag of the feature or a path into its folder, written from wherever', () => {
+    const text = ["built('demo#cut:the-cut');", 'const x = 1;', `mockup: '${FOLDER}/mockups/a.html',`, '// see demo#cut', '[its notes](../demo/notes.md)', `${FOLDER}/spec.html`].join('\n');
+    expect(plan.namesFeature(text, 'demo')).toEqual([
       { line: 1, text: "built('demo#cut:the-cut');" },
       { line: 3, text: `mockup: '${FOLDER}/mockups/a.html',` },
       { line: 4, text: '// see demo#cut' },
+      { line: 5, text: '[its notes](../demo/notes.md)' },
+      { line: 6, text: `${FOLDER}/spec.html` },
     ]);
   });
 
   it('leaves the feature\'s bare name, another feature whose name ends with it, and a folder that only opens like its own', () => {
-    const text = ['// demo, run 2', "built('other-demo#cut:the-cut');", `'${FOLDER}-two/plan.md'`, 'demo.css#top'].join('\n');
-    expect(plan.namesFeature(text, 'demo', FOLDER)).toEqual([]);
+    const text = ['// demo, run 2', "built('other-demo#cut:the-cut');", `'${FOLDER}-two/plan.md'`, '../other-demo/notes.md', 'demo.css#top'].join('\n');
+    expect(plan.namesFeature(text, 'demo')).toEqual([]);
+  });
+
+  it('leaves a path read back from a commit: the history keeps it', () => {
+    expect(plan.namesFeature(`its working set: \`git show 2a37f648:${FOLDER}/notes.md\``, 'demo')).toEqual([]);
+    expect(plan.namesFeature(`git show 2a37f648:${FOLDER}/notes.md, and ${FOLDER}/plan.md`, 'demo')).toHaveLength(1);
   });
 });
 
