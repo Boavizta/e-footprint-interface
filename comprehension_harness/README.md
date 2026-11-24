@@ -41,8 +41,10 @@ They are written for any project. What a project is to them is the three things 
    that run a tool, the narrative tests and the journeys. Two of the commands are held to more
    than their shape: `tests` is typed with test paths after it, and `watch` must keep running,
    since the local app stops when it exits. A runner with no watch mode needs a small loop of
-   the stack's own. One key is optional: `repositories`, the checkout of another repository by
-   its name, for a plan that points at a piece planned there.
+   the stack's own. Two keys are optional: `repositories`, the checkout of another repository by
+   its name, for a plan that points at a piece planned there; and `commands.testsUnder`, the
+   test folders `tests` does not run, each with the command that runs a plan's reproduction
+   there, or null for a folder left to a run by hand.
 
 3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
    - the three calls (`narrate`, `event`, `planned`) in the product's code, inert in production,
@@ -75,13 +77,13 @@ They are written for any project. What a project is to them is the three things 
    "journey:render": "tsx comprehension_harness/journey-render.ts"
    ```
 
-5. **What git ignores.** The pages are generated and never committed; their hand-written heads
-   are. With `specs` as the documents' folder:
+5. **What git ignores.** The pages are generated and never committed, the index that lists them
+   included: nothing on them is hand-written. With `specs` as the documents' folder:
 
    ```gitignore
+   specs/comprehension_harness/index.html
    specs/comprehension_harness/narratives/*.html
    specs/comprehension_harness/mechanisms/*.html
-   !specs/comprehension_harness/**/*.skeleton.html
    specs/comprehension_harness/plans/
    specs/design/journeys-generated/
    specs/features/*/plan-feedback.json
@@ -190,9 +192,11 @@ the narrative tests when its snapshot is older than the source, and the check re
 stories.
 
 The first narrative to tell is the project's own choice: one `narrate` call per step and a test that
-crosses them. The product page needs its hand-written head first, a title and a lede in
-`specs/comprehension_harness/narratives/<productPage>.skeleton.html`; the render stops and says
-so when it is missing.
+crosses them. Each narrative gets a page of its own, `narratives/<slug>.html` for a product
+narrative and `mechanisms/<slug>.html` for a mechanism, named from its title; its lede is the
+comment above its declaration. `specs/comprehension_harness/index.html` lists every generated page,
+and is what the project's documents link to. Why a part of the product is shaped as it is goes in
+the document that owns it, which links the narrative's page: a page holds nothing hand-written.
 
 ## Keeping the copies in step
 

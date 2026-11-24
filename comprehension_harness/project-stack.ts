@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { CONFIG_FILE, ROOT, config, layout } from './config';
 import { openJsonSource } from './json-source';
 import { commandTitles } from './json-titles';
-import type { PlanDiff, SourceReader, Stack, TitleReader } from './stack';
+import type { PlanDiff, SourceReader, Stack, Stripped, TitleReader } from './stack';
 
 const load = createRequire(import.meta.url);
 
@@ -39,6 +39,9 @@ export const titles: TitleReader = {
   read: (file, text) => (stack ??= loadStack()).titles.read(file, text),
   prime: (files) => (stack ??= loadStack()).titles.prime?.(files),
 };
+
+/** What the archive of `feature` takes off one file (`Stack.strip`); null when the stack gives no strip. */
+export const strip = (file: string, text: string, feature: string): Stripped | null => (stack ??= loadStack()).strip?.(file, text, feature) ?? null;
 
 /** The project's hook for a proposed migration's diff; null when the configuration names none. */
 export function loadPlanDiff(): PlanDiff | null {

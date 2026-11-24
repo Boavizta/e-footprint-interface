@@ -11,13 +11,13 @@
  *  - `docs`: the folder of the project's documents. The feature folders (`features/`), the generated pages and
  *    the journeys' captures are under it, by the method's own layout; the local app serves it;
  *  - `hub`: the page every generated page links back to, or null;
- *  - `productPage`: the name of the one page the product narratives are drawn on, whose hand-written title
- *    and lede are `<name>.skeleton.html` beside it;
  *  - `actor`: the word a product narrative's causes open with ("The user taps …" for `user`); any other cause is the world's;
  *  - `source` and `tests`: what a file is, by its path (`layout.ts`);
  *  - `pagesNamingCode`: the pages whose entries mark the steps they name: debts, rules, conventions;
  *  - `commands`: how a tool, the narrative tests and the journeys are run here. `tests` also runs the test files
- *    that hold a plan's reproduction, before a plan's page is drawn or checked;
+ *    that hold a plan's reproduction, before a plan's page is drawn or checked; `testsUnder`, optional, names the
+ *    folders `tests` does not run, each with the command that does, or null for one left to a run by hand
+ *    (`testCommandOf`);
  *  - `planDiff`: a module that draws what a proposed migration does to the database, or null;
  *  - `repositories`, optional: where the checkout of another repository is, by its name, as a path from the
  *    root. A plan that points at a piece planned there is read against it (`plan.md` § "Planned elsewhere").
@@ -43,7 +43,6 @@ export interface Config extends LayoutSettings {
   cache: string;
   docs: string;
   hub: { label: string; page: string } | null;
-  productPage: string;
   actor: string;
   pagesNamingCode: PageNamingCode[];
   commands: {
@@ -55,6 +54,10 @@ export interface Config extends LayoutSettings {
     watch: string[];
     /** Runs the journeys. */
     journeys: string[];
+    /** Optional: the test folders `tests` does not run, each as a path from the root ending in `/`, with the
+     *  command that runs a file of it once, its paths following, or null for a folder no tool runs (a server
+     *  that must be started first, a paid call). */
+    testsUnder?: Record<string, string[] | null>;
   };
   planDiff: string | null;
   repositories?: Record<string, string>;
@@ -77,7 +80,7 @@ export const ROOT = findRoot();
 
 type Shape = 'string' | 'strings' | 'object' | 'array' | 'stack';
 const SHAPES: Array<[key: string, shape: Shape, nullable?: true]> = [
-  ['name', 'string'], ['stack', 'stack'], ['cache', 'string'], ['docs', 'string'], ['hub', 'object', true], ['productPage', 'string'], ['actor', 'string'],
+  ['name', 'string'], ['stack', 'stack'], ['cache', 'string'], ['docs', 'string'], ['hub', 'object', true], ['actor', 'string'],
   ['source', 'object'], ['source.scan', 'strings'], ['source.app', 'strings'], ['source.product', 'strings'], ['source.words', 'strings'],
   ['source.mechanisms', 'strings'], ['source.chips', 'array'],
   ['tests', 'object'], ['tests.roots', 'strings'], ['tests.files', 'string'], ['tests.narrative', 'strings'], ['tests.browser', 'strings'],
@@ -106,11 +109,29 @@ function readConfig(): Config {
           : value !== null && typeof value === 'object' && !Array.isArray(value);
     if (!ok) throw new Error(`config: ${CONFIG_FILE} — "${key}" is ${value === undefined ? 'missing' : `not ${shape === 'strings' ? 'a list of strings' : shape === 'array' ? 'a list' : `a${shape === 'object' ? 'n' : ''} ${shape}`}`}${nullable ? ' (or null)' : ''}`);
   }
+  const under = (json as { commands: { testsUnder?: unknown } }).commands.testsUnder;
+  if (under !== undefined) {
+    const commandOrNull = (x: unknown) => x === null || (Array.isArray(x) && x.length > 0 && x.every((part) => typeof part === 'string'));
+    if (under === null || typeof under !== 'object' || Array.isArray(under) || !Object.entries(under).every(([root, command]) => root.endsWith('/') && commandOrNull(command))) {
+      throw new Error(`config: ${CONFIG_FILE} — "commands.testsUnder" is not an object of folders, each ending in "/", to a command (a list of strings) or null`);
+    }
+  }
   return json as Config;
 }
 
 export const config = readConfig();
 export const layout = layoutOf(config);
+
+/**
+ * The command that runs a test file once, its path following: that of the folder of `commands.testsUnder` it is
+ * under, else `commands.tests`. Null for a file no tool runs: one under a folder `testsUnder` gives null, and a
+ * browser's, which the journeys' command runs as a whole.
+ */
+export function testCommandOf(file: string): string[] | null {
+  const under = Object.entries(config.commands.testsUnder ?? {}).find(([root]) => file.startsWith(root));
+  if (under) return under[1];
+  return layout.isBrowserTest(file) ? null : config.commands.tests;
+}
 
 // ── The method's own layout, under `docs` and `cache` ──────────────────────────
 
