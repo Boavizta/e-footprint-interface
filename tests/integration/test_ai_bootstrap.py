@@ -6,7 +6,7 @@ import sys
 import pytest
 from pathlib import Path
 
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.constants.units import u
 
@@ -43,7 +43,7 @@ def test_handwritten_answer_computes_roundtrips_and_remains_editable():
     assert browsing.hourly_occurrences.comment == "200,000 monthly users opening the app 3 times a week."
     assert any(r.kind == "cloud_instance" for r in generated.resolutions)
     raw = system_to_json(system, save_computed_state=False)
-    objects, _, _ = json_to_system(raw)
+    objects, _, _ = load_system_document(raw)
     restored = next(iter(objects["System"].values()))
     assert restored.total_footprint.sum().value.to(u.kg).magnitude > 0
     repository = InMemorySystemRepository(initial_data=raw)

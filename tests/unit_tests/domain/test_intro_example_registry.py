@@ -13,7 +13,7 @@ import pytest
 from efootprint.abstract_modeling_classes.contextual_modeling_object_attribute import ContextualModelingObjectAttribute
 from efootprint.abstract_modeling_classes.explainable_hourly_quantities import ExplainableHourlyQuantities
 from efootprint.abstract_modeling_classes.explainable_recurrent_quantities import ExplainableRecurrentQuantities
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.builders.timeseries import (
     ExplainableHourlyQuantitiesFromFormInputs,
     ExplainableRecurrentQuantitiesFromConstant,
@@ -42,7 +42,7 @@ def test_json_path_exists(tpl):
 @_params
 def test_example_input_timeseries_are_editable_builders(tpl):
     with open(tpl.json_path) as f:
-        class_obj_dict, _, _ = json_to_system(json.load(f))
+        class_obj_dict, _, _ = load_system_document(json.load(f))
     system = next(iter(class_obj_dict["System"].values()))
 
     checked = []

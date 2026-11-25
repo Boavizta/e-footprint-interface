@@ -128,13 +128,13 @@ def with_fresh_system_id(system_data: Dict[str, Any]) -> Dict[str, Any]:
     re-minted slot keeps its Sankey settings (the no-collision path preserves them by returning the
     dict unchanged).
     """
-    from efootprint.api_utils.json_to_system import json_to_system
+    from efootprint.api_utils.json_to_system import load_system_document
     from efootprint.api_utils.system_to_json import materialize_serialized_state
     from efootprint.comparison.duplication import assign_fresh_system_id
     from model_builder.domain.all_efootprint_classes import MODELING_OBJECT_CLASSES_DICT
     from model_builder.domain.services.system_import_service import SystemImportService
 
-    response_objs, flat_efootprint_objs, _sd = json_to_system(
+    response_objs, flat_efootprint_objs, _sd = load_system_document(
         system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     system = next(iter(response_objs["System"].values()))
     materialize_serialized_state(flat_efootprint_objs.values())

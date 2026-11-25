@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.external_apis.ecologits.ecologits_external_api import EcoLogitsGenAIExternalAPI
 
@@ -73,5 +73,5 @@ def test_import_system_delegates_source_integrity_to_system_to_json(minimal_syst
         for source_payload in imported.get("Sources", {}).values()
     )
 
-    _, flat_obj_dict, _ = json_to_system(imported, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
+    _, flat_obj_dict, _ = load_system_document(imported, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
     assert external_api_id in flat_obj_dict

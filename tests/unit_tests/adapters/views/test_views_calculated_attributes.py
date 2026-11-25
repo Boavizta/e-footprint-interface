@@ -3,7 +3,7 @@ from collections import Counter
 
 import pytest
 from efootprint.abstract_modeling_classes.utils import css_escape
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.builders.hardware.edge.edge_computer import EdgeComputer
 from efootprint.builders.usage.edge.recurrent_edge_process import RecurrentEdgeProcess
@@ -127,7 +127,7 @@ def test_failing_fragment_views_show_the_exception_modal(
 @pytest.mark.django_db
 def test_edit_panel_explanation_buttons_target_their_own_row(client, edge_computer_system_data):
     # A second edge usage pattern gives the storage's per-pattern dicts several entries.
-    class_obj_dict, _, _ = json_to_system(edge_computer_system_data)
+    class_obj_dict, _, _ = load_system_document(edge_computer_system_data)
     system = next(iter(class_obj_dict["System"].values()))
     usage_pattern = system.edge_usage_patterns[0]
     system.edge_usage_patterns = [usage_pattern, EdgeUsagePattern(

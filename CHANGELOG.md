@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Model loading uses the library’s renamed `load_system_document` API, preserving disconnected objects and interface settings.
+
 ### Fixed
 - The chart button of an empty entry in a calculated dictionary, such as an edge storage's energy per usage pattern, no longer fails: the entry reads "no value" with its formula and no chart.
 - A failing calculated-attribute chart or explanation, delete confirmation, help drawer, Sources table or Sources row editor, or Sankey settings or cards request shows the error modal instead of an empty pane with no error.

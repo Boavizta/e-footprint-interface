@@ -7,7 +7,7 @@ the resulting payload against the size limit.
 from time import perf_counter
 from typing import Dict, Any
 
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import (
     CALCULATION_GRAPH_KEY, calculation_graph_section, materialize_serialized_state, system_to_json)
 from efootprint.logger import logger
@@ -51,7 +51,7 @@ class SystemImportService:
         Raises:
             PayloadSizeLimitExceeded: If the final payload exceeds max_payload_size_mb.
         """
-        response_objs, flat_efootprint_objs_dict, upgraded_system_data = json_to_system(
+        response_objs, flat_efootprint_objs_dict, upgraded_system_data = load_system_document(
             system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
         upgraded_system_data["efootprint_version"] = efootprint_version
 

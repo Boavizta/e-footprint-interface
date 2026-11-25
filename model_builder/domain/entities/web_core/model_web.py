@@ -9,7 +9,7 @@ from efootprint.abstract_modeling_classes.explainable_quantity import Explainabl
 from efootprint.abstract_modeling_classes.modeling_object import get_instance_attributes, ModelingObject
 from efootprint.abstract_modeling_classes.reactive_core import computed_slots
 from efootprint.abstract_modeling_classes.source_objects import Sources
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import (
     CALCULATION_GRAPH_KEY, calculation_graph_section, collect_referenced_source_ids,
     materialize_serialized_state)
@@ -107,7 +107,7 @@ class ModelWeb:
             gc_before = _gc_stats_snapshot()
             wall_started_at = perf_counter()
             cpu_started_at = process_time()
-            self.response_objs, self.flat_efootprint_objs_dict, self.system_data = json_to_system(
+            self.response_objs, self.flat_efootprint_objs_dict, self.system_data = load_system_document(
                 interface_upgraded_system_data, efootprint_classes_dict=MODELING_OBJECT_CLASSES_DICT)
             self.system = wrap_efootprint_object(list(self.response_objs["System"].values())[0], self)
             _log_runtime_stage("ModelWeb object created", wall_started_at, cpu_started_at, gc_before)
@@ -172,7 +172,7 @@ class ModelWeb:
 
         if save_computed_state:
             # The values-free calculation graph makes an exact-version reload attach the stored slot
-            # values as trusted caches (json_to_system only trusts a file that carries it), so the
+            # values as trusted caches (load_system_document only trusts a file that carries it), so the
             # session reopens without recomputing.
             output_json[CALCULATION_GRAPH_KEY] = calculation_graph_section(
                 list(self.flat_efootprint_objs_dict.values()))

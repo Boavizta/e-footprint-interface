@@ -18,7 +18,7 @@ import json
 import pytest
 from efootprint.abstract_modeling_classes.empty_explainable_object import EmptyExplainableObject
 from efootprint.abstract_modeling_classes.modeling_object import ModelingObject
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import system_to_json
 
 from model_builder.domain.reference_data.modeling_examples import INTRO_EXAMPLES
@@ -48,7 +48,7 @@ def _load_raw(tpl):
 def test_example_imports_and_computes_through_interface_path(tpl):
     imported = SystemImportService(max_payload_size_mb=MAX_PAYLOAD_SIZE_MB).import_system(_load_raw(tpl))
 
-    class_obj_dict, _, _ = json_to_system(imported)
+    class_obj_dict, _, _ = load_system_document(imported)
     system = next(iter(class_obj_dict["System"].values()))
     assert not isinstance(system.total_footprint, EmptyExplainableObject), (
         f"Example {tpl.id} produced an empty total_footprint")

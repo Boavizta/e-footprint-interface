@@ -23,7 +23,7 @@ from efootprint.abstract_modeling_classes.source_objects import (
     SourceTimezone,
     SourceValue,
 )
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.api_utils.system_to_json import system_to_json
 from efootprint.constants.units import u
 from efootprint.core.country import Country
@@ -1073,7 +1073,7 @@ def serialize_and_validate(
     system: System, scenario_name: str, profile: ImplementationProfile
 ) -> tuple[dict, float, float]:
     document = system_to_json(system, output_filepath=None, save_computed_state=False)
-    class_objects, _, _ = json_to_system(json.loads(json.dumps(document)))
+    class_objects, _, _ = load_system_document(json.loads(json.dumps(document)))
     loaded_system = next(iter(class_objects["System"].values()))
     expected_pattern_count = len(GEOGRAPHIES) * 2 + 1
     if len(loaded_system.usage_patterns) != expected_pattern_count:

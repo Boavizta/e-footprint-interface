@@ -7,7 +7,7 @@ serialized-System resolution that backs the load endpoint. Runs pure domain — 
 Django scaffolding.
 """
 import pytest
-from efootprint.api_utils.json_to_system import json_to_system
+from efootprint.api_utils.json_to_system import load_system_document
 from efootprint.modeling_examples import list_how_to_examples
 
 from model_builder.adapters.repositories import InMemorySystemRepository
@@ -81,7 +81,7 @@ def test_get_example_system_data_resolves_a_loadable_system(example_id):
     system_data = get_example_system_data(example_id)
     assert "System" in system_data
     # Exercise the resolved JSON through the library loader so a broken path/payload fails here.
-    class_obj_dict, _, _ = json_to_system(system_data)
+    class_obj_dict, _, _ = load_system_document(system_data)
     assert class_obj_dict["System"]
 
 

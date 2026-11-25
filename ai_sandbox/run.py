@@ -146,7 +146,7 @@ def device_total_checks(totals: dict[str, float], expected: dict[str, float]) ->
 
 def evaluate(data: dict, case: dict, export_path: Path | None, scope: str = "web") -> dict:
     """Validate -> build -> compute -> export -> reload. Each stage records ok/error."""
-    from efootprint.api_utils.json_to_system import json_to_system
+    from efootprint.api_utils.json_to_system import load_system_document
     from efootprint.api_utils.system_to_json import system_to_json
     from efootprint.constants.units import u
 
@@ -189,7 +189,7 @@ def evaluate(data: dict, case: dict, export_path: Path | None, scope: str = "web
         result["compute_s"] = round(time.perf_counter() - start, 2)
         if export_path:
             system_to_json(system, output_filepath=str(export_path), save_computed_state=False)
-            json_to_system(json.loads(export_path.read_text()))
+            load_system_document(json.loads(export_path.read_text()))
             result["export_ok"] = True
             result["export_path"] = str(export_path)
     except Exception as error:  # noqa: BLE001 - we want every failure recorded, not raised
