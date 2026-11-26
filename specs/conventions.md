@@ -68,7 +68,7 @@ For data and array operations:
 ## Documentation upkeep
 
 - If you notice that the AGENTS.md or specs/ files are missing important information that would allow for less context gathering in developments, propose improvements.
-- Whenever you implement or change a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), proactively check whether the owning [architecture page](architecture/index.html), `conventions.md`, or `testing.md` should be updated and propose the changes.
+- Follow `workflow.md` § "Documentation ownership" when updating explanations: maintain their canonical home and remove overlapping prose when a narrative replaces it.
 
 ## Form field metadata suffixes
 

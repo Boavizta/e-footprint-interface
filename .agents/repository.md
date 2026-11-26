@@ -9,7 +9,8 @@ is particular to this one here. `AGENTS.md` stays the entry point and wins where
 - **Rules**: `specs/constitution.md` (§1 the engineering principles, §2 the quality gates, §3 the
   agent-facing rules), `specs/conventions.md`, `specs/testing.md`. They are authoritative; no
   skill weakens a gate.
-- **Architecture**: `specs/architecture/index.html` is the entry point. Read the index, then only
+- **Architecture**: start at `specs/architecture/index.html`. Its relationship to narratives is
+  defined in `specs/workflow.md` § "Documentation ownership". Read the index, then only
   the owning pages. Use its task router and the actual page names; never invent a documentation
   path.
 - **Feature shaping**: apply
@@ -43,7 +44,7 @@ ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 | A reproduction | `@reproduces("<feature>#<slug>: <title> [<rule>]")` of `declare.py` on a written test that fails today: a run expects the failure, strictly. Built, it becomes `@titled("…")` under the same title. It observes, then asserts once at its end |
 | A planned test | `@planned_test("<feature>#<slug>: <title> [<rule>]")` of `comprehension_harness/python/declare.py` on a test function with an empty body: skipped by a run, listed by the plan |
 | A written test of a plan | The same title under `@titled("…")` once the body is written: `@planned_test` refuses a body. A test with neither is titled by its function's name, and a parametrized case adds pytest's `[case]` |
-| A narrative, its reference case | A test class under `@narrative("<title>")` of the same `declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
+| A narrative, its reference case | A test class under `@narrative("<title>")` of the same `declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Use scope="doc" for documentation generation and authoring. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
 | What each test crossed | `comprehension_harness/python/collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
 | The source index, the test titles, the watch, the strip | `source_index.py`, `titles.py`, `watch.py` and `strip.py` of `comprehension_harness/python/`: the four commands of the configuration, standard library only, run as `python3 -m comprehension_harness.python.<name>`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
 | A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class. A backticked name shaped like a declaration (`CamelCase`, or words joined by `_`) that the index cannot place fails `--check`, so a dict key, a field or a method is written without backticks |

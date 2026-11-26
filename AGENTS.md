@@ -88,7 +88,9 @@ Conversational bug batches use `bug-fixes` (a diagnostic a bug, and the reproduc
 
 ## Documentation upkeep
 
-When you implement a non-trivial pattern (new web wrapper convention, new HTMX flow, new render strategy, schema migration), update the owning architecture detail page (routed from [`specs/architecture/index.html`](specs/architecture/index.html)), `specs/conventions.md`, or `specs/testing.md` — a one-line mention in the right section is enough. The goal is to keep specs accurate so future agents don't rediscover patterns from code.
+Keep explanations in their canonical homes, following `specs/workflow.md` § "Documentation ownership":
+execution and recurring patterns in narratives, structuring decisions in architecture, local semantics
+beside code. Update the owning explanation when it changes, removing duplication as material is touched.
 
 ## Production maintenance workers
 

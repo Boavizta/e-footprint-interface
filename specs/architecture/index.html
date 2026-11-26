@@ -12,7 +12,7 @@
 <p class="lede">The interface’s architectural map and task router.</p></header>
 <main id="main">
 
-<p class="rule">Start here, then read only the pages that own the task. These pages describe the current implementation. Accepted future work remains in <a href="../features/">feature specs and plans</a>; immutable rules remain in the <a href="../constitution.md">constitution</a>.</p>
+<p class="rule">Start here, then read only the pages that own the task. These pages own the system map and structuring decisions; <a href="../comprehension_harness/index.html">executable narratives</a> explain execution flows and recurring implementation patterns. Existing detail is consolidated as it is touched. Accepted future work remains in <a href="../features/">feature specs and plans</a>; immutable rules remain in the <a href="../constitution.md">constitution</a>.</p>
 <h2 id="map">Architectural map</h2>
 <p>Django views parse HTTP input; application use cases orchestrate web wrappers and domain services; <code>efootprint</code> owns modeling truth. Presenters and templates turn results and side-effect descriptors into HTMX responses, including out-of-band (OOB) swaps. Inner layers do not import Django or adapters.</p>
 <div class="map" role="group" aria-label="Dependency direction: adapters to application to domain and library">

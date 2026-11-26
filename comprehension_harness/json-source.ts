@@ -39,6 +39,7 @@ export function checkSourceIndex(document: unknown, from: string): SourceIndexDo
     return fail(`"looksDeclared" is not the source of a regular expression, the shape of a name the language declares — ${(error as Error).message}`);
   }
   for (const n of doc.narratives) if (typeof n?.file !== 'string' || typeof n.title !== 'string' || typeof n.line !== 'number' || typeof n.summary !== 'string') fail(`a narrative is not { file, title, line, summary, firstTest }: ${JSON.stringify(n)}`);
+  for (const n of doc.narratives) if (n.scope !== undefined && n.scope !== "doc") fail(`invalid narrative scope for ${n.title}: ${JSON.stringify(n.scope)}`);
   if (doc.files === null || typeof doc.files !== 'object' || Array.isArray(doc.files)) return fail('"files" is not an object, a file each');
   for (const [file, tables] of Object.entries(doc.files)) {
     for (const table of TABLES) if (!Array.isArray((tables as Partial<SourceFileIndex>)?.[table])) fail(`"${table}" of ${file} is not a list`);
@@ -109,7 +110,7 @@ export class JsonSource implements SourceReader {
   declaration(file: string, title: string): Declaration {
     const found = this.document.narratives.find((n) => n.file === file && n.title === title);
     if (!found) throw new Error(`comprehension-source: ${file} declares no narrative titled "${title}" — a story is older than the source; re-run its test`);
-    return { summary: found.summary, firstTest: found.firstTest, line: found.line };
+    return { summary: found.summary, firstTest: found.firstTest, line: found.line, ...(found.scope ? { scope: found.scope } : {}) };
   }
 
   /** The functions of a file whose lines hold `line`, the innermost first. */

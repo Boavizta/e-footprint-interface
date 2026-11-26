@@ -35,15 +35,22 @@ format. Port an older plan to the current format before delivery resumes.
   names, then `step` for the steps you will change. It gives a `file:line` for what matters, so
   you read ranges, not files. Then the spec, `plan-draft.md` if the spec stage left one, the
   project's rules and the architecture pages that own what the change touches.
-- **List the narratives the change lands in, missing ones included.** From the spec's rules,
-  name each action of the product the change enters and set it against the map: told, told
-  wrongly, or missing. `map spec` names only the told ones, so a missing one is found from the
-  rules. For each missing or wrong one, propose its narrative to the reviewer: its title, its
-  reference case, the branch cases the rules need, and the functions its steps stand in.
-- **The narratives the change lands in are reviewed before the plan is written.** A missing one,
-  or one whose steps read wrong, is told or corrected first, in its own commit and preferably its
-  own session, which takes out the prose it replaces (`workflow.md`); say so and stop. A plan written on a narrative nobody has read is
-  rewritten when someone does.
+- **Read the narratives the change lands in and assess untold flows.** From the spec's rules,
+  name the actions the change enters and set them against the map. Follow `workflow.md`
+  § "Narratives and test ownership": untold code alone is no gap. Consider recurring kinds of
+  change too: when another developer will need a pattern to follow, choose a representative
+  example and assess whether a narrative would make that pattern clear. Give its question,
+  reference case, useful variants and step functions. Use the doc scope for documentation flows.
+- **Review the narratives used as planning context before relying on them.** Correct misleading
+  steps first. When a new narrative of existing behaviour is chosen as planning context, tell it
+  and have it read first, in its own commit and preferably its own session, taking out the prose
+  it replaces. A new flow can be planned with intended narration when the stack supports it.
+  Planning can proceed with direct code links and ordinary tests when a narrative adds little.
+- **Keep documentation in its owning form.** Apply `workflow.md` § "Documentation ownership":
+  patterns and execution belong in narratives, structuring decisions in architecture, local
+  semantics beside code. State deliberate conventions and their reasons at the relevant steps.
+  Link the representative example; remove prose the narrative replaces when it is delivered.
+  Add only information needed to understand or evolve the change, once in its canonical home.
 - **Trace the real code and tests** along every path the feature touches: success, error,
   cancellation, retry, rendering, persistence. A document is no evidence of what a function does
   today.

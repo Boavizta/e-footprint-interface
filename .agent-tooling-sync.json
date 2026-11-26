@@ -53,6 +53,7 @@
       "comprehension_harness/tests/fixtures/shop/source-index.json",
       "comprehension_harness/tests/fixtures/shop/tests/test_checkout.py",
       "comprehension_harness/tests/json-source.test.ts",
+      "comprehension_harness/tests/narrative-scope.test.ts",
       "comprehension_harness/tests/json-strip.test.ts",
       "comprehension_harness/tests/json-titles.test.ts",
       "comprehension_harness/tests/layout.ts",
@@ -86,6 +87,7 @@
       "comprehension_harness/python/tests/conftest.py",
       "comprehension_harness/python/tests/test_calls.py",
       "comprehension_harness/python/tests/test_collector.py",
+      "comprehension_harness/python/tests/test_narrative_scope.py",
       "comprehension_harness/python/tests/test_source_index.py",
       "comprehension_harness/python/tests/test_strip.py",
       "comprehension_harness/python/tests/test_titles.py"

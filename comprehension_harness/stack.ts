@@ -29,9 +29,12 @@ export interface Location {
 // ── 1. Stories ─────────────────────────────────────────────────────────────────
 
 export type NarrativeKind = 'product' | 'mechanism';
+/** Subject-area metadata; it does not change narrative ownership or execution. */
+export type NarrativeScope = 'doc';
 
 /** The narrative a test is declared in. */
 export interface NarrativeDeclaration {
+  scope?: NarrativeScope;
   title: string;
   kind: NarrativeKind;
 }
@@ -141,6 +144,7 @@ export type Resolution =
 
 /** What a test file says about a narrative it declares: the first paragraph of the comment above it, its first test. */
 export interface Declaration {
+  scope?: NarrativeScope;
   summary: string;
   firstTest: string | null;
   line: number;

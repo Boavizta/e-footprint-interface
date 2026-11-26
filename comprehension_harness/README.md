@@ -9,6 +9,12 @@ The method it serves is `specs/workflow.md`; the forms it holds a feature's file
 `specs/workflow-formats.md`; what a stack must give it is [`stack.md`](stack.md), and as types
 `stack.ts`.
 
+Narratives may declare scope="doc" for documentation generation and authoring flows:
+`@narrative("A scenario becomes published examples", scope="doc")` (also on
+`narrative.mechanism`). The doc label appears on narrative pages, the index and map output;
+`npm run map -- narrative --scope doc` lists that scope. Scope describes the subject area,
+independently of product/mechanism kind, recorded/planned status and test ownership.
+
 ## What is copied
 
 | Files | What |

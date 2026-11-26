@@ -14,7 +14,7 @@ Call it as `node comprehension_harness/map.mjs <verb> …` (or `npm run map -- <
 | You need | Ask |
 |---|---|
 | What a feature changes: intent, changed screens, cases to add, narrative steps it rides on, server steps a stub answered | `spec <feature>` |
-| The list of narratives | *(no verb)* |
+| The list of narratives; documentation flows only | *(no verb)*; `narrative --scope doc` |
 | One narrative, step by step, under its causes; branches; mechanisms it rides on | `narrative <slug>` |
 | One step: its function's source, who refers to it, what it calls, the tests reaching it, the debts and rules naming it | `step <slug>#<n>` |
 | The functions next to a narrative that hold no `narrate` (handlers, helpers, the page that renders it) | `around <slug>` |

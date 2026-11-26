@@ -53,6 +53,7 @@ export interface MapStep {
 export interface MapNarrative {
   slug: string;
   kind: 'product' | 'mechanism';
+  scope?: 'doc';
   title: string;
   summary: string;
   /** The declaring test file and its reference case. */
@@ -146,6 +147,7 @@ function build(): NarrativeMap {
     return {
       slug: n.slug,
       kind: n.kind,
+      ...(n.scope ? { scope: n.scope } : {}),
       title: n.title,
       summary: n.summary,
       file: n.file,
