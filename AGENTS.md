@@ -35,7 +35,6 @@ This file orients agents and contributors. It is intentionally short. Substance 
 | LinkedIn post drafts and captioned demo video scripts | `communications/README.md` and `communications/video/README.md` |
 | Active feature work | `specs/features/<feature-name>/` |
 | A `plan.html` of the earlier form: source links, one-click reproduction debugging, decision indexes and callouts | `.agents/skills/spec-plan/references/plan-review-links.md`, `.agents/skills/spec-plan/references/plan-decision-callouts.md`, and `tools/vscode-plan-review-links/README.md` |
-| The review guide of an implemented `plan.html` (preserved structure, implementation links, consolidated decisions) | `.agents/skills/plan-review-guide/SKILL.md`, run by the `plan-review-guide` agent |
 | Past investigations and dated decisions | `archives/` |
 
 In feature plans, HTML documentation links open in a new browser tab; production source links (including HTML templates) open in VS Code. See the plan-link convention above.
@@ -80,7 +79,9 @@ Stages 2 to 4 run on the Python stack of the comprehension tools: the `narrate`,
 `planned` and `built` calls of `model_builder/narrate.py`, and the test declarations and the commands of
 `comprehension_harness/python/` (`.agents/repository.md` § "The stack" says how each is spelled).
 `model_builder/narrate.py` is this project's copy of the stack's reference file: product code
-imports the calls from it, and nothing of the harness. A feature in flight on `plan.html` and `tasks.md` is finished by hand.
+imports the calls from it, and nothing of the harness.
+An older handwritten `plan.html` and its `tasks.md` are ported to the current format before
+delivery resumes.
 
 Investigations and ad-hoc design work are exempt; the staged flow is for features that ship.
 Conversational bug batches use `bug-fixes` (a diagnostic a bug, and the reproduction that fails today), then `bug-fixes-plan` (the plan in pieces, a section a bug, with its delivery), followed by the implement and archive stages. A batch has no tasks stage.

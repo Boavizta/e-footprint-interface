@@ -96,10 +96,8 @@
       "comprehension_harness/python/tests/test_journey.py"
     ],
     "e-footprint": [
-      ".agents/roles/plan-review-guide.md",
       ".agents/skills/feature-implement/scripts/test_vscode_review_links.py",
       ".agents/skills/feature-implement/scripts/vscode_review_links.py",
-      ".agents/skills/plan-review-guide/SKILL.md",
       ".agents/skills/spec-plan/assets/plan.html",
       ".agents/skills/spec-plan/references/plan-decision-callouts.md",
       ".agents/skills/spec-plan/references/plan-review-links.md",
