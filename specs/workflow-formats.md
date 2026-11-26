@@ -7,15 +7,17 @@ repository's (`.agents/repository.md`).
 
 ## The words
 
-- A **narrative** is what the code does for one action on the product, told by the code itself:
-  one `narrate` call per **step**, and a test that crosses the steps in order. A narrative the
-  code does not tell yet is **missing**. An `event` call is a **cause**: something done to the
-  system.
+- A **narrative** guides a developer through one meaningful flow, told by the code itself:
+  one `narrate` call per **step**, and a test that crosses the steps in order. Its purpose and
+  selection are in [`workflow.md` § "Narratives and test ownership"](workflow.md#narratives-and-test-ownership).
+  A narrative chosen as useful but not told yet is **missing**; untold code alone is no gap.
+  An `event` call is a **cause**: something done to the system.
 - A **piece** is one statement about a feature, with its reason, its changes and its tests. It is
   atomic to read and to approve, not to ship. Its name is `<feature>#<slug>`, both kebab-case.
 - A **site** is one place tagged with a piece. Several sites share a piece; nothing is numbered.
-- A **rule** is a behaviour of the spec that no screen shows. One test owns it, or a **waiver**
-  says why none does.
+- A **rule** is an observable requirement in the spec's optional **Behavioral requirements**
+  section. One existing or new test in an appropriate tier owns it, or a **waiver** says why
+  none does. Screen criteria declared in configured journeys are not repeated as rules.
 - A **lot** is what one implementer delivers and one reviewer reads: a few pieces, a commit each.
 - A **bug** is what is wrong for whoever meets it, with the pieces that fix it: one, or several
   when the fix is several decisions.
@@ -32,7 +34,7 @@ repository's (`.agents/repository.md`).
 
 | File | Written by | Holds |
 |---|---|---|
-| `spec.md` | specify | The intent, and the rules no screen shows |
+| `spec.md` | specify | The intent, and any additional behavioral requirements |
 | Mockup fragments | specify | One per decision on screen, where the repository draws journeys |
 | `plan-draft.md` | specify, when the discussion held any | The technical decisions already made, a line each. The plan stage turns them into pieces and deletes the file |
 | `plan.md` | plan, then every later stage, in place | A section a piece, the decisions across pieces, the waivers, the delivery |
@@ -51,18 +53,37 @@ A title, a lead, then sections of paragraphs and `- ` lists, nothing else. It st
 as it is agreed now and is edited in place: no dated note, no record of a decision.
 
 - **Problem**, then **The change**, in the user's terms. No file, no function, no type.
-- **Rules no screen shows**: one item a rule, opening with its bold slug.
+- **Behavioral requirements**, optional: one item a rule, opening with its bold slug.
   `- **free-by-default** An order is not wrapped unless the buyer asks.`
-  A rule is a behaviour a test can hold. A constraint on the implementation is worded as what the
-  user would observe, or the plan will waive it.
+  Record consequential, observable requirements of the agreed feature that **The change** leaves
+  ambiguous. A rule must belong to this feature's scope and responsibility and remain necessary
+  under any valid implementation. Being testable, or describing a possible failure, is not enough.
+  Risks introduced by a possible implementation or migration belong with that choice in the
+  plan. Unchanged guarantees of existing code and responsibilities of other components do not
+  become new feature requirements. Keep architectural decisions and editorial instructions in
+  their owning explanation or plan; remove paraphrases rather than turning them into test
+  obligations. Omit the section when it adds nothing. Planning assigns an existing or new test,
+  or an explicit justified waiver; a rule does not demand a new test of its own.
 - **Not doing**: what was considered and left out.
 
-Where the repository draws journeys, what changes on screen is not described here. It is declared
-in the journey tests: a **planned screen** names the feature and a mockup fragment, and each
-criterion on a screen is a **case to write**, a title tagged with the feature and the screen. A
-case is a screen, or a state of one, worth seeing; a criterion that is logic is a rule.
+Screen journeys are an optional verification capability, enabled by a nonempty
+`commands.journeys` in `comprehension.config.json`, independently of whether the product has a UI.
+Where configured, criteria best demonstrated visually are declared in the journey tests: a
+**planned screen** names the feature and a mockup fragment, and each criterion is a **case to
+write**, a title tagged with the feature and screen. Do not repeat that criterion in the spec.
+Other behavior uses appropriate tests regardless of UI presence. Without configured journeys,
+the spec stands alone; describe any relevant visible changes in its prose without requiring
+captures or a browser run. Local conventions and test tiers belong in `.agents/repository.md`.
 
 ## A site
+
+A narrative can be planned before it has a recording. Its reference test declares the intended
+step IDs in order; planned narration at the code declares each sentence and links to the change
+places it explains. These are separate from the change sites below: a step can describe existing
+behaviour, and several steps can explain one change. The stack spells the declarations
+([Python example](../comprehension_harness/README.md#planning-a-narrative-before-its-first-run)).
+The plan page labels the sequence as intended, without claiming observed crossings. Once built,
+the reference run must reach its declared steps in order.
 
 One of three, each carrying `<feature>#<slug>`:
 
@@ -85,9 +106,10 @@ One of three, each carrying `<feature>#<slug>`:
   a blank line before any comment that was there already, the one the tag is about included.
 
 On code that runs, a site is a call, never a comment: no test crosses a comment. A new function
-is named, in backticks, by the clause of the site that will call it; a shell no clause names is
-drawn in no narrative and fails the check. An entry point that nothing in the repository calls is
-named by the title of a planned test that calls it, as the test stands for its caller.
+is named, in backticks, by the clause of the site that will call it, so the check can connect it
+to its caller. An entry point that nothing in the repository calls is named by the title of a
+planned test that calls it, as the test stands for its caller. A shell named by neither fails
+the check; its caller need not be in a narrative.
 
 An existing test that changes carries an `@planned` comment. One a planned case now holds carries
 an `@planned.remove` comment naming the holder, and says "planned" when the holder is not written
@@ -153,9 +175,15 @@ gate holds.
 
 ## `plan.md`
 
+A piece's section order is its authored review order, preserved by the detailed cards on the plan
+page. Introduce concepts before pieces rely on them; a brief overview can establish context first.
+Narrative diagrams retain execution order. Implementation order is chosen during tasks and written
+in the delivery's ordered lots and pieces, without rearranging the review sections.
+
 A title, a lead, then:
 
-- **One `## #slug` section per piece**: its statement in the first paragraph, then its reason
+- **One `## #slug` section per piece**: optionally a standalone `Kind: refactoring` paragraph
+  immediately after the heading, then its statement in the first prose paragraph, its reason
   and what was refused.
 - **A `## Bug: <what is wrong>` section**, in a plan that fixes bugs: the sections of the pieces
   that fix it follow it. A piece of no bug stands above the first. A bug with no piece under it
@@ -166,6 +194,14 @@ A title, a lead, then:
 - **`## Planned elsewhere`**: the pointers, `- **the-repository** #the-piece — what this plan
   relies on`, for a feature that changes two repositories. Below.
 - **`## Delivery`**: the lots, below.
+
+`Kind: refactoring` marks a piece that reorganizes existing code or documentation while preserving
+its behavior or meaning. The marker is metadata, excluded from prose and word budgets, shown as a
+Refactoring badge on plan and delivery cards and in map answers and implementation briefs, and held
+by approval. No marker means no classification; no other kind is defined. Refactoring need not be
+optional: its reason says why it belongs in the delivery and whether the feature depends on it.
+Adding or removing the marker changes the approved piece. Behavior corrections remain separate
+pieces.
 
 Three paragraphs have a prefix:
 
@@ -183,9 +219,10 @@ any consequence needed to judge the change. Use up to 80 words, with no minimum;
 short and use the space when context is needed. One paragraph still explains one edit.
 
 After ` → `, a `Changed:` names the lines of the difference it comes to, parted by `;`: a kind
-(`code`, `test`, `statement`, `reason`, `text`, `unbuilt`) and a fragment the line holds, in double quotes
+(`code`, `test`, `statement`, `reason`, `kind`, `text`, `unbuilt`) and a fragment the line holds, in double quotes
 when it has a space. `Changed: **Its narrative case leaves for #wrap-row.** It reads the row the
-other piece adds → test "a wrapped order"`. A section with one such paragraph needs no claim.
+other piece adds → test "a wrapped order"`. A classification change can use `→ kind "refactoring"`.
+A section with one such paragraph needs no claim.
 
 **A paragraph names the commits that did what it says**: `commit` and seven digits of the hash
 or more, after the same ` → `: `→ test "a wrapped order"; commit 1a2b3c4d`. A `To confirm:`

@@ -126,13 +126,13 @@ describe('tierOf', () => {
 });
 
 describe('parseIntent', () => {
-  const md = ['# The cap', '', 'Lead line one', 'and two.', '', '## Rules no screen shows', '', '- **rule-a** The first rule,', '  continued.', '- **rule-b** The second.', '', '## Decision', '', '#cut-to-cap opens a paragraph and is no heading.'].join('\n');
+  const md = ['# The cap', '', 'Lead line one', 'and two.', '', '## Behavioral requirements', '', '- **rule-a** The first rule,', '  continued.', '- **rule-b** The second.', '', '## Decision', '', '#cut-to-cap opens a paragraph and is no heading.'].join('\n');
 
   it('parses the title, the lead, the sections, and takes an item\'s slug off its text', () => {
     const intent = parseIntent(md, 'spec.md');
     expect(intent.title).toBe('The cap');
     expect(intent.lead).toEqual([{ kind: 'p', text: 'Lead line one and two.', line: 3 }]);
-    expect(sluggedItems(intent, 'Rules no screen shows')).toEqual([
+    expect(sluggedItems(intent, 'Behavioral requirements')).toEqual([
       { slug: 'rule-a', text: 'The first rule, continued.', line: 8 },
       { slug: 'rule-b', text: 'The second.', line: 10 },
     ]);
@@ -145,9 +145,15 @@ describe('parseIntent', () => {
   });
 
   it('holds every rule to a slug, and to a slug of its own', () => {
-    expect(() => rulesOf(parseIntent('# T\n\n## Rules no screen shows\n\n- **rule-a** One.\n- A rule with no name.', 'spec.md'), 'spec.md')).toThrow(/spec\.md:6/);
-    expect(() => rulesOf(parseIntent('# T\n\n## Rules no screen shows\n\n- **rule-a** One.\n- **rule-a** Two.', 'spec.md'), 'spec.md')).toThrow(/spec\.md:6 — two rules are named "rule-a"/);
+    expect(() => rulesOf(parseIntent('# T\n\n## Behavioral requirements\n\n- **rule-a** One.\n- A rule with no name.', 'spec.md'), 'spec.md')).toThrow(/spec\.md:6/);
+    expect(() => rulesOf(parseIntent('# T\n\n## Behavioral requirements\n\n- **rule-a** One.\n- **rule-a** Two.', 'spec.md'), 'spec.md')).toThrow(/spec\.md:6 — two rules are named "rule-a"/);
     expect(rulesOf(parseIntent('# T\n\n## Other\n\n- x', 'spec.md'), 'spec.md')).toEqual([]);
+  });
+
+  it('allows a spec without additional requirements, but never silently drops the former section', () => {
+    expect(rulesOf(parseIntent('# T\n\n## The change\n\nUse one source.\n', 'spec.md'), 'spec.md')).toEqual([]);
+    expect(() => rulesOf(parseIntent('# T\n\n## Rules no screen shows\n\n- **still-required** Preserve this.\n', 'spec.md'), 'spec.md'))
+      .toThrow(/spec\.md:3 — rename .* to "Behavioral requirements"/);
   });
 });
 
@@ -168,7 +174,7 @@ const comment = (slug: string, file: string, line: number, removes = false): Sta
 const todo = (slug: string, file: string, line: number, rule: string | null = null, tier: PlanTodo['tier'] = 'unit'): PlanTodo => ({ feature: 'demo', slug, file, line, column: 3, title: `${slug} is tested`, rule, tier, written: false, reproduction: false, run: null, body: null });
 const crossed = (narrative: string, at: number) => ({ narrative, at, step: null });
 
-const SPEC = '# Demo\n\n## Rules no screen shows\n\n- **owned-once** One owner.\n- **owned-twice** Two owners.\n- **owned-by-none** No owner.\n';
+const SPEC = '# Demo\n\n## Behavioral requirements\n\n- **owned-once** One owner.\n- **owned-twice** Two owners.\n- **owned-by-none** No owner.\n';
 const PLAN = '# The plan\n\nLead.\n\n## Where the cap is applied\n\nIn the reader: #cut and #save.\n\n## The column\n\n- #cap-column is nullable.\n- #ghost is named and does not exist.\n';
 const docs = (plan: string | null = PLAN, spec: string | null = SPEC, folderExists = true) => (feature: string): FeatureDocs => ({
   folderExists,
@@ -284,6 +290,28 @@ describe('assemblePlans', () => {
     expect(one('# P\n\n## #cut\n\nTo confirm: a question first\n')).toThrow(/opens with its statement/);
     expect(one('# P\n\n## #cut\n\nIt cuts.\n\nTo confirm: one\n\nTo confirm: two\n')).toThrow(/plan\.md:9 — "## #cut" holds 2 "To confirm:" paragraphs/);
     expect(one('# P\n\n## #cut the reader\n\nIt cuts.\n')).toThrow(/plan\.md:3 — "## #cut the reader": a piece's section is titled with its tag alone/);
+  });
+
+  it('reads a refactoring marker as piece metadata without spending its prose budgets', () => {
+    const reason = Array(BUDGET.why).fill('reason').join(' ');
+    const md = `# P\n\n## #cut\n\nKind: refactoring\n\nThe reader cuts.\n\n${reason}\n\n## #save\n\nSave sends it.\n`;
+    const [made] = assemble({ sites: [site('cut', 'src/a.ts', 1), site('save', 'src/b.ts', 1)], docs: docs(md, null) });
+    expect(made.pieces[0].doc).toMatchObject({ kind: 'refactoring', what: 'The reader cuts.', why: [{ text: reason }] });
+    expect(made.pieces[1].doc!.kind).toBeNull();
+    expect(made.snapshot.units.find((u) => u.name === '#cut')!.facets.kind).toEqual(['refactoring']);
+    expect(made.snapshot.units.find((u) => u.name === '#save')!.facets).not.toHaveProperty('kind');
+    expect(findings(made).failures).toEqual([]);
+  });
+
+  it.each([
+    ['## #cut\n\nKind: cleanup\n\nIt cuts.', /the piece kind is "Kind: refactoring"/],
+    ['## #cut\n\nKind: refactoring\nIt cuts.', /a paragraph of its own/],
+    ['## #cut\n\nIt cuts.\n\nKind: refactoring', /stands once, immediately after/],
+    ['## #cut\n\nKind: refactoring\n\nKind: refactoring\n\nIt cuts.', /stands once, immediately after/],
+    ['## #cut\n\nKind: refactoring', /opens with its statement/],
+    ['## Across\n\nKind: refactoring', /belongs to a piece's section/],
+  ])('refuses invalid piece metadata: %s', (section, error) => {
+    expect(() => assemble({ sites: [site('cut', 'src/a.ts', 1)], docs: docs(`# P\n\n${section}\n`, null) })).toThrow(error);
   });
 
   it('gives each rule of spec.md its owners: none, one, two — and sets apart a claim on no rule', () => {
@@ -418,7 +446,7 @@ describe('findings', () => {
   });
 
   it('at the archive gate, passes once nothing is planned and every rule is owned by a written test', () => {
-    const spec = '# S\n\n## Rules no screen shows\n\n- **one-rule** A rule.\n- **other-rule** Another.\n';
+    const spec = '# S\n\n## Behavioral requirements\n\n- **one-rule** A rule.\n- **other-rule** Another.\n';
     const written = (rule: string | null) => ({ ...todo('cut', 'tests/x.test.ts', rule === 'other-rule' ? 9 : 3, rule), written: true });
     const [unowned] = assemble({ todos: [written('one-rule')], docs: docs(null, spec) });
     expect(findings(unowned).failures).toEqual([]);
@@ -795,6 +823,32 @@ describe('the approved plan', () => {
     expect(now({}).delta).toEqual([]);
     expect(now({ sites: [{ ...crossedSite, line: 190 }] }).delta).toEqual([]);
     expect(now({}, MD, null).delta).toBeNull();
+  });
+
+  it.each([false, true])('requires an explanation when the refactoring classification changes (previously marked: %s)', (marked) => {
+    const refactoring = MD.replace('## #cut\n', '## #cut\n\nKind: refactoring\n');
+    const before = marked ? refactoring : MD;
+    const after = marked ? MD : refactoring;
+    const baseline = approvedAs({ ...base, sites: [crossedSite] }, before);
+    const changed = now({}, after, baseline);
+    expect(changed.delta).toMatchObject([{
+      name: '#cut', reason: 'needed',
+      facets: [{ facet: 'kind', added: marked ? [] : ['refactoring'], removed: marked ? ['refactoring'] : [] }],
+    }]);
+    expect(findings(changed).failures).toHaveLength(1);
+    const explained = now({}, says(after, 'The developer must see the scope of the cleanup. → kind "refactoring"', '**The piece classification changed.** '), baseline);
+    expect(explained.delta![0].edits[0].lines).toEqual([{ facet: 'kind', sign: marked ? '−' : '+', text: 'refactoring' }]);
+    expect(findings(explained).failures).toEqual([]);
+  });
+
+  it('does not treat moving a refactoring label between pieces as moving an approved clause', () => {
+    const unmarked = `${MD}\n## #save\n\nSave sends it.\n`;
+    const before = unmarked.replace('## #cut\n', '## #cut\n\nKind: refactoring\n');
+    const after = unmarked.replace('## #save\n', '## #save\n\nKind: refactoring\n');
+    const sites = [crossedSite, site('save', 'src/save.ts', 1)];
+    const changed = now({ sites }, after, approvedAs({ ...base, sites }, before));
+    expect(changed.moves).toEqual([]);
+    expect(changed.delta!.map((d) => [d.name, d.reason])).toEqual([['#cut', 'needed'], ['#save', 'needed']]);
   });
 
   it('fails a piece that gained a clause, a test or a reason, until its section says why', () => {

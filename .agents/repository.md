@@ -29,8 +29,9 @@ is particular to this one here. `AGENTS.md` stays the entry point and wins where
 
 The Python stack of the comprehension harness is written to its contract
 (`comprehension_harness/stack.md`), and `comprehension.config.json` names its commands. One flow
-is narrated, the AI-assisted bootstrap (`tests/narratives/test_ai_bootstrap.py`); the others
-have no narrative yet. The same flow has the one journey drawn from a run, *Start a modeling
+is narrated, the AI-assisted bootstrap (`tests/narratives/test_ai_bootstrap.py`). Other flows stay
+outside narratives unless a guide would materially help the reader, following `specs/workflow.md`
+§ "Narratives and test ownership". The same flow has the one journey drawn from a run, *Start a modeling
 with AI* (`tests/e2e/journeys/test_start_a_modeling_with_ai.py`). A feature in flight on `plan.html` and `tasks.md` is finished by hand or
 ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 
@@ -47,6 +48,7 @@ ported; a bug batch is planned in pieces too (`bug-fixes`, `bug-fixes-plan`).
 | A narrative, its reference case | A test class under `@narrative("<title>")` of the same `declare.py`, in a file under `tests/narratives/`; `@narrative.mechanism("<title>")` for a mechanism. Use scope="doc" for documentation generation and authoring. Its summary is the first paragraph of the class docstring. Its reference case is its first test, or the one marked `@canonical`; a reference case is not parametrized |
 | What each test crossed | `comprehension_harness/python/collector.py`, a pytest plugin `tests/conftest.py` loads for every run, under pytest-xdist too: one story file a test file under `node_modules/.cache/comprehension_harness/stories/` |
 | The source index, the test titles, the watch, the strip | `source_index.py`, `titles.py`, `watch.py` and `strip.py` of `comprehension_harness/python/`: the four commands of the configuration, standard library only, run as `python3 -m comprehension_harness.python.<name>`. The index reads the Python files of the product folders; a JavaScript file has no site and no stand |
+| A planned narrative | Declare the test class with `@narrative`, and its empty `@planned_test` reference with `@canonical(steps=("<flow>:<step>", …))`. At the code, `narrate.planned("<flow>:<step>", "<sentence>", changes=("<feature>#<piece>:<place>", …))` declares each step; change links are optional. These calls can stand in shells and record nothing. Promote them to `narrate("<sentence>", step="<flow>:<step>")` and keep the ordered reference declaration when the test is written; its body must cross those named steps in order. See `comprehension_harness/README.md` |
 | A symbol in a sentence | A name the index can place: an import of the file, a local of the function, a top-level declaration. A method or a dotted name stays plain: name its class. A backticked name shaped like a declaration (`CamelCase`, or words joined by `_`) that the index cannot place fails `--check`, so a dict key, a field or a method is written without backticks |
 | A journey | A test class under `@journey("<name>", who=…, wants=…, now=…)` of `comprehension_harness/python/journey.py`, in a file under `tests/e2e/journeys/`; `screen(page, "<id>", why="…")` at each screen reached, once what makes it reached has been waited for. Its first test is the reference run, the others its variants. It is served by pytest-django's `live_server`, with the fixtures of `tests/e2e/journeys/conftest.py` (`specs/testing.md` § "Journey tests") |
 | A planned screen, a case to write | On a flow that has a journey: `screen(…, planned={"feature": "<feature>", "mockup": "specs/features/<feature>/mockups/<screen>.html", "what": "…"})`, the mockup an edited copy of today's capture, and `@planned_case("<feature>", "<screen>", "<title>")` on a test of the class with an empty body. Written, the case keeps its title under `@titled("<title>")` |

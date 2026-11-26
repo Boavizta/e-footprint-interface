@@ -9,11 +9,65 @@ The method it serves is `specs/workflow.md`; the forms it holds a feature's file
 `specs/workflow-formats.md`; what a stack must give it is [`stack.md`](stack.md), and as types
 `stack.ts`.
 
+Narratives are a small, curated set of guides through meaningful code flows. Their selection and
+test ownership follow [`workflow.md` § "Narratives and test ownership"](../specs/workflow.md#narratives-and-test-ownership).
+Ordinary tests can own behaviour without adding a page or a variant.
+
 Narratives may declare scope="doc" for documentation generation and authoring flows:
 `@narrative("A scenario becomes published examples", scope="doc")` (also on
 `narrative.mechanism`). The doc label appears on narrative pages, the index and map output;
 `npm run map -- narrative --scope doc` lists that scope. Scope describes the subject area,
 independently of product/mechanism kind, recorded/planned status and test ownership.
+
+Detailed plan cards follow the authored piece-section order in `plan.md`; narrative diagrams retain
+execution order. Authors introduce concepts before pieces rely on them. The tasks stage chooses
+implementation order separately in the delivery's lots and pieces.
+
+On plan and delivery pages, resolved references to declarations introduced by the feature carry a
+small **NEW** button, derived from its added places (including those already built). Clicking it briefly
+highlights the declaration row, scrolling it into view only when needed; the symbol still opens its source.
+
+A piece marked `Kind: refactoring` before its statement in `plan.md` carries a **Refactoring** badge
+on plan and delivery cards and a label in the map and implementation briefs. Its reason explains why
+it belongs in the delivery and whether the feature depends on it; classification alone does not mean
+optional work. Approval holds the marker too. The syntax is in `specs/workflow-formats.md`.
+
+## Planning a narrative before its first run
+
+Keep the intended sequence on a narrative's reference test, and its sentences beside the code:
+
+```python
+# In the product's code (import narrate from the project's own copy).
+narrate.planned("class-lookup:read", "The class supplies its **metadata**.",
+                changes=("agent-guidance#class-reference:reference-text",))
+
+# In a test file, using narrative, canonical and planned_test from the stack's declare module.
+@narrative("An agent consults class metadata")
+class TestClassMetadata:
+    """A class lookup prints the installed metadata without constructing an example."""
+
+    @canonical(steps=("class-lookup:read",))
+    @planned_test("agent-guidance#class-reference: A lookup prints the class metadata")
+    def test_class_metadata(self):
+        pass
+```
+
+Step IDs are `<flow>:<step>`, two kebab-case names independent of a feature. `changes` is an optional
+literal tuple of existing `<feature>#<piece>:<place>` IDs; an existing-behaviour step can omit it.
+Several steps may link to one change, and one step to several changes. A shell may contain these
+declarations alongside its `planned` call and raise.
+
+The pages and `map narrative` label this sequence **intended, not observed**, even with no story file.
+It contributes no recorded steps, coverage or ownership. The feature plan shows the linked sequences,
+and its approval holds their IDs, sentences and order. The check rejects missing or duplicate step IDs,
+orphan planned steps and unknown change places.
+
+When building the narrative, replace each declaration with `narrate("…", step="class-lookup:read")`
+at the actual operation, and write the test under `@titled` instead of `@planned_test`. Keep
+`@canonical(steps=…)`: the collector checks the first crossings of those steps in the test body
+against that order. Setup and teardown do not satisfy it. The render check also rejects a written
+reference that still names a planned step or has no matching recorded sequence. Planned declarations
+are always inert, even with a collector installed; promoted steps retain their stable identities.
 
 ## What is copied
 
@@ -51,6 +105,19 @@ They are written for any project. What a project is to them is the three things 
    its name, for a plan that points at a piece planned there; and `commands.testsUnder`, the
    test folders `tests` does not run, each with the command that runs a plan's reproduction
    there, or null for a folder left to a run by hand.
+
+   **Screen journeys are optional.** `commands.journeys: []` disables that integration;
+   `map spec <feature>` reads the feature's `spec.md` directly, without captures, a narrative
+   snapshot or a browser run. With a journey command configured, it also reads planned screens,
+   cases and their recorded narrative crossings. This declares a verification capability, not
+   whether the product has a UI. Keep local paths, commands and available test tiers in this
+   configuration, with guidance in `.agents/repository.md`; shared tools and skills use those
+   settings without project-specific branches.
+
+   Specs use the optional **Behavioral requirements** section for additional observable rules;
+   planning links each to an existing or new test, or a justified waiver. When syncing an older
+   checkout, rename `Rules no screen shows` to `Behavioral requirements` in its specs. The plan
+   reader rejects the former heading so that requirements cannot silently disappear.
 
 3. **The stack**, which gives the tools four things ([`stack.md`](stack.md) is its contract):
    - the calls (`narrate`, `event`, `planned`, and `built` where a planned place became code) in

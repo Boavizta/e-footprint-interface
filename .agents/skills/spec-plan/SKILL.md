@@ -13,12 +13,14 @@ changes, and the page is generated from them. You write:
   `@planned` comments where no line runs. A place that becomes code names itself in its tag,
   `<feature>#<slug>:<place>`: a short name for what changes there, its own within the piece
   (`workflow-formats.md` § "A site"). The check asks for it;
-- the **planned tests** of the narrative and server tiers, as titles with no body;
+- the **planned tests** that own the spec's rules, in any appropriate tier, and the narrative
+  and server cases the change needs, as titles with no body;
 - **`specs/features/<feature>/plan.md`**: a section a piece (its statement, its reason), the
   decisions across pieces, the waivers.
 
 Nothing the product does changes: a `planned` call is inert and a shell fails loudly if reached.
-You write no unit-tier title and no delivery; those are `spec-tasks`'.
+Additional unit coverage and the delivery belong to `spec-tasks`; a rule owner can be an ordinary
+test planned here.
 
 **Run it in a fresh session**, from the approved spec. A spec that cannot stand alone fails here,
 as a question to the user. Read `.agents/repository.md` (the stack's spellings, the commands, the
@@ -57,7 +59,7 @@ format. Port an older plan to the current format before delivery resumes.
 - **Look for the existing mechanism** before proposing a new one. For each interaction, make the
   checks of `repository.md` § "Planning checks" and say which it touches.
 - A feature that lands in no code that runs today has shells that never run, so its pieces have no
-  run order on the page. Tell the reviewer; the order is then `plan.md`'s.
+  observed run order on the page. Tell the reviewer.
 
 ## Audit complexity before the review
 
@@ -75,6 +77,9 @@ a smaller extension of what exists. Remove what has no demonstrated need.
 - Before planning a refresh, a preserved draft or a background sync, check which surfaces are
   visible. Showing an error is not keeping an edit.
 - No framework inferred from one helper, no second model of data owned elsewhere.
+- Put adjacent cleanup in its own piece, marked `Kind: refactoring`. Its reason states why it
+  belongs in this delivery and whether the feature depends on it. Separate behavior corrections
+  from changes that only reorganize existing code or documentation.
 - No recovery for a failure inside a failure handler by reflex: each adds branches of its own.
 - A confirmed bug found on the way is reported with its evidence, and a deferred concern parked
   where the repository parks them. Nothing is fixed during planning.
@@ -102,15 +107,24 @@ This audits your reasoning. It is no section of `plan.md`.
 - **A clause states the change at its place**, not what the code does today: one clause, no
   reason, no list of cases. The reason is the piece's, in `plan.md`.
 - **A new function is a shell, and the clause of the site that will call it names it in
-  backticks.** Without that the piece is drawn in no narrative, and the check fails. An entry
-  point nothing in the repository calls is named by the title of a planned test that calls it.
+  backticks.** This connects the new function to its caller; it does not require a narrative.
+  An entry point nothing in the repository calls is named by the title of a planned test that
+  calls it. A shell named by neither fails the check.
 - **On code that runs, a site is a call.** A comment is for a type, a schema, a migration, a doc.
   No test crosses a comment, so no narrative shows it and no test reaches it.
 - **A mechanical ripple is stated once, at its cause.** When one site makes twenty literals or
   assertions change the same way, its clause says so, and the twenty carry no tag. A place is
   tagged when its change is a decision.
+- **Order the piece sections in `plan.md` for review**, introducing concepts before pieces rely
+  on them; a brief overview can establish context first. The detailed cards preserve this order;
+  narrative diagrams retain execution order. Implementation order belongs to `spec-tasks`.
 - **Define a term where the plan first needs it**, and use only defined terms after.
 - **For a mechanism in two steps, the piece's reason says why one is not enough.**
+- **A useful new narrative can be planned before its reference run exists.** Use the stack's planned
+  narration at the code for its step IDs, sentences and optional links to change places. Its planned
+  reference test declares the IDs in intended order, without repeating the sentences. The page must label
+  this as intent, never an observed run or landing. On implementation the named steps become recorded
+  narration and the reference verifies their order. An existing-behaviour step needs no change link.
 - **Cross-piece sections hold genuinely shared decisions, stated once.** Keep one only when it
   constrains several named pieces and has no clear owning piece or site. Put owned details with
   their pieces and sites, and test expectations in their cases. Remove repeated overviews,
@@ -121,10 +135,20 @@ This audits your reasoning. It is no section of `plan.md`.
 
 ## Writing the tests
 
-Titles only, of the narrative and server tiers. A behaviour is proven by a narrative case; a unit
-title is `spec-tasks`' to plan.
+Titles only. Rules are the spec's optional **Behavioral requirements**, not a checklist of its
+architecture or prose. Keep design choices in their owning explanation or plan decision;
+do not invent tests to restate them. A regression risk introduced by a plan choice is verified
+with that choice, not promoted into a spec rule; unchanged guarantees stay with their existing
+coverage. Each rule has an appropriate existing or new test owner,
+or an explicit justified waiver. Use a narrative case when it helps explain
+the flow; use an ordinary test for other behaviour, at the level the project's testing guidance
+calls for. Plan rule owners in any appropriate tier here; additional unit coverage is
+`spec-tasks`' to plan.
 
 - **Each rule of the spec has one owner**: the test whose title ends `[<rule-slug>]`.
+- **Narrative membership is an editorial choice.** Keep each narrative focused on one coherent
+  question. A requirement, an additional code path or a branch crossed by an existing case does
+  not oblige that narrative to own it. Put other behaviour in ordinary tests.
 - **No title repeats a case the feature's host already has.** When the new value only joins an
   existing whole, that whole's tests are extended, not copied with the value swapped in.
 - **An existing case extended is the owner**: a planned test beside it, under a comment saying
@@ -133,7 +157,8 @@ title is `spec-tasks`' to plan.
   holds`, proposed with `To confirm:`. A test that restates the implementation is not written.
 - **A planned case goes to the piece at whose commit it can be written.**
 - **Re-read each journey case of the spec against the plan's decisions**, and reword one a
-  decision made false.
+  decision made false. Screen journeys apply only when `commands.journeys` is nonempty in
+  `comprehension.config.json`; available tiers and commands come from repository settings.
 
 ## Guards and states
 
@@ -170,7 +195,7 @@ title is `spec-tasks`' to plan.
 ## The review, and the approval
 
 - The reviewer reads the page top down: the pieces no narrative shows, the narratives the change lands in,
-  then a card a piece, those of the first block first. They ask in this session, and answer each
+  then a card a piece in `plan.md` section order. They ask in this session, and answer each
   point to confirm under it on the served page (`npm run comprehension`). Read those answers with
   `map feedback <feature>`; each answer is an edit in place and a commit.
 - A simplification of the underlying code found on the way is made in another session, and the

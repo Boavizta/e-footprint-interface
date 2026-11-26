@@ -47,11 +47,16 @@ Read `.agents/repository.md` § "Review surfaces" and § "Gates". `map …` is t
      the one it replaces by value, not by title.
    - **Each deleted test against the holder the plan named**, when the lot deleted one: does the
      holder's assertion fail if the behaviour breaks?
-   - **The steps written in the last commit**, when it wrote any: read the story. Is a sentence
-     now false, a step missing where a reader would stop?
+   - **The affected narrative**, when the lot changes one: read it. Are its sentences accurate,
+     and are any explanations missing? Does each added or changed step and variant help answer
+     its central question? Flag additions that expand coverage without helping the reader
+     understand the flow. Check that removing a variant preserves its necessary assertions in
+     an appropriate test. Keep this review within the narrative touched by the change.
    - **A piece that fixes a bug** (`specs/workflow-formats.md` § "A bug"): the check holds that
-     each reproduction is declared a written test and reads as approved. Did it fail before the
-     fix for the reason the piece gives? Is an evidence call left, or something written where
+     each reproduction is declared a written test and reads as approved. Its pre-fix failure
+     for the diagnosed reason has already been checked upstream. Review whether its assertions
+     capture the bug and whether the fix addresses the cause. Recheck against earlier code only
+     when a concrete concern warrants it. Is an evidence call left, or something written where
      one stood? A reproduction you would have assert more is a finding, and a change of the plan.
    - **What the next lot stands on**: a choice made here that no line of the plan says.
 

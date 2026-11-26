@@ -7,7 +7,7 @@
  *   npm run map -- step <slug>#<n>               one step: its function's source, who refers to it, its tests, the debts naming it
  *   npm run map -- where <file | function>       the steps a file or a function carries, or "unmapped"
  *   npm run map -- around <slug>                 the functions next to a narrative that hold no `narrate`
- *   npm run map -- spec <feature>                a feature's spec: intent, changed screens, cases to add, what it rides on
+ *   npm run map -- spec <feature>                a feature's spec; configured screen journeys add cases and recorded crossings
  *   npm run map -- plan <feature>                a feature's plan: plan.md, its pieces in run order with their sites and planned tests, the rules' owners
  *   npm run map -- brief <feature>#<piece>         one piece of a plan, with the code at each of its sites
  *   npm run map -- brief <feature>/<lot>           a lot of the plan's delivery: its pieces with their code, the decisions that bind them, its journey cases, what the spec plans at its screens
@@ -22,7 +22,8 @@
  * `map/` of the project's cache, so an answer costs a process start. Each snapshot lists the
  * files it was read from with their modification times; when one moved, the snapshot is rebuilt
  * first (a few seconds), and when source moved under the stories, the narrative tests are run again
- * before that. What cannot be refreshed from here (a journey test newer than its captures needs a
+ * before that. With screen journeys disabled, `spec` reads spec.md directly and needs no snapshot.
+ * What cannot be refreshed from here (a journey test newer than its captures needs a
  * browser run) fails with the command to run. `--stale-ok` answers from what is there.
  */
 import { spawnSync } from 'node:child_process';
@@ -140,7 +141,7 @@ function neighbours(list, indent = '    ') {
 
 function narratives(map) {
   say('Narratives — what the code does for one action, told by the code step by step, in the order one test crosses it.', '');
-  for (const n of map.narratives.filter((n) => !selectedScope || n.scope === selectedScope)) say(`${n.kind === 'mechanism' ? 'mechanism' : 'product  '}  ${n.slug}${n.scope ? ` [${n.scope}]` : ''}`, `           ${n.title} — ${plural(n.steps.length, 'step')}, ${plural(n.branches.length, 'branch').replace('branchs', 'branches')}, ${n.file}`);
+  for (const n of map.narratives.filter((n) => !selectedScope || n.scope === selectedScope)) say(`${n.intended?.planned ? 'planned  ' : n.kind === 'mechanism' ? 'mechanism' : 'product  '}  ${n.slug}${n.scope ? ` [${n.scope}]` : ''}`, `           ${n.title} — ${n.intended?.planned ? `${plural(n.intended.steps.length, 'intended step')}, not observed` : `${plural(n.steps.length, 'step')}, ${plural(n.branches.length, 'branch').replace('branchs', 'branches')}`}, ${n.file}`);
   say('', `next: npm run map -- narrative <slug>   (any part of a slug that names one)`);
 }
 
@@ -152,6 +153,11 @@ const edited = (n) => (n.editedSince.length
 function narrative(map, name) {
   const n = pick(map, name);
   say(`# ${n.title}  [${n.kind}${n.scope ? `, ${n.scope}` : ''}]`, `${n.file}:${n.line} — reference case "${n.canonical}"`, '', n.summary, '');
+  if (n.intended) {
+    say(n.intended.planned ? 'PLANNED — intended reference sequence, not an observed run:' : 'Declared reference sequence:');
+    for (const s of n.intended.steps) say(`  ${s.n}. ${s.sentence} [${s.planned ? 'planned' : 'code'}]`, `     ${at(s)}  in ${s.fn}${s.changes.length ? `\n     linked changes: ${s.changes.join(', ')}` : ''}`);
+    if (n.steps.length) say('', 'Observed steps:');
+  }
   let cause;
   for (const s of n.steps) {
     if (s.cause !== cause) { cause = s.cause; say(cause ? `▸ ${cause}` : '▸ (before any cause)'); }
@@ -171,6 +177,11 @@ function step(map, name) {
   const n = pick(map, name);
   const k = Number(name.split('#')[1]);
   const s = n.steps.find((x) => x.n === k);
+  if (!s && n.intended?.steps.some((x) => x.n === k)) {
+    const intended = n.intended.steps.find((x) => x.n === k);
+    say(`# ${n.title} — intended step ${k} (not observed)`, intended.sentence, '', `${at(intended)}  in ${intended.fn}`, `linked changes: ${intended.changes.join(', ') || 'existing behaviour; no change linked'}`);
+    return;
+  }
   if (!s) fail(`${n.slug} has steps 1 to ${n.steps.length}; ask for ${n.slug}#<n>`);
   say(`# ${n.title} — step ${s.n} of ${n.steps.length}`, s.sentence, '', `${at(s)}  in ${s.fn}${s.cause ? `\ncause: ${s.cause}` : ''}`, '');
   if (s.range) {
@@ -224,6 +235,7 @@ function where(map, what) {
   const match = (x) => (isFile ? x.file === what || x.file.endsWith(`/${what}`) : x.fn === what);
   const out = [];
   for (const n of map.narratives) {
+    for (const s of n.intended?.steps ?? []) if (match(s)) out.push(`  intended step ${s.n} of ${n.slug} (not an observed crossing)  ${at(s)}  in ${s.fn}\n     ${s.sentence}`);
     for (const s of n.steps) if (match(s)) out.push(`  step ${s.n} of ${n.slug}  ${at(s)}  in ${s.fn}\n     ${s.sentence}`);
     for (const b of n.branches) if (match(b)) out.push(`  a branch of ${n.slug}  ${at(b)}  in ${b.fn}, told by "${b.toldBy}"\n     ${b.sentence}`);
   }
@@ -238,13 +250,21 @@ function where(map, what) {
   if (out.length) say(`${what} carries ${plural(out.length, 'narrated site')}:`, ...out);
   if (near.size) say(out.length ? '' : `${what} holds no \`narrate\`, and is next to narrated code:`, ...(out.length ? ['Also next to narrated code, holding no `narrate` itself:'] : []), ...[...near.values()].slice(0, 20), ...(near.size > 20 ? [`  … and ${near.size - 20} more`] : []));
   const tests = new Set();
-  for (const n of map.narratives) if (n.steps.some(match) || n.branches.some(match)) tests.add(`${n.file} (the narrative's test)`);
+  for (const n of map.narratives) if (n.steps.some(match) || n.branches.some(match) || n.intended?.steps.some(match)) tests.add(`${n.file} (the narrative's test)`);
   if (tests.size) say('', 'Before editing, the tests that tell it:', ...[...tests].map((t) => `  ${t}`));
   say('', 'next: npm run map -- step <slug>#<n>');
 }
 
 function specText(feature) {
   if (!feature) fail('spec <feature>');
+  if (config.commands.journeys.length === 0) {
+    const file = `${FEATURES}/${feature}/spec.md`;
+    if (!existsSync(join(ROOT, file))) fail(`no spec ${file}`);
+    say(readFileSync(join(ROOT, file), 'utf8').trim(), '',
+      'Screen journeys are not configured in this repository. The spec is its spec.md; no journey run is required.',
+      'next: npm run map   (choose relevant narratives as planning context)');
+    return;
+  }
   const m = spec(feature);
   const t = snapshot();
   say(m.intent.trim(), '', '─'.repeat(60), `What changes on screen — declared in the journey tests`, '');
@@ -308,7 +328,7 @@ function blockLines(blocks, first) {
  *  the next piece stands on. A place has no line once it is code: it is its file and its function. `whole` (one
  *  piece asked for by name) adds the reason to a piece with nothing left. */
 function pieceText(plan, piece, code, whole = false, printed = new Map()) {
-  const out = [`#${piece.slug}${piece.doc ? ` — ${piece.doc.what}` : ''}`];
+  const out = [`#${piece.slug}${piece.doc?.kind === 'refactoring' ? ' [refactoring]' : ''}${piece.doc ? ` — ${piece.doc.what}` : ''}`];
   // A comment standing on a test this piece writes is a note on that test: it is told under the test's title,
   // once, and is no place of its own.
   const fullTitle = (t) => `${t.feature}#${t.slug}: ${t.title}${t.rule ? ` [${t.rule}]` : ''}`;
@@ -444,6 +464,12 @@ function plan(map, feature) {
   else say(`(no ${FEATURES}/${feature}/plan.md: the pieces have no statement and no reason)`, '');
   const bySlug = new Map(p.pieces.map((s) => [s.slug, s]));
   // A piece of a bug is told under its bug, below: the groups hold the others.
+  const intended = map.narratives.filter((n) => n.intended && (n.canonical?.startsWith(`${feature}#`) || n.intended.steps.some((s) => s.changes.some((tag) => tag.startsWith(`${feature}#`)))));
+  for (const n of intended) {
+    say(`Planned narrative — ${n.title} (intended, not observed)`, `  reference: ${n.file}`);
+    for (const step of n.intended.steps) say(`  ${step.n}. ${step.sentence}`, `     ${at(step)}${step.changes.length ? ` → ${step.changes.join(', ')}` : ''}`);
+    say('');
+  }
   for (const g of p.groups) {
     const slugs = g.slugs.filter((slug) => !bySlug.get(slug).bug);
     if (slugs.length === 0) continue;
@@ -548,6 +574,7 @@ function feedback(map, feature) {
 function check(map, feature) {
   if (!feature) fail('check <feature>');
   const p = pickPlan(map, feature);
+  const narrativeIssues = map.narrativeIssues ?? [];
   for (const lot of p.doc?.lots ?? []) say(lotLine(p, lot));
   if (!p.approved) say(p.doc ? 'never approved' : 'no plan.md');
   else {
@@ -556,8 +583,9 @@ function check(map, feature) {
   }
   for (const m of p.moves ?? []) say(`  moved, unchanged: ${m.from} → ${m.to} — ${m.facet}: ${m.text}`);
   for (const line of p.info) say(`info: ${line}`);
-  if (p.failures.length === 0) return say('', `check ${feature}: the plan passes. Its lines: npm run map -- brief ${feature}/<lot>`);
-  say('', `check ${feature}: ${plural(p.failures.length, 'failure')}`, ...p.failures.map((f) => `  ${f}`));
+  const failures = [...p.failures, ...narrativeIssues];
+  if (failures.length === 0) return say('', `check ${feature}: the plan passes. Its lines: npm run map -- brief ${feature}/<lot>`);
+  say('', `check ${feature}: ${plural(failures.length, 'failure')}`, ...failures.map((f) => `  ${f}`));
   process.exitCode = 1;
 }
 

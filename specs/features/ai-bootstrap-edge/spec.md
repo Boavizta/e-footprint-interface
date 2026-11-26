@@ -47,7 +47,7 @@ The design page of today's flow is
 - **The summary panel** (screen 6) after a Web + edge generation lists the edge checks after the web ones; the
   canvas shows the edge objects, and Edge modeling is on.
 
-## Rules no screen shows
+## Behavioral requirements
 
 - **web-by-default** Opening Start with AI does not recall the scope of an earlier bootstrap: with
   Edge modeling off, Web only is selected.

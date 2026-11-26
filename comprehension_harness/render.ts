@@ -79,7 +79,7 @@
  *  - backlinks: the pages that name code — `specs/backlog/tech-debt.md`, the constitution, the
  *    conventions — are indexed by `backlinks.ts` (their backticked tokens resolved with
  *    no step scope), and a step whose function, file or linked sentence symbol an entry names
- *    carries a marker in its watch column linking the entry; a mechanism page lists every
+ *    carries a marker in its watch column, or its text when no watch is declared, linking the entry; a mechanism page lists every
  *    entry that names any of its steps under "Named by". Nothing is cross-referenced by hand.
  *
  * Every source link carries the `data-review-source-href` the repo's `specs/review-links.js`
@@ -98,7 +98,7 @@ import { CONFIG_FILE, FEATURES, JOURNEYS, PAGES, ROOT, STORIES, STORIES_DIR, con
 import { blocksHtml, parseIntent, type MdBlock } from './intent-md';
 import { loadPlanDiff, openSource, strip, titles } from './project-stack';
 import { SourceIndex, type SourceSite } from './source-index';
-import type { Location, NarrativeKind, NarrativeScope, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit, Stripped } from './stack';
+import type { Location, NarrativeKind, NarrativeScope, PlannedSite, Resolution, SourceReader, Story, StoryFrame, StoryHit, Stripped, SymbolContext } from './stack';
 import { approvalRefusal, assemblePlans, builtPlaceOf, idsToKeep, landingsToFreeze, markOf, type BuiltLanding, commitBlocks, commitsNamed, editItems, filesNamed, findings, isOpenTest, isOwnNotice, namesFeature, isStoryOf, lotLeft, names, shared, siteLineOf, unexpected, type CommitBlock, type Crossing, type FrozenChain, type FunctionLines, BESIDE, NOTES, asksNoEdit, changedAway, REPRODUCTIONS, UNPLANNED, chainsToFreeze, fixedChains, isBuiltPlace, placesCrossed, reproductionKeyOf, type PieceCommit, overSentenceBudget, parseTag, pieceDocOf, pieceQuestion, planDocOf, reviewItems, waiverQuestion, writeAcceptedAnswers, type PointerTarget, replaceSlugRefs, scanJourneyCases, scanPlannedComments, scanTodos, todosByTier, TIERS, type FeatureDocs, type JourneyCase, type PlanBaseline, type DeltaLine, type PlanChange, type PlanFeedback, type PlanLot, type PlanMove, type ReviewItem, type UnitDelta, type Plan, type PlanGroup, type PlanSite, type PlanSection, type PlanPiece, type PlanTodo, type StaticSite } from './plan';
 import { commitsOfLines, hunkReader, readPieceCommits, type HunkReader } from './commits';
 import { buildBacklinks, describeEntry, markersFor, unresolvedDeclaredLooking, untracedEntries, type BacklinkIndex, type Marker, type PageEntry, type StepKeys } from './backlinks';
@@ -163,6 +163,8 @@ export interface Step {
 /** A narrative as the stories and the source declare it. */
 export interface Narrative {
   scope?: NarrativeScope;
+  /** Intended order from the reference test, separate from observed steps and ownership. */
+  intended?: { ids: string[]; sites: SourceSite[]; planned: boolean };
   kind: NarrativeKind;
   title: string;
   slug: string;
@@ -217,18 +219,29 @@ export function deriveNarratives(stories: Story[], index: SourceIndex): Narrativ
   for (const s of stories) {
     if (!s.narrative) continue;
     const key = `${s.file}::${s.narrative.title}`;
-    groups.set(key, [...(groups.get(key) ?? []), s]);
+    const body = { ...s, hits: s.hits.filter((h) => h.phase === undefined || h.phase === 'call'),
+      ...(s.capped ? { capped: s.capped.filter((c) => c.phase === undefined || c.phase === 'call') } : {}) };
+    groups.set(key, [...(groups.get(key) ?? []), body]);
   }
   const narratives: Narrative[] = [];
-  for (const group of groups.values()) {
-    const { file, narrative } = group[0];
-    const { title, kind } = narrative!;
+  const declaredNarratives = [...groups.values()].map((group) => ({ file: group[0].file, ...group[0].narrative! }));
+  for (const declaration of index.narrativeDeclarations()) {
+    if (declaration.intended && !groups.has(`${declaration.file}::${declaration.title}`)) {
+      declaredNarratives.push({ file: declaration.file, title: declaration.title, kind: declaration.kind ?? 'product' });
+    }
+  }
+  const namedSteps = index.namedSteps();
+  for (const { file, title, kind } of declaredNarratives) {
+    const group = groups.get(`${file}::${title}`) ?? [];
     const declared = index.declaration(file, title);
     const marked = group.filter((s) => s.canonical);
     if (marked.length > 1) throw new Error(`comprehension-render: "${title}" marks ${marked.length} cases canonical: ${marked.map((s) => s.test).join(' | ')}`);
-    const canonicalTest = marked[0]?.test ?? declared.firstTest;
+    const canonicalTest = declared.intended?.test ?? marked[0]?.test ?? declared.firstTest;
     const canonical = group.find((s) => s.test === canonicalTest) ?? null;
     narratives.push({
+      ...(declared.intended ? { intended: { ids: declared.intended.steps,
+        sites: declared.intended.steps.flatMap((id) => { const site = namedSteps.find((s) => s.id === id); return site ? [site] : []; }),
+        planned: declared.intended.planned } } : {}),
       kind, title, slug: slug(title), file,
       ...(declared.scope ? { scope: declared.scope } : {}),
       summary: declared.summary, declaredAt: declared.line,
@@ -260,6 +273,35 @@ export function deriveNarratives(stories: Story[], index: SourceIndex): Narrativ
     if (n.kind === 'mechanism') for (const id of n.siteIds) owned.add(id);
   }
   return narratives;
+}
+
+/** Source links describe intent; only a written reference run can establish the sequence. */
+export function narrativePlanIssues(narratives: Narrative[], index: SourceIndex): string[] {
+  const issues: string[] = [];
+  const named = index.namedSteps();
+  const seen = new Set<string>();
+  const used = new Set(narratives.flatMap((n) => n.intended?.ids ?? []));
+  const places = new Set(index.plannedSites().map((s) => {
+    const p = s.planned!;
+    return `${p.feature}#${p.slug}${p.place ? `:${p.place}` : ''}`;
+  }));
+  for (const site of named) {
+    if (seen.has(site.id)) issues.push(`duplicate narrative step ${site.id} at ${site.file}:${site.line}`);
+    seen.add(site.id);
+    if (site.narration!.planned && !used.has(site.id)) issues.push(`planned narrative step ${site.id} is named by no reference sequence`);
+    for (const change of site.narration!.changes) if (!places.has(change)) issues.push(`${site.id} links to unknown change place ${change}`);
+  }
+  for (const n of narratives) {
+    if (!n.intended) continue;
+    for (const id of n.intended.ids) if (!seen.has(id)) issues.push(`${n.title}: no declaration for intended step ${id}`);
+    if (!n.intended.planned) {
+      const observed = [...new Set(n.canonical?.hits.filter((h) => h.kind === 'step').map((h) => h.step)
+        .filter((id): id is string => id !== undefined && n.intended!.ids.includes(id)) ?? [])];
+      if (JSON.stringify(observed) !== JSON.stringify(n.intended.ids)) issues.push(`${n.title}: reference sequence differs; expected ${n.intended.ids.join(' → ')}, observed ${observed.join(' → ') || 'no run'}`);
+      for (const site of n.intended.sites) if (site.narration!.planned) issues.push(`${n.title}: written reference still names planned step ${site.id}`);
+    }
+  }
+  return issues;
 }
 
 /** Which mechanism owns a site: the first whose stories hit it. */
@@ -340,7 +382,7 @@ interface SentenceToken {
 
 /** The line in the step's own function from which a narrated function was called, as the stories saw it: a hit at
  *  one of that function's own sites whose stack carries the step's function as a frame. */
-function tracedCall(site: SourceSite, name: string, at: Location, stories: Story[], index: SourceIndex): Location | null {
+function tracedCall(site: SymbolContext, name: string, at: Location, stories: Story[], index: SourceIndex): Location | null {
   if (!layout.isApp(at.file)) return null;
   const narrated = [...index.sites(at.file).values()].some((s) => s.kind !== 'planned' && s.fn === name);
   if (!narrated) return null;
@@ -358,7 +400,8 @@ function tracedCall(site: SourceSite, name: string, at: Location, stories: Story
  *  first `src/` frame above a hit at the step's site that is not the step's function, each caller tried once.
  *  A sentence may tell what the caller set up for its step — a decision made on what its reader read — and
  *  the caller may be no step of its own. */
-function callerCall(site: SourceSite, name: string, at: Location, stories: Story[], index: SourceIndex): { at: Location; fn: string } | null {
+function callerCall(site: SymbolContext, name: string, at: Location, stories: Story[], index: SourceIndex): { at: Location; fn: string } | null {
+  if (!('kind' in site)) return null;
   const tried = new Set<string>();
   for (const story of stories) {
     for (const h of story.hits) {
@@ -377,7 +420,7 @@ function callerCall(site: SourceSite, name: string, at: Location, stories: Story
 }
 
 /** The first use of a symbol inside another step's function of the narrative, each function tried once. */
-function siblingCall(site: SourceSite, name: string, at: Location, siblings: SourceSite[], index: SourceIndex): { at: Location; fn: string } | null {
+function siblingCall(site: SymbolContext, name: string, at: Location, siblings: SourceSite[], index: SourceIndex): { at: Location; fn: string } | null {
   const tried = new Set([`${site.file}#${site.fn}`]);
   for (const sibling of siblings) {
     const key = `${sibling.file}#${sibling.fn}`;
@@ -393,7 +436,7 @@ function siblingCall(site: SourceSite, name: string, at: Location, siblings: Sou
  *  function of the narrative uses it), <code> otherwise; nothing else. `stories` lets a traced call line win over
  *  the static one; `siblings` are the sites of the narrative's steps, searched when the step's own function
  *  never uses the symbol. */
-function sentenceHtml(sentence: string, site: SourceSite, index: SourceIndex, stories: Story[] = [], siblings: SourceSite[] = []): { html: string; tokens: SentenceToken[] } {
+function sentenceHtml(sentence: string, site: SymbolContext, index: SourceIndex, stories: Story[] = [], siblings: SourceSite[] = []): { html: string; tokens: SentenceToken[] } {
   const tokens: SentenceToken[] = [];
   const html = sentence.replace(/\*\*([^*]+)\*\*|`([^`]+)`|[^*`]+|[*`]/g, (m, bold?: string, code?: string) => {
     if (bold !== undefined) return `<b>${esc(bold)}</b>`;
@@ -452,9 +495,27 @@ function testLine(file: string, test: string): number {
   return titles.read(file, readFileSync(abs, 'utf8')).tests.find((t) => t.title === test)?.line ?? 1;
 }
 
-function testLink(story: Story, extra = ''): string {
+function testLink(story: Story, extra = '', text = story.file.replace(/\.test\.tsx?$/, '')): string {
   const line = testLine(story.file, story.test);
-  return srcLink(story.file, line, 1, story.file.replace(/\.test\.tsx?$/, ''), extra);
+  return srcLink(story.file, line, 1, text, extra);
+}
+
+function testName(story: Story, index: SourceIndex): string {
+  return story.test.startsWith('test_') ? story.test
+    : index.functions(story.file).find((f) => f.line === testLine(story.file, story.test))?.fn.split('.').pop() ?? story.test;
+}
+
+function readableTestTitle(story: Story, index: SourceIndex): string {
+  const title = testName(story, index).replace(/^test_([^\[]+)/, (_, name: string) => name.replace(/_/g, ' '));
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
+function testDescriptionHtml(story: Story, index: SourceIndex): string {
+  if (story.test === testName(story, index)) return '';
+  const line = testLine(story.file, story.test);
+  const fn = index.functions(story.file).find((f) => f.line === line)!.fn;
+  const context = { file: story.file, line, column: 1, fn };
+  return `<p class="test-description">${sentenceHtml(story.test, context, index, [story]).html}</p>`;
 }
 
 function value(v: unknown): string {
@@ -507,11 +568,13 @@ function stepHtml(step: Step, nested: boolean, story: Story, variants: Story[], 
   ctx.anchored?.add(step.id);
   const sentence = sentenceHtml(step.sentence, step.source, index, narrativeStories(ctx.narrative), ctx.narrative.steps.map((s) => s.source));
   const named = markersFor(ctx.backlinks, stepKeys(step, sentence.tokens));
+  const markers = markersHtml(named);
+  const hasWatch = step.source.hasWatch;
   return `
-  <div class="step${nested ? ' nested' : ''}" data-step="${esc(step.id)}"${anchor}><b>${step.n}</b>
-    <div>${chip(site.file)}${sentence.html}
-      <span class="test">${srcLink(site.file, site.line, site.column, `${site.file}:${site.line}`)} in <code>${esc(site.fn ?? site.mappedFn ?? '(anonymous)')}</code> · ${testLink(story)} · ${total} stop${total === 1 ? '' : 's'}${stops.length < total ? ` (${stops.length} here)` : ''}${variants.length ? ` · reached by ${reach} of ${variants.length} variant${variants.length === 1 ? '' : 's'}` : ''} · <span class="cost">free</span></span></div>
-    <div class="watch">${markersHtml(named)}Stop at ${srcLink(site.file, site.line, site.column, 'the call', ' data-watch')}.${shown}${folded}</div>
+  <div class="step${nested ? ' nested' : ''}${hasWatch ? '' : ' without-watch'}" data-step="${esc(step.id)}"${anchor}><b>${step.n}</b>
+    <div>${hasWatch ? '' : markers}${chip(site.file)}${sentence.html}
+      <span class="test">${srcLink(site.file, site.line, site.column, `${site.file}:${site.line}`)} in <code>${esc(site.fn ?? site.mappedFn ?? '(anonymous)')}</code> · ${testLink(story)} · ${total} stop${total === 1 ? '' : 's'}${stops.length < total ? ` (${stops.length} here)` : ''}${variants.length ? ` · reached by ${reach} of ${variants.length} variant${variants.length === 1 ? '' : 's'}` : ''}</span></div>
+    ${hasWatch ? `<div class="watch">${markers}Stop at ${srcLink(site.file, site.line, site.column, 'the call', ' data-watch')}.${shown}${folded}</div>` : ''}
   </div>`;
 }
 
@@ -559,7 +622,7 @@ function namedByHtml(mechanism: Narrative, ctx: RenderContext): string {
   return `<small class="kicker">Named by</small><div class="narr-list">${rows.length ? rows.join('\n  ') : '<small>no debt entry, rule or convention names this mechanism\'s steps</small>'}</div>`;
 }
 
-/** The "rides on" row: a product story's hits at a mechanism's sites, collapsed, naming the mechanism's steps crossed. */
+/** The "rides on" disclosure keeps mechanism steps and timing out of the main story until opened. */
 function ridesHtml(mechanism: Narrative, hits: StoryHit[], nested: boolean, ctx: RenderContext): string {
   const crossed = new Map<Step, number>();
   const beyond = new Map<string, number>();
@@ -573,9 +636,10 @@ function ridesHtml(mechanism: Narrative, hits: StoryHit[], nested: boolean, ctx:
   const steps = [...crossed].sort(([a], [b]) => a.n - b.n).map(([s, n]) => `<a href="${page}#${esc(mechanism.slug)}-step-${s.n}">step ${s.n}</a> <code>${esc(label(s, ctx.index))}</code>${n > 1 ? ` ×${n}` : ''}`).join(', ');
   const extra = beyond.size ? `${steps ? '; ' : ''}beyond its canonical: ${[...beyond].map(([l, n]) => `<code>${esc(l)}</code>${n > 1 ? ` ×${n}` : ''}`).join(', ')}` : '';
   return `
-  <div class="rides${nested ? ' nested' : ''}" data-rides-on="${esc(mechanism.slug)}"><b>↳</b>
-    <div><span class="node mech">rides on</span><a href="${page}">${esc(mechanism.title)}</a> — ${steps}${extra} <span class="test">${hits.length} hit${hits.length === 1 ? '' : 's'} from +${hits[0].atMs} ms · the stops are on the mechanism's page</span></div>
-  </div>`;
+  <details class="rides${nested ? ' nested' : ''}" data-rides-on="${esc(mechanism.slug)}">
+    <summary>Rides on <a href="${page}">${esc(mechanism.title)}</a></summary>
+    <div class="ride-details">${steps}${extra}<span class="test">${hits.length} hit${hits.length === 1 ? '' : 's'} from +${hits[0].atMs} ms · the stops are on the mechanism's page</span></div>
+  </details>`;
 }
 
 /** The planned row: a `planned` site's hits in this segment, at the first — what this place will do once its
@@ -719,7 +783,7 @@ function crosses(story: Story, ids: ReadonlySet<string>, index: SourceIndex): bo
   return story.hits.some((h) => h.kind === 'step' && ids.has(index.identity(h.site).id));
 }
 
-/** The product-step hits of a story and its hits on each mechanism, for the header line. */
+/** The narrative's own step hits and its hits on each mechanism. */
 function hitCounts(story: Story, ctx: RenderContext): { steps: number; mechanisms: Map<Narrative, number> } {
   let steps = 0;
   const mechanisms = new Map<Narrative, number>();
@@ -732,23 +796,41 @@ function hitCounts(story: Story, ctx: RenderContext): { steps: number; mechanism
   return { steps, mechanisms };
 }
 
+function runDetailsHtml(story: Story, steps: Step[], ctx: RenderContext, extra = ''): string {
+  const counts = hitCounts(story, ctx);
+  const segments = deriveSegments(story);
+  const plannedRows = segments.reduce((n, s) => n + new Set(s.hits.filter((h) => h.kind === 'planned').map((h) => ctx.index.identity(h.site).id)).size, 0);
+  const mechanisms = [...counts.mechanisms].map(([m, n]) => `<li>${plural(n, 'mechanism step hit')}: <a href="${ctx.links.mechanism(m)}">${esc(m.title)}</a></li>`).join('');
+  return `<details class="run-details">
+    <summary>Run details</summary>
+    <ul>
+      <li>${plural(segments.filter((s) => s.event).length, 'event')}</li>
+      <li>${plural(counts.steps, 'narrative step hit')} across ${plural(steps.length, 'distinct step')}</li>
+      ${mechanisms}
+      ${plannedRows ? `<li>${plural(plannedRows, 'planned row')}</li>` : ''}
+      <li>Result: ${esc(story.state ?? 'unknown')} · Test duration: ${story.durationMs ?? '?'} ms</li>
+      ${extra}
+    </ul>
+  </details>`;
+}
+
 function variantHtml(story: Story, ctx: RenderContext): string {
   const { index, narrative, owner } = ctx;
   const exclude = new Set([...owner].filter(([, m]) => m !== narrative).map(([id]) => id));
   const steps = deriveSteps(story, index, exclude);
   const missed = narrative.steps.filter((c) => !steps.some((s) => s.id === c.id));
   const beyond = steps.filter((s) => !narrative.stepIds.has(s.id));
+  const stepLink = (s: Step) => srcLink(s.source.file, s.source.line, s.source.column, label(s, index), ` title="${esc(s.sentence.replace(/\*\*|`/g, ''))}"`);
   // The variant's own steps are numbered as the canonical numbers them, so the two read alike.
   for (const s of steps) s.n = narrative.steps.find((c) => c.id === s.id)?.n ?? s.n;
   const reached = steps.map((s) => `${label(s, index)} ×${s.stops.length}`).join(', ');
-  const events = story.hits.filter((h) => h.kind === 'event').length;
-  const counts = hitCounts(story, ctx);
-  const rides = [...counts.mechanisms].map(([m, n]) => `${n} on ${m.title}`).join(', ');
   return `
 <details class="fold">
-  <summary>${esc(story.test)} <small>— ${events} event${events === 1 ? '' : 's'} · ${counts.steps} step hits${rides ? ` · rides on: ${esc(rides)}` : ''} · ${esc(reached)}${missed.length ? ` · <span style="color:#b45309">not reached: ${esc(missed.map((m) => label(m, index)).join(', '))}</span>` : ' · every canonical step reached'}${beyond.length ? ` · <span style="color:#6d28d9">beyond the canonical: ${esc(beyond.map((b) => label(b, index)).join(', '))}</span>` : ''}</small></summary>
+  <summary>${esc(readableTestTitle(story, index))}${missed.length || beyond.length ? ` <small>${missed.length ? ` · <span style="color:#b45309">Not reached: ${missed.map(stepLink).join(', ')}</span>` : ''}${beyond.length ? ` · <span style="color:#6d28d9">Additional step${beyond.length === 1 ? '' : 's'} reached: ${beyond.map(stepLink).join(', ')}</span>` : ''}</small>` : ''}</summary>
   <div class="fbody">
-    <p style="font-size:.8rem;color:var(--muted)">pinned by ${testLink(story)} · ${story.state ?? 'unknown'} in ${story.durationMs ?? '?'} ms</p>
+    ${testDescriptionHtml(story, index)}
+    <p class="source-test">Source test: ${testLink(story)}</p>
+    ${runDetailsHtml(story, steps, ctx, `<li>Steps reached: ${esc(reached)}</li>${missed.length ? '' : '<li>Every canonical step reached</li>'}`)}
     <div class="lane-head"><span>step</span><span>what happens, who calls it, and the rule it enacts</span><span>where to stop, what to check</span></div>
     ${stepsHtml(story, steps, [], { ...ctx, anchored: null })}
   </div>
@@ -767,25 +849,41 @@ function elsewhereHtml(narrative: Narrative, stories: Story[], index: SourceInde
   return `<small class="kicker">Also crossed by</small><div class="narr-list">${list}<small>${total} tests in ${elsewhere.size} files pass through at least one step of this narrative; their stories are written and not rendered.</small></div>`;
 }
 
+function intendedNarrativeHtml(n: Narrative, index: SourceIndex, feature?: string): string {
+  if (!n.intended) return '';
+  const pending = n.intended.planned;
+  const rows = n.intended.ids.map((id, i) => {
+    const site = n.intended!.sites.find((s) => s.id === id);
+    if (!site) return `<div class="pline"><span class="mark removed">missing</span><span>${esc(id)}</span></div>`;
+    const changes = site.narration!.changes.map((tag) => {
+      const [ofFeature] = tag.split('#');
+      const fragment = `#${encodeURIComponent(changePlaceAnchor(tag))}`;
+      const href = feature === ofFeature ? fragment : `../plans/${ofFeature}.html${fragment}`;
+      return `<a class="slug" href="${esc(href)}" title="Linked change place">${esc(tag)}</a>`;
+    }).join(' ');
+    return `<div class="pline" id="intended-${esc(n.slug)}-${i + 1}"><span class="mark ${site.narration!.planned ? 'added' : ''}">${i + 1} · ${site.narration!.planned ? 'planned' : 'code'}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(site.fn)}</code></span><span class="clause">${sentenceHtml(site.sentence!, site, index).html}${changes ? `<br>${changes}` : ''}</span></div>`;
+  }).join('');
+  return `<section class="pbox intended" data-planned-narrative="${esc(n.slug)}"><h3>${esc(n.title)}${scopeBadge(n.scope)}</h3><p class="legend">${pending ? 'Planned narrative · intended order, not an observed run' : 'Declared reference sequence · see the recorded run below'}. Reference test: ${srcLink(n.file, n.declaredAt, 1, n.canonicalTest ?? n.file)}.</p><div class="plines">${rows}</div></section>`;
+}
+
 function narrativeHtml(narrative: Narrative, stories: Story[], narratives: Narrative[], index: SourceIndex, links: PageLinks, backlinks: BacklinkIndex): string {
   const { canonical, variants, steps } = narrative;
   if (!canonical) {
+    if (narrative.intended) return intendedNarrativeHtml(narrative, index);
     return `<section class="narr" id="${esc(narrative.slug)}"><header><strong>${esc(narrative.title)}</strong><small>no story yet for its canonical case${narrative.canonicalTest ? ` "${esc(narrative.canonicalTest)}"` : ''} — run <code>npm run comprehension</code> or <code>${esc(typed(config.commands.tests, narrative.file))}</code></small></header></section>`;
   }
   const ctx: RenderContext = { index, narrative, owner: ownership(narratives), links, backlinks, anchored: new Set() };
-  const counts = hitCounts(canonical, ctx);
-  const rides = [...counts.mechanisms].map(([m, n]) => `${n} on <a href="${links.mechanism(m)}">${esc(m.title)}</a>`).join(', ');
-  const plannedRows = deriveSegments(canonical).reduce((n, s) => n + new Set(s.hits.filter((h) => h.kind === 'planned').map((h) => index.identity(h.site).id)).size, 0);
-  return `
+  return `${intendedNarrativeHtml(narrative, index)}
 <section class="narr" id="${esc(narrative.slug)}" data-narrative>
   <header>
-    <strong>${esc(narrative.title)}</strong>
-    <small>present tense · one screen · pinned by ${testLink(canonical, ' data-narrative-test')}, "${esc(canonical.test)}" · the data is the test's · ${deriveSegments(canonical).filter((s) => s.event).length} events, ${counts.steps} hits over ${steps.length} steps${rides ? `, ${rides}` : ''}${plannedRows ? `, ${plannedRows} planned row${plannedRows === 1 ? '' : 's'}` : ''} in ${canonical.durationMs ?? '?'} ms</small>
+    <strong>Main narrative test: ${testLink(canonical, ' data-narrative-test', readableTestTitle(canonical, index))}</strong>
   </header>
+  ${testDescriptionHtml(canonical, index)}
+  ${runDetailsHtml(canonical, steps, ctx)}
   <div class="lane-head"><span>step</span><span>what happens, who calls it, and the rule it enacts</span><span>where to stop, what to check</span></div>
 ${stepsHtml(canonical, steps, variants, ctx)}
 </section>
-${variants.length ? `<small class="kicker">Variants — the other cases of the same narrative, as they ran</small>${variants.map((v) => variantHtml(v, ctx)).join('')}` : ''}
+${variants.length ? `<small class="kicker">Variants</small>${variants.map((v) => variantHtml(v, ctx)).join('')}` : ''}
 ${narrative.kind === 'mechanism' ? `${namedByHtml(narrative, ctx)}\n${exercisedByHtml(narrative, narratives, index, links)}` : ''}
 ${elsewhereHtml(narrative, stories, index)}`;
 }
@@ -814,19 +912,8 @@ function ridesOnHtml(products: Narrative[], narratives: Narrative[], index: Sour
   const lines: string[] = [];
   for (const m of narratives) {
     if (m.kind !== 'mechanism') continue;
-    const by: string[] = [];
-    for (const p of products) {
-      if (!p.canonical) continue;
-      const crossed = new Set<Step>();
-      for (const h of p.canonical.hits) {
-        if (h.kind !== 'step') continue;
-        const id = index.identity(h.site).id;
-        if (owner.get(id) !== m) continue;
-        crossed.add(m.steps.find((s) => s.id === id)!);
-      }
-      if (crossed.size) by.push(`${esc(p.title)} crosses step${crossed.size === 1 ? '' : 's'} ${[...crossed].map((s) => s.n).sort((a, b) => a - b).join(', ')} of ${m.steps.length}`);
-    }
-    if (by.length) lines.push(`<li><a href="${links.mechanism(m)}">${esc(m.title)}</a>: ${esc(m.summary)} — ${by.join('; ')}.</li>`);
+    const crossed = products.some((p) => p.canonical?.hits.some((h) => h.kind === 'step' && owner.get(index.identity(h.site).id) === m));
+    if (crossed) lines.push(`<li><a href="${links.mechanism(m)}">${esc(m.title)}</a></li>`);
   }
   return lines.length
     ? `<ul class="rules">\n  ${lines.join('\n  ')}\n</ul>`
@@ -841,7 +928,7 @@ function pageStyle(): string {
 
 
 /** How the links of a narrative page and a mechanism page are used: the same on every page, so said once. */
-const LINK_HINT = '<p style="font-size:.8rem;color:var(--muted);margin:.2rem 0 .6rem">A dotted link opens VS Code at the line; right-click it for the diff against <code>main</code>, or, on a test, to debug that case. A narrative\'s "▶ debug this narrative" runs its test under the debugger: set breakpoints at the watch points you want first, then continue from one stop to the next beside the steps.</p>';
+const LINK_HINT = '<details class="link-help"><summary>Links and debugging</summary><p>A dotted link opens VS Code at the line. Right-click it for the diff against <code>main</code>, or, on a test, to debug that case.</p><p>“▶ debug this narrative” runs the main test under the debugger. Set breakpoints at the watch points you want first, then continue from one stop to the next beside the steps.</p></details>';
 
 function pageHtml(title: string, crumb: string, body: string, footerNote: string, extraStyle = ''): string {
   return `<!DOCTYPE html>
@@ -1181,10 +1268,12 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
       reachedBy.set(story.file, [...(reachedBy.get(story.file) ?? []), story.test]);
       // A bug's evidence is what a test that fails today saw at the place, every time it crossed it.
       if (story.reproduction) seenBy.push({ file: story.file, test: story.test, at, crossings: story.hits.filter(here).map((h) => ({ watch: h.watch, expect: h.expect ?? null })) });
-      const n = narratives.find((x) => x.canonical === story);
-      if (!n) continue;
-      const lands = landsIn(story, at, site, n, index);
-      crossedBy.push({ narrative: n.title, at, step: lands ? { n: lands.step.n, label: label(lands.step, index), how: lands.how } : null });
+      const n = narratives.find((x) => x.file === story.file && x.title === story.narrative?.title && x.canonical?.test === story.test);
+      if (!n?.canonical) continue;
+      const narrativeAt = n.canonical.hits.findIndex(here);
+      if (narrativeAt < 0) continue;
+      const lands = landsIn(n.canonical, narrativeAt, site, n, index);
+      crossedBy.push({ narrative: n.title, at: narrativeAt, step: lands ? { n: lands.step.n, label: label(lands.step, index), how: lands.how } : null });
     }
     return {
       feature: p.feature, slug: p.slug, id: site.id, file: site.file, line: site.line, column: site.column, fn: site.fn,
@@ -1198,6 +1287,13 @@ export function derivePlans(stories: Story[], narratives: Narrative[], index: So
     return story ? { ...todo, run: { state: story.state, failure: story.failure ?? null } } : todo;
   });
   return assemblePlans({
+    narrativePlans: narratives.filter((n) => n.intended).flatMap((n) => {
+      const features = new Set(n.intended!.sites.flatMap((s) => s.narration!.changes.map((tag) => tag.split('#')[0])));
+      if (n.canonicalTest?.includes('#')) features.add(n.canonicalTest.split('#')[0]);
+      return [...features].map((feature) => ({ feature, title: n.title,
+        steps: n.intended!.ids.map((id) => { const site = n.intended!.sites.find((s) => s.id === id); return `${id} — ${site?.sentence ?? 'MISSING DECLARATION'}`; }),
+      }));
+    }),
     sites,
     statics: sources.statics,
     todos,
@@ -1329,12 +1425,68 @@ function functionPlace(index: SourceIndex, file: string, fn: string): { file: st
   return lines ? { file, line: lines[0], column: 1 } : null;
 }
 
+const declarationKey = (file: string, fn: string) => `${file}#${fn}`;
+const declarationRow = (file: string, fn: string) => ` data-declaration="${esc(declarationKey(file, fn))}"`;
+
+/** Mark resolved references by their declaration, so aliases work and namesakes stay distinct. */
+function withIntroducedReferences(body: string, plan: Plan, index: SourceIndex): string {
+  const declarations = new Map<string, { key: string; file: string }>();
+  for (const piece of plan.pieces) {
+    const added = [
+      ...piece.sites.filter((s) => s.change === 'added'),
+      ...piece.built.sites.flatMap((line) => { const place = builtPlaceOf(line); return place?.change === 'added' ? [place] : []; }),
+    ];
+    for (const place of added) {
+      // The delivery page does not repeat declarations that are still only planned.
+      if (!body.includes(declarationRow(place.file, place.fn))) continue;
+      const at = functionPlace(index, place.file, place.fn);
+      if (at) declarations.set(sourceHref(at), { key: declarationKey(place.file, place.fn), file: place.file });
+    }
+  }
+  let marked = false;
+  const html = body.replace(/<a\b[^>]*\bdata-review-source-href="([^"]+)"[^>]*>([^<]*)<\/a>/g, (link, href: string, label: string) => {
+    const declaration = declarations.get(href);
+    if (!declaration || label === esc(basename(declaration.file)) || label.startsWith(`${esc(basename(declaration.file))}:`)) return link;
+    marked = true;
+    return `${link} <button type="button" class="mark added new-reference" data-new-declaration="${esc(declaration.key)}" title="Introduced by this change · highlight its declaration" aria-label="Highlight the declaration of ${label}">new</button>`;
+  });
+  return marked ? `${html}${DECLARATION_SCRIPT}` : html;
+}
+
+const DECLARATION_SCRIPT = `<script>
+(function () {
+  var highlighted, timer;
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-new-declaration]');
+    if (!button) return;
+    var rows = Array.from(document.querySelectorAll('[data-declaration]')).filter(function (row) { return row.dataset.declaration === button.dataset.newDeclaration; });
+    var visible = function (row) { var rect = row.getBoundingClientRect(); return rect.height > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight; };
+    var row = rows.find(visible) || rows[0];
+    if (!row) return;
+    clearTimeout(timer);
+    if (highlighted) highlighted.classList.remove('declaration-highlight');
+    highlighted = row;
+    row.classList.add('declaration-highlight');
+    if (!visible(row)) row.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    timer = setTimeout(function () { row.classList.remove('declaration-highlight'); }, 2000);
+  });
+})();
+</script>`;
+
 /** A place's id, as its tag writes it after the piece: what its `built` call carries once it is code. */
 const placeId = (place: string | undefined) => (place === undefined ? '' : ` <small title="the place's id: planned('…:${esc(place)}', …), then built('…:${esc(place)}') once it is code">:${esc(place)}</small>`);
 
+const changePlaceAnchor = (tag: string) => `change-${tag}`;
+const changeRow = (site: Pick<PlanSite, 'feature' | 'slug' | 'place'>) => site.place
+  ? ` id="${esc(changePlaceAnchor(`${site.feature}#${site.slug}:${site.place}`))}"` : '';
+
+function pieceKindHtml(piece: PlanPiece): string {
+  return piece.doc?.kind === 'refactoring' ? '<span class="badge">Refactoring</span>' : '';
+}
+
 /** A piece's chip: the link to its card, amber and marked `?` when the card holds a point to confirm. */
 function pieceChip(piece: PlanPiece): string {
-  return `<a class="slug${piece.doc?.ask ? ' ask' : ''}" href="#piece-${piece.slug}">#${piece.slug}${piece.doc?.ask ? ' ?' : ''}</a>`;
+  return `<a class="slug${piece.doc?.ask ? ' ask' : ''}" href="#piece-${piece.slug}">#${piece.slug}${piece.doc?.ask ? ' ?' : ''}</a>${pieceKindHtml(piece)}`;
 }
 
 /**
@@ -1507,12 +1659,12 @@ function flowHtml(flow: Flow, ctx: PlanContext): string {
   const rows = flow.rows.map((row) => {
     if (row.kind === 'cause') return `<div class="fcause">${clauseInline(headClause(row.sentence, true))}</div>`;
     if (row.kind === 'new') {
-      return `<div class="frow new"><span class="n">+</span><span class="today">${placeLink(row.site.file, row.site.line, row.site.column)} <code>${esc(row.site.fn)}</code></span>
+      return `<div class="frow new"${declarationRow(row.site.file, row.site.fn)}><span class="n">+</span><span class="today">${placeLink(row.site.file, row.site.line, row.site.column)} <code>${esc(row.site.fn)}</code></span>
         <span class="chg"><span class="mark added">new</span> ${siteClause(row.site, ctx)}</span>${pieceChip(row.of)}</div>`;
     }
     if (row.kind === 'newBuilt') {
       const at = functionPlace(ctx.index, row.built.file, row.built.fn);
-      return `<div class="frow new done"><span class="n">+</span><span class="today">${at ? placeLink(at.file, at.line, at.column) : esc(basename(row.built.file))} <code>${esc(row.built.fn)}</code></span>
+      return `<div class="frow new done"${declarationRow(row.built.file, row.built.fn)}><span class="n">+</span><span class="today">${at ? placeLink(at.file, at.line, at.column) : esc(basename(row.built.file))} <code>${esc(row.built.fn)}</code></span>
         <span class="chg"><span class="mark done">built</span> ${builtClause(row.built, row.of, ctx)}</span>${pieceChip(row.of)}</div>`;
     }
     const { step, changes } = row;
@@ -1521,7 +1673,7 @@ function flowHtml(flow: Flow, ctx: PlanContext): string {
     const rest = head.startsWith(`\`${fn}\` `) ? head.slice(fn.length + 3) : `· ${head}`;
     const today = `${srcLink(step.source.file, step.source.line, step.source.column, fn, ` title="${esc(step.source.file)}:${step.source.line}"`)} ${clauseInline(rest)}`;
     const lines = changes.map((c) => ('site' in c ? `
-        <span class="chg"><span class="mark ${c.site.change}">${CHANGE_MARK[c.site.change]}</span> ${siteClause(c.site, ctx)}${c.how === 'in' ? '' : ` <small>in <code>${esc(c.site.fn)}</code></small>`}</span>${pieceChip(c.of)}` : `
+        <span class="chg"><span class="mark ${c.site.change}">${CHANGE_MARK[c.site.change]}</span> ${siteClause(c.site, ctx)} <small>${placeLink(c.site.file, c.site.line, c.site.column)}</small>${c.how === 'in' ? '' : ` <small>in <code>${esc(c.site.fn)}</code></small>`}</span>${pieceChip(c.of)}` : `
         <span class="chg"><span class="mark done">built</span> ${builtClause(c.built, c.of, ctx)}${builtAt(c.built, c.of)}${c.how === 'in' ? '' : ` <small>in ${builtFn(c.built, ctx)}</small>`}${c.among > 1 ? ` <small class="pending" title="${c.by === 'approved' ? 'The step this place was approved in tells another sentence now, and its function tells several steps: this one is the closest to the sentence approved.' : 'Nothing was kept of where this place was approved to land, and its function tells several steps: this is the first of them.'}">step not certain: the ${c.by === 'approved' ? 'closest' : 'first'} of the ${c.among} steps of <code>${esc(step.source.fn)}</code></small>` : ''} · <small>${builtCommitsHtml(c.built, c.of, ctx)}</small></span>${pieceChip(c.of)}`)).join('');
     const state = changes.length === 0 ? 'same' : changes.every((c) => 'built' in c) ? 'done' : 'touched';
     return `<div class="frow ${state}"><span class="n">${step.n}</span><span class="today"><a class="stepref" href="${narrativeHref(n).split('#')[0]}#${esc(n.slug)}-step-${step.n}" title="the step on its narrative page">↗</a> ${today}</span>${lines}</div>`;
@@ -1548,7 +1700,7 @@ function siteLine(site: PlanSite, ctx: PlanContext, ofABug = false): string {
     : site.crossedBy.length === 0 ? ' <small class="pending" title="no narrative\'s reference case crosses this call">no narrative crosses it</small>'
       : '';
   const untested = site.change !== 'added' && site.reachedBy.length === 0 ? ' <small class="pending">no test reaches it</small>' : '';
-  return `<div class="pline" data-planned="${esc(site.id)}"><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(name)}</code>${placeId(site.place)}</span><span class="clause">${siteClause(site, ctx)}${flag}${untested}</span></div>`;
+  return `<div class="pline" data-planned="${esc(site.id)}"${changeRow(site)}${site.change === 'added' ? declarationRow(site.file, site.fn) : ''}><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(name)}</code>${placeId(site.place)}</span><span class="clause">${siteClause(site, ctx)}${flag}${untested}</span></div>`;
 }
 
 /** A comment on a test says what becomes of the test under it: deleted, or changed. Elsewhere it says what the
@@ -1714,7 +1866,7 @@ function bugHtml(piece: PlanPiece, ctx: PlanContext): { html: string; shown: Set
   const told = reproductions.map((t) => {
     const crossed = placesCrossed(piece, t);
     for (const { site } of crossed) shown.add(site);
-    const rows = crossed.map(({ site, seen }) => `<div class="pline"><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(site.fn)}</code>${seen.crossings.length > 1 ? ` <small>crossed ×${seen.crossings.length}</small>` : ''}</span><span class="clause">${siteClause(site, ctx)}${seenValuesHtml(site, seen.crossings)}</span></div>`).join('');
+    const rows = crossed.map(({ site, seen }) => `<div class="pline"${changeRow(site)}><span class="mark ${site.change}">${CHANGE_MARK[site.change]}</span><span class="where">${placeLink(site.file, site.line, site.column)} <code>${esc(site.fn)}</code>${seen.crossings.length > 1 ? ` <small>crossed ×${seen.crossings.length}</small>` : ''}</span><span class="clause">${siteClause(site, ctx)}${seenValuesHtml(site, seen.crossings)}</span></div>`).join('');
     const failure = t.run?.failure;
     const failed = failure ? `<div class="failure"><small>it fails at ${failure.file ? placeLink(failure.file, failure.line) : `line ${failure.line}`}:</small><pre>${esc(failure.message)}</pre></div>`
       : t.run ? `<p class="also"><span class="flag">Its last run did not fail (${esc(t.run.state ?? 'no state')}):</span> a reproduction that passes is a test like another, declared as one.</p>`
@@ -1771,7 +1923,7 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
   const across = piece.decidedIn.length ? `<p class="also">Also decided in ${piece.decidedIn.map((s) => `<a href="#${s.anchor}">${esc(s.title)}</a>`).join(', ')}.</p>` : '';
   return `
 <section class="piece" id="piece-${piece.slug}" data-piece="${esc(plan.feature)}#${piece.slug}">
-  <header><a class="slug big" href="#piece-${piece.slug}">#${piece.slug}</a><small>${landsLabel(piece, group, ctx.narratives, plan)}</small>${moved ? `<a class="slug ask" href="${deliveryPage(plan.feature)}#piece-${piece.slug}">${moved.state === 'new' ? 'new' : 'modified'} since your approval</a>` : ''}</header>
+  <header><a class="slug big" href="#piece-${piece.slug}">#${piece.slug}</a>${pieceKindHtml(piece)}<small>${landsLabel(piece, group, ctx.narratives, plan)}</small>${moved ? `<a class="slug ask" href="${deliveryPage(plan.feature)}#piece-${piece.slug}">${moved.state === 'new' ? 'new' : 'modified'} since your approval</a>` : ''}</header>
   ${statement}
   ${notesHtml(piece, plan, (t) => planInline(t, plan))}
   ${pieceAskHtml(piece, plan)}
@@ -1791,7 +1943,7 @@ function planPieceHtml(piece: PlanPiece, ctx: PlanContext): string {
  *  plan waives reads "no test" and its reason, with the amber mark and the reviewer's answer under it while the
  *  waiver is to confirm. */
 function planRulesHtml(plan: Plan): string {
-  if (plan.rulesFile === null) return '';
+  if (plan.rulesFile === null || (plan.rules.length === 0 && plan.unknownRules.length === 0)) return '';
   const owner = (todo: PlanTodo) => `${todo.tier} · ${placeLink(todo.file, todo.line, todo.column)} <a class="slug" href="#piece-${todo.slug}">#${todo.slug}</a>`;
   const rows = plan.rules.map((r) => {
     const waived = r.waiver
@@ -1808,13 +1960,14 @@ function planRulesHtml(plan: Plan): string {
   const owned = plan.rules.filter((r) => r.owners.length === 1 && !r.waiver).length;
   const waivedCount = plan.rules.filter((r) => r.waiver && r.owners.length === 0).length;
   return `
-<h2 id="rules">The spec's rules no screen shows — ${owned} of ${plan.rules.length} owned by one test${waivedCount ? `, ${waivedCount} held by no test` : ''}</h2>
+<h2 id="rules">Behavioral requirements — ${owned} of ${plan.rules.length} owned by one test${waivedCount ? `, ${waivedCount} held by no test` : ''}</h2>
 <div class="pbox rules">${[...rows, ...stray].join('')}</div>`;
 }
 
 export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrative[], index: SourceIndex, diffs: DbDiffs = new Map()): string {
   const generatedAt = new Date().toISOString();
   const ctx: PlanContext = { plan, index, narratives, diffs, lineCommits: new Map() };
+  const intended = narratives.filter((n) => n.intended && (n.canonicalTest?.startsWith(`${plan.feature}#`) || n.intended.sites.some((s) => s.narration!.changes.some((tag) => tag.startsWith(`${plan.feature}#`)))));
   const folder = `${featureFolder(plan.feature)}/`;
   const doc = plan.doc;
   const lede = doc
@@ -1823,11 +1976,9 @@ export function renderPlanPage(plan: Plan, stories: Story[], narratives: Narrati
       ? `<span class="flag">${esc(folder)}plan.md does not exist</span>: the pieces have no statement and no reason.`
       : `<span class="flag">${esc(folder)} does not exist — <code>--check</code> fails on it.</span>`}</p>`;
   const { flows, shown } = planFlows(ctx);
-  // What no flow shows is read first: a piece no narrative crosses, one with no place in this repository. A
-  // flow gives such a piece no context, so nothing else on the page points the reader at it. A piece whose
-  // places all became code is no such piece.
-  const outside = plan.pieces.filter((s) => !s.sites.some((x) => shown.has(x)) && !pieceState(s).done && !(s.sites.length === 0 && s.built.sites.length > 0));
-  const cards = [...outside, ...plan.pieces.filter((s) => !outside.includes(s))];
+  // Review order is authored independently of execution order. Undocumented pieces stay visible at the end.
+  const cards = [...plan.pieces].sort((a, b) => (a.doc?.section.line ?? Infinity) - (b.doc?.section.line ?? Infinity));
+  const outside = cards.filter((s) => !s.sites.some((x) => shown.has(x)) && !pieceState(s).done && !(s.sites.length === 0 && s.built.sites.length > 0));
   const asks = plan.pieces.filter((s) => s.doc?.ask);
   const waiversToConfirm = plan.rules.filter((r) => r.waiver?.toConfirm);
   const points = asks.length + waiversToConfirm.length;
@@ -1865,10 +2016,11 @@ ${plan.pointers.length ? `
 <h2 id="elsewhere">Planned elsewhere — ${plural(plan.pointers.length, 'piece')}</h2>
 <div class="pbox outside">${plan.pointers.map((p) => pointerHtml(p, plan)).join('')}</div>
 <p class="legend">Each is planned, built and approved in its own repository, under this feature's name. This plan relies on it and holds none of it.</p>` : ''}
+${intended.length ? `<h2 id="planned-narratives">Planned narrative sequences</h2>${intended.map((n) => intendedNarrativeHtml(n, index, plan.feature)).join('')}` : ''}
 ${outside.length ? `
 <h2 id="outside">Outside the narratives — ${plural(outside.length, 'piece')}</h2>
 <div class="pbox outside">${byBug(outside, outsideRow, (bug) => `<div class="pline bugrow"><span class="where"><a href="#${bug.anchor}"><span class="mark failing">bug</span></a></span><span class="clause"><b>${planInline(bug.title, plan)}</b></span></div>`).join('')}</div>
-<p class="legend">No narrative${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}: ${bugs.length ? `${outside.length === 1 ? 'its card stands' : 'their cards stand'} below in the order of plan.md, a bug at a time` : `${outside.length === 1 ? 'its card is' : 'their cards are'} the first of the pieces`}.</p>` : ''}
+<p class="legend">No narrative${flows.length ? ' below' : ''} shows ${outside.length === 1 ? 'this piece' : 'these pieces'}; the detailed cards follow the order of plan.md${bugs.length ? ', a bug at a time' : ''}.</p>` : ''}
 ${flows.length ? `
 <h2 id="flows">The change, in the ${flows.length === 1 ? 'narrative' : `${flows.length} narratives`} it lands in</h2>
 <div class="flows">
@@ -1886,7 +2038,7 @@ ${across.length ? `
 ${REVIEW_SCRIPT}
 `;
   const crumb = `comprehension · plans / ${esc(plan.feature)} · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt}`;
-  return pageHtml(`Plan — ${plan.feature}`, crumb, body, `${doc ? 'each piece\'s statement and reason hand-written in plan.md' : 'no hand-written input'}; the places from the <code>planned</code> calls under ${APP} and the <code>@planned</code> comments, the tests from the tagged titles, which step a change lands in from the reference case of each narrative`, dbCss);
+  return pageHtml(`Plan — ${plan.feature}`, crumb, withIntroducedReferences(body, plan, index), `${doc ? 'each piece\'s statement and reason hand-written in plan.md' : 'no hand-written input'}; the places from the <code>planned</code> calls under ${APP} and the <code>@planned</code> comments, the tests from the tagged titles, which step a change lands in from the reference case of each narrative`, dbCss);
 }
 
 
@@ -1931,7 +2083,7 @@ const filesOf = (piece: PlanPiece | undefined) => [
 ].filter((x) => layout.isApp(x.file));
 
 /** What a line of the delta is, in the reader's words: the facet says how the plan stores it, this says what it is. */
-const LINE_KIND: Record<string, string> = { statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', pointers: 'planned elsewhere', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note', [REPRODUCTIONS]: 'reproduction', [BESIDE]: 'at no place of the plan' };
+const LINE_KIND: Record<string, string> = { kind: 'piece kind', statement: 'statement', reason: 'reason', question: 'question', text: 'text', waivers: 'waiver', pointers: 'planned elsewhere', lots: 'lot', cases: 'journey case', steps: 'story step', tests: 'test to write', [UNPLANNED]: 'beyond the plan', [NOTES]: 'note', [REPRODUCTIONS]: 'reproduction', [BESIDE]: 'at no place of the plan' };
 const commentKind = (file: string, removes: boolean) => (removes ? 'test goes' : layout.isTest(file) ? 'test changes' : file.endsWith('.sql') ? 'migration' : /\.(?:md|html)$/.test(file) ? 'doc' : 'code');
 
 /**
@@ -2144,13 +2296,15 @@ function pieceState(piece: PlanPiece): { left: number; toWrite: number; built: n
 function builtLinesHtml(piece: PlanPiece, plan: Plan, index: SourceIndex, tests = true): string {
   const inline = (t: string) => codeInline(t, plan, filesOf(piece), index);
   const file = (f: string) => (existsSync(join(ROOT, f)) ? srcLink(f, 1, 1, basename(f), ` title="${esc(f)}"`) : `<span title="${esc(f)} is deleted">${esc(basename(f))}</span>`);
-  const row = (mark: string, where: string, clause: string) => `<div class="pline built"><span class="mark done">${mark}</span><span class="where">${where}</span><span class="clause">${clause}</span></div>`;
+  const row = (mark: string, where: string, clause: string, declaration = '') => `<div class="pline built"${declaration}><span class="mark done">${mark}</span><span class="where">${where}</span><span class="clause">${clause}</span></div>`;
   const rows: string[] = [];
   for (const line of piece.built.sites) {
     const m = /^(changed|added|removed) (\S+) in (\S+) — (.*)$/.exec(line);
     if (!m) continue;
     const at = markOf(piece, line) ?? functionPlace(index, m[2], m[3]);
-    rows.push(row('built', `${at ? placeLink(at.file, at.line, at.column) : file(m[2])} <code>${esc(m[3])}</code>${placeId(Object.keys(piece.ids).find((place) => piece.ids[place] === line))}${m[1] === 'added' ? ' <span class="badge">new function</span>' : ''}`, inline(m[4])));
+    const place = Object.keys(piece.ids).find((id) => piece.ids[id] === line);
+    const anchor = changeRow({ feature: plan.feature, slug: piece.slug, place });
+    rows.push(row('built', `${at ? placeLink(at.file, at.line, at.column) : file(m[2])} <code>${esc(m[3])}</code>${placeId(Object.keys(piece.ids).find((place) => piece.ids[place] === line))}${m[1] === 'added' ? ' <span class="badge">new function</span>' : ''}`, inline(m[4]), (m[1] === 'added' ? declarationRow(m[2], m[3]) : '') + anchor));
   }
   for (const line of piece.built.comments) {
     const m = /^(changes|removes) (\S+) — (.*)$/.exec(line);
@@ -2297,7 +2451,7 @@ function deliveryPieceHtml(piece: PlanPiece | undefined, slug: string, plan: Pla
   const builtLines = builtLinesHtml(piece, plan, index, false);
   return `
 <section class="piece${d ? ' moved' : ''}${done ? ' built' : ''}" id="piece-${slug}">
-  <header>${card}<small>${state}${d ? ` · <b>${d.state === 'new' ? 'new' : 'modified'} since your approval</b>` : ' · as approved'}</small></header>
+  <header>${card}${pieceKindHtml(piece)}<small>${state}${d ? ` · <b>${d.state === 'new' ? 'new' : 'modified'} since your approval</b>` : ' · as approved'}</small></header>
   ${piece.doc ? `<p class="what">${codeInline(piece.doc.what, plan, filesOf(piece), index)}</p>` : ''}
   ${notesHtml(piece, plan, (t) => codeInline(t, plan, filesOf(piece), index))}
   ${pieceAskHtml(piece, plan)}
@@ -2355,7 +2509,7 @@ ${loose.length && lots.length ? `<h2 id="loose">In no lot</h2>${ledgerHtml(plan,
 ${REVIEW_SCRIPT}
 `;
   const crumb = `comprehension · plans / ${esc(plan.feature)} / delivery · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt}`;
-  return pageHtml(`Delivery — ${plan.feature}`, crumb, body, 'the lots hand-written in plan.md § "Delivery", each <code>Changed:</code> in its section; the approval read from plan.approved.json; every other line from the <code>planned</code> calls, the <code>@planned</code> comments and the tagged test titles; a piece\'s commits from git, by the line <code>Piece: feature#piece</code> of their message.');
+  return pageHtml(`Delivery — ${plan.feature}`, crumb, withIntroducedReferences(body, plan, index), 'the lots hand-written in plan.md § "Delivery", each <code>Changed:</code> in its section; the approval read from plan.approved.json; every other line from the <code>planned</code> calls, the <code>@planned</code> comments and the tagged test titles; a piece\'s commits from git, by the line <code>Piece: feature#piece</code> of their message.');
 }
 
 const anchorFor = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -2364,29 +2518,31 @@ export function renderNarrativePage(narrative: Narrative, stories: Story[], narr
   const generatedAt = new Date().toISOString();
   const body = `
 <h1>${esc(narrative.title)}${scopeBadge(narrative.scope)}</h1>
-<p class="lede">${esc(narrative.summary)} <small>A product narrative, declared by ${srcLink(narrative.file, narrative.declaredAt, 1, narrative.file)}; nothing on this page is hand-written.</small></p>
+<p class="lede">${esc(narrative.summary)}</p>
 ${LINK_HINT}
 <h2 id="structure">Rides on</h2>
 ${ridesOnHtml([narrative], narratives, index, PRODUCT_LINKS)}
 
 <h2 id="narratives">Narrative</h2>
+<p class="source-test">Source test: ${srcLink(narrative.file, narrative.declaredAt, 1, narrative.file)}</p>
 ${narrativeHtml(narrative, stories, narratives, index, PRODUCT_LINKS, backlinks)}
 `;
-  const crumb = `comprehension · narratives / ${esc(narrative.slug)} · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt} · <a href="../index.html">every page</a>`;
-  return pageHtml(narrative.title, crumb, body, 'no hand-written input; the narrative from the test that declares it; every step, link, chip, stop and value from the run, every symbol link from the source index, every "rides on" from the mechanisms\' own stories, every debt / rule / convention marker from the pages that name the code.');
+  const crumb = `comprehension · narratives / ${esc(narrative.slug)} · <b>generated</b> from ${narrative.intended?.planned ? 'source declarations (intended, not observed)' : 'test recordings'} at ${generatedAt} · <a href="../index.html">every page</a>`;
+  return pageHtml(narrative.title, crumb, body, narrative.intended?.planned ? 'the intended sequence from its reference test and planned narration beside the code; no execution has been observed' : 'no hand-written input; the narrative from the test that declares it; every step, link, chip, stop and value from the run, every symbol link from the source index, every "rides on" from the mechanisms\' own stories, every debt / rule / convention marker from the pages that name the code.');
 }
 
 export function renderMechanismPage(mechanism: Narrative, stories: Story[], narratives: Narrative[], index: SourceIndex, backlinks: BacklinkIndex): string {
   const generatedAt = new Date().toISOString();
   const body = `
 <h1>${esc(mechanism.title)}${scopeBadge(mechanism.scope)}</h1>
-<p class="lede">${esc(mechanism.summary)} <small>A mechanism narrative: the sites are the mechanism's own code, declared by ${srcLink(mechanism.file, mechanism.declaredAt, 1, mechanism.file)}; nothing on this page is hand-written.</small></p>
+<p class="lede">${esc(mechanism.summary)}</p>
 ${LINK_HINT}
 <h2 id="narratives">Narrative</h2>
+<p class="source-test">Source test: ${srcLink(mechanism.file, mechanism.declaredAt, 1, mechanism.file)}</p>
 ${narrativeHtml(mechanism, stories, narratives, index, MECHANISM_LINKS, backlinks)}
 `;
-  const crumb = `comprehension · mechanisms / ${esc(mechanism.slug)} · <b>generated</b> from ${stories.length} stor${stories.length === 1 ? 'y' : 'ies'} at ${generatedAt} · <a href="../index.html">every page</a>`;
-  return pageHtml(mechanism.title, crumb, body, 'no hand-written input; the narrative from the test that declares it; every step, link, chip, stop and value from the run, every symbol link from the source index.');
+  const crumb = `comprehension · mechanisms / ${esc(mechanism.slug)} · <b>generated</b> from ${mechanism.intended?.planned ? 'source declarations (intended, not observed)' : 'test recordings'} at ${generatedAt} · <a href="../index.html">every page</a>`;
+  return pageHtml(mechanism.title, crumb, body, mechanism.intended?.planned ? 'the intended sequence from its reference test and planned narration beside the code; no execution has been observed' : 'no hand-written input; the narrative from the test that declares it; every step, link, chip, stop and value from the run, every symbol link from the source index.');
 }
 
 /** A generated page, as the index lists it: its path from the folder the list is read from, and its own title. */
@@ -2531,7 +2687,7 @@ export function check(source: SourceReader = openSource(), archive: string | nul
   const stories = readStories();
   index.realign(stories);
   const narratives = deriveNarratives(stories, index);
-  const flagged: string[] = [];
+  const flagged: string[] = narrativePlanIssues(narratives, index);
   const calledHere = { total: 0, traced: 0, static: 0, caller: 0, sibling: 0, disagree: [] as string[] };
   for (const n of narratives) {
     console.log(`\n${n.kind} "${n.title}" — ${n.file}`);

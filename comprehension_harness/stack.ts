@@ -46,7 +46,11 @@ export interface StoryFrame extends Location {
   mappedFn?: string | null;
 }
 
+export type TestPhase = 'setup' | 'call' | 'teardown';
+
 export interface StoryHit {
+  /** Stable identity of an explicitly named narrative step. */
+  step?: string;
   /** A narrative step, the cause (`event`) the steps that follow answer, or a `planned` change on existing code. */
   kind: 'step' | 'event' | 'planned';
   sentence: string;
@@ -56,7 +60,9 @@ export interface StoryHit {
   site: StoryFrame;
   /** The frames above it, nearest first, of the repository's own files. */
   stack: StoryFrame[];
-  /** Milliseconds since the test began. */
+  /** Omitted by collectors that record the test body alone. */
+  phase?: TestPhase;
+  /** Milliseconds since the phase began, or the test began when no phase is given. */
   atMs: number;
   /** For a planned hit whose site says what it should see: that, at this crossing, a key of the watch each. */
   expect?: unknown;
@@ -66,6 +72,7 @@ export interface StoryHit {
 export interface CappedSite {
   file: string;
   line: number;
+  phase?: TestPhase;
   /** Hits of the site recorded in `hits`. */
   kept: number;
   /** Hits counted and not recorded. */
@@ -130,13 +137,20 @@ export interface PlannedSite {
 
 /** A `narrate`, `event` or `planned` call, as the source holds it. */
 export interface RawSite extends Location {
+  /** Intended steps are source declarations only; promoted steps keep the same id. */
+  narration?: { id: string; planned: boolean; changes: string[] };
   kind: 'step' | 'event' | 'planned';
   /** The function the call sits in, named as a frame of it would be. */
   fn: string;
   /** The call's sentence when it is a literal, else null. */
   sentence: string | null;
+  /** True when the call declares a watch, even if it returns null or an empty value. Omitted otherwise. */
+  hasWatch?: boolean;
   planned?: PlannedSite;
 }
+
+/** The source context for a symbol in a narrative sentence or a test description. */
+export type SymbolContext = Location & { fn: string };
 
 export type Resolution =
   | { linked: true; rule: 1 | '1b' | 2 | 3; at: Location }
@@ -145,6 +159,7 @@ export type Resolution =
 /** What a test file says about a narrative it declares: the first paragraph of the comment above it, its first test. */
 export interface Declaration {
   scope?: NarrativeScope;
+  intended?: { steps: string[]; planned: boolean; test: string };
   summary: string;
   firstTest: string | null;
   line: number;
@@ -186,18 +201,20 @@ export interface SourceReader {
   siteFiles(): string[];
   /** The test files that declare a narrative, found in the source: a cold start knows what to run. */
   narrativeTestFiles(): string[];
+  /** Source declarations, including narratives whose reference test has not run yet. */
+  narrativeDeclarations(): Array<Declaration & { file: string; title: string; kind?: NarrativeKind }>;
   /** The narrative `file` declares under `title`. Throws when it declares none. */
   declaration(file: string, title: string): Declaration;
   /** Where a name of a sentence is declared, seen from a site: an import of its file (rule 1), a local of the
    *  functions around the call, nearest first (1b), a top-level declaration of the file (2), one unique across
    *  the source (3). Otherwise the reason. */
-  resolve(site: RawSite, name: string): Resolution;
+  resolve(site: SymbolContext, name: string): Resolution;
   /** Rules 2 and 3 with no site: a top-level declaration in one of `files`, else one unique across the source. */
   resolveUnscoped(name: string, files: readonly string[]): Location | null;
   /** A declaration that is no top-level one (a local, a method, a field), in the files of `places`, nearest to one of them. */
   resolveNear(name: string, places: ReadonlyArray<{ file: string; line: number }>): Location | null;
   /** The first line where the site's own function uses the symbol declared at `at`, the call itself left out. */
-  useSite(site: RawSite, name: string, at: Location): Location | null;
+  useSite(site: SymbolContext, name: string, at: Location): Location | null;
   /** The same for the function `fn` of `file`; null when the file holds no single function of that name. */
   useIn(file: string, fn: string, name: string, at: Location): Location | null;
   /** The source file a path names, or a basename when exactly one source file has it. */
@@ -222,7 +239,7 @@ export interface SourceIndexDocument {
    *  expression both the stack's language and JavaScript read the same. */
   looksDeclared: string;
   /** Every narrative a test file declares. */
-  narratives: Array<{ file: string; title: string; line: number; summary: string; firstTest: string | null }>;
+  narratives: Array<Declaration & { file: string; title: string; kind?: NarrativeKind }>;
   /** Every file of the source folders, and every test file that declares a narrative or holds a site. */
   files: Record<string, SourceFileIndex>;
 }
@@ -230,11 +247,13 @@ export interface SourceIndexDocument {
 export interface SourceFileIndex {
   /** The `narrate`, `event` and `planned` calls, in source order. A `planned` one says its piece and its change. */
   sites: Array<{
+    narration?: RawSite['narration'];
     kind: 'step' | 'event' | 'planned';
     line: number;
     column: number;
     fn: string;
     sentence: string | null;
+    hasWatch?: boolean;
     planned?: { feature: string; slug: string; change: PlannedChange; signature: string | null; expect?: string; distinct?: string[] };
   }>;
   /** Every named function, with the line its name is on and its last line. A site, a local or a use belongs to

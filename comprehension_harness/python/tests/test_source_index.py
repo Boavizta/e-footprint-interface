@@ -181,12 +181,12 @@ def test_a_template_makes_the_calls_as_tags_and_each_is_a_site_of_it_in_no_funct
         "functions": [], "declarations": [], "imports": [], "locals": [], "uses": []}
     piece = {"feature": "gift-cards", "slug": "card-row", "signature": None}
     assert rows["sites"] == [
-        {"kind": "step", "line": 3, "column": 5, "fn": "(template)", "sentence": "A row is **drawn**."},
+        {"kind": "step", "line": 3, "column": 5, "fn": "(template)", "hasWatch": True, "sentence": "A row is **drawn**."},
         {"kind": "planned", "line": 4, "column": 22, "fn": "(template)", "sentence": "The row shows the card's balance.",
          "planned": {**piece, "place": "balance", "change": "changed"}},
-        {"kind": "planned", "line": 5, "column": 5, "fn": "(template)", "sentence": "A card is drawn **as a plain row**.",
+        {"kind": "planned", "line": 5, "column": 5, "fn": "(template)", "hasWatch": True, "sentence": "A card is drawn **as a plain row**.",
          "planned": {**piece, "change": "evidence", "expect": "drawn_as=row.kind|lower"}},
-        {"kind": "planned", "line": 6, "column": 5, "fn": "(template)", "sentence": "The row's id is the card's.",
+        {"kind": "planned", "line": 6, "column": 5, "fn": "(template)", "hasWatch": True, "sentence": "The row's id is the card's.",
          "planned": {**piece, "change": "changed", "distinct": ["id"]}},
         {"kind": "planned", "line": 7, "column": 5, "fn": "(template)", "sentence": "",
          "planned": {**piece, "place": "row-class", "change": "built"}}]
@@ -245,7 +245,7 @@ def test_a_narrative_is_a_test_class_with_its_summary_and_its_first_test(project
     index = indexed(project(PROJECT))
 
     assert index["narratives"] == [{
-        "file": "checks/test_engine.py", "title": "The engine starts", "line": 5,
+        "file": "checks/test_engine.py", "title": "The engine starts", "line": 5, "kind": "mechanism",
         "summary": "It starts under its limit, and stops.",
         "firstTest": "quiet-stop#drop-stop: the engine starts under its limit"}]
     # A test file is in the index when it declares a narrative or holds a site, and only then.
@@ -337,3 +337,10 @@ def test_the_source_of_this_repository_is_one_the_index_reads():
     done = run_stack("source_index")
 
     assert done.returncode == 0, done.stderr
+
+
+@pytest.mark.parametrize("watch", ["", ", lambda: None", ", watch=lambda: {}", ", lambda: []"])
+def test_watch_declaration_is_independent_of_its_value(project, watch):
+    root = project({"app/x.py": CALLS + f'def f():\n    narrate("A step."{watch})\n'})
+    [site] = indexed(root)["files"]["app/x.py"]["sites"]
+    assert site.get("hasWatch", False) == bool(watch)
