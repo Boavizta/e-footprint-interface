@@ -111,6 +111,11 @@ This audits your reasoning. It is no section of `plan.md`.
   tagged when its change is a decision.
 - **Define a term where the plan first needs it**, and use only defined terms after.
 - **For a mechanism in two steps, the piece's reason says why one is not enough.**
+- **Cross-piece sections hold genuinely shared decisions, stated once.** Keep one only when it
+  constrains several named pieces and has no clear owning piece or site. Put owned details with
+  their pieces and sites, and test expectations in their cases. Remove repeated overviews,
+  verification reports, unchanged guarantees and process commentary. Omit empty sections; never
+  use them to bypass piece budgets.
 - **Each fact once.** What a site's clause says, the section does not repeat; what a test title
   says, neither does.
 
